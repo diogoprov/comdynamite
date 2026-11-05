@@ -107,6 +107,22 @@ sim_t <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps =
 apply(sim_t$history > 0, 3, function(x) mean(rowSums(x)))
 ```
 
+## Traits under one or several adaptive optima
+
+`traits_ou()` simulates traits under an Ornstein-Uhlenbeck process (Hansen
+1997). With `alpha = 0` it is Brownian motion; with `alpha > 0` traits are
+pulled towards an optimum, and `paint_regimes()` gives clades their own
+optimum (multi-peak OU; Butler & King 2004).
+
+```{r}
+pool <- ape::rcoal(32)
+node <- ape::getMRCA(pool, pool$tip.label[1:8])
+in_clade <- rownames(traits_ou(pool)) %in% ape::extract.clade(pool, node)$tip.label
+reg <- paint_regimes(pool, nodes = node)
+x_ou <- traits_ou(pool, alpha = 2, theta = c(`0` = 0, `1` = 5), regimes = reg)
+tapply(x_ou[, 1], ifelse(in_clade, "clade (optimum 5)", "rest (optimum 0)"), mean)
+```
+
 ## Rule-based assembly (Kraft et al. 2007)
 
 Besides population dynamics, comdynamite can assemble a local community from
@@ -123,7 +139,7 @@ removed one at a time until the community reaches the chosen size:
 
 ```{r}
 pool <- ape::rcoal(32)
-x <- traits_bm(pool, n_traits = 2)
+x <- traits_ou(pool, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 ```
 
@@ -135,7 +151,7 @@ mpd <- function(tree, sp) mean(as.dist(ape::cophenetic.phylo(tree)[sp, sp]))
 rules <- c("limiting_similarity", "filtering", "neutral")
 res <- replicate(100, {
   pool <- ape::rcoal(32)
-  x <- traits_bm(pool, n_traits = 2)
+  x <- traits_ou(pool, n_traits = 2)
   sapply(rules, function(r) mpd(pool, assemble_community(x, 16, r)$community))
 })
 rowMeans(res)
@@ -157,6 +173,14 @@ The model follows the published equations. Two conventions differ:
 Thompson et al. (2020).
 
 ## References
+
+Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis: a
+modeling approach for adaptive evolution. *The American Naturalist*, 164,
+683–695. https://doi.org/10.1086/426002
+
+Hansen, T. F. (1997). Stabilizing selection and the comparative analysis of
+adaptation. *Evolution*, 51, 1341–1351.
+https://doi.org/10.1111/j.1558-5646.1997.tb01457.x
 
 Colwell, R. K., & Winkler, D. W. (1984). A null model for null models in
 biogeography. In D. R. Strong, D. Simberloff, L. G. Abele, & A. B. Thistle

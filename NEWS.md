@@ -6,4 +6,7 @@
 
 - Rule-based assembly (`assemble_community()`): limiting similarity (GAUSE
   algorithm of Colwell & Winkler 1984), habitat filtering and neutral assembly,
-  as in Kraft et al. (2007); `traits_bm()` for several Brownian traits.
+  as in Kraft et al. (2007).
+- `traits_ou()`: traits under an Ornstein-Uhlenbeck process with one or several
+  optima (multi-peak OU; Brownian motion when `alpha = 0`), with
+  `paint_regimes()` to assign regimes to clades.

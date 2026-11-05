@@ -15,16 +15,16 @@ assemble_community(
 \arguments{
 \item{traits}{Numeric vector (one trait) or matrix (one column per trait),
 with species names as names or row names. For example, the output of
-\code{\link[=trait_bm]{trait_bm()}} or \code{\link[=traits_bm]{traits_bm()}}.}
+\code{\link[=traits_ou]{traits_ou()}}.}
 
 \item{size}{Number of species in the local community.}
 
 \item{rule}{Assembly rule.}
 
 \item{optimum}{For \code{rule = "filtering"}: the niche optimum, either
-\code{"ancestral"} (the root state, 0, for traits from \code{\link[=trait_bm]{trait_bm()}} or
-\code{\link[=traits_bm]{traits_bm()}}), \code{"derived"} (the maximum of each trait in the pool, one
-extreme corner of trait space), or a numeric vector with one value per
+\code{"ancestral"} (the root state, 0 by default in \code{\link[=traits_ou]{traits_ou()}}),
+\code{"derived"} (the maximum of each trait in the pool, one extreme corner of
+trait space), or a numeric vector with one value per
 trait.}
 
 \item{min_distance}{For \code{rule = "limiting_similarity"}: optional end point.
@@ -61,7 +61,7 @@ each). Ties are broken at random.
 \examples{
 set.seed(1)
 tr <- ape::rcoal(32)
-x <- traits_bm(tr, n_traits = 2)
+x <- traits_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 }

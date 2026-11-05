@@ -9,8 +9,9 @@ stochasticity, and dispersal among sites. On top of the original model it
 offers:
 
 - **phylogenetic structure**: optima, niche breadths and maximum growth rates
-  with phylogenetic signal (Pagel's lambda), and competition that is stronger
-  between close relatives;
+  with phylogenetic signal (Pagel's lambda), traits under single- or
+  multi-optimum Ornstein-Uhlenbeck processes, and competition that is
+  stronger between close relatives;
 - **spatially implicit or explicit landscapes**: uniform dispersal among
   exchangeable sites, or a grid (optionally a torus) with an exponential
   dispersal kernel and a spatially autocorrelated environment;
