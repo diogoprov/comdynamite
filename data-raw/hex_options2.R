@@ -111,3 +111,30 @@ pD <- base("#2A9D8F", "#264653") +
   annotate("text", 1, 0.66, label = "environment", colour = "#264653", size = 1.5) +
   name("#F1FAEE", y = 0.5)
 save(pD, "optionD_sorting_dispersal.png")
+
+# E. Option A with the dispersal arrows of option D and a clearer environmental
+#    gradient across the patches (one solid colour per column)
+tsE <- clade_tree(c(0.6, 1.4, 1.36, 1.64))
+gE <- patches(3, 3, 0.66, 1.34, 0.84, 1.16)
+set.seed(12)
+gE_dots <- dots_in(gE, dx = 0.04)
+curved <- function(x, xend, y, yend, curvature = -0.5)
+  annotate("curve", x = x, xend = xend, y = y, yend = yend, curvature = curvature,
+           colour = "#F1FAEE", linewidth = 0.3,
+           arrow = grid::arrow(length = grid::unit(0.022, "inches"), type = "closed"))
+pE <- base("#264653", "#E9C46A") +
+  geom_tile(aes(x, y, fill = env), gE, width = 0.22, height = 0.13) +
+  scale_fill_manual(values = c("#3A6475", "#4F8AA3", "#72B3CB"), guide = "none") +
+  geom_segment(aes(x, y, xend = xend, yend = yend), tsE$seg, colour = "#F1FAEE",
+               linewidth = 0.45, lineend = "square") +
+  geom_point(aes(x, y, colour = clade), tsE$tips, size = 1.1) +
+  geom_point(aes(x, y, colour = clade), gE_dots, size = 1.25) +
+  scale_colour_manual(values = clade_cols, guide = "none") +
+  curved(0.74, 0.92, 1.235, 1.235) +
+  curved(1.08, 1.26, 1.235, 1.235) +
+  curved(1.26, 1.08, 0.765, 0.765) +
+  curved(0.92, 0.74, 0.765, 0.765) +
+  arrow_seg(x = 0.6, xend = 1.4, y = 0.68, yend = 0.68, colour = "#E9C46A") +
+  annotate("text", 1, 0.635, label = "environment", colour = "#E9C46A", size = 1.4) +
+  name("#E9C46A", y = 0.47)
+save(pE, "optionE_clades_dispersal.png")
