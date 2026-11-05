@@ -5,7 +5,7 @@
 # coordinates of the hexagon, so s_x/s_y/s_width/s_height place them where the
 # previews show them; adjust p_size if the name does not fit.
 library(hexSticker)
-option <- 1
+option <- "E"
 FRAME <- FALSE
 source("data-raw/hex_options.R")
 source("data-raw/hex_options2.R")
@@ -22,8 +22,12 @@ looks <- list(
 )
 look <- looks[[option]]
 dir.create("man/figures", showWarnings = FALSE, recursive = TRUE)
+# showtext must know the dpi of the file, or text in the subplot comes out too
+# small; with this, sizes match the previews (the name is size 3.9 there).
+showtext::showtext_opts(dpi = 300)
 sticker(look$p + theme_transparent(), package = "comdynamite",
-        p_size = 17, p_color = look$text, p_y = look$p_y, p_fontface = "bold",
+        p_family = "sans", p_size = 3.9, p_color = look$text, p_y = look$p_y,
+        p_fontface = "bold",
         s_x = 1, s_y = 1, s_width = 1.76, s_height = 2.04,
         h_fill = look$fill, h_color = look$border, h_size = 1.6,
         filename = "man/figures/logo.png", dpi = 300)

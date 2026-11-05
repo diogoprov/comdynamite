@@ -129,7 +129,7 @@ pE <- base("#264653", "#E9C46A") +
                linewidth = 0.45, lineend = "square") +
   geom_point(aes(x, y, colour = clade), tsE$tips, size = 1.1) +
   geom_point(aes(x, y, colour = clade), gE_dots, size = 1.25) +
-  scale_colour_manual(values = clade_cols, guide = "none") +
+  scale_colour_manual(values = c("#E76F51", "#F1FAEE", "#E9C46A"), guide = "none") +
   curved(0.74, 0.92, 1.235, 1.235) +
   curved(1.08, 1.26, 1.235, 1.235) +
   curved(1.26, 1.08, 0.765, 0.765) +
