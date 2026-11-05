@@ -1,0 +1,36 @@
+Package: comdynamite
+Title: Process-Based Metacommunity Simulations with Phylogenetic Structure
+Version: 0.0.0.9000
+Authors@R: person("Diogo B.", "Provete", email = "dbprovete@gmail.com",
+    role = c("aut", "cre"))
+Description: Simulates metacommunity dynamics with the process-based model of
+    Thompson et al. (2020) <doi:10.1111/ele.13568>: density-independent growth
+    that depends on the match between each species' environmental optimum and
+    the local environment, Beverton-Holt competition, Poisson demographic
+    stochasticity, and emigration and immigration among sites. Landscapes can
+    be spatially implicit, with uniform dispersal, or explicit grids with an
+    exponential dispersal kernel and a spatially autocorrelated environment,
+    and the environment can change over time. Species traits (environmental
+    optima, niche breadths and maximum growth rates) can carry phylogenetic
+    signal, and interspecific competition can be structured by relatedness.
+    The model was implemented from the published equations.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Depends:
+    R (>= 4.1.0)
+Imports:
+    ape,
+    stats
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/diogoprov/comdynamite
+BugReports: https://github.com/diogoprov/comdynamite/issues
+X-schema.org-keywords: metacommunity, community-ecology, simulation,
+    species-sorting, mass-effects, dispersal, competition, phylogenetics,
+    community-phylogenetics, process-based-model

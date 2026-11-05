@@ -1,0 +1,5 @@
+# comdynamite 0.0.0.9000
+
+- First version: the model of Thompson et al. (2020) with phylogenetic traits
+  and competition, spatially implicit and grid landscapes, torus permutations
+  and time-varying environments. Code from the pcps-sim project.

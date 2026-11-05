@@ -1,0 +1,126 @@
+---
+title: "Getting started with comdynamite"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with comdynamite}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
+```
+
+comdynamite simulates metacommunities with the process-based model of
+Thompson et al. (2020). Each simulation has four ingredients:
+
+1. a **landscape**: sites, their environment and how individuals disperse
+   among them;
+2. **species traits**: environmental optimum, niche breadth and maximum
+   growth rate, with or without phylogenetic signal;
+3. a **competition matrix**;
+4. the **dispersal** rate.
+
+```{r setup}
+library(comdynamite)
+set.seed(42)
+```
+
+## A first metacommunity
+
+We draw a tree of 40 species, give their optima a strong phylogenetic signal
+(Brownian motion, `lambda = 1`), and let close relatives compete more
+strongly.
+
+```{r}
+tr <- ape::rcoal(40)
+traits <- species_traits(tr, lambda = 1)
+alpha <- competition_matrix(tr, type = "phylo", inter_max = 0.1)
+land <- landscape_implicit(n_sites = 50)
+
+sim <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 500)
+sim
+```
+
+`sim$abundance` holds the abundance of each species at each site at the last
+step. Ordering sites by their environment and species by their optimum shows
+the sorting of species along the gradient:
+
+```{r}
+a <- sim$abundance[order(land$env), order(traits$optimum)]
+image(log1p(a), xlab = "sites (by environment)", ylab = "species (by optimum)",
+      axes = FALSE, col = hcl.colors(20, "YlGnBu", rev = TRUE))
+```
+
+## Species sorting and mass effects
+
+Dispersal changes the regime. With low dispersal, species occur where the
+environment suits them (species sorting); with high dispersal, they also occur
+in unsuitable sites that are kept supplied by immigrants (mass effects), so
+local richness increases and composition tracks the environment less closely.
+
+```{r}
+regimes <- c(sorting = 0.01, mass_effects = 0.5)
+res <- lapply(regimes, function(d)
+  simulate_metacommunity(land, traits, alpha, dispersal = d, n_steps = 500))
+sapply(res, function(s) c(
+  mean_richness = mean(rowSums(s$abundance > 0)),
+  persisting = sum(colSums(s$abundance) > 0)
+))
+```
+
+## Spatially explicit landscapes
+
+`landscape_grid()` places sites on a grid, by default wrapped as a torus, with
+a spatially autocorrelated environment and an exponential dispersal kernel.
+
+```{r}
+grid <- landscape_grid(side = 10, env_bandwidth = 2, disp_scale = 2)
+image(matrix(grid$env, 10, 10), asp = 1, axes = FALSE,
+      col = hcl.colors(20, "Earth"), main = "environment")
+sim_sp <- simulate_metacommunity(grid, traits, alpha, dispersal = 0.1, n_steps = 500)
+sim_sp
+```
+
+With spatial structure, sites are no longer exchangeable, so permuting sites
+at random is not a valid null model. `torus_permutations()` gives the
+rearrangements of a torus (translations and the eight symmetries of the
+square) that keep all distances among sites, and therefore the spatial
+autocorrelation of the environment:
+
+```{r}
+perms <- torus_permutations(10)
+dim(perms)
+# the environment under the first rearrangement
+env_perm <- grid$env[perms[1, ]]
+```
+
+## An environment that changes over time
+
+`env_over_time()` adds autocorrelated temporal fluctuations to the environment
+of each site, and `record_steps` keeps abundances at chosen steps.
+
+```{r}
+et <- env_over_time(land$env, n_steps = 500, rho = 0.95, sd = 5)
+sim_t <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 500,
+                                env_time = et, record_steps = seq(100, 500, 100))
+apply(sim_t$history > 0, 3, function(x) mean(rowSums(x)))
+```
+
+## Differences from Thompson et al. (2020)
+
+The model follows the published equations. Two conventions differ:
+
+* `sigma` is the standard deviation of the Gaussian response, so it equals
+  `sqrt(2)` times the niche breadth parameter of Thompson et al. (2020);
+* `alpha[j, k]` is the effect of species k on species j.
+
+`env_over_time()` is a simple autoregressive generator, not the one used by
+Thompson et al. (2020).
+
+## Reference
+
+Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R.,
+Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based
+metacommunity framework linking local and regional scale community ecology.
+*Ecology Letters*, 23, 1314–1329. https://doi.org/10.1111/ele.13568
