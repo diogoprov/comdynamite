@@ -1,4 +1,4 @@
-# comdynamite
+# comdynamite <img src="man/figures/logo.png" align="right" height="139" alt="comdynamite hex sticker" />
 
 Process-based metacommunity simulations in R, with phylogenetic structure.
 
