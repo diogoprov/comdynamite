@@ -36,7 +36,7 @@ test_that("filtering keeps the species nearest the optimum", {
 test_that("multivariate traits and output structure", {
   set.seed(2)
   tr <- ape::rcoal(30)
-  x <- traits_bm(tr, n_traits = 3)
+  x <- traits_ou(tr, n_traits = 3)
   expect_equal(dim(x), c(30, 3))
   for (rule in c("limiting_similarity", "filtering", "neutral")) {
     out <- assemble_community(x, 12, rule)

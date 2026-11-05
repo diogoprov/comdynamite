@@ -21,13 +21,13 @@
 #'
 #' @param traits Numeric vector (one trait) or matrix (one column per trait),
 #'   with species names as names or row names. For example, the output of
-#'   [trait_bm()] or [traits_bm()].
+#'   [traits_ou()].
 #' @param size Number of species in the local community.
 #' @param rule Assembly rule.
 #' @param optimum For `rule = "filtering"`: the niche optimum, either
-#'   `"ancestral"` (the root state, 0, for traits from [trait_bm()] or
-#'   [traits_bm()]), `"derived"` (the maximum of each trait in the pool, one
-#'   extreme corner of trait space), or a numeric vector with one value per
+#'   `"ancestral"` (the root state, 0 by default in [traits_ou()]),
+#'   `"derived"` (the maximum of each trait in the pool, one extreme corner of
+#'   trait space), or a numeric vector with one value per
 #'   trait.
 #' @param min_distance For `rule = "limiting_similarity"`: optional end point.
 #'   Removal stops as soon as no two remaining species are closer than this
@@ -48,7 +48,7 @@
 #' @examples
 #' set.seed(1)
 #' tr <- ape::rcoal(32)
-#' x <- traits_bm(tr, n_traits = 2)
+#' x <- traits_ou(tr, n_traits = 2)
 #' assemble_community(x, size = 16, rule = "limiting_similarity")$community
 #' assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 #' @export
@@ -97,24 +97,4 @@ gause_removal <- function(x, size, min_distance = NULL) {
     removed <- c(removed, rownames(d)[victim])
   }
   removed
-}
-
-#' Several traits evolving by Brownian motion
-#'
-#' Independent traits from [trait_bm()], each with Pagel's `lambda`, starting
-#' from a root state of 0.
-#'
-#' @inheritParams trait_bm
-#' @param n_traits Number of traits.
-#' @return Matrix with one row per tip and one column per trait.
-#' @examples
-#' set.seed(1)
-#' traits_bm(ape::rcoal(5), n_traits = 3)
-#' @export
-traits_bm <- function(tree, n_traits = 1, lambda = 1) {
-  stopifnot(n_traits >= 1)
-  x <- vapply(seq_len(n_traits), function(i) trait_bm(tree, lambda),
-              numeric(ape::Ntip(tree)))
-  x <- matrix(x, ncol = n_traits, dimnames = list(tree$tip.label, paste0("trait", seq_len(n_traits))))
-  x
 }
