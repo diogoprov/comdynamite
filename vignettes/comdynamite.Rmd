@@ -107,6 +107,44 @@ sim_t <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps =
 apply(sim_t$history > 0, 3, function(x) mean(rowSums(x)))
 ```
 
+## Rule-based assembly (Kraft et al. 2007)
+
+Besides population dynamics, comdynamite can assemble a local community from
+the regional pool by fixed rules, as in Kraft et al. (2007). Species are
+removed one at a time until the community reaches the chosen size:
+
+* `"limiting_similarity"`: the GAUSE algorithm of Colwell & Winkler (1984),
+  which Kraft et al. (2007) used for competition. From the pair of species
+  closest in trait space, the one with the smaller sum of distances to the
+  remaining species is removed, and so on.
+* `"filtering"`: the species farthest from a niche optimum (the ancestral
+  state or a derived corner of trait space) are removed first.
+* `"neutral"`: species are drawn at random.
+
+```{r}
+pool <- ape::rcoal(32)
+x <- traits_bm(pool, n_traits = 2)
+assemble_community(x, size = 16, rule = "limiting_similarity")$community
+```
+
+Over many pools, the mean phylogenetic distance (MPD) among community
+members shows the expected contrast when traits evolve by Brownian motion:
+
+```{r}
+mpd <- function(tree, sp) mean(as.dist(ape::cophenetic.phylo(tree)[sp, sp]))
+rules <- c("limiting_similarity", "filtering", "neutral")
+res <- replicate(100, {
+  pool <- ape::rcoal(32)
+  x <- traits_bm(pool, n_traits = 2)
+  sapply(rules, function(r) mpd(pool, assemble_community(x, 16, r)$community))
+})
+rowMeans(res)
+```
+
+On average, limiting similarity keeps more distant relatives than neutral
+assembly (higher MPD), and filtering keeps closer relatives (lower MPD),
+although single replicates vary.
+
 ## Differences from Thompson et al. (2020)
 
 The model follows the published equations. Two conventions differ:
@@ -118,7 +156,19 @@ The model follows the published equations. Two conventions differ:
 `env_over_time()` is a simple autoregressive generator, not the one used by
 Thompson et al. (2020).
 
-## Reference
+## References
+
+Colwell, R. K., & Winkler, D. W. (1984). A null model for null models in
+biogeography. In D. R. Strong, D. Simberloff, L. G. Abele, & A. B. Thistle
+(Eds.), *Ecological Communities: Conceptual Issues and the Evidence*
+(pp. 344–359). Princeton University Press.
+https://doi.org/10.1515/9781400857081.344
+
+Kraft, N. J. B., Cornwell, W. K., Webb, C. O., & Ackerly, D. D. (2007). Trait
+evolution, community assembly, and the phylogenetic structure of ecological
+communities. *The American Naturalist*, 170, 271–283.
+https://doi.org/10.1086/519400
+
 
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R.,
 Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based

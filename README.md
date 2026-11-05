@@ -17,7 +17,10 @@ offers:
 - **restricted null models** for grids: site permutations of a torus that keep
   its spatial structure;
 - an environment that can change over time, and abundances recorded at
-  chosen steps.
+  chosen steps;
+- **rule-based assembly** without population dynamics, as in Kraft et al.
+  (2007): limiting similarity (the GAUSE algorithm of Colwell & Winkler 1984),
+  habitat filtering and neutral assembly, on one or several traits.
 
 ## Installation
 
@@ -81,3 +84,14 @@ Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M.,
 Rangel, T. F., & Pellissier, L. (2021). gen3sis: A general engine for
 eco-evolutionary simulations of the processes that shape Earth's biodiversity.
 *PLoS Biology*, 19, e3001340. https://doi.org/10.1371/journal.pbio.3001340
+
+Colwell, R. K., & Winkler, D. W. (1984). A null model for null models in
+biogeography. In D. R. Strong, D. Simberloff, L. G. Abele, & A. B. Thistle
+(Eds.), *Ecological Communities: Conceptual Issues and the Evidence*
+(pp. 344–359). Princeton University Press.
+https://doi.org/10.1515/9781400857081.344
+
+Kraft, N. J. B., Cornwell, W. K., Webb, C. O., & Ackerly, D. D. (2007). Trait
+evolution, community assembly, and the phylogenetic structure of ecological
+communities. *The American Naturalist*, 170, 271–283.
+https://doi.org/10.1086/519400
