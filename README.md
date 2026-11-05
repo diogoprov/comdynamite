@@ -44,9 +44,40 @@ sim$abundance  # sites x species
 See `vignette("comdynamite")` for species sorting vs. mass effects, grids and
 time-varying environments.
 
-## Reference
+## Related packages
+
+- **[mcomsimr](https://github.com/plthompson/mcomsimr)**, by Patrick
+  Thompson, is the original R implementation of the model of Thompson et al.
+  (2020). comdynamite was written independently from the published equations.
+  It differs in its conventions (`sigma` is the standard deviation of the
+  Gaussian response, so it equals `sqrt(2)` times the niche breadth of
+  Thompson et al.; `alpha[j, k]` is the effect of species k on species j) and
+  adds phylogenetic traits and competition, grid landscapes on a torus with
+  their restricted permutations, and abundances recorded over time.
+- **[gen3sis](https://github.com/project-gen3sis/R-package)** (Hagen et al.
+  2021) is a general engine for eco-evolutionary simulations on landscapes
+  that change over geological time. Speciation, extinction, dispersal and trait
+  evolution are simulated, so the **phylogeny is an outcome** of the
+  simulation, and the ecological rules are functions that the user writes.
+  In comdynamite the **phylogeny is an input**: the tree is fixed, traits are
+  placed on it with a chosen phylogenetic signal, and a fixed population model
+  runs over ecological time (no speciation). This is what simulation studies
+  of methods need, because tree shape and phylogenetic signal can be set
+  independently and replicates can be paired by tree across scenarios.
+  The two can be combined: a phylogeny produced by gen3sis can be used as the
+  regional pool of a comdynamite simulation.
+- **[treeshapesim](https://github.com/diogoprov/treeshapesim)** simulates
+  trees with separately controlled imbalance and branching times, to use as
+  regional pools in comdynamite.
+
+## References
 
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R.,
 Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based
 metacommunity framework linking local and regional scale community ecology.
 *Ecology Letters*, 23, 1314–1329. https://doi.org/10.1111/ele.13568
+
+Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M.,
+Rangel, T. F., & Pellissier, L. (2021). gen3sis: A general engine for
+eco-evolutionary simulations of the processes that shape Earth's biodiversity.
+*PLoS Biology*, 19, e3001340. https://doi.org/10.1371/journal.pbio.3001340
