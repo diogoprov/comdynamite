@@ -25,6 +25,14 @@
   [`picante::match.phylo.comm()`](https://rdrr.io/pkg/picante/man/data.checking.html),
   drop with a warning the species found in only one of them. Repeated
   names are an error.
+- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md):
+  results of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  on the tree, as in Figure 3 of Leibold et al. (2010), as a phylogram
+  or a fan.
+  [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md):
+  fractions of
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md).
 - `daphniids`: data of Leibold et al. (2010), rebuilt from the public
   survey.
 - [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)

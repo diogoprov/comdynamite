@@ -135,6 +135,8 @@ species traits-environment relationships in the fourth-corner problem.
 
 ## See also
 
+[`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
+shows the results on the tree.
 [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
 and
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
@@ -146,7 +148,7 @@ test the whole tree at once.
 # daphniids of Leibold et al. (2010)
 nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
-out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
 #> <mc_node_test> 12 nodes, 11 tested
 #> nodes with p (max) <= 0.05: 0 before correction, 0 after
@@ -164,4 +166,5 @@ round(out$semipartial, 2)
 #> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02
 #> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25
 #> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA
+plot_node_test(out, daphniids$tree, test = "site")
 ```

@@ -209,11 +209,15 @@ Analyses of phylogenetic community structure.
   : Test clades against the environment, node by node
 - [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
   : Node contrasts of a phylogeny
+- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
+  : Plot the results of a node test on the phylogeny
 - [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   : Represent a phylogeny by one vector related to a predictor
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
   : Partition trait or phylogenetic variation between environment and
   space
+- [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
+  : Plot the fractions of a trait partition
 
 ## Data
 

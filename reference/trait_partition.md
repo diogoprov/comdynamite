@@ -114,6 +114,11 @@ variation, and here all predictors are standardised with site weights.
 Appendix A also gives semipartial correlations for each predictor, which
 are not implemented here.
 
+This function partitions variation and does not test each trait against
+each predictor. For that test, ter Braak (2019) proposed multilevel and
+weighted averaging regressions combined by the max test, in the package
+[TraitEnvMLMWA](https://github.com/CajoterBraak/TraitEnvMLMWA).
+
 ## References
 
 Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006).
@@ -126,6 +131,15 @@ effects of spatial contingency and environmental filtering on
 metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 [doi:10.1890/11-0494.1](https://doi.org/10.1890/11-0494.1)
 
+ter Braak, C. J. F. (2019). New robust weighted averaging- and
+model-based methods for assessing trait-environment relationships.
+*Methods in Ecology and Evolution*, 10, 1962–1971.
+[doi:10.1111/2041-210X.13278](https://doi.org/10.1111/2041-210X.13278)
+
+## See also
+
+[`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
+
 ## Examples
 
 ``` r
@@ -135,7 +149,8 @@ space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
 trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
-trait_partition(comm, trait, env, space, n_perm = 49)
+out <- trait_partition(comm, trait, env, space, n_perm = 49)
+out
 #> <mc_trait_partition> mean component, 0.511 of the total variation
 #>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max
 #> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02
@@ -145,4 +160,5 @@ trait_partition(comm, trait, env, space, n_perm = 49)
 #> 5        b 0.020065     -0.0167      0.03929     NA     NA    NA
 #> 6        c 0.000846     -0.0439      0.00166   0.98   0.06  0.98
 #> 7        d 0.509443      0.5677      0.03941     NA     NA    NA
+plot_trait_partition(out)
 ```
