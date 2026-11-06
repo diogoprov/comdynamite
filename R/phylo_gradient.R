@@ -220,8 +220,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #' @param traits Numeric vector or matrix with one row per species, which can hold traits
 #'   or the vectors of [phylo_vector()]. Species are matched to `comm` by name, in any
 #'   order, and those in only one of the two are dropped with a warning.
-#' @param env,space Numeric vector, or matrix or data frame, with one row per site, for
-#'   example the output of [spatial_eigenvectors()] for `space`.
+#' @param env,space Numeric vector, or matrix or data frame, with one row per site. For
+#'   `space`, the article uses Moran's eigenvector maps, which `adespatial::dbmem()` gives.
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
@@ -253,6 +253,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   \item The p-values follow the text in stacking two null distributions, and here we
 #'     report the larger of the two, as in [fourth_corner_test()].
 #' }
+#' Moran's eigenvector maps of the function `MEM` of the supplement are the same as those
+#' of `adespatial::dbmem()`, checked in Octave. Appendix A recommends centring them with
+#' site weights and the code does not, but orthogonality is not needed to partition
+#' variation, and here all predictors are standardised with site weights.
+#'
 #' Appendix A also gives semipartial correlations for each predictor, which are not
 #' implemented here.
 #' @references
@@ -263,10 +268,10 @@ print.mc_phylo_vector <- function(x, ...) {
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 #' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
 #' 93, S14--S30. \doi{10.1890/11-0494.1}
-#' @examples
+#' @examplesIf requireNamespace("adespatial", quietly = TRUE)
 #' set.seed(1)
 #' env <- runif(40, 0, 100)
-#' space <- spatial_eigenvectors(cbind(1:40))[, 1:3]
+#' space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
 #' trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 #' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 #' colnames(comm) <- names(trait)
@@ -328,53 +333,6 @@ print.mc_trait_partition <- function(x, ...) {
       "of the total variation\n")
   print(format(x$fractions, digits = 3), quote = FALSE)
   invisible(x)
-}
-
-#' Moran's eigenvector maps
-#'
-#' Spatial predictors of Dray et al. (2006). Distances above the largest edge of the
-#' minimum spanning tree are truncated, and the eigenvectors of the centred similarity
-#' matrix with positive Moran's I are kept, in order of decreasing spatial scale.
-#'
-#' @section Article and original code:
-#' The function `MEM` of the supplement differs from Appendix A of Peres-Neto et al.
-#' (2012) in two points, and here we follow the code:
-#' \itemize{
-#'   \item Appendix A recommends centring with site weights so that the maps stay
-#'     orthogonal in a weighted regression, and the code does not. [trait_partition()]
-#'     standardises the maps with site weights, and orthogonality is not needed to
-#'     partition variation.
-#'   \item Appendix A sets the distances between sites that are not connected to zero,
-#'     and the code to four times the threshold.
-#' }
-#'
-#' @param coords Matrix of coordinates with one row per site, or a `dist` object.
-#' @return Matrix with one row per site and one column per map, with their Moran's I in
-#'   the attribute `moran`.
-#' @references
-#' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
-#' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
-#' 93, S14--S30. \doi{10.1890/11-0494.1}
-#'
-#' Dray, S., Legendre, P., & Peres-Neto, P. R. (2006). Spatial modelling: a comprehensive
-#' framework for principal coordinate analysis of neighbour matrices (PCNM). *Ecological
-#' Modelling*, 196, 483--493. \doi{10.1016/j.ecolmodel.2006.02.015}
-#' @examples
-#' dim(spatial_eigenvectors(cbind(1:20)))
-#' @export
-spatial_eigenvectors <- function(coords) {
-  distances <- as.matrix(if (inherits(coords, "dist")) coords else stats::dist(coords))
-  n <- nrow(distances)
-  stopifnot(n > 2)
-  threshold <- max(distances[ape::mst(distances) > 0])
-  distances[distances > threshold] <- 4 * threshold
-  similarity <- 1 - (distances / max(distances))^2
-  diag(similarity) <- 0
-  centring <- diag(n) - 1 / n
-  eig <- eigen(centring %*% similarity %*% centring, symmetric = TRUE)
-  moran <- n / sum(similarity) * eig$values
-  keep <- moran > 1e-14
-  structure(eig$vectors[, keep, drop = FALSE], moran = moran[keep])
 }
 
 # weighted correlations between the columns of env and the site means of the columns of

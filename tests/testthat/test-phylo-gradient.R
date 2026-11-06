@@ -120,12 +120,3 @@ test_that("absent species are left out", {
   expect_equal(nrow(out$eigenvectors), ncol(d$comm) - 1)
   expect_error(phylo_vector(d$comm, d$tree, d$env, n_perm = 9, site_permutations = cbind(1:3)))
 })
-
-test_that("spatial eigenvectors match the original code in Octave", {
-  out <- spatial_eigenvectors(cbind(1:10))
-  expect_equal(attr(out, "moran"), c(0.93472615, 0.75861444, 0.46157224, 0.17941005),
-               tolerance = 1e-7)
-  expect_equal(abs(out[1:3, 1]), c(0.23053002, 0.38786839, 0.42206128), tolerance = 1e-7)
-  expect_equal(spatial_eigenvectors(dist(cbind(1:10))), out)
-  expect_error(spatial_eigenvectors(cbind(1:2)))
-})

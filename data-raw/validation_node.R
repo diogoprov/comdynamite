@@ -25,7 +25,7 @@ one_replicate <- function(scenario) {
   keep <- rowSums(comm) > 0
   out <- node_test(comm[keep, ], nodes, used[keep], n_perm = 99)$nodes
   c(max = mean(out$p_max <= 0.05, na.rm = TRUE), site = mean(out$p_site <= 0.05, na.rm = TRUE),
-    taxa = mean(out$p_taxa <= 0.05, na.rm = TRUE),
+    taxa = mean(out$p_taxa <= 0.05, na.rm = TRUE), joint = mean(out$p_joint <= 0.05, na.rm = TRUE),
     any_node = any(out$p_max <= 0.05, na.rm = TRUE))
 }
 

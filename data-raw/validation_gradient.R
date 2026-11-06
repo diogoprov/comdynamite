@@ -95,7 +95,7 @@ partition_case <- function(case) {
   tree$edge.length <- rep(1, nrow(tree$edge))
   tree$tip.label <- paste0("sp", 1:32)
   env <- runif(100, 0, 100)
-  maps <- spatial_eigenvectors(cbind(1:100))
+  maps <- as.matrix(adespatial::dbmem(cbind(1:100), silent = TRUE))
   space <- 100 * (maps[, 1] - min(maps[, 1])) / diff(range(maps[, 1]))
   comm <- responses(env, rescale(ape::rTraitCont(tree)), 1) *
     responses(space, rescale(ape::rTraitCont(tree)), 1)

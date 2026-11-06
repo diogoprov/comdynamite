@@ -52,17 +52,22 @@ node_contrasts <- function(tree, cherries = TRUE) {
 #'
 #' The test statistic is the explained over the residual sum of squares. It is
 #' tested by permuting sites, and by replacing the species of the node with a random
-#' set of the same size from all species. The article permutes both at once; following
-#' Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
-#' of the two tests. With many nodes these p-values need a correction, and
+#' set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
+#' et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 #' `p_adjusted` gives the false discovery rate that the article uses. This correction
 #' needs many permutations, as the smallest p-value is 1 / (`n_perm` + 1), so the default
 #' is the 9999 of the article.
 #'
-#' With few species at a node, permutations of species have little power, so `p_max`
-#' is conservative: with the [daphniids] of the article, of 13 species, no predictor
-#' passes it, whereas sites alone recover most of the environmental results of its
-#' Figure 3 (see the article on validation).
+#' The article permutes sites and species at once, which is `p_joint`. This tests the
+#' null hypothesis that neither the environment nor the phylogeny matters, so it is not
+#' a test of their association. In simulations where the environment acts but species
+#' responses have no phylogenetic signal, `p_joint` rejected 76% of the nodes at the 5%
+#' level, and `p_max` 4.8%.
+#'
+#' With few species at a node, permutations of species have little power, so `p_max` is
+#' conservative: with the [daphniids] of the article, of 13 species, no predictor passes
+#' it, whereas sites alone recover most of the environmental results of its Figure 3 (see
+#' the article on validation).
 #'
 #' Each predictor gets a semipartial correlation, the square root of the loss of R2
 #' when it is removed, with the sign of its slope when it is alone in the model.
@@ -103,13 +108,17 @@ node_contrasts <- function(tree, cherries = TRUE) {
 #'   site.
 #' @param biogeography Optional matrix of biogeographic events with one row per site
 #'   and values of 1, -1 and 0.
-#' @param n_perm Number of permutations of sites and of species.
+#' @param n_perm Number of permutations of sites, of species and of both.
+#' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
+#'   where one core is used. For reproducible p-values with more than one core, call
+#'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `statistic`,
-#'   `p_site`, `p_taxa`, `p_max` and `p_adjusted`; `semipartial`, a matrix of nodes by
-#'   predictors; `p_partial`, with the larger of the two p-values for each of them;
-#'   `p_partial_site`, with the p-values of sites alone; and `biogeography`, a list with
-#'   the same three matrices for the events, or `NULL`.
+#'   `p_site`, `p_taxa`, `p_max`, `p_joint` and `p_adjusted`; `semipartial`, a matrix of
+#'   nodes by predictors; `p_partial`, with the larger of the two p-values for each of
+#'   them; `p_partial_site`, with the p-values of sites alone; `p_partial_joint`, with
+#'   those of the permutation of the article; and `biogeography`, a list with the same
+#'   four matrices for the events, or `NULL`.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -132,17 +141,21 @@ node_contrasts <- function(tree, cherries = TRUE) {
 #' out
 #' round(out$semipartial, 2)
 #' @export
-node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
+node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1) {
   comm <- as.matrix(comm) * 1
   nodes <- as.matrix(nodes)
   env <- as.matrix(env)
-  stopifnot(nrow(env) == nrow(comm), n_perm >= 1, all(comm >= 0))
+  stopifnot(nrow(env) == nrow(comm), n_perm >= 1, cores >= 1, all(comm >= 0))
   species <- match_species(comm, rownames(nodes), "`nodes`")
   comm <- comm[, species, drop = FALSE]
   nodes <- nodes[species, , drop = FALSE]
   node_names <- colnames(nodes) %||% seq_len(ncol(nodes))
   env_names <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
-  per_node <- function(run) lapply(seq_len(ncol(nodes)), function(i) run(nodes[, i]))
+  # forking is not available on Windows
+  workers <- if (.Platform$OS.type == "windows") 1L else cores
+  per_node <- function(run) {
+    parallel::mclapply(seq_len(ncol(nodes)), function(i) run(nodes[, i]), mc.cores = workers)
+  }
   matrix_of <- function(results, field, names) {
     matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
            dimnames = list(node_names, names))
@@ -153,6 +166,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
                  p_partial = matrix_of(results, "p_partial", env_names),
                  p_partial_site = matrix_of(results, "p_partial_site", env_names),
+                 p_partial_joint = matrix_of(results, "p_partial_joint", env_names),
                  biogeography = if (!is.null(biogeography)) {
                    biogeography <- as.matrix(biogeography)
                    stopifnot(nrow(biogeography) == nrow(comm), all(biogeography %in% c(-1, 0, 1)))
@@ -174,7 +188,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
                    }
                    list(semipartial = shaped(first("semipartial")),
                         p_partial = shaped(first("p_partial")),
-                        p_partial_site = shaped(first("p_partial_site")))
+                        p_partial_site = shaped(first("p_partial_site")),
+                        p_partial_joint = shaped(first("p_partial_joint")))
                  }),
             class = "mc_node_test")
 }
@@ -199,8 +214,10 @@ one_node <- function(comm, contrast, env, n_perm) {
   if (is.na(observed$statistic)) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                                      r2 = NA_real_, r2_adjusted = NA_real_, statistic = NA_real_,
-                                     p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_),
-                semipartial = blank, p_partial = blank, p_partial_site = blank))
+                                     p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_,
+                                     p_joint = NA_real_),
+                semipartial = blank, p_partial = blank, p_partial_site = blank,
+                p_partial_joint = blank))
   }
   null_of <- function(draw) {
     t(replicate(n_perm, {
@@ -214,20 +231,28 @@ one_node <- function(comm, contrast, env, n_perm) {
   by_taxa <- null_of(function() {
     node_fit(comm[, sample.int(ncol(comm), length(members)), drop = FALSE], values, env)
   })
+  by_both <- null_of(function() {
+    node_fit(comm[sample.int(nrow(comm)), sample.int(ncol(comm), length(members)), drop = FALSE],
+             values, env)
+  })
   p_site <- count(by_site[, 1], observed$statistic)
   p_taxa <- count(by_taxa[, 1], observed$statistic)
+  p_joint <- count(by_both[, 1], observed$statistic)
   partial_site <- vapply(seq_len(ncol(env)), function(j) {
     count(by_site[, j + 1], observed$partial_f[j])
   }, numeric(1))
   partial_taxa <- vapply(seq_len(ncol(env)), function(j) {
     count(by_taxa[, j + 1], observed$partial_f[j])
   }, numeric(1))
+  partial_joint <- vapply(seq_len(ncol(env)), function(j) {
+    count(by_both[, j + 1], observed$partial_f[j])
+  }, numeric(1))
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
                             statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
-                            p_max = max(p_site, p_taxa)),
+                            p_max = max(p_site, p_taxa), p_joint = p_joint),
        semipartial = observed$semipartial, p_partial = pmax(partial_site, partial_taxa),
-       p_partial_site = partial_site)
+       p_partial_site = partial_site, p_partial_joint = partial_joint)
 }
 
 # statistics of one node; all NA when the model cannot be fitted

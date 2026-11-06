@@ -4,7 +4,7 @@
 \alias{node_test}
 \title{Test clades against the environment, node by node}
 \usage{
-node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999)
+node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are
@@ -20,15 +20,20 @@ site.}
 \item{biogeography}{Optional matrix of biogeographic events with one row per site
 and values of 1, -1 and 0.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites, of species and of both.}
+
+\item{cores}{Number of cores, with nodes run in parallel. Not available on Windows,
+where one core is used. For reproducible p-values with more than one core, call
+\code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
 node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{statistic},
-\code{p_site}, \code{p_taxa}, \code{p_max} and \code{p_adjusted}; \code{semipartial}, a matrix of nodes by
-predictors; \code{p_partial}, with the larger of the two p-values for each of them;
-\code{p_partial_site}, with the p-values of sites alone; and \code{biogeography}, a list with
-the same three matrices for the events, or \code{NULL}.
+\code{p_site}, \code{p_taxa}, \code{p_max}, \code{p_joint} and \code{p_adjusted}; \code{semipartial}, a matrix of
+nodes by predictors; \code{p_partial}, with the larger of the two p-values for each of
+them; \code{p_partial_site}, with the p-values of sites alone; \code{p_partial_joint}, with
+those of the permutation of the article; and \code{biogeography}, a list with the same
+four matrices for the events, or \code{NULL}.
 }
 \description{
 Implements the regression of Leibold et al. (2010). For each node, sites without
@@ -40,17 +45,22 @@ whether the two clades that split there differ in their response to the predicto
 \details{
 The test statistic is the explained over the residual sum of squares. It is
 tested by permuting sites, and by replacing the species of the node with a random
-set of the same size from all species. The article permutes both at once; following
-Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
-of the two tests. With many nodes these p-values need a correction, and
+set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
+et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 \code{p_adjusted} gives the false discovery rate that the article uses. This correction
 needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), so the default
 is the 9999 of the article.
 
-With few species at a node, permutations of species have little power, so \code{p_max}
-is conservative: with the \link{daphniids} of the article, of 13 species, no predictor
-passes it, whereas sites alone recover most of the environmental results of its
-Figure 3 (see the article on validation).
+The article permutes sites and species at once, which is \code{p_joint}. This tests the
+null hypothesis that neither the environment nor the phylogeny matters, so it is not
+a test of their association. In simulations where the environment acts but species
+responses have no phylogenetic signal, \code{p_joint} rejected 76\% of the nodes at the 5\%
+level, and \code{p_max} 4.8\%.
+
+With few species at a node, permutations of species have little power, so \code{p_max} is
+conservative: with the \link{daphniids} of the article, of 13 species, no predictor passes
+it, whereas sites alone recover most of the environmental results of its Figure 3 (see
+the article on validation).
 
 Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.

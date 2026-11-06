@@ -173,14 +173,13 @@ Vem antes do ABC por decisão de 2026-11-06. O código está em
 os suplementos não trazem licença. Esta máquina não tem MATLAB nem Octave, e a
 comparação em dados fixos depende de um dos dois.
 
-- [x] Peres-Neto et al. (2012): `fourth_corner_test()`, `phylo_vector()`,
-      `trait_partition()` e `spatial_eigenvectors()`, conferidas no Octave e nas Tabelas 1
+- [x] Peres-Neto et al. (2012): `fourth_corner_test()`, `phylo_vector()` e
+      `trait_partition()`, conferidas no Octave e nas Tabelas 1
       a 4 do artigo.
 - [ ] Reproduzir a Tabela 5 com `logistic_gradients()` (Apêndice C).
 - [ ] Semiparciais de `trait_partition()`, descritas no Apêndice A.
-- [ ] Permutação conjunta de linhas e colunas do artigo de Leibold em `node_test()`.
-- [ ] `node_test()` com 9999 permutações é lento em árvores grandes: paralelizar ou
-      vetorizar `node_fit()`.
+- [ ] `node_test()` roda nós em paralelo com `cores`. Se ainda for lento em árvores
+      grandes, vetorizar `node_fit()`.
 - [x] Leibold et al. (2010): `node_test()` e `node_contrasts()`. R2, R2 ajustado e F iguais
       ao MATLAB no Octave 11.3 (diferença abaixo de 1e-15), e os 13 contrastes de
       `CreateNodeContrasts` iguais. Em `data-raw/validation_node.R`, por nó, sites .049 e

@@ -44,7 +44,6 @@ reference:
   - fourth_corner_test
   - phylo_vector
   - trait_partition
-  - spatial_eigenvectors
 - title: Data
   contents:
   - daphniids

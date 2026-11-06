@@ -54,6 +54,23 @@ test_that("with one predictor, the semipartial squared is the R2", {
   expect_equal(out$nodes$p_adjusted, p.adjust(out$nodes$p_max, "BH"))
 })
 
+test_that("several cores give the same statistics", {
+  x <- node_contrasts(daphniids$tree)
+  one <- node_test(daphniids$comm, x, daphniids$env, n_perm = 2)
+  two <- node_test(daphniids$comm, x, daphniids$env, n_perm = 2, cores = 2)
+  expect_equal(two$nodes$r2, one$nodes$r2)
+  expect_equal(two$semipartial, one$semipartial)
+  expect_error(node_test(daphniids$comm, x, daphniids$env, n_perm = 2, cores = 0))
+})
+
+test_that("the joint test breaks both links", {
+  set.seed(4)
+  x <- node_contrasts(daphniids$tree)
+  out <- node_test(daphniids$comm, x, daphniids$env, n_perm = 9)
+  expect_true(all(out$nodes$p_joint > 0, na.rm = TRUE))
+  expect_equal(dim(out$p_partial_joint), dim(out$p_partial))
+})
+
 test_that("the daphniids run from the data of the package", {
   set.seed(1)
   out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env,

@@ -26,8 +26,10 @@ Depends:
     R (>= 4.1.0)
 Imports:
     ape,
+    parallel,
     stats
 Suggests:
+    adespatial,
     knitr,
     picante,
     rmarkdown,

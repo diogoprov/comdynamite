@@ -21,8 +21,8 @@ at least one individual.}
 or the vectors of \code{\link[=phylo_vector]{phylo_vector()}}. Species are matched to \code{comm} by name, in any
 order, and those in only one of the two are dropped with a warning.}
 
-\item{env, space}{Numeric vector, or matrix or data frame, with one row per site, for
-example the output of \code{\link[=spatial_eigenvectors]{spatial_eigenvectors()}} for \code{space}.}
+\item{env, space}{Numeric vector, or matrix or data frame, with one row per site. For
+\code{space}, the article uses Moran's eigenvector maps, which \code{adespatial::dbmem()} gives.}
 
 \item{component}{\code{"mean"} for the composition of sites or \code{"variance"} for their
 dispersion.}
@@ -73,18 +73,25 @@ not include. None of this is done here.
 \item The p-values follow the text in stacking two null distributions, and here we
 report the larger of the two, as in \code{\link[=fourth_corner_test]{fourth_corner_test()}}.
 }
+Moran's eigenvector maps of the function \code{MEM} of the supplement are the same as those
+of \code{adespatial::dbmem()}, checked in Octave. Appendix A recommends centring them with
+site weights and the code does not, but orthogonality is not needed to partition
+variation, and here all predictors are standardised with site weights.
+
 Appendix A also gives semipartial correlations for each predictor, which are not
 implemented here.
 }
 
 \examples{
+\dontshow{if (requireNamespace("adespatial", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 env <- runif(40, 0, 100)
-space <- spatial_eigenvectors(cbind(1:40))[, 1:3]
+space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
 trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
 trait_partition(comm, trait, env, space, n_perm = 49)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning
