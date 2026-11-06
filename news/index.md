@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.5.0
 
 - [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md):
   static metacommunities from the Gaussian response of Dray & Legendre
@@ -25,6 +25,9 @@
   [`picante::match.phylo.comm()`](https://rdrr.io/pkg/picante/man/data.checking.html),
   drop with a warning the species found in only one of them. Repeated
   names are an error.
+- [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
+  semipartial correlations of each predictor, with their tests,
+  following Appendix A of Peres-Neto et al. (2012).
 - [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md):
   results of
   [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)

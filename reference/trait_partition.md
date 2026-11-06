@@ -56,8 +56,11 @@ trait_partition(
 List of class `mc_trait_partition` with `fractions`, a data frame with
 one row for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the
 columns `r2`, `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and
-`p_max`; `component`; and `component_share`, the share of the total
-variation in the component.
+`p_max`; `component`; `component_share`, the share of the total
+variation in the component; `semipartial`, a matrix of predictors by
+traits; and `p_partial`, `p_partial_site` and `p_partial_taxa`, with the
+larger p-value and those of sites and of species. All are `NA` if
+predictors are collinear.
 
 ## Details
 
@@ -111,8 +114,16 @@ checked in Octave. Appendix A recommends centring them with site weights
 and the code does not, but orthogonality is not needed to partition
 variation, and here all predictors are standardised with site weights.
 
-Appendix A also gives semipartial correlations for each predictor, which
-are not implemented here.
+Semipartial correlations follow Appendix A: the square root of the loss
+of R2 when a predictor leaves the model of all predictors, with the sign
+of its slope when it is alone. The supplement has no code for them, so
+they were checked against separate regressions and not in Octave.
+Appendix A calculates the model without the predictor with the slopes of
+the full model, which it had just fitted again without it, and here we
+use the second slopes. With several traits it gives no rule, so here
+each trait has its own value, relative to the variation of that trait.
+They are tested as the fractions are, with the loss of R2 as the
+statistic, and with many predictors they need a correction.
 
 This function partitions variation and does not test each trait against
 each predictor. For that test, ter Braak (2019) proposed multilevel and
