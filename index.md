@@ -103,6 +103,16 @@ function reference.
                                 dispersal = 0.01, n_steps = 1000)
   ```
 
+## Citation
+
+Provete, D. B. (2026). comdynamite: Process-based metacommunity
+simulations with phylogenetic structure. R package.
+<https://doi.org/10.5281/zenodo.23993533>
+
+This DOI always points to the latest version; each release also has its
+own DOI on Zenodo. In R, `citation("comdynamite")` gives the entry with
+the installed version.
+
 ## References
 
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik,
