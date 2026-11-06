@@ -47,7 +47,7 @@ base sem dinâmica.
 
 - [x] `simulate_static()`: resposta gaussiana com contagens de Poisson (Peres-Neto
       et al. 2012).
-- [ ] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
+- [x] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
       espaço, como em `ScriptDemo.m`.
 - [ ] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
       [E] e [S].
@@ -98,8 +98,8 @@ história conhecida.
 ## v0.5.0: métodos de metacommunity phylogenetics
 
 Objetivo: levar para o R os métodos que só existem em MATLAB. O código está nos
-suplementos de Peres-Neto et al. (2012) e Leibold et al. (2010). Antes de começar,
-confirmar que não há implementação em outro pacote.
+suplementos de Peres-Neto et al. (2012) e Leibold et al. (2010), e nenhum dos dois
+métodos está em pacote de R.
 
 - [ ] Peres-Neto et al. (2012): correlações entre traits e ambiente, autovetores
       ponderados, seleção estocástica e partição da variação. Reaproveitar
@@ -148,18 +148,22 @@ Analisar, chamando os pacotes de referência sobre a estrutura comum:
 
 - [ ] Riqueza por rarefação e extrapolação (`iNEXT`).
 - [ ] Sinal filogenético em traits discretos: Rao decomposto nos nós (`adiv`, `ade4`).
-- [ ] Modelos GeoSSE com seleção por AIC e MCMC (`diversitree`).
+- [ ] Diversificação por região: GeoHiSSE (Caetano et al. 2018), no lugar do GeoSSE
+      usado no artigo, e testes baseados nas pontas, como FiSSE (Rabosky & Goldberg
+      2017) e ES-sim (Harvey & Rabosky 2017).
 - [ ] Curvas de linhagens no tempo por região (`ape`).
 - [ ] DEC (BioGeoBEARS; Matzke 2014) e tempo de colonização por idades crown e stem.
 - [ ] MPD, MNTD e análogos funcionais, com o pool definido em três extensões: só uma
       região, só a outra e as duas juntas (`picante`).
 - [ ] Relação da diversidade com clima, clima passado e topografia nas três extensões.
+- [ ] Diversificação em função de clima e topografia, com o RPANDA (Morlon et al. 2016).
 
 Depois:
 
 - [ ] Avaliar o fluxo: em que cenários ele recupera a causa simulada e com que frequência
       erra. Incluir árvore incompleta e poucos sítios, limitações citadas no artigo, e
-      os falsos positivos de modelos SSE (Rabosky & Goldberg 2015).
+      os falsos positivos de modelos SSE (Rabosky & Goldberg 2015). Comparar GeoSSE,
+      GeoHiSSE e testes baseados nas pontas nos mesmos cenários.
 - [ ] ClaSSE (Goldberg & Igić 2012) e outros modelos de Markov com k estados.
 - [ ] SBEARS, do Herodotools. Conferir o que ele faz: entrou aqui como modelo contínuo,
       e o nome é Site Based Estimation of Ancestral Range of Species.
@@ -224,13 +228,17 @@ Objetivo: API estável e pacote no CRAN.
 Conferidas no Crossref em 2026-11-05.
 
 - Benício, R. A., et al. (2021). *Journal of Biogeography*, 48, 2211–2225. https://doi.org/10.1111/jbi.14145
+- Caetano, D. S., et al. (2018). *Evolution*, 72, 2308–2324. https://doi.org/10.1111/evo.13602
 - Clavel, J., et al. (2015). *Methods in Ecology and Evolution*, 6, 1311–1319. https://doi.org/10.1111/2041-210x.12420
 - Goldberg, E. E., et al. (2011). *Systematic Biology*, 60, 451–465. https://doi.org/10.1093/sysbio/syr046
 - Goldberg, E. E., & Igić, B. (2012). *Evolution*, 66, 3701–3709. https://doi.org/10.1111/j.1558-5646.2012.01730.x
+- Harvey, M. G., & Rabosky, D. L. (2017). *Methods in Ecology and Evolution*, 9, 984–993. https://doi.org/10.1111/2041-210x.12949
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
+- Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
+- Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395

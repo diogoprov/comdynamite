@@ -3,6 +3,8 @@
 - `simulate_static()`: static metacommunities from unimodal species responses
   with Poisson counts, the Gaussian response of Peres-Neto et al. (2012), as a
   baseline without population dynamics.
+  With several gradients, for example environment and space, the expected
+  abundance is the product of the responses.
 
 # comdynamite 0.1.0
 

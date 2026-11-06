@@ -8,10 +8,14 @@ simulate_static(traits, env, incidence = FALSE)
 }
 \arguments{
 \item{traits}{Data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame with
-columns \code{optimum}, \code{sigma} and \code{r_max}. Here \code{r_max} is the maximum
-expected abundance, not a growth rate, so set \code{rmax_range} accordingly.}
+columns \code{optimum}, \code{sigma} and \code{r_max}, or a list of them, one per
+gradient, with the same species. Here \code{r_max} is the maximum expected
+abundance, not a growth rate, so set \code{rmax_range} accordingly. With several
+gradients the maxima multiply, so a range such as \code{c(1, 1)} in all but one
+of them keeps abundances on the scale of the first.}
 
-\item{env}{Environmental value of each site.}
+\item{env}{Value of the gradient at each site, or a list or data frame with
+one gradient per element, in the order of \code{traits}.}
 
 \item{incidence}{Return presences and absences instead of abundances?}
 }
@@ -30,6 +34,11 @@ abundances are Poisson counts with that mean. Because nothing but the
 gradient structures the data, this is a baseline for
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} and a fast generator for evaluating methods.
 }
+\details{
+With several gradients, for example an environmental and a spatial one, each
+species has its own response to each gradient and the expected abundance is
+the product of the responses, as in Peres-Neto et al. (2012).
+}
 \examples{
 set.seed(1)
 tr <- ape::rcoal(20)
@@ -37,6 +46,12 @@ traits <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 sim <- simulate_static(traits, env = runif(100, 0, 100))
 sim
+
+# an environmental and a spatial gradient
+space <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
+                        rmax_range = c(1, 1))
+gradients <- data.frame(env = runif(100, 0, 100), space = 1:100)
+simulate_static(list(traits, space), gradients)
 }
 \references{
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
