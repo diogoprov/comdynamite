@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,7 +19,8 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -37,9 +38,23 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Changelog</h1>
-      <small>Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.5.0/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
+      <small>Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.5.1" id="comdynamite-051">comdynamite 0.5.1<a class="anchor" aria-label="anchor" href="#comdynamite-051"></a></h2>
+<ul><li>
+<code><a href="../reference/node_contrasts.html">node_contrasts()</a></code>: <code>branch_lengths = TRUE</code> gives the coding with branch lengths of the supplement of Leibold et al. (2010).</li>
+<li>
+<code><a href="../reference/plot_node_test.html">plot_node_test()</a></code>: with <code>type = "fan"</code>, the names of the variables follow the radii and no longer overlap the names of the species.</li>
+<li>
+<code><a href="../reference/plot_node_heatmap.html">plot_node_heatmap()</a></code>: semipartial correlations of <code><a href="../reference/node_test.html">node_test()</a></code> as a table of nodes by variables.</li>
+<li>
+<code><a href="../reference/simulate_logistic.html">simulate_logistic()</a></code> now uses the values of the code of Ives &amp; Helmus (2011): the default of <code>intercept_sd</code> is 0.5, and slopes have a standard deviation of <code>slope_sd</code> among species.</li>
+<li>
+<code><a href="../reference/logistic_gradients.html">logistic_gradients()</a></code>: in scenario 3, the error is added to <code>y</code> with unit variance and only in <code>y_test</code>, and in scenarios 5 and 6 <code>x</code> is in random order along the transect.</li>
+<li>New article on analysing clades and traits. The article on validation now compares Table 5 of Peres-Neto et al. (2012).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.5.0" id="comdynamite-050">comdynamite 0.5.0<a class="anchor" aria-label="anchor" href="#comdynamite-050"></a></h2>
 <ul><li>

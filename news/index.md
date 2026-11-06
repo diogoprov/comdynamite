@@ -1,5 +1,28 @@
 # Changelog
 
+## comdynamite 0.5.1
+
+- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md):
+  `branch_lengths = TRUE` gives the coding with branch lengths of the
+  supplement of Leibold et al. (2010).
+- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md):
+  with `type = "fan"`, the names of the variables follow the radii and
+  no longer overlap the names of the species.
+- [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md):
+  semipartial correlations of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  as a table of nodes by variables.
+- [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md)
+  now uses the values of the code of Ives & Helmus (2011): the default
+  of `intercept_sd` is 0.5, and slopes have a standard deviation of
+  `slope_sd` among species.
+- [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md):
+  in scenario 3, the error is added to `y` with unit variance and only
+  in `y_test`, and in scenarios 5 and 6 `x` is in random order along the
+  transect.
+- New article on analysing clades and traits. The article on validation
+  now compares Table 5 of Peres-Neto et al. (2012).
+
 ## comdynamite 0.5.0
 
 - [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md):

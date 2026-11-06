@@ -8,7 +8,7 @@ Species outside the node get zero.
 ## Usage
 
 ``` r
-node_contrasts(tree, cherries = TRUE)
+node_contrasts(tree, cherries = TRUE, branch_lengths = FALSE)
 ```
 
 ## Arguments
@@ -22,10 +22,24 @@ node_contrasts(tree, cherries = TRUE)
   Keep nodes that join two tips? The article tests them (its Figure 3),
   but the function `CreateNodeContrasts` of the authors leaves them out.
 
+- branch_lengths:
+
+  Use the branch lengths of `tree`?
+
 ## Value
 
 Matrix with one row per tip and one column per node, named by the node
 numbers of `tree`.
+
+## Details
+
+With `branch_lengths = TRUE`, values follow section III of the
+supplement of Leibold et al. (2010): each branch between a species and
+the node counts its length divided by the number of species below it,
+and the sum is divided by the total length of that side of the node.
+Species that share history get less weight, and each side still sums
+to 1. The supplement proposes this coding for trees in which all species
+are equally distant from the root.
 
 ## References
 
@@ -44,4 +58,15 @@ node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
 #> c  0.50  0 -1.0  0
 #> d  0.25  0  0.5 -1
 #> e  0.25  0  0.5  1
+
+# Figure S2 of the supplement
+tree <- ape::read.tree(text = "((((A:0.2,B:0.2):0.65,C:0.85):0.15,D:1):0.4,(E:0.5,F:0.5):0.9);")
+round(node_contrasts(tree, branch_lengths = TRUE), 3)
+#>        7      8    9 10 11
+#> A -0.196 -0.280 -0.5 -1  0
+#> B -0.196 -0.280 -0.5  1  0
+#> C -0.290 -0.439  1.0  0  0
+#> D -0.319  1.000  0.0  0  0
+#> E  0.500  0.000  0.0  0 -1
+#> F  0.500  0.000  0.0  0  1
 ```

@@ -32,17 +32,19 @@ generate the data, and `x_test` and `y_test`, the ones to analyse.
 2.  They are equally important and correlated: `y` is `x` plus a N(0, 1)
     error.
 
-3.  They are independent, and `y` is less important: it has a N(0, 1)
-    error. Appendix C does not say more, and this error is small on this
-    scale.
+3.  They are independent, and `y` is less important: data come from `y`,
+    and `y_test` is `y` with unit variance plus a N(0, 1) error. On the
+    scale of `y` this error would have no effect, and with unit variance
+    the results agree with Table 5.
 
 4.  Neither is important: data come from scenario 1, and `x_test` and
     `y_test` are N(0, 1) deviates, to estimate the type I error.
 
 5.  `y` has a broad spatial scale, the first Moran's eigenvector map
-    (MEM).
+    (MEM), and `x` is in random order along the transect.
 
-6.  `y` has an intermediate spatial scale, the third MEM.
+6.  `y` has an intermediate spatial scale, the third MEM, and `x` is as
+    in scenario 5.
 
 7.  `x` is the first MEM and `y` the third.
 
@@ -61,10 +63,10 @@ metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 set.seed(1)
 head(logistic_gradients(6))
 #>     x          y x_test     y_test
-#> 1 -15  -5.740251    -15  -5.740251
-#> 2 -14 -10.606602    -14 -10.606602
-#> 3 -13 -13.858193    -13 -13.858193
-#> 4 -12 -15.000000    -12 -15.000000
-#> 5 -11 -13.858193    -11 -13.858193
-#> 6 -10 -10.606602    -10 -10.606602
+#> 1 -13  -5.740251    -13  -5.740251
+#> 2 -10 -10.606602    -10 -10.606602
+#> 3  -6 -13.858193     -6 -13.858193
+#> 4  13 -15.000000     13 -15.000000
+#> 5  14 -13.858193     14 -13.858193
+#> 6  -1 -10.606602     -1 -10.606602
 ```

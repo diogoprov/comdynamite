@@ -2,6 +2,8 @@
 
 ### All vignettes
 
+- [Analysing clades and traits in a
+  metacommunity](https://provetelab.org/comdynamite/articles/analysing-clades.md):
 - [Getting started with
   comdynamite](https://provetelab.org/comdynamite/articles/comdynamite.md):
 - [Evaluating a method with simulated

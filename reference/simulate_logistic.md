@@ -15,7 +15,7 @@ simulate_logistic(
   tree,
   gradients,
   intercept_mean = 0,
-  intercept_sd = 1,
+  intercept_sd = 0.5,
   slope_sd = 1,
   lambda = 1,
   reduction = c(0.5, 1),
@@ -40,12 +40,14 @@ simulate_logistic(
 - intercept_mean, intercept_sd:
 
   Mean and standard deviation of `a`. Appendix C does not give these
-  values.
+  values, and the defaults are those of the code of Ives & Helmus
+  (2011).
 
 - slope_sd:
 
-  Standard deviation of the slopes `b` across the tree. Appendix C does
-  not give this value.
+  Standard deviation of the slopes `b` among the species of the tree, as
+  in the code of Ives & Helmus (2011). Appendix C does not give this
+  value.
 
 - lambda:
 
@@ -94,5 +96,5 @@ tr <- ape::compute.brlen(ape::stree(32, "balanced"), method = "Grafen")
 simulate_logistic(tr, logistic_gradients(1)[c("x", "y")])
 #> <mc_sim> 31 sites x 32 species
 #> species persisting: 32 of 32 
-#> mean local richness: 5.13 
+#> mean local richness: 5.65 
 ```

@@ -11,7 +11,7 @@ order, so that the two are independent."><meta property="og:image" content="http
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,7 +23,8 @@ order, so that the two are independent."><meta property="og:image" content="http
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -41,7 +42,7 @@ order, so that the two are independent."><meta property="og:image" content="http
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Gradients of the seven scenarios of Peres-Neto et al. (2012)</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.5.0/R/static.R" class="external-link"><code>R/static.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/static.R" class="external-link"><code>R/static.R</code></a></small>
       <div class="d-none name"><code>logistic_gradients.Rd</code></div>
     </div>
 
@@ -78,12 +79,14 @@ generate the data, and <code>x_test</code> and <code>y_test</code>, the ones to 
 
 <ol><li><p>The two gradients are equally important and independent.</p></li>
 <li><p>They are equally important and correlated: <code>y</code> is <code>x</code> plus a N(0, 1) error.</p></li>
-<li><p>They are independent, and <code>y</code> is less important: it has a N(0, 1) error.
-Appendix C does not say more, and this error is small on this scale.</p></li>
+<li><p>They are independent, and <code>y</code> is less important: data come from <code>y</code>, and
+<code>y_test</code> is <code>y</code> with unit variance plus a N(0, 1) error. On the scale of <code>y</code> this
+error would have no effect, and with unit variance the results agree with Table 5.</p></li>
 <li><p>Neither is important: data come from scenario 1, and <code>x_test</code> and <code>y_test</code>
 are N(0, 1) deviates, to estimate the type I error.</p></li>
-<li><p><code>y</code> has a broad spatial scale, the first Moran's eigenvector map (MEM).</p></li>
-<li><p><code>y</code> has an intermediate spatial scale, the third MEM.</p></li>
+<li><p><code>y</code> has a broad spatial scale, the first Moran's eigenvector map (MEM), and <code>x</code> is
+in random order along the transect.</p></li>
+<li><p><code>y</code> has an intermediate spatial scale, the third MEM, and <code>x</code> is as in scenario 5.</p></li>
 <li><p><code>x</code> is the first MEM and <code>y</code> the third.</p></li>
 </ol><p>MEMs are rescaled to [-15, 15].</p>
     </div>
@@ -99,12 +102,12 @@ phylogenetics. <em>Ecology</em>, 93, S14–S30. <a href="https://doi.org/10.1890
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">logistic_gradients</span><span class="op">(</span><span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     x          y x_test     y_test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -15  -5.740251    -15  -5.740251</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -14 -10.606602    -14 -10.606602</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -13 -13.858193    -13 -13.858193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -12 -15.000000    -12 -15.000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 -11 -13.858193    -11 -13.858193</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 -10 -10.606602    -10 -10.606602</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 -13  -5.740251    -13  -5.740251</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -10 -10.606602    -10 -10.606602</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  -6 -13.858193     -6 -13.858193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  13 -15.000000     13 -15.000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  14 -13.858193     14 -13.858193</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  -1 -10.606602     -1 -10.606602</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

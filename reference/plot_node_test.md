@@ -45,7 +45,9 @@ plot_node_test(
 
 - type:
 
-  `"phylogram"`, as in the article, or `"fan"`.
+  `"phylogram"`, as in the article, or `"fan"`, for very large trees,
+  with the names of the variables along the radii so that they stay
+  clear of the species.
 
 - alpha:
 
@@ -112,8 +114,6 @@ plot_node_test(out, daphniids$tree, test = "site")
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 999)
 plot_node_test(out, daphniids$tree, test = "site")
-
-plot_node_test(out, daphniids$tree, test = "site", type = "fan")
 
 # }
 ```

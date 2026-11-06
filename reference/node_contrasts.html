@@ -13,7 +13,7 @@ get zero."><meta property="og:image" content="https://provetelab.org/comdynamite
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -25,7 +25,8 @@ get zero."><meta property="og:image" content="https://provetelab.org/comdynamite
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -43,7 +44,7 @@ get zero."><meta property="og:image" content="https://provetelab.org/comdynamite
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Node contrasts of a phylogeny</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.5.0/R/node_test.R" class="external-link"><code>R/node_test.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/node_test.R" class="external-link"><code>R/node_test.R</code></a></small>
       <div class="d-none name"><code>node_contrasts.Rd</code></div>
     </div>
 
@@ -56,7 +57,7 @@ get zero.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_contrasts</span><span class="op">(</span><span class="va">tree</span>, cherries <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_contrasts</span><span class="op">(</span><span class="va">tree</span>, cherries <span class="op">=</span> <span class="cn">TRUE</span>, branch_lengths <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,11 +72,24 @@ get zero.</p>
 <dd><p>Keep nodes that join two tips? The article tests them (its Figure 3),
 but the function <code>CreateNodeContrasts</code> of the authors leaves them out.</p></dd>
 
+
+<dt id="arg-branch-lengths">branch_lengths<a class="anchor" aria-label="anchor" href="#arg-branch-lengths"></a></dt>
+<dd><p>Use the branch lengths of <code>tree</code>?</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Matrix with one row per tip and one column per node, named by the node
 numbers of <code>tree</code>.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With <code>branch_lengths = TRUE</code>, values follow section III of the supplement of Leibold
+et al. (2010): each branch between a species and the node counts its length divided by
+the number of species below it, and the sum is divided by the total length of that side
+of the node. Species that share history get less weight, and each side still sums
+to 1. The supplement proposes this coding for trees in which all species are equally
+distant from the root.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -94,6 +108,17 @@ biogeography. <em>Ecology Letters</em>, 13, 1290–1299.
 <span class="r-out co"><span class="r-pr">#&gt;</span> c  0.50  0 -1.0  0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> d  0.25  0  0.5 -1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> e  0.25  0  0.5  1</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Figure S2 of the supplement</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span>text <span class="op">=</span> <span class="st">"((((A:0.2,B:0.2):0.65,C:0.85):0.15,D:1):0.4,(E:0.5,F:0.5):0.9);"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">node_contrasts</span><span class="op">(</span><span class="va">tree</span>, branch_lengths <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        7      8    9 10 11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> A -0.196 -0.280 -0.5 -1  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> B -0.196 -0.280 -0.5  1  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> C -0.290 -0.439  1.0  0  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> D -0.319  1.000  0.0  0  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> E  0.500  0.000  0.0  0 -1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> F  0.500  0.000  0.0  0  1</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

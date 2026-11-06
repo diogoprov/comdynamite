@@ -2,13 +2,14 @@ pandoc: 3.8.3
 pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
+  articles/analysing-clades: analysing-clades.html
   comdynamite: comdynamite.html
   evaluating-methods: evaluating-methods.html
   phylogenetic-structure: phylogenetic-structure.html
   articles/validation-gradient: validation-gradient.html
   articles/validation: validation.html
   articles/watching-assembly: watching-assembly.html
-last_built: 2026-11-06T21:47Z
+last_built: 2026-11-06T21:52Z
 urls:
   reference: https://provetelab.org/comdynamite/reference
   article: https://provetelab.org/comdynamite/articles

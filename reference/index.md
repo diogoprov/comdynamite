@@ -71,6 +71,8 @@ Analyses of phylogenetic community structure.
   : Node contrasts of a phylogeny
 - [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
   : Plot the results of a node test on the phylogeny
+- [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+  : Plot the semipartial correlations of a node test
 - [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   : Represent a phylogeny by one vector related to a predictor
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)

@@ -136,7 +136,9 @@ species traits-environment relationships in the fourth-corner problem.
 ## See also
 
 [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
-shows the results on the tree.
+and
+[`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+show the results.
 [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
 and
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)

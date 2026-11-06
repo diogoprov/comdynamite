@@ -17,7 +17,7 @@ reduction then reduces them, which adds noise."><meta property="og:image" conten
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -29,7 +29,8 @@ reduction then reduces them, which adds noise."><meta property="og:image" conten
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -47,7 +48,7 @@ reduction then reduces them, which adds noise."><meta property="og:image" conten
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Simulate presences and absences from logistic responses</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.5.0/R/static.R" class="external-link"><code>R/static.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/static.R" class="external-link"><code>R/static.R</code></a></small>
       <div class="d-none name"><code>simulate_logistic.Rd</code></div>
     </div>
 
@@ -66,7 +67,7 @@ the slope <code>b</code> evolves on the tree. With several gradients, each with 
 <span>  <span class="va">tree</span>,</span>
 <span>  <span class="va">gradients</span>,</span>
 <span>  intercept_mean <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  intercept_sd <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  intercept_sd <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  slope_sd <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  lambda <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  reduction <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">1</span><span class="op">)</span>,</span>
@@ -90,13 +91,13 @@ centred.</p></dd>
 
 
 <dt id="arg-intercept-mean-intercept-sd">intercept_mean, intercept_sd<a class="anchor" aria-label="anchor" href="#arg-intercept-mean-intercept-sd"></a></dt>
-<dd><p>Mean and standard deviation of <code>a</code>.
-Appendix C does not give these values.</p></dd>
+<dd><p>Mean and standard deviation of <code>a</code>. Appendix C does
+not give these values, and the defaults are those of the code of Ives &amp; Helmus (2011).</p></dd>
 
 
 <dt id="arg-slope-sd">slope_sd<a class="anchor" aria-label="anchor" href="#arg-slope-sd"></a></dt>
-<dd><p>Standard deviation of the slopes <code>b</code> across the tree.
-Appendix C does not give this value.</p></dd>
+<dd><p>Standard deviation of the slopes <code>b</code> among the species of the tree, as in
+the code of Ives &amp; Helmus (2011). Appendix C does not give this value.</p></dd>
 
 
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
@@ -142,7 +143,7 @@ phylogenetics. <em>Ecology</em>, 93, S14–S30. <a href="https://doi.org/10.1890
 <span class="r-in"><span><span class="fu">simulate_logistic</span><span class="op">(</span><span class="va">tr</span>, <span class="fu"><a href="logistic_gradients.html">logistic_gradients</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_sim&gt; 31 sites x 32 species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> species persisting: 32 of 32 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 5.13 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 5.65 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
