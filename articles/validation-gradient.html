@@ -74,11 +74,11 @@
     
     
 <p>The functions <code><a href="../reference/fourth_corner_test.html">fourth_corner_test()</a></code>,
-<code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>, <code><a href="../reference/trait_partition.html">trait_partition()</a></code>,
-<code><a href="../reference/spatial_eigenvectors.html">spatial_eigenvectors()</a></code> and <code><a href="../reference/node_test.html">node_test()</a></code> are
-translations of MATLAB code from the supplements of these articles. We
-checked them in three ways. Each help page lists the differences between
-the text of the article and the code.</p>
+<code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>, <code><a href="../reference/trait_partition.html">trait_partition()</a></code> and
+<code><a href="../reference/node_test.html">node_test()</a></code> are translations of MATLAB code from the
+supplements of these articles. We checked them in three ways. Each help
+page lists the differences between the text of the article and the
+code.</p>
 <div class="section level2">
 <h2 id="comparison-with-the-original-code">Comparison with the original code<a class="anchor" aria-label="anchor" href="#comparison-with-the-original-code"></a>
 </h2>
@@ -87,8 +87,10 @@ A of Peres-Neto et al. (2012) and on simulated data. The supplement
 lacks the functions <code>eigen</code> and <code>WeightedMeanVar</code>,
 which we wrote. Weighted coordinates, correlations, Moran’s eigenvector
 maps and the raw and adjusted fractions agreed to within 1e-13.
-Correlations also agreed with <code>ade4::fourthcorner()</code>, and
-maps with <code>adespatial::dbmem()</code>.</p>
+Correlations also agreed with <code><a href="https://adeverse.github.io/ade4/reference/fourthcorner.html" class="external-link">ade4::fourthcorner()</a></code>. The
+package does not include the maps, as those of
+<code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code> are the same as the ones of the
+supplement.</p>
 </div>
 <div class="section level2">
 <h2 id="type-i-error-and-power">Type I error and power<a class="anchor" aria-label="anchor" href="#type-i-error-and-power"></a>
@@ -320,9 +322,60 @@ alone.</p>
 <p>The data set <code>daphniids</code> rebuilds the data of the article
 from the public survey. With the larger p-value, no predictor is
 significant at any node, as species permutations have little power with
-13 species. The article permutes rows and columns together. With sites
-alone, at a level of 0.05 without correction and 999 permutations,
-environmental results compare with Figure 3a as follows:</p>
+13 species. The article permutes rows and columns together, which
+<code><a href="../reference/node_test.html">node_test()</a></code> gives as <code>p_joint</code>. Rates of
+rejection per node at the 5% level (one Yule tree of 24 species, 60
+sites, 300 data sets, 99 permutations,
+<code>data-raw/validation_node.R</code>):</p>
+<table class="table">
+<thead><tr class="header">
+<th>What acts</th>
+<th>Sites</th>
+<th>Species</th>
+<th>Larger p</th>
+<th>Joint</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Neither</td>
+<td>0.047</td>
+<td>0.045</td>
+<td>0.018</td>
+<td>0.046</td>
+</tr>
+<tr class="even">
+<td>Environment</td>
+<td>0.770</td>
+<td>0.048</td>
+<td>0.048</td>
+<td>0.759</td>
+</tr>
+<tr class="odd">
+<td>Phylogeny</td>
+<td>0.057</td>
+<td>0.061</td>
+<td>0.024</td>
+<td>0.060</td>
+</tr>
+<tr class="even">
+<td>Both</td>
+<td>0.798</td>
+<td>0.087</td>
+<td>0.087</td>
+<td>0.793</td>
+</tr>
+</tbody>
+</table>
+<p>The joint test is valid only when neither acts. With the environment
+alone it behaves as the permutation of sites, so it does not separate an
+effect of the environment from an association between environment and
+phylogeny.</p>
+<p>In the daphniids, the joint test with 999 permutations found fewer
+predictors than sites alone at the 0.05 level (PHEQ, AV_DEP, DOC, TN_TP
+and PTL at four nodes, with none left after the false discovery rate).
+It therefore did not recover Figure 3a better. With sites alone, at a
+level of 0.05 without correction and 999 permutations, environmental
+results compare with Figure 3a as follows:</p>
 <table class="table">
 <colgroup>
 <col width="33%">

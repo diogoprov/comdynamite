@@ -59,7 +59,7 @@ whether the two clades that split there differ in their response to the predicto
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, biogeography <span class="op">=</span> <span class="cn">NULL</span>, n_perm <span class="op">=</span> <span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, biogeography <span class="op">=</span> <span class="cn">NULL</span>, n_perm <span class="op">=</span> <span class="fl">9999</span>, cores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -88,32 +88,43 @@ and values of 1, -1 and 0.</p></dd>
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Number of permutations of sites and of species.</p></dd>
+<dd><p>Number of permutations of sites, of species and of both.</p></dd>
+
+
+<dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
+<dd><p>Number of cores, with nodes run in parallel. Not available on Windows,
+where one core is used. For reproducible p-values with more than one core, call
+<code>RNGkind("L'Ecuyer-CMRG")</code> before <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_node_test</code> with <code>nodes</code>, a data frame with one row per
 node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>statistic</code>,
-<code>p_site</code>, <code>p_taxa</code>, <code>p_max</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of nodes by
-predictors; <code>p_partial</code>, with the larger of the two p-values for each of them;
-<code>p_partial_site</code>, with the p-values of sites alone; and <code>biogeography</code>, a list with
-the same three matrices for the events, or <code>NULL</code>.</p>
+<code>p_site</code>, <code>p_taxa</code>, <code>p_max</code>, <code>p_joint</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of
+nodes by predictors; <code>p_partial</code>, with the larger of the two p-values for each of
+them; <code>p_partial_site</code>, with the p-values of sites alone; <code>p_partial_joint</code>, with
+those of the permutation of the article; and <code>biogeography</code>, a list with the same
+four matrices for the events, or <code>NULL</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The test statistic is the explained over the residual sum of squares. It is
 tested by permuting sites, and by replacing the species of the node with a random
-set of the same size from all species. The article permutes both at once; following
-Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
-of the two tests. With many nodes these p-values need a correction, and
+set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
+et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 <code>p_adjusted</code> gives the false discovery rate that the article uses. This correction
 needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), so the default
 is the 9999 of the article.</p>
-<p>With few species at a node, permutations of species have little power, so <code>p_max</code>
-is conservative: with the <a href="daphniids.html">daphniids</a> of the article, of 13 species, no predictor
-passes it, whereas sites alone recover most of the environmental results of its
-Figure 3 (see the article on validation).</p>
+<p>The article permutes sites and species at once, which is <code>p_joint</code>. This tests the
+null hypothesis that neither the environment nor the phylogeny matters, so it is not
+a test of their association. In simulations where the environment acts but species
+responses have no phylogenetic signal, <code>p_joint</code> rejected 76% of the nodes at the 5%
+level, and <code>p_max</code> 4.8%.</p>
+<p>With few species at a node, permutations of species have little power, so <code>p_max</code> is
+conservative: with the <a href="daphniids.html">daphniids</a> of the article, of 13 species, no predictor passes
+it, whereas sites alone recover most of the environmental results of its Figure 3 (see
+the article on validation).</p>
 <p>Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.</p>
 <p>Biogeographic events follow the article: a column of <code>biogeography</code> has 1 for sites

@@ -47,14 +47,14 @@
 <li>
 <code><a href="../reference/simulate_logistic.html">simulate_logistic()</a></code> and <code><a href="../reference/logistic_gradients.html">logistic_gradients()</a></code>: presences and absences from logistic responses to two gradients, with the seven scenarios of Appendix C of Peres-Neto et al. (2012).</li>
 <li>
-<code><a href="../reference/fourth_corner_test.html">fourth_corner_test()</a></code>, <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>, <code><a href="../reference/trait_partition.html">trait_partition()</a></code> and <code><a href="../reference/spatial_eigenvectors.html">spatial_eigenvectors()</a></code>: phylogenetic gradient analysis of Peres-Neto et al. (2012), tested against the original code in Octave.</li>
+<code><a href="../reference/fourth_corner_test.html">fourth_corner_test()</a></code>, <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> and <code><a href="../reference/trait_partition.html">trait_partition()</a></code>: phylogenetic gradient analysis of Peres-Neto et al. (2012), tested against the original code in Octave.</li>
 <li>Functions that take a community and a phylogeny, traits or contrasts now match species by name and, as <code><a href="https://rdrr.io/pkg/picante/man/data.checking.html" class="external-link">picante::match.phylo.comm()</a></code>, drop with a warning the species found in only one of them. Repeated names are an error.</li>
 <li>
 <code>daphniids</code>: data of Leibold et al. (2010), rebuilt from the public survey.</li>
 <li>
 <code><a href="../reference/node_contrasts.html">node_contrasts()</a></code> now keeps nodes that join two tips, as the article does. <code>cherries = FALSE</code> gives the original code.</li>
 <li>
-<code><a href="../reference/node_test.html">node_test()</a></code>: <code>semipartial</code> replaces <code>partial_r2</code>, following the article, and there are <code>p_adjusted</code> (false discovery rate) and biogeographic events.</li>
+<code><a href="../reference/node_test.html">node_test()</a></code>: <code>semipartial</code> replaces <code>partial_r2</code>, following the article, and there are <code>p_adjusted</code> (false discovery rate), biogeographic events, the joint permutation of the article (<code>p_joint</code>), 9999 permutations by default and <code>cores</code>.</li>
 <li>
 <code><a href="../reference/pcc_test.html">pcc_test()</a></code> and <code><a href="../reference/phylo_eigenvectors.html">phylo_eigenvectors()</a></code>: phylogenetic community composition of Peres-Neto &amp; Kembel (2015), with site and species permutations.</li>
 <li>

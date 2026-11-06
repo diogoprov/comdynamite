@@ -216,8 +216,6 @@ Analyses of phylogenetic community structure.
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
   : Partition trait or phylogenetic variation between environment and
   space
-- [`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md)
-  : Moran's eigenvector maps
 
 ## Data
 

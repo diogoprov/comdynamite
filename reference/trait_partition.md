@@ -37,10 +37,10 @@ trait_partition(
 
 - env, space:
 
-  Numeric vector, or matrix or data frame, with one row per site, for
-  example the output of
-  [`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md)
-  for `space`.
+  Numeric vector, or matrix or data frame, with one row per site. For
+  `space`, the article uses Moran's eigenvector maps, which
+  [`adespatial::dbmem()`](http://adeverse.github.io/adespatial/reference/dbmem.md)
+  gives.
 
 - component:
 
@@ -104,6 +104,13 @@ follow the text:
   here we report the larger of the two, as in
   [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md).
 
+Moran's eigenvector maps of the function `MEM` of the supplement are the
+same as those of
+[`adespatial::dbmem()`](http://adeverse.github.io/adespatial/reference/dbmem.md),
+checked in Octave. Appendix A recommends centring them with site weights
+and the code does not, but orthogonality is not needed to partition
+variation, and here all predictors are standardised with site weights.
+
 Appendix A also gives semipartial correlations for each predictor, which
 are not implemented here.
 
@@ -124,7 +131,7 @@ metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 ``` r
 set.seed(1)
 env <- runif(40, 0, 100)
-space <- spatial_eigenvectors(cbind(1:40))[, 1:3]
+space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
 trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)

@@ -3,8 +3,7 @@
 The functions
 [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md),
 [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
-[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md),
-[`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md)
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
 and
 [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
 are translations of MATLAB code from the supplements of these articles.
@@ -18,7 +17,10 @@ of Peres-Neto et al. (2012) and on simulated data. The supplement lacks
 the functions `eigen` and `WeightedMeanVar`, which we wrote. Weighted
 coordinates, correlations, Moran’s eigenvector maps and the raw and
 adjusted fractions agreed to within 1e-13. Correlations also agreed with
-`ade4::fourthcorner()`, and maps with `adespatial::dbmem()`.
+[`ade4::fourthcorner()`](https://adeverse.github.io/ade4/reference/fourthcorner.html).
+The package does not include the maps, as those of
+[`adespatial::dbmem()`](http://adeverse.github.io/adespatial/reference/dbmem.md)
+are the same as the ones of the supplement.
 
 ## Type I error and power
 
@@ -91,9 +93,30 @@ for a vector estimated for environment alone.
 The data set `daphniids` rebuilds the data of the article from the
 public survey. With the larger p-value, no predictor is significant at
 any node, as species permutations have little power with 13 species. The
-article permutes rows and columns together. With sites alone, at a level
-of 0.05 without correction and 999 permutations, environmental results
-compare with Figure 3a as follows:
+article permutes rows and columns together, which
+[`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+gives as `p_joint`. Rates of rejection per node at the 5% level (one
+Yule tree of 24 species, 60 sites, 300 data sets, 99 permutations,
+`data-raw/validation_node.R`):
+
+| What acts   | Sites | Species | Larger p | Joint |
+|-------------|-------|---------|----------|-------|
+| Neither     | 0.047 | 0.045   | 0.018    | 0.046 |
+| Environment | 0.770 | 0.048   | 0.048    | 0.759 |
+| Phylogeny   | 0.057 | 0.061   | 0.024    | 0.060 |
+| Both        | 0.798 | 0.087   | 0.087    | 0.793 |
+
+The joint test is valid only when neither acts. With the environment
+alone it behaves as the permutation of sites, so it does not separate an
+effect of the environment from an association between environment and
+phylogeny.
+
+In the daphniids, the joint test with 999 permutations found fewer
+predictors than sites alone at the 0.05 level (PHEQ, AV_DEP, DOC, TN_TP
+and PTL at four nodes, with none left after the false discovery rate).
+It therefore did not recover Figure 3a better. With sites alone, at a
+level of 0.05 without correction and 999 permutations, environmental
+results compare with Figure 3a as follows:
 
 | Node | Figure 3a | Here |
 |----|----|----|

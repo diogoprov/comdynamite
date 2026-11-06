@@ -14,10 +14,9 @@
   presences and absences from logistic responses to two gradients, with
   the seven scenarios of Appendix C of Peres-Neto et al. (2012).
 - [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md),
-  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
-  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   and
-  [`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md):
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
   phylogenetic gradient analysis of Peres-Neto et al. (2012), tested
   against the original code in Octave.
 - Functions that take a community and a phylogeny, traits or contrasts
@@ -32,7 +31,9 @@
   `cherries = FALSE` gives the original code.
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `semipartial` replaces `partial_r2`, following the article, and there
-  are `p_adjusted` (false discovery rate) and biogeographic events.
+  are `p_adjusted` (false discovery rate), biogeographic events, the
+  joint permutation of the article (`p_joint`), 9999 permutations by
+  default and `cores`.
 - [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
   and
   [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md):

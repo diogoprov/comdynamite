@@ -85,8 +85,8 @@ order, and those in only one of the two are dropped with a warning.</p></dd>
 
 
 <dt id="arg-env-space">env, space<a class="anchor" aria-label="anchor" href="#arg-env-space"></a></dt>
-<dd><p>Numeric vector, or matrix or data frame, with one row per site, for
-example the output of <code><a href="spatial_eigenvectors.html">spatial_eigenvectors()</a></code> for <code>space</code>.</p></dd>
+<dd><p>Numeric vector, or matrix or data frame, with one row per site. For
+<code>space</code>, the article uses Moran's eigenvector maps, which <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code> gives.</p></dd>
 
 
 <dt id="arg-component">component<a class="anchor" aria-label="anchor" href="#arg-component"></a></dt>
@@ -136,7 +136,11 @@ not include. None of this is done here.</p></li>
 <li><p>The code runs <code>n_perm</code> - 1 permutations in each null distribution.</p></li>
 <li><p>The p-values follow the text in stacking two null distributions, and here we
 report the larger of the two, as in <code><a href="fourth_corner_test.html">fourth_corner_test()</a></code>.</p></li>
-</ul><p>Appendix A also gives semipartial correlations for each predictor, which are not
+</ul><p>Moran's eigenvector maps of the function <code>MEM</code> of the supplement are the same as those
+of <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>, checked in Octave. Appendix A recommends centring them with
+site weights and the code does not, but orthogonality is not needed to partition
+variation, and here all predictors are standardised with site weights.</p>
+<p>Appendix A also gives semipartial correlations for each predictor, which are not
 implemented here.</p>
     </div>
     <div class="section level2">
@@ -153,7 +157,7 @@ contingency and environmental filtering on metacommunity phylogenetics. <em>Ecol
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="spatial_eigenvectors.html">spatial_eigenvectors</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">adespatial</span><span class="fu">::</span><span class="fu"><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">dbmem</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">env</span>, <span class="va">trait</span>, <span class="kw">function</span><span class="op">(</span><span class="va">e</span>, <span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">e</span> <span class="op">-</span> <span class="va">t</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trait</span><span class="op">)</span></span></span>

@@ -10,7 +10,7 @@ there differ in their response to the predictors.
 ## Usage
 
 ``` r
-node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999)
+node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1)
 ```
 
 ## Arguments
@@ -38,29 +38,43 @@ node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999)
 
 - n_perm:
 
-  Number of permutations of sites and of species.
+  Number of permutations of sites, of species and of both.
+
+- cores:
+
+  Number of cores, with nodes run in parallel. Not available on Windows,
+  where one core is used. For reproducible p-values with more than one
+  core, call `RNGkind("L'Ecuyer-CMRG")` before
+  [`set.seed()`](https://rdrr.io/r/base/Random.html).
 
 ## Value
 
 List of class `mc_node_test` with `nodes`, a data frame with one row per
 node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`,
-`statistic`, `p_site`, `p_taxa`, `p_max` and `p_adjusted`;
+`statistic`, `p_site`, `p_taxa`, `p_max`, `p_joint` and `p_adjusted`;
 `semipartial`, a matrix of nodes by predictors; `p_partial`, with the
 larger of the two p-values for each of them; `p_partial_site`, with the
-p-values of sites alone; and `biogeography`, a list with the same three
-matrices for the events, or `NULL`.
+p-values of sites alone; `p_partial_joint`, with those of the
+permutation of the article; and `biogeography`, a list with the same
+four matrices for the events, or `NULL`.
 
 ## Details
 
 The test statistic is the explained over the residual sum of squares. It
 is tested by permuting sites, and by replacing the species of the node
-with a random set of the same size from all species. The article
-permutes both at once; following Peres-Neto et al. (2012) and ter Braak
-et al. (2012), the p-value here is the larger of the two tests. With
-many nodes these p-values need a correction, and `p_adjusted` gives the
-false discovery rate that the article uses. This correction needs many
-permutations, as the smallest p-value is 1 / (`n_perm` + 1), so the
-default is the 9999 of the article.
+with a random set of the same size from all species. Following
+Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value to
+report is the larger of the two tests. With many nodes these p-values
+need a correction, and `p_adjusted` gives the false discovery rate that
+the article uses. This correction needs many permutations, as the
+smallest p-value is 1 / (`n_perm` + 1), so the default is the 9999 of
+the article.
+
+The article permutes sites and species at once, which is `p_joint`. This
+tests the null hypothesis that neither the environment nor the phylogeny
+matters, so it is not a test of their association. In simulations where
+the environment acts but species responses have no phylogenetic signal,
+`p_joint` rejected 76% of the nodes at the 5% level, and `p_max` 4.8%.
 
 With few species at a node, permutations of species have little power,
 so `p_max` is conservative: with the
