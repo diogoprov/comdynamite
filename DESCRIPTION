@@ -34,6 +34,7 @@ Suggests:
     treeshapesim,
     vegan
 Additional_repositories: https://diogoprov.r-universe.dev
+Remotes: diogoprov/treeshapesim
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://provetelab.org/comdynamite/,

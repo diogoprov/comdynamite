@@ -78,6 +78,8 @@ Objetivo: ampliar os cenários que o pacote cobre. Escolher pelo uso real.
 Objetivo: API estável e pacote no CRAN.
 
 - [ ] Congelar a API e registrar as funções depreciadas no `NEWS.md`.
+- [ ] Tirar `Remotes` do `DESCRIPTION`: o CRAN não aceita. `treeshapesim` precisa estar
+      no CRAN, ou ficar só em `Additional_repositories` com o CI ajustado.
 - [ ] `cran-comments.md`; rodar `R CMD check --as-cran`, `rhub` e `win-builder`.
 - [ ] Conferir o tempo dos exemplos e das vignettes.
 - [ ] Submeter ao CRAN e criar a tag `v1.0.0`.
