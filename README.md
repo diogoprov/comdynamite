@@ -81,7 +81,15 @@ reference.
   regional pool of a comdynamite simulation.
 - **[treeshapesim](https://github.com/diogoprov/treeshapesim)** simulates
   trees with separately controlled imbalance and branching times, to use as
-  regional pools in comdynamite.
+  regional pools in comdynamite. Tree shape can then be a factor in the design
+  of a simulation study:
+
+  ```r
+  tr <- treeshapesim::sim_tree_shape(40, beta = -1, c = -0.5)
+  sim <- simulate_metacommunity(landscape_implicit(20), species_traits(tr, lambda = 1),
+                                competition_matrix(tr, type = "phylo"),
+                                dispersal = 0.01, n_steps = 1000)
+  ```
 
 ## References
 

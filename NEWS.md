@@ -13,3 +13,5 @@
 - New vignettes: `vignette("phylogenetic-structure")`, on how dispersal, niche
   conservatism and competition shape phylogenetic community structure, and
   `vignette("evaluating-methods")`, on type I error and power with simulations.
+- `vignette("evaluating-methods")` shows tree shape as a factor of the design,
+  with trees from treeshapesim (in Suggests).

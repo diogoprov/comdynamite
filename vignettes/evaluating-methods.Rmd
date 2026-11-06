@@ -144,6 +144,29 @@ information.
 * Check that the simulated communities are realistic for your question, for
   example in local richness and occupancy, before interpreting rejection rates.
 
+## Tree shape as a factor of the design
+
+The results above use coalescent trees from `ape::rcoal()`, and the statistic
+ignores the tree, so tree shape cannot affect them. For a method that uses
+phylogenetic information, tree shape should be part of the design. The
+[treeshapesim](https://provetelab.org/treeshapesim/) package simulates trees
+in which imbalance (`beta`) and branching times (`c`) are set separately.
+
+```{r, eval = requireNamespace("treeshapesim", quietly = TRUE)}
+set.seed(1)
+shapes <- expand.grid(beta = c(-1, 0), c = c(-0.5, 0))
+measured <- t(mapply(function(beta, c) {
+  trees <- treeshapesim::sim_tree_shape(30, beta = beta, c = c, nsim = 100)
+  rowMeans(sapply(trees, treeshapesim::tree_shape))
+}, shapes$beta, shapes$c))
+knitr::kable(cbind(shapes, measured), digits = 2)
+```
+
+The table gives the mean gamma statistic and normalized Colless index of 100
+trees for each combination. Each tree is a `phylo` object, so it replaces
+`ape::rcoal()` in step 1 without other changes. To aim at given values of gamma
+and Colless, use `shape_grid()` and `sim_tree_target()` from the same package.
+
 `torus_permutations()` requires a landscape on a torus, which is a property of the
 simulation. Empirical landscapes have edges, so a valid restricted null model for
 real data must be chosen separately. The rates above also apply only to the
