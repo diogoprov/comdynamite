@@ -73,12 +73,11 @@
 
     
     
-<p>The functions <code><a href="../reference/fourth_corner_test.html">fourth_corner_test()</a></code>,
-<code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>, <code><a href="../reference/trait_partition.html">trait_partition()</a></code> and
-<code><a href="../reference/node_test.html">node_test()</a></code> are translations of MATLAB code from the
-supplements of these articles. We checked them in three ways. Each help
-page lists the differences between the text of the article and the
-code.</p>
+<p>The functions <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>,
+<code><a href="../reference/trait_partition.html">trait_partition()</a></code> and <code><a href="../reference/node_test.html">node_test()</a></code> are
+translations of MATLAB code from the supplements of these articles. We
+checked them in three ways. Each help page lists the differences between
+the text of the article and the code.</p>
 <div class="section level2">
 <h2 id="comparison-with-the-original-code">Comparison with the original code<a class="anchor" aria-label="anchor" href="#comparison-with-the-original-code"></a>
 </h2>
@@ -101,7 +100,9 @@ simulations of the article, with 1000 data sets and 999 permutations
 stacks the two null distributions and uses alpha / 2, shown here as
 “stacked”. Rates near 0.05 are expected for a true null hypothesis, with
 a standard error near 0.007.</p>
-<p>Trait and environment (Table 4 of the article):</p>
+<p>Trait and environment (Table 4 of the article), with the correlation
+inside <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>. The package has no function for this
+test, which is available in <code><a href="https://adeverse.github.io/ade4/reference/fourthcorner.html" class="external-link">ade4::fourthcorner()</a></code>:</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="11%">

@@ -13,12 +13,13 @@
   [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md):
   presences and absences from logistic responses to two gradients, with
   the seven scenarios of Appendix C of Peres-Neto et al. (2012).
-- [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md),
-  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
+- [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   and
   [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
   phylogenetic gradient analysis of Peres-Neto et al. (2012), tested
-  against the original code in Octave.
+  against the original code in Octave. The test between a trait and the
+  environment stays in
+  [`ade4::fourthcorner()`](https://adeverse.github.io/ade4/reference/fourthcorner.html).
 - Functions that take a community and a phylogeny, traits or contrasts
   now match species by name and, as
   [`picante::match.phylo.comm()`](https://rdrr.io/pkg/picante/man/data.checking.html),

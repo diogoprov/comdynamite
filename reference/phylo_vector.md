@@ -68,10 +68,12 @@ significant or no eigenvector is retained; `eigenvectors`;
 
 ## Details
 
-The p-values of the global test are the ones to report. The two vectors
-are chosen to fit the predictor, so a test of them with
-[`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md)
-is not valid on its own. They are meant for
+The correlations are fourth-corner correlations, and the p-value to
+report is the larger of the tests that permute sites and species (ter
+Braak et al. 2012). For a test between a trait and the environment, see
+[`ade4::fourthcorner()`](https://adeverse.github.io/ade4/reference/fourthcorner.html).
+The two vectors are chosen to fit the predictor, so a further test of
+them is not valid on its own. They are meant for
 [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
 after a significant global test.
 
@@ -81,10 +83,10 @@ individuals have no weight and are left out.
 
 ## Article and original code
 
-The functions `ModelSelectionStochastic` and `PCoAWeigthed` and the
-script `ScriptDemo` of the supplement differ from the article and
-Appendix B in the points below. Here we follow the text, except in the
-addition of Brownian vectors and where noted.
+The functions `TraitEnvCor`, `ModelSelectionStochastic` and
+`PCoAWeigthed` and the script `ScriptDemo` of the supplement differ from
+the article and its appendices in the points below. Here we follow the
+text, except in the addition of Brownian vectors and where noted.
 
 - Weights of the eigenvectors: the text uses the correlations and the
   code their absolute values, so eigenvectors with opposite signs
@@ -128,6 +130,19 @@ addition of Brownian vectors and where noted.
   and the script always takes the Brownian vector. Here both are
   returned.
 
+- Combination of permutations: Appendix A stacks the two null
+  distributions, adds one to the count and uses alpha / 2, and
+  `TraitEnvCor` adds two. The stacked p-value is close to the mean of
+  the two p-values, so any test that it rejects at alpha / 2 is also
+  rejected by the larger p-value at alpha, which we use.
+
+- Permuted variables: Appendix A recalculates the statistic, and
+  `TraitEnvCor` keeps the observed mean and standard deviation, so a
+  permuted variable no longer has weighted mean zero. Here it is
+  standardised again, as in the code of the partition.
+
+- The code runs `n_perm` - 1 permutations in each null distribution.
+
 - The supplement calls `eigen`, which it does not include, and the
   example 2 of `ScriptDemo` removes rows of `PhyloDistance` before
   creating it.
@@ -138,6 +153,11 @@ Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the
 effects of spatial contingency and environmental filtering on
 metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 [doi:10.1890/11-0494.1](https://doi.org/10.1890/11-0494.1)
+
+ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of
+species traits–environment relationships in the fourth-corner problem.
+*Ecology*, 93, 1525–1526.
+[doi:10.1890/12-0126.1](https://doi.org/10.1890/12-0126.1)
 
 ## Examples
 

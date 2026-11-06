@@ -118,9 +118,11 @@ when the global test is not significant or no eigenvector is retained;
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The p-values of the global test are the ones to report. The two vectors are chosen to
-fit the predictor, so a test of them with <code><a href="fourth_corner_test.html">fourth_corner_test()</a></code> is not valid on its
-own. They are meant for <code><a href="trait_partition.html">trait_partition()</a></code> after a significant global test.</p>
+    <p>The correlations are fourth-corner correlations, and the p-value to report is the
+larger of the tests that permute sites and species (ter Braak et al. 2012). For a test
+between a trait and the environment, see <code><a href="https://adeverse.github.io/ade4/reference/fourthcorner.html" class="external-link">ade4::fourthcorner()</a></code>. The two vectors are
+chosen to fit the predictor, so a further test of them is not valid on its own. They
+are meant for <code><a href="trait_partition.html">trait_partition()</a></code> after a significant global test.</p>
 <p>Species are matched to the tips of <code>tree</code> by name, in any order, and those in only one
 of the two are dropped with a warning. Species without individuals have no weight and
 are left out.</p>
@@ -129,8 +131,9 @@ are left out.</p>
     <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
 
 
-<p>The functions <code>ModelSelectionStochastic</code> and <code>PCoAWeigthed</code> and the script <code>ScriptDemo</code>
-of the supplement differ from the article and Appendix B in the points below. Here we
+<p>The functions <code>TraitEnvCor</code>, <code>ModelSelectionStochastic</code> and <code>PCoAWeigthed</code> and the
+script <code>ScriptDemo</code> of the supplement differ from the article and its appendices in the
+points below. Here we
 follow the text, except in the addition of Brownian vectors and where noted.</p><ul><li><p>Weights of the eigenvectors: the text uses the correlations and the code their
 absolute values, so eigenvectors with opposite signs cancel.</p></li>
 <li><p>Brownian vectors: the text multiplies each one by <code>pev</code> and the code adds them.
@@ -157,6 +160,15 @@ number of permutations, which halves it.</p></li>
 enter later analyses. Here <code>pev</code> and <code>pev_brown</code> are <code>NULL</code>.</p></li>
 <li><p>Choice of vector: the article recommends the one with the highest R2, and the
 script always takes the Brownian vector. Here both are returned.</p></li>
+<li><p>Combination of permutations: Appendix A stacks the two null distributions, adds
+one to the count and uses alpha / 2, and <code>TraitEnvCor</code> adds two. The stacked p-value
+is close to the mean of the two p-values, so any test that it rejects at alpha / 2
+is also rejected by the larger p-value at alpha, which we use.</p></li>
+<li><p>Permuted variables: Appendix A recalculates the statistic, and <code>TraitEnvCor</code>
+keeps the observed mean and standard deviation, so a permuted variable no longer
+has weighted mean zero. Here it is standardised again, as in the code of the
+partition.</p></li>
+<li><p>The code runs <code>n_perm</code> - 1 permutations in each null distribution.</p></li>
 <li><p>The supplement calls <code>eigen</code>, which it does not include, and the example 2 of
 <code>ScriptDemo</code> removes rows of <code>PhyloDistance</code> before creating it.</p></li>
 </ul></div>
@@ -165,6 +177,9 @@ script always takes the Brownian vector. Here both are returned.</p></li>
     <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects of spatial
 contingency and environmental filtering on metacommunity phylogenetics. <em>Ecology</em>,
 93, S14–S30. <a href="https://doi.org/10.1890/11-0494.1" class="external-link">doi:10.1890/11-0494.1</a></p>
+<p>ter Braak, C. J. F., Cormont, A., &amp; Dray, S. (2012). Improved testing of species
+traits–environment relationships in the fourth-corner problem. <em>Ecology</em>, 93,
+1525–1526. <a href="https://doi.org/10.1890/12-0126.1" class="external-link">doi:10.1890/12-0126.1</a></p>
     </div>
 
     <div class="section level2">

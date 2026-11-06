@@ -1,7 +1,6 @@
 # Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)
 
 The functions
-[`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md),
 [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
 [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
 and
@@ -31,7 +30,11 @@ distributions and uses alpha / 2, shown here as “stacked”. Rates near
 0.05 are expected for a true null hypothesis, with a standard error near
 0.007.
 
-Trait and environment (Table 4 of the article):
+Trait and environment (Table 4 of the article), with the correlation
+inside
+[`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md).
+The package has no function for this test, which is available in
+[`ade4::fourthcorner()`](https://adeverse.github.io/ade4/reference/fourthcorner.html):
 
 | Case | Tolerance | Row, article | Row, here | Column, article | Column, here | Stacked, article | Stacked, here | Larger p, here |
 |----|----|----|----|----|----|----|----|----|

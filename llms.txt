@@ -209,8 +209,6 @@ Analyses of phylogenetic community structure.
   : Test clades against the environment, node by node
 - [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
   : Node contrasts of a phylogeny
-- [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md)
-  : Test the association between a trait and the environment
 - [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   : Represent a phylogeny by one vector related to a predictor
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)

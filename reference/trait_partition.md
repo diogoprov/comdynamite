@@ -100,9 +100,9 @@ follow the text:
 
 - The code runs `n_perm` - 1 permutations in each null distribution.
 
-- The p-values follow the text in stacking two null distributions, and
-  here we report the larger of the two, as in
-  [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md).
+- The text stacks two null distributions, and here we report the larger
+  of the two p-values, as in
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md).
 
 Moran's eigenvector maps of the function `MEM` of the supplement are the
 same as those of

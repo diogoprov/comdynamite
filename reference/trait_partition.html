@@ -134,8 +134,8 @@ rescales the permuted values to the observed mean and standard deviation, which 
 text does not mention. It also calls <code>WeightedMeanVar</code>, which the supplement does
 not include. None of this is done here.</p></li>
 <li><p>The code runs <code>n_perm</code> - 1 permutations in each null distribution.</p></li>
-<li><p>The p-values follow the text in stacking two null distributions, and here we
-report the larger of the two, as in <code><a href="fourth_corner_test.html">fourth_corner_test()</a></code>.</p></li>
+<li><p>The text stacks two null distributions, and here we report the larger of the
+two p-values, as in <code><a href="phylo_vector.html">phylo_vector()</a></code>.</p></li>
 </ul><p>Moran's eigenvector maps of the function <code>MEM</code> of the supplement are the same as those
 of <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>, checked in Octave. Appendix A recommends centring them with
 site weights and the code does not, but orthogonality is not needed to partition
