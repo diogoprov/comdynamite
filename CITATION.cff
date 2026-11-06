@@ -7,6 +7,7 @@ authors:
   - family-names: Provete
     given-names: Diogo B.
 license: MIT
+doi: 10.5281/zenodo.23993533
 repository-code: "https://github.com/diogoprov/comdynamite"
 url: "https://provetelab.org/comdynamite/"
 keywords:

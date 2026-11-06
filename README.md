@@ -3,6 +3,7 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
 <!-- badges: end -->
 
 Process-based metacommunity simulations in R, with phylogenetic structure.
@@ -90,6 +91,15 @@ reference.
                                 competition_matrix(tr, type = "phylo"),
                                 dispersal = 0.01, n_steps = 1000)
   ```
+
+## Citation
+
+Provete, D. B. (2026). comdynamite: Process-based metacommunity simulations with
+phylogenetic structure. R package. https://doi.org/10.5281/zenodo.23993533
+
+This DOI always points to the latest version; each release also has its own DOI
+on Zenodo. In R, `citation("comdynamite")` gives the entry with the installed
+version.
 
 ## References
 

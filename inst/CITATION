@@ -5,9 +5,10 @@ bibentry(
   year = "2026",
   note = paste("R package version", meta$Version),
   url = "https://github.com/diogoprov/comdynamite",
+  doi = "10.5281/zenodo.23993533",
   textVersion = paste0(
     "Provete, D. B. (2026). comdynamite: Process-based metacommunity ",
     "simulations with phylogenetic structure. R package version ",
-    meta$Version, ". https://github.com/diogoprov/comdynamite"
+    meta$Version, ". https://doi.org/10.5281/zenodo.23993533"
   )
 )
