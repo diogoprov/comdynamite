@@ -6,17 +6,25 @@ dispersal. The expected abundance of species j at site i is
 `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the
 Gaussian response of Dray & Legendre (2008), also used by Peres-Neto et
 al. (2012). By default, observed abundances are Poisson counts with that
-mean. This is our addition: in those simulations the abundances are the
-expected values, with `r_max` between 0.5 and 1, which `poisson = FALSE`
-returns. Because nothing but the gradient structures the data, this is a
-baseline for
+mean, as in Peres-Neto & Kembel (2015) and Duarte et al. (2016), where
+`r_max` lies between 0 and 30. In the two earlier studies `r_max` lies
+between 0.5 and 1, abundances are the expected values
+(`sampling = "expected"`), and Dray & Legendre (2008) draw presences
+from a binomial distribution with the expected value as the probability
+(`sampling = "binomial"`). Because nothing but the gradient structures
+the data, this is a baseline for
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
 and a fast generator for evaluating methods.
 
 ## Usage
 
 ``` r
-simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
+simulate_static(
+  traits,
+  env,
+  incidence = FALSE,
+  sampling = c("poisson", "binomial", "expected")
+)
 ```
 
 ## Arguments
@@ -39,14 +47,15 @@ simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
 
 - incidence:
 
-  Return presences and absences instead of abundances? A species is
-  present where its Poisson count is positive, so this needs
-  `poisson = TRUE`. Dray & Legendre (2008) instead draw presences from a
-  binomial distribution with the expected value as the probability.
+  Return presences and absences instead of Poisson counts? A species is
+  present where its count is positive. Only for `sampling = "poisson"`.
 
-- poisson:
+- sampling:
 
-  Draw Poisson counts? If `FALSE`, return the expected abundances.
+  How to obtain the data from the expected values: `"poisson"` draws
+  counts, `"binomial"` draws presences and absences, which needs
+  expected values of at most 1, and `"expected"` returns the expected
+  values.
 
 ## Value
 
@@ -66,6 +75,16 @@ abundance is the product of the responses, as in Peres-Neto et al.
 Dray, S., & Legendre, P. (2008). Testing the species traits-environment
 relationships: the fourth-corner problem revisited. *Ecology*, 89,
 3400–3412. [doi:10.1890/08-0349.1](https://doi.org/10.1890/08-0349.1)
+
+Duarte, L. D. S., et al. (2016). Dissecting phylogenetic fuzzy
+weighting: theory and application in metacommunity phylogenetics.
+*Methods in Ecology and Evolution*, 7, 937–946.
+[doi:10.1111/2041-210X.12547](https://doi.org/10.1111/2041-210X.12547)
+
+Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient
+analysis: environmental drivers of phylogenetic variation across
+ecological communities. *Plant Ecology*, 216, 709–724.
+[doi:10.1007/s11258-014-0405-0](https://doi.org/10.1007/s11258-014-0405-0)
 
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the
 effects of spatial contingency and environmental filtering on

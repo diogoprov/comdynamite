@@ -3,16 +3,22 @@
 ## comdynamite (development version)
 
 - [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md):
-  static metacommunities from unimodal species responses with Poisson
-  counts, the Gaussian response of Peres-Neto et al. (2012), as a
-  baseline without population dynamics. With several gradients, for
-  example environment and space, the expected abundance is the product
-  of the responses.
+  static metacommunities from the Gaussian response of Dray & Legendre
+  (2008), also used by Peres-Neto et al. (2012), as a baseline without
+  population dynamics. Data can be Poisson counts, binomial presences or
+  the expected values. With several gradients, for example environment
+  and space, the expected abundance is the product of the responses.
 - [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md)
   and
   [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md):
   presences and absences from logistic responses to two gradients, with
   the seven scenarios of Appendix C of Peres-Neto et al. (2012).
+- [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
+  and
+  [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md):
+  phylogenetic community composition of Peres-Neto & Kembel (2015), with
+  site and species permutations.
+- New article with animations of metacommunity dynamics.
 
 ## comdynamite 0.1.0
 

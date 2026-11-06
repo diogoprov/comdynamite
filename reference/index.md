@@ -53,6 +53,15 @@ Interspecific competition, optionally structured by relatedness.
 - [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md)
   : Competition matrix
 
+## Testing methods
+
+Analyses of phylogenetic community structure.
+
+- [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
+  : Test phylogenetic community composition against the environment
+- [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md)
+  : Phylogenetic eigenvectors
+
 ## Rule-based assembly
 
 Community assembly without population dynamics.
