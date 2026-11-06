@@ -1,7 +1,7 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.5.0 (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0` e `v0.5.0`, uma para cada marco concluído. `v0.3.0` e `v0.4.0`
+Atualizado em 2026-11-06. Versão atual: 0.5.1 (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0` e `v0.5.1`, a última com o que faltava da v0.5.0. `v0.3.0` e `v0.4.0`
 não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
 v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
@@ -178,7 +178,11 @@ máquina.
 
 - [x] Peres-Neto et al. (2012): `phylo_vector()` e `trait_partition()`, conferidas no Octave e nas Tabelas 1
       a 4 do artigo.
-- [ ] Reproduzir a Tabela 5 com `logistic_gradients()` (Apêndice C).
+- [x] Tabela 5 com `logistic_gradients()` (Apêndice C), em `data-raw/validation_table5.R`.
+      Frações com os vetores que geraram os dados e rejeição de E e S pelo teste global de
+      `phylo_vector()`: o padrão entre cenários se repete, e I, III e IV ficam mais perto. A
+      razão de variância não bate (0,62 contra 0,39 a 0,94), e o cenário VII tem `b` maior.
+      A diferença está no artigo de validação; para fechar, só perguntando aos autores.
 - [x] Semiparciais de `trait_partition()`, do Apêndice A, com testes. O suplemento não
       tem código para elas, então a conferência foi feita contra regressões separadas.
 - [ ] `node_test()` roda nós em paralelo com `cores`. Se ainda for lento em árvores
@@ -193,7 +197,8 @@ máquina.
 - [x] Semiparcial, FDR e eventos biogeográficos conforme o texto de Leibold et al. (2010).
       O MATLAB multiplica pelo módulo da inclinação e usa preditores brutos; o artigo
       divide e usa padronizados, e seguimos o artigo.
-- [ ] Codificação com comprimentos de ramo, na seção III do suplemento de Leibold et al.
+- [x] Codificação com comprimentos de ramo, na seção III do suplemento de Leibold et al.:
+      `branch_lengths = TRUE`, conferida na Figura S2.
 - [x] `plot_node_test()`: Figura 3 de Leibold et al. (2010), em filograma ou leque, com
       `ape::plot.phylo()`, sem dependência nova. O artigo não define a família do FDR:
       corrigimos preditores e eventos separadamente, o que está no help.
@@ -206,16 +211,15 @@ máquina.
 - [x] Saíram `fourth_corner_test()` (fica no `ade4`) e `spatial_eigenvectors()` (fica no
       `adespatial`). `trait_partition()` cita ter Braak (2019) e o TraitEnvMLMWA para o
       teste de cada traço.
-- [ ] Heatmap de nós por preditores com `semipartial`, como a Tabela S1 de Leibold et al.
+- [x] `plot_node_heatmap()`: nós por preditores com `semipartial`, como a Tabela S1.
 - [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
       permutações em paralelo com o Futureverse.
 - [x] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
       coisa: R e Octave concordam até 1e-13, e as divergências estão nos helps.
-- [ ] Vignette com os métodos aplicados a dados simulados e reais. O artigo de validação
-      já cobre a conferência; falta o fluxo de análise, com os daphniídeos e os plots.
+- [x] Artigo "Analysing clades and traits in a metacommunity", com dafinídeos e simulação.
 
-Situação em 2026-11-06: o critério abaixo foi cumprido, com a exceção da Tabela 5. Faltam
-os itens em aberto acima, nenhum deles bloqueia o ABC.
+Situação em 2026-11-06: marco fechado na 0.5.1. Sobra o estilo tidyverse e o Futureverse,
+se ainda fizerem sentido.
 
 **Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
 reproduzirem o erro tipo I publicado.
@@ -386,8 +390,8 @@ Objetivo: API estável e pacote no CRAN.
   `PGLMM_model_simulations.m`, em `~/Downloads/3567789/`) esclarece parte disso: `a` é
   N(0; 0,5), `b` tem desvio 1 na amostra de espécies, a presença vem de `rand` (uniforme),
   e a redução U(0,5; 1) entra uma vez por gradiente, enquanto o Appendix C a aplica uma
-  vez. Falta confirmar se Peres-Neto et al. usaram esses valores, e `simulate_logistic()`
-  ainda tem `intercept_sd = 1`. Com isso dá para tentar de novo a Tabela 5.
+  vez. `simulate_logistic()` adotou esses valores na 0.5.1, e a redução fica uma só, como
+  no Appendix C. O resultado da Tabela 5 está no artigo de validação.
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
   assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver

@@ -99,7 +99,8 @@ phylo <- do.call(rbind, lapply(seq_len(nrow(grid)), function(i) {
 
 saveRDS(phylo, "data-raw/validation_gradient_phylo.tmp.rds")
 
-# Table 5 and the demonstration script: environment and space on a transect of 100 sites
+# The demonstration script: environment and space on a transect of 100 sites (Table 5 is in
+# validation_table5.R)
 partition_case <- function(case) {
   tree <- ape::stree(32, "balanced")
   tree$edge.length <- rep(1, nrow(tree$edge))

@@ -8,7 +8,7 @@ simulate_logistic(
   tree,
   gradients,
   intercept_mean = 0,
-  intercept_sd = 1,
+  intercept_sd = 0.5,
   slope_sd = 1,
   lambda = 1,
   reduction = c(0.5, 1),
@@ -23,11 +23,11 @@ balanced tree with 32 species.}
 with one gradient per element, such as \code{\link[=logistic_gradients]{logistic_gradients()}}. Gradients are
 centred.}
 
-\item{intercept_mean, intercept_sd}{Mean and standard deviation of \code{a}.
-Appendix C does not give these values.}
+\item{intercept_mean, intercept_sd}{Mean and standard deviation of \code{a}. Appendix C does
+not give these values, and the defaults are those of the code of Ives & Helmus (2011).}
 
-\item{slope_sd}{Standard deviation of the slopes \code{b} across the tree.
-Appendix C does not give this value.}
+\item{slope_sd}{Standard deviation of the slopes \code{b} among the species of the tree, as in
+the code of Ives & Helmus (2011). Appendix C does not give this value.}
 
 \item{lambda}{Pagel's lambda of the slopes.}
 

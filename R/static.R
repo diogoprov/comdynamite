@@ -111,10 +111,10 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' @param gradients Value of the gradient at each site, or a list or data frame
 #'   with one gradient per element, such as [logistic_gradients()]. Gradients are
 #'   centred.
-#' @param intercept_mean,intercept_sd Mean and standard deviation of `a`.
-#'   Appendix C does not give these values.
-#' @param slope_sd Standard deviation of the slopes `b` across the tree.
-#'   Appendix C does not give this value.
+#' @param intercept_mean,intercept_sd Mean and standard deviation of `a`. Appendix C does
+#'   not give these values, and the defaults are those of the code of Ives & Helmus (2011).
+#' @param slope_sd Standard deviation of the slopes `b` among the species of the tree, as in
+#'   the code of Ives & Helmus (2011). Appendix C does not give this value.
 #' @param lambda Pagel's lambda of the slopes.
 #' @param reduction Range of the uniform distribution of the site reduction.
 #' @param draw Distribution of the value compared with each probability.
@@ -135,7 +135,7 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' tr <- ape::compute.brlen(ape::stree(32, "balanced"), method = "Grafen")
 #' simulate_logistic(tr, logistic_gradients(1)[c("x", "y")])
 #' @export
-simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd = 1,
+simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd = 0.5,
                               slope_sd = 1, lambda = 1, reduction = c(0.5, 1),
                               draw = c("uniform", "normal")) {
   draw <- match.arg(draw)
@@ -147,9 +147,8 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
   sp <- tree$tip.label
   k <- length(sp)
   n <- length(grads[[1]])
-  scale <- sqrt(mean(diag(ape::vcv.phylo(tree))))
   a <- vapply(grads, function(g) stats::rnorm(k, intercept_mean, intercept_sd), numeric(k))
-  b <- vapply(grads, function(g) slope_sd * trait_bm(tree, lambda) / scale, numeric(k))
+  b <- vapply(grads, function(g) slope_sd * drop(scale(trait_bm(tree, lambda))), numeric(k))
   a <- matrix(a, k, dimnames = list(sp, names(grads)))
   b <- matrix(b, k, dimnames = list(sp, names(grads)))
   probability <- matrix(1, n, k, dimnames = list(paste0("site", seq_len(n)), sp))
@@ -173,12 +172,14 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #'
 #' 1. The two gradients are equally important and independent.
 #' 2. They are equally important and correlated: `y` is `x` plus a N(0, 1) error.
-#' 3. They are independent, and `y` is less important: it has a N(0, 1) error.
-#'    Appendix C does not say more, and this error is small on this scale.
+#' 3. They are independent, and `y` is less important: data come from `y`, and
+#'    `y_test` is `y` with unit variance plus a N(0, 1) error. On the scale of `y` this
+#'    error would have no effect, and with unit variance the results agree with Table 5.
 #' 4. Neither is important: data come from scenario 1, and `x_test` and `y_test`
 #'    are N(0, 1) deviates, to estimate the type I error.
-#' 5. `y` has a broad spatial scale, the first Moran's eigenvector map (MEM).
-#' 6. `y` has an intermediate spatial scale, the third MEM.
+#' 5. `y` has a broad spatial scale, the first Moran's eigenvector map (MEM), and `x` is
+#'    in random order along the transect.
+#' 6. `y` has an intermediate spatial scale, the third MEM, and `x` is as in scenario 5.
 #' 7. `x` is the first MEM and `y` the third.
 #'
 #' MEMs are rescaled to \[-15, 15\].
@@ -203,15 +204,24 @@ logistic_gradients <- function(scenario, n_sites = 31) {
   mem <- if (scenario >= 5) transect_mem(n_sites)
   switch(as.character(scenario),
     "2" = y <- x + stats::rnorm(n_sites),
-    "3" = y <- y + stats::rnorm(n_sites),
-    "5" = y <- to_range(mem[, 1]),
-    "6" = y <- to_range(mem[, 3]),
+    "5" = {
+      x <- sample(x)
+      y <- to_range(mem[, 1])
+    },
+    "6" = {
+      x <- sample(x)
+      y <- to_range(mem[, 3])
+    },
     "7" = {
       x <- to_range(mem[, 1])
       y <- to_range(mem[, 3])
     }
   )
-  test <- if (scenario == 4) list(stats::rnorm(n_sites), stats::rnorm(n_sites)) else list(x, y)
+  test <- switch(as.character(scenario),
+    "3" = list(x, drop(scale(y)) + stats::rnorm(n_sites)),
+    "4" = list(stats::rnorm(n_sites), stats::rnorm(n_sites)),
+    list(x, y)
+  )
   data.frame(x = x, y = y, x_test = test[[1]], y_test = test[[2]])
 }
 

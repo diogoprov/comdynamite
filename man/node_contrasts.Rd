@@ -4,13 +4,15 @@
 \alias{node_contrasts}
 \title{Node contrasts of a phylogeny}
 \usage{
-node_contrasts(tree, cherries = TRUE)
+node_contrasts(tree, cherries = TRUE, branch_lengths = FALSE)
 }
 \arguments{
 \item{tree}{A \code{phylo} object with dichotomous nodes.}
 
 \item{cherries}{Keep nodes that join two tips? The article tests them (its Figure 3),
 but the function \code{CreateNodeContrasts} of the authors leaves them out.}
+
+\item{branch_lengths}{Use the branch lengths of \code{tree}?}
 }
 \value{
 Matrix with one row per tip and one column per node, named by the node
@@ -22,8 +24,20 @@ in Leibold et al. (2010). One clade starts at -1 and the other at 1, and the
 value is halved at each node on the way to the tips. Species outside the node
 get zero.
 }
+\details{
+With \code{branch_lengths = TRUE}, values follow section III of the supplement of Leibold
+et al. (2010): each branch between a species and the node counts its length divided by
+the number of species below it, and the sum is divided by the total length of that side
+of the node. Species that share history get less weight, and each side still sums
+to 1. The supplement proposes this coding for trees in which all species are equally
+distant from the root.
+}
 \examples{
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
+
+# Figure S2 of the supplement
+tree <- ape::read.tree(text = "((((A:0.2,B:0.2):0.65,C:0.85):0.15,D:1):0.4,(E:0.5,F:0.5):0.9);")
+round(node_contrasts(tree, branch_lengths = TRUE), 3)
 }
 \references{
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity

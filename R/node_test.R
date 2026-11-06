@@ -5,9 +5,17 @@
 #' value is halved at each node on the way to the tips. Species outside the node
 #' get zero.
 #'
+#' With `branch_lengths = TRUE`, values follow section III of the supplement of Leibold
+#' et al. (2010): each branch between a species and the node counts its length divided by
+#' the number of species below it, and the sum is divided by the total length of that side
+#' of the node. Species that share history get less weight, and each side still sums
+#' to 1. The supplement proposes this coding for trees in which all species are equally
+#' distant from the root.
+#'
 #' @param tree A `phylo` object with dichotomous nodes.
 #' @param cherries Keep nodes that join two tips? The article tests them (its Figure 3),
 #'   but the function `CreateNodeContrasts` of the authors leaves them out.
+#' @param branch_lengths Use the branch lengths of `tree`?
 #' @return Matrix with one row per tip and one column per node, named by the node
 #'   numbers of `tree`.
 #' @references
@@ -17,9 +25,16 @@
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
 #' @examples
 #' node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
+#'
+#' # Figure S2 of the supplement
+#' tree <- ape::read.tree(text = "((((A:0.2,B:0.2):0.65,C:0.85):0.15,D:1):0.4,(E:0.5,F:0.5):0.9);")
+#' round(node_contrasts(tree, branch_lengths = TRUE), 3)
 #' @export
-node_contrasts <- function(tree, cherries = TRUE) {
+node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
   stopifnot(inherits(tree, "phylo"))
+  if (branch_lengths && is.null(tree$edge.length)) {
+    stop("`tree` has no branch lengths", call. = FALSE)
+  }
   n_tips <- length(tree$tip.label)
   children <- split(tree$edge[, 2], tree$edge[, 1])
   if (any(lengths(children) != 2)) stop("the tree must be dichotomous and rooted", call. = FALSE)
@@ -29,12 +44,29 @@ node_contrasts <- function(tree, cherries = TRUE) {
     unlist(lapply(children[[as.character(node)]], spread, value = value / 2),
            use.names = TRUE)
   }
+  edge_length <- numeric(max(tree$edge))
+  if (branch_lengths) edge_length[tree$edge[, 2]] <- tree$edge.length
+  n_below <- function(node) {
+    if (node <= n_tips) return(1)
+    sum(vapply(children[[as.character(node)]], n_below, numeric(1)))
+  }
+  # branch lengths on the way to each tip, shared among the species below each branch
+  shared <- function(node, value) {
+    value <- value + edge_length[node] / n_below(node)
+    if (node <= n_tips) return(stats::setNames(value, node))
+    unlist(lapply(children[[as.character(node)]], shared, value = value), use.names = TRUE)
+  }
+  side_values <- function(node, sign) {
+    if (!branch_lengths) return(spread(node, sign))
+    values <- shared(node, 0)
+    sign * values / sum(values)
+  }
   informative <- Filter(function(node) cherries || any(children[[node]] > n_tips), names(children))
   contrasts <- vapply(informative, function(node) {
     pair <- children[[node]]
     out <- numeric(n_tips)
     for (side in 1:2) {
-      values <- spread(pair[side], c(-1, 1)[side])
+      values <- side_values(pair[side], c(-1, 1)[side])
       out[as.integer(sub(".*\\.", "", names(values)))] <- values
     }
     out
@@ -132,7 +164,7 @@ node_contrasts <- function(tree, cherries = TRUE) {
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits-environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526.
-#' @seealso [plot_node_test()] shows the results on the tree. [pcc_test()] and
+#' @seealso [plot_node_test()] and [plot_node_heatmap()] show the results. [pcc_test()] and
 #'   [phylo_beta_test()] test the whole tree at once.
 #' @examples
 #' # daphniids of Leibold et al. (2010)

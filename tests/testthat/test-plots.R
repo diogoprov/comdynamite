@@ -63,3 +63,15 @@ test_that("the partition plot returns the three fractions in order", {
   expect_equal(shown$shown, pmax(shown$r2_adjusted, 0))
   expect_silent(plot_trait_partition(out, value = "r2", test = "site"))
 })
+
+test_that("the heatmap holds predictors and events, with blanks where there is no value", {
+  pdf(NULL)
+  on.exit(dev.off())
+  out <- daphniid_result()
+  values <- plot_node_heatmap(out, test = "site", alpha = 0.2)
+  expect_equal(colnames(values), c(colnames(daphniids$env), colnames(daphniids$biogeography)))
+  expect_equal(rownames(values), as.character(out$nodes$node))
+  expect_true(anyNA(values))
+  only_env <- daphniid_result(NULL)
+  expect_equal(ncol(plot_node_heatmap(only_env, alpha = 0)), ncol(daphniids$env))
+})

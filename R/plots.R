@@ -78,6 +78,61 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   invisible(marks)
 }
 
+#' Plot the semipartial correlations of a node test
+#'
+#' Draws a table of nodes by variables with the semipartial correlations of [node_test()],
+#' as in Table S1 of Leibold et al. (2010). Bold values with an asterisk remain significant
+#' after the false discovery rate, as in [plot_node_test()]; other bold values are
+#' significant only as isolated tests. Blank cells could not be calculated.
+#'
+#' Rows are the node numbers of the tree. To find them, call `ape::nodelabels()` after
+#' [plot_node_test()].
+#'
+#' @inheritParams plot_node_test
+#' @param col Colours of negative and positive values.
+#' @param ... Other arguments of [graphics::image()].
+#' @return Invisibly, the matrix of semipartial correlations, with predictors followed by
+#'   biogeographic events.
+#' @references
+#' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
+#' phylogenetics: separating the roles of environmental filters and historical
+#' biogeography. *Ecology Letters*, 13, 1290--1299.
+#' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @examples
+#' nodes <- node_contrasts(daphniids$tree)
+#' set.seed(1)
+#' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
+#'                  n_perm = 49)
+#' plot_node_heatmap(out, test = "site")
+#' @export
+plot_node_heatmap <- function(x, test = c("max", "site", "joint"), alpha = 0.05,
+                              col = c("#0072B2", "#D55E00"), cex = 0.8, ...) {
+  stopifnot(inherits(x, "mc_node_test"), length(col) == 2)
+  test <- match.arg(test)
+  values <- cbind(x$semipartial, x$biogeography$semipartial)
+  marks <- node_marks(x, test, alpha)
+  n_nodes <- nrow(values)
+  n_variables <- ncol(values)
+  rows <- rev(seq_len(n_nodes))
+  limit <- max(abs(values), na.rm = TRUE)
+  ramp <- grDevices::colorRampPalette(c(col[1], "white", col[2]))(101)
+  old <- graphics::par(mar = c(6, 4, 1, 1))
+  on.exit(graphics::par(old))
+  graphics::image(seq_len(n_variables), seq_len(n_nodes), t(values[rows, , drop = FALSE]),
+                  zlim = c(-limit, limit), col = ramp, axes = FALSE, xlab = "", ylab = "Node", ...)
+  graphics::axis(1, seq_len(n_variables), colnames(values), las = 2, tick = FALSE, cex.axis = cex)
+  graphics::axis(2, seq_len(n_nodes), rownames(values)[rows], las = 1, tick = FALSE, cex.axis = cex)
+  graphics::box()
+  significant <- matrix(0, n_nodes, n_variables, dimnames = dimnames(values))
+  significant[cbind(marks$node, marks$variable)] <- 1 + marks$corrected
+  cells <- which(!is.na(values), arr.ind = TRUE)
+  level <- significant[cells]
+  graphics::text(cells[, 2], n_nodes + 1 - cells[, 1],
+                 paste0(format(round(values[cells], 2), nsmall = 2), c("", "", "*")[level + 1]),
+                 font = ifelse(level > 0, 2, 1), cex = cex * 0.85)
+  invisible(values)
+}
+
 # the tree must be able to hold the species of each node
 check_node_tree <- function(x, tree) {
   sizes <- colSums(node_contrasts(tree) != 0)

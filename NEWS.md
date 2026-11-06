@@ -1,3 +1,16 @@
+# comdynamite 0.5.1
+
+- `node_contrasts()`: `branch_lengths = TRUE` gives the coding with branch lengths of the
+  supplement of Leibold et al. (2010).
+- `plot_node_heatmap()`: semipartial correlations of `node_test()` as a table of nodes by
+  variables.
+- `simulate_logistic()` now uses the values of the code of Ives & Helmus (2011): the default
+  of `intercept_sd` is 0.5, and slopes have a standard deviation of `slope_sd` among species.
+- `logistic_gradients()`: in scenario 3, the error is added to `y` with unit variance and only
+  in `y_test`, and in scenarios 5 and 6 `x` is in random order along the transect.
+- New article on analysing clades and traits. The article on validation now compares Table 5
+  of Peres-Neto et al. (2012).
+
 # comdynamite 0.5.0
 
 - `simulate_static()`: static metacommunities from the Gaussian response of Dray

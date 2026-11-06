@@ -24,12 +24,14 @@ order, so that the two are independent.
 \enumerate{
 \item The two gradients are equally important and independent.
 \item They are equally important and correlated: \code{y} is \code{x} plus a N(0, 1) error.
-\item They are independent, and \code{y} is less important: it has a N(0, 1) error.
-Appendix C does not say more, and this error is small on this scale.
+\item They are independent, and \code{y} is less important: data come from \code{y}, and
+\code{y_test} is \code{y} with unit variance plus a N(0, 1) error. On the scale of \code{y} this
+error would have no effect, and with unit variance the results agree with Table 5.
 \item Neither is important: data come from scenario 1, and \code{x_test} and \code{y_test}
 are N(0, 1) deviates, to estimate the type I error.
-\item \code{y} has a broad spatial scale, the first Moran's eigenvector map (MEM).
-\item \code{y} has an intermediate spatial scale, the third MEM.
+\item \code{y} has a broad spatial scale, the first Moran's eigenvector map (MEM), and \code{x} is
+in random order along the transect.
+\item \code{y} has an intermediate spatial scale, the third MEM, and \code{x} is as in scenario 5.
 \item \code{x} is the first MEM and \code{y} the third.
 }
 

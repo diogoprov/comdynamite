@@ -68,8 +68,43 @@ Brownian vectors reported in the article may come from this difference.
 
 ### Partition
 
-We did not reproduce Table 5, which depends on details of Appendix C. Following the
-demonstration script of the authors instead, with a vector fixed in advance and predictors
+Table 5 uses the logistic generator of Appendix C. The appendix leaves out the intercepts and
+the scale of the slopes, so we took them from the simulation code of Ives & Helmus (2011):
+intercepts from N(0, 0.5), slopes with a standard deviation of 1 among species, and presences
+from a uniform draw. Neither the article nor the appendix says how the two vectors were
+obtained. The fractions of Table 5 agree with the vectors that generated the data, and its
+rejection rates for E and S agree with the global test of `phylo_vector()`, so the table
+below combines both (`data-raw/validation_table5.R`, 1000 data sets, 999 permutations). The
+values of the article are in parentheses:
+
+| Scenario | [E, S] | [a] | [b] | [c] | Rejection of E | Rejection of S |
+|---|---|---|---|---|---|---|
+| I | 0.490 (0.478) | 0.223 (0.216) | 0.043 (0.069) | 0.223 (0.193) | 0.706 (0.687) | 0.710 (0.679) |
+| II | 0.473 (0.589) | 0.008 (0.061) | 0.458 (0.488) | 0.007 (0.036) | 0.700 (0.750) | 0.705 (0.751) |
+| III | 0.383 (0.349) | 0.239 (0.234) | 0.030 (0.036) | 0.114 (0.079) | 0.691 (0.701) | 0.592 (0.418) |
+| IV | 0.047 (0.032) | 0.023 (0.015) | 0.000 (0.001) | 0.024 (0.016) | 0.043 (0.051) | 0.047 (0.061) |
+| V | 0.524 (0.457) | 0.219 (0.202) | 0.049 (0.054) | 0.255 (0.201) | 0.683 (0.597) | 0.724 (0.637) |
+| VI | 0.518 (0.440) | 0.217 (0.201) | 0.051 (0.063) | 0.251 (0.176) | 0.707 (0.632) | 0.697 (0.627) |
+| VII | 0.549 (0.396) | 0.255 (0.194) | 0.041 (0.000) | 0.253 (0.202) | 0.700 (0.562) | 0.708 (0.597) |
+
+The pattern among scenarios is the same, and scenarios I, III and IV are the closest. Three
+choices are ours. In scenario III, the N(0, 1) error of Appendix C has no effect on a gradient
+from -15 to 15, so we added it to `y` with unit variance, and only in the analysis. In
+scenarios V and VI, `x` is in random order along the transect, as otherwise it is correlated
+with space. In scenario II we kept the text, and the gradients seem more correlated than those
+of the article, as fractions `a` and `c` are smaller.
+
+Three parts remain different. The share of the compositional component is near 0.62 in all
+scenarios, whereas the article gives 0.39 to 0.94, so that value must depend on something
+that the appendix does not describe. Scenario VII has a larger `b` than the zero of the
+article, probably because the maps here are orthogonal only without site weights. The
+rejection of [E, S] is 0.71 to 0.91, against 0.77 to 0.84, here as the rejection of either
+gradient, which gives 0.085 in scenario IV against 0.055 in the article. Rejections of `a` and
+`c`, with vectors estimated only after a significant global test, were 0.66 to 0.71 and 0.48
+to 0.72 outside scenarios II and IV, against 0.56 to 0.70 and 0.30 to 0.60 in the article; in
+scenario II they were zero, against 0.29 and 0.25.
+
+Following the demonstration script of the authors instead, with a vector fixed in advance and predictors
 without relation to the data, rejection rates of the larger p-value were 0.023 to 0.028,
 because both null hypotheses are true. With environment and space acting, the global test
 for environment passed in 37% of the data sets. In those, the rejection rate was 0.99 for

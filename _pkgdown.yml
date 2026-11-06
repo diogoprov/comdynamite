@@ -42,6 +42,7 @@ reference:
   - node_test
   - node_contrasts
   - plot_node_test
+  - plot_node_heatmap
   - phylo_vector
   - trait_partition
   - plot_trait_partition

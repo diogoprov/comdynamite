@@ -116,6 +116,6 @@ traits-environment relationships in the fourth-corner problem. \emph{Ecology}, 9
 1525--1526.
 }
 \seealso{
-\code{\link[=plot_node_test]{plot_node_test()}} shows the results on the tree. \code{\link[=pcc_test]{pcc_test()}} and
+\code{\link[=plot_node_test]{plot_node_test()}} and \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results. \code{\link[=pcc_test]{pcc_test()}} and
 \code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
 }

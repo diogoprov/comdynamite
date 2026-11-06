@@ -163,3 +163,18 @@ test_that("invalid data are rejected", {
   expect_warning(node_test(d$comm[, -1], x, d$env, n_perm = 2), "not in `comm` dropped")
   expect_error(node_test(d$comm, x, d$env[-1], n_perm = 5))
 })
+
+test_that("branch lengths give the values of Figure S2 of the supplement", {
+  tree <- ape::read.tree(text = "((((A:0.2,B:0.2):0.65,C:0.85):0.15,D:1):0.4,(E:0.5,F:0.5):0.9);")
+  x <- node_contrasts(tree, branch_lengths = TRUE)
+  expect_equal(abs(x[c("A", "B", "C", "D", "E", "F"), "7"]),
+               c(A = 0.196, B = 0.196, C = 0.290, D = 0.319, E = 0.5, F = 0.5), tolerance = 2e-3)
+  expect_equal(abs(x[c("A", "B", "C", "D"), "8"]), c(A = 0.281, B = 0.281, C = 0.439, D = 1),
+               tolerance = 2e-3)
+  expect_equal(unname(abs(x[c("A", "B", "C"), "9"])), c(0.5, 0.5, 1))
+  sums <- apply(x, 2, function(column) c(sum(column[column < 0]), sum(column[column > 0])))
+  expect_true(all(abs(sums) - 1 < 1e-12))
+  expect_equal(dimnames(x), dimnames(node_contrasts(tree)))
+  expect_error(node_contrasts(ape::read.tree(text = "((a,b),c);"), branch_lengths = TRUE),
+               "no branch lengths")
+})
