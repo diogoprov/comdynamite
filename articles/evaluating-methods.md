@@ -197,7 +197,9 @@ The table gives the mean gamma statistic and normalized Colless index of
 replaces [`ape::rcoal()`](https://rdrr.io/pkg/ape/man/rtree.html) in
 step 1 without other changes. To aim at given values of gamma and
 Colless, use `shape_grid()` and `sim_tree_target()` from the same
-package.
+package. The [treeshapesim article on
+comdynamite](https://provetelab.org/treeshapesim/articles/comdynamite.html)
+shows the two packages together.
 
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
 requires a landscape on a torus, which is a property of the simulation.
