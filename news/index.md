@@ -24,3 +24,7 @@
   phylogenetic community structure, and
   [`vignette("evaluating-methods")`](https://provetelab.org/comdynamite/articles/evaluating-methods.md),
   on type I error and power with simulations.
+
+- [`vignette("evaluating-methods")`](https://provetelab.org/comdynamite/articles/evaluating-methods.md)
+  shows tree shape as a factor of the design, with trees from
+  treeshapesim (in Suggests).

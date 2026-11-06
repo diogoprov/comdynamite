@@ -71,8 +71,10 @@ function reference.
   species k on species j) and adds phylogenetic traits and competition,
   grid landscapes on a torus with their restricted permutations, and
   abundances recorded over time.
+
 - **[gen3sis](https://github.com/project-gen3sis/R-package)** (Hagen et
   al.
+
   2021. is a general engine for eco-evolutionary simulations on
         landscapes that change over geological time. Speciation,
         extinction, dispersal and trait evolution are simulated, so the
@@ -87,9 +89,19 @@ function reference.
         scenarios. The two can be combined: a phylogeny produced by
         gen3sis can be used as the regional pool of a comdynamite
         simulation.
+
 - **[treeshapesim](https://github.com/diogoprov/treeshapesim)**
   simulates trees with separately controlled imbalance and branching
-  times, to use as regional pools in comdynamite.
+  times, to use as regional pools in comdynamite. Tree shape can then be
+  a factor in the design of a simulation study:
+
+  ``` r
+
+  tr <- treeshapesim::sim_tree_shape(40, beta = -1, c = -0.5)
+  sim <- simulate_metacommunity(landscape_implicit(20), species_traits(tr, lambda = 1),
+                                competition_matrix(tr, type = "phylo"),
+                                dispersal = 0.01, n_steps = 1000)
+  ```
 
 ## References
 

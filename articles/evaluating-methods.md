@@ -164,6 +164,41 @@ matter for a method that uses phylogenetic information.
   for example in local richness and occupancy, before interpreting
   rejection rates.
 
+## Tree shape as a factor of the design
+
+The results above use coalescent trees from
+[`ape::rcoal()`](https://rdrr.io/pkg/ape/man/rtree.html), and the
+statistic ignores the tree, so tree shape cannot affect them. For a
+method that uses phylogenetic information, tree shape should be part of
+the design. The [treeshapesim](https://provetelab.org/treeshapesim/)
+package simulates trees in which imbalance (`beta`) and branching times
+(`c`) are set separately.
+
+``` r
+
+set.seed(1)
+shapes <- expand.grid(beta = c(-1, 0), c = c(-0.5, 0))
+measured <- t(mapply(function(beta, c) {
+  trees <- treeshapesim::sim_tree_shape(30, beta = beta, c = c, nsim = 100)
+  rowMeans(sapply(trees, treeshapesim::tree_shape))
+}, shapes$beta, shapes$c))
+knitr::kable(cbind(shapes, measured), digits = 2)
+```
+
+| beta |    c | gamma | colless |
+|-----:|-----:|------:|--------:|
+|   -1 | -0.5 | -1.61 |    1.40 |
+|    0 | -0.5 | -1.58 |   -0.02 |
+|   -1 |  0.0 |  0.00 |    1.22 |
+|    0 |  0.0 | -0.01 |    0.14 |
+
+The table gives the mean gamma statistic and normalized Colless index of
+100 trees for each combination. Each tree is a `phylo` object, so it
+replaces [`ape::rcoal()`](https://rdrr.io/pkg/ape/man/rtree.html) in
+step 1 without other changes. To aim at given values of gamma and
+Colless, use `shape_grid()` and `sim_tree_target()` from the same
+package.
+
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
 requires a landscape on a torus, which is a property of the simulation.
 Empirical landscapes have edges, so a valid restricted null model for

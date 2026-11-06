@@ -271,6 +271,64 @@ standard error of a rejection rate <code>p</code> is
 question, for example in local richness and occupancy, before
 interpreting rejection rates.</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="tree-shape-as-a-factor-of-the-design">Tree shape as a factor of the design<a class="anchor" aria-label="anchor" href="#tree-shape-as-a-factor-of-the-design"></a>
+</h2>
+<p>The results above use coalescent trees from
+<code><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">ape::rcoal()</a></code>, and the statistic ignores the tree, so tree
+shape cannot affect them. For a method that uses phylogenetic
+information, tree shape should be part of the design. The <a href="https://provetelab.org/treeshapesim/" class="external-link">treeshapesim</a> package
+simulates trees in which imbalance (<code>beta</code>) and branching
+times (<code>c</code>) are set separately.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">shapes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/expand.grid.html" class="external-link">expand.grid</a></span><span class="op">(</span>beta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span>, c <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">0.5</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">measured</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mapply.html" class="external-link">mapply</a></span><span class="op">(</span><span class="kw">function</span><span class="op">(</span><span class="va">beta</span>, <span class="va">c</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">trees</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://diogoprov.github.io/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">30</span>, beta <span class="op">=</span> <span class="va">beta</span>, c <span class="op">=</span> <span class="va">c</span>, nsim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">trees</span>, <span class="fu">treeshapesim</span><span class="fu">::</span><span class="va"><a href="https://diogoprov.github.io/treeshapesim/reference/tree_shape.html" class="external-link">tree_shape</a></span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span>, <span class="va">shapes</span><span class="op">$</span><span class="va">beta</span>, <span class="va">shapes</span><span class="op">$</span><span class="va">c</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">shapes</span>, <span class="va">measured</span><span class="op">)</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
+<table class="table">
+<thead><tr class="header">
+<th align="right">beta</th>
+<th align="right">c</th>
+<th align="right">gamma</th>
+<th align="right">colless</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="right">-1</td>
+<td align="right">-0.5</td>
+<td align="right">-1.61</td>
+<td align="right">1.40</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">-0.5</td>
+<td align="right">-1.58</td>
+<td align="right">-0.02</td>
+</tr>
+<tr class="odd">
+<td align="right">-1</td>
+<td align="right">0.0</td>
+<td align="right">0.00</td>
+<td align="right">1.22</td>
+</tr>
+<tr class="even">
+<td align="right">0</td>
+<td align="right">0.0</td>
+<td align="right">-0.01</td>
+<td align="right">0.14</td>
+</tr>
+</tbody>
+</table>
+<p>The table gives the mean gamma statistic and normalized Colless index
+of 100 trees for each combination. Each tree is a <code>phylo</code>
+object, so it replaces <code><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">ape::rcoal()</a></code> in step 1 without other
+changes. To aim at given values of gamma and Colless, use
+<code>shape_grid()</code> and <code>sim_tree_target()</code> from the
+same package.</p>
 <p><code><a href="../reference/torus_permutations.html">torus_permutations()</a></code> requires a landscape on a torus,
 which is a property of the simulation. Empirical landscapes have edges,
 so a valid restricted null model for real data must be chosen
