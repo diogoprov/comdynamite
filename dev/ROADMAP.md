@@ -33,8 +33,12 @@ primeiros métodos entrarem.
 ## v0.1.0: primeira versão citável (concluída em 2026-11-05)
 
 CI em macOS, Windows e Linux; 100% de cobertura de linhas; `inst/CITATION` e
-`CITATION.cff`; release no GitHub com DOI do Zenodo. Falta confirmar o pacote no
-r-universe: o registro foi feito, e o build depende do ciclo do serviço.
+`CITATION.cff`; release no GitHub com DOI do Zenodo.
+
+- [x] Submissão ao r-universe: `comdynamite` incluído em `packages.json`, no repositório
+      `diogoprov/diogoprov.r-universe.dev`.
+- [ ] Confirmar o build em https://diogoprov.r-universe.dev/comdynamite. Depois, pôr o
+      badge e a instalação pelo r-universe no README, como no treeshapesim.
 
 ## v0.2.0: validação e geradores estáticos
 
@@ -125,20 +129,43 @@ pacotes de referência em vez de reimplementá-los.
 
 ## v0.7.0: traits, filogenia e biogeografia
 
-Objetivo: ligar história biogeográfica, traits e montagem local, como em Benício et
-al. (2021).
+Objetivo: transformar o desenho de Benício et al. (2021) em um fluxo do pacote e testar,
+com a verdade conhecida, se ele separa tempo para especiação, taxas de diversificação
+e conservação de nicho. Scripts e dados do artigo estão no Dryad
+(https://doi.org/10.5061/dryad.sf7m0cg65).
 
-- [ ] Fluxo que integra traits, filogenias e biogeografia, seguindo Benício et al.
-      (2021).
-- [ ] Modelos de Markov com k estados para áreas e traits discretos: DEC e
-      variantes do BioGeoBEARS (Matzke 2014), ClaSSE (Goldberg & Igić 2012) e GeoSSE
-      (Goldberg et al. 2011), usando a entrada da v0.4.0.
+Simular o cenário:
+
+- [ ] Árvore e regiões geradas juntas, por exemplo com um simulador de GeoSSE, em cenários
+      que variem especiação, extinção, dispersão e tempo de colonização por região.
+- [ ] Traits discretos e filtragem por eles, como os modos reprodutivos. Hoje o modelo
+      só tem traits contínuos.
+- [ ] Duas regiões com pools próprios e dispersão limitada entre elas, usando a
+      entrada da v0.4.0.
+- [ ] Amostragem imperfeita: sítios, dias de coleta e espécies não detectadas.
+
+Analisar, chamando os pacotes de referência sobre a estrutura comum:
+
+- [ ] Riqueza por rarefação e extrapolação (`iNEXT`).
+- [ ] Sinal filogenético em traits discretos: Rao decomposto nos nós (`adiv`, `ade4`).
+- [ ] Modelos GeoSSE com seleção por AIC e MCMC (`diversitree`).
+- [ ] Curvas de linhagens no tempo por região (`ape`).
+- [ ] DEC (BioGeoBEARS; Matzke 2014) e tempo de colonização por idades crown e stem.
+- [ ] MPD, MNTD e análogos funcionais, com o pool definido em três extensões: só uma
+      região, só a outra e as duas juntas (`picante`).
+- [ ] Relação da diversidade com clima, clima passado e topografia nas três extensões.
+
+Depois:
+
+- [ ] Avaliar o fluxo: em que cenários ele recupera a causa simulada e com que frequência
+      erra. Incluir árvore incompleta e poucos sítios, limitações citadas no artigo, e
+      os falsos positivos de modelos SSE (Rabosky & Goldberg 2015).
+- [ ] ClaSSE (Goldberg & Igić 2012) e outros modelos de Markov com k estados.
 - [ ] SBEARS, do Herodotools. Conferir o que ele faz: entrou aqui como modelo contínuo,
       e o nome é Site Based Estimation of Ancestral Range of Species.
-- [ ] Decidir como ligar a escala evolutiva à ecológica, que é o problema difícil.
 
-**Concluído quando:** um cenário com história biogeográfica conhecida for recuperado
-pelo fluxo completo.
+**Concluído quando:** um estudo de simulação mostrar quando o fluxo acerta e quando erra.
+Esse estudo pode virar artigo próprio.
 
 ## v0.8.0: mais processos
 
@@ -204,5 +231,6 @@ Conferidas no Crossref em 2026-11-05.
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
+- Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395
