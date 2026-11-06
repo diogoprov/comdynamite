@@ -1,6 +1,6 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-05. Versão atual: 0.1.0 (tag `v0.1.0`, DOI de conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-06. Versão atual: 0.1.0 (tag `v0.1.0`, DOI de conceito `10.5281/zenodo.23993533`).
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -170,8 +170,8 @@ métodos está em pacote de R.
 Vem antes do ABC por decisão de 2026-11-06. O código está em
 `~/Downloads/ECOL_93_175/` (Peres-Neto et al. 2012) e em
 `~/Downloads/ele_1523_sm_datas2.doc` (Leibold et al. 2010), fora do repositório porque
-os suplementos não trazem licença. Esta máquina não tem MATLAB nem Octave, e a
-comparação em dados fixos depende de um dos dois.
+os suplementos não trazem licença. As comparações usaram Octave 11.3, instalado nesta
+máquina.
 
 - [x] Peres-Neto et al. (2012): `phylo_vector()` e `trait_partition()`, conferidas no Octave e nas Tabelas 1
       a 4 do artigo.
@@ -190,12 +190,28 @@ comparação em dados fixos depende de um dos dois.
       O MATLAB multiplica pelo módulo da inclinação e usa preditores brutos; o artigo
       divide e usa padronizados, e seguimos o artigo.
 - [ ] Codificação com comprimentos de ramo, na seção III do suplemento de Leibold et al.
-- [ ] Heatmaps ou mapa da árvore com os nós significativos.
+- [x] `plot_node_test()`: Figura 3 de Leibold et al. (2010), em filograma ou leque, com
+      `ape::plot.phylo()`, sem dependência nova. O artigo não define a família do FDR:
+      corrigimos preditores e eventos separadamente, o que está no help.
+- [x] `plot_trait_partition()`: frações em barras, com negativas como zero (Legendre 2008).
+      A tabela mantém os valores negativos.
+- [x] `node_test()`: refúgios, 9999 permutações por padrão, permutação conjunta do artigo
+      (`p_joint`, que rejeita 76% dos nós só com ambiente, contra 4,8% de `p_max`).
+- [x] `daphniids`: dados de Leibold et al. (2010), refeitos da pesquisa pública da EPA.
+- [x] Conferência de espécies por nome nas funções com árvore, traits ou contrastes.
+- [x] Saíram `fourth_corner_test()` (fica no `ade4`) e `spatial_eigenvectors()` (fica no
+      `adespatial`). `trait_partition()` cita ter Braak (2019) e o TraitEnvMLMWA para o
+      teste de cada traço.
+- [ ] Heatmap de nós por preditores com `semipartial`, como a Tabela S1 de Leibold et al.
 - [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
       permutações em paralelo com o Futureverse.
-- [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
-      coisa. Ver os possíveis erros em "Pendências e decisões".
-- [ ] Vignette com os métodos aplicados a dados simulados e reais.
+- [x] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
+      coisa: R e Octave concordam até 1e-13, e as divergências estão nos helps.
+- [ ] Vignette com os métodos aplicados a dados simulados e reais. O artigo de validação
+      já cobre a conferência; falta o fluxo de análise, com os daphniídeos e os plots.
+
+Situação em 2026-11-06: o critério abaixo foi cumprido, com a exceção da Tabela 5. Faltam
+os itens em aberto acima, nenhum deles bloqueia o ABC.
 
 **Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
 reproduzirem o erro tipo I publicado.
@@ -351,7 +367,7 @@ Objetivo: API estável e pacote no CRAN.
 - **Erros no artigo de Thompson et al. (2020).** Tabela 1 (beta), faixa de dispersão,
   conversão do ambiente em postos e metade dos imigrantes no cenário de
   competição-colonização não batem com o código. Vale citar isso no artigo do pacote.
-- **Dependências do hub.** Hoje o pacote só importa `ape` e `stats`. Tidyverse, Futureverse
+- **Dependências do hub.** Hoje o pacote só importa `ape` e pacotes base (`graphics`, `grDevices`, `parallel`, `stats`). Tidyverse, Futureverse
   e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
   equações e citar; se for copiar a estrutura do código, falar com os autores.
@@ -376,6 +392,8 @@ Objetivo: API estável e pacote no CRAN.
 - **Resultados pré-calculados.** Os `.rds` em `vignettes/` vêm de
   `data-raw/vignette_ecology.R` e `data-raw/vignette_method.R`. Se o modelo mudar,
   é preciso rodar os scripts de novo e revisar os números citados no texto.
+- **Páginas órfãs do site.** O deploy do pkgdown usa `clean: false`, então a página de uma
+  função removida fica no `gh-pages` e precisa ser apagada à mão.
 - **`data-raw/hex_dynamite.R`.** Sobrescreve o `logo.png` oficial se for rodado. Remover
   ou mudar o arquivo de saída.
 
@@ -384,6 +402,7 @@ Objetivo: API estável e pacote no CRAN.
 Conferidas no Crossref em 2026-11-05.
 
 - Benício, R. A., et al. (2021). *Journal of Biogeography*, 48, 2211–2225. https://doi.org/10.1111/jbi.14145
+- ter Braak, C. J. F. (2019). *Methods in Ecology and Evolution*, 10, 1962–1971. https://doi.org/10.1111/2041-210X.13278
 - Caetano, D. S., et al. (2018). *Evolution*, 72, 2308–2324. https://doi.org/10.1111/evo.13602
 - Csilléry, K., et al. (2012). *Methods in Ecology and Evolution*, 3, 475–479. https://doi.org/10.1111/j.2041-210x.2011.00179.x
 - Dray, S., & Legendre, P. (2008). *Ecology*, 89, 3400–3412. https://doi.org/10.1890/08-0349.1
@@ -395,6 +414,7 @@ Conferidas no Crossref em 2026-11-05.
 - Guzman, L. M., et al. (2022). *Ecology*, 103. https://doi.org/10.1002/ecy.3683
 - Harvey, M. G., & Rabosky, D. L. (2017). *Methods in Ecology and Evolution*, 9, 984–993. https://doi.org/10.1111/2041-210x.12949
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
+- Legendre, P. (2008). *Journal of Plant Ecology*, 1, 3–8. https://doi.org/10.1093/jpe/rtm001
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
