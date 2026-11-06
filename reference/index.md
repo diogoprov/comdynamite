@@ -61,6 +61,10 @@ Analyses of phylogenetic community structure.
   : Test phylogenetic community composition against the environment
 - [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md)
   : Phylogenetic eigenvectors
+- [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  : Test phylogenetic beta diversity against the environment
+- [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md)
+  : Phylogenetic beta diversity between communities
 
 ## Rule-based assembly
 

@@ -18,6 +18,17 @@
   [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md):
   phylogenetic community composition of Peres-Neto & Kembel (2015), with
   site and species permutations.
+- [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  and
+  [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md):
+  phylogenetic beta-diversity framework of the same article, a
+  distance-based redundancy analysis of the mean phylogenetic distance
+  between communities.
+- [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
+  stochastic extirpation of populations (`extirpation`), used by
+  Thompson et al. (2020) in their competition-colonisation scenario.
 - New article with animations of metacommunity dynamics.
 
 ## comdynamite 0.1.0

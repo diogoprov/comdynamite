@@ -18,7 +18,8 @@ mc_dynamics(
   disp_matrix = NULL,
   record_steps = NULL,
   sites = NULL,
-  species = NULL
+  species = NULL,
+  extirpation = 0
 )
 ```
 
@@ -64,6 +65,11 @@ mc_dynamics(
 - sites, species:
 
   Optional names of sites and species.
+
+- extirpation:
+
+  Probability that a population is lost at each time step, one value or
+  one per species.
 
 ## Value
 

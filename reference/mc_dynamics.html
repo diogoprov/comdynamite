@@ -58,7 +58,8 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  disp_matrix <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  record_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sites <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  species <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  species <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extirpation <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,6 +105,11 @@ site at each seeding step (and at the start).</p></dd>
 
 <dt id="arg-sites-species">sites, species<a class="anchor" aria-label="anchor" href="#arg-sites-species"></a></dt>
 <dd><p>Optional names of sites and species.</p></dd>
+
+
+<dt id="arg-extirpation">extirpation<a class="anchor" aria-label="anchor" href="#arg-extirpation"></a></dt>
+<dd><p>Probability that a population is lost at each time step,
+one value or one per species.</p></dd>
 
 </dl></div>
     <div class="section level2">

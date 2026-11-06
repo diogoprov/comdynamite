@@ -69,7 +69,8 @@ probability <code>dispersal</code>, and emigrants are redistributed among sites:
 <span>  env_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  seed_steps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">100</span>, <span class="fl">10</span><span class="op">)</span>,</span>
 <span>  seed_mean <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  record_steps <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  record_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  extirpation <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,12 +117,18 @@ site at each seeding step (and at the start).</p></dd>
 <dt id="arg-record-steps">record_steps<a class="anchor" aria-label="anchor" href="#arg-record-steps"></a></dt>
 <dd><p>Optional steps at which abundances are recorded.</p></dd>
 
+
+<dt id="arg-extirpation">extirpation<a class="anchor" aria-label="anchor" href="#arg-extirpation"></a></dt>
+<dd><p>Probability that a population is lost at each time step,
+one value or one per species.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>mc_sim</code> object: a list with <code>abundance</code> (sites x species matrix
 at the last step), <code>history</code> (sites x species x recorded steps array, or
-<code>NULL</code>), and the <code>landscape</code>, <code>traits</code>, <code>alpha</code> and <code>dispersal</code> used.</p>
+<code>NULL</code>), and the <code>landscape</code>, <code>traits</code>, <code>alpha</code>, <code>dispersal</code> and <code>extirpation</code>
+used.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -134,8 +141,14 @@ probability proportional to the number of emigrants from the other sites
 immigrants of each species at each site is drawn from a Poisson
 distribution whose mean is the expected flow of emigrants through the
 dispersal kernel. This approximation does not conserve the number of
-dispersing individuals exactly, but has the right expectation.</p></li>
-</ul><p>During colonisation, Poisson(<code>seed_mean</code>) individuals of every species are
+dispersing individuals exactly, but has the right expectation. The code of
+Thompson et al. (2020) does the same. Few emigrants may then produce no
+immigrant, so with <code>extirpation</code> and low dispersal, recolonisation is rarer
+than in mcomsimr, which conserves dispersers.</p></li>
+</ul><p>After dispersal, each population is lost with probability <code>extirpation</code>,
+independently of its size. Thompson et al. (2020) used 0.002 in their
+competition-colonisation scenario and no extirpation in the others.</p>
+<p>During colonisation, Poisson(<code>seed_mean</code>) individuals of every species are
 added to every site at each of the <code>seed_steps</code>. After the last of these,
 species absent from all sites can never return and are no longer computed.</p>
     </div>

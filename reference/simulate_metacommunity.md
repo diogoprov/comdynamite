@@ -22,7 +22,8 @@ simulate_metacommunity(
   env_time = NULL,
   seed_steps = seq(10, 100, 10),
   seed_mean = 0.5,
-  record_steps = NULL
+  record_steps = NULL,
+  extirpation = 0
 )
 ```
 
@@ -71,11 +72,17 @@ simulate_metacommunity(
 
   Optional steps at which abundances are recorded.
 
+- extirpation:
+
+  Probability that a population is lost at each time step, one value or
+  one per species.
+
 ## Value
 
 An `mc_sim` object: a list with `abundance` (sites x species matrix at
 the last step), `history` (sites x species x recorded steps array, or
-`NULL`), and the `landscape`, `traits`, `alpha` and `dispersal` used.
+`NULL`), and the `landscape`, `traits`, `alpha`, `dispersal` and
+`extirpation` used.
 
 ## Details
 
@@ -92,7 +99,14 @@ the last step), `history` (sites x species x recorded steps array, or
   Poisson distribution whose mean is the expected flow of emigrants
   through the dispersal kernel. This approximation does not conserve the
   number of dispersing individuals exactly, but has the right
-  expectation.
+  expectation. The code of Thompson et al. (2020) does the same. Few
+  emigrants may then produce no immigrant, so with `extirpation` and low
+  dispersal, recolonisation is rarer than in mcomsimr, which conserves
+  dispersers.
+
+After dispersal, each population is lost with probability `extirpation`,
+independently of its size. Thompson et al. (2020) used 0.002 in their
+competition-colonisation scenario and no extirpation in the others.
 
 During colonisation, Poisson(`seed_mean`) individuals of every species
 are added to every site at each of the `seed_steps`. After the last of
