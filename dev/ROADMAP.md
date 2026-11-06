@@ -112,7 +112,7 @@ ligados, como em Benício et al. (2021), com a verdade conhecida.
       variantes do BioGeoBEARS (Matzke 2014), ClaSSE (Goldberg & Igić 2012) e GeoSSE
       (Goldberg et al. 2011).
 - [ ] Modelos contínuos: SBEARS, do Herodotools.
-- [ ] Integração com o Herodotools (Nakamura et al. 2024): saídas do comdynamite nos
+- [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas do comdynamite nos
       formatos que ele lê, e as métricas de `calc_tip_based_trait_evo()` como
       resumo. Vignette de exemplo.
 
@@ -170,6 +170,6 @@ Conferidas no Crossref em 2026-11-05.
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
-- Nakamura, G., et al. (2024). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
+- Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395
