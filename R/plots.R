@@ -129,8 +129,11 @@ draw_symbol <- function(x, y, group, col, cex, type) {
 #'
 #' Draws one bar for each fraction of [trait_partition()]: `a` for the environment alone,
 #' `b` for what the environment and space share, and `c` for space alone. The unexplained
-#' fraction `d` is given below the plot, as it would hide the others. Adjusted fractions
-#' can be negative. Dark bars are significant, and `b` has no test, so it is grey.
+#' fraction `d` is given below the plot, as it would hide the others. Dark bars are
+#' significant, and `b` has no test, so it is grey.
+#'
+#' Negative fractions are shown as zero, following Legendre (2008). The result of
+#' [trait_partition()] keeps them, because all fractions sum to one only with them.
 #'
 #' @param x Result of [trait_partition()].
 #' @param value Column of the fractions to show: `"r2_adjusted"`, `"r2"`, or
@@ -140,7 +143,12 @@ draw_symbol <- function(x, y, group, col, cex, type) {
 #' @param alpha Significance level.
 #' @param col Colour of significant bars.
 #' @param ... Other arguments of [graphics::barplot()].
-#' @return Invisibly, the rows of `x$fractions` for `a`, `b` and `c`.
+#' @return Invisibly, the rows of `x$fractions` for `a`, `b` and `c`, with `shown`, the
+#'   values of the bars.
+#' @references
+#' Legendre, P. (2008). Studying beta diversity: ecological variation partitioning by
+#' multiple regression and canonical analysis. *Journal of Plant Ecology*, 1, 3--8.
+#' \doi{10.1093/jpe/rtm001}
 #' @examples
 #' set.seed(1)
 #' trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
@@ -159,16 +167,17 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   test <- match.arg(test)
   table <- x$fractions
   shown <- table[match(c("c", "b", "a"), table$fraction), ]
+  shown$shown <- pmax(shown[[value]], 0)
   p <- shown[[paste0("p_", test)]]
   fill <- ifelse(is.na(p), "grey70", ifelse(p <= alpha, col, grDevices::adjustcolor(col, 0.3)))
   old <- graphics::par(mar = c(5, 9, 3, 2))
   on.exit(graphics::par(old))
-  graphics::barplot(shown[[value]], horiz = TRUE, names.arg = c("Space [c]", "Shared [b]",
+  graphics::barplot(shown$shown, horiz = TRUE, names.arg = c("Space [c]", "Shared [b]",
                                                                 "Environment [a]"),
                     col = fill, border = NA, las = 1, xlab = value,
                     main = paste(x$component, "component"),
                     sub = paste("Unexplained [d]:",
-                                format(table[[value]][table$fraction == "d"], digits = 3)), ...)
+                                format(max(table[[value]][table$fraction == "d"], 0), digits = 3)), ...)
   graphics::abline(v = 0)
   invisible(shown[3:1, ])
 }

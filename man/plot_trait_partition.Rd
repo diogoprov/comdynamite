@@ -29,13 +29,18 @@ plot_trait_partition(
 \item{...}{Other arguments of \code{\link[graphics:barplot]{graphics::barplot()}}.}
 }
 \value{
-Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b} and \code{c}.
+Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b} and \code{c}, with \code{shown}, the
+values of the bars.
 }
 \description{
 Draws one bar for each fraction of \code{\link[=trait_partition]{trait_partition()}}: \code{a} for the environment alone,
 \code{b} for what the environment and space share, and \code{c} for space alone. The unexplained
-fraction \code{d} is given below the plot, as it would hide the others. Adjusted fractions
-can be negative. Dark bars are significant, and \code{b} has no test, so it is grey.
+fraction \code{d} is given below the plot, as it would hide the others. Dark bars are
+significant, and \code{b} has no test, so it is grey.
+}
+\details{
+Negative fractions are shown as zero, following Legendre (2008). The result of
+\code{\link[=trait_partition]{trait_partition()}} keeps them, because all fractions sum to one only with them.
 }
 \examples{
 set.seed(1)
@@ -46,4 +51,9 @@ comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
 plot_trait_partition(out)
+}
+\references{
+Legendre, P. (2008). Studying beta diversity: ecological variation partitioning by
+multiple regression and canonical analysis. \emph{Journal of Plant Ecology}, 1, 3--8.
+\doi{10.1093/jpe/rtm001}
 }

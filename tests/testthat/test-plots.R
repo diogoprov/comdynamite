@@ -59,5 +59,7 @@ test_that("the partition plot returns the three fractions in order", {
   expect_equal(shown$fraction, c("a", "b", "c"))
   expect_equal(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c"),
                                                                   out$fractions$fraction)])
+  expect_true(any(shown$r2_adjusted < 0))
+  expect_equal(shown$shown, pmax(shown$r2_adjusted, 0))
   expect_silent(plot_trait_partition(out, value = "r2", test = "site"))
 })
