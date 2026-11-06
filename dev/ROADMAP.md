@@ -47,8 +47,10 @@ base sem dinâmica.
 
 - [x] `simulate_static()`: resposta gaussiana de Dray & Legendre (2008), usada também
       por Peres-Neto et al. (2012). Nessas fontes, `h` vem de U(0,5; 1), a abundância é
-      o valor esperado e a incidência é binomial com probabilidade `y`. As contagens de
-      Poisson e `h` em U(0, 30) não estão nelas: vêm do pcps-sim.
+      o valor esperado e a incidência é binomial com probabilidade `y`, opções de
+      `sampling`. As contagens de Poisson e `h` em U(0, 30), padrão no pcps-sim, vêm de
+      Peres-Neto & Kembel (2015, Appendix A) e Duarte et al. (2016, Appendix S2). Duarte
+      et al. atribuem o Poisson a 2012, mas ele não está no texto principal desse artigo.
 - [x] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
       espaço, como em `ScriptDemo.m`.
 - [x] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
@@ -59,12 +61,31 @@ base sem dinâmica.
       ambiente constante e 200 réplicas por modelo. Nenhuma das 80 comparações de
       distribuição foi significativa (KS, FDR 5%), e as diferenças nas médias de alfa,
       gama e abundância total ficaram abaixo de 1%. Falta um ambiente que mude no tempo.
-- [ ] Reproduzir qualitativamente os padrões de Thompson et al. (2020).
-- [ ] Testes de propriedades com resultado analítico (por exemplo, o equilíbrio de
-      Beverton-Holt com uma espécie, já usado no exemplo de `mc_dynamics()`).
+- [x] Reproduzir qualitativamente os padrões de Thompson et al. (2020), em
+      `data-raw/validation_thompson.R`: 100 manchas, 50 espécies, 2200 passos, 30
+      paisagens, 15 taxas de dispersão, 5 larguras de nicho, 3 tipos de competição. H1,
+      H2, H3, H5 e H6 aparecem. Em H4, a parte da competição aparece, mas beta não cresce
+      com nichos mais estreitos entre 0,1 e 10: só em 0,05, onde quase não há
+      indivíduos. A Tabela 1 deles não estava disponível e as definições de beta são
+      nossas (gama/alfa), o que pode explicar a diferença. Ficou de fora a
+      competição-colonização, que exige extirpação estocástica.
+- [ ] Conferir a definição de beta na Tabela 1 de Thompson et al. (2020) e repetir H4.
+- [x] Testes de propriedades com resultado analítico, em `test-analytic.R`: equilíbrios
+      com uma e várias espécies, exclusão, fonte e sumidouro, fluxo pelo kernel.
 - [ ] Vignette ou seção "Validation" no site.
 
 **Concluído quando:** houver um script em `data-raw/` que reproduza a comparação.
+
+## Métodos de análise
+
+- [x] `pcc_test()` e `phylo_eigenvectors()`: PCC de Peres-Neto & Kembel (2015), vindo do
+      pcps-sim, com permutações restritas opcionais. Em `data-raw/validation_pcc.R`, as
+      taxas de neither e environment batem com a Tabela 1 (erro tipo I do teste de
+      espécies 0,045 e 0,068 contra 0,054 e 0,052). O poder (0,88 e 0,84 contra 0,945 e
+      0,947) e o teste de espécies em phylogeny (0,20 e 0,19 contra 0,27 e 0,28) ficam
+      abaixo, como esperado sem a árvore deles.
+- [ ] Framework PGA-β do mesmo artigo (db-RDA sobre MPD entre comunidades). Não existe
+      no pcps-sim.
 
 ## v0.3.0: fluxo de estudos de simulação
 
@@ -118,11 +139,14 @@ Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et 
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
 et al. (2015). Definir o que o comdynamite acrescenta a esses trabalhos.
 
-Pontarp et al. (2019), lido no texto principal (Appendix S4 não lido): propõem um ciclo
+Pontarp et al. (2019), lido com o Appendix S4: propõem um ciclo
 de construir o modelo, analisá-lo sem dados, estimar parâmetros e avaliar. O caso de
-estudo usa ABC por rejeição, distância euclidiana entre estatísticas (riqueza, abundância,
-distribuição de traits, NRI, NTI), priors amplos e dois modelos, escolhidos pela razão de
-aceitação, tudo em dados simulados. O que levar para cá:
+estudo usa ABC por rejeição com 14 mil simulações por modelo, distância euclidiana entre
+estatísticas (riqueza, abundância, distribuição de traits, NRI, NTI) escaladas pelo desvio
+padrão, priors amplos e dois modelos, escolhidos pela razão de aceitação, tudo em dados
+simulados e só com a comunidade final. O limiar sai do gráfico das distâncias e de uma
+análise de sensibilidade; vale copiar esse passo, mas ele muda entre os trechos (1 na
+Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 
 - Se um processo não é recuperado em dados simulados, não deve ser inferido em dados
   reais. É o papel do piloto da v0.3.0 e da recuperação abaixo.
@@ -312,6 +336,7 @@ Conferidas no Crossref em 2026-11-05.
 - Csilléry, K., et al. (2012). *Methods in Ecology and Evolution*, 3, 475–479. https://doi.org/10.1111/j.2041-210x.2011.00179.x
 - Dray, S., & Legendre, P. (2008). *Ecology*, 89, 3400–3412. https://doi.org/10.1890/08-0349.1
 - Clavel, J., et al. (2015). *Methods in Ecology and Evolution*, 6, 1311–1319. https://doi.org/10.1111/2041-210x.12420
+- Duarte, L. D. S., et al. (2016). *Methods in Ecology and Evolution*, 7, 937–946. https://doi.org/10.1111/2041-210x.12547
 - Duarte, L. D. S., et al. (2023). *Ecography*, 2023. https://doi.org/10.1111/ecog.06544
 - Goldberg, E. E., et al. (2011). *Systematic Biology*, 60, 451–465. https://doi.org/10.1093/sysbio/syr046
 - Goldberg, E. E., & Igić, B. (2012). *Evolution*, 66, 3701–3709. https://doi.org/10.1111/j.1558-5646.2012.01730.x
@@ -327,6 +352,7 @@ Conferidas no Crossref em 2026-11-05.
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
+- Peres-Neto, P. R., & Kembel, S. W. (2015). *Plant Ecology*, 216, 709–724. https://doi.org/10.1007/s11258-014-0405-0
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395
 - Robert, C. P., et al. (2011). *PNAS*, 108, 15112–15117. https://doi.org/10.1073/pnas.1102900108

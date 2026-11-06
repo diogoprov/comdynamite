@@ -5,9 +5,12 @@
 #' dispersal. The expected abundance of species j at site i is
 #' `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the Gaussian
 #' response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
-#' default, observed abundances are Poisson counts with that mean. This is our
-#' addition: in those simulations the abundances are the expected values, with
-#' `r_max` between 0.5 and 1, which `poisson = FALSE` returns. Because nothing but the
+#' default, observed abundances are Poisson counts with that mean, as in
+#' Peres-Neto & Kembel (2015) and Duarte et al. (2016), where `r_max` lies between
+#' 0 and 30. In the two earlier studies `r_max` lies between 0.5 and 1, abundances
+#' are the expected values (`sampling = "expected"`), and Dray & Legendre (2008)
+#' draw presences from a binomial distribution with the expected value as the
+#' probability (`sampling = "binomial"`). Because nothing but the
 #' gradient structures the data, this is a baseline for
 #' [simulate_metacommunity()] and a fast generator for evaluating methods.
 #'
@@ -23,11 +26,12 @@
 #'   of them keeps abundances on the scale of the first.
 #' @param env Value of the gradient at each site, or a list or data frame with
 #'   one gradient per element, in the order of `traits`.
-#' @param incidence Return presences and absences instead of abundances? A
-#'   species is present where its Poisson count is positive, so this needs
-#'   `poisson = TRUE`. Dray & Legendre (2008) instead draw presences from a
-#'   binomial distribution with the expected value as the probability.
-#' @param poisson Draw Poisson counts? If `FALSE`, return the expected abundances.
+#' @param incidence Return presences and absences instead of Poisson counts? A
+#'   species is present where its count is positive. Only for
+#'   `sampling = "poisson"`.
+#' @param sampling How to obtain the data from the expected values: `"poisson"`
+#'   draws counts, `"binomial"` draws presences and absences, which needs
+#'   expected values of at most 1, and `"expected"` returns the expected values.
 #' @return List of class `mc_sim` with `abundance`, a matrix with one row per
 #'   site and one column per species, plus `env` and `traits`. Sites and species
 #'   with no individuals are kept, so remove them if a method requires it.
@@ -35,6 +39,14 @@
 #' Dray, S., & Legendre, P. (2008). Testing the species traits-environment
 #' relationships: the fourth-corner problem revisited. *Ecology*, 89,
 #' 3400--3412. \doi{10.1890/08-0349.1}
+#'
+#' Duarte, L. D. S., et al. (2016). Dissecting phylogenetic fuzzy weighting:
+#' theory and application in metacommunity phylogenetics. *Methods in Ecology
+#' and Evolution*, 7, 937--946. \doi{10.1111/2041-210X.12547}
+#'
+#' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
+#' environmental drivers of phylogenetic variation across ecological
+#' communities. *Plant Ecology*, 216, 709--724. \doi{10.1007/s11258-014-0405-0}
 #'
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
@@ -53,18 +65,26 @@
 #' gradients <- data.frame(env = runif(100, 0, 100), space = 1:100)
 #' simulate_static(list(traits, space), gradients)
 #' @export
-simulate_static <- function(traits, env, incidence = FALSE, poisson = TRUE) {
+simulate_static <- function(traits, env, incidence = FALSE,
+                            sampling = c("poisson", "binomial", "expected")) {
+  sampling <- match.arg(sampling)
   trait_list <- if (is.data.frame(traits)) list(traits) else traits
   env_list <- if (is.list(env)) as.list(env) else list(env)
-  stopifnot(poisson || !incidence, length(trait_list) == length(env_list),
+  stopifnot(sampling == "poisson" || !incidence, length(trait_list) == length(env_list),
             all(vapply(env_list, is.numeric, logical(1))),
             length(unique(lengths(env_list))) == 1, length(env_list[[1]]) >= 1,
             all(vapply(trait_list, function(x) all(x$r_max >= 0), logical(1))),
             all(vapply(trait_list, function(x) identical(rownames(x), rownames(trait_list[[1]])),
                        logical(1))))
   expected <- Reduce(`*`, Map(growth_rates, unname(env_list), trait_list))
-  abundance <- matrix(if (poisson) stats::rpois(length(expected), expected) else expected,
-                      nrow(expected), ncol(expected), dimnames = list(
+  if (sampling == "binomial" && any(expected > 1)) {
+    stop("binomial sampling needs expected values of at most 1, so set r_max accordingly",
+         call. = FALSE)
+  }
+  n <- length(expected)
+  drawn <- switch(sampling, poisson = stats::rpois(n, expected),
+                  binomial = stats::rbinom(n, 1, expected), expected = expected)
+  abundance <- matrix(drawn, nrow(expected), ncol(expected), dimnames = list(
                         rownames(expected) %||% paste0("site", seq_along(env_list[[1]])),
                         rownames(trait_list[[1]])))
   if (incidence) abundance[] <- (abundance > 0) * 1L

@@ -32,6 +32,11 @@ reference:
   desc: Interspecific competition, optionally structured by relatedness.
   contents:
   - competition_matrix
+- title: Testing methods
+  desc: Analyses of phylogenetic community structure.
+  contents:
+  - pcc_test
+  - phylo_eigenvectors
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
   contents:

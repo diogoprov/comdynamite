@@ -50,11 +50,11 @@ test_that("gradients and traits must match", {
   expect_error(simulate_static(a, "x"))
 })
 
-test_that("poisson = FALSE returns the expected abundances", {
+test_that("sampling = 'expected' returns the expected abundances", {
   traits <- data.frame(optimum = 20, sigma = 10, r_max = 0.8, row.names = "a")
-  sim <- simulate_static(traits, c(20, 30), poisson = FALSE)
+  sim <- simulate_static(traits, c(20, 30), sampling = "expected")
   expect_equal(unname(sim$abundance[, 1]), 0.8 * exp(-c(0, 10)^2 / 200))
-  expect_error(simulate_static(traits, 20, incidence = TRUE, poisson = FALSE))
+  expect_error(simulate_static(traits, 20, incidence = TRUE, sampling = "expected"))
 })
 
 test_that("logistic presences follow their probabilities", {
@@ -113,4 +113,16 @@ test_that("transect MEMs are orthonormal", {
   m <- transect_mem(20)
   expect_equal(crossprod(m), diag(ncol(m)), tolerance = 1e-8)
   expect_lt(ncol(m), 20)
+})
+
+test_that("binomial sampling draws presences with the expected probability", {
+  set.seed(8)
+  traits <- data.frame(optimum = 50, sigma = 10, r_max = 0.8, row.names = "sp1")
+  env <- rep(c(50, 60), each = 5000)
+  sim <- simulate_static(traits, env, sampling = "binomial")
+  expect_setequal(sim$abundance, c(0, 1))
+  expect_equal(unname(c(tapply(sim$abundance[, 1], env, mean))),
+               0.8 * exp(-c(0, 10)^2 / (2 * 10^2)), tolerance = 0.03)
+  traits$r_max <- 2
+  expect_error(simulate_static(traits, env, sampling = "binomial"), "at most 1")
 })

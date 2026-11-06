@@ -4,7 +4,12 @@
 \alias{simulate_static}
 \title{Simulate a static metacommunity}
 \usage{
-simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
+simulate_static(
+  traits,
+  env,
+  incidence = FALSE,
+  sampling = c("poisson", "binomial", "expected")
+)
 }
 \arguments{
 \item{traits}{Data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame with
@@ -17,12 +22,13 @@ of them keeps abundances on the scale of the first.}
 \item{env}{Value of the gradient at each site, or a list or data frame with
 one gradient per element, in the order of \code{traits}.}
 
-\item{incidence}{Return presences and absences instead of abundances? A
-species is present where its Poisson count is positive, so this needs
-\code{poisson = TRUE}. Dray & Legendre (2008) instead draw presences from a
-binomial distribution with the expected value as the probability.}
+\item{incidence}{Return presences and absences instead of Poisson counts? A
+species is present where its count is positive. Only for
+\code{sampling = "poisson"}.}
 
-\item{poisson}{Draw Poisson counts? If \code{FALSE}, return the expected abundances.}
+\item{sampling}{How to obtain the data from the expected values: \code{"poisson"}
+draws counts, \code{"binomial"} draws presences and absences, which needs
+expected values of at most 1, and \code{"expected"} returns the expected values.}
 }
 \value{
 List of class \code{mc_sim} with \code{abundance}, a matrix with one row per
@@ -35,9 +41,12 @@ environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 \code{r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))}, the Gaussian
 response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
-default, observed abundances are Poisson counts with that mean. This is our
-addition: in those simulations the abundances are the expected values, with
-\code{r_max} between 0.5 and 1, which \code{poisson = FALSE} returns. Because nothing but the
+default, observed abundances are Poisson counts with that mean, as in
+Peres-Neto & Kembel (2015) and Duarte et al. (2016), where \code{r_max} lies between
+0 and 30. In the two earlier studies \code{r_max} lies between 0.5 and 1, abundances
+are the expected values (\code{sampling = "expected"}), and Dray & Legendre (2008)
+draw presences from a binomial distribution with the expected value as the
+probability (\code{sampling = "binomial"}). Because nothing but the
 gradient structures the data, this is a baseline for
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} and a fast generator for evaluating methods.
 }
@@ -64,6 +73,14 @@ simulate_static(list(traits, space), gradients)
 Dray, S., & Legendre, P. (2008). Testing the species traits-environment
 relationships: the fourth-corner problem revisited. \emph{Ecology}, 89,
 3400--3412. \doi{10.1890/08-0349.1}
+
+Duarte, L. D. S., et al. (2016). Dissecting phylogenetic fuzzy weighting:
+theory and application in metacommunity phylogenetics. \emph{Methods in Ecology
+and Evolution}, 7, 937--946. \doi{10.1111/2041-210X.12547}
+
+Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
+environmental drivers of phylogenetic variation across ecological
+communities. \emph{Plant Ecology}, 216, 709--724. \doi{10.1007/s11258-014-0405-0}
 
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 of spatial contingency and environmental filtering on metacommunity
