@@ -129,19 +129,19 @@ significant global test.
 vectors <- cbind(first$pev_brown, second$pev_brown)
 partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
 partition
-#> <mc_trait_partition> mean component, 0.595 of the total variation
+#> <mc_trait_partition> mean component, 0.583 of the total variation
 #>   fraction    r2 r2_adjusted r2_component p_site p_taxa p_max
-#> 1      abc 0.479       0.441        0.804  0.005  0.005 0.005
-#> 2       ab 0.314       0.290        0.527  0.005  0.005 0.005
-#> 3       bc 0.300       0.276        0.505  0.005  0.005 0.005
-#> 4        a 0.178       0.165        0.299  0.005  0.005 0.005
-#> 5        b 0.136       0.125        0.228     NA     NA    NA
-#> 6        c 0.165       0.151        0.277  0.005  0.005 0.005
-#> 7        d 0.521       0.559        0.196     NA     NA    NA
+#> 1      abc 0.473       0.435        0.811  0.005  0.005 0.005
+#> 2       ab 0.285       0.260        0.489  0.005  0.005 0.005
+#> 3       bc 0.314       0.290        0.538  0.005  0.005 0.005
+#> 4        a 0.159       0.145        0.273  0.005  0.005 0.005
+#> 5        b 0.126       0.115        0.216     NA     NA    NA
+#> 6        c 0.188       0.175        0.322  0.005  0.005 0.005
+#> 7        d 0.527       0.565        0.189     NA     NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
-#> env1     0.49   0.34
-#> space1   0.35   0.45
+#> env1     0.51   0.25
+#> space1   0.33   0.52
 ```
 
 ``` r
