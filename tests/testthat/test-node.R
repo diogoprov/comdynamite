@@ -178,3 +178,63 @@ test_that("branch lengths give the values of Figure S2 of the supplement", {
   expect_error(node_contrasts(ape::read.tree(text = "((a,b),c);"), branch_lengths = TRUE),
                "no branch lengths")
 })
+
+test_that("the events of the daphniids come out of the areas", {
+  observed <- daphniids$biogeography
+  area <- apply(observed, 1, paste, collapse = " ")
+  events <- lapply(colnames(observed), function(e) {
+    list(unique(area[observed[, e] == 1]), unique(area[observed[, e] == -1]))
+  })
+  names(events) <- colnames(observed)
+  built <- biogeography_matrix(area, events)
+  expect_equal(unname(built), unname(observed))
+  expect_equal(colnames(built), colnames(observed))
+})
+
+test_that("each area can face the others, with sites outside left out or not", {
+  area <- c(a = "x", b = "x", c = "y", d = "z", e = NA)
+  zero <- biogeography_matrix(area, "others", min_sites = 1)
+  expect_equal(zero[, "x"], c(a = 1, b = 1, c = -1, d = -1, e = 0))
+  other <- biogeography_matrix(area, "others", outside = "other", min_sites = 1)
+  expect_equal(other[, "y"], c(a = -1, b = -1, c = 1, d = -1, e = -1))
+})
+
+test_that("a matrix of areas gives the same events, with overlaps as zero", {
+  area <- rep(c("x", "y", NA), c(3, 3, 2))
+  member <- cbind(x = area %in% "x", y = area %in% "y")
+  expect_equal(biogeography_matrix(member, min_sites = 1),
+               biogeography_matrix(area, min_sites = 1))
+  member[1, "y"] <- TRUE
+  events <- list(e = list("x", "y"))
+  expect_equal(biogeography_matrix(member, events, min_sites = 1)[, "e"],
+               c(0, 1, 1, -1, -1, -1, 0, 0))
+})
+
+test_that("mistakes in areas and events are explained", {
+  area <- rep(c("x", "y"), each = 6)
+  expect_error(biogeography_matrix(rep("x", 6)), "two areas")
+  expect_error(biogeography_matrix(matrix(1:4, 2)), "names of areas")
+  expect_error(biogeography_matrix(area, "pairs"), "named list")
+  expect_error(biogeography_matrix(area, list(e = list("x"))), "named list")
+  expect_error(biogeography_matrix(area, list(e = list("x", "w"))), "not found in `area`: w")
+  expect_warning(biogeography_matrix(area, min_sites = 7), "fewer than 7 sites on one side of: x, y")
+})
+
+test_that("restricted permutations reach sites and events", {
+  set.seed(1)
+  nodes <- node_contrasts(daphniids$tree)
+  rows <- which(rowSums(daphniids$comm) > 0)[1:60]
+  comm <- daphniids$comm[rows, ]
+  env <- daphniids$env[rows, 1:2]
+  events <- cbind(e = rep(c(1, -1, 0), each = 20))
+  perms <- t(replicate(9, sample(60)))
+  out <- node_test(comm, nodes, env, events, n_perm = 9, site_permutations = perms)
+  tested <- !is.na(out$nodes$p_site)
+  expect_true(all(out$nodes$p_site[tested] >= 0.1))
+  expect_true(any(!is.na(out$biogeography$p_partial_site)))
+  # identical rows leave the data as they are, so the observed value is never beaten
+  same <- matrix(seq_len(60), 3, 60, byrow = TRUE)
+  fixed <- node_test(comm, nodes, env, events, n_perm = 3, site_permutations = same)
+  expect_equal(fixed$nodes$p_site[tested], rep(1, sum(tested)))
+  expect_error(node_test(comm, nodes, env, n_perm = 3, site_permutations = same[, -1]))
+})

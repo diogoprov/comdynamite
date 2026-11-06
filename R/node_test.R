@@ -108,7 +108,15 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' in one area, -1 for sites in the other and 0 for sites in neither. Each event is
 #' tested only in its sites, controlling for `env`. Other contrasts are allowed, for
 #' example a column without zeros, which compares one area with all the others. Events
-#' with few sites in one area give unstable values.
+#' with few sites in one area give unstable values. [biogeography_matrix()] builds the
+#' matrix from the area of each site.
+#'
+#' Free permutations treat sites as exchangeable. When sites of an area are neighbours and
+#' the community has spatial structure of its own, they reject too often: 45% of tests at
+#' the 5% level in a simulation with areas placed at random, against 5% with
+#' [torus_permutations()] (see the article on analysing clades). `site_permutations` accepts
+#' a restricted null model. For events, each row moves the areas across the sites, which
+#' keep their community and predictors.
 #'
 #' R2, adjusted R2 and the statistic equal those of the MATLAB function
 #' `MetacommunityPhylogenetics` of the authors, checked in Octave. Three parts of that
@@ -141,6 +149,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @param biogeography Optional matrix of biogeographic events with one row per site
 #'   and values of 1, -1 and 0.
 #' @param n_perm Number of permutations of sites, of species and of both.
+#' @param site_permutations Optional matrix of site indices with one permutation per row,
+#'   for example from [torus_permutations()], to use instead of free permutations of sites.
 #' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
 #'   where one core is used. For reproducible p-values with more than one core, call
 #'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`.
@@ -164,7 +174,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits-environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526.
-#' @seealso [plot_node_test()] and [plot_node_heatmap()] show the results. [pcc_test()] and
+#' @seealso [biogeography_matrix()] codes the events. [plot_node_test()] and
+#'   [plot_node_heatmap()] show the results. [pcc_test()] and
 #'   [phylo_beta_test()] test the whole tree at once.
 #' @examples
 #' # daphniids of Leibold et al. (2010)
@@ -175,11 +186,13 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' round(out$semipartial, 2)
 #' plot_node_test(out, daphniids$tree, test = "site")
 #' @export
-node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1) {
+node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1,
+                      site_permutations = NULL) {
   comm <- as.matrix(comm) * 1
   nodes <- as.matrix(nodes)
   env <- as.matrix(env)
   stopifnot(nrow(env) == nrow(comm), n_perm >= 1, cores >= 1, all(comm >= 0))
+  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
   species <- match_species(comm, rownames(nodes), "`nodes`")
   comm <- comm[, species, drop = FALSE]
   nodes <- nodes[species, , drop = FALSE]
@@ -194,7 +207,23 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
     matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
            dimnames = list(node_names, names))
   }
-  results <- per_node(function(contrast) one_node(comm, contrast, env, n_perm))
+  # one draw of the null model of sites: rows of the community or areas moved across sites
+  shuffle_sites <- function(r) {
+    rows <- if (is.null(site_permutations)) sample.int(nrow(comm)) else site_permutations[r, ]
+    list(comm = comm[rows, , drop = FALSE], env = env)
+  }
+  shuffle_areas <- function(event) {
+    function(r) {
+      moved <- event[site_permutations[r, ]]
+      sites <- moved != 0
+      list(comm = comm[sites, , drop = FALSE],
+           env = cbind(moved[sites], env[sites, , drop = FALSE]))
+    }
+  }
+  n_site <- if (is.null(site_permutations)) n_perm else nrow(site_permutations)
+  results <- per_node(function(contrast) {
+    one_node(comm, contrast, env, n_perm, shuffle_sites, n_site)
+  })
   table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
@@ -208,8 +237,17 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                    by_event <- lapply(seq_len(ncol(biogeography)), function(e) {
                      sites <- biogeography[, e] != 0
                      predictors <- cbind(biogeography[sites, e], env[sites, , drop = FALSE])
+                     local_comm <- comm[sites, , drop = FALSE]
+                     shuffle <- if (is.null(site_permutations)) {
+                       function(r) {
+                         list(comm = local_comm[sample.int(nrow(local_comm)), , drop = FALSE],
+                              env = predictors)
+                       }
+                     } else {
+                       shuffle_areas(biogeography[, e])
+                     }
                      per_node(function(contrast) {
-                       one_node(comm[sites, , drop = FALSE], contrast, predictors, n_perm)
+                       one_node(local_comm, contrast, predictors, n_perm, shuffle, n_site)
                      })
                    })
                    first <- function(field) {
@@ -228,6 +266,109 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
             class = "mc_node_test")
 }
 
+#' Matrix of biogeographic events
+#'
+#' Codes the events of [node_test()] from the area of each site, for example the refugium,
+#' basin or island where it lies. Each event gets 1 for sites on one side, -1 for sites on
+#' the other and 0 for sites on neither.
+#'
+#' Events should come from a hypothesis stated in advance. Leibold et al. (2010) contrasted
+#' areas on the two sides of historical barriers, and Leibold & Chase (2018, chapter 9) a
+#' published biogeographic hypothesis. A named list in `contrast` gives this design, and
+#' nested events are written as nested groups of areas. `contrast = "others"` compares each
+#' area with the rest, which does not need that hypothesis, but asks a different question
+#' and is better seen as exploratory.
+#'
+#' A site on both sides of an event gets 0.
+#'
+#' The sites of an area are often neighbours, so their number overstates the information
+#' in an event. See `site_permutations` in [node_test()].
+#'
+#' @param area Area of each site, with `NA` for sites outside all areas, or a matrix or data
+#'   frame with one row per site and one column per area, with 1 or `TRUE` for the sites of
+#'   each area. Polygons can give it with `sf::st_join()` or `sf::st_intersects()`.
+#' @param contrast Named list of events, each a list with the areas of the two sides, or
+#'   `"others"` for one event per area.
+#' @param outside For `contrast = "others"`, sites outside all areas are left out of each
+#'   event with `"zero"` or count as the other side with `"other"`.
+#' @param min_sites A warning is given for events with fewer sites on one side. This is a
+#'   rule of thumb, not a value from the literature.
+#' @return Matrix with one row per site and one column per event, with values of 1, -1 and 0.
+#' @references
+#' Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population
+#' Biology 59. Princeton University Press. \doi{10.2307/j.ctt1wf4d24}
+#'
+#' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
+#' phylogenetics: separating the roles of environmental filters and historical
+#' biogeography. *Ecology Letters*, 13, 1290--1299.
+#' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @examples
+#' area <- rep(c("north", "centre", "south", NA), c(8, 6, 6, 10))
+#'
+#' # a barrier between the north and the rest, and a later one between centre and south
+#' events <- list(barrier = list("north", c("centre", "south")),
+#'                river = list("centre", "south"))
+#' colSums(biogeography_matrix(area, events) == 1)
+#'
+#' # each area against the others
+#' head(biogeography_matrix(area, "others"))
+#' @export
+biogeography_matrix <- function(area, contrast = "others", outside = c("zero", "other"),
+                                min_sites = 5) {
+  outside <- match.arg(outside)
+  member <- area_membership(area)
+  inside <- if (outside == "zero") rowSums(member) > 0 else rep(TRUE, nrow(member))
+  sides <- function(first, second) {
+    in_any <- function(areas) rowSums(member[, areas, drop = FALSE]) > 0
+    in_any(first) * 1 - in_any(second) * 1
+  }
+  events <- if (identical(contrast, "others")) {
+    vapply(colnames(member), function(a) ifelse(member[, a], 1, ifelse(inside, -1, 0)),
+           numeric(nrow(member)))
+  } else {
+    check_events(contrast, colnames(member))
+    vapply(contrast, function(event) sides(event[[1]], event[[2]]), numeric(nrow(member)))
+  }
+  events <- matrix(events, nrow(member), dimnames = list(rownames(member), colnames(events)))
+  smaller <- pmin(colSums(events == 1), colSums(events == -1))
+  if (any(smaller < min_sites)) {
+    warning("fewer than ", min_sites, " sites on one side of: ",
+            paste(names(smaller)[smaller < min_sites], collapse = ", "), call. = FALSE)
+  }
+  events
+}
+
+# one logical column per area
+area_membership <- function(area) {
+  if (is.matrix(area) || is.data.frame(area)) {
+    member <- as.matrix(area)
+    if (is.null(colnames(member)) || !all(member %in% c(0, 1))) {
+      stop("`area` as a matrix needs names of areas and values of 0 and 1", call. = FALSE)
+    }
+    return(member == 1)
+  }
+  areas <- sort(unique(as.character(area)))
+  if (length(areas) < 2) stop("`area` needs at least two areas", call. = FALSE)
+  member <- outer(as.character(area), areas, `==`)
+  member[is.na(member)] <- FALSE
+  dimnames(member) <- list(names(area), areas)
+  member
+}
+
+check_events <- function(contrast, areas) {
+  well_formed <- is.list(contrast) && !is.null(names(contrast)) &&
+    all(lengths(contrast) == 2)
+  if (!well_formed) {
+    stop("`contrast` must be \"others\" or a named list of events, each with two sides, as ",
+         "`list(barrier = list(\"north\", c(\"centre\", \"south\")))`", call. = FALSE)
+  }
+  unknown <- setdiff(unlist(contrast), areas)
+  if (length(unknown) > 0) {
+    stop("areas in `contrast` not found in `area`: ", paste(unknown, collapse = ", "),
+         call. = FALSE)
+  }
+}
+
 #' @export
 print.mc_node_test <- function(x, ...) {
   tested <- x$nodes[!is.na(x$nodes$p_max), ]
@@ -237,7 +378,7 @@ print.mc_node_test <- function(x, ...) {
   invisible(x)
 }
 
-one_node <- function(comm, contrast, env, n_perm) {
+one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   members <- which(contrast != 0)
   values <- contrast[members]
   observed <- node_fit(comm[, members, drop = FALSE], values, env)
@@ -253,21 +394,23 @@ one_node <- function(comm, contrast, env, n_perm) {
                 semipartial = blank, p_partial = blank, p_partial_site = blank,
                 p_partial_joint = blank))
   }
-  null_of <- function(draw) {
-    t(replicate(n_perm, {
-      fit <- draw()
+  null_of <- function(n, draw) {
+    t(vapply(seq_len(n), function(r) {
+      fit <- draw(r)
       c(fit$statistic, fit$partial_f)
-    }))
+    }, numeric(ncol(env) + 1)))
   }
-  by_site <- null_of(function() {
-    node_fit(comm[sample.int(nrow(comm)), members, drop = FALSE], values, env)
+  by_site <- null_of(n_site, function(r) {
+    moved <- shuffle(r)
+    node_fit(moved$comm[, members, drop = FALSE], values, moved$env)
   })
-  by_taxa <- null_of(function() {
+  by_taxa <- null_of(n_perm, function(r) {
     node_fit(comm[, sample.int(ncol(comm), length(members)), drop = FALSE], values, env)
   })
-  by_both <- null_of(function() {
-    node_fit(comm[sample.int(nrow(comm)), sample.int(ncol(comm), length(members)), drop = FALSE],
-             values, env)
+  by_both <- null_of(n_site, function(r) {
+    moved <- shuffle(r)
+    node_fit(moved$comm[, sample.int(ncol(comm), length(members)), drop = FALSE], values,
+             moved$env)
   })
   p_site <- count(by_site[, 1], observed$statistic)
   p_taxa <- count(by_taxa[, 1], observed$statistic)

@@ -4,7 +4,15 @@
 \alias{node_test}
 \title{Test clades against the environment, node by node}
 \usage{
-node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1)
+node_test(
+  comm,
+  nodes,
+  env,
+  biogeography = NULL,
+  n_perm = 9999,
+  cores = 1,
+  site_permutations = NULL
+)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are
@@ -25,6 +33,9 @@ and values of 1, -1 and 0.}
 \item{cores}{Number of cores, with nodes run in parallel. Not available on Windows,
 where one core is used. For reproducible p-values with more than one core, call
 \code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}.}
+
+\item{site_permutations}{Optional matrix of site indices with one permutation per row,
+for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
@@ -69,7 +80,15 @@ Biogeographic events follow the article: a column of \code{biogeography} has 1 f
 in one area, -1 for sites in the other and 0 for sites in neither. Each event is
 tested only in its sites, controlling for \code{env}. Other contrasts are allowed, for
 example a column without zeros, which compares one area with all the others. Events
-with few sites in one area give unstable values.
+with few sites in one area give unstable values. \code{\link[=biogeography_matrix]{biogeography_matrix()}} builds the
+matrix from the area of each site.
+
+Free permutations treat sites as exchangeable. When sites of an area are neighbours and
+the community has spatial structure of its own, they reject too often: 45\% of tests at
+the 5\% level in a simulation with areas placed at random, against 5\% with
+\code{\link[=torus_permutations]{torus_permutations()}} (see the article on analysing clades). \code{site_permutations} accepts
+a restricted null model. For events, each row moves the areas across the sites, which
+keep their community and predictors.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 \code{MetacommunityPhylogenetics} of the authors, checked in Octave. Three parts of that
@@ -116,6 +135,7 @@ traits-environment relationships in the fourth-corner problem. \emph{Ecology}, 9
 1525--1526.
 }
 \seealso{
-\code{\link[=plot_node_test]{plot_node_test()}} and \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results. \code{\link[=pcc_test]{pcc_test()}} and
+\code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events. \code{\link[=plot_node_test]{plot_node_test()}} and
+\code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results. \code{\link[=pcc_test]{pcc_test()}} and
 \code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
 }

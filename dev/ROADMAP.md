@@ -231,19 +231,24 @@ Objetivo: tirar a maior barreira de uso do método de Leibold et al. (2010), que
 matriz de eventos, e revisar o pacote do ponto de vista de quem usa. Vem antes de v0.3.0 e
 v0.6.0 por decisão de 2026-11-06.
 
-- [ ] `biogeography_matrix()`: matriz de eventos a partir da área de cada site ou de uma
+- [x] `biogeography_matrix()`: matriz de eventos a partir da área de cada site ou de uma
       matriz 0/1 de sites por áreas. Pares de áreas definidos a priori são o caminho
       principal, como em Leibold et al. (2010) e Leibold & Chase (2018, cap. 9), que usam
       hipóteses publicadas. "Cada área contra as outras" fica como opção exploratória, com
       fora das áreas como 0 (script de 2022) ou como -1 (script de 2015), e aviso quando um
       lado tiver poucos sites. Os dois scripts estão em `legacy/` do af-frogs-climate-rarity.
-      Sobrepor polígonos e grade fica no exemplo, com `sf::st_join()`, sem dependência nova.
-- [ ] Permutações restritas em `node_test()`, como `site_permutations` de `pcc_test()`, ou
-      de áreas inteiras. Sites de um refúgio são vizinhos e a permutação livre deve inflar o
-      erro tipo I dos eventos. É hipótese ainda não testada: simular antes de afirmar.
-- [ ] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
+      Sobrepor polígonos e grade fica para o usuário, com `sf::st_join()`, sem dependência
+      nova. Reproduz os seis eventos de `daphniids` e a tabela de refúgios de 2022 (com 5 como 1).
+- [x] `site_permutations` em `node_test()`: para eventos, cada linha move as áreas pelos
+      sites. Em `data-raw/validation_events.R` (1000 réplicas, toro de 15 por 15, blocos de 25
+      sites sem efeito, comunidade seguindo ambiente oculto autocorrelacionado), rejeição por
+      nó a 5%: .448 com permutação livre e .049 com o toro; ao menos um nó em 89% e 28% das
+      réplicas, sem correção. Só testado com toro.
+- [ ] Nulo restrito para paisagens com borda, como os refúgios: hoje o usuário precisa
+      fornecer a matriz. Avaliar antes de aplicar a dados reais.
+- [x] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
       (2018), além da cor.
-- [ ] Citar Leibold & Chase (2018) em `node_test()` e em `biogeography_matrix()`.
+- [x] Citar Leibold & Chase (2018) em `biogeography_matrix()`.
 - [ ] Auditoria do código com foco em experiência de uso: nomes e argumentos, mensagens de
       erro, saídas de `print`, exemplos e o caminho de um usuário novo, além de bugs.
 

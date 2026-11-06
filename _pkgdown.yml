@@ -40,6 +40,7 @@ reference:
   - phylo_beta_test
   - phylo_beta
   - node_test
+  - biogeography_matrix
   - node_contrasts
   - plot_node_test
   - plot_node_heatmap

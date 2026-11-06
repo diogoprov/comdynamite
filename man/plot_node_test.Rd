@@ -44,7 +44,7 @@ Invisibly, a data frame with one row per symbol, with \code{node}, \code{set}, \
 }
 \description{
 Draws the tree with the associations found by \code{\link[=node_test]{node_test()}} at each node, as in
-Figure 3 of Leibold et al. (2010). Blue symbols are predictors and red symbols are
+Figure 3 of Leibold et al. (2010). Blue circles are predictors and red triangles are
 biogeographic events, each with the names of the variables. Solid symbols remain
 significant after the false discovery rate, and open symbols are significant only as
 isolated tests.

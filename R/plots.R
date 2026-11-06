@@ -1,7 +1,7 @@
 #' Plot the results of a node test on the phylogeny
 #'
 #' Draws the tree with the associations found by [node_test()] at each node, as in
-#' Figure 3 of Leibold et al. (2010). Blue symbols are predictors and red symbols are
+#' Figure 3 of Leibold et al. (2010). Blue circles are predictors and red triangles are
 #' biogeographic events, each with the names of the variables. Solid symbols remain
 #' significant after the false discovery rate, and open symbols are significant only as
 #' isolated tests.
@@ -77,7 +77,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   }
   if (legend) {
     graphics::legend("bottomleft", c("Predictor", "Biogeography", "After correction", "Uncorrected"),
-                     pch = c(19, 19, 19, 21), col = c(col, "black", "black"), bty = "n", cex = cex)
+                     pch = c(19, 17, 19, 21), col = c(col, "black", "black"), bty = "n", cex = cex)
   }
   invisible(marks)
 }
@@ -184,7 +184,8 @@ draw_symbol <- function(x, y, group, col, cex, angle, room) {
                     place$y + c(-1, 1, 1, -1) * along[2] + c(-1, -1, 1, 1) * across[2],
                     col = "white", border = NA)
   graphics::text(place$x, place$y, label, srt = place$srt, col = colour, cex = size)
-  graphics::points(x, y, pch = if (group$corrected[1]) 19 else 21, col = colour, bg = "white")
+  shape <- if (group$set[1] == "biogeography") c(17, 24) else c(19, 21)
+  graphics::points(x, y, pch = shape[2 - group$corrected[1]], col = colour, bg = "white")
 }
 
 # centre and rotation of a label; it goes away from the root only if there is no room,

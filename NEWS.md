@@ -1,3 +1,11 @@
+# comdynamite (development version)
+
+- `biogeography_matrix()`: events of `node_test()` from the area of each site, as pairs of
+  areas stated in advance or as each area against the others.
+- `node_test()`: `site_permutations` gives a restricted null model. For events, it moves the
+  areas across the sites.
+- `plot_node_test()`: biogeographic events are triangles, as in Leibold & Chase (2018).
+
 # comdynamite 0.5.1
 
 - `node_contrasts()`: `branch_lengths = TRUE` gives the coding with branch lengths of the
