@@ -1,78 +1,3 @@
-#' Test the association between a trait and the environment
-#'
-#' Weighted correlation between a site predictor and the mean of a species trait in each
-#' site, which is the fourth-corner statistic in the form of Peres-Neto et al. (2012).
-#' Permuting sites tests the link between composition and the predictor, and permuting
-#' species tests the link between composition and the trait. The association needs both,
-#' so the p-value to report is the larger of the two (ter Braak et al. 2012).
-#'
-#' @param comm Matrix with one row per site and one column per species. Every site needs
-#'   at least one individual.
-#' @param trait Numeric vector with the value of each species. Species are matched to
-#'   `comm` by name, in any order, and those in only one of the two are dropped with a
-#'   warning.
-#' @param env Numeric vector with the value of each site.
-#' @param n_perm Number of permutations of sites and of species.
-#' @param site_permutations Optional matrix of site indices with one permutation per
-#'   row, for example from [torus_permutations()], to use instead of free permutations.
-#' @return List of class `mc_fourth_corner` with `correlation`, `p_site`, `p_taxa` and
-#'   `p_max`.
-#' @section Article and original code:
-#' The function `TraitEnvCor` of the supplement differs from Appendix A, and this function
-#' from both:
-#' \itemize{
-#'   \item Appendix A stacks the two null distributions, adds one to the count and uses
-#'     alpha / 2. The code adds two to the count. Here we use the larger of the two
-#'     p-values. The stacked p-value is close to their mean, so any test that it rejects
-#'     at alpha / 2 is also rejected by the larger p-value at alpha.
-#'   \item Appendix A says that the statistic is calculated again for the permuted data.
-#'     The code keeps the observed mean and standard deviation of the permuted variable,
-#'     which then no longer has weighted mean zero. Here it is standardised again, as
-#'     the code of the partition does.
-#'   \item The code runs `n_perm` - 1 permutations in each null distribution.
-#'   \item Appendix A allows several traits and predictors. The permutations of the code
-#'     work with one of each, as here.
-#'   \item The code returns the absolute value, and here the correlation keeps its sign.
-#' }
-#' @references
-#' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
-#' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
-#' 93, S14--S30. \doi{10.1890/11-0494.1}
-#'
-#' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
-#' traits--environment relationships in the fourth-corner problem. *Ecology*, 93,
-#' 1525--1526. \doi{10.1890/12-0126.1}
-#' @examples
-#' set.seed(1)
-#' env <- runif(40, 0, 100)
-#' trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
-#' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
-#' colnames(comm) <- names(trait)
-#' fourth_corner_test(comm, trait, env, n_perm = 99)
-#' @export
-fourth_corner_test <- function(comm, trait, env, n_perm = 999, site_permutations = NULL) {
-  stopifnot(is.numeric(trait), length(env) == nrow(comm), n_perm >= 1)
-  comm <- check_species_comm(comm, names(trait), "`trait`")
-  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
-  trait <- as.matrix(trait[colnames(comm)])
-  env <- as.matrix(env)
-  observed <- corner_correlation(comm, trait, env)[1]
-  nulls <- corner_nulls(comm, trait, env, n_perm, site_permutations)
-  p_site <- permutation_p(abs(nulls$site), abs(observed))
-  p_taxa <- permutation_p(abs(nulls$taxa), abs(observed))
-  structure(list(correlation = observed, p_site = p_site, p_taxa = p_taxa,
-                 p_max = max(p_site, p_taxa)), class = "mc_fourth_corner")
-}
-
-#' @export
-print.mc_fourth_corner <- function(x, ...) {
-  cat("<mc_fourth_corner> trait-environment correlation\n")
-  cat("correlation:", format(x$correlation, digits = 3), "\n")
-  cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
-  invisible(x)
-}
-
 #' Represent a phylogeny by one vector related to a predictor
 #'
 #' The phylogenetic representation of Peres-Neto et al. (2012). Eigenvectors of the
@@ -82,28 +7,35 @@ print.mc_fourth_corner <- function(x, ...) {
 #' their correlations as weights (`pev`). Brownian vectors are then added to `pev`, and the
 #' sum with the largest correlation is kept (`pev_brown`).
 #'
-#' The p-values of the global test are the ones to report. The two vectors are chosen to
-#' fit the predictor, so a test of them with [fourth_corner_test()] is not valid on its
-#' own. They are meant for [trait_partition()] after a significant global test.
+#' The correlations are fourth-corner correlations, and the p-value to report is the
+#' larger of the tests that permute sites and species (ter Braak et al. 2012). For a test
+#' between a trait and the environment, see `ade4::fourthcorner()`. The two vectors are
+#' chosen to fit the predictor, so a further test of them is not valid on its own. They
+#' are meant for [trait_partition()] after a significant global test.
 #'
 #' Species are matched to the tips of `tree` by name, in any order, and those in only one
 #' of the two are dropped with a warning. Species without individuals have no weight and
 #' are left out.
 #'
-#' @inheritParams fourth_corner_test
+#' @param comm Matrix with one row per site and one column per species. Every site needs
+#'   at least one individual.
 #' @param tree A `phylo` object.
 #' @param predictor Numeric vector with the value of each site. The authors estimate one
 #'   vector for each predictor.
 #' @param alpha Significance level of the global test and of the selection.
 #' @param n_sim Number of Brownian vectors.
+#' @param n_perm Number of permutations of sites and of species.
+#' @param site_permutations Optional matrix of site indices with one permutation per
+#'   row, for example from [torus_permutations()], to use instead of free permutations.
 #' @return List of class `mc_phylo_vector` with `correlation`, the correlations of `pev`
 #'   and `pev_brown`; `p_site`, `p_taxa` and `p_max` of the global test; `selected`, the
 #'   columns of `eigenvectors` retained; `pev` and `pev_brown`, named vectors or `NULL`
 #'   when the global test is not significant or no eigenvector is retained;
 #'   `eigenvectors`; `eigenvalues`; and `eigenvector_correlation`.
 #' @section Article and original code:
-#' The functions `ModelSelectionStochastic` and `PCoAWeigthed` and the script `ScriptDemo`
-#' of the supplement differ from the article and Appendix B in the points below. Here we
+#' The functions `TraitEnvCor`, `ModelSelectionStochastic` and `PCoAWeigthed` and the
+#' script `ScriptDemo` of the supplement differ from the article and its appendices in the
+#' points below. Here we
 #' follow the text, except in the addition of Brownian vectors and where noted.
 #' \itemize{
 #'   \item Weights of the eigenvectors: the text uses the correlations and the code their
@@ -132,6 +64,15 @@ print.mc_fourth_corner <- function(x, ...) {
 #'     enter later analyses. Here `pev` and `pev_brown` are `NULL`.
 #'   \item Choice of vector: the article recommends the one with the highest R2, and the
 #'     script always takes the Brownian vector. Here both are returned.
+#'   \item Combination of permutations: Appendix A stacks the two null distributions, adds
+#'     one to the count and uses alpha / 2, and `TraitEnvCor` adds two. The stacked p-value
+#'     is close to the mean of the two p-values, so any test that it rejects at alpha / 2
+#'     is also rejected by the larger p-value at alpha, which we use.
+#'   \item Permuted variables: Appendix A recalculates the statistic, and `TraitEnvCor`
+#'     keeps the observed mean and standard deviation, so a permuted variable no longer
+#'     has weighted mean zero. Here it is standardised again, as in the code of the
+#'     partition.
+#'   \item The code runs `n_perm` - 1 permutations in each null distribution.
 #'   \item The supplement calls `eigen`, which it does not include, and the example 2 of
 #'     `ScriptDemo` removes rows of `PhyloDistance` before creating it.
 #' }
@@ -139,6 +80,10 @@ print.mc_fourth_corner <- function(x, ...) {
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 #' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
 #' 93, S14--S30. \doi{10.1890/11-0494.1}
+#'
+#' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
+#' traits--environment relationships in the fourth-corner problem. *Ecology*, 93,
+#' 1525--1526. \doi{10.1890/12-0126.1}
 #' @examples
 #' set.seed(1)
 #' tree <- ape::rcoal(20)
@@ -216,7 +161,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #' answers how much of all the variation each fraction holds, and `r2_component` how much
 #' of the component. Fractions `b` and `d` cannot be tested.
 #'
-#' @inheritParams fourth_corner_test
+#' @param comm Matrix with one row per site and one column per species. Every site needs
+#'   at least one individual.
 #' @param traits Numeric vector or matrix with one row per species, which can hold traits
 #'   or the vectors of [phylo_vector()]. Species are matched to `comm` by name, in any
 #'   order, and those in only one of the two are dropped with a warning.
@@ -224,6 +170,7 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   `space`, the article uses Moran's eigenvector maps, which `adespatial::dbmem()` gives.
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
+#' @param n_perm Number of permutations of sites and of species.
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
 #'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`; and
@@ -250,8 +197,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #'     text does not mention. It also calls `WeightedMeanVar`, which the supplement does
 #'     not include. None of this is done here.
 #'   \item The code runs `n_perm` - 1 permutations in each null distribution.
-#'   \item The p-values follow the text in stacking two null distributions, and here we
-#'     report the larger of the two, as in [fourth_corner_test()].
+#'   \item The text stacks two null distributions, and here we report the larger of the
+#'     two p-values, as in [phylo_vector()].
 #' }
 #' Moran's eigenvector maps of the function `MEM` of the supplement are the same as those
 #' of `adespatial::dbmem()`, checked in Octave. Appendix A recommends centring them with

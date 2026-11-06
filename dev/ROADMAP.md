@@ -173,8 +173,7 @@ Vem antes do ABC por decisão de 2026-11-06. O código está em
 os suplementos não trazem licença. Esta máquina não tem MATLAB nem Octave, e a
 comparação em dados fixos depende de um dos dois.
 
-- [x] Peres-Neto et al. (2012): `fourth_corner_test()`, `phylo_vector()` e
-      `trait_partition()`, conferidas no Octave e nas Tabelas 1
+- [x] Peres-Neto et al. (2012): `phylo_vector()` e `trait_partition()`, conferidas no Octave e nas Tabelas 1
       a 4 do artigo.
 - [ ] Reproduzir a Tabela 5 com `logistic_gradients()` (Apêndice C).
 - [ ] Semiparciais de `trait_partition()`, descritas no Apêndice A.

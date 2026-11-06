@@ -7,10 +7,6 @@ test_that("the order of the species does not matter", {
   expect_equal(phylo_beta(shuffled, tree), phylo_beta(comm, tree))
   trait <- c(a = 1, b = 2, c = 3, d = 5)
   env <- c(1, 4, 2, 7)
-  set.seed(1)
-  first <- fourth_corner_test(comm, trait, env, n_perm = 3)
-  expect_equal(fourth_corner_test(shuffled, rev(trait), env, n_perm = 3)$correlation,
-               first$correlation)
   expect_equal(trait_partition(shuffled, rev(trait), env, c(2, 1, 1, 3), n_perm = 1)$fractions$r2,
                trait_partition(comm, trait, env, c(2, 1, 1, 3), n_perm = 1)$fractions$r2)
 })
@@ -21,7 +17,6 @@ test_that("species in only one source are named and dropped", {
   expect_equal(out, phylo_beta(comm, tree))
   expect_warning(pruned <- phylo_beta(comm[, -4], tree), "not in `comm` dropped: d")
   expect_equal(pruned, phylo_beta(comm[, -4], ape::drop.tip(tree, "d")))
-  expect_warning(fourth_corner_test(comm, c(a = 1, b = 2, c = 3), 1:4, n_perm = 2), "`comm` not in `trait`")
   expect_warning(trait_partition(comm, c(a = 1, b = 2, c = 3), 1:4, c(1, 3, 2, 2), n_perm = 1),
                  "`comm` not in `traits`")
   expect_warning(pcc_test(comm[, -4], tree, 1:4, n_perm = 2), "not in `comm` dropped: d")
@@ -44,7 +39,8 @@ test_that("long lists are cut", {
 
 test_that("names are required and must not repeat", {
   expect_error(phylo_beta(unname(comm), tree), "species names in its columns")
-  expect_error(fourth_corner_test(comm, c(1, 2, 3, 4), 1:4, n_perm = 2), "needs species names")
+  expect_error(trait_partition(comm, c(1, 2, 3, 4), 1:4, c(1, 3, 2, 2), n_perm = 1),
+               "needs species names")
   repeated <- comm
   colnames(repeated)[2] <- "a"
   expect_error(phylo_beta(repeated, tree), "repeated species: a")

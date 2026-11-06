@@ -48,9 +48,11 @@ their correlations as weights (\code{pev}). Brownian vectors are then added to \
 sum with the largest correlation is kept (\code{pev_brown}).
 }
 \details{
-The p-values of the global test are the ones to report. The two vectors are chosen to
-fit the predictor, so a test of them with \code{\link[=fourth_corner_test]{fourth_corner_test()}} is not valid on its
-own. They are meant for \code{\link[=trait_partition]{trait_partition()}} after a significant global test.
+The correlations are fourth-corner correlations, and the p-value to report is the
+larger of the tests that permute sites and species (ter Braak et al. 2012). For a test
+between a trait and the environment, see \code{ade4::fourthcorner()}. The two vectors are
+chosen to fit the predictor, so a further test of them is not valid on its own. They
+are meant for \code{\link[=trait_partition]{trait_partition()}} after a significant global test.
 
 Species are matched to the tips of \code{tree} by name, in any order, and those in only one
 of the two are dropped with a warning. Species without individuals have no weight and
@@ -58,8 +60,9 @@ are left out.
 }
 \section{Article and original code}{
 
-The functions \code{ModelSelectionStochastic} and \code{PCoAWeigthed} and the script \code{ScriptDemo}
-of the supplement differ from the article and Appendix B in the points below. Here we
+The functions \code{TraitEnvCor}, \code{ModelSelectionStochastic} and \code{PCoAWeigthed} and the
+script \code{ScriptDemo} of the supplement differ from the article and its appendices in the
+points below. Here we
 follow the text, except in the addition of Brownian vectors and where noted.
 \itemize{
 \item Weights of the eigenvectors: the text uses the correlations and the code their
@@ -88,6 +91,15 @@ number of permutations, which halves it.
 enter later analyses. Here \code{pev} and \code{pev_brown} are \code{NULL}.
 \item Choice of vector: the article recommends the one with the highest R2, and the
 script always takes the Brownian vector. Here both are returned.
+\item Combination of permutations: Appendix A stacks the two null distributions, adds
+one to the count and uses alpha / 2, and \code{TraitEnvCor} adds two. The stacked p-value
+is close to the mean of the two p-values, so any test that it rejects at alpha / 2
+is also rejected by the larger p-value at alpha, which we use.
+\item Permuted variables: Appendix A recalculates the statistic, and \code{TraitEnvCor}
+keeps the observed mean and standard deviation, so a permuted variable no longer
+has weighted mean zero. Here it is standardised again, as in the code of the
+partition.
+\item The code runs \code{n_perm} - 1 permutations in each null distribution.
 \item The supplement calls \code{eigen}, which it does not include, and the example 2 of
 \code{ScriptDemo} removes rows of \code{PhyloDistance} before creating it.
 }
@@ -107,4 +119,8 @@ phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 contingency and environmental filtering on metacommunity phylogenetics. \emph{Ecology},
 93, S14--S30. \doi{10.1890/11-0494.1}
+
+ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
+traits--environment relationships in the fourth-corner problem. \emph{Ecology}, 93,
+1525--1526. \doi{10.1890/12-0126.1}
 }

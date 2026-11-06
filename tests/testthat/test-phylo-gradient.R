@@ -30,8 +30,7 @@ test_that("standardised values match the appendix", {
 
 test_that("the correlation and fractions match the original code in Octave", {
   a <- example_a()
-  set.seed(1)
-  expect_equal(fourth_corner_test(a$comm, a$trait, a$env, n_perm = 9)$correlation, 0.938977,
+  expect_equal(abs(corner_correlation(a$comm, as.matrix(a$trait), as.matrix(a$env))[1]), 0.938977,
                tolerance = 1e-5)
   out <- trait_partition(a$comm, a$trait, a$env, a$space, n_perm = 3)
   f <- out$fractions
@@ -62,17 +61,12 @@ test_that("several traits add to the total variation", {
                                  n_perm = 1)$component_share / 2)
 })
 
-test_that("the test uses both permutations", {
+test_that("nulls have one row per permutation", {
   a <- example_a()
   set.seed(1)
-  out <- fourth_corner_test(a$comm, a$trait, a$env, n_perm = 49)
-  expect_identical(out$p_max, max(out$p_site, out$p_taxa))
-  expect_s3_class(out, "mc_fourth_corner")
-  expect_output(print(out), "p \\(max\\)")
-  perms <- t(replicate(9, sample(10)))
-  expect_length(fourth_corner_test(a$comm, a$trait, a$env, 9, perms), 4)
-  expect_error(fourth_corner_test(a$comm, a$trait, a$env, 9, perms[, 1:3]))
-  expect_error(fourth_corner_test(rbind(0, a$comm[-1, ]), a$trait, a$env, 9), "every site")
+  out <- corner_nulls(a$comm, as.matrix(a$trait), as.matrix(a$env), 2, NULL)
+  expect_equal(dim(out$site), c(2, 1))
+  expect_equal(dim(out$taxa), c(2, 1))
 })
 
 test_that("weighted coordinates are centred and orthogonal under the weights", {

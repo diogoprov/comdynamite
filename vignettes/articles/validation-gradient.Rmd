@@ -2,8 +2,7 @@
 title: "Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)"
 ---
 
-The functions `fourth_corner_test()`, `phylo_vector()`, `trait_partition()` and
-`node_test()` are translations of MATLAB code from the
+The functions `phylo_vector()`, `trait_partition()` and `node_test()` are translations of MATLAB code from the
 supplements of these articles. We checked them in three ways. Each help page lists the
 differences between the text of the article and the code.
 
@@ -23,7 +22,9 @@ The script `data-raw/validation_gradient.R` follows the simulations of the artic
 The article stacks the two null distributions and uses alpha / 2, shown here as "stacked".
 Rates near 0.05 are expected for a true null hypothesis, with a standard error near 0.007.
 
-Trait and environment (Table 4 of the article):
+Trait and environment (Table 4 of the article), with the correlation inside
+`phylo_vector()`. The package has no function for this test, which is available in
+`ade4::fourthcorner()`:
 
 | Case | Tolerance | Row, article | Row, here | Column, article | Column, here | Stacked, article | Stacked, here | Larger p, here |
 |---|---|---|---|---|---|---|---|---|

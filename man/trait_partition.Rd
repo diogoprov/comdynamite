@@ -70,8 +70,8 @@ rescales the permuted values to the observed mean and standard deviation, which 
 text does not mention. It also calls \code{WeightedMeanVar}, which the supplement does
 not include. None of this is done here.
 \item The code runs \code{n_perm} - 1 permutations in each null distribution.
-\item The p-values follow the text in stacking two null distributions, and here we
-report the larger of the two, as in \code{\link[=fourth_corner_test]{fourth_corner_test()}}.
+\item The text stacks two null distributions, and here we report the larger of the
+two p-values, as in \code{\link[=phylo_vector]{phylo_vector()}}.
 }
 Moran's eigenvector maps of the function \code{MEM} of the supplement are the same as those
 of \code{adespatial::dbmem()}, checked in Octave. Appendix A recommends centring them with

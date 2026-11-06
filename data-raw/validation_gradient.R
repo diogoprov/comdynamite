@@ -20,6 +20,16 @@ clean <- function(comm, ...) {
   keep <- rowSums(comm) > 0
   c(list(comm = comm[keep, colSums(comm[keep, ]) > 0]), lapply(list(...), function(x) x[keep]))
 }
+# fourth-corner test with the internal functions of phylo_vector()
+fourth_corner <- function(comm, trait, env, n_perm) {
+  trait <- as.matrix(trait[colnames(comm)])
+  env <- as.matrix(env)
+  observed <- abs(comdynamite:::corner_correlation(comm, trait, env)[1])
+  nulls <- comdynamite:::corner_nulls(comm, trait, env, n_perm, NULL)
+  p_site <- comdynamite:::permutation_p(abs(nulls$site), observed)
+  p_taxa <- comdynamite:::permutation_p(abs(nulls$taxa), observed)
+  list(p_site = p_site, p_taxa = p_taxa, p_max = max(p_site, p_taxa))
+}
 rejected <- function(x, alpha = 0.05) {
   c(row = x$p_site <= alpha, column = x$p_taxa <= alpha, max = x$p_max <= alpha,
     stacked = mean(c(x$p_site, x$p_taxa)) <= alpha / 2)
@@ -33,7 +43,7 @@ trait_case <- function(tolerance, case) {
   if (case == "random_environment") env <- rnorm(100)
   if (case == "random_trait") trait[] <- rnorm(50)
   d <- clean(comm, env = env)
-  rejected(fourth_corner_test(d$comm, trait[colnames(d$comm)], d$env, n_perm))
+  rejected(fourth_corner(d$comm, trait, d$env, n_perm))
 }
 grid <- expand.grid(tolerance = c(1, 20, 60),
                     case = c("random_trait", "random_environment", "both"),
@@ -73,7 +83,7 @@ phylo_case <- function(tolerance, case) {
     out["match_brown"] <- abs(cor(x$pev_brown, simulated[species]))
     out["match_absolute"] <- abs(cor(absolute, simulated[species]))
     best <- if (out[["r_brown"]] >= out[["r_pev"]]) x$pev_brown else x$pev
-    final <- fourth_corner_test(d$comm, best, d$env, n_perm)
+    final <- fourth_corner(d$comm, best, d$env, n_perm)
     out["final_max"] <- x$p_max <= 0.05 && final$p_max <= 0.05
   }
   out

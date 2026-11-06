@@ -9,8 +9,9 @@
 - `simulate_logistic()` and `logistic_gradients()`: presences and absences from
   logistic responses to two gradients, with the seven scenarios of Appendix C of
   Peres-Neto et al. (2012).
-- `fourth_corner_test()`, `phylo_vector()` and `trait_partition()`: phylogenetic gradient analysis of Peres-Neto et al.
+- `phylo_vector()` and `trait_partition()`: phylogenetic gradient analysis of Peres-Neto et al.
   (2012), tested against the original code in Octave.
+  The test between a trait and the environment stays in `ade4::fourthcorner()`.
 - Functions that take a community and a phylogeny, traits or contrasts now match
   species by name and, as `picante::match.phylo.comm()`, drop with a warning the
   species found in only one of them. Repeated names are an error.

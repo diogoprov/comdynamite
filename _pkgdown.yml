@@ -41,7 +41,6 @@ reference:
   - phylo_beta
   - node_test
   - node_contrasts
-  - fourth_corner_test
   - phylo_vector
   - trait_partition
 - title: Data
