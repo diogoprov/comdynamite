@@ -49,8 +49,8 @@ base sem dinâmica.
       et al. 2012).
 - [x] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
       espaço, como em `ScriptDemo.m`.
-- [ ] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
-      [E] e [S].
+- [x] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
+      [E] e [S]: `simulate_logistic()` e `logistic_gradients()`.
 - [ ] Comparar com o `mcomsimr` nos mesmos parâmetros, levando em conta as diferenças
       de convenção (`sigma`, `alpha[j, k]`). Comparar distribuições, não réplicas.
 - [ ] Reproduzir qualitativamente os padrões de Thompson et al. (2020).
@@ -209,9 +209,14 @@ Objetivo: API estável e pacote no CRAN.
   nas permutações 2 e 3, `randperm(NumberSpecies)` usa o número de espécies do nó, então
   só sorteia as primeiras colunas da matriz; e `TotalSum` não é recalculado depois
   que `Incidence` muda.
-- **Protocolo estático.** `ScriptDemo.m` usa `h` entre 0,5 e 1 e não sorteia contagens;
-  o pcps-sim usa `h` entre 0 e 30 e Poisson. Conferir no texto de Peres-Neto et al.
-  (2012) antes de definir os padrões da função.
+- **Protocolo estático.** O texto de Peres-Neto et al. (2012) dá `h` entre 0,5 e 1 e usa
+  **L** como abundância, sem Poisson nos trechos lidos (a etapa 1 não veio). O pcps-sim
+  usa `h` entre 0 e 30 e Poisson, e o manuscrito atribui isso a Peres-Neto et al.
+  (2012): conferir essa citação, talvez a fonte seja Dray & Legendre (2008).
+- **Appendix C.** Não dá a distribuição de `a` nem a escala de `b`; diz que a presença
+  vem de um valor "normally generated", o que gera muito ruído (a legenda da Fig. 4
+  comenta o ruído). `simulate_logistic()` usa uniforme por padrão e aceita
+  `draw = "normal"`. O cenário III é ambíguo. Conferir em Ives & Helmus (2011).
 - **Sessão anterior.** A sessão que começou o pacote não foi avisada por aqui de que o
   desenvolvimento mudou de lugar. Commits novos dela vão divergir do `main`.
 - **pcps-sim.** Se a submissão for duplo-cega, avaliar se o `NEWS.md` pode manter "Code

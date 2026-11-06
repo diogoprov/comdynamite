@@ -9,6 +9,8 @@ reference:
   contents:
   - simulate_metacommunity
   - simulate_static
+  - simulate_logistic
+  - logistic_gradients
   - mc_dynamics
   - growth_rates
 - title: Landscapes

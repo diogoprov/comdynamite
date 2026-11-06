@@ -4,7 +4,7 @@
 \alias{simulate_static}
 \title{Simulate a static metacommunity}
 \usage{
-simulate_static(traits, env, incidence = FALSE)
+simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
 }
 \arguments{
 \item{traits}{Data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame with
@@ -17,7 +17,10 @@ of them keeps abundances on the scale of the first.}
 \item{env}{Value of the gradient at each site, or a list or data frame with
 one gradient per element, in the order of \code{traits}.}
 
-\item{incidence}{Return presences and absences instead of abundances?}
+\item{incidence}{Return presences and absences instead of abundances? Needs
+\code{poisson = TRUE}.}
+
+\item{poisson}{Draw Poisson counts? If \code{FALSE}, return the expected abundances.}
 }
 \value{
 List of class \code{mc_sim} with \code{abundance}, a matrix with one row per
@@ -29,8 +32,10 @@ Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 \code{r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))}, the Gaussian
-response used in the simulations of Peres-Neto et al. (2012), and observed
-abundances are Poisson counts with that mean. Because nothing but the
+response used in the simulations of Peres-Neto et al. (2012). By default,
+observed abundances are Poisson counts with that mean; in the original
+simulations the abundances are the expected values, which \code{poisson = FALSE}
+returns. Because nothing but the
 gradient structures the data, this is a baseline for
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} and a fast generator for evaluating methods.
 }
