@@ -10,13 +10,19 @@ immigration among sites. Landscapes can be spatially implicit, with
 uniform dispersal, or explicit grids with an exponential dispersal
 kernel and a spatially autocorrelated environment, and the environment
 can change over time. Species traits (environmental optima, niche
-breadths and maximum growth rates) can carry phylogenetic signal, and
-interspecific competition can be structured by relatedness. The model
-was implemented from the published equations.
+breadths and maximum growth rates) can carry phylogenetic signal or
+evolve under an Ornstein-Uhlenbeck process with one or several optima,
+and interspecific competition can be structured by relatedness.
+Rule-based assembly without population dynamics (limiting similarity,
+habitat filtering and neutral assembly) follows Kraft et al. (2007)
+[doi:10.1086/519400](https://doi.org/10.1086/519400) . The model was
+implemented from the published equations.
 
 ## See also
 
 Useful links:
+
+- <https://provetelab.org/comdynamite/>
 
 - <https://github.com/diogoprov/comdynamite>
 
@@ -25,3 +31,7 @@ Useful links:
 ## Author
 
 **Maintainer**: Diogo B. Provete <dbprovete@gmail.com>
+
+Authors:
+
+- Diogo B. Provete <dbprovete@gmail.com>

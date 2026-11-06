@@ -26,7 +26,8 @@ growth_rates(env, traits)
 
 ## Value
 
-Matrix with one row per site and one column per species.
+Numeric matrix with one row per site and one column per species: the
+density-independent growth rate of each species at each site.
 
 ## Examples
 

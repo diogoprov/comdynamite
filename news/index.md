@@ -17,3 +17,10 @@
   (multi-peak OU; Brownian motion when `alpha = 0`), with
   [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
   to assign regimes to clades.
+
+- New vignettes:
+  [`vignette("phylogenetic-structure")`](https://provetelab.org/comdynamite/articles/phylogenetic-structure.md),
+  on how dispersal, niche conservatism and competition shape
+  phylogenetic community structure, and
+  [`vignette("evaluating-methods")`](https://provetelab.org/comdynamite/articles/evaluating-methods.md),
+  on type I error and power with simulations.

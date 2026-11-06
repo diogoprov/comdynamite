@@ -22,7 +22,7 @@ trait_bm(tree, lambda = 1)
 
 ## Value
 
-Named numeric vector, one value per tip.
+Named numeric vector with the simulated trait value of each tip.
 
 ## Examples
 

@@ -52,7 +52,13 @@ sim$abundance  # sites x species
 See
 [`vignette("comdynamite")`](https://provetelab.org/comdynamite/articles/comdynamite.md)
 for species sorting vs. mass effects, grids and time-varying
-environments.
+environments,
+[`vignette("phylogenetic-structure")`](https://provetelab.org/comdynamite/articles/phylogenetic-structure.md)
+for an ecological question worked through simulations, and
+[`vignette("evaluating-methods")`](https://provetelab.org/comdynamite/articles/evaluating-methods.md)
+for the evaluation of a statistical method. The
+[website](https://provetelab.org/comdynamite/) has the articles and the
+function reference.
 
 ## Related packages
 
