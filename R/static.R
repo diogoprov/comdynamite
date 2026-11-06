@@ -4,10 +4,10 @@
 #' environmental gradient, without population dynamics, competition or
 #' dispersal. The expected abundance of species j at site i is
 #' `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the Gaussian
-#' response used in the simulations of Peres-Neto et al. (2012). By default,
-#' observed abundances are Poisson counts with that mean; in the original
-#' simulations the abundances are the expected values, which `poisson = FALSE`
-#' returns. Because nothing but the
+#' response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
+#' default, observed abundances are Poisson counts with that mean. This is our
+#' addition: in those simulations the abundances are the expected values, with
+#' `r_max` between 0.5 and 1, which `poisson = FALSE` returns. Because nothing but the
 #' gradient structures the data, this is a baseline for
 #' [simulate_metacommunity()] and a fast generator for evaluating methods.
 #'
@@ -23,13 +23,19 @@
 #'   of them keeps abundances on the scale of the first.
 #' @param env Value of the gradient at each site, or a list or data frame with
 #'   one gradient per element, in the order of `traits`.
-#' @param incidence Return presences and absences instead of abundances? Needs
-#'   `poisson = TRUE`.
+#' @param incidence Return presences and absences instead of abundances? A
+#'   species is present where its Poisson count is positive, so this needs
+#'   `poisson = TRUE`. Dray & Legendre (2008) instead draw presences from a
+#'   binomial distribution with the expected value as the probability.
 #' @param poisson Draw Poisson counts? If `FALSE`, return the expected abundances.
 #' @return List of class `mc_sim` with `abundance`, a matrix with one row per
 #'   site and one column per species, plus `env` and `traits`. Sites and species
 #'   with no individuals are kept, so remove them if a method requires it.
 #' @references
+#' Dray, S., & Legendre, P. (2008). Testing the species traits-environment
+#' relationships: the fourth-corner problem revisited. *Ecology*, 89,
+#' 3400--3412. \doi{10.1890/08-0349.1}
+#'
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}

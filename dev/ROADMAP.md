@@ -45,14 +45,20 @@ CI em macOS, Windows e Linux; 100% de cobertura de linhas; `inst/CITATION` e
 Objetivo: mostrar que a implementação reproduz o modelo publicado e ter uma linha de
 base sem dinâmica.
 
-- [x] `simulate_static()`: resposta gaussiana com contagens de Poisson (Peres-Neto
-      et al. 2012).
+- [x] `simulate_static()`: resposta gaussiana de Dray & Legendre (2008), usada também
+      por Peres-Neto et al. (2012). Nessas fontes, `h` vem de U(0,5; 1), a abundância é
+      o valor esperado e a incidência é binomial com probabilidade `y`. As contagens de
+      Poisson e `h` em U(0, 30) não estão nelas: vêm do pcps-sim.
 - [x] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
       espaço, como em `ScriptDemo.m`.
 - [x] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
       [E] e [S]: `simulate_logistic()` e `logistic_gradients()`.
-- [ ] Comparar com o `mcomsimr` nos mesmos parâmetros, levando em conta as diferenças
-      de convenção (`sigma`, `alpha[j, k]`). Comparar distribuições, não réplicas.
+- [x] Comparar com o `mcomsimr` nos mesmos parâmetros, levando em conta as diferenças
+      de convenção (`sigma`, `alpha[j, k]`). Em `data-raw/validation_mcomsimr.R`: 16
+      cenários (dispersão, competição, paisagem), 25 sítios, 12 espécies, 300 passos,
+      ambiente constante e 200 réplicas por modelo. Nenhuma das 80 comparações de
+      distribuição foi significativa (KS, FDR 5%), e as diferenças nas médias de alfa,
+      gama e abundância total ficaram abaixo de 1%. Falta um ambiente que mude no tempo.
 - [ ] Reproduzir qualitativamente os padrões de Thompson et al. (2020).
 - [ ] Testes de propriedades com resultado analítico (por exemplo, o equilíbrio de
       Beverton-Holt com uma espécie, já usado no exemplo de `mc_dynamics()`).
@@ -108,10 +114,27 @@ história conhecida.
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0 e da estrutura comum da v0.4.0.
 
-Ler antes de implementar: Pontarp et al. (2019), que ainda não foi lido (falta o PDF);
-Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
+Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
 et al. (2015). Definir o que o comdynamite acrescenta a esses trabalhos.
+
+Pontarp et al. (2019), lido no texto principal (Appendix S4 não lido): propõem um ciclo
+de construir o modelo, analisá-lo sem dados, estimar parâmetros e avaliar. O caso de
+estudo usa ABC por rejeição, distância euclidiana entre estatísticas (riqueza, abundância,
+distribuição de traits, NRI, NTI), priors amplos e dois modelos, escolhidos pela razão de
+aceitação, tudo em dados simulados. O que levar para cá:
+
+- Se um processo não é recuperado em dados simulados, não deve ser inferido em dados
+  reais. É o papel do piloto da v0.3.0 e da recuperação abaixo.
+- Traits e filogenia juntos separaram processos com sinais parecidos, então
+  `summary_stats()` deve cobrir os dois.
+- O modelo errado deu estimativas aparentemente boas, com a largura de nicho
+  superestimada. Uma boa estimativa não valida o modelo: daí os PPCs.
+- Eles não selecionaram estatísticas e citam Prangle et al. (2014) para isso. A razão de
+  aceitação depende do limiar e das estatísticas (Robert et al. 2011), então preferir
+  `abcrf` e medir o erro de classificação em dados simulados.
+- O que o comdynamite acrescenta: espaço com muitos sítios, pacote em R (o código deles
+  é MATLAB), cobertura dos posteriores e checagem do modelo, que o caso de estudo não faz.
 
 - [ ] Tabela de referência: sortear parâmetros dos priors e simular, com a árvore, o
       ambiente e as coordenadas observados e com detecção imperfeita.
@@ -287,6 +310,7 @@ Conferidas no Crossref em 2026-11-05.
 - Benício, R. A., et al. (2021). *Journal of Biogeography*, 48, 2211–2225. https://doi.org/10.1111/jbi.14145
 - Caetano, D. S., et al. (2018). *Evolution*, 72, 2308–2324. https://doi.org/10.1111/evo.13602
 - Csilléry, K., et al. (2012). *Methods in Ecology and Evolution*, 3, 475–479. https://doi.org/10.1111/j.2041-210x.2011.00179.x
+- Dray, S., & Legendre, P. (2008). *Ecology*, 89, 3400–3412. https://doi.org/10.1890/08-0349.1
 - Clavel, J., et al. (2015). *Methods in Ecology and Evolution*, 6, 1311–1319. https://doi.org/10.1111/2041-210x.12420
 - Duarte, L. D. S., et al. (2023). *Ecography*, 2023. https://doi.org/10.1111/ecog.06544
 - Goldberg, E. E., et al. (2011). *Systematic Biology*, 60, 451–465. https://doi.org/10.1093/sysbio/syr046
@@ -299,11 +323,13 @@ Conferidas no Crossref em 2026-11-05.
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Pontarp, M., et al. (2019). *Methods in Ecology and Evolution*, 10, 450–460. https://doi.org/10.1111/2041-210x.13129
+- Prangle, D., et al. (2014). *Statistical Applications in Genetics and Molecular Biology*, 13, 67–82. https://doi.org/10.1515/sagmb-2013-0012
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395
+- Robert, C. P., et al. (2011). *PNAS*, 108, 15112–15117. https://doi.org/10.1073/pnas.1102900108
 - Ruffley, M., et al. (2019). *Ecology and Evolution*, 9, 13218–13230. https://doi.org/10.1002/ece3.5773
 - van der Plas, F., et al. (2015). *Ecology*, 96, 1502–1515. https://doi.org/10.1890/14-0454.1
 - Vehtari, A., et al. (2017). *Statistics and Computing*, 27, 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
