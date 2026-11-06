@@ -46,8 +46,9 @@ List of class `mc_node_test` with `nodes`, a data frame with one row per
 node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`,
 `statistic`, `p_site`, `p_taxa`, `p_max` and `p_adjusted`;
 `semipartial`, a matrix of nodes by predictors; `p_partial`, with the
-larger of the two p-values for each of them; and `biogeography`, a list
-with the same two matrices for the events, or `NULL`.
+larger of the two p-values for each of them; `p_partial_site`, with the
+p-values of sites alone; and `biogeography`, a list with the same three
+matrices for the events, or `NULL`.
 
 ## Details
 
@@ -60,6 +61,13 @@ many nodes these p-values need a correction, and `p_adjusted` gives the
 false discovery rate that the article uses. This correction needs many
 permutations, as the smallest p-value is 1 / (`n_perm` + 1), so the
 default is the 9999 of the article.
+
+With few species at a node, permutations of species have little power,
+so `p_max` is conservative: with the
+[daphniids](https://provetelab.org/comdynamite/reference/daphniids.md)
+of the article, of 13 species, no predictor passes it, whereas sites
+alone recover most of the environmental results of its Figure 3 (see the
+article on validation).
 
 Each predictor gets a semipartial correlation, the square root of the
 loss of R2 when it is removed, with the sign of its slope when it is
@@ -121,14 +129,25 @@ test the whole tree at once.
 ## Examples
 
 ``` r
+# daphniids of Leibold et al. (2010)
+nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
-tree <- ape::rcoal(12)
-traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
-                         rmax_range = c(0, 30))
-env <- runif(40, 0, 100)
-comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-keep <- rowSums(comm) > 0
-node_test(comm[keep, ], node_contrasts(tree), env[keep], n_perm = 19)
-#> <mc_node_test> 7 nodes, 7 tested
+out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+out
+#> <mc_node_test> 12 nodes, 11 tested
 #> nodes with p (max) <= 0.05: 0 before correction, 0 after
+round(out$semipartial, 2)
+#>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP
+#> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00
+#> 15 -0.04 -0.07 -0.04 -0.04  0.09  0.02   0.08  0.12  0.03
+#> 16 -0.04  0.00 -0.18 -0.16  0.30 -0.06   0.29  0.19  0.19
+#> 17  0.02  0.03  0.07  0.11 -0.13 -0.07  -0.05 -0.21 -0.16
+#> 18 -0.01  0.06 -0.06 -0.06  0.28  0.03   0.20  0.14  0.14
+#> 19  0.00 -0.20 -0.02 -0.15 -0.01 -0.05   0.06  0.01  0.00
+#> 20 -0.03  0.11 -0.09  0.05 -0.16  0.03  -0.36  0.00  0.00
+#> 21 -0.28  0.19 -0.24  0.39  0.01  0.15  -0.15 -0.35 -0.17
+#> 22  0.03  0.01  0.06  0.00  0.13  0.06  -0.29 -0.21 -0.03
+#> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02
+#> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25
+#> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA
 ```

@@ -79,6 +79,11 @@ Analyses of phylogenetic community structure.
 - [`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md)
   : Moran's eigenvector maps
 
+## Data
+
+- [`daphniids`](https://provetelab.org/comdynamite/reference/daphniids.md)
+  : Daphniids of the northeastern United States
+
 ## Rule-based assembly
 
 Community assembly without population dynamics.

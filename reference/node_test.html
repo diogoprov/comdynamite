@@ -29,6 +29,7 @@ whether the two clades that split there differ in their response to the predicto
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
   </ul></li>
@@ -96,7 +97,8 @@ and values of 1, -1 and 0.</p></dd>
 node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>statistic</code>,
 <code>p_site</code>, <code>p_taxa</code>, <code>p_max</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of nodes by
 predictors; <code>p_partial</code>, with the larger of the two p-values for each of them;
-and <code>biogeography</code>, a list with the same two matrices for the events, or <code>NULL</code>.</p>
+<code>p_partial_site</code>, with the p-values of sites alone; and <code>biogeography</code>, a list with
+the same three matrices for the events, or <code>NULL</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -108,6 +110,10 @@ of the two tests. With many nodes these p-values need a correction, and
 <code>p_adjusted</code> gives the false discovery rate that the article uses. This correction
 needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), so the default
 is the 9999 of the article.</p>
+<p>With few species at a node, permutations of species have little power, so <code>p_max</code>
+is conservative: with the <a href="daphniids.html">daphniids</a> of the article, of 13 species, no predictor
+passes it, whereas sites alone recover most of the environmental results of its
+Figure 3 (see the article on validation).</p>
 <p>Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.</p>
 <p>Biogeographic events follow the article: a column of <code>biogeography</code> has 1 for sites
@@ -151,16 +157,27 @@ traits-environment relationships in the fourth-corner problem. <em>Ecology</em>,
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">12</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span>, optima_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">101</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_static.html">simulate_static</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">env</span>, incidence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">abundance</span></span></span>
-<span class="r-in"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
-<span class="r-in"><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span><span class="op">[</span><span class="va">keep</span>, <span class="op">]</span>, <span class="fu"><a href="node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>, <span class="va">env</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, n_perm <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_node_test&gt; 7 nodes, 7 tested</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># daphniids of Leibold et al. (2010)</span></span></span>
+<span class="r-in"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">node_test</span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">out</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_node_test&gt; 12 nodes, 11 tested</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 -0.04 -0.07 -0.04 -0.04  0.09  0.02   0.08  0.12  0.03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16 -0.04  0.00 -0.18 -0.16  0.30 -0.06   0.29  0.19  0.19</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  0.02  0.03  0.07  0.11 -0.13 -0.07  -0.05 -0.21 -0.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18 -0.01  0.06 -0.06 -0.06  0.28  0.03   0.20  0.14  0.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  0.00 -0.20 -0.02 -0.15 -0.01 -0.05   0.06  0.01  0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.03  0.11 -0.09  0.05 -0.16  0.03  -0.36  0.00  0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 21 -0.28  0.19 -0.24  0.39  0.01  0.15  -0.15 -0.35 -0.17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22  0.03  0.01  0.06  0.00  0.13  0.06  -0.29 -0.21 -0.03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

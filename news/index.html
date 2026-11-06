@@ -21,6 +21,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
   </ul></li>
@@ -48,6 +49,10 @@
 <li>
 <code><a href="../reference/fourth_corner_test.html">fourth_corner_test()</a></code>, <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code>, <code><a href="../reference/trait_partition.html">trait_partition()</a></code> and <code><a href="../reference/spatial_eigenvectors.html">spatial_eigenvectors()</a></code>: phylogenetic gradient analysis of Peres-Neto et al. (2012), tested against the original code in Octave.</li>
 <li>Functions that take a community and a phylogeny, traits or contrasts now match species by name and, as <code><a href="https://rdrr.io/pkg/picante/man/data.checking.html" class="external-link">picante::match.phylo.comm()</a></code>, drop with a warning the species found in only one of them. Repeated names are an error.</li>
+<li>
+<code>daphniids</code>: data of Leibold et al. (2010), rebuilt from the public survey.</li>
+<li>
+<code><a href="../reference/node_contrasts.html">node_contrasts()</a></code> now keeps nodes that join two tips, as the article does. <code>cherries = FALSE</code> gives the original code.</li>
 <li>
 <code><a href="../reference/node_test.html">node_test()</a></code>: <code>semipartial</code> replaces <code>partial_r2</code>, following the article, and there are <code>p_adjusted</code> (false discovery rate) and biogeographic events.</li>
 <li>

@@ -3,13 +3,12 @@
 Codes each node of a tree as a contrast between its two descendant
 clades, as in Leibold et al. (2010). One clade starts at -1 and the
 other at 1, and the value is halved at each node on the way to the tips.
-Species outside the node get zero. Nodes that join two tips are left
-out, as in the original code, because they contrast two single species.
+Species outside the node get zero.
 
 ## Usage
 
 ``` r
-node_contrasts(tree)
+node_contrasts(tree, cherries = TRUE)
 ```
 
 ## Arguments
@@ -17,6 +16,11 @@ node_contrasts(tree)
 - tree:
 
   A `phylo` object with dichotomous nodes.
+
+- cherries:
+
+  Keep nodes that join two tips? The article tests them (its Figure 3),
+  but the function `CreateNodeContrasts` of the authors leaves them out.
 
 ## Value
 
@@ -34,10 +38,10 @@ historical biogeography. *Ecology Letters*, 13, 1290–1299.
 
 ``` r
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
-#>       6    8
-#> a -0.50  0.0
-#> b -0.50  0.0
-#> c  0.50 -1.0
-#> d  0.25  0.5
-#> e  0.25  0.5
+#>       6  7    8  9
+#> a -0.50 -1  0.0  0
+#> b -0.50  1  0.0  0
+#> c  0.50  0 -1.0  0
+#> d  0.25  0  0.5 -1
+#> e  0.25  0  0.5  1
 ```

@@ -25,6 +25,11 @@
   [`picante::match.phylo.comm()`](https://rdrr.io/pkg/picante/man/data.checking.html),
   drop with a warning the species found in only one of them. Repeated
   names are an error.
+- `daphniids`: data of Leibold et al. (2010), rebuilt from the public
+  survey.
+- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
+  now keeps nodes that join two tips, as the article does.
+  `cherries = FALSE` gives the original code.
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `semipartial` replaces `partial_r2`, following the article, and there
   are `p_adjusted` (false discovery rate) and biogeographic events.
