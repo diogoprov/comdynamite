@@ -74,11 +74,13 @@ funções escritos à mão, o que indica o que falta no pacote.
 - [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
       mostrar ganho real, como foi feito no treeshapesim. O ABC da v0.5.0 depende disso.
 - [ ] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
-      (alfa, beta, gama, ocupação, SAD, SES MPD e MNTD, decaimento com a distância,
-      relação entre traits e ambiente).
+      (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
+      a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
+      temporal, como o CV das abundâncias. Em Guzman et al. (2022), estatísticas
+      temporais aumentaram o poder explicativo em até 59%, e a dispersão dependeu delas.
 - [ ] Piloto de identificabilidade, com poucos parâmetros: quanto dá para recuperar a
-      partir dessas estatísticas? É o ponto de decisão para a v0.5.0, e o desenho deve
-      ser combinado antes de rodar.
+      partir dessas estatísticas, com um levantamento único e com séries temporais? É o
+      ponto de decisão para a v0.5.0, e o desenho deve ser combinado antes de rodar.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código.
@@ -104,12 +106,21 @@ história conhecida.
 ## v0.5.0: inferência por ABC
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
-piloto da v0.3.0 e da estrutura comum da v0.4.0. Exemplos de uso de ABC em montagem de
-comunidades: Pontarp et al. (2019).
+piloto da v0.3.0 e da estrutura comum da v0.4.0.
+
+Ler antes de implementar: Pontarp et al. (2019), que ainda não foi lido (falta o PDF);
+Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
+2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
+et al. (2015). Definir o que o comdynamite acrescenta a esses trabalhos.
 
 - [ ] Tabela de referência: sortear parâmetros dos priors e simular, com a árvore, o
       ambiente e as coordenadas observados e com detecção imperfeita.
-- [ ] Estimação e escolha de modelos com o pacote `abc` (Csilléry et al. 2012).
+- [ ] Estimação e escolha de modelos com `abc` (Csilléry et al. 2012) e `abcrf` (Pudlo
+      et al. 2015), em `Suggests`. Random forests lidam bem com muitas estatísticas
+      correlacionadas e ordenam a importância delas.
+- [ ] Custo: cerca de 0,2 s por simulação pequena (36 espécies, 20 sítios, 300 passos),
+      ou 6 h por 100 mil simulações em um núcleo. Guzman et al. (2022) usaram 100
+      manchas, 50 espécies e 2200 passos.
 - [ ] Recuperação em dados simulados com parâmetros conhecidos: viés e cobertura.
 
 Avaliação do modelo, sempre em conjunto com a inferência:
@@ -124,6 +135,9 @@ Avaliação do modelo, sempre em conjunto com a inferência:
 - [ ] PSIS-LOO padrão (Vehtari et al. 2017) precisa de log-verossimilhança por observação,
       que o ABC não dá. Avaliar likelihood sintética (Wood 2010) por sítio ou por
       estatística, que daria esse termo de forma aproximada.
+
+Limites a deixar claros: um bom ajuste não prova o mecanismo, e dados de um único
+levantamento podem não informar a dispersão.
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
@@ -274,8 +288,10 @@ Conferidas no Crossref em 2026-11-05.
 - Caetano, D. S., et al. (2018). *Evolution*, 72, 2308–2324. https://doi.org/10.1111/evo.13602
 - Csilléry, K., et al. (2012). *Methods in Ecology and Evolution*, 3, 475–479. https://doi.org/10.1111/j.2041-210x.2011.00179.x
 - Clavel, J., et al. (2015). *Methods in Ecology and Evolution*, 6, 1311–1319. https://doi.org/10.1111/2041-210x.12420
+- Duarte, L. D. S., et al. (2023). *Ecography*, 2023. https://doi.org/10.1111/ecog.06544
 - Goldberg, E. E., et al. (2011). *Systematic Biology*, 60, 451–465. https://doi.org/10.1093/sysbio/syr046
 - Goldberg, E. E., & Igić, B. (2012). *Evolution*, 66, 3701–3709. https://doi.org/10.1111/j.1558-5646.2012.01730.x
+- Guzman, L. M., et al. (2022). *Ecology*, 103. https://doi.org/10.1002/ecy.3683
 - Harvey, M. G., & Rabosky, D. L. (2017). *Methods in Ecology and Evolution*, 9, 984–993. https://doi.org/10.1111/2041-210x.12949
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
@@ -283,9 +299,12 @@ Conferidas no Crossref em 2026-11-05.
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Pontarp, M., et al. (2019). *Methods in Ecology and Evolution*, 10, 450–460. https://doi.org/10.1111/2041-210x.13129
+- Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395
+- Ruffley, M., et al. (2019). *Ecology and Evolution*, 9, 13218–13230. https://doi.org/10.1002/ece3.5773
+- van der Plas, F., et al. (2015). *Ecology*, 96, 1502–1515. https://doi.org/10.1890/14-0454.1
 - Vehtari, A., et al. (2017). *Statistics and Computing*, 27, 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
 - Wood, S. N. (2010). *Nature*, 466, 1102–1104. https://doi.org/10.1038/nature09319
