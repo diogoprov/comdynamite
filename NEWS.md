@@ -11,6 +11,9 @@
   Peres-Neto et al. (2012).
 - `pcc_test()` and `phylo_eigenvectors()`: phylogenetic community composition of
   Peres-Neto & Kembel (2015), with site and species permutations.
+- `phylo_beta_test()` and `phylo_beta()`: phylogenetic beta-diversity framework of
+  the same article, a distance-based redundancy analysis of the mean phylogenetic
+  distance between communities.
 - New article with animations of metacommunity dynamics.
 
 # comdynamite 0.1.0

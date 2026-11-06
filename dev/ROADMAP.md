@@ -84,8 +84,20 @@ base sem dinâmica.
       espécies 0,045 e 0,068 contra 0,054 e 0,052). O poder (0,88 e 0,84 contra 0,945 e
       0,947) e o teste de espécies em phylogeny (0,20 e 0,19 contra 0,27 e 0,28) ficam
       abaixo, como esperado sem a árvore deles.
-- [ ] Framework PGA-β do mesmo artigo (db-RDA sobre MPD entre comunidades). Não existe
-      no pcps-sim.
+- [x] `phylo_beta_test()` e `phylo_beta()`: framework de beta diversidade filogenética do
+      mesmo artigo (db-RDA sobre MPD entre comunidades), que não existia no pcps-sim. F e
+      R2 iguais aos do `vegan::adonis2()`, e métrica igual a `picante::comdist()`. Em
+      `data-raw/validation_phylo_beta.R`, com 1000 réplicas e o PCC nos mesmos dados, as
+      taxas batem com a Tabela 1: neither .005 e .010 (.007, .008), environment .050 e
+      .062 (.055, .050), phylogeny .033 e .056 (.035, .039), teste de espécies em
+      phylogeny .16 e .19 (.167, .177). Poder .893 e .908 (.937, .939), R2 ajustado .083
+      e .060 (.091, .064). O PCC teve poder de .888 e .856 nos mesmos dados, ao contrário
+      do artigo, onde fica à frente (.945, .947), e um erro de .058 onde a outra rodada
+      deu .068, o que mostra o ruído desses valores.
+- [ ] Heatmaps do artigo para visualizar os eixos de `scores`.
+- [ ] Avisar os autores ou registrar no texto: a matriz de MPD não é sempre euclidiana,
+      ao contrário do que o artigo afirma (exemplo em `?phylo_beta`), e o picante não traz
+      as funções que o artigo anuncia.
 
 ## v0.3.0: fluxo de estudos de simulação
 
@@ -352,6 +364,7 @@ Conferidas no Crossref em 2026-11-05.
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
+- McArdle, B. H., & Anderson, M. J. (2001). *Ecology*, 82, 290–297. https://doi.org/10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2
 - Peres-Neto, P. R., & Kembel, S. W. (2015). *Plant Ecology*, 216, 709–724. https://doi.org/10.1007/s11258-014-0405-0
 - Peres-Neto, P. R., et al. (2012). *Ecology*, 93, S14–S30. https://doi.org/10.1890/11-0494.1
 - Pigot, A. L., & Etienne, R. S. (2015). *Ecology Letters*, 18, 153–163. https://doi.org/10.1111/ele.12395

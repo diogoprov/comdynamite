@@ -37,6 +37,8 @@ reference:
   contents:
   - pcc_test
   - phylo_eigenvectors
+  - phylo_beta_test
+  - phylo_beta
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
   contents:
