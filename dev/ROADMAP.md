@@ -176,11 +176,16 @@ comparação em dados fixos depende de um dos dois.
 - [ ] Peres-Neto et al. (2012): correlações entre traits e ambiente, autovetores
       ponderados, seleção estocástica e partição da variação. Reaproveitar
       `ade4::fourthcorner` e `adespatial::mem` se servirem.
-- [ ] Leibold et al. (2010), `MetacommunityPhylogenetics`: regressão ponderada por nó,
-      com testes de permutação.
-- [ ] `CreateNodeContrasts` de Peres-Neto (em `~/Downloads/matlabquestion/`), que monta
-      a `NodeMatrix` de espécies por nós a partir da árvore. Sem ela a regressão por nó
-      não tem entrada. Usar `rt.dat` do pacote como árvore de teste.
+- [x] Leibold et al. (2010): `node_test()` e `node_contrasts()`. R2, R2 ajustado e F iguais
+      ao MATLAB no Octave 11.3 (diferença abaixo de 1e-15), e os 13 contrastes de
+      `CreateNodeContrasts` iguais. Em `data-raw/validation_node.R`, por nó, sites .049 e
+      espécies .052 sob a nula dupla; p máximo .043 só com ambiente e .025 só com filogenia.
+      Poder por nó .08, e ao menos um nó em 77% das réplicas, mas 26% sob a nula: é preciso
+      corrigir para testes múltiplos. Os erros do original foram confirmados na leitura e
+      corrigidos, com a diferença descrita em `?node_test`.
+- [ ] Conferir a definição de semiparcial no texto de Leibold et al. (2010), que não
+      consegui ler. `partial_r2` é uma escolha nossa.
+- [ ] Heatmaps ou mapa da árvore com os nós significativos.
 - [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
       permutações em paralelo com o Futureverse.
 - [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
@@ -345,10 +350,6 @@ Objetivo: API estável e pacote no CRAN.
   e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
   equações e citar; se for copiar a estrutura do código, falar com os autores.
-- **Possíveis erros no MATLAB, a confirmar rodando.** Em `MetacommunityPhylogenetics`,
-  nas permutações 2 e 3, `randperm(NumberSpecies)` usa o número de espécies do nó, então
-  só sorteia as primeiras colunas da matriz; e `TotalSum` não é recalculado depois
-  que `Incidence` muda.
 - **Protocolo estático.** O texto de Peres-Neto et al. (2012) dá `h` entre 0,5 e 1 e usa
   **L** como abundância, sem Poisson nos trechos lidos (a etapa 1 não veio). O pcps-sim
   usa `h` entre 0 e 30 e Poisson, e o manuscrito atribui isso a Peres-Neto et al.

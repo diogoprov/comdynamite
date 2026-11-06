@@ -14,6 +14,8 @@
 - `phylo_beta_test()` and `phylo_beta()`: phylogenetic beta-diversity framework of
   the same article, a distance-based redundancy analysis of the mean phylogenetic
   distance between communities.
+- `node_test()` and `node_contrasts()`: regression of clades on the environment,
+  node by node, from Leibold et al. (2010), with site and species permutations.
 - `simulate_metacommunity()` and `mc_dynamics()`: stochastic extirpation of
   populations (`extirpation`), used by Thompson et al. (2020) in their
   competition-colonisation scenario.

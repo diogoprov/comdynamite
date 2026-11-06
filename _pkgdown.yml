@@ -39,6 +39,8 @@ reference:
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta
+  - node_test
+  - node_contrasts
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
   contents:
