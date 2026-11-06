@@ -66,24 +66,46 @@ sites, so `r2` answers how much of all the variation each fraction
 holds, and `r2_component` how much of the component. Fractions `b` and
 `d` cannot be tested.
 
-## Original code
+## Article and original code
 
-Results for the mean component agree with
-`PartitionRDATwoDataMatricesPhylogeny` of the authors in the raw and
-adjusted fractions of the total. The code departs from the text in the
-following:
+Raw and adjusted fractions of the total for the mean component agree
+with `PartitionRDATwoDataMatricesPhylogeny` of the supplement, checked
+in Octave. The code departs from Appendix A in these points, where we
+follow the text:
 
-- The fractions relative to the component mix the two denominators, and
-  their adjusted values use the number of predictors of both sets in
-  every model, which can give values above one.
+- Fractions relative to the component: `Meana` and `Meanc` subtract the
+  fractions of the total from the fraction of the component.
 
-- The total variation does not grow with the number of traits, as it
-  should according to Appendix A.
+- Adjusted values relative to the component use the number of predictors
+  of both sets in the models of one set, and the result can exceed one.
 
-- For the variance, the explained sum of squares contains the intercept,
-  so `b` absorbs the mean dispersion. Here the intercept is removed.
+- Total variation: Appendix A multiplies it by the number of traits, and
+  the code does not.
 
-- The permutations of the variance take the square root twice.
+- Several vectors: the article analyses the vectors of environment and
+  space together in a redundancy analysis, and the script passes only
+  the first.
+
+- Variance component: the explained sum of squares contains the
+  intercept, so `b` absorbs the mean dispersion. Appendix A asks for the
+  intercept in the models. Here it is removed, and `r2` is the variation
+  around the weighted mean.
+
+- Permutations of the variance component: the code takes the square root
+  twice, sets small values to zero in the observed matrix instead of the
+  permuted one, and rescales the permuted values to the observed mean
+  and standard deviation, which the text does not mention. It also calls
+  `WeightedMeanVar`, which the supplement does not include. None of this
+  is done here.
+
+- The code runs `n_perm` - 1 permutations in each null distribution.
+
+- The p-values follow the text in stacking two null distributions, and
+  here we report the larger of the two, as in
+  [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md).
+
+Appendix A also gives semipartial correlations for each predictor, which
+are not implemented here.
 
 ## References
 

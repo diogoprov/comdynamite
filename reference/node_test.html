@@ -58,7 +58,7 @@ whether the two clades that split there differ in their response to the predicto
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, biogeography <span class="op">=</span> <span class="cn">NULL</span>, n_perm <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, biogeography <span class="op">=</span> <span class="cn">NULL</span>, n_perm <span class="op">=</span> <span class="fl">9999</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -106,14 +106,15 @@ set of the same size from all species. The article permutes both at once; follow
 Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
 of the two tests. With many nodes these p-values need a correction, and
 <code>p_adjusted</code> gives the false discovery rate that the article uses. This correction
-needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), and the article
-uses 9999.</p>
+needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), so the default
+is the 9999 of the article.</p>
 <p>Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.</p>
 <p>Biogeographic events follow the article: a column of <code>biogeography</code> has 1 for sites
 in one area, -1 for sites in the other and 0 for sites in neither. Each event is
-tested only in its sites, controlling for <code>env</code>. A column without zeros compares one
-area with all the others. Events with few sites in one area give unstable values.</p>
+tested only in its sites, controlling for <code>env</code>. Other contrasts are allowed, for
+example a column without zeros, which compares one area with all the others. Events
+with few sites in one area give unstable values.</p>
 <p>R2, adjusted R2 and the statistic equal those of the MATLAB function
 <code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Three parts of that
 function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns

@@ -46,14 +46,29 @@ fourth_corner_test(comm, trait, env, n_perm = 999, site_permutations = NULL)
 List of class `mc_fourth_corner` with `correlation`, `p_site`, `p_taxa`
 and `p_max`.
 
-## Original code
+## Article and original code
 
-The function `TraitEnvCor` of the authors keeps the observed mean and
-standard deviation when it permutes and stacks the two null
-distributions, with a significance level of alpha / 2. Here each
-permuted variable is standardised again. The stacked p-value is close to
-the mean of the two p-values, so any test it rejects at alpha / 2 is
-also rejected by the larger p-value at alpha.
+The function `TraitEnvCor` of the supplement differs from Appendix A,
+and this function from both:
+
+- Appendix A stacks the two null distributions, adds one to the count
+  and uses alpha / 2. The code adds two to the count. Here we use the
+  larger of the two p-values. The stacked p-value is close to their
+  mean, so any test that it rejects at alpha / 2 is also rejected by the
+  larger p-value at alpha.
+
+- Appendix A says that the statistic is calculated again for the
+  permuted data. The code keeps the observed mean and standard deviation
+  of the permuted variable, which then no longer has weighted mean zero.
+  Here it is standardised again, as the code of the partition does.
+
+- The code runs `n_perm` - 1 permutations in each null distribution.
+
+- Appendix A allows several traits and predictors. The permutations of
+  the code work with one of each, as here.
+
+- The code returns the absolute value, and here the correlation keeps
+  its sign.
 
 ## References
 

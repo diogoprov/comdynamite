@@ -128,18 +128,37 @@ are left out.</p>
     <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
 
 
-<p>The code and the text differ. Here we follow the text in the first three points and
-the code in the last:</p><ul><li><p>The text sums eigenvectors weighted by their correlations. The code uses the
-absolute correlations, and eigenvectors with opposite signs then cancel.</p></li>
-<li><p>The text uses the square root of the path length as distance. The code example
-uses one minus the covariance.</p></li>
-<li><p>The text draws 1000 Brownian vectors, and the code 100.</p></li>
-<li><p>The text multiplies each Brownian vector by <code>pev</code>, and the code adds them.</p></li>
-</ul><p>In addition, <code>PCoAWeigthed</code> of the authors is called with weights that do not sum to
-one and returns coordinates without dividing by the square root of the weights, so its
-centring is not the one in the text. <code>DoubleCenterWeigth</code>, which is not used in their
-example, does both, and agrees with this function.</p>
-    </div>
+<p>The functions <code>ModelSelectionStochastic</code> and <code>PCoAWeigthed</code> and the script <code>ScriptDemo</code>
+of the supplement differ from the article and Appendix B in the points below. Here we
+follow the text, except in the addition of Brownian vectors and where noted.</p><ul><li><p>Weights of the eigenvectors: the text uses the correlations and the code their
+absolute values, so eigenvectors with opposite signs cancel.</p></li>
+<li><p>Brownian vectors: the text multiplies each one by <code>pev</code> and the code adds them.
+We follow the code, as the product of a random vector with mean zero would not
+keep the structure of <code>pev</code>.</p></li>
+<li><p>Number of Brownian vectors: 1000 in the text and 100 in the code.</p></li>
+<li><p>Distances: the text uses the square root of the path length, and the script
+one minus the covariance.</p></li>
+<li><p>Centring: <code>Q</code> in the text only centres if the weights sum to one, and the script
+passes the sums of the species. <code>PCoAWeigthed</code> also does not divide the coordinates
+by the square root of the weights. <code>DoubleCenterWeigth</code>, which the script does not
+call, does both and agrees with this function.</p></li>
+<li><p>Global test: the text regresses each eigenvector on all predictors, and the
+code accepts one. With one predictor both are the same statistic. We also take one
+predictor.</p></li>
+<li><p>Forward selection: the text tests each eigenvector given the remaining
+predictors, and the code tests its simple correlation. We follow the code.</p></li>
+<li><p>Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
+permutation strategy, although Appendix A gives alpha / 2 only for the stacked
+test. Here the larger p-value is compared with <code>alpha</code>.</p></li>
+<li><p>p-value of the global test with row permutations: the code divides by twice the
+number of permutations, which halves it.</p></li>
+<li><p>No significant result: the code returns random normal vectors, which can then
+enter later analyses. Here <code>pev</code> and <code>pev_brown</code> are <code>NULL</code>.</p></li>
+<li><p>Choice of vector: the article recommends the one with the highest R2, and the
+script always takes the Brownian vector. Here both are returned.</p></li>
+<li><p>The supplement calls <code>eigen</code>, which it does not include, and the example 2 of
+<code>ScriptDemo</code> removes rows of <code>PhyloDistance</code> before creating it.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects of spatial

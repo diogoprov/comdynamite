@@ -69,15 +69,23 @@ matrix with positive Moran's I are kept, in order of decreasing spatial scale.</
 the attribute <code>moran</code>.</p>
     </div>
     <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Appendix B of Peres-Neto et al. (2012) recommends centring with site weights so that
-the maps stay orthogonal in a weighted regression. The function <code>MEM</code> of the authors
-does not, and neither does this one. <code><a href="trait_partition.html">trait_partition()</a></code> standardises the maps with
-site weights, and orthogonality is not needed to partition variation.</p>
-    </div>
+    <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
+
+
+<p>The function <code>MEM</code> of the supplement differs from Appendix A of Peres-Neto et al.
+(2012) in two points, and here we follow the code:</p><ul><li><p>Appendix A recommends centring with site weights so that the maps stay
+orthogonal in a weighted regression, and the code does not. <code><a href="trait_partition.html">trait_partition()</a></code>
+standardises the maps with site weights, and orthogonality is not needed to
+partition variation.</p></li>
+<li><p>Appendix A sets the distances between sites that are not connected to zero,
+and the code to four times the threshold.</p></li>
+</ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Dray, S., Legendre, P., &amp; Peres-Neto, P. R. (2006). Spatial modelling: a comprehensive
+    <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects of spatial
+contingency and environmental filtering on metacommunity phylogenetics. <em>Ecology</em>,
+93, S14–S30. <a href="https://doi.org/10.1890/11-0494.1" class="external-link">doi:10.1890/11-0494.1</a></p>
+<p>Dray, S., Legendre, P., &amp; Peres-Neto, P. R. (2006). Spatial modelling: a comprehensive
 framework for principal coordinate analysis of neighbour matrices (PCNM). <em>Ecological
 Modelling</em>, 196, 483–493. <a href="https://doi.org/10.1016/j.ecolmodel.2006.02.015" class="external-link">doi:10.1016/j.ecolmodel.2006.02.015</a></p>
     </div>

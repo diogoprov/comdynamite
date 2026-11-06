@@ -22,16 +22,26 @@ spatial_eigenvectors(coords)
 Matrix with one row per site and one column per map, with their Moran's
 I in the attribute `moran`.
 
-## Details
+## Article and original code
 
-Appendix B of Peres-Neto et al. (2012) recommends centring with site
-weights so that the maps stay orthogonal in a weighted regression. The
-function `MEM` of the authors does not, and neither does this one.
-[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
-standardises the maps with site weights, and orthogonality is not needed
-to partition variation.
+The function `MEM` of the supplement differs from Appendix A of
+Peres-Neto et al. (2012) in two points, and here we follow the code:
+
+- Appendix A recommends centring with site weights so that the maps stay
+  orthogonal in a weighted regression, and the code does not.
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  standardises the maps with site weights, and orthogonality is not
+  needed to partition variation.
+
+- Appendix A sets the distances between sites that are not connected to
+  zero, and the code to four times the threshold.
 
 ## References
+
+Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the
+effects of spatial contingency and environmental filtering on
+metacommunity phylogenetics. *Ecology*, 93, S14–S30.
+[doi:10.1890/11-0494.1](https://doi.org/10.1890/11-0494.1)
 
 Dray, S., Legendre, P., & Peres-Neto, P. R. (2006). Spatial modelling: a
 comprehensive framework for principal coordinate analysis of neighbour

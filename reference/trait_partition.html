@@ -111,20 +111,33 @@ answers how much of all the variation each fraction holds, and <code>r2_componen
 of the component. Fractions <code>b</code> and <code>d</code> cannot be tested.</p>
     </div>
     <div class="section level2">
-    <h2 id="original-code">Original code<a class="anchor" aria-label="anchor" href="#original-code"></a></h2>
+    <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
 
 
-<p>Results for the mean component agree with <code>PartitionRDATwoDataMatricesPhylogeny</code> of the
-authors in the raw and adjusted fractions of the total. The code departs from the text
-in the following:</p><ul><li><p>The fractions relative to the component mix the two denominators, and their
-adjusted values use the number of predictors of both sets in every model, which
-can give values above one.</p></li>
-<li><p>The total variation does not grow with the number of traits, as it should
-according to Appendix A.</p></li>
-<li><p>For the variance, the explained sum of squares contains the intercept, so
-<code>b</code> absorbs the mean dispersion. Here the intercept is removed.</p></li>
-<li><p>The permutations of the variance take the square root twice.</p></li>
-</ul></div>
+<p>Raw and adjusted fractions of the total for the mean component agree with
+<code>PartitionRDATwoDataMatricesPhylogeny</code> of the supplement, checked in Octave. The code
+departs from Appendix A in these points, where we follow the text:</p><ul><li><p>Fractions relative to the component: <code>Meana</code> and <code>Meanc</code> subtract the fractions
+of the total from the fraction of the component.</p></li>
+<li><p>Adjusted values relative to the component use the number of predictors of both
+sets in the models of one set, and the result can exceed one.</p></li>
+<li><p>Total variation: Appendix A multiplies it by the number of traits, and the code
+does not.</p></li>
+<li><p>Several vectors: the article analyses the vectors of environment and space
+together in a redundancy analysis, and the script passes only the first.</p></li>
+<li><p>Variance component: the explained sum of squares contains the intercept, so
+<code>b</code> absorbs the mean dispersion. Appendix A asks for the intercept in the models.
+Here it is removed, and <code>r2</code> is the variation around the weighted mean.</p></li>
+<li><p>Permutations of the variance component: the code takes the square root twice,
+sets small values to zero in the observed matrix instead of the permuted one, and
+rescales the permuted values to the observed mean and standard deviation, which the
+text does not mention. It also calls <code>WeightedMeanVar</code>, which the supplement does
+not include. None of this is done here.</p></li>
+<li><p>The code runs <code>n_perm</code> - 1 permutations in each null distribution.</p></li>
+<li><p>The p-values follow the text in stacking two null distributions, and here we
+report the larger of the two, as in <code><a href="fourth_corner_test.html">fourth_corner_test()</a></code>.</p></li>
+</ul><p>Appendix A also gives semipartial correlations for each predictor, which are not
+implemented here.</p>
+    </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Peres-Neto, P. R., Legendre, P., Dray, S., &amp; Borcard, D. (2006). Variation partitioning
