@@ -1,6 +1,9 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.1.0 (tag `v0.1.0`, DOI de conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-06. Versão atual: 0.5.0 (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0` e `v0.5.0`, uma para cada marco concluído. `v0.3.0` e `v0.4.0`
+não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
+v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -176,7 +179,8 @@ máquina.
 - [x] Peres-Neto et al. (2012): `phylo_vector()` e `trait_partition()`, conferidas no Octave e nas Tabelas 1
       a 4 do artigo.
 - [ ] Reproduzir a Tabela 5 com `logistic_gradients()` (Apêndice C).
-- [ ] Semiparciais de `trait_partition()`, descritas no Apêndice A.
+- [x] Semiparciais de `trait_partition()`, do Apêndice A, com testes. O suplemento não
+      tem código para elas, então a conferência foi feita contra regressões separadas.
 - [ ] `node_test()` roda nós em paralelo com `cores`. Se ainda for lento em árvores
       grandes, vetorizar `node_fit()`.
 - [x] Leibold et al. (2010): `node_test()` e `node_contrasts()`. R2, R2 ajustado e F iguais
@@ -378,7 +382,12 @@ Objetivo: API estável e pacote no CRAN.
 - **Appendix C.** Não dá a distribuição de `a` nem a escala de `b`; diz que a presença
   vem de um valor "normally generated", o que gera muito ruído (a legenda da Fig. 4
   comenta o ruído). `simulate_logistic()` usa uniforme por padrão e aceita
-  `draw = "normal"`. O cenário III é ambíguo. Conferir em Ives & Helmus (2011).
+  `draw = "normal"`. O cenário III é ambíguo. O código de Ives & Helmus (2011,
+  `PGLMM_model_simulations.m`, em `~/Downloads/3567789/`) esclarece parte disso: `a` é
+  N(0; 0,5), `b` tem desvio 1 na amostra de espécies, a presença vem de `rand` (uniforme),
+  e a redução U(0,5; 1) entra uma vez por gradiente, enquanto o Appendix C a aplica uma
+  vez. Falta confirmar se Peres-Neto et al. usaram esses valores, e `simulate_logistic()`
+  ainda tem `intercept_sd = 1`. Com isso dá para tentar de novo a Tabela 5.
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
   assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver

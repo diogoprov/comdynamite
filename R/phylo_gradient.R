@@ -174,8 +174,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
-#'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`; and
-#'   `component_share`, the share of the total variation in the component.
+#'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`;
+#'   `component_share`, the share of the total variation in the component; `semipartial`,
+#'   a matrix of predictors by traits; and `p_partial`, `p_partial_site` and
+#'   `p_partial_taxa`, with the larger p-value and those of sites and of species. All are
+#'   `NA` if predictors are collinear.
 #' @section Article and original code:
 #' Raw and adjusted fractions of the total for the mean component agree with
 #' `PartitionRDATwoDataMatricesPhylogeny` of the supplement, checked in Octave. The code
@@ -206,8 +209,14 @@ print.mc_phylo_vector <- function(x, ...) {
 #' site weights and the code does not, but orthogonality is not needed to partition
 #' variation, and here all predictors are standardised with site weights.
 #'
-#' Appendix A also gives semipartial correlations for each predictor, which are not
-#' implemented here.
+#' Semipartial correlations follow Appendix A: the square root of the loss of R2 when a
+#' predictor leaves the model of all predictors, with the sign of its slope when it is
+#' alone. The supplement has no code for them, so they were checked against separate
+#' regressions and not in Octave. Appendix A calculates the model without the predictor
+#' with the slopes of the full model, which it had just fitted again without it, and here
+#' we use the second slopes. With several traits it gives no rule, so here each trait has its own
+#' value, relative to the variation of that trait. They are tested as the fractions are,
+#' with the loss of R2 as the statistic, and with many predictors they need a correction.
 #'
 #' This function partitions variation and does not test each trait against each
 #' predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging
@@ -248,6 +257,8 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   site_weights <- rowSums(comm)
   n <- nrow(comm)
   sizes <- c(abc = ncol(env) + ncol(space), ab = ncol(env), bc = ncol(space))
+  labels <- c(colnames(env) %||% paste0("env", seq_len(ncol(env))),
+              colnames(space) %||% paste0("space", seq_len(ncol(space))))
   total <- ncol(traits) * sum(comm)
 
   components <- function(response, env, space) {
@@ -261,28 +272,47 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
     r2 <- ss / total
     c(r2, a = r2[["abc"]] - r2[["bc"]], c = r2[["abc"]] - r2[["ab"]])
   }
+  all_predictors <- function(env, space) {
+    cbind(weighted_standardise(env, site_weights), weighted_standardise(space, site_weights))
+  }
+  # fractions and the loss of R2 of each predictor for each trait
+  statistics <- function(response, env, space) {
+    loss <- unique_ss(all_predictors(env, space), response, site_weights) / sum(comm)
+    c(tested(components(response, env, space)),
+      stats::setNames(as.vector(loss), paste0("loss", seq_along(loss))))
+  }
 
   response <- trait_response(comm, traits, component)
   component_ss <- sum(site_weights * sweep(response, 2, colSums(site_weights * response) /
                                              sum(site_weights))^2)
   share <- sum(site_weights * response^2) / total
   ss <- components(response, env, space)
-  observed <- tested(ss)
+  observed <- statistics(response, env, space)
   null_site <- replicate(n_perm, {
     i <- sample.int(n)
-    tested(components(response, env[i, , drop = FALSE], space[i, , drop = FALSE]))
+    statistics(response, env[i, , drop = FALSE], space[i, , drop = FALSE])
   })
   null_taxa <- replicate(n_perm, {
     shuffled <- traits[sample.int(nrow(traits)), , drop = FALSE]
-    tested(components(trait_response(comm, shuffled, component), env, space))
+    statistics(trait_response(comm, shuffled, component), env, space)
   })
   p_site <- vapply(names(observed), function(f) permutation_p(null_site[f, ], observed[[f]]),
                    numeric(1))
   p_taxa <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
                    numeric(1))
 
+  by_trait <- function(x) {
+    matrix(x[grep("^loss", names(x))], length(labels),
+           dimnames = list(labels, colnames(traits) %||% paste0("trait", seq_len(ncol(traits)))))
+  }
+  slopes <- crossprod(all_predictors(env, space), site_weights * response)
+  # p-values stay NA where the statistic is NA
+  tested_p <- function(p) by_trait(p) + 0 * by_trait(observed)
   structure(list(fractions = partition_table(ss, total, component_ss, sizes, n, p_site, p_taxa),
-                 component = component, component_share = share),
+                 component = component, component_share = share,
+                 semipartial = sqrt(by_trait(observed)) * sign(slopes),
+                 p_partial = pmax(tested_p(p_site), tested_p(p_taxa)),
+                 p_partial_site = tested_p(p_site), p_partial_taxa = tested_p(p_taxa)),
             class = "mc_trait_partition")
 }
 
@@ -357,6 +387,19 @@ explained_ss <- function(predictors, response, site_weights) {
   root <- sqrt(site_weights)
   centred <- sweep(response, 2, colSums(site_weights * response) / sum(site_weights))
   sum(qr.fitted(qr(root * predictors), root * centred)^2)
+}
+
+# loss of explained sum of squares when each predictor leaves the model, for each
+# column of the response; beta^2 / the diagonal of the inverse of X'WX gives it without
+# fitting one model per predictor
+unique_ss <- function(predictors, response, site_weights) {
+  root <- sqrt(site_weights)
+  centred <- sweep(response, 2, colSums(site_weights * response) / sum(site_weights))
+  fit <- qr(root * predictors)
+  if (fit$rank < ncol(predictors)) {
+    return(matrix(NA_real_, ncol(predictors), ncol(response)))
+  }
+  qr.coef(fit, root * centred)^2 / diag(chol2inv(qr.R(fit)))
 }
 
 partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_taxa) {

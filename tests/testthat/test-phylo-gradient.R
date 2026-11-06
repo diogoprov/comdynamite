@@ -114,3 +114,46 @@ test_that("absent species are left out", {
   expect_equal(nrow(out$eigenvectors), ncol(d$comm) - 1)
   expect_error(phylo_vector(d$comm, d$tree, d$env, n_perm = 9, site_permutations = cbind(1:3)))
 })
+
+partition_data <- function() {
+  set.seed(2)
+  trait <- cbind(t1 = seq(0, 100, 10), t2 = rev(seq(0, 100, 10))^1.5)
+  rownames(trait) <- letters[1:11]
+  env <- cbind(e1 = runif(40, 0, 100), e2 = runif(40, 0, 100))
+  space <- cbind(runif(40), runif(40))
+  comm <- outer(env[, 1], trait[, 1], function(e, t) exp(-(e - t)^2 / 800)) + 0.01
+  colnames(comm) <- rownames(trait)
+  list(comm = comm, trait = trait, env = env, space = space)
+}
+
+test_that("semipartials are the loss of R2 of separate weighted regressions", {
+  d <- partition_data()
+  out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 3)
+  w <- rowSums(d$comm)
+  y <- trait_response(d$comm, d$trait, "mean")[, 1]
+  x <- as.data.frame(cbind(d$env, d$space))
+  names(x) <- c("e1", "e2", "s1", "s2")
+  explained <- function(fit) sum(w * (fitted(fit) - weighted.mean(y, w))^2)
+  full <- lm(y ~ ., x, weights = w)
+  loss <- explained(full) - explained(lm(y ~ . - e1, x, weights = w))
+  slope <- coef(lm(y ~ e1, x, weights = w))[["e1"]]
+  expect_equal(out$semipartial["e1", "t1"], sign(slope) * sqrt(loss / sum(d$comm)))
+  expect_equal(dimnames(out$semipartial), list(c("e1", "e2", "space1", "space2"), c("t1", "t2")))
+  expect_equal(out$p_partial, pmax(out$p_partial_site, out$p_partial_taxa))
+})
+
+test_that("the sign of a semipartial follows the predictor", {
+  d <- partition_data()
+  set.seed(1)
+  one <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 1)$semipartial
+  set.seed(1)
+  other <- trait_partition(d$comm, d$trait, -d$env, d$space, n_perm = 1)$semipartial
+  expect_equal(one[1:2, ], -other[1:2, ])
+})
+
+test_that("collinear predictors give no semipartials", {
+  d <- partition_data()
+  out <- trait_partition(d$comm, d$trait, d$env, cbind(d$env[, 1], d$space), n_perm = 2)
+  expect_true(all(is.na(out$semipartial)))
+  expect_true(all(is.na(out$p_partial)))
+})

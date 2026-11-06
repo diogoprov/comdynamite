@@ -32,8 +32,11 @@ dispersion.}
 \value{
 List of class \code{mc_trait_partition} with \code{fractions}, a data frame with one row
 for each of \code{abc}, \code{ab}, \code{bc}, \code{a}, \code{b}, \code{c} and \code{d}, and the columns \code{r2},
-\code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_taxa} and \code{p_max}; \code{component}; and
-\code{component_share}, the share of the total variation in the component.
+\code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_taxa} and \code{p_max}; \code{component};
+\code{component_share}, the share of the total variation in the component; \code{semipartial},
+a matrix of predictors by traits; and \code{p_partial}, \code{p_partial_site} and
+\code{p_partial_taxa}, with the larger p-value and those of sites and of species. All are
+\code{NA} if predictors are collinear.
 }
 \description{
 The phylogenetic gradient analysis of Peres-Neto et al. (2012). Trait values are
@@ -78,8 +81,14 @@ of \code{adespatial::dbmem()}, checked in Octave. Appendix A recommends centring
 site weights and the code does not, but orthogonality is not needed to partition
 variation, and here all predictors are standardised with site weights.
 
-Appendix A also gives semipartial correlations for each predictor, which are not
-implemented here.
+Semipartial correlations follow Appendix A: the square root of the loss of R2 when a
+predictor leaves the model of all predictors, with the sign of its slope when it is
+alone. The supplement has no code for them, so they were checked against separate
+regressions and not in Octave. Appendix A calculates the model without the predictor
+with the slopes of the full model, which it had just fitted again without it, and here
+we use the second slopes. With several traits it gives no rule, so here each trait has its own
+value, relative to the variation of that trait. They are tested as the fractions are,
+with the loss of R2 as the statistic, and with many predictors they need a correction.
 
 This function partitions variation and does not test each trait against each
 predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging

@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.5.0
 
 - `simulate_static()`: static metacommunities from the Gaussian response of Dray
   & Legendre (2008), also used by Peres-Neto et al. (2012), as a baseline without
@@ -15,6 +15,8 @@
 - Functions that take a community and a phylogeny, traits or contrasts now match
   species by name and, as `picante::match.phylo.comm()`, drop with a warning the
   species found in only one of them. Repeated names are an error.
+- `trait_partition()`: semipartial correlations of each predictor, with their tests,
+  following Appendix A of Peres-Neto et al. (2012).
 - `plot_node_test()`: results of `node_test()` on the tree, as in Figure 3 of Leibold
   et al. (2010), as a phylogram or a fan. `plot_trait_partition()`: fractions of
   `trait_partition()`.
