@@ -14,7 +14,8 @@ mc_dynamics(
   disp_matrix = NULL,
   record_steps = NULL,
   sites = NULL,
-  species = NULL
+  species = NULL,
+  extirpation = 0
 )
 }
 \arguments{
@@ -39,6 +40,9 @@ site at each seeding step (and at the start).}
 \item{record_steps}{Optional steps at which abundances are recorded.}
 
 \item{sites, species}{Optional names of sites and species.}
+
+\item{extirpation}{Probability that a population is lost at each time step,
+one value or one per species.}
 }
 \value{
 List with \code{abundance} and \code{history}, as in

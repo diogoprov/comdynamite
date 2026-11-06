@@ -79,3 +79,15 @@ test_that("mean static abundance equals the Gaussian response", {
   means <- tapply(sim$abundance[, 1], env, mean)
   expect_equal(unname(c(means)), 20 * exp(-c(0, 10, 20)^2 / (2 * 10^2)), tolerance = 0.02)
 })
+
+test_that("isolated populations survive extirpation geometrically", {
+  # r = 5 and alpha = 0.05 keep populations near 80, so only extirpation removes them
+  set.seed(20)
+  q <- 0.01
+  steps <- 50
+  sites <- 5000
+  out <- mc_dynamics(matrix(5, sites, 1), matrix(0.05), dispersal = 0, n_steps = steps,
+                     seed_steps = integer(0), seed_mean = 20, extirpation = q)
+  expected <- (1 - q)^steps
+  expect_lt(abs(mean(out$abundance > 0) - expected), 4 * sqrt(expected * (1 - expected) / sites))
+})

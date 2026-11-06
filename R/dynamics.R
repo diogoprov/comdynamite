@@ -15,7 +15,14 @@
 #'   immigrants of each species at each site is drawn from a Poisson
 #'   distribution whose mean is the expected flow of emigrants through the
 #'   dispersal kernel. This approximation does not conserve the number of
-#'   dispersing individuals exactly, but has the right expectation.
+#'   dispersing individuals exactly, but has the right expectation. The code of
+#'   Thompson et al. (2020) does the same. Few emigrants may then produce no
+#'   immigrant, so with `extirpation` and low dispersal, recolonisation is rarer
+#'   than in mcomsimr, which conserves dispersers.
+#'
+#' After dispersal, each population is lost with probability `extirpation`,
+#' independently of its size. Thompson et al. (2020) used 0.002 in their
+#' competition-colonisation scenario and no extirpation in the others.
 #'
 #' During colonisation, Poisson(`seed_mean`) individuals of every species are
 #' added to every site at each of the `seed_steps`. After the last of these,
@@ -26,6 +33,8 @@
 #' @param alpha Competition matrix from [competition_matrix()], with species
 #'   in the same order as the rows of `traits`.
 #' @param dispersal Emigration probability, one value or one per species.
+#' @param extirpation Probability that a population is lost at each time step,
+#'   one value or one per species.
 #' @param n_steps Number of time steps.
 #' @param env_time Optional matrix (sites x `n_steps`) with the environment at
 #'   each step, e.g. from [env_over_time()]. If `NULL`, the environment of the
@@ -36,7 +45,8 @@
 #' @param record_steps Optional steps at which abundances are recorded.
 #' @return An `mc_sim` object: a list with `abundance` (sites x species matrix
 #'   at the last step), `history` (sites x species x recorded steps array, or
-#'   `NULL`), and the `landscape`, `traits`, `alpha` and `dispersal` used.
+#'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal` and `extirpation`
+#'   used.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
 #'   Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 #'   process-based metacommunity framework linking local and regional scale
@@ -54,7 +64,7 @@
 simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    n_steps = 1000, env_time = NULL,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
-                                   record_steps = NULL) {
+                                   record_steps = NULL, extirpation = 0) {
   stopifnot(inherits(landscape, "mc_landscape"), nrow(alpha) == nrow(traits),
             ncol(alpha) == nrow(traits))
   sites <- paste0("site", seq_along(landscape$env))
@@ -66,9 +76,10 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   }
   out <- mc_dynamics(r, alpha, dispersal, n_steps = n_steps, seed_steps = seed_steps,
                      seed_mean = seed_mean, disp_matrix = landscape$dispersal,
-                     record_steps = record_steps, sites = sites, species = rownames(traits))
+                     record_steps = record_steps, sites = sites, species = rownames(traits),
+                     extirpation = extirpation)
   structure(c(out, list(landscape = landscape, traits = traits, alpha = alpha,
-                        dispersal = dispersal)), class = "mc_sim")
+                        dispersal = dispersal, extirpation = extirpation)), class = "mc_sim")
 }
 
 #' Metacommunity dynamics from growth rates
@@ -93,7 +104,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
 mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                         disp_matrix = NULL, record_steps = NULL,
-                        sites = NULL, species = NULL) {
+                        sites = NULL, species = NULL, extirpation = 0) {
   r_fun <- if (is.function(r)) r else function(step) r
   r1 <- r_fun(1)
   m <- nrow(r1)
@@ -101,7 +112,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   stopifnot(all(dim(alpha) == k_all), n_steps >= 1)
   if (!is.null(disp_matrix)) stopifnot(all(dim(disp_matrix) == m))
   dispersal <- rep_len(dispersal, k_all)
-  stopifnot(all(dispersal >= 0 & dispersal <= 1))
+  extirpation <- rep_len(extirpation, k_all)
+  stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
   sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
   species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
   record_steps <- sort(unique(record_steps[record_steps >= 1 & record_steps <= n_steps]))
@@ -112,6 +124,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   alive <- seq_len(k_all)
   k <- k_all
   p_em <- rep(dispersal, each = m)
+  p_ex <- rep(extirpation, each = m)
   at <- t(alpha)
   n <- matrix(stats::rpois(m * k, seed_mean), m, k)
   last_seed <- max(c(0, seed_steps))
@@ -124,6 +137,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
       at <- at[keep, keep, drop = FALSE]
       k <- length(alive)
       p_em <- rep(dispersal[alive], each = m)
+      p_ex <- rep(extirpation[alive], each = m)
     }
     if (k > 0) {
       r_now <- r_fun(step)[, alive, drop = FALSE]
@@ -141,6 +155,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
           n <- n - em + imm
         }
       }
+      # no draws without extirpation, so that seeds give the same results as before
+      if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
     }
     if (!is.null(history) && step %in% record_steps)
       history[, alive, match(step, record_steps)] <- n

@@ -60,16 +60,34 @@ base sem dinâmica.
       cenários (dispersão, competição, paisagem), 25 sítios, 12 espécies, 300 passos,
       ambiente constante e 200 réplicas por modelo. Nenhuma das 80 comparações de
       distribuição foi significativa (KS, FDR 5%), e as diferenças nas médias de alfa,
-      gama e abundância total ficaram abaixo de 1%. Falta um ambiente que mude no tempo.
-- [x] Reproduzir qualitativamente os padrões de Thompson et al. (2020), em
-      `data-raw/validation_thompson.R`: 100 manchas, 50 espécies, 2200 passos, 30
-      paisagens, 15 taxas de dispersão, 5 larguras de nicho, 3 tipos de competição. H1,
-      H2, H3, H5 e H6 aparecem. Em H4, a parte da competição aparece, mas beta não cresce
-      com nichos mais estreitos entre 0,1 e 10: só em 0,05, onde quase não há
-      indivíduos. A Tabela 1 deles não estava disponível e as definições de beta são
-      nossas (gama/alfa), o que pode explicar a diferença. Ficou de fora a
-      competição-colonização, que exige extirpação estocástica.
-- [ ] Conferir a definição de beta na Tabela 1 de Thompson et al. (2020) e repetir H4.
+      gama e abundância total ficaram abaixo de 1%. Com extirpação de 0,02, nenhuma das 80
+      foi significativa, mas alfa ficou 8% abaixo na grade com dispersão 0,001: nossos
+      imigrantes são Poisson, como no código Julia dos autores, e o mcomsimr conserva os
+      dispersores (alfa 1,75, contra 1,85 com multinomial e 1,85 no mcomsimr). Falta um
+      ambiente que mude no tempo.
+- [x] Reproduzir os padrões de Thompson et al. (2020), em
+      `data-raw/validation_thompson.R` e `validation_thompson_cc.R`: 100 manchas, 50
+      espécies, 2200 passos, 30 paisagens, 15 taxas de dispersão, 6 das 13 larguras de
+      nicho, 4 tipos de competição. Os scripts seguem o código dos autores
+      (Meta_com_framework v1.0, Zenodo 10.5281/zenodo.3708350), que difere do artigo em
+      pontos que mudam o resultado: beta é gama/alfa, e não o gama − alfa da Tabela 1;
+      manchas e tempos vazios não entram em alfa; o ambiente é convertido em postos,
+      portanto uniforme em [0, 1]; dispersão começa em 0,00001, não 0,0001; a
+      competição-colonização reduz os imigrantes à metade. Com isso, em dispersão 1e-5,
+      stabilising dá alfa 4,6, gama 42 e beta 9,1 (σ = 0,5) e 6,6, 46 e 7,0 (σ = 10),
+      próximos das Figuras 3c e 3d lidas a olho. H1, H2, H3, H5 e H6 aparecem.
+- [x] H4 resolvido. A diferença anterior vinha do ambiente, não da definição de beta,
+      que já era gama/alfa. A parte da competição aparece (beta espacial em 1e-5, σ = 0,5:
+      equal 38,8, mixed 21,5, stabilising 9,1). A parte do nicho depende do cenário, como
+      na Figura 4 deles: em stabilising, beta tem pico em σ = 0,215 (14,4 contra 7,0 em
+      σ = 10); em mixed o pico é fraco, em σ = 0,5; em equal e dispersão baixa, beta cresce
+      com o nicho (16,5, 38,8 e 43,1 em σ = 0,215, 0,5 e 10), por deriva. Nichos estreitos
+      só elevam beta em equal a partir de dispersão perto de 0,02. O texto de H4 generaliza
+      mais do que a figura mostra. A comparação com as figuras é visual, porque os valores
+      publicados não estão em tabela.
+- [x] `extirpation` em `simulate_metacommunity()` e `mc_dynamics()`. O cenário
+      competição-colonização lembra as Figuras 3g e 3h: com σ = 0,5, gama sobe de 3,6 para
+      cerca de 6 perto de dispersão 5e-4; com σ = 10, colapsa em uma espécie perto de 0,02.
 - [x] Testes de propriedades com resultado analítico, em `test-analytic.R`: equilíbrios
       com uma e várias espécies, exclusão, fonte e sumidouro, fluxo pelo kernel.
 - [ ] Vignette ou seção "Validation" no site.
@@ -111,7 +129,7 @@ funções escritos à mão, o que indica o que falta no pacote.
       exclusão regional continuou até 3000 passos, e hoje nada avisa o usuário.
 - [ ] Saída em formato longo (tibble) a partir de `history`.
 - [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
-      mostrar ganho real, como foi feito no treeshapesim. O ABC da v0.5.0 depende disso.
+      mostrar ganho real, como foi feito no treeshapesim. O ABC da v0.6.0 depende disso.
 - [ ] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
       (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
@@ -119,7 +137,7 @@ funções escritos à mão, o que indica o que falta no pacote.
       temporais aumentaram o poder explicativo em até 59%, e a dispersão dependeu delas.
 - [ ] Piloto de identificabilidade, com poucos parâmetros: quanto dá para recuperar a
       partir dessas estatísticas, com um levantamento único e com séries temporais? É o
-      ponto de decisão para a v0.5.0, e o desenho deve ser combinado antes de rodar.
+      ponto de decisão para a v0.6.0, e o desenho deve ser combinado antes de rodar.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código.
@@ -142,7 +160,36 @@ com outros pacotes. As versões seguintes dependem desta.
 **Concluído quando:** um cenário simulado passar pelo Herodotools e recuperar a
 história conhecida.
 
-## v0.5.0: inferência por ABC
+## v0.5.0: métodos de metacommunity phylogenetics
+
+Objetivo: levar para o R os métodos que só existem em MATLAB. O código está nos
+suplementos de Peres-Neto et al. (2012) e Leibold et al. (2010), e nenhum dos dois
+métodos está em pacote de R.
+
+Vem antes do ABC por decisão de 2026-11-06. O código está em
+`~/Downloads/ECOL_93_175/` (Peres-Neto et al. 2012) e em
+`~/Downloads/ele_1523_sm_datas2.doc` (Leibold et al. 2010), fora do repositório porque
+os suplementos não trazem licença. Esta máquina não tem MATLAB nem Octave, e a
+comparação em dados fixos depende de um dos dois.
+
+- [ ] Peres-Neto et al. (2012): correlações entre traits e ambiente, autovetores
+      ponderados, seleção estocástica e partição da variação. Reaproveitar
+      `ade4::fourthcorner` e `adespatial::mem` se servirem.
+- [ ] Leibold et al. (2010), `MetacommunityPhylogenetics`: regressão ponderada por nó,
+      com testes de permutação.
+- [ ] `CreateNodeContrasts` de Peres-Neto (em `~/Downloads/matlabquestion/`), que monta
+      a `NodeMatrix` de espécies por nós a partir da árvore. Sem ela a regressão por nó
+      não tem entrada. Usar `rt.dat` do pacote como árvore de teste.
+- [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
+      permutações em paralelo com o Futureverse.
+- [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
+      coisa. Ver os possíveis erros em "Pendências e decisões".
+- [ ] Vignette com os métodos aplicados a dados simulados e reais.
+
+**Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
+reproduzirem o erro tipo I publicado.
+
+## v0.6.0: inferência por ABC
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0 e da estrutura comum da v0.4.0.
@@ -200,26 +247,6 @@ levantamento podem não informar a dispersão.
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
-
-## v0.6.0: métodos de metacommunity phylogenetics
-
-Objetivo: levar para o R os métodos que só existem em MATLAB. O código está nos
-suplementos de Peres-Neto et al. (2012) e Leibold et al. (2010), e nenhum dos dois
-métodos está em pacote de R.
-
-- [ ] Peres-Neto et al. (2012): correlações entre traits e ambiente, autovetores
-      ponderados, seleção estocástica e partição da variação. Reaproveitar
-      `ade4::fourthcorner` e `adespatial::mem` se servirem.
-- [ ] Leibold et al. (2010), `MetacommunityPhylogenetics`: regressão ponderada por nó,
-      com testes de permutação.
-- [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
-      permutações em paralelo com o Futureverse.
-- [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
-      coisa. Ver os possíveis erros em "Pendências e decisões".
-- [ ] Vignette com os métodos aplicados a dados simulados e reais.
-
-**Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
-reproduzirem o erro tipo I publicado.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
@@ -307,6 +334,12 @@ Objetivo: API estável e pacote no CRAN.
 
 ## Pendências e decisões
 
+- **Imigração na grade.** Decidir se `mc_dynamics()` passa a conservar dispersores, como o
+  mcomsimr, ou mantém a Poisson do código original. Mudar altera os resultados de
+  sementes antigas e exige refazer as vignettes.
+- **Erros no artigo de Thompson et al. (2020).** Tabela 1 (beta), faixa de dispersão,
+  conversão do ambiente em postos e metade dos imigrantes no cenário de
+  competição-colonização não batem com o código. Vale citar isso no artigo do pacote.
 - **Dependências do hub.** Hoje o pacote só importa `ape` e `stats`. Tidyverse, Futureverse
   e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das

@@ -60,3 +60,34 @@ test_that("print.mc_sim reports the simulation and returns it invisibly", {
   expect_output(print(sim), "recorded steps: 3")
   expect_identical(out, sim)
 })
+
+test_that("extirpation acts on each species and leaves other runs unchanged", {
+  r <- matrix(5, 30, 2)
+  a <- diag(0.05, 2)
+  set.seed(1)
+  out <- mc_dynamics(r, a, dispersal = 0, n_steps = 5, seed_steps = integer(0), seed_mean = 20,
+                     extirpation = c(0, 1))
+  expect_true(all(out$abundance[, 1] > 0))
+  expect_true(all(out$abundance[, 2] == 0))
+
+  set.seed(2)
+  none <- mc_dynamics(r, a, dispersal = 0.1, n_steps = 20)
+  set.seed(2)
+  zero <- mc_dynamics(r, a, dispersal = 0.1, n_steps = 20, extirpation = 0)
+  expect_identical(none, zero)
+
+  expect_error(mc_dynamics(r, a, dispersal = 0, n_steps = 5, extirpation = 2))
+})
+
+test_that("extirpation reaches the metacommunity and is kept with the result", {
+  set.seed(3)
+  tree <- ape::rcoal(5)
+  land <- landscape_implicit(40)
+  traits <- species_traits(tree)
+  alpha <- competition_matrix(tree, "none")
+  with_loss <- simulate_metacommunity(land, traits, alpha, dispersal = 0, n_steps = 150,
+                                      extirpation = 0.2)
+  without <- simulate_metacommunity(land, traits, alpha, dispersal = 0, n_steps = 150)
+  expect_equal(with_loss$extirpation, 0.2)
+  expect_lt(sum(with_loss$abundance > 0), sum(without$abundance > 0))
+})

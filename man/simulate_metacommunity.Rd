@@ -13,7 +13,8 @@ simulate_metacommunity(
   env_time = NULL,
   seed_steps = seq(10, 100, 10),
   seed_mean = 0.5,
-  record_steps = NULL
+  record_steps = NULL,
+  extirpation = 0
 )
 }
 \arguments{
@@ -38,11 +39,15 @@ landscape is constant.}
 site at each seeding step (and at the start).}
 
 \item{record_steps}{Optional steps at which abundances are recorded.}
+
+\item{extirpation}{Probability that a population is lost at each time step,
+one value or one per species.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
-\code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha} and \code{dispersal} used.
+\code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal} and \code{extirpation}
+used.
 }
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
@@ -62,8 +67,15 @@ probability proportional to the number of emigrants from the other sites
 immigrants of each species at each site is drawn from a Poisson
 distribution whose mean is the expected flow of emigrants through the
 dispersal kernel. This approximation does not conserve the number of
-dispersing individuals exactly, but has the right expectation.
+dispersing individuals exactly, but has the right expectation. The code of
+Thompson et al. (2020) does the same. Few emigrants may then produce no
+immigrant, so with \code{extirpation} and low dispersal, recolonisation is rarer
+than in mcomsimr, which conserves dispersers.
 }
+
+After dispersal, each population is lost with probability \code{extirpation},
+independently of its size. Thompson et al. (2020) used 0.002 in their
+competition-colonisation scenario and no extirpation in the others.
 
 During colonisation, Poisson(\code{seed_mean}) individuals of every species are
 added to every site at each of the \code{seed_steps}. After the last of these,

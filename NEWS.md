@@ -14,6 +14,9 @@
 - `phylo_beta_test()` and `phylo_beta()`: phylogenetic beta-diversity framework of
   the same article, a distance-based redundancy analysis of the mean phylogenetic
   distance between communities.
+- `simulate_metacommunity()` and `mc_dynamics()`: stochastic extirpation of
+  populations (`extirpation`), used by Thompson et al. (2020) in their
+  competition-colonisation scenario.
 - New article with animations of metacommunity dynamics.
 
 # comdynamite 0.1.0

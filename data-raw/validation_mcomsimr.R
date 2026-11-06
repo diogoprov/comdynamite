@@ -11,7 +11,9 @@
 # held constant, and an implicit landscape is a uniform disp_mat without a
 # diagonal. On a grid, mcomsimr distributes emigrants multinomially and
 # comdynamite draws immigrants from a Poisson distribution, so the number of
-# dispersers is conserved only in expectation.
+# dispersers is conserved only in expectation. This matters with extirpation and
+# low dispersal: at dispersal 0.001 on the grid, alpha is 1.75 with Poisson
+# immigrants, 1.85 with multinomial immigrants and 1.85 in mcomsimr (600 runs).
 library(comdynamite)
 library(mcomsimr)
 
@@ -31,6 +33,7 @@ n_after <- 200
 scenarios <- expand.grid(dispersal = c(0.001, 0.01, 0.1, 0.5),
                          competition = c("intraspecific", "stabilising"),
                          landscape = c("implicit", "grid"),
+                         extirpation = c(0, 0.02),
                          stringsAsFactors = FALSE)
 
 setup <- function(s) {
@@ -51,6 +54,7 @@ setup <- function(s) {
                        row.names = paste0("sp", seq_len(n_species)))
   list(env = env, optima = optima, alpha = alpha, xy = xy, from_to = from_to,
        traits = traits, grid = grid, dispersal = s$dispersal,
+       extirpation = s$extirpation,
        env_df = data.frame(env1 = rep(env, n_after), patch = rep(seq_len(n_sites), n_after),
                            time = rep(seq_len(n_after), each = n_sites)))
 }
@@ -58,7 +62,7 @@ setup <- function(s) {
 run_comdynamite <- function(p) {
   r <- growth_rates(p$env, p$traits)
   mc_dynamics(r, p$alpha, p$dispersal, n_steps = n_init + n_after,
-              disp_matrix = if (p$grid) p$from_to)$abundance
+              disp_matrix = if (p$grid) p$from_to, extirpation = p$extirpation)$abundance
 }
 
 run_mcomsimr <- function(p) {
@@ -66,7 +70,8 @@ run_mcomsimr <- function(p) {
     patches = n_sites, species = n_species, dispersal = p$dispersal, plot = FALSE,
     timesteps = n_after, burn_in = 0, initialization = n_init, max_r = max_r,
     env_niche_breadth = breadth, landscape = p$xy, disp_mat = t(p$from_to),
-    env.df = p$env_df, env_optima = p$optima, int_mat = t(p$alpha)))))
+    env.df = p$env_df, env_optima = p$optima, int_mat = t(p$alpha),
+    extirp_prob = p$extirpation))))
   d <- out$dynamics.df
   d <- d[d$time == max(d$time), ]
   n <- matrix(0L, n_sites, n_species)
@@ -93,7 +98,7 @@ one_scenario <- function(i) {
 }
 
 results <- parallel::mclapply(seq_len(nrow(scenarios)), one_scenario,
-                              mc.cores = nrow(scenarios))
+                              mc.cores = 16)
 saveRDS(results, "data-raw/validation_mcomsimr.rds", version = 2)
 
 # Summary: difference in means and Kolmogorov-Smirnov test for each statistic,
