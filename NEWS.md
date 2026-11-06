@@ -15,6 +15,9 @@
 - Functions that take a community and a phylogeny, traits or contrasts now match
   species by name and, as `picante::match.phylo.comm()`, drop with a warning the
   species found in only one of them. Repeated names are an error.
+- `plot_node_test()`: results of `node_test()` on the tree, as in Figure 3 of Leibold
+  et al. (2010), as a phylogram or a fan. `plot_trait_partition()`: fractions of
+  `trait_partition()`.
 - `daphniids`: data of Leibold et al. (2010), rebuilt from the public survey.
 - `node_contrasts()` now keeps nodes that join two tips, as the article does.
   `cherries = FALSE` gives the original code.

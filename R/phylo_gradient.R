@@ -171,6 +171,7 @@ print.mc_phylo_vector <- function(x, ...) {
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
 #' @param n_perm Number of permutations of sites and of species.
+#' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
 #'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`; and
@@ -207,6 +208,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #'
 #' Appendix A also gives semipartial correlations for each predictor, which are not
 #' implemented here.
+#'
+#' This function partitions variation and does not test each trait against each
+#' predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging
+#' regressions combined by the max test, in the package
+#' [TraitEnvMLMWA](https://github.com/CajoterBraak/TraitEnvMLMWA).
 #' @references
 #' Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning
 #' of species data matrices: estimation and comparison of fractions. *Ecology*, 87,
@@ -215,6 +221,10 @@ print.mc_phylo_vector <- function(x, ...) {
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 #' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
 #' 93, S14--S30. \doi{10.1890/11-0494.1}
+#'
+#' ter Braak, C. J. F. (2019). New robust weighted averaging- and model-based methods for
+#' assessing trait-environment relationships. *Methods in Ecology and Evolution*, 10,
+#' 1962--1971. \doi{10.1111/2041-210X.13278}
 #' @examplesIf requireNamespace("adespatial", quietly = TRUE)
 #' set.seed(1)
 #' env <- runif(40, 0, 100)
@@ -222,7 +232,9 @@ print.mc_phylo_vector <- function(x, ...) {
 #' trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 #' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 #' colnames(comm) <- names(trait)
-#' trait_partition(comm, trait, env, space, n_perm = 49)
+#' out <- trait_partition(comm, trait, env, space, n_perm = 49)
+#' out
+#' plot_trait_partition(out)
 #' @export
 trait_partition <- function(comm, traits, env, space, component = c("mean", "variance"),
                             n_perm = 999) {

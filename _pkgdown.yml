@@ -41,8 +41,10 @@ reference:
   - phylo_beta
   - node_test
   - node_contrasts
+  - plot_node_test
   - phylo_vector
   - trait_partition
+  - plot_trait_partition
 - title: Data
   contents:
   - daphniids

@@ -132,14 +132,16 @@ node_contrasts <- function(tree, cherries = TRUE) {
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits-environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526.
-#' @seealso [pcc_test()] and [phylo_beta_test()] test the whole tree at once.
+#' @seealso [plot_node_test()] shows the results on the tree. [pcc_test()] and
+#'   [phylo_beta_test()] test the whole tree at once.
 #' @examples
 #' # daphniids of Leibold et al. (2010)
 #' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
-#' out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+#' out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 #' out
 #' round(out$semipartial, 2)
+#' plot_node_test(out, daphniids$tree, test = "site")
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1) {
   comm <- as.matrix(comm) * 1

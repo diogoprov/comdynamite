@@ -1,0 +1,174 @@
+#' Plot the results of a node test on the phylogeny
+#'
+#' Draws the tree with the associations found by [node_test()] at each node, as in
+#' Figure 3 of Leibold et al. (2010). Blue symbols are predictors and red symbols are
+#' biogeographic events, each with the names of the variables. Solid symbols remain
+#' significant after the false discovery rate, and open symbols are significant only as
+#' isolated tests.
+#'
+#' The article does not say which tests form a family for the correction. Here, the
+#' correction of Benjamini & Hochberg (1995) uses all nodes and variables of each set, so
+#' predictors and events are corrected separately.
+#'
+#' As the smallest p-value is 1 / (`n_perm` + 1), solid symbols need many permutations.
+#' With few species, `test = "max"` may leave no symbols at all (see [node_test()]).
+#'
+#' @param x Result of [node_test()].
+#' @param tree The `phylo` object that gave the contrasts of [node_contrasts()].
+#' @param test Permutation test to show: `"max"` for the larger p-value of sites and
+#'   species, `"site"` for sites alone, or `"joint"` for the permutation of the article.
+#'   See [node_test()] for what each one tests.
+#' @param type `"phylogram"`, as in the article, or `"fan"`.
+#' @param alpha Significance level.
+#' @param col Colours of predictors and biogeographic events.
+#' @param cex Size of the text.
+#' @param legend Add a legend?
+#' @param ... Other arguments of [ape::plot.phylo()].
+#' @return Invisibly, a data frame with one row per symbol, with `node`, `set`, `variable`,
+#'   `p`, `p_adjusted` and `corrected`, which is `TRUE` for solid symbols.
+#' @references
+#' Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: a
+#' practical and powerful approach to multiple testing. *Journal of the Royal Statistical
+#' Society: Series B*, 57, 289--300. \doi{10.1111/j.2517-6161.1995.tb02031.x}
+#'
+#' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
+#' phylogenetics: separating the roles of environmental filters and historical
+#' biogeography. *Ecology Letters*, 13, 1290--1299.
+#' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @examples
+#' nodes <- node_contrasts(daphniids$tree)
+#' set.seed(1)
+#' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
+#'                  n_perm = 49)
+#' plot_node_test(out, daphniids$tree, test = "site")
+#' \donttest{
+#' # solid symbols need more permutations
+#' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
+#'                  n_perm = 999)
+#' plot_node_test(out, daphniids$tree, test = "site")
+#' plot_node_test(out, daphniids$tree, test = "site", type = "fan")
+#' }
+#' @export
+plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
+                           type = c("phylogram", "fan"), alpha = 0.05,
+                           col = c("#0072B2", "#D55E00"), cex = 0.8, legend = TRUE, ...) {
+  stopifnot(inherits(x, "mc_node_test"), inherits(tree, "phylo"), length(col) == 2)
+  test <- match.arg(test)
+  type <- match.arg(type)
+  check_node_tree(x, tree)
+  marks <- node_marks(x, test, alpha)
+  # names of species and of variables can go beyond the plot region
+  old <- graphics::par(xpd = NA)
+  on.exit(graphics::par(old))
+  ape::plot.phylo(tree, type = type, cex = cex, ...)
+  last <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+  for (node in unique(marks$node)) {
+    here <- marks[marks$node == node, ]
+    # one symbol per set and level, with solid ones next to the node
+    groups <- split(here, list(here$set == "biogeography", !here$corrected), drop = TRUE)
+    side <- vapply(groups, function(g) if (g$set[1] == "biogeography") -1 else 1, numeric(1))
+    at <- as.integer(node)
+    y <- last$yy[at] + symbol_steps(side, graphics::strheight("M", cex = cex))
+    for (i in seq_along(groups)) draw_symbol(last$xx[at], y[i], groups[[i]], col, cex, type)
+  }
+  if (legend) {
+    graphics::legend("bottomleft", c("Predictor", "Biogeography", "After correction", "Uncorrected"),
+                     pch = c(19, 19, 19, 21), col = c(col, "black", "black"), bty = "n", cex = cex)
+  }
+  invisible(marks)
+}
+
+# the tree must be able to hold the species of each node
+check_node_tree <- function(x, tree) {
+  sizes <- colSums(node_contrasts(tree) != 0)
+  size <- sizes[as.character(x$nodes$node)]
+  if (anyNA(size) || any(size < x$nodes$n_species)) {
+    stop("`tree` is not the tree of the contrasts in `x`", call. = FALSE)
+  }
+}
+
+# one row for each significant test, in the sets of predictors and events
+node_marks <- function(x, test, alpha) {
+  field <- c(max = "p_partial", site = "p_partial_site", joint = "p_partial_joint")[[test]]
+  one_set <- function(p, set) {
+    if (is.null(p)) return(NULL)
+    table <- data.frame(node = rep(rownames(p), ncol(p)), set = set,
+                        variable = rep(colnames(p), each = nrow(p)), p = as.vector(p),
+                        p_adjusted = stats::p.adjust(as.vector(p), "BH"))
+    table <- table[!is.na(table$p) & table$p <= alpha, ]
+    table$corrected <- table$p_adjusted <= alpha
+    table
+  }
+  marks <- rbind(one_set(x[[field]], "environment"),
+                 one_set(x$biogeography[[field]], "biogeography"))
+  rownames(marks) <- NULL
+  marks
+}
+
+# symbols in a column at the node, predictors above and events below
+symbol_steps <- function(side, height) {
+  side * (stats::ave(side, side, FUN = seq_along) - 0.4) * height * 1.3
+}
+
+# labels go towards the root of a phylogram and outwards in a fan, over a white box
+draw_symbol <- function(x, y, group, col, cex, type) {
+  colour <- col[1 + (group$set[1] == "biogeography")]
+  label <- paste(group$variable, collapse = ", ")
+  size <- cex * 0.85
+  width <- graphics::strwidth(label, cex = size)
+  height <- graphics::strheight(label, cex = size)
+  gap <- graphics::strwidth("n", cex = size)
+  left <- if (type == "phylogram") x - gap - width > graphics::par("usr")[1] else x < 0
+  start <- if (left) x - gap - width else x + gap
+  graphics::rect(start, y - height / 2, start + width, y + height / 2, col = "white", border = NA)
+  graphics::text(start, y, label, adj = c(0, 0.5), col = colour, cex = size)
+  graphics::points(x, y, pch = if (group$corrected[1]) 19 else 21, col = colour, bg = "white")
+}
+
+#' Plot the fractions of a trait partition
+#'
+#' Draws one bar for each fraction of [trait_partition()]: `a` for the environment alone,
+#' `b` for what the environment and space share, and `c` for space alone. The unexplained
+#' fraction `d` is given below the plot, as it would hide the others. Adjusted fractions
+#' can be negative. Dark bars are significant, and `b` has no test, so it is grey.
+#'
+#' @param x Result of [trait_partition()].
+#' @param value Column of the fractions to show: `"r2_adjusted"`, `"r2"`, or
+#'   `"r2_component"` for the share of the mean or variance component.
+#' @param test Permutation test: `"max"` for the larger p-value of sites and species,
+#'   `"site"` or `"taxa"`.
+#' @param alpha Significance level.
+#' @param col Colour of significant bars.
+#' @param ... Other arguments of [graphics::barplot()].
+#' @return Invisibly, the rows of `x$fractions` for `a`, `b` and `c`.
+#' @examples
+#' set.seed(1)
+#' trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
+#' env <- runif(40, 0, 100)
+#' space <- cbind(runif(40), runif(40))
+#' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
+#' colnames(comm) <- names(trait)
+#' out <- trait_partition(comm, trait, env, space, n_perm = 49)
+#' plot_trait_partition(out)
+#' @export
+plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
+                                 test = c("max", "site", "taxa"), alpha = 0.05,
+                                 col = "#0072B2", ...) {
+  stopifnot(inherits(x, "mc_trait_partition"))
+  value <- match.arg(value)
+  test <- match.arg(test)
+  table <- x$fractions
+  shown <- table[match(c("c", "b", "a"), table$fraction), ]
+  p <- shown[[paste0("p_", test)]]
+  fill <- ifelse(is.na(p), "grey70", ifelse(p <= alpha, col, grDevices::adjustcolor(col, 0.3)))
+  old <- graphics::par(mar = c(5, 9, 3, 2))
+  on.exit(graphics::par(old))
+  graphics::barplot(shown[[value]], horiz = TRUE, names.arg = c("Space [c]", "Shared [b]",
+                                                                "Environment [a]"),
+                    col = fill, border = NA, las = 1, xlab = value,
+                    main = paste(x$component, "component"),
+                    sub = paste("Unexplained [d]:",
+                                format(table[[value]][table$fraction == "d"], digits = 3)), ...)
+  graphics::abline(v = 0)
+  invisible(shown[3:1, ])
+}

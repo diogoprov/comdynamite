@@ -96,9 +96,10 @@ few sites, get \code{NA}. The original stops with an error.
 # daphniids of Leibold et al. (2010)
 nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
-out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
 round(out$semipartial, 2)
+plot_node_test(out, daphniids$tree, test = "site")
 }
 \references{
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
@@ -115,5 +116,6 @@ traits-environment relationships in the fourth-corner problem. \emph{Ecology}, 9
 1525--1526.
 }
 \seealso{
-\code{\link[=pcc_test]{pcc_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
+\code{\link[=plot_node_test]{plot_node_test()}} shows the results on the tree. \code{\link[=pcc_test]{pcc_test()}} and
+\code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
 }
