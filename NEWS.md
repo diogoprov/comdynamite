@@ -2,6 +2,8 @@
 
 - `node_contrasts()`: `branch_lengths = TRUE` gives the coding with branch lengths of the
   supplement of Leibold et al. (2010).
+- `plot_node_test()`: with `type = "fan"`, the names of the variables follow the radii and
+  no longer overlap the names of the species.
 - `plot_node_heatmap()`: semipartial correlations of `node_test()` as a table of nodes by
   variables.
 - `simulate_logistic()` now uses the values of the code of Ives & Helmus (2011): the default

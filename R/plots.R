@@ -18,7 +18,8 @@
 #' @param test Permutation test to show: `"max"` for the larger p-value of sites and
 #'   species, `"site"` for sites alone, or `"joint"` for the permutation of the article.
 #'   See [node_test()] for what each one tests.
-#' @param type `"phylogram"`, as in the article, or `"fan"`.
+#' @param type `"phylogram"`, as in the article, or `"fan"`, for very large trees, with the
+#'   names of the variables along the radii so that they stay clear of the species.
 #' @param alpha Significance level.
 #' @param col Colours of predictors and biogeographic events.
 #' @param cex Size of the text.
@@ -46,7 +47,6 @@
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
 #'                  n_perm = 999)
 #' plot_node_test(out, daphniids$tree, test = "site")
-#' plot_node_test(out, daphniids$tree, test = "site", type = "fan")
 #' }
 #' @export
 plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
@@ -68,8 +68,12 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
     groups <- split(here, list(here$set == "biogeography", !here$corrected), drop = TRUE)
     side <- vapply(groups, function(g) if (g$set[1] == "biogeography") -1 else 1, numeric(1))
     at <- as.integer(node)
-    y <- last$yy[at] + symbol_steps(side, graphics::strheight("M", cex = cex))
-    for (i in seq_along(groups)) draw_symbol(last$xx[at], y[i], groups[[i]], col, cex, type)
+    angle <- if (type == "fan") atan2(last$yy[at], last$xx[at]) else 0
+    steps <- symbol_steps(side, graphics::strheight("M", cex = cex))
+    x <- last$xx[at] - steps * sin(angle)
+    y <- last$yy[at] + steps * cos(angle)
+    room <- if (type == "fan") sqrt(x^2 + y^2) else x - graphics::par("usr")[1]
+    for (i in seq_along(groups)) draw_symbol(x[i], y[i], groups[[i]], col, cex, angle, room[i])
   }
   if (legend) {
     graphics::legend("bottomleft", c("Predictor", "Biogeography", "After correction", "Uncorrected"),
@@ -165,19 +169,31 @@ symbol_steps <- function(side, height) {
   side * (stats::ave(side, side, FUN = seq_along) - 0.4) * height * 1.3
 }
 
-# labels go towards the root of a phylogram and outwards in a fan, over a white box
-draw_symbol <- function(x, y, group, col, cex, type) {
+# labels go towards the root, over a white box, along the radius of a fan
+draw_symbol <- function(x, y, group, col, cex, angle, room) {
   colour <- col[1 + (group$set[1] == "biogeography")]
   label <- paste(group$variable, collapse = ", ")
   size <- cex * 0.85
   width <- graphics::strwidth(label, cex = size)
   height <- graphics::strheight(label, cex = size)
   gap <- graphics::strwidth("n", cex = size)
-  left <- if (type == "phylogram") x - gap - width > graphics::par("usr")[1] else x < 0
-  start <- if (left) x - gap - width else x + gap
-  graphics::rect(start, y - height / 2, start + width, y + height / 2, col = "white", border = NA)
-  graphics::text(start, y, label, adj = c(0, 0.5), col = colour, cex = size)
+  place <- label_place(x, y, width, gap, angle, room)
+  along <- c(cos(angle), sin(angle)) * width / 2
+  across <- c(-sin(angle), cos(angle)) * height / 2
+  graphics::polygon(place$x + c(-1, 1, 1, -1) * along[1] + c(-1, -1, 1, 1) * across[1],
+                    place$y + c(-1, 1, 1, -1) * along[2] + c(-1, -1, 1, 1) * across[2],
+                    col = "white", border = NA)
+  graphics::text(place$x, place$y, label, srt = place$srt, col = colour, cex = size)
   graphics::points(x, y, pch = if (group$corrected[1]) 19 else 21, col = colour, bg = "white")
+}
+
+# centre and rotation of a label; it goes away from the root only if there is no room,
+# and turns on the left of a fan so that it is not upside down
+label_place <- function(x, y, width, gap, angle, room) {
+  direction <- if (room > gap + width) -1 else 1
+  shift <- direction * (gap + width / 2)
+  list(x = x + shift * cos(angle), y = y + shift * sin(angle),
+       srt = angle * 180 / pi + if (cos(angle) < 0) 180 else 0)
 }
 
 #' Plot the fractions of a trait partition

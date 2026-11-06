@@ -25,7 +25,8 @@ plot_node_test(
 species, \code{"site"} for sites alone, or \code{"joint"} for the permutation of the article.
 See \code{\link[=node_test]{node_test()}} for what each one tests.}
 
-\item{type}{\code{"phylogram"}, as in the article, or \code{"fan"}.}
+\item{type}{\code{"phylogram"}, as in the article, or \code{"fan"}, for very large trees, with the
+names of the variables along the radii so that they stay clear of the species.}
 
 \item{alpha}{Significance level.}
 
@@ -67,7 +68,6 @@ plot_node_test(out, daphniids$tree, test = "site")
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 999)
 plot_node_test(out, daphniids$tree, test = "site")
-plot_node_test(out, daphniids$tree, test = "site", type = "fan")
 }
 }
 \references{

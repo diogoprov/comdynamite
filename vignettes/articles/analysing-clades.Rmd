@@ -52,11 +52,8 @@ article, and should be read with that limit in mind.
 plot_node_test(out, daphniids$tree, test = "site")
 ```
 
-The same plot works as a fan, which helps with larger trees.
-
-```{r, fig.alt = "The same tree and symbols drawn as a fan."}
-plot_node_test(out, daphniids$tree, test = "site", type = "fan")
-```
+A tree of this size reads best as a phylogram. For very large trees, `type = "fan"` draws the
+same plot in less space.
 
 `plot_node_heatmap()` gives the direction and size of each association, as in Table S1 of
 the article.

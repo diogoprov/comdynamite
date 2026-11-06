@@ -36,6 +36,16 @@ test_that("symbols of a node stay apart, with predictors above events", {
   expect_equal(symbol_steps(c(1, -1, 1), 1), c(0.6, -0.6, 1.6) * 1.3)
 })
 
+test_that("labels go towards the root and stay readable", {
+  phylogram <- label_place(5, 1, width = 2, gap = 1, angle = 0, room = 5)
+  expect_equal(unlist(phylogram), c(x = 3, y = 1, srt = 0))
+  expect_equal(label_place(5, 1, 2, 1, 0, room = 2)$x, 7)
+  left <- label_place(-5, 0, width = 2, gap = 1, angle = pi, room = 5)
+  expect_equal(c(left$x, left$srt), c(-3, 360))
+  top <- label_place(0, 5, width = 2, gap = 1, angle = pi / 2, room = 5)
+  expect_equal(c(top$x, top$y, top$srt), c(0, 3, 90))
+})
+
 test_that("a tree that cannot hold the nodes is an error", {
   out <- daphniid_result(NULL)
   expect_error(plot_node_test(out, ape::rcoal(5)), "not the tree")
