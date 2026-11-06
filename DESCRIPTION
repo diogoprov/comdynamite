@@ -45,3 +45,4 @@ X-schema.org-keywords: metacommunity, community-ecology, simulation,
     species-sorting, mass-effects, dispersal, competition, phylogenetics,
     community-phylogenetics, process-based-model
 Config/roxygen2/version: 8.1.1
+LazyData: true

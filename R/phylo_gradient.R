@@ -399,7 +399,10 @@ corner_nulls <- function(comm, traits, env, n_perm, site_permutations) {
        })) |> matrix(n_perm))
 }
 
-permutation_p <- function(null, observed) (sum(null >= observed) + 1) / (length(null) + 1)
+# a permutation can leave a variable without variance, and then it does not count
+permutation_p <- function(null, observed) {
+  (sum(null >= observed, na.rm = TRUE) + 1) / (sum(!is.na(null)) + 1)
+}
 
 # principal coordinates with species weights (Appendix B of Peres-Neto et al. 2012);
 # half_squared holds D^2 / 2. The coordinates have weighted mean zero and are orthogonal

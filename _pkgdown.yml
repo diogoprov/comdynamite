@@ -45,6 +45,9 @@ reference:
   - phylo_vector
   - trait_partition
   - spatial_eigenvectors
+- title: Data
+  contents:
+  - daphniids
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
   contents:

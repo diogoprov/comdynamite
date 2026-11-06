@@ -13,7 +13,7 @@ library(comdynamite)
 RNGkind("L'Ecuyer-CMRG")
 set.seed(2010)
 tree <- ape::rphylo(24, birth = 1, death = 0)
-nodes <- node_contrasts(tree)
+nodes <- node_contrasts(tree, cherries = FALSE)
 
 one_replicate <- function(scenario) {
   traits <- species_traits(tree, lambda = as.numeric(scenario %in% c("phylogeny", "both")),

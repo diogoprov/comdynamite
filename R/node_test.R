@@ -3,10 +3,11 @@
 #' Codes each node of a tree as a contrast between its two descendant clades, as
 #' in Leibold et al. (2010). One clade starts at -1 and the other at 1, and the
 #' value is halved at each node on the way to the tips. Species outside the node
-#' get zero. Nodes that join two tips are left out, as in the original code,
-#' because they contrast two single species.
+#' get zero.
 #'
 #' @param tree A `phylo` object with dichotomous nodes.
+#' @param cherries Keep nodes that join two tips? The article tests them (its Figure 3),
+#'   but the function `CreateNodeContrasts` of the authors leaves them out.
 #' @return Matrix with one row per tip and one column per node, named by the node
 #'   numbers of `tree`.
 #' @references
@@ -17,7 +18,7 @@
 #' @examples
 #' node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
 #' @export
-node_contrasts <- function(tree) {
+node_contrasts <- function(tree, cherries = TRUE) {
   stopifnot(inherits(tree, "phylo"))
   n_tips <- length(tree$tip.label)
   children <- split(tree$edge[, 2], tree$edge[, 1])
@@ -28,7 +29,7 @@ node_contrasts <- function(tree) {
     unlist(lapply(children[[as.character(node)]], spread, value = value / 2),
            use.names = TRUE)
   }
-  informative <- Filter(function(node) any(children[[node]] > n_tips), names(children))
+  informative <- Filter(function(node) cherries || any(children[[node]] > n_tips), names(children))
   contrasts <- vapply(informative, function(node) {
     pair <- children[[node]]
     out <- numeric(n_tips)
@@ -57,6 +58,11 @@ node_contrasts <- function(tree) {
 #' `p_adjusted` gives the false discovery rate that the article uses. This correction
 #' needs many permutations, as the smallest p-value is 1 / (`n_perm` + 1), so the default
 #' is the 9999 of the article.
+#'
+#' With few species at a node, permutations of species have little power, so `p_max`
+#' is conservative: with the [daphniids] of the article, of 13 species, no predictor
+#' passes it, whereas sites alone recover most of the environmental results of its
+#' Figure 3 (see the article on validation).
 #'
 #' Each predictor gets a semipartial correlation, the square root of the loss of R2
 #' when it is removed, with the sign of its slope when it is alone in the model.
@@ -102,7 +108,8 @@ node_contrasts <- function(tree) {
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `statistic`,
 #'   `p_site`, `p_taxa`, `p_max` and `p_adjusted`; `semipartial`, a matrix of nodes by
 #'   predictors; `p_partial`, with the larger of the two p-values for each of them;
-#'   and `biogeography`, a list with the same two matrices for the events, or `NULL`.
+#'   `p_partial_site`, with the p-values of sites alone; and `biogeography`, a list with
+#'   the same three matrices for the events, or `NULL`.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -118,14 +125,12 @@ node_contrasts <- function(tree) {
 #' 1525--1526.
 #' @seealso [pcc_test()] and [phylo_beta_test()] test the whole tree at once.
 #' @examples
+#' # daphniids of Leibold et al. (2010)
+#' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
-#' tree <- ape::rcoal(12)
-#' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
-#'                          rmax_range = c(0, 30))
-#' env <- runif(40, 0, 100)
-#' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-#' keep <- rowSums(comm) > 0
-#' node_test(comm[keep, ], node_contrasts(tree), env[keep], n_perm = 19)
+#' out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+#' out
+#' round(out$semipartial, 2)
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
   comm <- as.matrix(comm) * 1
@@ -147,6 +152,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
                  p_partial = matrix_of(results, "p_partial", env_names),
+                 p_partial_site = matrix_of(results, "p_partial_site", env_names),
                  biogeography = if (!is.null(biogeography)) {
                    biogeography <- as.matrix(biogeography)
                    stopifnot(nrow(biogeography) == nrow(comm), all(biogeography %in% c(-1, 0, 1)))
@@ -167,7 +173,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999) {
                      matrix(x, ncol(nodes), length(events), dimnames = list(node_names, events))
                    }
                    list(semipartial = shaped(first("semipartial")),
-                        p_partial = shaped(first("p_partial")))
+                        p_partial = shaped(first("p_partial")),
+                        p_partial_site = shaped(first("p_partial_site")))
                  }),
             class = "mc_node_test")
 }
@@ -193,7 +200,7 @@ one_node <- function(comm, contrast, env, n_perm) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                                      r2 = NA_real_, r2_adjusted = NA_real_, statistic = NA_real_,
                                      p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_),
-                semipartial = blank, p_partial = blank))
+                semipartial = blank, p_partial = blank, p_partial_site = blank))
   }
   null_of <- function(draw) {
     t(replicate(n_perm, {
@@ -209,15 +216,18 @@ one_node <- function(comm, contrast, env, n_perm) {
   })
   p_site <- count(by_site[, 1], observed$statistic)
   p_taxa <- count(by_taxa[, 1], observed$statistic)
-  p_partial <- vapply(seq_len(ncol(env)), function(j) {
-    max(count(by_site[, j + 1], observed$partial_f[j]),
-        count(by_taxa[, j + 1], observed$partial_f[j]))
+  partial_site <- vapply(seq_len(ncol(env)), function(j) {
+    count(by_site[, j + 1], observed$partial_f[j])
+  }, numeric(1))
+  partial_taxa <- vapply(seq_len(ncol(env)), function(j) {
+    count(by_taxa[, j + 1], observed$partial_f[j])
   }, numeric(1))
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
                             statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
                             p_max = max(p_site, p_taxa)),
-       semipartial = observed$semipartial, p_partial = p_partial)
+       semipartial = observed$semipartial, p_partial = pmax(partial_site, partial_taxa),
+       p_partial_site = partial_site)
 }
 
 # statistics of one node; all NA when the model cannot be fitted

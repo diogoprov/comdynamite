@@ -4,10 +4,13 @@
 \alias{node_contrasts}
 \title{Node contrasts of a phylogeny}
 \usage{
-node_contrasts(tree)
+node_contrasts(tree, cherries = TRUE)
 }
 \arguments{
 \item{tree}{A \code{phylo} object with dichotomous nodes.}
+
+\item{cherries}{Keep nodes that join two tips? The article tests them (its Figure 3),
+but the function \code{CreateNodeContrasts} of the authors leaves them out.}
 }
 \value{
 Matrix with one row per tip and one column per node, named by the node
@@ -17,8 +20,7 @@ numbers of \code{tree}.
 Codes each node of a tree as a contrast between its two descendant clades, as
 in Leibold et al. (2010). One clade starts at -1 and the other at 1, and the
 value is halved at each node on the way to the tips. Species outside the node
-get zero. Nodes that join two tips are left out, as in the original code,
-because they contrast two single species.
+get zero.
 }
 \examples{
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))

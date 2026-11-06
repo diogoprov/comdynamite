@@ -33,6 +33,10 @@ test_that("species without individuals raise no warning", {
   expect_no_warning(phylo_beta(extra, tree))
 })
 
+test_that("permutations without variance do not count", {
+  expect_equal(permutation_p(c(1, NaN, 3), 2), 2 / 3)
+})
+
 test_that("long lists are cut", {
   expect_identical(species_list(letters[1:3]), "a, b, c")
   expect_match(species_list(letters), "and 16 more$")

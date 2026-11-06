@@ -10,7 +10,9 @@ simulated <- function(lambda, n_sites = 50, n_species = 14) {
 
 test_that("contrasts halve at each node, as worked out by hand", {
   tree <- ape::read.tree(text = "((a,b),(c,(d,e)));")
-  x <- node_contrasts(tree)
+  expect_equal(ncol(node_contrasts(tree)), 4)
+  expect_equal(unname(node_contrasts(tree)[, "7"]), c(-1, 1, 0, 0, 0))
+  x <- node_contrasts(tree, cherries = FALSE)
   # nodes: root, (a,b) is left out, (c,(d,e)), (d,e) is left out
   expect_equal(ncol(x), 2)
   expect_equal(x[, 1], c(a = -0.5, b = -0.5, c = 0.5, d = 0.25, e = 0.25))
@@ -50,6 +52,15 @@ test_that("with one predictor, the semipartial squared is the R2", {
   flipped <- node_test(d$comm, x, -d$env, n_perm = 3)
   expect_equal(flipped$semipartial, -out$semipartial)
   expect_equal(out$nodes$p_adjusted, p.adjust(out$nodes$p_max, "BH"))
+})
+
+test_that("the daphniids run from the data of the package", {
+  set.seed(1)
+  out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env,
+                   biogeography = daphniids$biogeography[, 1:2], n_perm = 2)
+  expect_equal(dim(out$p_partial_site), c(12, 9))
+  expect_true(all(out$p_partial >= out$p_partial_site, na.rm = TRUE))
+  expect_equal(dim(out$biogeography$p_partial_site), c(12, 2))
 })
 
 test_that("biogeographic events use only their sites and control for the environment", {

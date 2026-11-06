@@ -27,7 +27,8 @@ List of class \code{mc_node_test} with \code{nodes}, a data frame with one row p
 node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{statistic},
 \code{p_site}, \code{p_taxa}, \code{p_max} and \code{p_adjusted}; \code{semipartial}, a matrix of nodes by
 predictors; \code{p_partial}, with the larger of the two p-values for each of them;
-and \code{biogeography}, a list with the same two matrices for the events, or \code{NULL}.
+\code{p_partial_site}, with the p-values of sites alone; and \code{biogeography}, a list with
+the same three matrices for the events, or \code{NULL}.
 }
 \description{
 Implements the regression of Leibold et al. (2010). For each node, sites without
@@ -45,6 +46,11 @@ of the two tests. With many nodes these p-values need a correction, and
 \code{p_adjusted} gives the false discovery rate that the article uses. This correction
 needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), so the default
 is the 9999 of the article.
+
+With few species at a node, permutations of species have little power, so \code{p_max}
+is conservative: with the \link{daphniids} of the article, of 13 species, no predictor
+passes it, whereas sites alone recover most of the environmental results of its
+Figure 3 (see the article on validation).
 
 Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.
@@ -77,14 +83,12 @@ Nodes for which a predictor has no variance among the remaining sites, or with t
 few sites, get \code{NA}. The original stops with an error.
 }
 \examples{
+# daphniids of Leibold et al. (2010)
+nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
-tree <- ape::rcoal(12)
-traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
-                         rmax_range = c(0, 30))
-env <- runif(40, 0, 100)
-comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-keep <- rowSums(comm) > 0
-node_test(comm[keep, ], node_contrasts(tree), env[keep], n_perm = 19)
+out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 19)
+out
+round(out$semipartial, 2)
 }
 \references{
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity

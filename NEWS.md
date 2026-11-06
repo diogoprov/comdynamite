@@ -15,6 +15,9 @@
 - Functions that take a community and a phylogeny, traits or contrasts now match
   species by name and, as `picante::match.phylo.comm()`, drop with a warning the
   species found in only one of them. Repeated names are an error.
+- `daphniids`: data of Leibold et al. (2010), rebuilt from the public survey.
+- `node_contrasts()` now keeps nodes that join two tips, as the article does.
+  `cherries = FALSE` gives the original code.
 - `node_test()`: `semipartial` replaces `partial_r2`, following the article, and
   there are `p_adjusted` (false discovery rate) and biogeographic events.
 - `pcc_test()` and `phylo_eigenvectors()`: phylogenetic community composition of
