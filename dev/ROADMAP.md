@@ -199,7 +199,8 @@ máquina.
       divide e usa padronizados, e seguimos o artigo.
 - [x] Codificação com comprimentos de ramo, na seção III do suplemento de Leibold et al.:
       `branch_lengths = TRUE`, conferida na Figura S2.
-- [x] `plot_node_test()`: Figura 3 de Leibold et al. (2010), em filograma ou leque, com
+- [x] `plot_node_test()`: Figura 3 de Leibold et al. (2010), em filograma ou, para árvores
+      muito grandes, leque, com os nomes das variáveis ao longo dos raios, com
       `ape::plot.phylo()`, sem dependência nova. O artigo não define a família do FDR:
       corrigimos preditores e eventos separadamente, o que está no help.
 - [x] `plot_trait_partition()`: frações em barras, com negativas como zero (Legendre 2008).
@@ -223,6 +224,38 @@ se ainda fizerem sentido.
 
 **Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
 reproduzirem o erro tipo I publicado.
+
+## v0.5.2: biogeografia em `node_test()` e auditoria
+
+Objetivo: tirar a maior barreira de uso do método de Leibold et al. (2010), que é montar a
+matriz de eventos, e revisar o pacote do ponto de vista de quem usa. Vem antes de v0.3.0 e
+v0.6.0 por decisão de 2026-11-06.
+
+- [ ] `biogeography_matrix()`: matriz de eventos a partir da área de cada site ou de uma
+      matriz 0/1 de sites por áreas. Pares de áreas definidos a priori são o caminho
+      principal, como em Leibold et al. (2010) e Leibold & Chase (2018, cap. 9), que usam
+      hipóteses publicadas. "Cada área contra as outras" fica como opção exploratória, com
+      fora das áreas como 0 (script de 2022) ou como -1 (script de 2015), e aviso quando um
+      lado tiver poucos sites. Os dois scripts estão em `legacy/` do af-frogs-climate-rarity.
+      Sobrepor polígonos e grade fica no exemplo, com `sf::st_join()`, sem dependência nova.
+- [ ] Permutações restritas em `node_test()`, como `site_permutations` de `pcc_test()`, ou
+      de áreas inteiras. Sites de um refúgio são vizinhos e a permutação livre deve inflar o
+      erro tipo I dos eventos. É hipótese ainda não testada: simular antes de afirmar.
+- [ ] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
+      (2018), além da cor.
+- [ ] Citar Leibold & Chase (2018) em `node_test()` e em `biogeography_matrix()`.
+- [ ] Auditoria do código com foco em experiência de uso: nomes e argumentos, mensagens de
+      erro, saídas de `print`, exemplos e o caminho de um usuário novo, além de bugs.
+
+Opção, sem data: calanoides como segundo exemplo, se as espécies estiverem nas tabelas
+públicas da EMAP. A topologia sairia da Fig. 9.5b, e os resultados do livro não foram
+publicados em artigo, então seria exemplo novo, sem afirmar que reproduz o livro. O texto
+do livro diz que os dafinídeos não mostram restrição biogeográfica, mas a Fig. 9.5a tem
+vários triângulos: vale perguntar aos autores.
+
+**Concluído quando:** a matriz dos refúgios e a dos dafinídeos saírem da função, o erro tipo
+I dos eventos estiver medido com sites agregados no espaço e os achados da auditoria
+estiverem resolvidos ou registrados aqui.
 
 ## v0.6.0: inferência por ABC
 
@@ -411,6 +444,8 @@ Objetivo: API estável e pacote no CRAN.
   ou mudar o arquivo de saída.
 
 ## Referências citadas neste roadmap
+
+- Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population Biology 59. Princeton University Press. https://doi.org/10.2307/j.ctt1wf4d24
 
 Conferidas no Crossref em 2026-11-05.
 
