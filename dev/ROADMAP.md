@@ -90,7 +90,8 @@ base sem dinâmica.
       cerca de 6 perto de dispersão 5e-4; com σ = 10, colapsa em uma espécie perto de 0,02.
 - [x] Testes de propriedades com resultado analítico, em `test-analytic.R`: equilíbrios
       com uma e várias espécies, exclusão, fonte e sumidouro, fluxo pelo kernel.
-- [ ] Vignette ou seção "Validation" no site.
+- [x] Artigo "Validating the model of Thompson et al. (2020)" no site, com as divergências
+      entre artigo e código, também resumidas no help de `simulate_metacommunity()`.
 
 **Concluído quando:** houver um script em `data-raw/` que reproduza a comparação.
 
