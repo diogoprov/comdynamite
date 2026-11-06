@@ -9,6 +9,14 @@
 - `simulate_logistic()` and `logistic_gradients()`: presences and absences from
   logistic responses to two gradients, with the seven scenarios of Appendix C of
   Peres-Neto et al. (2012).
+- `fourth_corner_test()`, `phylo_vector()`, `trait_partition()` and
+  `spatial_eigenvectors()`: phylogenetic gradient analysis of Peres-Neto et al.
+  (2012), tested against the original code in Octave.
+- Functions that take a community and a phylogeny, traits or contrasts now match
+  species by name and, as `picante::match.phylo.comm()`, drop with a warning the
+  species found in only one of them. Repeated names are an error.
+- `node_test()`: `semipartial` replaces `partial_r2`, following the article, and
+  there are `p_adjusted` (false discovery rate) and biogeographic events.
 - `pcc_test()` and `phylo_eigenvectors()`: phylogenetic community composition of
   Peres-Neto & Kembel (2015), with site and species permutations.
 - `phylo_beta_test()` and `phylo_beta()`: phylogenetic beta-diversity framework of

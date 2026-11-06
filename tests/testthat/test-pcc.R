@@ -88,6 +88,6 @@ test_that("invalid data are rejected", {
   empty <- d$comm
   empty[1, ] <- 0
   expect_error(pcc_test(empty, d$tree, d$env, n_perm = 5), "at least one individual")
-  expect_error(pcc_test(d$comm[, -1], d$tree, d$env, n_perm = 5))
+  expect_warning(pcc_test(d$comm[, -1], d$tree, d$env, n_perm = 5), "dropped")
   expect_error(pcc_test(d$comm, d$tree, d$env[-1], n_perm = 5))
 })

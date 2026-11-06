@@ -41,6 +41,10 @@ reference:
   - phylo_beta
   - node_test
   - node_contrasts
+  - fourth_corner_test
+  - phylo_vector
+  - trait_partition
+  - spatial_eigenvectors
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
   contents:

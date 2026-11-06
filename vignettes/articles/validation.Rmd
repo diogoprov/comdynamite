@@ -52,7 +52,7 @@ and not gamma - alpha.
 | Seeding | Every 10 steps up to step 100 | Every 20 steps up to step 100 |
 | Emigrants | Binomial | Poisson |
 | Sampling | Every 20 steps after step 1000 | Every 22 steps, from about step 1040 |
-| Replicate landscapes | 30 | The scripts loop over 15 |
+| Replicate landscapes | 30 in the text, 15 in the captions of Figures S1 and S2 | The scripts loop over 15 |
 | Competition-colonisation: immigrants | Not mentioned | Halved in this scenario only |
 | Competition-colonisation: dominants | Dominant effects from U(1, 1.5) | The same, but only on species later in the order, so dominants form a hierarchy |
 

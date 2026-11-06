@@ -44,9 +44,10 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' The authors used presences and absences. Abundances are accepted, with
 #' species and site totals as weights.
 #'
-#' @param comm Matrix with one row per site and one column per species, named
-#'   as the tips of `tree`. Every site needs at least one individual.
-#' @param tree A `phylo` object with the same species as `comm`.
+#' @param comm Matrix with one row per site and one column per species. Species are
+#'   matched to the tips of `tree` by name, in any order, and those in only one of the
+#'   two are dropped with a warning. Every site needs at least one individual.
+#' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
 #'   site.
 #' @param n_perm Number of permutations of sites and of species.
@@ -75,14 +76,12 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @export
 pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
                      site_permutations = NULL) {
-  comm <- as.matrix(comm)
+  matched <- check_phylo_comm(comm, tree)
+  comm <- matched$comm
+  tree <- matched$tree
   env <- as.matrix(env)
-  stopifnot(inherits(tree, "phylo"), setequal(colnames(comm), tree$tip.label),
-            nrow(env) == nrow(comm), nrow(comm) > ncol(env) + 1, n_perm >= 1,
-            all(comm >= 0))
-  if (any(rowSums(comm) == 0)) stop("every site needs at least one individual", call. = FALSE)
+  stopifnot(nrow(env) == nrow(comm), nrow(comm) > ncol(env) + 1, n_perm >= 1)
   if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
-  comm <- comm[, tree$tip.label, drop = FALSE]
   vectors <- phylo_eigenvectors(tree, squared = squared)
   observed <- pcc_r2(comm, vectors, env)
   statistic <- stats::var(observed)

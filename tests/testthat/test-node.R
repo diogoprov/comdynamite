@@ -41,12 +41,35 @@ test_that("statistics equal the original function run in Octave", {
   expect_equal(mine, expected, tolerance = 1e-6)
 })
 
-test_that("partial R2 with one predictor is the R2", {
+test_that("with one predictor, the semipartial squared is the R2", {
   set.seed(1)
   d <- simulated(1)
   x <- node_contrasts(d$tree)
   out <- node_test(d$comm, x, d$env, n_perm = 3)
-  expect_equal(unname(out$partial_r2[, 1]), out$nodes$r2)
+  expect_equal(unname(out$semipartial[, 1]^2), out$nodes$r2)
+  flipped <- node_test(d$comm, x, -d$env, n_perm = 3)
+  expect_equal(flipped$semipartial, -out$semipartial)
+  expect_equal(out$nodes$p_adjusted, p.adjust(out$nodes$p_max, "BH"))
+})
+
+test_that("biogeographic events use only their sites and control for the environment", {
+  set.seed(7)
+  d <- simulated(1, n_sites = 70)
+  x <- node_contrasts(d$tree)
+  n <- nrow(d$comm)
+  event <- sample(c(-1, 0, 1), n, replace = TRUE)
+  out <- node_test(d$comm, x, d$env, biogeography = cbind(north_south = event), n_perm = 3)
+  expect_identical(colnames(out$biogeography$semipartial), "north_south")
+  expect_equal(dim(out$biogeography$p_partial), c(ncol(x), 1))
+  sites <- event != 0
+  m <- which(x[, 1] != 0)
+  direct <- node_fit(d$comm[sites, names(m), drop = FALSE], x[m, 1],
+                     cbind(event[sites], d$env[sites]))
+  expect_equal(unname(out$biogeography$semipartial[1, 1]), direct$semipartial[1])
+  unnamed <- node_test(d$comm, x, d$env, biogeography = cbind(event), n_perm = 2)
+  expect_null(node_test(d$comm, x, d$env, n_perm = 2)$biogeography)
+  expect_identical(colnames(unname(unnamed$biogeography$semipartial)), NULL)
+  expect_error(node_test(d$comm, x, d$env, biogeography = cbind(event * 2), n_perm = 2))
 })
 
 test_that("the test detects clades that differ in their response", {
@@ -78,10 +101,10 @@ test_that("several predictors give one partial value each", {
   d <- simulated(1)
   env <- cbind(temperature = d$env, noise = runif(nrow(d$comm)))
   out <- node_test(d$comm, node_contrasts(d$tree), env, n_perm = 5)
-  expect_identical(colnames(out$partial_r2), colnames(env))
-  expect_equal(dim(out$p_partial), dim(out$partial_r2))
+  expect_identical(colnames(out$semipartial), colnames(env))
+  expect_equal(dim(out$p_partial), dim(out$semipartial))
   unnamed <- node_test(d$comm, node_contrasts(d$tree), unname(env), n_perm = 2)
-  expect_identical(colnames(unnamed$partial_r2), c("predictor1", "predictor2"))
+  expect_identical(colnames(unnamed$semipartial), c("predictor1", "predictor2"))
 })
 
 test_that("nodes that cannot be fitted give NA", {
@@ -109,6 +132,6 @@ test_that("invalid data are rejected", {
   set.seed(6)
   d <- simulated(1)
   x <- node_contrasts(d$tree)
-  expect_error(node_test(d$comm[, -1], x, d$env, n_perm = 5))
+  expect_warning(node_test(d$comm[, -1], x, d$env, n_perm = 2), "not in `comm` dropped")
   expect_error(node_test(d$comm, x, d$env[-1], n_perm = 5))
 })

@@ -110,7 +110,6 @@ test_that("invalid data are rejected", {
   empty <- d$comm
   empty[1, ] <- 0
   expect_error(phylo_beta(empty, d$tree), "at least one individual")
-  expect_error(phylo_beta_test(d$comm[, -1], d$tree, d$env, n_perm = 5))
   expect_error(phylo_beta_test(d$comm, d$tree, d$env[-1], n_perm = 5))
   expect_error(phylo_beta_test(d$comm, d$tree, cbind(d$env, 2 * d$env), n_perm = 5),
                "collinear")

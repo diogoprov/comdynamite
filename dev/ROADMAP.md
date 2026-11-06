@@ -183,8 +183,10 @@ comparação em dados fixos depende de um dos dois.
       Poder por nó .08, e ao menos um nó em 77% das réplicas, mas 26% sob a nula: é preciso
       corrigir para testes múltiplos. Os erros do original foram confirmados na leitura e
       corrigidos, com a diferença descrita em `?node_test`.
-- [ ] Conferir a definição de semiparcial no texto de Leibold et al. (2010), que não
-      consegui ler. `partial_r2` é uma escolha nossa.
+- [x] Semiparcial, FDR e eventos biogeográficos conforme o texto de Leibold et al. (2010).
+      O MATLAB multiplica pelo módulo da inclinação e usa preditores brutos; o artigo
+      divide e usa padronizados, e seguimos o artigo.
+- [ ] Codificação com comprimentos de ramo, na seção III do suplemento de Leibold et al.
 - [ ] Heatmaps ou mapa da árvore com os nós significativos.
 - [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
       permutações em paralelo com o Futureverse.

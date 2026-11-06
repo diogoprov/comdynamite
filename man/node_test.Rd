@@ -4,11 +4,12 @@
 \alias{node_test}
 \title{Test clades against the environment, node by node}
 \usage{
-node_test(comm, nodes, env, n_perm = 999)
+node_test(comm, nodes, env, biogeography = NULL, n_perm = 999)
 }
 \arguments{
-\item{comm}{Matrix with one row per site and one column per species, named
-as the rows of \code{nodes}.}
+\item{comm}{Matrix with one row per site and one column per species. Species are
+matched to the rows of \code{nodes} by name, in any order, and those in only one of the
+two are dropped with a warning.}
 
 \item{nodes}{Matrix of contrasts with one row per species, from
 \code{\link[=node_contrasts]{node_contrasts()}}.}
@@ -16,13 +17,17 @@ as the rows of \code{nodes}.}
 \item{env}{Predictor, or matrix or data frame of predictors, with one row per
 site.}
 
+\item{biogeography}{Optional matrix of biogeographic events with one row per site
+and values of 1, -1 and 0.}
+
 \item{n_perm}{Number of permutations of sites and of species.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
 node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{statistic},
-\code{p_site}, \code{p_taxa} and \code{p_max}; \code{partial_r2}, a matrix of nodes by predictors; and
-\code{p_partial}, with the larger of the two p-values for each of them.
+\code{p_site}, \code{p_taxa}, \code{p_max} and \code{p_adjusted}; \code{semipartial}, a matrix of nodes by
+predictors; \code{p_partial}, with the larger of the two p-values for each of them;
+and \code{biogeography}, a list with the same two matrices for the events, or \code{NULL}.
 }
 \description{
 Implements the regression of Leibold et al. (2010). For each node, sites without
@@ -34,12 +39,24 @@ whether the two clades that split there differ in their response to the predicto
 \details{
 The test statistic is the explained over the residual sum of squares. It is
 tested by permuting sites, and by replacing the species of the node with a random
-set of the same size from all species. Following Peres-Neto et al. (2012) and
-ter Braak et al. (2012), the p-value to report is the larger of the two. With many
-nodes, these p-values need a correction for multiple tests.
+set of the same size from all species. The article permutes both at once; following
+Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
+of the two tests. With many nodes these p-values need a correction, and
+\code{p_adjusted} gives the false discovery rate that the article uses. This correction
+needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), and the article
+uses 9999.
+
+Each predictor gets a semipartial correlation, the square root of the loss of R2
+when it is removed, with the sign of its slope when it is alone in the model.
+
+Biogeographic events follow the article: a column of \code{biogeography} has 1 for sites
+in one area, -1 for sites in the other and 0 for sites in neither. Each event is
+tested only in its sites, controlling for \code{env}. A column without zeros compares one
+area with all the others. Events with few sites in one area give unstable values.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
-\code{MetacommunityPhylogenetics} of the authors, checked in Octave. Three parts differ:
+\code{MetacommunityPhylogenetics} of the authors, checked in Octave. Three parts of that
+function differ from this one:
 \itemize{
 \item In the original, the species permutations shuffle only the first columns
 of the community matrix, as many as there are species in the node, so they
@@ -47,9 +64,8 @@ do not draw from all species. Here they do.
 \item The original keeps the total of the observed data after permuting
 species. Here it is recalculated.
 \item The semipartial values of the original use the raw predictors, without an
-intercept, whereas the full model uses standardised predictors. Here
-\code{partial_r2} is the loss of R2 when a predictor is removed, with standardised
-predictors in both models.
+intercept, and multiply by the absolute slope. The article uses standardised
+predictors and divides by it, to keep only the sign, which is what we do.
 }
 
 As in the original, R2 sums squares without site weights, although the fit

@@ -35,8 +35,8 @@
 #' phylo_beta(comm > 0, tree)
 #' @export
 phylo_beta <- function(comm, tree) {
-  comm <- check_phylo_comm(comm, tree)
-  stats::as.dist(beta_matrix(comm / rowSums(comm), tip_distances(tree)))
+  matched <- check_phylo_comm(comm, tree)
+  stats::as.dist(beta_matrix(matched$comm / rowSums(matched$comm), tip_distances(matched$tree)))
 }
 
 #' Test phylogenetic beta diversity against the environment
@@ -97,7 +97,9 @@ phylo_beta <- function(comm, tree) {
 #' phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #' @export
 phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL) {
-  comm <- check_phylo_comm(comm, tree)
+  matched <- check_phylo_comm(comm, tree)
+  comm <- matched$comm
+  tree <- matched$tree
   env <- as.matrix(env)
   stopifnot(nrow(env) == nrow(comm), nrow(comm) > ncol(env) + 1, n_perm >= 1)
   if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
@@ -138,11 +140,49 @@ print.mc_phylo_beta <- function(x, ...) {
   invisible(x)
 }
 
+# the community and the tree with the same species, in the order of the tips
 check_phylo_comm <- function(comm, tree) {
+  stopifnot(inherits(tree, "phylo"))
+  comm <- check_species_comm(comm, tree$tip.label, "the phylogeny")
+  tree <- ape::drop.tip(tree, setdiff(tree$tip.label, colnames(comm)))
+  list(comm = comm[, tree$tip.label, drop = FALSE], tree = tree)
+}
+
+# numeric community with the species in `species`, in that order, and no empty site
+check_species_comm <- function(comm, species, source) {
   comm <- as.matrix(comm) * 1
-  stopifnot(inherits(tree, "phylo"), setequal(colnames(comm), tree$tip.label), all(comm >= 0))
+  stopifnot(all(comm >= 0))
+  comm <- comm[, match_species(comm, species, source), drop = FALSE]
   if (any(rowSums(comm) == 0)) stop("every site needs at least one individual", call. = FALSE)
-  comm[, tree$tip.label, drop = FALSE]
+  comm
+}
+
+# species shared by `comm` and `species`, matched by name, as match.phylo.comm() of
+# picante does. Species of `comm` without individuals do not matter, so they raise no
+# warning
+match_species <- function(comm, species, source) {
+  if (is.null(colnames(comm))) stop("`comm` needs species names in its columns", call. = FALSE)
+  if (is.null(species)) stop(source, " needs species names", call. = FALSE)
+  repeated <- unique(c(colnames(comm)[duplicated(colnames(comm))], species[duplicated(species)]))
+  if (length(repeated) > 0) stop("repeated species: ", species_list(repeated), call. = FALSE)
+  only_comm <- setdiff(colnames(comm)[colSums(comm) > 0], species)
+  only_source <- setdiff(species, colnames(comm))
+  if (length(only_comm) > 0) {
+    warning(length(only_comm), " species of `comm` not in ", source, " dropped: ",
+            species_list(only_comm), call. = FALSE)
+  }
+  if (length(only_source) > 0) {
+    warning(length(only_source), " species of ", source, " not in `comm` dropped: ",
+            species_list(only_source), call. = FALSE)
+  }
+  shared <- intersect(species, colnames(comm))
+  if (length(shared) < 2) stop("`comm` and ", source, " share fewer than two species", call. = FALSE)
+  shared
+}
+
+species_list <- function(x) {
+  shown <- paste(x[seq_len(min(length(x), 10))], collapse = ", ")
+  if (length(x) > 10) paste0(shown, " and ", length(x) - 10, " more") else shown
 }
 
 tip_distances <- function(tree) {

@@ -51,12 +51,24 @@ node_contrasts <- function(tree) {
 #'
 #' The test statistic is the explained over the residual sum of squares. It is
 #' tested by permuting sites, and by replacing the species of the node with a random
-#' set of the same size from all species. Following Peres-Neto et al. (2012) and
-#' ter Braak et al. (2012), the p-value to report is the larger of the two. With many
-#' nodes, these p-values need a correction for multiple tests.
+#' set of the same size from all species. The article permutes both at once; following
+#' Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
+#' of the two tests. With many nodes these p-values need a correction, and
+#' `p_adjusted` gives the false discovery rate that the article uses. This correction
+#' needs many permutations, as the smallest p-value is 1 / (`n_perm` + 1), and the article
+#' uses 9999.
+#'
+#' Each predictor gets a semipartial correlation, the square root of the loss of R2
+#' when it is removed, with the sign of its slope when it is alone in the model.
+#'
+#' Biogeographic events follow the article: a column of `biogeography` has 1 for sites
+#' in one area, -1 for sites in the other and 0 for sites in neither. Each event is
+#' tested only in its sites, controlling for `env`. A column without zeros compares one
+#' area with all the others. Events with few sites in one area give unstable values.
 #'
 #' R2, adjusted R2 and the statistic equal those of the MATLAB function
-#' `MetacommunityPhylogenetics` of the authors, checked in Octave. Three parts differ:
+#' `MetacommunityPhylogenetics` of the authors, checked in Octave. Three parts of that
+#' function differ from this one:
 #' \itemize{
 #'   \item In the original, the species permutations shuffle only the first columns
 #'     of the community matrix, as many as there are species in the node, so they
@@ -64,9 +76,8 @@ node_contrasts <- function(tree) {
 #'   \item The original keeps the total of the observed data after permuting
 #'     species. Here it is recalculated.
 #'   \item The semipartial values of the original use the raw predictors, without an
-#'     intercept, whereas the full model uses standardised predictors. Here
-#'     `partial_r2` is the loss of R2 when a predictor is removed, with standardised
-#'     predictors in both models.
+#'     intercept, and multiply by the absolute slope. The article uses standardised
+#'     predictors and divides by it, to keep only the sign, which is what we do.
 #' }
 #'
 #' As in the original, R2 sums squares without site weights, although the fit
@@ -76,17 +87,21 @@ node_contrasts <- function(tree) {
 #' Nodes for which a predictor has no variance among the remaining sites, or with too
 #' few sites, get `NA`. The original stops with an error.
 #'
-#' @param comm Matrix with one row per site and one column per species, named
-#'   as the rows of `nodes`.
+#' @param comm Matrix with one row per site and one column per species. Species are
+#'   matched to the rows of `nodes` by name, in any order, and those in only one of the
+#'   two are dropped with a warning.
 #' @param nodes Matrix of contrasts with one row per species, from
 #'   [node_contrasts()].
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
 #'   site.
+#' @param biogeography Optional matrix of biogeographic events with one row per site
+#'   and values of 1, -1 and 0.
 #' @param n_perm Number of permutations of sites and of species.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `statistic`,
-#'   `p_site`, `p_taxa` and `p_max`; `partial_r2`, a matrix of nodes by predictors; and
-#'   `p_partial`, with the larger of the two p-values for each of them.
+#'   `p_site`, `p_taxa`, `p_max` and `p_adjusted`; `semipartial`, a matrix of nodes by
+#'   predictors; `p_partial`, with the larger of the two p-values for each of them;
+#'   and `biogeography`, a list with the same two matrices for the events, or `NULL`.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -111,23 +126,48 @@ node_contrasts <- function(tree) {
 #' keep <- rowSums(comm) > 0
 #' node_test(comm[keep, ], node_contrasts(tree), env[keep], n_perm = 19)
 #' @export
-node_test <- function(comm, nodes, env, n_perm = 999) {
+node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999) {
   comm <- as.matrix(comm) * 1
   nodes <- as.matrix(nodes)
   env <- as.matrix(env)
-  stopifnot(setequal(colnames(comm), rownames(nodes)), nrow(env) == nrow(comm),
-            n_perm >= 1, all(comm >= 0))
-  comm <- comm[, rownames(nodes), drop = FALSE]
-  names_env <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
-  results <- lapply(seq_len(ncol(nodes)), function(i) one_node(comm, nodes[, i], env, n_perm))
-  matrix_of <- function(field) {
-    out <- do.call(rbind, lapply(results, `[[`, field))
-    dimnames(out) <- list(colnames(nodes), names_env)
-    out
+  stopifnot(nrow(env) == nrow(comm), n_perm >= 1, all(comm >= 0))
+  species <- match_species(comm, rownames(nodes), "`nodes`")
+  comm <- comm[, species, drop = FALSE]
+  nodes <- nodes[species, , drop = FALSE]
+  node_names <- colnames(nodes) %||% seq_len(ncol(nodes))
+  env_names <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
+  per_node <- function(run) lapply(seq_len(ncol(nodes)), function(i) run(nodes[, i]))
+  matrix_of <- function(results, field, names) {
+    matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
+           dimnames = list(node_names, names))
   }
-  table <- do.call(rbind, lapply(results, `[[`, "summary"))
-  structure(list(nodes = data.frame(node = colnames(nodes) %||% seq_len(ncol(nodes)), table),
-                 partial_r2 = matrix_of("partial_r2"), p_partial = matrix_of("p_partial")),
+  results <- per_node(function(contrast) one_node(comm, contrast, env, n_perm))
+  table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
+  table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
+  structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
+                 p_partial = matrix_of(results, "p_partial", env_names),
+                 biogeography = if (!is.null(biogeography)) {
+                   biogeography <- as.matrix(biogeography)
+                   stopifnot(nrow(biogeography) == nrow(comm), all(biogeography %in% c(-1, 0, 1)))
+                   events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
+                   by_event <- lapply(seq_len(ncol(biogeography)), function(e) {
+                     sites <- biogeography[, e] != 0
+                     predictors <- cbind(biogeography[sites, e], env[sites, , drop = FALSE])
+                     per_node(function(contrast) {
+                       one_node(comm[sites, , drop = FALSE], contrast, predictors, n_perm)
+                     })
+                   })
+                   first <- function(field) {
+                     vapply(by_event, function(event) {
+                       vapply(event, function(node) node[[field]][1], numeric(1))
+                     }, numeric(ncol(nodes)))
+                   }
+                   shaped <- function(x) {
+                     matrix(x, ncol(nodes), length(events), dimnames = list(node_names, events))
+                   }
+                   list(semipartial = shaped(first("semipartial")),
+                        p_partial = shaped(first("p_partial")))
+                 }),
             class = "mc_node_test")
 }
 
@@ -135,7 +175,8 @@ node_test <- function(comm, nodes, env, n_perm = 999) {
 print.mc_node_test <- function(x, ...) {
   tested <- x$nodes[!is.na(x$nodes$p_max), ]
   cat("<mc_node_test>", nrow(x$nodes), "nodes,", nrow(tested), "tested\n")
-  cat("nodes with p (max) <= 0.05, before correction:", sum(tested$p_max <= 0.05), "\n")
+  cat("nodes with p (max) <= 0.05:", sum(tested$p_max <= 0.05), "before correction,",
+      sum(tested$p_adjusted <= 0.05), "after\n")
   invisible(x)
 }
 
@@ -151,7 +192,7 @@ one_node <- function(comm, contrast, env, n_perm) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                                      r2 = NA_real_, r2_adjusted = NA_real_, statistic = NA_real_,
                                      p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_),
-                partial_r2 = blank, p_partial = blank))
+                semipartial = blank, p_partial = blank))
   }
   null_of <- function(draw) {
     t(replicate(n_perm, {
@@ -175,7 +216,7 @@ one_node <- function(comm, contrast, env, n_perm) {
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
                             statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
                             p_max = max(p_site, p_taxa)),
-       partial_r2 = observed$partial_r2, p_partial = p_partial)
+       semipartial = observed$semipartial, p_partial = p_partial)
 }
 
 # statistics of one node; all NA when the model cannot be fitted
@@ -203,8 +244,10 @@ node_fit <- function(incidence, values, env) {
     if (p == 1) return(r2)
     r2 - sum(weighted_fit(predictors[, -j, drop = FALSE], response, site_weights)^2) / total
   }, numeric(1))
+  slopes <- colSums(site_weights * predictors * response)
   list(statistic = explained / residual, partial_f = partial_r2 / residual, r2 = r2,
-       r2_adjusted = 1 - (n - 1) / (n - p - 1) * (1 - r2), partial_r2 = partial_r2, n_sites = n)
+       r2_adjusted = 1 - (n - 1) / (n - p - 1) * (1 - r2),
+       semipartial = sign(slopes) * sqrt(pmax(partial_r2, 0)), n_sites = n)
 }
 
 weighted_fit <- function(predictors, response, weights) {
