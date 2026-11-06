@@ -2,9 +2,9 @@
 
 Draws the tree with the associations found by
 [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
-at each node, as in Figure 3 of Leibold et al. (2010). Blue symbols are
-predictors and red symbols are biogeographic events, each with the names
-of the variables. Solid symbols remain significant after the false
+at each node, as in Figure 3 of Leibold et al. (2010). Blue circles are
+predictors and red triangles are biogeographic events, each with the
+names of the variables. Solid symbols remain significant after the false
 discovery rate, and open symbols are significant only as isolated tests.
 
 ## Usage

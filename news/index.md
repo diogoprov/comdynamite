@@ -1,5 +1,18 @@
 # Changelog
 
+## comdynamite (development version)
+
+- [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md):
+  events of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  from the area of each site, as pairs of areas stated in advance or as
+  each area against the others.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `site_permutations` gives a restricted null model. For events, it
+  moves the areas across the sites.
+- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md):
+  biogeographic events are triangles, as in Leibold & Chase (2018).
+
 ## comdynamite 0.5.1
 
 - [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md):

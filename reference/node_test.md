@@ -10,7 +10,15 @@ there differ in their response to the predictors.
 ## Usage
 
 ``` r
-node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1)
+node_test(
+  comm,
+  nodes,
+  env,
+  biogeography = NULL,
+  n_perm = 9999,
+  cores = 1,
+  site_permutations = NULL
+)
 ```
 
 ## Arguments
@@ -46,6 +54,13 @@ node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1)
   where one core is used. For reproducible p-values with more than one
   core, call `RNGkind("L'Ecuyer-CMRG")` before
   [`set.seed()`](https://rdrr.io/r/base/Random.html).
+
+- site_permutations:
+
+  Optional matrix of site indices with one permutation per row, for
+  example from
+  [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
+  to use instead of free permutations of sites.
 
 ## Value
 
@@ -93,6 +108,17 @@ neither. Each event is tested only in its sites, controlling for `env`.
 Other contrasts are allowed, for example a column without zeros, which
 compares one area with all the others. Events with few sites in one area
 give unstable values.
+[`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
+builds the matrix from the area of each site.
+
+Free permutations treat sites as exchangeable. When sites of an area are
+neighbours and the community has spatial structure of its own, they
+reject too often: 45% of tests at the 5% level in a simulation with
+areas placed at random, against 5% with
+[`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
+(see the article on analysing clades). `site_permutations` accepts a
+restricted null model. For events, each row moves the areas across the
+sites, which keep their community and predictors.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 `MetacommunityPhylogenetics` of the authors, checked in Octave. Three
@@ -135,6 +161,8 @@ species traits-environment relationships in the fourth-corner problem.
 
 ## See also
 
+[`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
+codes the events.
 [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
 and
 [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)

@@ -60,8 +60,8 @@ places the results on the tree, as in Figure 3 of the article.
 plot_node_test(out, daphniids$tree, test = "site")
 ```
 
-![Phylogeny of daphniids with blue symbols for predictors and red
-symbols for biogeographic events at the nodes, labelled with the names
+![Phylogeny of daphniids with blue circles for predictors and red
+triangles for biogeographic events at the nodes, labelled with the names
 of the
 variables.](analysing-clades_files/figure-html/unnamed-chunk-5-1.png)
 
@@ -83,6 +83,47 @@ bold.](analysing-clades_files/figure-html/unnamed-chunk-6-1.png)
 
 A positive value means that the second clade of the node, in the order
 of the tree, is favoured where the predictor is high.
+
+## Coding biogeographic events
+
+[`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
+builds the events from the area of each site. Events should come from a
+hypothesis stated in advance, as the areas on the two sides of a barrier
+(Leibold et al. 2010; Leibold & Chase 2018). Here, three regions are
+separated by two barriers, and the later one splits the last two
+regions.
+
+``` r
+
+region <- rep(c("north", "centre", "south", NA), c(8, 6, 6, 10))
+events <- list(barrier = list("north", c("centre", "south")),
+               river = list("centre", "south"))
+head(biogeography_matrix(region, events, min_sites = 3))
+#>      barrier river
+#> [1,]       1     0
+#> [2,]       1     0
+#> [3,]       1     0
+#> [4,]       1     0
+#> [5,]       1     0
+#> [6,]       1     0
+```
+
+`contrast = "others"` compares each area with the rest, for example each
+refugium with the other refugia. It needs no hypothesis about how areas
+relate, so it asks a weaker question.
+
+Sites of an area are often neighbours, and free permutations then reject
+too often. We simulated 1000 metacommunities on a torus of 15 by 15
+sites, with communities that followed a hidden autocorrelated
+environment and two blocks of 25 sites placed at random, so that events
+had no effect (`data-raw/validation_events.R`). Free permutations
+rejected 44.8% of the tests of a node at the 5% level, and permutations
+from
+[`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
+given in `site_permutations`, rejected 4.9%. The events in the figures
+above used free permutations, so they should be read with this in mind.
+Landscapes with edges need a restricted null model chosen for them, and
+a matrix of permutations of any origin can be given.
 
 ## How much of the phylogenetic structure is due to environment and space?
 
@@ -150,12 +191,16 @@ plot_trait_partition(partition)
 ```
 
 ![Bars of the fractions explained by environment, by space and by
-both.](analysing-clades_files/figure-html/unnamed-chunk-10-1.png)
+both.](analysing-clades_files/figure-html/unnamed-chunk-11-1.png)
 
 The test of each trait against each predictor is a different question,
 for which ter Braak (2019) is the reference.
 
 ## References
+
+Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*.
+Monographs in Population Biology 59. Princeton University Press.
+<https://doi.org/10.2307/j.ctt1wf4d24>
 
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 phylogenetics: separating the roles of environmental filters and

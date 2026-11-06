@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -118,7 +118,7 @@ should be read with that limit in mind.</p>
 Figure 3 of the article.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_node_test.html">plot_node_test</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">tree</span>, test <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="analysing-clades_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="Phylogeny of daphniids with blue symbols for predictors and red symbols for biogeographic events at the nodes, labelled with the names of the variables." width="672"></p>
+<p><img src="analysing-clades_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="Phylogeny of daphniids with blue circles for predictors and red triangles for biogeographic events at the nodes, labelled with the names of the variables." width="672"></p>
 <p>A tree of this size reads best as a phylogram. For very large trees,
 <code>type = "fan"</code> draws the same plot in less space.</p>
 <p><code><a href="../reference/plot_node_heatmap.html">plot_node_heatmap()</a></code> gives the direction and size of each
@@ -130,6 +130,41 @@ association, as in Table S1 of the article.</p>
 order of the tree, is favoured where the predictor is high.</p>
 </div>
 <div class="section level2">
+<h2 id="coding-biogeographic-events">Coding biogeographic events<a class="anchor" aria-label="anchor" href="#coding-biogeographic-events"></a>
+</h2>
+<p><code><a href="../reference/biogeography_matrix.html">biogeography_matrix()</a></code> builds the events from the area of
+each site. Events should come from a hypothesis stated in advance, as
+the areas on the two sides of a barrier (Leibold et al. 2010; Leibold
+&amp; Chase 2018). Here, three regions are separated by two barriers,
+and the later one splits the last two regions.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">region</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"north"</span>, <span class="st">"centre"</span>, <span class="st">"south"</span>, <span class="cn">NA</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">6</span>, <span class="fl">6</span>, <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">events</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>barrier <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"north"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"south"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>               river <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="st">"centre"</span>, <span class="st">"south"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="../reference/biogeography_matrix.html">biogeography_matrix</a></span><span class="op">(</span><span class="va">region</span>, <span class="va">events</span>, min_sites <span class="op">=</span> <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;      barrier river</span></span>
+<span><span class="co">#&gt; [1,]       1     0</span></span>
+<span><span class="co">#&gt; [2,]       1     0</span></span>
+<span><span class="co">#&gt; [3,]       1     0</span></span>
+<span><span class="co">#&gt; [4,]       1     0</span></span>
+<span><span class="co">#&gt; [5,]       1     0</span></span>
+<span><span class="co">#&gt; [6,]       1     0</span></span></code></pre></div>
+<p><code>contrast = "others"</code> compares each area with the rest,
+for example each refugium with the other refugia. It needs no hypothesis
+about how areas relate, so it asks a weaker question.</p>
+<p>Sites of an area are often neighbours, and free permutations then
+reject too often. We simulated 1000 metacommunities on a torus of 15 by
+15 sites, with communities that followed a hidden autocorrelated
+environment and two blocks of 25 sites placed at random, so that events
+had no effect (<code>data-raw/validation_events.R</code>). Free
+permutations rejected 44.8% of the tests of a node at the 5% level, and
+permutations from <code><a href="../reference/torus_permutations.html">torus_permutations()</a></code>, given in
+<code>site_permutations</code>, rejected 4.9%. The events in the figures
+above used free permutations, so they should be read with this in mind.
+Landscapes with edges need a restricted null model chosen for them, and
+a matrix of permutations of any origin can be given.</p>
+</div>
+<div class="section level2">
 <h2 id="how-much-of-the-phylogenetic-structure-is-due-to-environment-and-space">How much of the phylogenetic structure is due to environment and
 space?<a class="anchor" aria-label="anchor" href="#how-much-of-the-phylogenetic-structure-is-due-to-environment-and-space"></a>
 </h2>
@@ -137,7 +172,7 @@ space?<a class="anchor" aria-label="anchor" href="#how-much-of-the-phylogenetic-
 coordinates, so we simulate them with the generator of Appendix C of
 Peres-Neto et al. (2012). In the first scenario, two independent
 gradients act on species.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/stree.html" class="external-link">stree</a></span><span class="op">(</span><span class="fl">32</span>, <span class="st">"balanced"</span><span class="op">)</span></span>
 <span><span class="va">tree</span><span class="op">$</span><span class="va">edge.length</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">edge</span><span class="op">)</span><span class="op">)</span></span>
@@ -152,7 +187,7 @@ gradients act on species.</p>
 <p><code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> tests whether a gradient is related to
 the phylogeny and, if so, gives a vector of species values for the next
 step. Here we ask this for each gradient.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">x</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">second</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">p_max</span>, <span class="va">second</span><span class="op">$</span><span class="va">p_max</span><span class="op">)</span></span>
@@ -160,7 +195,7 @@ step. Here we ask this for each gradient.</p>
 <p><code><a href="../reference/trait_partition.html">trait_partition()</a></code> then splits the variation of these
 vectors among sites. The vectors are chosen to fit the gradients, so
 this step only makes sense after a significant global test.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vectors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">pev_brown</span>, <span class="va">second</span><span class="op">$</span><span class="va">pev_brown</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_partition.html">trait_partition</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">vectors</span>, <span class="va">x</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">partition</span></span>
@@ -177,15 +212,18 @@ this step only makes sense after a significant global test.</p>
 <span><span class="co">#&gt;        trait1 trait2</span></span>
 <span><span class="co">#&gt; env1     0.49   0.34</span></span>
 <span><span class="co">#&gt; space1   0.35   0.45</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span><span class="op">)</span></span></code></pre></div>
-<p><img src="analysing-clades_files/figure-html/unnamed-chunk-10-1.png" class="r-plt" alt="Bars of the fractions explained by environment, by space and by both." width="672"></p>
+<p><img src="analysing-clades_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Bars of the fractions explained by environment, by space and by both." width="672"></p>
 <p>The test of each trait against each predictor is a different
 question, for which ter Braak (2019) is the reference.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Leibold, M. A., &amp; Chase, J. M. (2018). <em>Metacommunity
+Ecology</em>. Monographs in Population Biology 59. Princeton University
+Press. <a href="https://doi.org/10.2307/j.ctt1wf4d24" class="external-link uri">https://doi.org/10.2307/j.ctt1wf4d24</a></p>
 <p>Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010).
 Metacommunity phylogenetics: separating the roles of environmental
 filters and historical biogeography. <em>Ecology Letters</em>, 13,
