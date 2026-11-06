@@ -193,7 +193,6 @@ node_fit <- function(incidence, values, env) {
   if (any(!is.finite(standard))) return(failed)
   response <- drop(incidence %*% standard)
   predictors <- weighted_standardise(env, site_weights)
-  if (any(!is.finite(predictors))) return(failed)
   fit <- weighted_fit(predictors, response, site_weights)
   if (is.null(fit)) return(failed)
   total <- sum(response^2)
