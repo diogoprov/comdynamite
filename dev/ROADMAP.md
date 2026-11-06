@@ -4,6 +4,19 @@ Atualizado em 2026-11-05. Versão atual: 0.1.0 (tag `v0.1.0`, DOI de conceito `1
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
+## Visão
+
+O comdynamite deixa de ser só um simulador e passa a ser um hub de métodos que ligam
+traits, filogenias, biogeografia e metacomunidades. A simulação continua no centro:
+cada método do pacote pode ser testado com dados em que a verdade é conhecida.
+Métodos publicados que nunca chegaram ao R, como os de Leibold et al. (2010) e
+Peres-Neto et al. (2012), são pouco usados por isso e têm prioridade.
+
+Para isso funcionar, o pacote precisa de uma estrutura de dados comum, dependências
+leves (pacotes grandes em `Suggests`) e convenção de nomes (`simulate_*` para gerar,
+e um prefixo a definir para analisar). O título e o `Description` mudam quando os
+primeiros métodos entrarem.
+
 ## Feito
 
 | Item | O que entrou |
@@ -13,6 +26,7 @@ ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 | Traits | `traits_ou()` (um ou vários ótimos) e `paint_regimes()`, no lugar de `traits_bm()` |
 | Identidade | hex sticker (opção E) e `data-raw/hex_sticker.R` |
 | Site | pkgdown em https://provetelab.org/comdynamite/, com build automático no `main` |
+| Simulador estático | `simulate_static()`, na versão de desenvolvimento |
 | Vignettes | `comdynamite`, `phylogenetic-structure` e `evaluating-methods` |
 | Documentação | `\value` e exemplos em todas as funções exportadas; `Description` atualizada |
 
@@ -22,10 +36,17 @@ CI em macOS, Windows e Linux; 100% de cobertura de linhas; `inst/CITATION` e
 `CITATION.cff`; release no GitHub com DOI do Zenodo. Falta confirmar o pacote no
 r-universe: o registro foi feito, e o build depende do ciclo do serviço.
 
-## v0.2.0: validação do modelo
+## v0.2.0: validação e geradores estáticos
 
-Objetivo: mostrar que a implementação reproduz o modelo publicado.
+Objetivo: mostrar que a implementação reproduz o modelo publicado e ter uma linha de
+base sem dinâmica.
 
+- [x] `simulate_static()`: resposta gaussiana com contagens de Poisson (Peres-Neto
+      et al. 2012).
+- [ ] Dois gradientes em `simulate_static()`: produto das respostas ao ambiente e ao
+      espaço, como em `ScriptDemo.m`.
+- [ ] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
+      [E] e [S].
 - [ ] Comparar com o `mcomsimr` nos mesmos parâmetros, levando em conta as diferenças
       de convenção (`sigma`, `alpha[j, k]`). Comparar distribuições, não réplicas.
 - [ ] Reproduzir qualitativamente os padrões de Thompson et al. (2020).
@@ -37,23 +58,91 @@ Objetivo: mostrar que a implementação reproduz o modelo publicado.
 
 ## v0.3.0: fluxo de estudos de simulação
 
-Objetivo: reduzir o código que o usuário repete. As duas vignettes novas precisaram de
-laços e funções escritos à mão, o que indica o que falta no pacote.
+Objetivo: reduzir o código que o usuário repete. As vignettes precisaram de laços e
+funções escritos à mão, o que indica o que falta no pacote.
 
 - [ ] Função para rodar grades de cenários com réplicas pareadas por árvore e
-      paisagem, com semente controlada e paralelismo opcional.
+      paisagem e semente controlada, com paralelismo pelo Futureverse (`future`,
+      `furrr` ou `future.apply` em `Suggests`).
 - [ ] Diagnóstico de equilíbrio. Com competição filogenética e dispersão alta, a
       exclusão regional continuou até 3000 passos, e hoje nada avisa o usuário.
-- [ ] Saída em formato longo (data frame) a partir de `history`.
+- [ ] Saída em formato longo (tibble) a partir de `history`.
 - [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
       mostrar ganho real, como foi feito no treeshapesim.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código.
 
-## v0.4.0: mais processos e integração
+## v0.4.0: base do hub
 
-Objetivo: ampliar os cenários que o pacote cobre. Escolher pelo uso real.
+Objetivo: uma interface comum, para que simulação e métodos troquem dados entre si e
+com outros pacotes. As versões seguintes dependem desta.
+
+- [ ] Estrutura de dados comum: comunidade, árvore, traits, ambiente e coordenadas,
+      com checagem de nomes. Serve para dados simulados e reais.
+- [ ] Árvore e distribuições como entrada: pool regional por sítio e estado inicial
+      vindos de fora. Cobre gen3sis, modelos de SSE e reconstruções biogeográficas.
+- [ ] `species_traits()` aceitar traits vindos de fora, por exemplo do mvMORPH.
+- [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
+- [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
+      lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
+      Com a história conhecida, a simulação pode validar esses métodos.
+
+**Concluído quando:** um cenário simulado passar pelo Herodotools e recuperar a
+história conhecida.
+
+## v0.5.0: métodos de metacommunity phylogenetics
+
+Objetivo: levar para o R os métodos que só existem em MATLAB. O código está nos
+suplementos de Peres-Neto et al. (2012) e Leibold et al. (2010). Antes de começar,
+confirmar que não há implementação em outro pacote.
+
+- [ ] Peres-Neto et al. (2012): correlações entre traits e ambiente, autovetores
+      ponderados, seleção estocástica e partição da variação. Reaproveitar
+      `ade4::fourthcorner` e `adespatial::mem` se servirem.
+- [ ] Leibold et al. (2010), `MetacommunityPhylogenetics`: regressão ponderada por nó,
+      com testes de permutação.
+- [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
+      permutações em paralelo com o Futureverse.
+- [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
+      coisa. Ver os possíveis erros em "Pendências e decisões".
+- [ ] Vignette com os métodos aplicados a dados simulados e reais.
+
+**Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
+reproduzirem o erro tipo I publicado.
+
+## v0.6.0: evolução de traits e modelos nulos
+
+Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
+pacotes de referência em vez de reimplementá-los.
+
+- [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
+      pelo mvMORPH (Clavel et al. 2015).
+- [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
+      local ao longo da árvore.
+
+**Concluído quando:** cada opção tiver teste e exemplo em vignette.
+
+## v0.7.0: traits, filogenia e biogeografia
+
+Objetivo: ligar história biogeográfica, traits e montagem local, como em Benício et
+al. (2021).
+
+- [ ] Fluxo que integra traits, filogenias e biogeografia, seguindo Benício et al.
+      (2021).
+- [ ] Modelos de Markov com k estados para áreas e traits discretos: DEC e
+      variantes do BioGeoBEARS (Matzke 2014), ClaSSE (Goldberg & Igić 2012) e GeoSSE
+      (Goldberg et al. 2011), usando a entrada da v0.4.0.
+- [ ] SBEARS, do Herodotools. Conferir o que ele faz: entrou aqui como modelo contínuo,
+      e o nome é Site Based Estimation of Ancestral Range of Species.
+- [ ] Decidir como ligar a escala evolutiva à ecológica, que é o problema difícil.
+
+**Concluído quando:** um cenário com história biogeográfica conhecida for recuperado
+pelo fluxo completo.
+
+## v0.8.0: mais processos
+
+Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 
 - [ ] Vários eixos ambientais (hoje há um só).
 - [ ] Paisagens irregulares ou lidas de coordenadas, além da grade.
@@ -61,63 +150,8 @@ Objetivo: ampliar os cenários que o pacote cobre. Escolher pelo uso real.
       em toro, e isso limita o uso com dados reais.
 - [ ] Gerador de ambiente temporal fiel ao de Thompson et al. (2020), como alternativa
       a `env_over_time()`.
-- [ ] Vignette com árvores do treeshapesim e do gen3sis como pool regional.
 
 **Concluído quando:** os itens escolhidos tiverem testes e exemplo em vignette.
-
-## v0.5.0: geradores estáticos e métodos de metacommunity phylogenetics
-
-Objetivo: reunir os geradores e os testes usados na literatura de validação, para
-comparar métodos no mesmo desenho. O código em MATLAB está nos suplementos de
-Peres-Neto et al. (2012) e Leibold et al. (2010).
-
-- [ ] Gerador estático de Peres-Neto et al. (2012): resposta gaussiana com traits em
-      Brownian motion e, com dois gradientes, produto das respostas ao ambiente e ao
-      espaço. Partir de `R/simulate_layerA.R` e `R/simulate_static.R` do pcps-sim, que
-      já reproduzem as validações publicadas.
-- [ ] Gerador logístico do Appendix C (Ives & Helmus 2011), com os sete cenários de
-      [E] e [S].
-- [ ] Traduzir de MATLAB para R o framework de Peres-Neto et al. (2012): correlações
-      entre traits e ambiente, autovetores ponderados, seleção estocástica e partição
-      da variação. Reaproveitar `ade4::fourthcorner` e `adespatial::mem` se servirem.
-- [ ] Traduzir `MetacommunityPhylogenetics` de Leibold et al. (2010): regressão
-      ponderada por nó, com testes de permutação.
-- [ ] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
-      coisa. Ver os problemas listados em "Pendências e decisões".
-- [ ] Paralelismo com o Futureverse e estilo tidyverse, sem pesar nas dependências:
-      `future`, `furrr` ou `future.apply` em `Suggests`.
-
-**Concluído quando:** a tradução reproduzir os resultados do MATLAB e os testes
-reproduzirem o erro tipo I publicado.
-
-## v0.6.0: mais evolução de traits e modelos nulos
-
-Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica.
-
-- [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
-      tomando o mvMORPH (Clavel et al. 2015) como referência.
-- [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
-      local ao longo da árvore. Decidir entre chamar o pacote e reimplementar.
-
-**Concluído quando:** cada opção tiver teste contra o pacote de referência.
-
-## v0.7.0: traits, filogenia e biogeografia
-
-Objetivo: gerar cenários em que história biogeográfica, traits e montagem local estão
-ligados, como em Benício et al. (2021), com a verdade conhecida.
-
-- [ ] Fluxo que integra traits, filogenias e biogeografia, seguindo Benício et al.
-      (2021).
-- [ ] Modelos de Markov com k estados para áreas e traits discretos: DEC e
-      variantes do BioGeoBEARS (Matzke 2014), ClaSSE (Goldberg & Igić 2012) e GeoSSE
-      (Goldberg et al. 2011).
-- [ ] Modelos contínuos: SBEARS, do Herodotools.
-- [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas do comdynamite nos
-      formatos que ele lê, e as métricas de `calc_tip_based_trait_evo()` como
-      resumo. Vignette de exemplo.
-
-**Concluído quando:** um cenário simulado passar pelo Herodotools e recuperar a
-história conhecida.
 
 ## v1.0.0: CRAN e artigo
 
@@ -136,9 +170,8 @@ Objetivo: API estável e pacote no CRAN.
 
 ## Pendências e decisões
 
-- **Escopo.** Os itens de análise da v0.5.0 são métodos, não simulação. Decidir se
-  ficam no comdynamite ou em pacote irmão. Tidyverse e Futureverse em `Imports` também
-  pesariam: hoje o pacote só importa `ape` e `stats`.
+- **Dependências do hub.** Hoje o pacote só importa `ape` e `stats`. Tidyverse, Futureverse
+  e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
   equações e citar; se for copiar a estrutura do código, falar com os autores.
 - **Possíveis erros no MATLAB, a confirmar rodando.** Em `MetacommunityPhylogenetics`,

@@ -1,6 +1,6 @@
 Package: comdynamite
 Title: Process-Based Metacommunity Simulations with Phylogenetic Structure
-Version: 0.1.0
+Version: 0.1.0.9000
 Authors@R: person("Diogo B.", "Provete", email = "dbprovete@gmail.com",
     role = c("aut", "cre"))
 Description: Simulates metacommunity dynamics with the process-based model of
@@ -16,8 +16,9 @@ Description: Simulates metacommunity dynamics with the process-based model of
     optima, and interspecific competition can be structured by relatedness.
     Rule-based assembly without population dynamics (limiting similarity,
     habitat filtering and neutral assembly) follows Kraft et al. (2007)
-    <doi:10.1086/519400>. The model was implemented from the published
-    equations.
+    <doi:10.1086/519400>, and static metacommunities with unimodal species
+    responses follow Peres-Neto et al. (2012) <doi:10.1890/11-0494.1>. The model
+    was implemented from the published equations.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

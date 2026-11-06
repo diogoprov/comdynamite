@@ -8,6 +8,7 @@ reference:
   desc: The process-based model, from landscape and traits to abundances.
   contents:
   - simulate_metacommunity
+  - simulate_static
   - mc_dynamics
   - growth_rates
 - title: Landscapes
