@@ -7,16 +7,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/diogoprov/comdynamite/blob/main/DESCRIPTION)
+[`inst/CITATION`](https://github.com/diogoprov/comdynamite/blob/main/inst/CITATION)
 
-Provete D (2026). *comdynamite: Process-Based Metacommunity Simulations
-with Phylogenetic Structure*. R package version 0.0.0.9000,
-<https://provetelab.org/comdynamite/>.
+Provete, D. B. (2026). comdynamite: Process-based metacommunity
+simulations with phylogenetic structure. R package version 0.1.0.
+https://github.com/diogoprov/comdynamite
 
     @Manual{,
       title = {comdynamite: Process-Based Metacommunity Simulations with Phylogenetic Structure},
       author = {Diogo B. Provete},
       year = {2026},
-      note = {R package version 0.0.0.9000},
-      url = {https://provetelab.org/comdynamite/},
+      note = {R package version 0.1.0},
+      url = {https://github.com/diogoprov/comdynamite},
     }

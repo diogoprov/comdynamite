@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite 0.0.0.9000
+## comdynamite 0.1.0
 
 - First version: the model of Thompson et al. (2020) with phylogenetic
   traits and competition, spatially implicit and grid landscapes, torus
