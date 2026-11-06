@@ -4,6 +4,7 @@
 [![R-CMD-check](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
+[![Codecov test coverage](https://codecov.io/gh/diogoprov/comdynamite/graph/badge.svg)](https://app.codecov.io/gh/diogoprov/comdynamite)
 <!-- badges: end -->
 
 Process-based metacommunity simulations in R, with phylogenetic structure.
