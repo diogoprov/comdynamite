@@ -63,3 +63,9 @@ test_that("env_over_time has the requested autocorrelation", {
   expect_equal(stats::acf(e[1, ], plot = FALSE)$acf[2], 0.8, tolerance = 0.05)
   expect_equal(stats::sd(e[1, ]), 2, tolerance = 0.1)
 })
+
+test_that("rescale returns the midpoint when values do not vary", {
+  expect_equal(rescale(c(2, 2, 2), c(0, 10)), rep(5, 3))
+  expect_equal(rescale(1, c(0, 10)), 5)
+  expect_equal(rescale(c(0, 1, 2), c(0, 10)), c(0, 5, 10))
+})

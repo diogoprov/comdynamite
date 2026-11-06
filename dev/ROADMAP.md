@@ -1,6 +1,6 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-05. Versão de desenvolvimento 0.0.0.9000, ainda sem tag.
+Atualizado em 2026-11-05. Versão 0.1.0 no `DESCRIPTION`, ainda sem tag.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -20,13 +20,13 @@ ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
 Objetivo: uma versão estável, com DOI, que possa ser citada e instalada.
 
-- [ ] Workflow `R-CMD-check.yaml` (macOS, Windows, Linux) e badge no README. Hoje só
-      existe o workflow do pkgdown; o check só foi rodado no Mac.
-- [ ] Medir a cobertura de testes (`covr`) e cobrir o que faltar nas funções exportadas.
-- [ ] `inst/CITATION` e `CITATION.cff`.
+- [x] Workflow `R-CMD-check.yaml` (macOS, Windows, Linux) e badge no README.
+- [x] Medir a cobertura de testes (`covr`): 100% das linhas.
+- [x] `inst/CITATION` e `CITATION.cff`. Falta acrescentar o DOI depois do Zenodo.
 - [ ] Integração com o Zenodo e DOI de conceito no README.
 - [ ] Publicar no r-universe (`diogoprov.r-universe.dev`), como o treeshapesim.
-- [ ] Versão 0.1.0 no `DESCRIPTION` e no `NEWS.md`; tag `v0.1.0`.
+- [x] Versão 0.1.0 no `DESCRIPTION` e no `NEWS.md`.
+- [ ] Tag `v0.1.0` e release no GitHub, com o Zenodo já ativado.
 
 **Concluído quando:** o check passar nas três plataformas e o DOI estiver no README.
 
@@ -98,4 +98,3 @@ Objetivo: API estável e pacote no CRAN.
   é preciso rodar os scripts de novo e revisar os números citados no texto.
 - **`data-raw/hex_dynamite.R`.** Sobrescreve o `logo.png` oficial se for rodado. Remover
   ou mudar o arquivo de saída.
-- **Versão.** `0.0.0.9000` gera nota no check do CRAN; a v0.1.0 resolve.

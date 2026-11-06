@@ -1,6 +1,6 @@
 Package: comdynamite
 Title: Process-Based Metacommunity Simulations with Phylogenetic Structure
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: person("Diogo B.", "Provete", email = "dbprovete@gmail.com",
     role = c("aut", "cre"))
 Description: Simulates metacommunity dynamics with the process-based model of

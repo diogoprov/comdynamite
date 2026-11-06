@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "comdynamite: Process-Based Metacommunity Simulations with Phylogenetic Structure"
+version: 0.1.0
+authors:
+  - family-names: Provete
+    given-names: Diogo B.
+license: MIT
+repository-code: "https://github.com/diogoprov/comdynamite"
+url: "https://provetelab.org/comdynamite/"
+keywords:
+  - metacommunity
+  - community ecology
+  - simulation
+  - phylogenetics
+  - R

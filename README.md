@@ -1,5 +1,10 @@
 # comdynamite <img src="man/figures/logo.png" align="right" height="139" alt="comdynamite hex sticker" />
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml)
+[![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
+<!-- badges: end -->
+
 Process-based metacommunity simulations in R, with phylogenetic structure.
 
 comdynamite implements the model of Thompson et al. (2020): density-independent

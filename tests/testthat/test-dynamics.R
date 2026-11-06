@@ -49,3 +49,14 @@ test_that("spatially explicit simulation runs on a grid", {
   expect_equal(dim(sim$abundance), c(25, 10))
   expect_output(print(sim), "25 sites x 10 species")
 })
+
+test_that("print.mc_sim reports the simulation and returns it invisibly", {
+  set.seed(1)
+  tr <- ape::rcoal(4)
+  sim <- simulate_metacommunity(landscape_implicit(3), species_traits(tr),
+                                competition_matrix(tr, "none"), dispersal = 0.01,
+                                n_steps = 3, record_steps = 1:3)
+  expect_output(out <- print(sim), "3 sites x 4 species")
+  expect_output(print(sim), "recorded steps: 3")
+  expect_identical(out, sim)
+})
