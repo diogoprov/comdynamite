@@ -58,20 +58,39 @@ are left out.
 }
 \section{Article and original code}{
 
-The code and the text differ. Here we follow the text in the first three points and
-the code in the last:
+The functions \code{ModelSelectionStochastic} and \code{PCoAWeigthed} and the script \code{ScriptDemo}
+of the supplement differ from the article and Appendix B in the points below. Here we
+follow the text, except in the addition of Brownian vectors and where noted.
 \itemize{
-\item The text sums eigenvectors weighted by their correlations. The code uses the
-absolute correlations, and eigenvectors with opposite signs then cancel.
-\item The text uses the square root of the path length as distance. The code example
-uses one minus the covariance.
-\item The text draws 1000 Brownian vectors, and the code 100.
-\item The text multiplies each Brownian vector by \code{pev}, and the code adds them.
+\item Weights of the eigenvectors: the text uses the correlations and the code their
+absolute values, so eigenvectors with opposite signs cancel.
+\item Brownian vectors: the text multiplies each one by \code{pev} and the code adds them.
+We follow the code, as the product of a random vector with mean zero would not
+keep the structure of \code{pev}.
+\item Number of Brownian vectors: 1000 in the text and 100 in the code.
+\item Distances: the text uses the square root of the path length, and the script
+one minus the covariance.
+\item Centring: \code{Q} in the text only centres if the weights sum to one, and the script
+passes the sums of the species. \code{PCoAWeigthed} also does not divide the coordinates
+by the square root of the weights. \code{DoubleCenterWeigth}, which the script does not
+call, does both and agrees with this function.
+\item Global test: the text regresses each eigenvector on all predictors, and the
+code accepts one. With one predictor both are the same statistic. We also take one
+predictor.
+\item Forward selection: the text tests each eigenvector given the remaining
+predictors, and the code tests its simple correlation. We follow the code.
+\item Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
+permutation strategy, although Appendix A gives alpha / 2 only for the stacked
+test. Here the larger p-value is compared with \code{alpha}.
+\item p-value of the global test with row permutations: the code divides by twice the
+number of permutations, which halves it.
+\item No significant result: the code returns random normal vectors, which can then
+enter later analyses. Here \code{pev} and \code{pev_brown} are \code{NULL}.
+\item Choice of vector: the article recommends the one with the highest R2, and the
+script always takes the Brownian vector. Here both are returned.
+\item The supplement calls \code{eigen}, which it does not include, and the example 2 of
+\code{ScriptDemo} removes rows of \code{PhyloDistance} before creating it.
 }
-In addition, \code{PCoAWeigthed} of the authors is called with weights that do not sum to
-one and returns coordinates without dividing by the square root of the weights, so its
-centring is not the one in the text. \code{DoubleCenterWeigth}, which is not used in their
-example, does both, and agrees with this function.
 }
 
 \examples{

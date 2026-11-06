@@ -17,12 +17,23 @@
 #'   row, for example from [torus_permutations()], to use instead of free permutations.
 #' @return List of class `mc_fourth_corner` with `correlation`, `p_site`, `p_taxa` and
 #'   `p_max`.
-#' @section Original code:
-#' The function `TraitEnvCor` of the authors keeps the observed mean and standard
-#' deviation when it permutes and stacks the two null distributions, with a significance
-#' level of alpha / 2. Here each permuted variable is standardised again. The stacked
-#' p-value is close to the mean of the two p-values, so any test it rejects at alpha / 2
-#' is also rejected by the larger p-value at alpha.
+#' @section Article and original code:
+#' The function `TraitEnvCor` of the supplement differs from Appendix A, and this function
+#' from both:
+#' \itemize{
+#'   \item Appendix A stacks the two null distributions, adds one to the count and uses
+#'     alpha / 2. The code adds two to the count. Here we use the larger of the two
+#'     p-values. The stacked p-value is close to their mean, so any test that it rejects
+#'     at alpha / 2 is also rejected by the larger p-value at alpha.
+#'   \item Appendix A says that the statistic is calculated again for the permuted data.
+#'     The code keeps the observed mean and standard deviation of the permuted variable,
+#'     which then no longer has weighted mean zero. Here it is standardised again, as
+#'     the code of the partition does.
+#'   \item The code runs `n_perm` - 1 permutations in each null distribution.
+#'   \item Appendix A allows several traits and predictors. The permutations of the code
+#'     work with one of each, as here.
+#'   \item The code returns the absolute value, and here the correlation keeps its sign.
+#' }
 #' @references
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 #' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
@@ -91,20 +102,39 @@ print.mc_fourth_corner <- function(x, ...) {
 #'   when the global test is not significant or no eigenvector is retained;
 #'   `eigenvectors`; `eigenvalues`; and `eigenvector_correlation`.
 #' @section Article and original code:
-#' The code and the text differ. Here we follow the text in the first three points and
-#' the code in the last:
+#' The functions `ModelSelectionStochastic` and `PCoAWeigthed` and the script `ScriptDemo`
+#' of the supplement differ from the article and Appendix B in the points below. Here we
+#' follow the text, except in the addition of Brownian vectors and where noted.
 #' \itemize{
-#'   \item The text sums eigenvectors weighted by their correlations. The code uses the
-#'     absolute correlations, and eigenvectors with opposite signs then cancel.
-#'   \item The text uses the square root of the path length as distance. The code example
-#'     uses one minus the covariance.
-#'   \item The text draws 1000 Brownian vectors, and the code 100.
-#'   \item The text multiplies each Brownian vector by `pev`, and the code adds them.
+#'   \item Weights of the eigenvectors: the text uses the correlations and the code their
+#'     absolute values, so eigenvectors with opposite signs cancel.
+#'   \item Brownian vectors: the text multiplies each one by `pev` and the code adds them.
+#'     We follow the code, as the product of a random vector with mean zero would not
+#'     keep the structure of `pev`.
+#'   \item Number of Brownian vectors: 1000 in the text and 100 in the code.
+#'   \item Distances: the text uses the square root of the path length, and the script
+#'     one minus the covariance.
+#'   \item Centring: `Q` in the text only centres if the weights sum to one, and the script
+#'     passes the sums of the species. `PCoAWeigthed` also does not divide the coordinates
+#'     by the square root of the weights. `DoubleCenterWeigth`, which the script does not
+#'     call, does both and agrees with this function.
+#'   \item Global test: the text regresses each eigenvector on all predictors, and the
+#'     code accepts one. With one predictor both are the same statistic. We also take one
+#'     predictor.
+#'   \item Forward selection: the text tests each eigenvector given the remaining
+#'     predictors, and the code tests its simple correlation. We follow the code.
+#'   \item Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
+#'     permutation strategy, although Appendix A gives alpha / 2 only for the stacked
+#'     test. Here the larger p-value is compared with `alpha`.
+#'   \item p-value of the global test with row permutations: the code divides by twice the
+#'     number of permutations, which halves it.
+#'   \item No significant result: the code returns random normal vectors, which can then
+#'     enter later analyses. Here `pev` and `pev_brown` are `NULL`.
+#'   \item Choice of vector: the article recommends the one with the highest R2, and the
+#'     script always takes the Brownian vector. Here both are returned.
+#'   \item The supplement calls `eigen`, which it does not include, and the example 2 of
+#'     `ScriptDemo` removes rows of `PhyloDistance` before creating it.
 #' }
-#' In addition, `PCoAWeigthed` of the authors is called with weights that do not sum to
-#' one and returns coordinates without dividing by the square root of the weights, so its
-#' centring is not the one in the text. `DoubleCenterWeigth`, which is not used in their
-#' example, does both, and agrees with this function.
 #' @references
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 #' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
@@ -198,20 +228,33 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
 #'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`; and
 #'   `component_share`, the share of the total variation in the component.
-#' @section Original code:
-#' Results for the mean component agree with `PartitionRDATwoDataMatricesPhylogeny` of the
-#' authors in the raw and adjusted fractions of the total. The code departs from the text
-#' in the following:
+#' @section Article and original code:
+#' Raw and adjusted fractions of the total for the mean component agree with
+#' `PartitionRDATwoDataMatricesPhylogeny` of the supplement, checked in Octave. The code
+#' departs from Appendix A in these points, where we follow the text:
 #' \itemize{
-#'   \item The fractions relative to the component mix the two denominators, and their
-#'     adjusted values use the number of predictors of both sets in every model, which
-#'     can give values above one.
-#'   \item The total variation does not grow with the number of traits, as it should
-#'     according to Appendix A.
-#'   \item For the variance, the explained sum of squares contains the intercept, so
-#'     `b` absorbs the mean dispersion. Here the intercept is removed.
-#'   \item The permutations of the variance take the square root twice.
+#'   \item Fractions relative to the component: `Meana` and `Meanc` subtract the fractions
+#'     of the total from the fraction of the component.
+#'   \item Adjusted values relative to the component use the number of predictors of both
+#'     sets in the models of one set, and the result can exceed one.
+#'   \item Total variation: Appendix A multiplies it by the number of traits, and the code
+#'     does not.
+#'   \item Several vectors: the article analyses the vectors of environment and space
+#'     together in a redundancy analysis, and the script passes only the first.
+#'   \item Variance component: the explained sum of squares contains the intercept, so
+#'     `b` absorbs the mean dispersion. Appendix A asks for the intercept in the models.
+#'     Here it is removed, and `r2` is the variation around the weighted mean.
+#'   \item Permutations of the variance component: the code takes the square root twice,
+#'     sets small values to zero in the observed matrix instead of the permuted one, and
+#'     rescales the permuted values to the observed mean and standard deviation, which the
+#'     text does not mention. It also calls `WeightedMeanVar`, which the supplement does
+#'     not include. None of this is done here.
+#'   \item The code runs `n_perm` - 1 permutations in each null distribution.
+#'   \item The p-values follow the text in stacking two null distributions, and here we
+#'     report the larger of the two, as in [fourth_corner_test()].
 #' }
+#' Appendix A also gives semipartial correlations for each predictor, which are not
+#' implemented here.
 #' @references
 #' Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning
 #' of species data matrices: estimation and comparison of fractions. *Ecology*, 87,
@@ -293,15 +336,26 @@ print.mc_trait_partition <- function(x, ...) {
 #' minimum spanning tree are truncated, and the eigenvectors of the centred similarity
 #' matrix with positive Moran's I are kept, in order of decreasing spatial scale.
 #'
-#' Appendix B of Peres-Neto et al. (2012) recommends centring with site weights so that
-#' the maps stay orthogonal in a weighted regression. The function `MEM` of the authors
-#' does not, and neither does this one. [trait_partition()] standardises the maps with
-#' site weights, and orthogonality is not needed to partition variation.
+#' @section Article and original code:
+#' The function `MEM` of the supplement differs from Appendix A of Peres-Neto et al.
+#' (2012) in two points, and here we follow the code:
+#' \itemize{
+#'   \item Appendix A recommends centring with site weights so that the maps stay
+#'     orthogonal in a weighted regression, and the code does not. [trait_partition()]
+#'     standardises the maps with site weights, and orthogonality is not needed to
+#'     partition variation.
+#'   \item Appendix A sets the distances between sites that are not connected to zero,
+#'     and the code to four times the threshold.
+#' }
 #'
 #' @param coords Matrix of coordinates with one row per site, or a `dist` object.
 #' @return Matrix with one row per site and one column per map, with their Moran's I in
 #'   the attribute `moran`.
 #' @references
+#' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
+#' contingency and environmental filtering on metacommunity phylogenetics. *Ecology*,
+#' 93, S14--S30. \doi{10.1890/11-0494.1}
+#'
 #' Dray, S., Legendre, P., & Peres-Neto, P. R. (2006). Spatial modelling: a comprehensive
 #' framework for principal coordinate analysis of neighbour matrices (PCNM). *Ecological
 #' Modelling*, 196, 483--493. \doi{10.1016/j.ecolmodel.2006.02.015}

@@ -4,7 +4,7 @@
 \alias{node_test}
 \title{Test clades against the environment, node by node}
 \usage{
-node_test(comm, nodes, env, biogeography = NULL, n_perm = 999)
+node_test(comm, nodes, env, biogeography = NULL, n_perm = 9999)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are
@@ -43,16 +43,17 @@ set of the same size from all species. The article permutes both at once; follow
 Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
 of the two tests. With many nodes these p-values need a correction, and
 \code{p_adjusted} gives the false discovery rate that the article uses. This correction
-needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), and the article
-uses 9999.
+needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), so the default
+is the 9999 of the article.
 
 Each predictor gets a semipartial correlation, the square root of the loss of R2
 when it is removed, with the sign of its slope when it is alone in the model.
 
 Biogeographic events follow the article: a column of \code{biogeography} has 1 for sites
 in one area, -1 for sites in the other and 0 for sites in neither. Each event is
-tested only in its sites, controlling for \code{env}. A column without zeros compares one
-area with all the others. Events with few sites in one area give unstable values.
+tested only in its sites, controlling for \code{env}. Other contrasts are allowed, for
+example a column without zeros, which compares one area with all the others. Events
+with few sites in one area give unstable values.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 \code{MetacommunityPhylogenetics} of the authors, checked in Octave. Three parts of that

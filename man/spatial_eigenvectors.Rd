@@ -18,16 +18,28 @@ Spatial predictors of Dray et al. (2006). Distances above the largest edge of th
 minimum spanning tree are truncated, and the eigenvectors of the centred similarity
 matrix with positive Moran's I are kept, in order of decreasing spatial scale.
 }
-\details{
-Appendix B of Peres-Neto et al. (2012) recommends centring with site weights so that
-the maps stay orthogonal in a weighted regression. The function \code{MEM} of the authors
-does not, and neither does this one. \code{\link[=trait_partition]{trait_partition()}} standardises the maps with
-site weights, and orthogonality is not needed to partition variation.
+\section{Article and original code}{
+
+The function \code{MEM} of the supplement differs from Appendix A of Peres-Neto et al.
+(2012) in two points, and here we follow the code:
+\itemize{
+\item Appendix A recommends centring with site weights so that the maps stay
+orthogonal in a weighted regression, and the code does not. \code{\link[=trait_partition]{trait_partition()}}
+standardises the maps with site weights, and orthogonality is not needed to
+partition variation.
+\item Appendix A sets the distances between sites that are not connected to zero,
+and the code to four times the threshold.
 }
+}
+
 \examples{
 dim(spatial_eigenvectors(cbind(1:20)))
 }
 \references{
+Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
+contingency and environmental filtering on metacommunity phylogenetics. \emph{Ecology},
+93, S14--S30. \doi{10.1890/11-0494.1}
+
 Dray, S., Legendre, P., & Peres-Neto, P. R. (2006). Spatial modelling: a comprehensive
 framework for principal coordinate analysis of neighbour matrices (PCNM). \emph{Ecological
 Modelling}, 196, 483--493. \doi{10.1016/j.ecolmodel.2006.02.015}
