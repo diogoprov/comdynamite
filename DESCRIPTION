@@ -29,7 +29,8 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/diogoprov/comdynamite
+URL: https://provetelab.org/comdynamite/,
+    https://github.com/diogoprov/comdynamite
 BugReports: https://github.com/diogoprov/comdynamite/issues
 X-schema.org-keywords: metacommunity, community-ecology, simulation,
     species-sorting, mass-effects, dispersal, competition, phylogenetics,
