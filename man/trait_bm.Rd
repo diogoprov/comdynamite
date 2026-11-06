@@ -12,7 +12,7 @@ trait_bm(tree, lambda = 1)
 \item{lambda}{Pagel's lambda, in [0, 1].}
 }
 \value{
-Named numeric vector, one value per tip.
+Named numeric vector with the simulated trait value of each tip.
 }
 \description{
 Draws from a multivariate normal distribution with covariance

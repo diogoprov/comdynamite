@@ -10,3 +10,6 @@
 - `traits_ou()`: traits under an Ornstein-Uhlenbeck process with one or several
   optima (multi-peak OU; Brownian motion when `alpha = 0`), with
   `paint_regimes()` to assign regimes to clades.
+- New vignettes: `vignette("phylogenetic-structure")`, on how dispersal, niche
+  conservatism and competition shape phylogenetic community structure, and
+  `vignette("evaluating-methods")`, on type I error and power with simulations.

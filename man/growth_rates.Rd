@@ -13,7 +13,8 @@ growth_rates(env, traits)
 columns \code{optimum}, \code{sigma} and \code{r_max}.}
 }
 \value{
-Matrix with one row per site and one column per species.
+Numeric matrix with one row per site and one column per species:
+the density-independent growth rate of each species at each site.
 }
 \description{
 Density-independent growth rate of species j at site i,

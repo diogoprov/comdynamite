@@ -68,7 +68,7 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #'
 #' @param tree A `phylo` tree with branch lengths.
 #' @param lambda Pagel's lambda, in \[0, 1\].
-#' @return Named numeric vector, one value per tip.
+#' @return Named numeric vector with the simulated trait value of each tip.
 #' @examples
 #' set.seed(1)
 #' trait_bm(ape::rcoal(5), lambda = 0.5)
@@ -92,7 +92,8 @@ trait_bm <- function(tree, lambda = 1) {
 #' @param env Environment of each site.
 #' @param traits Data frame from [species_traits()], or any data frame with
 #'   columns `optimum`, `sigma` and `r_max`.
-#' @return Matrix with one row per site and one column per species.
+#' @return Numeric matrix with one row per site and one column per species:
+#'   the density-independent growth rate of each species at each site.
 #' @examples
 #' set.seed(1)
 #' g <- growth_rates(seq(0, 100, 10), species_traits(3))
