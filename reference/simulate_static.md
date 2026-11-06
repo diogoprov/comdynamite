@@ -4,11 +4,12 @@ Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the
-Gaussian response used in the simulations of Peres-Neto et al. (2012).
-By default, observed abundances are Poisson counts with that mean; in
-the original simulations the abundances are the expected values, which
-`poisson = FALSE` returns. Because nothing but the gradient structures
-the data, this is a baseline for
+Gaussian response of Dray & Legendre (2008), also used by Peres-Neto et
+al. (2012). By default, observed abundances are Poisson counts with that
+mean. This is our addition: in those simulations the abundances are the
+expected values, with `r_max` between 0.5 and 1, which `poisson = FALSE`
+returns. Because nothing but the gradient structures the data, this is a
+baseline for
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
 and a fast generator for evaluating methods.
 
@@ -38,8 +39,10 @@ simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
 
 - incidence:
 
-  Return presences and absences instead of abundances? Needs
-  `poisson = TRUE`.
+  Return presences and absences instead of abundances? A species is
+  present where its Poisson count is positive, so this needs
+  `poisson = TRUE`. Dray & Legendre (2008) instead draw presences from a
+  binomial distribution with the expected value as the probability.
 
 - poisson:
 
@@ -59,6 +62,10 @@ abundance is the product of the responses, as in Peres-Neto et al.
 (2012).
 
 ## References
+
+Dray, S., & Legendre, P. (2008). Testing the species traits-environment
+relationships: the fourth-corner problem revisited. *Ecology*, 89,
+3400–3412. [doi:10.1890/08-0349.1](https://doi.org/10.1890/08-0349.1)
 
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the
 effects of spatial contingency and environmental filtering on

@@ -3,19 +3,19 @@
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2)), the Gaussian
-response used in the simulations of Peres-Neto et al. (2012). By default,
-observed abundances are Poisson counts with that mean; in the original
-simulations the abundances are the expected values, which poisson = FALSE
-returns. Because nothing but the
+response of Dray &amp;amp; Legendre (2008), also used by Peres-Neto et al. (2012). By
+default, observed abundances are Poisson counts with that mean. This is our
+addition: in those simulations the abundances are the expected values, with
+r_max between 0.5 and 1, which poisson = FALSE returns. Because nothing but the
 gradient structures the data, this is a baseline for
 simulate_metacommunity() and a fast generator for evaluating methods."><meta property="og:description" content="Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2)), the Gaussian
-response used in the simulations of Peres-Neto et al. (2012). By default,
-observed abundances are Poisson counts with that mean; in the original
-simulations the abundances are the expected values, which poisson = FALSE
-returns. Because nothing but the
+response of Dray &amp;amp; Legendre (2008), also used by Peres-Neto et al. (2012). By
+default, observed abundances are Poisson counts with that mean. This is our
+addition: in those simulations the abundances are the expected values, with
+r_max between 0.5 and 1, which poisson = FALSE returns. Because nothing but the
 gradient structures the data, this is a baseline for
 simulate_metacommunity() and a fast generator for evaluating methods."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -61,10 +61,10 @@ simulate_metacommunity() and a fast generator for evaluating methods."><meta pro
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 <code>r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))</code>, the Gaussian
-response used in the simulations of Peres-Neto et al. (2012). By default,
-observed abundances are Poisson counts with that mean; in the original
-simulations the abundances are the expected values, which <code>poisson = FALSE</code>
-returns. Because nothing but the
+response of Dray &amp; Legendre (2008), also used by Peres-Neto et al. (2012). By
+default, observed abundances are Poisson counts with that mean. This is our
+addition: in those simulations the abundances are the expected values, with
+<code>r_max</code> between 0.5 and 1, which <code>poisson = FALSE</code> returns. Because nothing but the
 gradient structures the data, this is a baseline for
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> and a fast generator for evaluating methods.</p>
     </div>
@@ -93,8 +93,10 @@ one gradient per element, in the order of <code>traits</code>.</p></dd>
 
 
 <dt id="arg-incidence">incidence<a class="anchor" aria-label="anchor" href="#arg-incidence"></a></dt>
-<dd><p>Return presences and absences instead of abundances? Needs
-<code>poisson = TRUE</code>.</p></dd>
+<dd><p>Return presences and absences instead of abundances? A
+species is present where its Poisson count is positive, so this needs
+<code>poisson = TRUE</code>. Dray &amp; Legendre (2008) instead draw presences from a
+binomial distribution with the expected value as the probability.</p></dd>
 
 
 <dt id="arg-poisson">poisson<a class="anchor" aria-label="anchor" href="#arg-poisson"></a></dt>
@@ -115,7 +117,10 @@ the product of the responses, as in Peres-Neto et al. (2012).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects
+    <p>Dray, S., &amp; Legendre, P. (2008). Testing the species traits-environment
+relationships: the fourth-corner problem revisited. <em>Ecology</em>, 89,
+3400–3412. <a href="https://doi.org/10.1890/08-0349.1" class="external-link">doi:10.1890/08-0349.1</a></p>
+<p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects
 of spatial contingency and environmental filtering on metacommunity
 phylogenetics. <em>Ecology</em>, 93, S14–S30. <a href="https://doi.org/10.1890/11-0494.1" class="external-link">doi:10.1890/11-0494.1</a></p>
     </div>
