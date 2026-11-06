@@ -58,7 +58,7 @@ whether the two clades that split there differ in their response to the predicto
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, biogeography <span class="op">=</span> <span class="cn">NULL</span>, n_perm <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,8 +66,9 @@ whether the two clades that split there differ in their response to the predicto
 
 
 <dl><dt id="arg-comm">comm<a class="anchor" aria-label="anchor" href="#arg-comm"></a></dt>
-<dd><p>Matrix with one row per site and one column per species, named
-as the rows of <code>nodes</code>.</p></dd>
+<dd><p>Matrix with one row per site and one column per species. Species are
+matched to the rows of <code>nodes</code> by name, in any order, and those in only one of the
+two are dropped with a warning.</p></dd>
 
 
 <dt id="arg-nodes">nodes<a class="anchor" aria-label="anchor" href="#arg-nodes"></a></dt>
@@ -80,6 +81,11 @@ as the rows of <code>nodes</code>.</p></dd>
 site.</p></dd>
 
 
+<dt id="arg-biogeography">biogeography<a class="anchor" aria-label="anchor" href="#arg-biogeography"></a></dt>
+<dd><p>Optional matrix of biogeographic events with one row per site
+and values of 1, -1 and 0.</p></dd>
+
+
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>Number of permutations of sites and of species.</p></dd>
 
@@ -88,26 +94,36 @@ site.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_node_test</code> with <code>nodes</code>, a data frame with one row per
 node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>statistic</code>,
-<code>p_site</code>, <code>p_taxa</code> and <code>p_max</code>; <code>partial_r2</code>, a matrix of nodes by predictors; and
-<code>p_partial</code>, with the larger of the two p-values for each of them.</p>
+<code>p_site</code>, <code>p_taxa</code>, <code>p_max</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of nodes by
+predictors; <code>p_partial</code>, with the larger of the two p-values for each of them;
+and <code>biogeography</code>, a list with the same two matrices for the events, or <code>NULL</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The test statistic is the explained over the residual sum of squares. It is
 tested by permuting sites, and by replacing the species of the node with a random
-set of the same size from all species. Following Peres-Neto et al. (2012) and
-ter Braak et al. (2012), the p-value to report is the larger of the two. With many
-nodes, these p-values need a correction for multiple tests.</p>
+set of the same size from all species. The article permutes both at once; following
+Peres-Neto et al. (2012) and ter Braak et al. (2012), the p-value here is the larger
+of the two tests. With many nodes these p-values need a correction, and
+<code>p_adjusted</code> gives the false discovery rate that the article uses. This correction
+needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), and the article
+uses 9999.</p>
+<p>Each predictor gets a semipartial correlation, the square root of the loss of R2
+when it is removed, with the sign of its slope when it is alone in the model.</p>
+<p>Biogeographic events follow the article: a column of <code>biogeography</code> has 1 for sites
+in one area, -1 for sites in the other and 0 for sites in neither. Each event is
+tested only in its sites, controlling for <code>env</code>. A column without zeros compares one
+area with all the others. Events with few sites in one area give unstable values.</p>
 <p>R2, adjusted R2 and the statistic equal those of the MATLAB function
-<code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Three parts differ:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
+<code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Three parts of that
+function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
 of the community matrix, as many as there are species in the node, so they
 do not draw from all species. Here they do.</p></li>
 <li><p>The original keeps the total of the observed data after permuting
 species. Here it is recalculated.</p></li>
 <li><p>The semipartial values of the original use the raw predictors, without an
-intercept, whereas the full model uses standardised predictors. Here
-<code>partial_r2</code> is the loss of R2 when a predictor is removed, with standardised
-predictors in both models.</p></li>
+intercept, and multiply by the absolute slope. The article uses standardised
+predictors and divides by it, to keep only the sign, which is what we do.</p></li>
 </ul><p>As in the original, R2 sums squares without site weights, although the fit
 uses them, so it is not the R2 of a weighted regression, and the adjusted R2
 uses the degrees of freedom of an unweighted model.</p>
@@ -143,7 +159,7 @@ traits-environment relationships in the fourth-corner problem. <em>Ecology</em>,
 <span class="r-in"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">node_test</span><span class="op">(</span><span class="va">comm</span><span class="op">[</span><span class="va">keep</span>, <span class="op">]</span>, <span class="fu"><a href="node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>, <span class="va">env</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, n_perm <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_node_test&gt; 7 nodes, 7 tested</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> nodes with p (max) &lt;= 0.05, before correction: 0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

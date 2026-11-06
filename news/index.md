@@ -13,6 +13,21 @@
   [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md):
   presences and absences from logistic responses to two gradients, with
   the seven scenarios of Appendix C of Peres-Neto et al. (2012).
+- [`fourth_corner_test()`](https://provetelab.org/comdynamite/reference/fourth_corner_test.md),
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  and
+  [`spatial_eigenvectors()`](https://provetelab.org/comdynamite/reference/spatial_eigenvectors.md):
+  phylogenetic gradient analysis of Peres-Neto et al. (2012), tested
+  against the original code in Octave.
+- Functions that take a community and a phylogeny, traits or contrasts
+  now match species by name and, as
+  [`picante::match.phylo.comm()`](https://rdrr.io/pkg/picante/man/data.checking.html),
+  drop with a warning the species found in only one of them. Repeated
+  names are an error.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `semipartial` replaces `partial_r2`, following the article, and there
+  are `p_adjusted` (false discovery rate) and biogeographic events.
 - [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
   and
   [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md):

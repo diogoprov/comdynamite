@@ -85,12 +85,13 @@ the larger of the two.</p>
 
 
 <dl><dt id="arg-comm">comm<a class="anchor" aria-label="anchor" href="#arg-comm"></a></dt>
-<dd><p>Matrix with one row per site and one column per species, named
-as the tips of <code>tree</code>. Every site needs at least one individual.</p></dd>
+<dd><p>Matrix with one row per site and one column per species. Species are
+matched to the tips of <code>tree</code> by name, in any order, and those in only one of the
+two are dropped with a warning. Every site needs at least one individual.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
-<dd><p>A <code>phylo</code> object with the same species as <code>comm</code>.</p></dd>
+<dd><p>A <code>phylo</code> object.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>

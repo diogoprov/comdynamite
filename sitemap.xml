@@ -16,6 +16,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/competition_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/dispersal_kernel.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/env_over_time.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/fourth_corner_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/growth_rates.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/landscape_grid.html</loc></url>
@@ -29,12 +30,15 @@
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_beta.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_beta_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_eigenvectors.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/phylo_vector.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_logistic.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_static.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/spatial_eigenvectors.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/species_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/torus_permutations.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_bm.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/trait_partition.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/traits_ou.html</loc></url>
 </urlset>
 

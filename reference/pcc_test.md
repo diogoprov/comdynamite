@@ -27,12 +27,14 @@ pcc_test(
 
 - comm:
 
-  Matrix with one row per site and one column per species, named as the
-  tips of `tree`. Every site needs at least one individual.
+  Matrix with one row per site and one column per species. Species are
+  matched to the tips of `tree` by name, in any order, and those in only
+  one of the two are dropped with a warning. Every site needs at least
+  one individual.
 
 - tree:
 
-  A `phylo` object with the same species as `comm`.
+  A `phylo` object.
 
 - env:
 
