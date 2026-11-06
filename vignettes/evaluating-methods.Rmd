@@ -165,7 +165,9 @@ knitr::kable(cbind(shapes, measured), digits = 2)
 The table gives the mean gamma statistic and normalized Colless index of 100
 trees for each combination. Each tree is a `phylo` object, so it replaces
 `ape::rcoal()` in step 1 without other changes. To aim at given values of gamma
-and Colless, use `shape_grid()` and `sim_tree_target()` from the same package.
+and Colless, use `shape_grid()` and `sim_tree_target()` from the same package. The
+[treeshapesim article on comdynamite](https://provetelab.org/treeshapesim/articles/comdynamite.html)
+shows the two packages together.
 
 `torus_permutations()` requires a landscape on a torus, which is a property of the
 simulation. Empirical landscapes have edges, so a valid restricted null model for
