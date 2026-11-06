@@ -1,5 +1,12 @@
 # Changelog
 
+## comdynamite (development version)
+
+- [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md):
+  static metacommunities from unimodal species responses with Poisson
+  counts, the Gaussian response of Peres-Neto et al. (2012), as a
+  baseline without population dynamics.
+
 ## comdynamite 0.1.0
 
 - First version: the model of Thompson et al. (2020) with phylogenetic

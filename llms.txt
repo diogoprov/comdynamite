@@ -146,6 +146,8 @@ The process-based model, from landscape and traits to abundances.
 
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   : Simulate a metacommunity
+- [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+  : Simulate a static metacommunity
 - [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
   : Metacommunity dynamics from growth rates
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)

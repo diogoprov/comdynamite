@@ -15,8 +15,10 @@ evolve under an Ornstein-Uhlenbeck process with one or several optima,
 and interspecific competition can be structured by relatedness.
 Rule-based assembly without population dynamics (limiting similarity,
 habitat filtering and neutral assembly) follows Kraft et al. (2007)
-[doi:10.1086/519400](https://doi.org/10.1086/519400) . The model was
-implemented from the published equations.
+[doi:10.1086/519400](https://doi.org/10.1086/519400) , and static
+metacommunities with unimodal species responses follow Peres-Neto et al.
+(2012) [doi:10.1890/11-0494.1](https://doi.org/10.1890/11-0494.1) . The
+model was implemented from the published equations.
 
 ## See also
 
