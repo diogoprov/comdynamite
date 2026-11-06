@@ -113,6 +113,19 @@ are added to every site at each of the `seed_steps`. After the last of
 these, species absent from all sites can never return and are no longer
 computed.
 
+## Article and archived code
+
+The article of Thompson et al. (2020) and the code archived with it
+([doi:10.5281/zenodo.3708350](https://doi.org/10.5281/zenodo.3708350) )
+differ in points that change results. Beta is gamma / alpha in the code
+and in their figures, but gamma - alpha in their Table 1. Their
+environment is converted to ranks, so it is uniform between 0 and 1, and
+the lowest dispersal is 0.00001, not 0.0001. Emigrants are Poisson in
+the code and binomial in the article, which comdynamite follows. In
+their competition-colonisation scenario, the code also halves the
+immigrants. See the article "Validating the model of Thompson et al.
+(2020)" on the package website for the complete list.
+
 ## References
 
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik,

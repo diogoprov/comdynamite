@@ -65,6 +65,10 @@ Analyses of phylogenetic community structure.
   : Test phylogenetic beta diversity against the environment
 - [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md)
   : Phylogenetic beta diversity between communities
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  : Test clades against the environment, node by node
+- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
+  : Node contrasts of a phylogeny
 
 ## Rule-based assembly
 

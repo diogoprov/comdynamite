@@ -24,11 +24,19 @@
   phylogenetic beta-diversity framework of the same article, a
   distance-based redundancy analysis of the mean phylogenetic distance
   between communities.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  and
+  [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md):
+  regression of clades on the environment, node by node, from Leibold et
+  al. (2010), with site and species permutations.
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
   stochastic extirpation of populations (`extirpation`), used by
   Thompson et al. (2020) in their competition-colonisation scenario.
+- New article on the validation of the model, with the differences
+  between the article of Thompson et al. (2020) and the code archived
+  with it.
 - New article with animations of metacommunity dynamics.
 
 ## comdynamite 0.1.0

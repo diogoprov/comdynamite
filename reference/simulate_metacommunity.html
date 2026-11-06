@@ -31,6 +31,7 @@ probability dispersal, and emigrants are redistributed among sites:"><meta prope
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
+    <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -151,6 +152,21 @@ competition-colonisation scenario and no extirpation in the others.</p>
 <p>During colonisation, Poisson(<code>seed_mean</code>) individuals of every species are
 added to every site at each of the <code>seed_steps</code>. After the last of these,
 species absent from all sites can never return and are no longer computed.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="article-and-archived-code">Article and archived code<a class="anchor" aria-label="anchor" href="#article-and-archived-code"></a></h2>
+
+
+<p>The article of Thompson et al. (2020) and the code archived with it
+(<a href="https://doi.org/10.5281/zenodo.3708350" class="external-link">doi:10.5281/zenodo.3708350</a>
+) differ in points that change results. Beta is
+gamma / alpha in the code and in their figures, but gamma - alpha in their
+Table 1. Their environment is converted to ranks, so it is uniform between 0
+and 1, and the lowest dispersal is 0.00001, not 0.0001. Emigrants are Poisson in
+the code and binomial in the article, which comdynamite follows. In their
+competition-colonisation scenario, the code also halves the immigrants. See
+the article "Validating the model of Thompson et al. (2020)" on the package
+website for the complete list.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
