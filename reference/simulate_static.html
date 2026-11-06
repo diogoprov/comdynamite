@@ -74,12 +74,16 @@ gradient structures the data, this is a baseline for
 
 <dl><dt id="arg-traits">traits<a class="anchor" aria-label="anchor" href="#arg-traits"></a></dt>
 <dd><p>Data frame from <code><a href="species_traits.html">species_traits()</a></code>, or any data frame with
-columns <code>optimum</code>, <code>sigma</code> and <code>r_max</code>. Here <code>r_max</code> is the maximum
-expected abundance, not a growth rate, so set <code>rmax_range</code> accordingly.</p></dd>
+columns <code>optimum</code>, <code>sigma</code> and <code>r_max</code>, or a list of them, one per
+gradient, with the same species. Here <code>r_max</code> is the maximum expected
+abundance, not a growth rate, so set <code>rmax_range</code> accordingly. With several
+gradients the maxima multiply, so a range such as <code>c(1, 1)</code> in all but one
+of them keeps abundances on the scale of the first.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Environmental value of each site.</p></dd>
+<dd><p>Value of the gradient at each site, or a list or data frame with
+one gradient per element, in the order of <code>traits</code>.</p></dd>
 
 
 <dt id="arg-incidence">incidence<a class="anchor" aria-label="anchor" href="#arg-incidence"></a></dt>
@@ -91,6 +95,12 @@ expected abundance, not a growth rate, so set <code>rmax_range</code> accordingl
     <p>List of class <code>mc_sim</code> with <code>abundance</code>, a matrix with one row per
 site and one column per species, plus <code>env</code> and <code>traits</code>. Sites and species
 with no individuals are kept, so remove them if a method requires it.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With several gradients, for example an environmental and a spatial one, each
+species has its own response to each gradient and the expected abundance is
+the product of the responses, as in Peres-Neto et al. (2012).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -110,6 +120,15 @@ phylogenetics. <em>Ecology</em>, 93, S14–S30. <a href="https://doi.org/10.1890
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_sim&gt; 100 sites x 20 species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> species persisting: 19 of 20 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 9 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># an environmental and a spatial gradient</span></span></span>
+<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tr</span>, lambda <span class="op">=</span> <span class="fl">1</span>, optima_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">101</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                        rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gradients</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, space <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">simulate_static</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">space</span><span class="op">)</span>, <span class="va">gradients</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_sim&gt; 100 sites x 20 species</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> species persisting: 19 of 20 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 3.58 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

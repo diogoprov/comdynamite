@@ -22,13 +22,17 @@ simulate_static(traits, env, incidence = FALSE)
 
   Data frame from
   [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
-  or any data frame with columns `optimum`, `sigma` and `r_max`. Here
-  `r_max` is the maximum expected abundance, not a growth rate, so set
-  `rmax_range` accordingly.
+  or any data frame with columns `optimum`, `sigma` and `r_max`, or a
+  list of them, one per gradient, with the same species. Here `r_max` is
+  the maximum expected abundance, not a growth rate, so set `rmax_range`
+  accordingly. With several gradients the maxima multiply, so a range
+  such as `c(1, 1)` in all but one of them keeps abundances on the scale
+  of the first.
 
 - env:
 
-  Environmental value of each site.
+  Value of the gradient at each site, or a list or data frame with one
+  gradient per element, in the order of `traits`.
 
 - incidence:
 
@@ -39,6 +43,13 @@ simulate_static(traits, env, incidence = FALSE)
 List of class `mc_sim` with `abundance`, a matrix with one row per site
 and one column per species, plus `env` and `traits`. Sites and species
 with no individuals are kept, so remove them if a method requires it.
+
+## Details
+
+With several gradients, for example an environmental and a spatial one,
+each species has its own response to each gradient and the expected
+abundance is the product of the responses, as in Peres-Neto et al.
+(2012).
 
 ## References
 
@@ -59,4 +70,13 @@ sim
 #> <mc_sim> 100 sites x 20 species
 #> species persisting: 19 of 20 
 #> mean local richness: 9 
+
+# an environmental and a spatial gradient
+space <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
+                        rmax_range = c(1, 1))
+gradients <- data.frame(env = runif(100, 0, 100), space = 1:100)
+simulate_static(list(traits, space), gradients)
+#> <mc_sim> 100 sites x 20 species
+#> species persisting: 19 of 20 
+#> mean local richness: 3.58 
 ```
