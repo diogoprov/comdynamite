@@ -4,16 +4,18 @@ Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the
-Gaussian response used in the simulations of Peres-Neto et al. (2012),
-and observed abundances are Poisson counts with that mean. Because
-nothing but the gradient structures the data, this is a baseline for
+Gaussian response used in the simulations of Peres-Neto et al. (2012).
+By default, observed abundances are Poisson counts with that mean; in
+the original simulations the abundances are the expected values, which
+`poisson = FALSE` returns. Because nothing but the gradient structures
+the data, this is a baseline for
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
 and a fast generator for evaluating methods.
 
 ## Usage
 
 ``` r
-simulate_static(traits, env, incidence = FALSE)
+simulate_static(traits, env, incidence = FALSE, poisson = TRUE)
 ```
 
 ## Arguments
@@ -36,7 +38,12 @@ simulate_static(traits, env, incidence = FALSE)
 
 - incidence:
 
-  Return presences and absences instead of abundances?
+  Return presences and absences instead of abundances? Needs
+  `poisson = TRUE`.
+
+- poisson:
+
+  Draw Poisson counts? If `FALSE`, return the expected abundances.
 
 ## Value
 

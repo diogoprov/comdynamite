@@ -8,6 +8,11 @@
   baseline without population dynamics. With several gradients, for
   example environment and space, the expected abundance is the product
   of the responses.
+- [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md)
+  and
+  [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md):
+  presences and absences from logistic responses to two gradients, with
+  the seven scenarios of Appendix C of Peres-Neto et al. (2012).
 
 ## comdynamite 0.1.0
 

@@ -3,15 +3,19 @@
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2)), the Gaussian
-response used in the simulations of Peres-Neto et al. (2012), and observed
-abundances are Poisson counts with that mean. Because nothing but the
+response used in the simulations of Peres-Neto et al. (2012). By default,
+observed abundances are Poisson counts with that mean; in the original
+simulations the abundances are the expected values, which poisson = FALSE
+returns. Because nothing but the
 gradient structures the data, this is a baseline for
 simulate_metacommunity() and a fast generator for evaluating methods."><meta property="og:description" content="Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2)), the Gaussian
-response used in the simulations of Peres-Neto et al. (2012), and observed
-abundances are Poisson counts with that mean. Because nothing but the
+response used in the simulations of Peres-Neto et al. (2012). By default,
+observed abundances are Poisson counts with that mean; in the original
+simulations the abundances are the expected values, which poisson = FALSE
+returns. Because nothing but the
 gradient structures the data, this is a baseline for
 simulate_metacommunity() and a fast generator for evaluating methods."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -57,15 +61,17 @@ simulate_metacommunity() and a fast generator for evaluating methods."><meta pro
 environmental gradient, without population dynamics, competition or
 dispersal. The expected abundance of species j at site i is
 <code>r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))</code>, the Gaussian
-response used in the simulations of Peres-Neto et al. (2012), and observed
-abundances are Poisson counts with that mean. Because nothing but the
+response used in the simulations of Peres-Neto et al. (2012). By default,
+observed abundances are Poisson counts with that mean; in the original
+simulations the abundances are the expected values, which <code>poisson = FALSE</code>
+returns. Because nothing but the
 gradient structures the data, this is a baseline for
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> and a fast generator for evaluating methods.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_static</span><span class="op">(</span><span class="va">traits</span>, <span class="va">env</span>, incidence <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">simulate_static</span><span class="op">(</span><span class="va">traits</span>, <span class="va">env</span>, incidence <span class="op">=</span> <span class="cn">FALSE</span>, poisson <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -87,7 +93,12 @@ one gradient per element, in the order of <code>traits</code>.</p></dd>
 
 
 <dt id="arg-incidence">incidence<a class="anchor" aria-label="anchor" href="#arg-incidence"></a></dt>
-<dd><p>Return presences and absences instead of abundances?</p></dd>
+<dd><p>Return presences and absences instead of abundances? Needs
+<code>poisson = TRUE</code>.</p></dd>
+
+
+<dt id="arg-poisson">poisson<a class="anchor" aria-label="anchor" href="#arg-poisson"></a></dt>
+<dd><p>Draw Poisson counts? If <code>FALSE</code>, return the expected abundances.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -8,6 +8,10 @@ The process-based model, from landscape and traits to abundances.
   : Simulate a metacommunity
 - [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
   : Simulate a static metacommunity
+- [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md)
+  : Simulate presences and absences from logistic responses
+- [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md)
+  : Gradients of the seven scenarios of Peres-Neto et al. (2012)
 - [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
   : Metacommunity dynamics from growth rates
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)
