@@ -230,10 +230,12 @@ print.mc_phylo_vector <- function(x, ...) {
 #'
 #' `data-raw/validation_fractions_null.R` chose what the moves of `site_permutations` should
 #' move, with [torus_permutations()], on the first generator (300 data sets) and checked the
-#' choice on the second (200 data sets). For `a`, moving `env` alone held the level in every
-#' null scenario of both generators (3.7% to 5.7% and 4.5% to 7.1% with the p-value of sites,
-#' standard errors of 0.011 to 0.018), including an environment structured at scales outside
-#' `space`, where free permutations rejected 9.7% and 20%, and its power was the same. For
+#' choice on the second (200 data sets). For `a`, moving `env` alone held the level wherever
+#' the environment had no effect, in both generators (3.7% to 5.7% and 4.5% to 7.1% with the
+#' p-value of sites, standard errors of 0.011 to 0.018), including an environment structured at
+#' scales outside `space`, where free permutations rejected 9.7% and 20%, and its power was the
+#' same. When the environment acted on a trait other than the one analysed, the p-value of
+#' sites rejected 45% and 75%, as with free permutations, and `p_max` 2% and 4%. For
 #' `c`, moving `space` alone held the level (3.0% to 7.0% and 3.5% to 8.0%; larger p-value at
 #' most 3%) where free permutations rejected 8.0% and 24% with a strong, structured
 #' environment acting alone, and moving both sets together rejected 22% with a strong
