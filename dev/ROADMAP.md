@@ -322,6 +322,12 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
 - [ ] Testes das frações `a` e `c` de `trait_partition()`: permutar sob o modelo reduzido, em
       vez de ambiente e espaço juntos. Hoje são conservadores. Conferir o MATLAB de
       Peres-Neto et al. (2012) antes de mudar.
+- [ ] Testar a fração compartilhada `b` de `trait_partition()`, hoje sem teste, com o esquema de
+      `adespatial::envspace.test()` (Clappe et al. 2018): substituir `env` por versões que mantêm
+      a autocorrelação, por toro em grade completa ou Moran spectral randomization (`msr()`) nas
+      outras, e recalcular `b`. A função só testa se `env` tiver estrutura espacial. A resposta
+      aqui é ponderada por sítio e há também a permutação de espécies, então é preciso definir
+      o p a relatar e medir erro tipo I e poder. `adespatial` já está em `Suggests`.
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
