@@ -13,7 +13,11 @@ species_traits(
   sigma_sd = 10,
   rmax_range = c(2, 8),
   sigma_signal = FALSE,
-  rmax_signal = FALSE
+  rmax_signal = FALSE,
+  optima = NULL,
+  sigma = NULL,
+  r_max = NULL,
+  rescale_optima = TRUE
 )
 }
 \arguments{
@@ -35,6 +39,12 @@ rates.}
 
 \item{sigma_signal, rmax_signal}{Should niche breadth or maximum growth rate
 carry phylogenetic signal (Brownian motion)?}
+
+\item{optima, sigma, r_max}{Optional values of each trait, named by species or in the order
+of the species, as a vector or a one-column matrix or data frame. They replace the values
+drawn for that trait.}
+
+\item{rescale_optima}{Rescale external optima to \code{optima_range}?}
 }
 \value{
 Data frame with columns \code{optimum}, \code{sigma} and \code{r_max}, one row per
@@ -50,11 +60,21 @@ uniform distribution. Either can carry phylogenetic signal: the values are
 then assigned to species by the ranks of a Brownian-motion trait, which
 keeps their marginal distribution.
 }
+\details{
+Any of the three traits can come from elsewhere instead, such as optima simulated by
+mvMORPH or measured in the field, through \code{optima}, \code{sigma} and \code{r_max}. The other traits are
+still drawn, and with the same seed they are the same as without the external ones. External
+optima are rescaled to \code{optima_range}, or ranked with \code{uniform_optima}, unless
+\code{rescale_optima = FALSE}.
+}
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(10)
 species_traits(tr, lambda = 1, sigma_signal = TRUE)
 species_traits(5)
+# optima from another model, here an Ornstein-Uhlenbeck process
+ou <- traits_ou(tr, alpha = 1, theta = 0)
+species_traits(tr, optima = ou[, 1])
 \dontshow{\}) # examplesIf}
 }

@@ -177,7 +177,8 @@ com outros pacotes. As versões seguintes dependem desta.
       objeto no primeiro argumento, e as simulações guardam a árvore.
 - [ ] Árvore e distribuições como entrada: pool regional por sítio e estado inicial
       vindos de fora. Cobre gen3sis, modelos de SSE e reconstruções biogeográficas.
-- [ ] `species_traits()` aceitar traits vindos de fora, por exemplo do mvMORPH.
+- [x] `species_traits()` aceita traits vindos de fora (`optima`, `sigma`, `r_max`), por
+      exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
 - [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
 - [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
       lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
