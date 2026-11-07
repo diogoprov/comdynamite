@@ -70,14 +70,62 @@ plot_phylo_beta(beta, comm, tree)
 
 ![](whole-tree_files/figure-html/unnamed-chunk-5-1.png)
 
+## Principal coordinates of phylogenetic structure
+
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+is the method of the package PCPS. Each species shares its relative
+abundance with its relatives, in proportion to their similarity on the
+tree, and the principal coordinates of the resulting matrix order sites
+by phylogenetic composition. The test covers all the dissimilarity and,
+separately, each axis in `axes`, whose `share` is its part of the
+variation.
+
+``` r
+
+pcps <- pcps_test(comm, tree, env, n_perm = 199)
+pcps
+#> <mc_pcps> principal coordinates of phylogenetic structure
+#> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005
+#>   test share     r2 statistic p_site p_species p_max
+#>  whole 1.000 0.4989    47.793  0.005     0.025 0.025
+#>  pcps1 0.541 0.9126   500.958  0.005     0.075 0.075
+#>  pcps2 0.137 0.0133     0.648  0.445     0.735 0.735
+```
+
+Unlike the method of
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+which works on eigenvectors of the tree, this one takes eigenvectors of
+the sites, so `scores` can be plotted against the environment.
+
+``` r
+
+plot(env, pcps$scores[, 1], xlab = "Environment", ylab = "PCPS 1")
+```
+
+![](whole-tree_files/figure-html/unnamed-chunk-7-1.png)
+
+When sites are neighbours and the environment and the communities are
+both autocorrelated, free permutations of sites reject far too often.
+`site_permutations` takes a restricted null model, such as
+[`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
+on a complete grid, in
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+and
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+alike. The help of
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+gives the rates, including those in a landscape with edges, where the
+torus still rejects too often when fields are broad.
+
 ## Reading the two p-values
 
-Both functions permute sites, which breaks the link between composition
-and environment, and species across the tips, which breaks the link
-between composition and phylogeny. The association requires both links,
-so the p-value to report is `p_max`, the larger of the two. A small
-`p_site` with a large `p_species` says that composition follows the
-environment, but that the phylogeny adds nothing to it.
+All these functions permute sites, which breaks the link between
+composition and environment, and species across the tips, which breaks
+the link between composition and phylogeny. The association requires
+both links, so the p-value to report is `p_max`, the larger of the two.
+A small `p_site` with a large `p_species` says that composition follows
+the environment, but that the phylogeny adds nothing to it.
 
 The scripts `data-raw/validation_pcc.R` and
 `data-raw/validation_phylo_beta.R` compare the rejection rates of these

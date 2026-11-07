@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.1.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Preparing your data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.6.1/vignettes/articles/preparing-data.Rmd" class="external-link"><code>vignettes/articles/preparing-data.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/vignettes/articles/preparing-data.Rmd" class="external-link"><code>vignettes/articles/preparing-data.Rmd</code></a></small>
       <div class="d-none name"><code>preparing-data.Rmd</code></div>
     </div>
 
@@ -126,9 +126,10 @@ records becomes a matrix with <code><a href="https://rdrr.io/r/base/table.html" 
 <span><span class="co">#&gt;   s10              0               0              1</span></span>
 <span><span class="co">#&gt;   s11              1               0              1</span></span></code></pre></div>
 <p>A site without records does not appear in this matrix.
-<code><a href="../reference/pcc_test.html">pcc_test()</a></code>, <code><a href="../reference/phylo_beta_test.html">phylo_beta_test()</a></code> and
-<code><a href="../reference/phylo_beta.html">phylo_beta()</a></code> need at least one individual in every site, so
-sites without any species stay out of those analyses.</p>
+<code><a href="../reference/pcc_test.html">pcc_test()</a></code>, <code><a href="../reference/pcps_test.html">pcps_test()</a></code>,
+<code><a href="../reference/phylo_beta_test.html">phylo_beta_test()</a></code> and <code><a href="../reference/phylo_beta.html">phylo_beta()</a></code> need at
+least one individual in every site, so sites without any species stay
+out of those analyses.</p>
 </div>
 <div class="section level2">
 <h2 id="the-tree">The tree<a class="anchor" aria-label="anchor" href="#the-tree"></a>
@@ -245,20 +246,27 @@ and it is printed with the results.</p>
 <td></td>
 </tr>
 <tr class="odd">
-<td><code><a href="../reference/phylo_beta_test.html">phylo_beta_test()</a></code></td>
+<td><code><a href="../reference/pcps_test.html">pcps_test()</a></code></td>
 <td>no empty sites</td>
 <td>with branch lengths</td>
 <td><code>env</code></td>
 <td></td>
 </tr>
 <tr class="even">
+<td><code><a href="../reference/phylo_beta_test.html">phylo_beta_test()</a></code></td>
+<td>no empty sites</td>
+<td>with branch lengths</td>
+<td><code>env</code></td>
+<td></td>
+</tr>
+<tr class="odd">
 <td><code><a href="../reference/phylo_vector.html">phylo_vector()</a></code></td>
 <td>sites by species</td>
 <td>with branch lengths</td>
 <td>one predictor</td>
 <td></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/trait_partition.html">trait_partition()</a></code></td>
 <td>sites by species</td>
 <td>traits or <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> scores</td>

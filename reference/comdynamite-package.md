@@ -37,7 +37,9 @@ implemented from the published equations.
 - Does phylogenetic composition follow the environment across the whole
   tree?
   [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
-  works on phylogenetic eigenvectors and
+  and
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+  work on phylogenetic eigenvectors and
   [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
   on the phylogenetic distances between communities, from
   [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),

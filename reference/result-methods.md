@@ -31,6 +31,12 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 # S3 method for class 'mc_pcc'
 summary(object, ...)
 
+# S3 method for class 'mc_pcps'
+as.data.frame(x, row.names = NULL, optional = FALSE, ...)
+
+# S3 method for class 'mc_pcps'
+summary(object, ...)
+
 # S3 method for class 'mc_phylo_beta'
 as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 

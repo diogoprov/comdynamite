@@ -52,6 +52,7 @@ comm[1:3, 1:3]
 
 A site without records does not appear in this matrix.
 [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
 and
 [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md)
@@ -165,6 +166,7 @@ and it is printed with the results.
 |----|----|----|----|----|
 | [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md) | sites by species | contrasts from [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md) | `env` | `biogeography`, optional |
 | [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md) | no empty sites | with branch lengths | `env` |  |
+| [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md) | no empty sites | with branch lengths | `env` |  |
 | [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md) | no empty sites | with branch lengths | `env` |  |
 | [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md) | sites by species | with branch lengths | one predictor |  |
 | [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md) | sites by species | traits or [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md) scores | `env` | `space` |

@@ -72,6 +72,8 @@ Does phylogenetic composition follow the environment?
 
 - [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
   : Test phylogenetic community composition against the environment
+- [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+  : Principal coordinates of phylogenetic structure
 - [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md)
   : Phylogenetic eigenvectors
 - [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
@@ -113,6 +115,8 @@ Tables, summaries and plots of results.
   [`plot(`*`<mc_node_test>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`as.data.frame(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`summary(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`as.data.frame(`*`<mc_pcps>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_pcps>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`as.data.frame(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`summary(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`plot(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
