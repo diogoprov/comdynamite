@@ -17,8 +17,9 @@
 #' `data-raw/validation_edges.R`, with communities that followed a hidden autocorrelated
 #' environment and areas without effect, it rejected 3.0% to 6.3% of the tests at the 5% level
 #' in a square, a strip and an irregular band, against 44% to 55% with free permutations (see
-#' the article on analysing clades). Autocorrelation at a scale close to that of the
-#' landscape, areas much larger than those simulated and real landscapes were not evaluated.
+#' the article on analysing clades). With autocorrelation at scales up to that of the
+#' landscape it rejected 2.2% to 6.0%, and free permutations 49% to 75%. Areas much larger
+#' than those simulated were not evaluated.
 #'
 #' @param coords Matrix or data frame with the two coordinates of each site, in the order of
 #'   the rows of `biogeography`.

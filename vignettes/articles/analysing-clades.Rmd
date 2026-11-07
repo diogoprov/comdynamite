@@ -109,6 +109,11 @@ sites, the rejection rate of `patch_permutations()` rose to 11% to 32%. It was l
 compact blocks and highest for one area against the others, and the effect of an area does not
 reach all nodes, so these values are not the power for a node with an effect.
 
+The hidden environment above had a kernel bandwidth of 3 sites. With bandwidths of 6, 12 and
+25 sites, up to the scale of the landscape, and no effect of areas, `patch_permutations()`
+rejected 2.2% to 6.0% and free permutations 49% to 75%. It was conservative for one area
+against the others (2.2% to 3.9%). The torus rejected 5.6% to 9.5% in the square.
+
 This is a method of this package without published evaluation, tested only in these
 simulations. Coordinates should be projected, and landscapes with parts far apart may give
 patches that cross the gaps.

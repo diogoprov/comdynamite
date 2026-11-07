@@ -251,7 +251,7 @@ v0.6.0 por decisão de 2026-11-06.
       contra .44 a .55 com permutação livre. Descartados no protótipo: curva de Hilbert com
       deslocamento cíclico (.16 a .19), rotação rígida (lenta; .06 a .12) e mancha única por
       lado (conservador em áreas com várias manchas, .02 a .03, e menos poder). Falta aplicar a
-      dados reais; não avaliado com autocorrelação na escala da paisagem.
+      dados reais.
 - [x] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
       (2018), além da cor.
 - [x] Citar Leibold & Chase (2018) em `biogeography_matrix()`.
@@ -305,8 +305,10 @@ estiverem resolvidos ou registrados aqui.
 `patch_permutations()`, `area_permutations` em `node_test()`, novo título e documentação por
 pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
 
-- [ ] Avaliar `patch_permutations()` com autocorrelação na escala da paisagem (bandas de 6,
-      12 e 25 sites, contra 3 na validação), sem efeito das áreas. Simulação em andamento.
+- [x] `patch_permutations()` com autocorrelação na escala da paisagem (bandas de 6, 12 e 25
+      sites, 200 réplicas, sem efeito): rejeição de .022 a .060, contra .49 a .75 com
+      permutação livre e .056 a .095 com o toro no quadrado. Conservador para área contra as
+      outras (.022 a .039). Em `data-raw/validation_edges_scale.rds`.
 - [ ] Aplicar aos refúgios da Mata Atlântica antes de usar em manuscrito.
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
