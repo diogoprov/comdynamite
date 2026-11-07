@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- `run_scenarios()`: grids of scenarios with replicates paired by what `setup` draws, a seed per
+  cell and optional parallel runs.
+- `equilibrium_check()`: warns when a simulation is still changing at the end of its record.
+- `as.data.frame()` for `mc_sim`: long table from `history`.
 - `trait_partition()` with `site_permutations`: each set of predictors now moves alone in its
   tests, with the response and the other set in place: `env` for `ab`, `a` and its
   semipartials, `space` for `bc`, `c` and its semipartials; `abc` still moves both. Up to

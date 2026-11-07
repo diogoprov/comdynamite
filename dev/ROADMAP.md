@@ -1,9 +1,10 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.6.1 (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2` e `v0.6.0`. `v0.3.0` e `v0.4.0`
-não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
-v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
+Atualizado em 2026-11-07. Versão atual: 0.6.1, com `0.6.1.9000` em desenvolvimento (DOI de
+conceito `10.5281/zenodo.23993533`). Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que
+faltava da v0.5.0, `v0.5.2`, `v0.6.0` e `v0.6.1`. O marco v0.3.0 fechou em 2026-11-07 depois da
+0.6.1, então não terá a tag `v0.3.0`: o número da versão que o publica está por decidir. A
+`v0.4.0` segue em aberto. Todas as pendências das etapas anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -31,6 +32,7 @@ e um prefixo a definir para analisar). O título e o `Description` mudaram na 0.
 | Simulador estático | `simulate_static()`, na versão de desenvolvimento |
 | Vignettes | `comdynamite`, `phylogenetic-structure` e `evaluating-methods` |
 | Documentação | `\value` e exemplos em todas as funções exportadas; `Description` atualizada |
+| Desde a 0.6.1 | `pcps_test()`, toro retangular, `summary_stats()`, `run_scenarios()`, `equilibrium_check()`, saída longa, paralelismo opcional, nulo restrito por conjunto em `trait_partition()`, piloto de identificabilidade |
 
 ## v0.1.0: primeira versão citável (concluída em 2026-11-05)
 
@@ -127,30 +129,42 @@ base sem dinâmica.
       que o artigo afirma, e o pseudo-F não exige isso. A nota antiga de que o picante não traz
       as funções que o artigo anuncia não diz quais são: fica fora do texto até ser conferida.
 
-## v0.3.0: fluxo de estudos de simulação
+## v0.3.0: fluxo de estudos de simulação (concluída em 2026-11-07)
 
 Objetivo: reduzir o código que o usuário repete. As vignettes precisaram de laços e
 funções escritos à mão, o que indica o que falta no pacote.
 
-- [ ] Função para rodar grades de cenários com réplicas pareadas por árvore e
-      paisagem e semente controlada, com paralelismo pelo Futureverse (`future`,
-      `furrr` ou `future.apply` em `Suggests`).
-- [ ] Diagnóstico de equilíbrio. Com competição filogenética e dispersão alta, a
+- [x] `run_scenarios()`: grades de cenários com réplicas pareadas por árvore e
+      paisagem e semente por célula, com paralelismo por `future.apply` em `Suggests`.
+- [x] `equilibrium_check()`: diagnóstico de equilíbrio. Com competição filogenética e dispersão alta, a
       exclusão regional continuou até 3000 passos, e hoje nada avisa o usuário.
-- [ ] Saída em formato longo (tibble) a partir de `history`.
-- [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
-      mostrar ganho real, como foi feito no treeshapesim. O ABC depende disso.
+- [x] Saída em formato longo a partir de `history`: `as.data.frame()`, e `as_tibble()` por cima.
+- [x] Benchmark de `mc_dynamics()`, em `data-raw/benchmark_dynamics.R`: 0,7 s para 50
+      espécies, 100 sítios e 2200 passos, ou cerca de 19 h por 100 mil simulações em um núcleo.
+      O sorteio de números aleatórios (`rmultinom`, `rpois`, `rbinom`) toma cerca de 60% do
+      tempo e já é C, então código compilado não traria ganho que justifique. O ABC paraleliza
+      por simulação.
 - [x] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
       (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
       temporal, como o CV das abundâncias. Em Guzman et al. (2022), estatísticas
       temporais aumentaram o poder explicativo em até 59%, e a dispersão dependeu delas.
-- [ ] Piloto de identificabilidade, com poucos parâmetros: quanto dá para recuperar a
-      partir dessas estatísticas, com um levantamento único e com séries temporais? É o
-      ponto de decisão para o ABC, e o desenho deve ser combinado antes de rodar.
+- [x] Piloto de identificabilidade, em `data-raw/pilot_identifiability.R`: 30 espécies, grade
+      5 x 5, árvore e paisagem fixas, sem erro de detecção; critério combinado antes de rodar,
+      R2 >= 0,5 e cobertura de 85% a 95%. Com 5000 simulações, nenhum parâmetro passou: R2 de
+      0,8 a 0,98 em dispersão, competição e nicho, mas cobertura de 40% a 90%, que sobe com a
+      tolerância. Na sensibilidade fora do plano, com 50 mil simulações e 500 aceitas (tolerância
+      0,01), os três passam com um levantamento e com série: R2 0,98 e 0,99 (dispersão), 0,88 e
+      0,90 (competição), 0,91 e 0,93 (nicho), cobertura 88% a 92%. A série só estreita o
+      intervalo, de 0,13 para 0,10 da amplitude na dispersão. `lambda` não é recuperado
+      (R2 <= 0,07). Decisão para o ABC: seguir, com pelo menos 500 aceitas, e dar a `lambda`
+      uma estatística de sinal dos traits, que `summary_stats()` ainda não tem. Falta testar com
+      árvore e paisagem variando, detecção imperfeita e modelo errado.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
-menos código.
+menos código. A `phylogenetic-structure` mostra o desenho com `run_scenarios()`; os
+resultados salvos não foram refeitos. As vignettes de avaliação de nulos usam laços de outro
+tipo e não mudaram.
 
 ## v0.4.0: base do hub
 
@@ -393,7 +407,10 @@ versão em desenvolvimento (item da v0.6.0).
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
-piloto da v0.3.0 e da estrutura comum da v0.4.0.
+piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
+
+- [ ] Estatística de sinal filogenético dos traits em `summary_stats()`: no piloto, `lambda`
+      não foi recuperado (R2 <= 0,07) com as estatísticas atuais.
 
 Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
@@ -566,6 +583,9 @@ Objetivo: API estável e pacote no CRAN.
   e a redução U(0,5; 1) entra uma vez por gradiente, enquanto o Appendix C a aplica uma
   vez. `simulate_logistic()` adotou esses valores na 0.5.1, e a redução fica uma só, como
   no Appendix C. O resultado da Tabela 5 está no artigo de validação.
+- **Validar `simulate_logistic()` com PGLMM.** Ideia de 2026-11-07, sem compromisso: ajustar
+  `phyr::pglmm()` (CRAN, GPL-3), ou `pez::communityPGLMM()`, aos dados simulados e ver se recupera
+  as variâncias e o sinal filogenético. Só em `data-raw`, sem copiar código para o pacote (MIT).
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
   assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver

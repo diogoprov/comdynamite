@@ -60,10 +60,13 @@ reference:
   - torus_permutations
   - rigid_permutations
   - patch_permutations
-- title: Summary statistics
-  desc: The same statistics for simulated and observed data.
+- title: Simulation studies
+  desc: Grids of scenarios, summaries and checks.
   contents:
+  - run_scenarios
   - summary_stats
+  - equilibrium_check
+  - as.data.frame.mc_sim
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:
