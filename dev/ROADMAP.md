@@ -1,9 +1,8 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-07. Versão atual: 0.6.1, com `0.6.1.9000` em desenvolvimento (DOI de
-conceito `10.5281/zenodo.23993533`). Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que
-faltava da v0.5.0, `v0.5.2`, `v0.6.0` e `v0.6.1`. O marco v0.3.0 fechou em 2026-11-07 depois da
-0.6.1, então não terá a tag `v0.3.0`: o número da versão que o publica está por decidir. A
+Atualizado em 2026-11-07. Versão atual: 0.6.2 (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2`, `v0.6.0`,
+`v0.6.1` e `v0.6.2`. O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`. A
 `v0.4.0` começou com `mc_data()` e tem 4 itens abertos. Todas as pendências das etapas
 anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
@@ -398,6 +397,13 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       (1.0; .25 a .28 com campo exponencial que `space` segura em parte, contra .98 livre),
       porque pergunta se esses mapas explicam mais do que os mesmos mapas em outro lugar da
       grade, não se o resíduo tem estrutura espacial.
+
+## v0.6.2: fluxo de simulação, PCPS e estrutura comum (concluída em 2026-11-07)
+
+Publica o marco v0.3.0 (`run_scenarios()`, `summary_stats()`, `equilibrium_check()`, saída
+longa, benchmark e piloto de identificabilidade), `pcps_test()` com o toro retangular, as
+pendências das etapas anteriores, o nulo restrito por conjunto em `trait_partition()` e o
+primeiro item da v0.4.0, `mc_data()`.
 
 ## v0.6.1: nulo rígido e testes das frações (concluída em 2026-11-07)
 

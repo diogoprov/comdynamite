@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.6.2
 
 - `mc_data()` and `as_mc_data()`: community, tree, traits, environment, coordinates, areas and
   time series in one object, with names checked once. The analyses and `summary_stats()` take an
