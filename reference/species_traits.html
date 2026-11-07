@@ -21,7 +21,7 @@ keeps their marginal distribution."><meta property="og:image" content="https://p
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ keeps their marginal distribution."><meta property="og:image" content="https://p
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Species traits, with or without phylogenetic signal</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.6.2/R/traits.R" class="external-link"><code>R/traits.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/traits.R" class="external-link"><code>R/traits.R</code></a></small>
       <div class="d-none name"><code>species_traits.Rd</code></div>
     </div>
 
@@ -86,7 +86,11 @@ keeps their marginal distribution.</p>
 <span>  sigma_sd <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">8</span><span class="op">)</span>,</span>
 <span>  sigma_signal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  rmax_signal <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  rmax_signal <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  optima <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  sigma <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  r_max <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rescale_optima <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -126,11 +130,29 @@ rates.</p></dd>
 <dd><p>Should niche breadth or maximum growth rate
 carry phylogenetic signal (Brownian motion)?</p></dd>
 
+
+<dt id="arg-optima-sigma-r-max">optima, sigma, r_max<a class="anchor" aria-label="anchor" href="#arg-optima-sigma-r-max"></a></dt>
+<dd><p>Optional values of each trait, named by species or in the order
+of the species, as a vector or a one-column matrix or data frame. They replace the values
+drawn for that trait.</p></dd>
+
+
+<dt id="arg-rescale-optima">rescale_optima<a class="anchor" aria-label="anchor" href="#arg-rescale-optima"></a></dt>
+<dd><p>Rescale external optima to <code>optima_range</code>?</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Data frame with columns <code>optimum</code>, <code>sigma</code> and <code>r_max</code>, one row per
 species, with species names as row names.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>Any of the three traits can come from elsewhere instead, such as optima simulated by
+mvMORPH or measured in the field, through <code>optima</code>, <code>sigma</code> and <code>r_max</code>. The other traits are
+still drawn, and with the same seed they are the same as without the external ones. External
+optima are rescaled to <code>optima_range</code>, or ranked with <code>uniform_optima</code>, unless
+<code>rescale_optima = FALSE</code>.</p>
     </div>
 
     <div class="section level2">
@@ -156,6 +178,20 @@ species, with species names as row names.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sp3  41.12514  5.5670813 6.342356</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sp4   0.00000 10.0110535 4.025692</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sp5  45.81600 10.7434132 5.782485</span>
+<span class="r-in"><span><span class="co"># optima from another model, here an Ornstein-Uhlenbeck process</span></span></span>
+<span class="r-in"><span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">1</span>, theta <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">species_traits</span><span class="op">(</span><span class="va">tr</span>, optima <span class="op">=</span> <span class="va">ou</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       optimum     sigma    r_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t1   95.73952 20.537509 6.528234</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t2  100.00000 13.356172 5.722460</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t3   53.57144 14.947958 3.017461</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t4   61.74475 11.380527 2.373284</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t5   29.88675  8.812080 2.654176</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t6   55.81391 11.976843 4.290298</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t7   26.41955  1.967868 3.015865</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t8   55.07890 25.800917 3.791915</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9    0.00000 24.978188 3.153257</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t10  16.88222 12.626455 3.543020</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

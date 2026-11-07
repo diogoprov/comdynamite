@@ -21,7 +21,11 @@ species_traits(
   sigma_sd = 10,
   rmax_range = c(2, 8),
   sigma_signal = FALSE,
-  rmax_signal = FALSE
+  rmax_signal = FALSE,
+  optima = NULL,
+  sigma = NULL,
+  r_max = NULL,
+  rescale_optima = TRUE
 )
 ```
 
@@ -59,10 +63,29 @@ species_traits(
   Should niche breadth or maximum growth rate carry phylogenetic signal
   (Brownian motion)?
 
+- optima, sigma, r_max:
+
+  Optional values of each trait, named by species or in the order of the
+  species, as a vector or a one-column matrix or data frame. They
+  replace the values drawn for that trait.
+
+- rescale_optima:
+
+  Rescale external optima to `optima_range`?
+
 ## Value
 
 Data frame with columns `optimum`, `sigma` and `r_max`, one row per
 species, with species names as row names.
+
+## Details
+
+Any of the three traits can come from elsewhere instead, such as optima
+simulated by mvMORPH or measured in the field, through `optima`, `sigma`
+and `r_max`. The other traits are still drawn, and with the same seed
+they are the same as without the external ones. External optima are
+rescaled to `optima_range`, or ranked with `uniform_optima`, unless
+`rescale_optima = FALSE`.
 
 ## Examples
 
@@ -88,4 +111,18 @@ species_traits(5)
 #> sp3  41.12514  5.5670813 6.342356
 #> sp4   0.00000 10.0110535 4.025692
 #> sp5  45.81600 10.7434132 5.782485
+# optima from another model, here an Ornstein-Uhlenbeck process
+ou <- traits_ou(tr, alpha = 1, theta = 0)
+species_traits(tr, optima = ou[, 1])
+#>       optimum     sigma    r_max
+#> t1   95.73952 20.537509 6.528234
+#> t2  100.00000 13.356172 5.722460
+#> t3   53.57144 14.947958 3.017461
+#> t4   61.74475 11.380527 2.373284
+#> t5   29.88675  8.812080 2.654176
+#> t6   55.81391 11.976843 4.290298
+#> t7   26.41955  1.967868 3.015865
+#> t8   55.07890 25.800917 3.791915
+#> t9    0.00000 24.978188 3.153257
+#> t10  16.88222 12.626455 3.543020
 ```
