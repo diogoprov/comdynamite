@@ -404,7 +404,7 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
 Publica o marco v0.3.0 (`run_scenarios()`, `summary_stats()`, `equilibrium_check()`, saída
 longa, benchmark e piloto de identificabilidade), `pcps_test()` com o toro retangular, as
 pendências das etapas anteriores, o nulo restrito por conjunto em `trait_partition()` e o
-primeiro item da v0.4.0, `mc_data()`.
+primeiro item da v0.4.0, `mc_data()`. DOI da versão: `10.5281/zenodo.24044811`.
 
 ## v0.6.1: nulo rígido e testes das frações (concluída em 2026-11-07)
 
