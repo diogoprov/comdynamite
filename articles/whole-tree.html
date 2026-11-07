@@ -130,9 +130,11 @@ analysis.</p>
 <span><span class="co">#&gt; p (sites): 0.005  p (species): 0.005  p (max): 0.005</span></span></code></pre></div>
 <p><code>scores</code> holds the sites on the principal coordinates of
 the predicted matrix, which the authors suggest using to order sites in
-a heatmap of the community matrix.</p>
+a heatmap of the community matrix. <code><a href="../reference/plot_phylo_beta.html">plot_phylo_beta()</a></code> draws
+it, with species in the order of the tree, so that clades replace each
+other along the sites when composition follows the environment.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">env</span>, <span class="va">beta</span><span class="op">$</span><span class="va">scores</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, xlab <span class="op">=</span> <span class="st">"Environment"</span>, ylab <span class="op">=</span> <span class="st">"First axis of the predicted matrix"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_phylo_beta.html">plot_phylo_beta</a></span><span class="op">(</span><span class="va">beta</span>, <span class="va">comm</span>, <span class="va">tree</span><span class="op">)</span></span></code></pre></div>
 <p><img src="whole-tree_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">

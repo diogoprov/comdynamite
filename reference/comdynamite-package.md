@@ -40,7 +40,9 @@ implemented from the published equations.
   works on phylogenetic eigenvectors and
   [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
   on the phylogenetic distances between communities, from
-  [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md).
+  [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
+  shown by
+  [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md).
 
 - Which phylogenetic axis relates to a predictor?
   [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md).

@@ -87,8 +87,10 @@ ecological communities. *Plant Ecology*, 216, 709–724.
 
 ## See also
 
-[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
-the other framework of the same article.
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+shows the result.
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
+is the other framework of the same article.
 
 ## Examples
 

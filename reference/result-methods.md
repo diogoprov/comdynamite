@@ -9,7 +9,9 @@ in order of `p_adjusted`.
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) calls
 [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
 or
-[`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md).
+[`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
+or
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md).
 
 ## Usage
 
@@ -34,6 +36,9 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
 # S3 method for class 'mc_phylo_beta'
 summary(object, ...)
+
+# S3 method for class 'mc_phylo_beta'
+plot(x, comm, tree, ...)
 
 # S3 method for class 'mc_phylo_vector'
 as.data.frame(x, row.names = NULL, optional = FALSE, ...)
@@ -73,8 +78,12 @@ plot(x, ...)
 
 - tree:
 
-  The `phylo` object that gave the contrasts of
-  [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md).
+  The `phylo` object of the analysis.
+
+- comm:
+
+  The community matrix given to
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md).
 
 ## Value
 

@@ -6,6 +6,10 @@
   [`summary()`](https://rdrr.io/r/base/summary.html) and
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods for
   the results of the analyses.
+- [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md):
+  community matrix with sites ordered by
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  and species by the tree, as Peres-Neto & Kembel (2015) suggest.
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `r2_weighted`, which stays between 0 and 1, unlike `r2`, inherited
   from the original code; `n_draws`, the valid draws of sites. Errors in

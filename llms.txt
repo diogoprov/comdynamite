@@ -216,6 +216,8 @@ Does phylogenetic composition follow the environment?
   : Test phylogenetic beta diversity against the environment
 - [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md)
   : Phylogenetic beta diversity between communities
+- [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+  : Community matrix ordered by phylogenetic beta diversity
 
 ## Environment and space
 
@@ -249,6 +251,7 @@ Tables, summaries and plots of results.
   [`summary(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`as.data.frame(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`summary(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`plot(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`as.data.frame(`*`<mc_phylo_vector>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`summary(`*`<mc_phylo_vector>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   [`as.data.frame(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)

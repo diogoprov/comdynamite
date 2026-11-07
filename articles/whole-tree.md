@@ -59,10 +59,13 @@ beta
 `scores` holds the sites on the principal coordinates of the predicted
 matrix, which the authors suggest using to order sites in a heatmap of
 the community matrix.
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+draws it, with species in the order of the tree, so that clades replace
+each other along the sites when composition follows the environment.
 
 ``` r
 
-plot(env, beta$scores[, 1], xlab = "Environment", ylab = "First axis of the predicted matrix")
+plot_phylo_beta(beta, comm, tree)
 ```
 
 ![](whole-tree_files/figure-html/unnamed-chunk-5-1.png)
