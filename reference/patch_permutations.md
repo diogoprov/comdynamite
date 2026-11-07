@@ -37,8 +37,11 @@ patch_permutations(coords, biogeography, n_perm = 999, gap = NULL)
 - gap:
 
   Largest distance between neighbouring sites of a patch. The default,
-  1.5 times the median distance to the nearest site, joins diagonal
-  neighbours in a regular grid.
+  1.5 times the median distance from a site to its fourth nearest site,
+  joins diagonal neighbours in a full grid where most sites are not on
+  an edge, and the four nearest sites are one step away, and grows with
+  the spacing of sparse sites, where it follows the distance between
+  neighbouring sites rather than the nearest pair.
 
 ## Value
 
@@ -56,10 +59,10 @@ not kept, and a patch next to an edge or to another patch may take an
 elongated form or be split. Distances are Euclidean, so coordinates
 should be projected. A landscape with holes or with parts far apart,
 such as islands, may give patches that cross the gaps. With sparse
-sites, as cells with records in a large region, the default `gap` splits
-areas into many patches of one site, which move almost freely, so `gap`
-should follow the scale of the area. Results should be compared across
-values of `gap`.
+sites, as cells with records in a large region, the default `gap`
+follows the spacing of the sites, so that neighbouring sites of an area
+form a patch instead of moving one by one. Results should still be
+compared across values of `gap`.
 
 This method was built for this package and has no published evaluation.
 In `data-raw/validation_edges.R`, with communities that followed a
@@ -78,9 +81,16 @@ together. With areas fixed in a square of 20 by 20 sites, the rate was
 corners or halves of the landscape. The test is therefore liberal for
 sides far apart, as across a barrier, and conservative for neighbouring
 sides. With 25% to 40% of the sites of that square and areas in opposite
-corners, it rejected 15% to 16% with the default `gap` and 5% to 6% with
-a `gap` of 3. It is still far better than free permutations, which
-rejected 48% to 74%, but p-values near the threshold need caution.
+corners (`data-raw/validation_gap.R`, 150 replicates and 99
+permutations), it rejected 15% to 17% with 1.5 times the distance to the
+nearest site as `gap`, the former default, and 5.6% to 5.9% with the
+current default, which follows the fourth nearest site; those two cases
+were used to choose it. In sparse landscapes held out from that choice
+(irregular areas with 40% of the sites, adjacent areas with 60%, random
+blocks with 80% and irregular areas on seven clusters of sites) it
+rejected 2.1% to 5.9%, against 2.6% to 8.4% with the former default. It
+is still far better than free permutations, which rejected 48% to 74%,
+but p-values near the threshold need caution.
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
 keeps those distances, and is the better choice for sides close enough
 to have room to move.

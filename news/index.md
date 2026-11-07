@@ -40,6 +40,32 @@
   that span the landscape. Its `independent` argument covers those at
   the price of an assumption on the range of autocorrelation, and
   remains liberal in some layouts. See its help for the rates.
+- [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  off a regular lattice now enumerates the moves, on a grid of rotations
+  and reflections with a translation to each site, instead of drawing
+  them at random, so which placements exist no longer changes between
+  runs. In `data-raw/validation_offgrid.R` it rejected 4.7% and 5.9% of
+  the tests at the 5% level for adjacent areas off a lattice, and 6.8%
+  to 8.0% for two blocks placed at random, where it is liberal.
+- [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  and
+  [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md):
+  the default `gap` follows the fourth nearest site, the step of a full
+  grid and the spacing of sparse sites, instead of the nearest one.
+  [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  thus no longer stops on a grid with holes, and the holes between sites
+  count as inside the landscape while the rim beyond an edge does not.
+  The default of
+  [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+  is unchanged on a full grid where most sites are off the edge, and
+  larger with sparse or irregular sites, where it changes the patches
+  and the results: with 25% to 40% of the sites of a square and areas in
+  opposite corners it rejected 5.6% to 5.9%, against 15% to 17% before
+  (`data-raw/validation_gap.R`).
+- [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  draws the placements at random when an event has more than `n_perm` of
+  them. Before, with fewer than twice `n_perm`, it took the first ones
+  in the order of enumeration.
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `permutations$areas` now gives the number of permutations of each
   event, which may differ, and

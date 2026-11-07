@@ -164,9 +164,16 @@ These rates average over places of areas. Patches are placed
 independently, so the distance between the two sides of an event is not
 kept. With areas fixed in the square, the rate was 0.4% to 2% for
 adjacent areas and 6% to 10% for areas in opposite corners or halves of
-the landscape, and 15% to 16% with sparse sites and the default `gap`.
-The test is thus liberal for sides far apart and conservative for
-neighbouring sides, and p-values near the threshold need caution.
+the landscape. The test is thus liberal for sides far apart and
+conservative for neighbouring sides, and p-values near the threshold
+need caution. With sparse sites the result depends on `gap`, which sets
+what counts as neighbouring sites: with 25% to 40% of the sites of the
+square and areas in opposite corners, 1.5 times the distance to the
+nearest site, the former default, gave 15% to 17%, and the current
+default, which follows the fourth nearest site, 5.6% to 5.9%
+(`data-raw/validation_gap.R`, 150 replicates and 99 permutations). In
+sparse landscapes held out from that choice the current default gave
+2.1% to 5.9%.
 
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
 keeps those distances. It moves the whole event at once, by a rotation
@@ -185,8 +192,9 @@ areas, it rejected 3.7% to 4.7% for areas placed at random in the square
 and the strip, 2.2% to 3.5% for adjacent and several small areas fixed
 in the square, and 4.2% to 4.8% for adjacent areas, an L shape and two
 areas at a short distance when the hidden environment had an exponential
-covariance. With sparse sites and areas in opposite corners, it rejected
-less than 1%. Power for adjacent areas was about twice that of
+covariance. With sparse sites and areas with room to move, it rejected
+5.5% to 6.1%, and with areas in opposite corners it had no placement or
+fewer than five. Power for adjacent areas was about twice that of
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
 (24% against 13%).
 
@@ -218,15 +226,27 @@ We found no null model that is valid for sides far apart at any range of
 autocorrelation, so that range has to be argued from outside the data,
 and results should be compared across values.
 
-As a guide, use
+As a guide, on a grid use
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
 when the sides have room to move, and compare it with
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
-and values of `independent` when they do not. Coordinates off a regular
-lattice get random moves, and were less precise, with 2% to 9% in a
-square with jitter (60 replicates). There a large part of an event in an
-irregular region seldom fits after a move; it then stays nearly in place
-while small parts move, and the function warns.
+and values of `independent` when they do not. Off a grid,
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+is the safer choice, for the reason below. Coordinates off a regular
+lattice get an enumerated grid of rotations, reflections and
+translations, with the moved sites taken to the nearest free sites.
+There (`data-raw/validation_offgrid.R`, 150 replicates and 99
+permutations) it rejected 4.7% and 5.9% for adjacent areas in a square
+with jitter and in sites placed at random, but 6.8% to 8.0% for two
+blocks placed at random in four landscapes, where it is liberal, against
+1.2% to 6.3% with
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md).
+With a second generator in an L-shaped region of random sites
+(`data-raw/validation_nulls_check.R`) it rejected 7.0% and 8.7%, against
+5.5% and 6.6%. Power for adjacent areas was 23% against 12%. A large
+part of an event in an irregular region may have few moves that fit; it
+then stays nearly in place while small parts move, and the function
+warns.
 
 Both are methods of this package without published evaluation, tested
 only in these simulations. Coordinates should be projected, and with
