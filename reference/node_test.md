@@ -29,7 +29,10 @@ node_test(
 
   Matrix with one row per site and one column per species. Species are
   matched to the rows of `nodes` by name, in any order, and those in
-  only one of the two are dropped with a warning.
+  only one of the two are dropped with a warning. Or an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object, whose parts fill the arguments left out (its tree gives
+  `nodes`).
 
 - nodes:
 

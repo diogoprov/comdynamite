@@ -67,7 +67,7 @@ List of class `mc_sim` with `abundance`, a 0/1 matrix with one row per
 site and one column per species; `probability`, the matrix of
 probabilities; `env`, the gradients; and `traits`, a list with the
 matrices `intercept` and `slope`, with one row per species and one
-column per gradient.
+column per gradient; and `tree`.
 
 ## Details
 

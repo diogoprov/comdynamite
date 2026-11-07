@@ -83,7 +83,9 @@ simulate_metacommunity(
 An `mc_sim` object: a list with `abundance` (sites x species matrix at
 the last step), `history` (sites x species x recorded steps array, or
 `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal` and
-`extirpation` used.
+`extirpation` used, and `tree` when the traits came from
+[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
+with a tree.
 
 ## Details
 

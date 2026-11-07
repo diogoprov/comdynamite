@@ -30,7 +30,9 @@ pcc_test(
   Matrix with one row per site and one column per species. Species are
   matched to the tips of `tree` by name, in any order, and those in only
   one of the two are dropped with a warning. Every site needs at least
-  one individual.
+  one individual. Or an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object, whose parts fill the arguments left out.
 
 - tree:
 

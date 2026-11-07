@@ -16,7 +16,9 @@ phylo_beta(comm, tree)
 - comm:
 
   Matrix with one row per site and one column per species, named as the
-  tips of `tree`. Every site needs at least one individual.
+  tips of `tree`. Every site needs at least one individual. Or an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object, whose parts fill the arguments left out.
 
 - tree:
 

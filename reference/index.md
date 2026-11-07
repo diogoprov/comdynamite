@@ -1,5 +1,17 @@
 # Package index
 
+## Data
+
+Community, tree, traits, environment and coordinates in one object.
+
+- [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  [`print(`*`<mc_data>`*`)`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  [`` `[`( ``*`<mc_data>`*`)`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  [`summary(`*`<mc_data>`*`)`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  [`as.data.frame(`*`<mc_data>`*`)`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  : Metacommunity data in one object
+
 ## Simulate metacommunities
 
 The process-based model, from landscape and traits to abundances.
@@ -140,7 +152,7 @@ Tables, summaries and plots of results.
   [`plot(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   : Results as data frames, summaries and plots
 
-## Data
+## Example data
 
 - [`daphniids`](https://provetelab.org/comdynamite/reference/daphniids.md)
   : Daphniids of the northeastern United States

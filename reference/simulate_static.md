@@ -60,8 +60,11 @@ simulate_static(
 ## Value
 
 List of class `mc_sim` with `abundance`, a matrix with one row per site
-and one column per species, plus `env` and `traits`. Sites and species
-with no individuals are kept, so remove them if a method requires it.
+and one column per species, plus `env`, `traits` and, when the traits
+came from
+[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
+with a tree, `tree`. Sites and species with no individuals are kept, so
+remove them if a method requires it.
 
 ## Details
 

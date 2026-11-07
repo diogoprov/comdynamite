@@ -22,12 +22,17 @@ summary_stats(
 
 - x:
 
-  An `mc_sim` object, a matrix with one row per site and one column per
-  species, or an array of sites x species x steps. In an array, the last
-  step gives the statistics that are not temporal. From an `mc_sim`,
-  these come from `abundance` and the temporal ones from `history`, and
-  `env`, `coords` and `trait` default to those of the simulation, the
-  trait being the environmental optimum.
+  An
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object, an `mc_sim` object, a matrix with one row per site and one
+  column per species, or an array of sites x species x steps. In an
+  array, the last step gives the statistics that are not temporal. From
+  an `mc_sim`, these come from `abundance` and the temporal ones from
+  `history`, and `env`, `coords` and `trait` default to those of the
+  simulation, the trait being the environmental optimum. From an
+  `mc_data` object, they default to its parts: the trait is the column
+  `optimum`, or the only numeric column of `traits`, and `env` the only
+  numeric column of `env`.
 
 - tree:
 

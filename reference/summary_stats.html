@@ -77,11 +77,13 @@ same names and results can be bound by rows.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <code>mc_sim</code> object, a matrix with one row per site and one column per species, or
+<dd><p>An <code><a href="mc_data.html">mc_data()</a></code> object, an <code>mc_sim</code> object, a matrix with one row per site and one column per species, or
 an array of sites x species x steps. In an array, the last step gives the statistics that
 are not temporal. From an <code>mc_sim</code>, these come from <code>abundance</code> and the temporal ones
 from <code>history</code>, and <code>env</code>, <code>coords</code> and <code>trait</code> default to those of the simulation, the
-trait being the environmental optimum.</p></dd>
+trait being the environmental optimum. From an <code>mc_data</code> object, they default to its
+parts: the trait is the column <code>optimum</code>, or the only numeric column of <code>traits</code>, and
+<code>env</code> the only numeric column of <code>env</code>.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
