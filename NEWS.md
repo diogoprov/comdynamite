@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.6.1
 
 - `trait_partition()`: the tests of fractions `a` and `c`, and of the semipartials, now use the
   share of the component that the other set leaves unexplained as statistic, which is monotone
