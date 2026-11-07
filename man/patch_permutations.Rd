@@ -16,7 +16,10 @@ the rows of \code{biogeography}.}
 \item{n_perm}{Number of permutations.}
 
 \item{gap}{Largest distance between neighbouring sites of a patch. The default, 1.5 times
-the median distance to the nearest site, joins diagonal neighbours in a regular grid.}
+the median distance from a site to its fourth nearest site, joins diagonal neighbours in
+a full grid of at least 8 by 8 sites, where the four nearest sites are one step away,
+and grows with the spacing of sparse sites, where it follows the distance between
+neighbouring sites rather than the nearest pair.}
 }
 \value{
 List with one integer matrix per event, each with one permutation per row and the
@@ -37,9 +40,9 @@ Patches take a compact form near their random site, so their shape is not kept, 
 patch next to an edge or to another patch may take an elongated form or be split.
 Distances are Euclidean, so coordinates should be projected. A landscape with holes or
 with parts far apart, such as islands, may give patches that cross the gaps. With sparse
-sites, as cells with records in a large region, the default \code{gap} splits areas into many
-patches of one site, which move almost freely, so \code{gap} should follow the scale of the
-area. Results should be compared across values of \code{gap}.
+sites, as cells with records in a large region, the default \code{gap} follows the spacing of
+the sites, so that neighbouring sites of an area form a patch instead of moving one by
+one. Results should still be compared across values of \code{gap}.
 
 This method was built for this package and has no published evaluation. In
 \code{data-raw/validation_edges.R}, with communities that followed a hidden autocorrelated
@@ -54,10 +57,16 @@ and sides tend to end close together. With areas fixed in a square of 20 by 20 s
 rate was 0.4\% to 2\% for adjacent areas, and 6\% to 10\% for areas in opposite corners or
 halves of the landscape. The test is therefore liberal for sides far apart, as across a
 barrier, and conservative for neighbouring sides. With 25\% to 40\% of the sites of that
-square and areas in opposite corners, it rejected 15\% to 16\% with the default \code{gap} and 5\%
-to 6\% with a \code{gap} of 3. It is still far better than free permutations, which rejected 48\%
-to 74\%, but p-values near the threshold need caution. \code{\link[=rigid_permutations]{rigid_permutations()}} keeps those
-distances, and is the better choice for sides close enough to have room to move.
+square and areas in opposite corners (\code{data-raw/validation_gap.R}, 150 replicates and 99
+permutations), it rejected 15\% to 17\% with 1.5 times the distance to the nearest site as
+\code{gap}, the former default, and 5.6\% to 5.9\% with the current default, which follows the
+fourth nearest site; those two cases were used to choose it. In sparse landscapes held out
+from that choice (irregular areas with 40\% of the sites, adjacent areas with 60\%, random
+blocks with 80\% and irregular areas on seven clusters of sites) it rejected 2.1\% to 5.9\%,
+against 2.6\% to 8.4\% with the former default. It is still far better than free
+permutations, which rejected 48\% to 74\%, but p-values near the threshold need caution.
+\code{\link[=rigid_permutations]{rigid_permutations()}} keeps those distances, and is the better choice for sides close
+enough to have room to move.
 }
 \examples{
 coords <- expand.grid(x = 1:10, y = 1:6)

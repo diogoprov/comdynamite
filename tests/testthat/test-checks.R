@@ -163,7 +163,7 @@ test_that("the simulator explains wrong input", {
 })
 
 test_that("patch_permutations() explains repeated sites", {
-  expect_error(patch_permutations(cbind(rep(1:3, each = 3), 0), cbind(rep(c(1, -1, 0), 3))),
+  expect_error(patch_permutations(cbind(rep(1:2, each = 5), 0), cbind(rep(c(1, -1, 0, 0, 0), 2))),
                "share their coordinates")
 })
 

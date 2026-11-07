@@ -322,11 +322,21 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       .064 na minha conferência, 150 réplicas; .078 a .101 na auditoria, 60 réplicas). A
       validação sorteava as áreas, o que tira a média disso. Candidato: mover o conjunto de
       manchas de um evento junto, com deslocamento e rotação comuns.
-- [ ] Ramo fora de grade de `rigid_permutations()`: .02 a .09 em 60 réplicas. Nos refúgios,
-      partes grandes quase não encaixam em movimentos aleatórios, e o resultado muda entre
-      execuções. Candidato: enumerar ângulos e translações, como na grade.
-- [ ] Critério para escolher `gap` com sítios esparsos: com 25% a 40% da grade e áreas em cantos
-      opostos, .15 a .16 com o padrão e .05 a .06 com `gap` 3.
+- [x] Ramo fora de grade de `rigid_permutations()`: agora enumera rotações (passo que move o
+      sítio mais distante em cerca de `gap`, de 4 a 360), reflexões e translações para cada
+      sítio, sobre um raster com fechamento (buracos contam como dentro, a borda não), em vez
+      de sortear movimentos; o conjunto de encaixes é fixo. Em `data-raw/validation_offgrid.R`
+      (150 réplicas, 99 permutações): áreas adjacentes .047 e .059; dois blocos aleatórios em
+      quatro paisagens .068 a .080, liberal; `patch_permutations()` .012 a .063; poder 23%
+      contra 12%. Fica pendente: blocos aleatórios fora de grade acima de .07, e eventos
+      grandes em grade com jitter são lentos (225 sítios em 750: 701 encaixes em 12 min).
+      Nos refúgios, a parte grande tem um único encaixe, de forma determinística.
+- [x] Critério para `gap`: mediana da distância ao quarto sítio mais próximo (passo da grade
+      cheia; espaçamento com sítios esparsos). `patch_permutations()` usa 1,5 vez isso (cantos
+      com 25% a 40% da grade: .056 a .059, contra .15 a .17 com o padrão antigo; holdout .021
+      a .059). `rigid_permutations()` usa o valor direto e não erra mais com poucos buracos
+      (.055 a .061 com 40% a 80% dos sítios). Em `data-raw/validation_gap.R`. Cantos opostos
+      esparsos e clusters seguem sem encaixes para o rígido.
 - [ ] Testes das frações `a` e `c` de `trait_partition()`: permutar sob o modelo reduzido, em
       vez de ambiente e espaço juntos. Hoje são conservadores. Conferir o MATLAB de
       Peres-Neto et al. (2012) antes de mudar.
