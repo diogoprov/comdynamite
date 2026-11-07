@@ -99,6 +99,8 @@ Permutations for sites that are neighbours.
 
 - [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
   : Site permutations that keep the structure of a torus
+- [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  : Permutations that move biogeographic events as rigid bodies
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   : Permutations that move the patches of biogeographic events
 

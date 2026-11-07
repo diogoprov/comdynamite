@@ -6,6 +6,21 @@
   [`summary()`](https://rdrr.io/r/base/summary.html) and
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods for
   the results of the analyses.
+- [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md):
+  restricted null model for the events of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  that moves the whole event by a rotation or a reflection and a
+  translation, so it keeps the shape of the sides and the distance
+  between them. It is better than
+  [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+  for sides with room to move, and gives few or no placements for events
+  that span the landscape. Its `independent` argument covers those at
+  the price of an assumption on the range of autocorrelation, and
+  remains liberal in some layouts. See its help for the rates.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `permutations$areas` now gives the number of permutations of each
+  event, which may differ, and
+  [`print()`](https://rdrr.io/r/base/print.html) shows them.
 - [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md):
   community matrix with sites ordered by
   [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)

@@ -127,7 +127,7 @@ for example from <code><a href="torus_permutations.html">torus_permutations()</a
 
 <dt id="arg-area-permutations">area_permutations<a class="anchor" aria-label="anchor" href="#arg-area-permutations"></a></dt>
 <dd><p>Optional list with one matrix per event, from
-<code><a href="patch_permutations.html">patch_permutations()</a></code>, to use for the events instead of <code>site_permutations</code> or free
+<code><a href="rigid_permutations.html">rigid_permutations()</a></code> or <code><a href="patch_permutations.html">patch_permutations()</a></code>, to use for the events instead of <code>site_permutations</code> or free
 permutations. Sites must be in the order of <code>comm</code>.</p></dd>
 
 </dl></div>
@@ -141,7 +141,8 @@ nodes by predictors; <code>p_partial_max</code>, with the larger of the two p-va
 them; <code>p_partial_site</code>, with the p-values of sites alone; <code>p_partial_joint</code>, with
 those of the permutation of the article; <code>biogeography</code>, a list with the same
 four matrices for the events, or <code>NULL</code>; and <code>permutations</code>, the numbers of
-permutations and whether those of sites were free or restricted.</p>
+permutations, per event for <code>area_permutations</code>, and whether those of sites were free or
+restricted.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -174,8 +175,8 @@ the community has spatial structure of its own, they reject too often: 45% of te
 the 5% level in a simulation with areas placed at random, against 5% with
 <code><a href="torus_permutations.html">torus_permutations()</a></code> (see the article on analysing clades). <code>site_permutations</code> accepts
 a restricted null model. For events, each row moves the areas across the sites, which
-keep their community and predictors. In a landscape with edges, <code><a href="patch_permutations.html">patch_permutations()</a></code>
-gives the permutations of each event for <code>area_permutations</code>.</p>
+keep their community and predictors. In a landscape with edges, <code><a href="rigid_permutations.html">rigid_permutations()</a></code>
+and <code><a href="patch_permutations.html">patch_permutations()</a></code> give the permutations of each event for <code>area_permutations</code>.</p>
 <p>R2, adjusted R2 and the statistic equal those of the MATLAB function
 <code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Four parts of that
 function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns

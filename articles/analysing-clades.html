@@ -207,10 +207,56 @@ the landscape, and 15% to 16% with sparse sites and the default
 <code>gap</code>. The test is thus liberal for sides far apart and
 conservative for neighbouring sides, and p-values near the threshold
 need caution.</p>
-<p>This is a method of this package without published evaluation, tested
-only in these simulations. Coordinates should be projected, and
-landscapes with parts far apart may give patches that cross the
-gaps.</p>
+<p><code><a href="../reference/rigid_permutations.html">rigid_permutations()</a></code> keeps those distances. It moves the
+whole event at once, by a rotation or a reflection and a translation, as
+the torus-translation test of Harms et al. (2001) without the
+wrap-around, so each side keeps its shape and the sides keep their
+distance.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">area_moves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rigid_permutations.html">rigid_permutations</a></span><span class="op">(</span><span class="va">coords</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/node_test.html">node_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, <span class="va">events</span>, area_permutations <span class="op">=</span> <span class="va">area_moves</span><span class="op">)</span></span></code></pre></div>
+<p>With 150 replicates (<code>data-raw/validation_rigid.R</code>) and no
+effect of areas, it rejected 3.7% to 4.7% for areas placed at random in
+the square and the strip, 2.2% to 3.5% for adjacent and several small
+areas fixed in the square, and 4.2% to 4.8% for adjacent areas, an L
+shape and two areas at a short distance when the hidden environment had
+an exponential covariance. With sparse sites and areas in opposite
+corners, it rejected less than 1%. Power for adjacent areas was about
+twice that of <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> (24% against 13%).</p>
+<p>The price is that an event that spans the landscape has little room
+to move. Two halves, two strips along opposite edges or areas in
+opposite corners had one placement besides the observed one, and most
+random areas in the band had none or fewer than 20. The function then
+returns fewer permutations, with a warning, or stops, and
+<code><a href="../reference/node_test.html">node_test()</a></code> prints how many each event got. With fewer than
+19 no node can reach the 5% level. Such an event cannot be tested by
+moving it whole, by this or by any other permutation that keeps its
+shape.</p>
+<p><code>independent</code> lets parts of an event farther apart than
+that distance move on their own, which gives placements to sides far
+apart, but assumes that the community is not spatially autocorrelated
+beyond it.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">area_moves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/rigid_permutations.html">rigid_permutations</a></span><span class="op">(</span><span class="va">coords</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">999</span>, independent <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></code></pre></div>
+<p>With <code>independent = 10</code>, random areas in the three
+landscapes gave 3.9% to 5.5%, but areas in opposite corners gave 6% to
+7% with autocorrelation over 3 or 4 sites and 12% over 12 sites, and
+strips along opposite edges 8% to 9%, against 2% to 3% with
+<code><a href="../reference/patch_permutations.html">patch_permutations()</a></code>. We found no null model that is valid
+for sides far apart at any range of autocorrelation, so that range has
+to be argued from outside the data, and results should be compared
+across values.</p>
+<p>As a guide, use <code><a href="../reference/rigid_permutations.html">rigid_permutations()</a></code> when the sides have
+room to move, and compare it with <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> and
+values of <code>independent</code> when they do not. Coordinates off a
+regular lattice get random moves, and were less precise, with 2% to 9%
+in a square with jitter (60 replicates). There a large part of an event
+in an irregular region seldom fits after a move; it then stays nearly in
+place while small parts move, and the function warns.</p>
+<p>Both are methods of this package without published evaluation, tested
+only in these simulations. Coordinates should be projected, and with
+<code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> landscapes with parts far apart may
+give patches that cross the gaps.</p>
 </div>
 <div class="section level2">
 <h2 id="how-much-of-the-phylogenetic-structure-is-due-to-environment-and-space">How much of the phylogenetic structure is due to environment and
@@ -220,7 +266,7 @@ space?<a class="anchor" aria-label="anchor" href="#how-much-of-the-phylogenetic-
 coordinates, so we simulate them with the generator of Appendix C of
 Peres-Neto et al. (2012). In the first scenario, two independent
 gradients act on species.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span>, beta <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">gradients</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logistic_gradients.html">logistic_gradients</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -234,7 +280,7 @@ gradients act on species.</p>
 <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> tests whether a gradient is related to the
 phylogeny and, if so, gives a vector of species values for the next
 step. Here we ask this for each gradient.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">x</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">second</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">p_max</span>, <span class="va">second</span><span class="op">$</span><span class="va">p_max</span><span class="op">)</span></span>
@@ -242,7 +288,7 @@ step. Here we ask this for each gradient.</p>
 <p><code><a href="../reference/trait_partition.html">trait_partition()</a></code> then splits the variation of these
 vectors among sites. The vectors are chosen to fit the gradients, so
 this step only makes sense after a significant global test.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vectors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">pev_brown</span>, <span class="va">second</span><span class="op">$</span><span class="va">pev_brown</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_partition.html">trait_partition</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">vectors</span>, <span class="va">x</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">partition</span></span>
@@ -260,9 +306,9 @@ this step only makes sense after a significant global test.</p>
 <span><span class="co">#&gt;        trait1 trait2</span></span>
 <span><span class="co">#&gt; env1     0.50  -0.17</span></span>
 <span><span class="co">#&gt; space1  -0.27   0.51</span></span></code></pre></div>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gradient x"</span>, <span class="st">"Gradient y"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="analysing-clades_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
+<p><img src="analysing-clades_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
 <p>The test of each trait against each predictor is a different
 question, for which ter Braak (2019) is the reference.</p>
 </div>

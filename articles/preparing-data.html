@@ -186,8 +186,11 @@ in advance.</p>
 <span><span class="co">#&gt; 15 10 15</span></span></code></pre></div>
 <p>Sites of an area are usually neighbours, and free permutations then
 reject too often. <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> gives a null model
-for landscapes with edges. Coordinates should be projected, because
-distances are Euclidean; <code><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">sf::st_transform()</a></code> does this.</p>
+for landscapes with edges, and <code><a href="../reference/rigid_permutations.html">rigid_permutations()</a></code> another
+that keeps the distance between the sides of an event, for sides with
+room to move (see the article on analysing clades). Coordinates should
+be projected, because distances are Euclidean;
+<code><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">sf::st_transform()</a></code> does this.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">sites</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">area_moves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/patch_permutations.html">patch_permutations</a></span><span class="op">(</span><span class="va">coords</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></code></pre></div>
@@ -200,7 +203,7 @@ distances are Euclidean; <code><a href="https://r-spatial.github.io/sf/reference
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_test.html">node_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">99</span>, area_permutations <span class="op">=</span> <span class="va">area_moves</span><span class="op">)</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 9 nodes, 9 tested</span></span>
-<span><span class="co">#&gt; permutations: 99 free of sites, 99 of species, 99 of areas; smallest possible p: 0.01</span></span>
+<span><span class="co">#&gt; permutations: 99 free of sites, 99 of species, of areas barrier 99; smallest possible p: 0.01</span></span>
 <span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span></span></code></pre></div>
 <p>The number of permutations here keeps the article fast. Use more than
 this in an analysis, because the smallest possible p-value depends on it

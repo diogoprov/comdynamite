@@ -129,11 +129,13 @@ halves of the landscape. The test is therefore liberal for sides far apart, as a
 barrier, and conservative for neighbouring sides. With 25% to 40% of the sites of that
 square and areas in opposite corners, it rejected 15% to 16% with the default <code>gap</code> and 5%
 to 6% with a <code>gap</code> of 3. It is still far better than free permutations, which rejected 48%
-to 74%, but p-values near the threshold need caution.</p>
+to 74%, but p-values near the threshold need caution. <code><a href="rigid_permutations.html">rigid_permutations()</a></code> keeps those
+distances, and is the better choice for sides close enough to have room to move.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="torus_permutations.html">torus_permutations()</a></code> for a torus. <code><a href="biogeography_matrix.html">biogeography_matrix()</a></code> codes the events.</p></div>
+    <div class="dont-index"><p><code><a href="rigid_permutations.html">rigid_permutations()</a></code> keeps the shape of the sides and the distances between
+them, and <code><a href="torus_permutations.html">torus_permutations()</a></code> gives a torus. <code><a href="biogeography_matrix.html">biogeography_matrix()</a></code> codes the events.</p></div>
     </div>
 
     <div class="section level2">

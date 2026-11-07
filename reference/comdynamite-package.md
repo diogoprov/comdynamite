@@ -55,7 +55,9 @@ implemented from the published equations.
 
 - Are sites neighbours?
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
-  gives restricted null models for a torus and
+  gives restricted null models for a torus, and
+  [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  and
   [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   for the events of a landscape with edges.
 

@@ -69,6 +69,8 @@ node_test(
 - area_permutations:
 
   Optional list with one matrix per event, from
+  [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+  or
   [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
   to use for the events instead of `site_permutations` or free
   permutations. Sites must be in the order of `comm`.
@@ -84,8 +86,8 @@ predictors; `p_partial_max`, with the larger of the two p-values for
 each of them; `p_partial_site`, with the p-values of sites alone;
 `p_partial_joint`, with those of the permutation of the article;
 `biogeography`, a list with the same four matrices for the events, or
-`NULL`; and `permutations`, the numbers of permutations and whether
-those of sites were free or restricted.
+`NULL`; and `permutations`, the numbers of permutations, per event for
+`area_permutations`, and whether those of sites were free or restricted.
 
 ## Details
 
@@ -134,8 +136,10 @@ areas placed at random, against 5% with
 restricted null model. For events, each row moves the areas across the
 sites, which keep their community and predictors. In a landscape with
 edges,
+[`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+and
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
-gives the permutations of each event for `area_permutations`.
+give the permutations of each event for `area_permutations`.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 `MetacommunityPhylogenetics` of the authors, checked in Octave. Four

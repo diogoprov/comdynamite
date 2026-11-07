@@ -81,11 +81,16 @@ sides. With 25% to 40% of the sites of that square and areas in opposite
 corners, it rejected 15% to 16% with the default `gap` and 5% to 6% with
 a `gap` of 3. It is still far better than free permutations, which
 rejected 48% to 74%, but p-values near the threshold need caution.
+[`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+keeps those distances, and is the better choice for sides close enough
+to have room to move.
 
 ## See also
 
+[`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+keeps the shape of the sides and the distances between them, and
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
-for a torus.
+gives a torus.
 [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
 codes the events.
 

@@ -129,8 +129,11 @@ table(events)
 Sites of an area are usually neighbours, and free permutations then
 reject too often.
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
-gives a null model for landscapes with edges. Coordinates should be
-projected, because distances are Euclidean;
+gives a null model for landscapes with edges, and
+[`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
+another that keeps the distance between the sides of an event, for sides
+with room to move (see the article on analysing clades). Coordinates
+should be projected, because distances are Euclidean;
 [`sf::st_transform()`](https://r-spatial.github.io/sf/reference/st_transform.html)
 does this.
 
@@ -148,7 +151,7 @@ nodes <- node_contrasts(tree)
 out <- node_test(comm, nodes, env, events, n_perm = 99, area_permutations = area_moves)
 out
 #> <mc_node_test> 9 nodes, 9 tested
-#> permutations: 99 free of sites, 99 of species, 99 of areas; smallest possible p: 0.01
+#> permutations: 99 free of sites, 99 of species, of areas barrier 99; smallest possible p: 0.01
 #> nodes with p (max) <= 0.05: 0 before correction, 0 after
 ```
 
