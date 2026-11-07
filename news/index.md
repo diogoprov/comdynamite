@@ -8,6 +8,11 @@
   not given are drawn as before, and with the same seed they are the
   same as without the external ones. `rescale_optima = FALSE` keeps
   external optima on their own scale.
+- [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md):
+  new statistic `trait_k`, Blomberg’s K of the trait over the species
+  shared by `trait` and `tree`, as
+  [`picante::Kcalc()`](https://rdrr.io/pkg/picante/man/Kcalc.html) gives
+  it. It is `NA` without a tree or a trait.
 
 ## comdynamite 0.6.2
 
