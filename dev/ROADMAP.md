@@ -312,11 +312,19 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       outras (.022 a .039). Em `data-raw/validation_edges_scale.rds`.
 - [x] Aplicado aos refúgios da Mata Atlântica, fora deste repositório (dados não publicados).
       Com células esparsas, o resultado depende muito de `gap`.
-- [ ] `patch_permutations()` não preserva a distância entre os lados do evento. Com áreas fixas
+- [x] `patch_permutations()` não preserva a distância entre os lados do evento: resolvido em
+      parte com `rigid_permutations()` (movimento rígido do evento inteiro; `independent` para
+      lados distantes). Lados próximos: .022 a .048. Eventos que ocupam a extensão da paisagem
+      ficam sem layouts ou, com `independent`, liberais (.06 a .09; .12 com autocorrelação longa).
+      Não há nulo válido para lados distantes sem conhecer o alcance da autocorrelação.
+      Em `data-raw/validation_rigid.R`. Registro do problema: com áreas fixas
       no quadrado 20 por 20: adjacentes .004 a .02; cantos opostos e metades .06 a .10 (.065 e
       .064 na minha conferência, 150 réplicas; .078 a .101 na auditoria, 60 réplicas). A
       validação sorteava as áreas, o que tira a média disso. Candidato: mover o conjunto de
       manchas de um evento junto, com deslocamento e rotação comuns.
+- [ ] Ramo fora de grade de `rigid_permutations()`: .02 a .09 em 60 réplicas. Nos refúgios,
+      partes grandes quase não encaixam em movimentos aleatórios, e o resultado muda entre
+      execuções. Candidato: enumerar ângulos e translações, como na grade.
 - [ ] Critério para escolher `gap` com sítios esparsos: com 25% a 40% da grade e áreas em cantos
       opostos, .15 a .16 com o padrão e .05 a .06 com `gap` 3.
 - [ ] Testes das frações `a` e `c` de `trait_partition()`: permutar sob o modelo reduzido, em

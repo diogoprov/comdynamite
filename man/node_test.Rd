@@ -41,7 +41,7 @@ cores.}
 for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites.}
 
 \item{area_permutations}{Optional list with one matrix per event, from
-\code{\link[=patch_permutations]{patch_permutations()}}, to use for the events instead of \code{site_permutations} or free
+\code{\link[=rigid_permutations]{rigid_permutations()}} or \code{\link[=patch_permutations]{patch_permutations()}}, to use for the events instead of \code{site_permutations} or free
 permutations. Sites must be in the order of \code{comm}.}
 }
 \value{
@@ -53,7 +53,8 @@ nodes by predictors; \code{p_partial_max}, with the larger of the two p-values f
 them; \code{p_partial_site}, with the p-values of sites alone; \code{p_partial_joint}, with
 those of the permutation of the article; \code{biogeography}, a list with the same
 four matrices for the events, or \code{NULL}; and \code{permutations}, the numbers of
-permutations and whether those of sites were free or restricted.
+permutations, per event for \code{area_permutations}, and whether those of sites were free or
+restricted.
 }
 \description{
 Implements the regression of Leibold et al. (2010). For each node, sites without
@@ -98,8 +99,8 @@ the community has spatial structure of its own, they reject too often: 45\% of t
 the 5\% level in a simulation with areas placed at random, against 5\% with
 \code{\link[=torus_permutations]{torus_permutations()}} (see the article on analysing clades). \code{site_permutations} accepts
 a restricted null model. For events, each row moves the areas across the sites, which
-keep their community and predictors. In a landscape with edges, \code{\link[=patch_permutations]{patch_permutations()}}
-gives the permutations of each event for \code{area_permutations}.
+keep their community and predictors. In a landscape with edges, \code{\link[=rigid_permutations]{rigid_permutations()}}
+and \code{\link[=patch_permutations]{patch_permutations()}} give the permutations of each event for \code{area_permutations}.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 \code{MetacommunityPhylogenetics} of the authors, checked in Octave. Four parts of that

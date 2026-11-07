@@ -24,7 +24,8 @@ phylogenetic distances between communities, from \code{\link[=phylo_beta]{phylo_
 \item How much of trait or phylogenetic variation is due to environment and space?
 \code{\link[=trait_partition]{trait_partition()}} and \code{\link[=plot_trait_partition]{plot_trait_partition()}}.
 \item Are sites neighbours? \code{\link[=torus_permutations]{torus_permutations()}} gives restricted null models for a
-torus and \code{\link[=patch_permutations]{patch_permutations()}} for the events of a landscape with edges.
+torus, and \code{\link[=rigid_permutations]{rigid_permutations()}} and \code{\link[=patch_permutations]{patch_permutations()}} for the events of a
+landscape with edges.
 }
 }
 

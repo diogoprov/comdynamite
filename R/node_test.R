@@ -121,8 +121,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' the 5% level in a simulation with areas placed at random, against 5% with
 #' [torus_permutations()] (see the article on analysing clades). `site_permutations` accepts
 #' a restricted null model. For events, each row moves the areas across the sites, which
-#' keep their community and predictors. In a landscape with edges, [patch_permutations()]
-#' gives the permutations of each event for `area_permutations`.
+#' keep their community and predictors. In a landscape with edges, [rigid_permutations()]
+#' and [patch_permutations()] give the permutations of each event for `area_permutations`.
 #'
 #' R2, adjusted R2 and the statistic equal those of the MATLAB function
 #' `MetacommunityPhylogenetics` of the authors, checked in Octave. Four parts of that
@@ -170,7 +170,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @param site_permutations Optional matrix of site indices with one permutation per row,
 #'   for example from [torus_permutations()], to use instead of free permutations of sites.
 #' @param area_permutations Optional list with one matrix per event, from
-#'   [patch_permutations()], to use for the events instead of `site_permutations` or free
+#'   [rigid_permutations()] or [patch_permutations()], to use for the events instead of `site_permutations` or free
 #'   permutations. Sites must be in the order of `comm`.
 #' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
 #'   where one core is used. For reproducible p-values with more than one core, call
@@ -184,7 +184,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   them; `p_partial_site`, with the p-values of sites alone; `p_partial_joint`, with
 #'   those of the permutation of the article; `biogeography`, a list with the same
 #'   four matrices for the events, or `NULL`; and `permutations`, the numbers of
-#'   permutations and whether those of sites were free or restricted.
+#'   permutations, per event for `area_permutations`, and whether those of sites were free or
+#'   restricted.
 #' @note Adapted from the MATLAB function `MetacommunityPhylogenetics` in the supplement of
 #'   Leibold et al. (2010), with the differences listed in Details.
 #' @references
@@ -433,8 +434,8 @@ check_area_permutations <- function(permutations, biogeography, comm) {
     stop("`area_permutations` needs `biogeography`", call. = FALSE)
   }
   if (!is.list(permutations) || length(permutations) != ncol(biogeography)) {
-    stop("`area_permutations` needs one matrix per event, as given by `patch_permutations()`",
-         call. = FALSE)
+    stop("`area_permutations` needs one matrix per event, as given by `rigid_permutations()` ",
+         "or `patch_permutations()`", call. = FALSE)
   }
   for (event in permutations) {
     check_permutations(event, comm, "`area_permutations`")

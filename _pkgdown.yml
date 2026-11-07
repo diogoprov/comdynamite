@@ -57,6 +57,7 @@ reference:
   desc: Permutations for sites that are neighbours.
   contents:
   - torus_permutations
+  - rigid_permutations
   - patch_permutations
 - title: Results
   desc: Tables, summaries and plots of results.

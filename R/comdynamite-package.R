@@ -11,7 +11,8 @@
 #'   \item How much of trait or phylogenetic variation is due to environment and space?
 #'     [trait_partition()] and [plot_trait_partition()].
 #'   \item Are sites neighbours? [torus_permutations()] gives restricted null models for a
-#'     torus and [patch_permutations()] for the events of a landscape with edges.
+#'     torus, and [rigid_permutations()] and [patch_permutations()] for the events of a
+#'     landscape with edges.
 #' }
 #'
 #' @section Simulate data:

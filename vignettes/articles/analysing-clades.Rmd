@@ -121,9 +121,52 @@ landscape, and 15% to 16% with sparse sites and the default `gap`. The test is t
 sides far apart and conservative for neighbouring sides, and p-values near the threshold need
 caution.
 
-This is a method of this package without published evaluation, tested only in these
-simulations. Coordinates should be projected, and landscapes with parts far apart may give
-patches that cross the gaps.
+`rigid_permutations()` keeps those distances. It moves the whole event at once, by a rotation
+or a reflection and a translation, as the torus-translation test of Harms et al. (2001) without
+the wrap-around, so each side keeps its shape and the sides keep their distance.
+
+```{r, eval = FALSE}
+area_moves <- rigid_permutations(coords, events, n_perm = 999)
+node_test(comm, nodes, env, events, area_permutations = area_moves)
+```
+
+With 150 replicates (`data-raw/validation_rigid.R`) and no effect of areas, it rejected 3.7% to
+4.7% for areas placed at random in the square and the strip, 2.2% to 3.5% for adjacent and
+several small areas fixed in the square, and 4.2% to 4.8% for adjacent areas, an L shape and two
+areas at a short distance when the hidden environment had an exponential covariance. With sparse
+sites and areas in opposite corners, it rejected less than 1%. Power for adjacent areas was
+about twice that of `patch_permutations()` (24% against 13%).
+
+The price is that an event that spans the landscape has little room to move. Two halves, two
+strips along opposite edges or areas in opposite corners had one placement besides the observed
+one, and most random areas in the band had none or fewer than 20. The function then returns
+fewer permutations, with a warning, or stops, and `node_test()` prints how many each event got.
+With fewer than 19 no node can reach the 5% level. Such an event cannot be tested by moving it
+whole, by this or by any other permutation that keeps its shape.
+
+`independent` lets parts of an event farther apart than that distance move on their own, which
+gives placements to sides far apart, but assumes that the community is not spatially
+autocorrelated beyond it.
+
+```{r, eval = FALSE}
+area_moves <- rigid_permutations(coords, events, n_perm = 999, independent = 10)
+```
+
+With `independent = 10`, random areas in the three landscapes gave 3.9% to 5.5%, but areas in
+opposite corners gave 6% to 7% with autocorrelation over 3 or 4 sites and 12% over 12 sites, and
+strips along opposite edges 8% to 9%, against 2% to 3% with `patch_permutations()`. We found no
+null model that is valid for sides far apart at any range of autocorrelation, so that range has
+to be argued from outside the data, and results should be compared across values.
+
+As a guide, use `rigid_permutations()` when the sides have room to move, and compare it with
+`patch_permutations()` and values of `independent` when they do not. Coordinates off a regular
+lattice get random moves, and were less precise, with 2% to 9% in a square with jitter (60
+replicates). There a large part of an event in an irregular region seldom fits after a move; it
+then stays nearly in place while small parts move, and the function warns.
+
+Both are methods of this package without published evaluation, tested only in these
+simulations. Coordinates should be projected, and with `patch_permutations()` landscapes with
+parts far apart may give patches that cross the gaps.
 
 ## How much of the phylogenetic structure is due to environment and space?
 
