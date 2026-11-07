@@ -16,9 +16,10 @@ phylo_vector(
   tree,
   predictor,
   n_perm = 999,
-  alpha = 0.05,
+  level = 0.05,
   n_sim = 1000,
-  site_permutations = NULL
+  site_permutations = NULL,
+  alpha = NULL
 )
 ```
 
@@ -42,7 +43,7 @@ phylo_vector(
 
   Number of permutations of sites and of species.
 
-- alpha:
+- level:
 
   Significance level of the global test and of the selection.
 
@@ -56,6 +57,10 @@ phylo_vector(
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
   to use instead of free permutations.
+
+- alpha:
+
+  Deprecated, use `level`.
 
 ## Value
 
@@ -127,7 +132,7 @@ text, except in the addition of Brownian vectors and where noted.
 - Significance level: Appendix B uses 0.05, and the code uses alpha / 2
   for every permutation strategy, although Appendix A gives alpha / 2
   only for the stacked test. Here the larger p-value is compared with
-  `alpha`.
+  `level`.
 
 - p-value of the global test with row permutations: the code divides by
   twice the number of permutations, which halves it.
@@ -182,5 +187,5 @@ phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 #> <mc_phylo_vector> 18 eigenvectors, 2 retained
 #> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01
 #> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 
-#> correlation: PEV 0.61  PEV-B 0.588 
+#> correlation: PEV 0.61  PEV-B -0.595 
 ```

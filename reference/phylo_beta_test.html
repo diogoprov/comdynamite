@@ -19,7 +19,7 @@ requires both, so the p-value to report is the larger of the two."><meta propert
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,8 @@ site.</p></dd>
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
 <dd><p>Optional matrix of site indices with one permutation
 per row, for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free
-permutations of sites.</p></dd>
+permutations of sites. Empty sites are then allowed, because they are part of the
+landscape: they leave the analysis but their predictors can reach occupied sites.</p></dd>
 
 </dl></div>
     <div class="section level2">

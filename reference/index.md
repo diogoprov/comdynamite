@@ -100,6 +100,24 @@ Permutations for sites that are neighbours.
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   : Permutations that move the patches of biogeographic events
 
+## Results
+
+Tables, summaries and plots of results.
+
+- [`as.data.frame(`*`<mc_node_test>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_node_test>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`plot(`*`<mc_node_test>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`as.data.frame(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`as.data.frame(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_phylo_beta>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`as.data.frame(`*`<mc_phylo_vector>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_phylo_vector>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`as.data.frame(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`summary(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  [`plot(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
+  : Results as data frames, summaries and plots
+
 ## Data
 
 - [`daphniids`](https://provetelab.org/comdynamite/reference/daphniids.md)

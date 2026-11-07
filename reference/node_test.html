@@ -15,7 +15,7 @@ whether the two clades that split there differ in their response to the predicto
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ whether the two clades that split there differ in their response to the predicto
 <span>  <span class="va">nodes</span>,</span>
 <span>  <span class="va">env</span>,</span>
 <span>  biogeography <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  n_perm <span class="op">=</span> <span class="fl">9999</span>,</span>
+<span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  area_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -131,8 +131,9 @@ permutations. Sites must be in the order of <code>comm</code>.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_node_test</code> with <code>nodes</code>, a data frame with one row per
-node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>statistic</code>,
-<code>p_site</code>, <code>p_taxa</code>, <code>p_max</code>, <code>p_joint</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of
+node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>r2_weighted</code>, <code>statistic</code>,
+<code>p_site</code>, <code>p_taxa</code>, <code>p_max</code>, <code>p_joint</code>, <code>n_draws</code>, the valid draws of sites, since a
+draw without variance does not count, and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of
 nodes by predictors; <code>p_partial</code>, with the larger of the two p-values for each of
 them; <code>p_partial_site</code>, with the p-values of sites alone; <code>p_partial_joint</code>, with
 those of the permutation of the article; <code>biogeography</code>, a list with the same
@@ -146,8 +147,8 @@ tested by permuting sites, and by replacing the species of the node with a rando
 set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
 et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 <code>p_adjusted</code> gives the false discovery rate that the article uses. This correction
-needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1), so the default
-is the 9999 of the article.</p>
+needs many permutations, as the smallest p-value is 1 / (<code>n_perm</code> + 1). The article used
+9999, which is advisable with many nodes.</p>
 <p>The article permutes sites and species at once, which is <code>p_joint</code>. This tests the
 null hypothesis that neither the environment nor the phylogeny matters, so it is not
 a test of their association. In simulations where the environment acts but species
@@ -189,8 +190,9 @@ takes into account that draws of species occupy different numbers of sites. Here
 draws are ranked on F statistics. <code>statistic</code> is still the one of the original, and
 p-values of sites alone are the same, but those that use species differ.</p></li>
 </ul><p>As in the original, R2 sums squares without site weights, although the fit
-uses them, so it is not the R2 of a weighted regression, and the adjusted R2
-uses the degrees of freedom of an unweighted model.</p>
+uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
+R2 uses the degrees of freedom of an unweighted model. <code>r2_weighted</code> sums squares with the
+site weights, stays between 0 and 1, and is the value to report as a proportion.</p>
 <p>Nodes for which a predictor has no variance among the remaining sites, with too
 few sites, or with a clade without individuals get <code>NA</code>. The original stops with an
 error.</p>

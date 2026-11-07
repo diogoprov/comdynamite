@@ -1,5 +1,50 @@
 # Changelog
 
+## comdynamite (development version)
+
+- [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html) and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods for
+  the results of the analyses.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `r2_weighted`, which stays between 0 and 1, unlike `r2`, inherited
+  from the original code; `n_draws`, the valid draws of sites. Errors in
+  parallel workers now stop the function. The default of `n_perm` is
+  999, as in the other functions.
+- [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
+  `site_permutations`.
+- [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  and
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  accept empty sites with `site_permutations`, since these sites are
+  part of the landscape.
+- The significance level is now `level` in
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+  [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md),
+  [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+  and
+  [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md),
+  because `alpha` also names the competition matrix. `alpha` still
+  works, with a warning.
+- [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md):
+  evaluated with autocorrelation up to the scale of the landscape, and
+  advice on `gap` for sparse sites.
+- [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
+  gives an `r2` of 0, not `NaN`, when no adjusted R2 is positive.
+- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
+  accepts clades with branches of length zero, and
+  [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+  accepts a predictor and an event with the same name.
+- Clearer errors in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
+  with one site,
+  [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md)
+  and
+  [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+  without tested nodes.
+
 ## comdynamite 0.6.0
 
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md):

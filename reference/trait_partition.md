@@ -16,7 +16,8 @@ trait_partition(
   env,
   space,
   component = c("mean", "variance"),
-  n_perm = 999
+  n_perm = 999,
+  site_permutations = NULL
 )
 ```
 
@@ -50,6 +51,15 @@ trait_partition(
 - n_perm:
 
   Number of permutations of sites and of species.
+
+- site_permutations:
+
+  Optional matrix of site indices with one permutation per row, for
+  example from
+  [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
+  to use instead of free permutations of sites. Empty sites are then
+  allowed: they leave the analysis but their predictors can reach
+  occupied sites.
 
 ## Value
 

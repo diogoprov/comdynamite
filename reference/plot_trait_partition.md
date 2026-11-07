@@ -15,11 +15,12 @@ plot_trait_partition(
   x,
   value = c("r2_adjusted", "r2", "r2_component"),
   test = c("max", "site", "taxa"),
-  alpha = 0.05,
+  level = 0.05,
   col = "#0072B2",
   labels = c("Environment", "Space"),
   cex = 0.9,
-  ...
+  ...,
+  alpha = NULL
 )
 ```
 
@@ -40,7 +41,7 @@ plot_trait_partition(
   Permutation test: `"max"` for the larger p-value of sites and species,
   `"site"` or `"taxa"`.
 
-- alpha:
+- level:
 
   Significance level.
 
@@ -60,6 +61,10 @@ plot_trait_partition(
 
   Other arguments of
   [`graphics::plot.window()`](https://rdrr.io/r/graphics/plot.window.html).
+
+- alpha:
+
+  Deprecated, use `level`.
 
 ## Value
 

@@ -14,10 +14,11 @@ could not be calculated.
 plot_node_heatmap(
   x,
   test = c("max", "site", "joint"),
-  alpha = 0.05,
+  level = 0.05,
   col = c("#0072B2", "#D55E00"),
   cex = 0.8,
-  ...
+  ...,
+  alpha = NULL
 )
 ```
 
@@ -36,7 +37,7 @@ plot_node_heatmap(
   [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
   for what each one tests.
 
-- alpha:
+- level:
 
   Significance level.
 
@@ -52,6 +53,10 @@ plot_node_heatmap(
 
   Other arguments of
   [`graphics::image()`](https://rdrr.io/r/graphics/image.html).
+
+- alpha:
+
+  Deprecated, use `level`.
 
 ## Value
 

@@ -41,7 +41,9 @@ phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
   Optional matrix of site indices with one permutation per row, for
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
-  to use instead of free permutations of sites.
+  to use instead of free permutations of sites. Empty sites are then
+  allowed, because they are part of the landscape: they leave the
+  analysis but their predictors can reach occupied sites.
 
 ## Value
 

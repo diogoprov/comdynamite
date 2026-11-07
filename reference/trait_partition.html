@@ -15,7 +15,7 @@ alone; b, shared; c, space alone; and d, unexplained."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,7 +74,8 @@ alone; <code>b</code>, shared; <code>c</code>, space alone; and <code>d</code>, 
 <span>  <span class="va">env</span>,</span>
 <span>  <span class="va">space</span>,</span>
 <span>  component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"variance"</span><span class="op">)</span>,</span>
-<span>  n_perm <span class="op">=</span> <span class="fl">999</span></span>
+<span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,6 +106,13 @@ dispersion.</p></dd>
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>Number of permutations of sites and of species.</p></dd>
+
+
+<dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
+<dd><p>Optional matrix of site indices with one permutation per row, for
+example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations of sites. Empty
+sites are then allowed: they leave the analysis but their predictors can reach occupied
+sites.</p></dd>
 
 </dl></div>
     <div class="section level2">

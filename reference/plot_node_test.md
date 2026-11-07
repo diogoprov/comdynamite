@@ -15,11 +15,12 @@ plot_node_test(
   tree,
   test = c("max", "site", "joint"),
   type = c("phylogram", "fan"),
-  alpha = 0.05,
+  level = 0.05,
   col = c("#0072B2", "#D55E00"),
   cex = 0.8,
   legend = TRUE,
-  ...
+  ...,
+  alpha = NULL
 )
 ```
 
@@ -49,7 +50,7 @@ plot_node_test(
   with the names of the variables along the radii so that they stay
   clear of the species.
 
-- alpha:
+- level:
 
   Significance level.
 
@@ -69,6 +70,10 @@ plot_node_test(
 
   Other arguments of
   [`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html).
+
+- alpha:
+
+  Deprecated, use `level`.
 
 ## Value
 

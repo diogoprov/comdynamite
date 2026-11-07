@@ -17,7 +17,7 @@ sum with the largest correlation is kept (pev_brown)."><meta property="og:image"
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,9 +76,10 @@ sum with the largest correlation is kept (<code>pev_brown</code>).</p>
 <span>  <span class="va">tree</span>,</span>
 <span>  <span class="va">predictor</span>,</span>
 <span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="fl">0.05</span>,</span>
+<span>  level <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_sim <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,7 +105,7 @@ vector for each predictor.</p></dd>
 <dd><p>Number of permutations of sites and of species.</p></dd>
 
 
-<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
 <dd><p>Significance level of the global test and of the selection.</p></dd>
 
 
@@ -115,6 +116,10 @@ vector for each predictor.</p></dd>
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
 <dd><p>Optional matrix of site indices with one permutation per
 row, for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations.</p></dd>
+
+
+<dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
+<dd><p>Deprecated, use <code>level</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -168,7 +173,7 @@ predictor.</p></li>
 predictors, and the code tests its simple correlation. We follow the code.</p></li>
 <li><p>Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
 permutation strategy, although Appendix A gives alpha / 2 only for the stacked
-test. Here the larger p-value is compared with <code>alpha</code>.</p></li>
+test. Here the larger p-value is compared with <code>level</code>.</p></li>
 <li><p>p-value of the global test with row permutations: the code divides by twice the
 number of permutations, which halves it.</p></li>
 <li><p>No significant result: the code returns random normal vectors, which can then
@@ -210,7 +215,7 @@ traits–environment relationships in the fourth-corner problem. <em>Ecology</em
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_vector&gt; 18 eigenvectors, 2 retained</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B 0.588 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B -0.595 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

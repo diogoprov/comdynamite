@@ -55,15 +55,17 @@ pcc_test(
   Optional matrix of site indices with one permutation per row, for
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
-  to use instead of free permutations of sites.
+  to use instead of free permutations of sites. Empty sites are then
+  allowed, because they are part of the landscape: they leave the
+  analysis but their predictors can reach occupied sites.
 
 ## Value
 
 List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
-values, which is the value the authors recommend reporting; `statistic`,
-the variance of the adjusted R2 across eigenvectors; `p_site`, `p_taxa`
-and `p_max`; `r2_adjusted`, with one value per eigenvector; and
-`permutations`.
+values, which is the value the authors recommend reporting, or 0 if none
+is positive; `statistic`, the variance of the adjusted R2 across
+eigenvectors; `p_site`, `p_taxa` and `p_max`; `r2_adjusted`, with one
+value per eigenvector; and `permutations`.
 
 ## Details
 

@@ -146,5 +146,5 @@ sim <- simulate_metacommunity(ls, species_traits(tr),
 sim
 #> <mc_sim> 30 sites x 20 species
 #> species persisting: 18 of 20 
-#> mean local richness: 6.87 
+#> mean local richness: 7.03 
 ```
