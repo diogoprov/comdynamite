@@ -7,10 +7,11 @@
 plot_node_heatmap(
   x,
   test = c("max", "site", "joint"),
-  alpha = 0.05,
+  level = 0.05,
   col = c("#0072B2", "#D55E00"),
   cex = 0.8,
-  ...
+  ...,
+  alpha = NULL
 )
 }
 \arguments{
@@ -20,13 +21,15 @@ plot_node_heatmap(
 species, \code{"site"} for sites alone, or \code{"joint"} for the permutation of the article.
 See \code{\link[=node_test]{node_test()}} for what each one tests.}
 
-\item{alpha}{Significance level.}
+\item{level}{Significance level.}
 
 \item{col}{Colours of negative and positive values.}
 
 \item{cex}{Size of the text.}
 
 \item{...}{Other arguments of \code{\link[graphics:image]{graphics::image()}}.}
+
+\item{alpha}{Deprecated, use \code{level}.}
 }
 \value{
 Invisibly, the matrix of semipartial correlations, with predictors followed by

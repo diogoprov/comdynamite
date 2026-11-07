@@ -117,7 +117,7 @@ test_that("results keep and print the permutations", {
   expect_output(print(phylo_beta_test(d$comm, d$tree, d$env, n_perm = 2)), "permutations")
   expect_output(print(trait_partition(d$comm, setNames(as.numeric(1:8), d$tree$tip.label),
                                       d$env[, 1], d$env[, 2], n_perm = 2)), "permutations")
-  expect_output(print(phylo_vector(d$comm, d$tree, d$env[, 1], n_perm = 2, alpha = 0.01)),
+  expect_output(print(phylo_vector(d$comm, d$tree, d$env[, 1], n_perm = 2, level = 0.01)),
                 "no vector retained")
 })
 
@@ -126,4 +126,43 @@ test_that("nodes that were not tested are reported", {
   nodes <- node_contrasts(d$tree)
   d$comm[, 1:2] <- 0
   expect_output(print(node_test(d$comm, nodes, d$env, n_perm = 2)), "nodes not tested")
+})
+
+test_that("`alpha` for a significance level is deprecated", {
+  expect_warning(expect_equal(deprecated_level(0.05, 0.1), 0.1), "use `level`")
+  expect_equal(deprecated_level(0.05, NULL), 0.05)
+})
+
+test_that("restricted permutations accept empty sites", {
+  set.seed(4)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(96, 2), 16, dimnames = list(NULL, tree$tip.label))
+  comm[c(1, 7), ] <- 0
+  env <- cbind(a = rnorm(16))
+  moves <- torus_permutations(4)[1:9, ]
+  expect_error(pcc_test(comm, tree, env, n_perm = 3), "every site")
+  expect_equal(pcc_test(comm, tree, env, n_perm = 3, site_permutations = moves)$permutations$sites, 9)
+  expect_equal(phylo_beta_test(comm, tree, env, n_perm = 3,
+                               site_permutations = moves)$permutations$sites, 9)
+  traits <- cbind(t1 = rnorm(6))
+  rownames(traits) <- tree$tip.label
+  out <- trait_partition(comm, traits, env, cbind(s = rnorm(16)), n_perm = 3,
+                         site_permutations = moves)
+  expect_equal(out$permutations$null, "restricted")
+  expect_error(trait_partition(comm, traits, env, cbind(s = rnorm(16)), n_perm = 3), "every site")
+})
+
+test_that("the simulator explains wrong input", {
+  land <- landscape_implicit(3)
+  traits <- species_traits(3)
+  expect_error(simulate_metacommunity(land, traits, diag(2)), "one row and one column")
+  expect_error(simulate_metacommunity(land, traits[, 1:2], diag(3)), "r_max")
+  expect_error(mc_dynamics(matrix(c(2, 3), 1), diag(2) * 0.1, 0.1, n_steps = 2), "two sites")
+  expect_silent(mc_dynamics(matrix(c(2, 3), 1), diag(2) * 0.1, 0, n_steps = 2))
+  expect_error(logistic_gradients(5, n_sites = 6), "at least 8")
+})
+
+test_that("patch_permutations() explains repeated sites", {
+  expect_error(patch_permutations(cbind(rep(1:3, each = 3), 0), cbind(rep(c(1, -1, 0), 3))),
+               "share their coordinates")
 })

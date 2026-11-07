@@ -8,11 +8,12 @@ plot_trait_partition(
   x,
   value = c("r2_adjusted", "r2", "r2_component"),
   test = c("max", "site", "taxa"),
-  alpha = 0.05,
+  level = 0.05,
   col = "#0072B2",
   labels = c("Environment", "Space"),
   cex = 0.9,
-  ...
+  ...,
+  alpha = NULL
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ plot_trait_partition(
 \item{test}{Permutation test: \code{"max"} for the larger p-value of sites and species,
 \code{"site"} or \code{"taxa"}.}
 
-\item{alpha}{Significance level.}
+\item{level}{Significance level.}
 
 \item{col}{Colour of significant segments.}
 
@@ -33,6 +34,8 @@ plot_trait_partition(
 \item{cex}{Size of the text.}
 
 \item{...}{Other arguments of \code{\link[graphics:plot.window]{graphics::plot.window()}}.}
+
+\item{alpha}{Deprecated, use \code{level}.}
 }
 \value{
 Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b}, \code{c} and \code{d}, with \code{shown}, the

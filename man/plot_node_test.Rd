@@ -9,11 +9,12 @@ plot_node_test(
   tree,
   test = c("max", "site", "joint"),
   type = c("phylogram", "fan"),
-  alpha = 0.05,
+  level = 0.05,
   col = c("#0072B2", "#D55E00"),
   cex = 0.8,
   legend = TRUE,
-  ...
+  ...,
+  alpha = NULL
 )
 }
 \arguments{
@@ -28,7 +29,7 @@ See \code{\link[=node_test]{node_test()}} for what each one tests.}
 \item{type}{\code{"phylogram"}, as in the article, or \code{"fan"}, for very large trees, with the
 names of the variables along the radii so that they stay clear of the species.}
 
-\item{alpha}{Significance level.}
+\item{level}{Significance level.}
 
 \item{col}{Colours of predictors and biogeographic events.}
 
@@ -37,6 +38,8 @@ names of the variables along the radii so that they stay clear of the species.}
 \item{legend}{Add a legend?}
 
 \item{...}{Other arguments of \code{\link[ape:plot.phylo]{ape::plot.phylo()}}.}
+
+\item{alpha}{Deprecated, use \code{level}.}
 }
 \value{
 Invisibly, a data frame with one row per symbol, with \code{node}, \code{set}, \code{variable},

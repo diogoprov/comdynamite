@@ -25,11 +25,11 @@ test_that("nodes are drawn in both layouts, with or without symbols", {
   pdf(NULL)
   on.exit(dev.off())
   out <- daphniid_result()
-  marks <- plot_node_test(out, daphniids$tree, test = "site", alpha = 0.2)
+  marks <- plot_node_test(out, daphniids$tree, test = "site", level = 0.2)
   expect_gt(nrow(marks), 0)
-  expect_silent(plot_node_test(out, daphniids$tree, test = "site", type = "fan", alpha = 0.2,
+  expect_silent(plot_node_test(out, daphniids$tree, test = "site", type = "fan", level = 0.2,
                                legend = FALSE))
-  expect_equal(nrow(plot_node_test(out, daphniids$tree, alpha = 0)), 0)
+  expect_equal(nrow(plot_node_test(out, daphniids$tree, level = 0)), 0)
 })
 
 test_that("symbols of a node stay apart, with predictors above events", {
@@ -78,12 +78,12 @@ test_that("the heatmap holds predictors and events, with blanks where there is n
   pdf(NULL)
   on.exit(dev.off())
   out <- daphniid_result()
-  values <- plot_node_heatmap(out, test = "site", alpha = 0.2)
+  values <- plot_node_heatmap(out, test = "site", level = 0.2)
   expect_equal(colnames(values), c(colnames(daphniids$env), colnames(daphniids$biogeography)))
   expect_equal(rownames(values), as.character(out$nodes$node))
   expect_true(anyNA(values))
   only_env <- daphniid_result(NULL)
-  expect_equal(ncol(plot_node_heatmap(only_env, alpha = 0)), ncol(daphniids$env))
+  expect_equal(ncol(plot_node_heatmap(only_env, level = 0)), ncol(daphniids$env))
 })
 
 test_that("labels of small fractions stay apart and inside the line", {

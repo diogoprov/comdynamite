@@ -28,9 +28,9 @@ nodes <- node_contrasts(daphniids$tree)
 dim(nodes)
 ```
 
-`node_test()` regresses each contrast on the predictors. The default of 9999 permutations
-suits the false discovery rate. We use 999 here to keep the page quick to build, with
-nodes in parallel on two cores.
+`node_test()` regresses each contrast on the predictors. The 9999 permutations of the
+article suit the false discovery rate. We use the default of 999 here to keep the page quick
+to build, with nodes in parallel on two cores.
 
 ```{r}
 set.seed(1)
@@ -108,6 +108,11 @@ square although it has edges, rejected 5.8% to 7.1%. When areas moved the enviro
 sites, the rejection rate of `patch_permutations()` rose to 11% to 32%. It was lowest for
 compact blocks and highest for one area against the others, and the effect of an area does not
 reach all nodes, so these values are not the power for a node with an effect.
+
+The hidden environment above had a kernel bandwidth of 3 sites. With bandwidths of 6, 12 and
+25 sites, up to the scale of the landscape, and no effect of areas, `patch_permutations()`
+rejected 2.2% to 6.0% and free permutations 49% to 75%. It was conservative for one area
+against the others (2.2% to 3.9%). The torus rejected 5.6% to 9.5% in the square.
 
 This is a method of this package without published evaluation, tested only in these
 simulations. Coordinates should be projected, and landscapes with parts far apart may give

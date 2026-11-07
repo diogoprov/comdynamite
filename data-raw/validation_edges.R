@@ -2,10 +2,13 @@
 # community follows a hidden autocorrelated environment. Areas are placed at random and, with
 # effect > 0, move the environment that sites offer. Compares free permutations,
 # patch_permutations() and, in the square, permutations of a torus, which ignore the edges.
+# BANDWIDTHS sets the scale of autocorrelation of the hidden environment. The stored results
+# come from the defaults and, in validation_edges_scale.rds, from BANDWIDTHS=6,12,25 EFFECTS=0.
 library(comdynamite)
 
 n_rep <- as.integer(Sys.getenv("N_REP", "200"))
 n_perm <- 199
+values <- function(name, default) as.numeric(strsplit(Sys.getenv(name, default), ",")[[1]])
 
 grid <- as.matrix(expand.grid(1:70, 1:30))
 middle <- 15 + 9 * sin(grid[, 1] / 9)
@@ -43,11 +46,11 @@ others <- function(xy) {
   ifelse(f >= quantile(f, 0.9), 1, -1)
 }
 
-one_rep <- function(i, land, kind, effect) {
+one_rep <- function(i, land, kind, effect, bandwidth) {
   set.seed(i)
   xy <- landscapes[[land]]
   tree <- treeshapesim::sim_tree_shape(12)
-  hidden <- smooth_field(xy, 3)
+  hidden <- smooth_field(xy, bandwidth)
   hidden <- (hidden - min(hidden)) / diff(range(hidden)) * 100
   event <- get(kind)(xy)
   traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(0, 30))
@@ -60,7 +63,8 @@ one_rep <- function(i, land, kind, effect) {
   p <- function(...) {
     node_test(comm, nodes, noise, events, n_perm = n_perm, ...)$biogeography$p_partial_site[, 1]
   }
-  data.frame(rep = i, land = land, kind = kind, effect = effect, node = seq_len(ncol(nodes)),
+  data.frame(rep = i, land = land, kind = kind, effect = effect, bandwidth = bandwidth,
+             node = seq_len(ncol(nodes)),
              free = p(),
              patch = p(area_permutations = patch_permutations(xy, events, n_perm)),
              torus = if (land == "square") {
@@ -71,10 +75,11 @@ one_rep <- function(i, land, kind, effect) {
 }
 
 design <- expand.grid(i = seq_len(n_rep), land = names(landscapes),
-                      kind = c("blocks", "tails", "others"), effect = c(0, 20),
+                      kind = c("blocks", "tails", "others"), effect = values("EFFECTS", "0,20"),
+                      bandwidth = values("BANDWIDTHS", "3"),
                       stringsAsFactors = FALSE)
 results <- parallel::mclapply(seq_len(nrow(design)), function(k) {
-  one_rep(design$i[k], design$land[k], design$kind[k], design$effect[k])
+  one_rep(design$i[k], design$land[k], design$kind[k], design$effect[k], design$bandwidth[k])
 }, mc.cores = as.integer(Sys.getenv("CORES", "8")))
 failed <- vapply(results, inherits, logical(1), "try-error")
 if (any(failed)) stop(sum(failed), " replicates failed: ", results[failed][[1]])

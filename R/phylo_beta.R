@@ -66,7 +66,8 @@ phylo_beta <- function(comm, tree) {
 #' @param n_perm Number of permutations of sites and of species.
 #' @param site_permutations Optional matrix of site indices with one permutation
 #'   per row, for example from [torus_permutations()], to use instead of free
-#'   permutations of sites.
+#'   permutations of sites. Empty sites are then allowed, because they are part of the
+#'   landscape: they leave the analysis but their predictors can reach occupied sites.
 #' @return List of class `mc_phylo_beta` with `r2`, the adjusted R2; `statistic`,
 #'   the pseudo-F; `p_site`, `p_taxa` and `p_max`; `scores`, the sites on the
 #'   principal coordinates of the predicted matrix, which the authors suggest
@@ -97,25 +98,25 @@ phylo_beta <- function(comm, tree) {
 #' phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #' @export
 phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL) {
-  matched <- present_species(check_phylo_comm(comm, tree))
+  restricted <- !is.null(site_permutations)
+  matched <- present_species(check_phylo_comm(comm, tree, allow_empty = restricted))
   comm <- matched$comm
   tree <- matched$tree
-  env <- check_env(env, comm)
-  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  landscape_env <- check_env(env, comm)
   check_permutations(site_permutations, comm)
-  basis <- qr.Q(qr(sweep(env, 2, colMeans(env))))
+  draws <- site_draws(comm, n_perm, site_permutations)
+  comm <- comm[draws$occupied, , drop = FALSE]
+  env <- landscape_env[draws$occupied, , drop = FALSE]
+  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  env_basis <- function(x) qr.Q(qr(sweep(x, 2, colMeans(x))))
+  basis <- env_basis(env)
   weights <- comm / rowSums(comm)
   distances <- tip_distances(tree)
   centred <- gower_centre(beta_matrix(weights, distances))
   fit <- beta_fit(centred, basis)
 
-  sites <- if (is.null(site_permutations)) {
-    t(replicate(n_perm, sample.int(nrow(comm))))
-  } else {
-    site_permutations
-  }
-  null_site <- unlist(progress_map(seq_len(nrow(sites)), function(r) {
-    beta_fit(centred, basis[sites[r, ], , drop = FALSE])$statistic
+  null_site <- unlist(progress_map(seq_len(nrow(draws$rows)), function(r) {
+    beta_fit(centred, env_basis(landscape_env[draws$rows[r, ], , drop = FALSE]))$statistic
   }, "Sites"))
   null_taxa <- unlist(progress_map(seq_len(n_perm), function(r) {
     shuffled <- weights[, sample.int(ncol(weights)), drop = FALSE]
@@ -141,9 +142,9 @@ print.mc_phylo_beta <- function(x, ...) {
 }
 
 # the community and the tree with the same species, in the order of the tips
-check_phylo_comm <- function(comm, tree) {
+check_phylo_comm <- function(comm, tree, allow_empty = FALSE) {
   if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
-  comm <- check_species_comm(comm, tree$tip.label, "the phylogeny")
+  comm <- check_species_comm(comm, tree$tip.label, "the phylogeny", allow_empty)
   tree <- ape::drop.tip(tree, setdiff(tree$tip.label, colnames(comm)))
   list(comm = comm[, tree$tip.label, drop = FALSE], tree = tree)
 }
@@ -159,12 +160,12 @@ present_species <- function(matched, minimum = 2) {
 }
 
 # numeric community with the species in `species`, in that order, and no empty site
-check_species_comm <- function(comm, species, source) {
+check_species_comm <- function(comm, species, source, allow_empty = FALSE) {
   comm <- check_comm(comm)
   already_empty <- sum(rowSums(comm) == 0)
   comm <- comm[, match_species(comm, species, source), drop = FALSE]
   empty <- rowSums(comm) == 0
-  if (any(empty)) {
+  if (any(empty) && !allow_empty) {
     stop("every site needs at least one individual, and ", sum(empty), " have none",
          if (sum(empty) > already_empty) " of the species shared with " else "",
          if (sum(empty) > already_empty) source else "",

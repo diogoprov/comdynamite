@@ -29,11 +29,13 @@ site.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation
 per row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free
-permutations of sites.}
+permutations of sites. Empty sites are then allowed, because they are part of the
+landscape: they leave the analysis but their predictors can reach occupied sites.}
 }
 \value{
 List of class \code{mc_pcc} with \code{r2}, the mean of the positive adjusted R2
-values, which is the value the authors recommend reporting; \code{statistic}, the
+values, which is the value the authors recommend reporting, or 0 if none is positive;
+\code{statistic}, the
 variance of the adjusted R2 across eigenvectors; \code{p_site}, \code{p_taxa} and
 \code{p_max}; \code{r2_adjusted}, with one value per eigenvector; and \code{permutations}.
 }
