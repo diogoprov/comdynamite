@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/diogoprov/comdynamite/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/diogoprov/comdynamite/blob/v0.6.1/inst/CITATION)
 
 Provete, D. B. (2026). comdynamite: Linking traits, phylogenies and
 biogeography in metacommunities. R package version 0.6.1.
