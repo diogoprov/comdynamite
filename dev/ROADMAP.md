@@ -1,9 +1,10 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-07. Versão atual: 0.6.2 (DOI de conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-07. Versão atual: 0.6.2, com `0.6.2.9000` em desenvolvimento (DOI de
+conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2`, `v0.6.0`,
 `v0.6.1` e `v0.6.2`. O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`. A
-`v0.4.0` começou com `mc_data()` e tem 4 itens abertos. Todas as pendências das etapas
+`v0.4.0` começou com `mc_data()` e traits externos e tem 3 itens abertos. Todas as pendências das etapas
 anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
@@ -176,7 +177,8 @@ com outros pacotes. As versões seguintes dependem desta.
       objeto no primeiro argumento, e as simulações guardam a árvore.
 - [ ] Árvore e distribuições como entrada: pool regional por sítio e estado inicial
       vindos de fora. Cobre gen3sis, modelos de SSE e reconstruções biogeográficas.
-- [ ] `species_traits()` aceitar traits vindos de fora, por exemplo do mvMORPH.
+- [x] `species_traits()` aceita traits vindos de fora (`optima`, `sigma`, `r_max`), por
+      exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
 - [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
 - [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
       lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
@@ -402,7 +404,7 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
 Publica o marco v0.3.0 (`run_scenarios()`, `summary_stats()`, `equilibrium_check()`, saída
 longa, benchmark e piloto de identificabilidade), `pcps_test()` com o toro retangular, as
 pendências das etapas anteriores, o nulo restrito por conjunto em `trait_partition()` e o
-primeiro item da v0.4.0, `mc_data()`.
+primeiro item da v0.4.0, `mc_data()`. DOI da versão: `10.5281/zenodo.24044811`.
 
 ## v0.6.1: nulo rígido e testes das frações (concluída em 2026-11-07)
 

@@ -1,3 +1,10 @@
+# comdynamite (development version)
+
+- `species_traits()`: `optima`, `sigma` and `r_max` take values from elsewhere, such as mvMORPH,
+  by species name or in the order of the species. The traits not given are drawn as before, and
+  with the same seed they are the same as without the external ones. `rescale_optima = FALSE`
+  keeps external optima on their own scale.
+
 # comdynamite 0.6.2
 
 - `mc_data()` and `as_mc_data()`: community, tree, traits, environment, coordinates, areas and
