@@ -175,6 +175,12 @@ about half the data sets and the larger p-value holds the level, as intended. Th
 of species alone, with 20 species, is slightly liberal when nothing acts (0.066 to 0.080 with
 either statistic), and the larger p-value is not.
 
+A second generator (`data-raw/validation_fractions_check.R`: counts, a grid of 10 by 10 sites,
+8 Moran's eigenvector maps, 200 data sets) gave larger values for these two limits. With a
+hidden field that `space` holds only in part, free permutations rejected `a` in 21% of the data
+sets (larger p-value: 2%), and with a structured environment acting alone they rejected `c` in
+25% (larger p-value: 7.5%). So `p_max`, not the p-value of sites alone, is the one to read.
+
 The shared fraction `b`, with `env` replaced by free permutations of its values, by Moran
 spectral randomisations (MSR, `shared_null = "msr"`) and by moves of the whole map
 (`shared_null = "sites"` with `torus_permutations()`), by permutations of species, and with

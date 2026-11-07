@@ -116,6 +116,14 @@ spatial structure. \code{site_permutations} are nearly degenerate for \code{c}, 
 Moran's eigenvector maps rigidly changes little of what they explain: 19\% with a strong
 environment without structure.
 
+These limits were larger with a second generator (\code{data-raw/validation_fractions_check.R}:
+counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden
+field that \code{space} holds only in part drove the species: free permutations rejected \code{a} in
+21\% (larger p-value: 2\%), and with a structured environment acting alone they rejected \code{c}
+in 25\% (larger p-value: 7.5\%). The p-value of sites alone should not be read when residuals
+can keep spatial structure; \code{p_max} should. Without effects, the rates there were 4.5\% to
+6.1\% with free permutations, and Moran spectral randomisation rejected \code{b} in 5\% to 6\%.
+
 For \code{b}, with an environment that was spatially structured but had no effect, free
 permutations of \code{env} rejected 48\% of data sets, Moran spectral randomisation 5.6\% and
 moves of the map 11\%. With a trait unrelated to the composition, the randomisation alone
