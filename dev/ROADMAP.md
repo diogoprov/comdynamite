@@ -147,9 +147,17 @@ funções escritos à mão, o que indica o que falta no pacote.
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
       temporal, como o CV das abundâncias. Em Guzman et al. (2022), estatísticas
       temporais aumentaram o poder explicativo em até 59%, e a dispersão dependeu delas.
-- [ ] Piloto de identificabilidade, com poucos parâmetros: quanto dá para recuperar a
-      partir dessas estatísticas, com um levantamento único e com séries temporais? É o
-      ponto de decisão para o ABC, e o desenho deve ser combinado antes de rodar.
+- [x] Piloto de identificabilidade, em `data-raw/pilot_identifiability.R`: 30 espécies, grade
+      5 x 5, árvore e paisagem fixas, sem erro de detecção; critério combinado antes de rodar,
+      R2 >= 0,5 e cobertura de 85% a 95%. Com 5000 simulações, nenhum parâmetro passou: R2 de
+      0,8 a 0,98 em dispersão, competição e nicho, mas cobertura de 40% a 90%, que sobe com a
+      tolerância. Na sensibilidade fora do plano, com 50 mil simulações e 500 aceitas (tolerância
+      0,01), os três passam com um levantamento e com série: R2 0,98 e 0,99 (dispersão), 0,88 e
+      0,90 (competição), 0,91 e 0,93 (nicho), cobertura 88% a 92%. A série só estreita o
+      intervalo, de 0,13 para 0,10 da amplitude na dispersão. `lambda` não é recuperado
+      (R2 <= 0,07). Decisão para o ABC: seguir, com pelo menos 500 aceitas, e dar a `lambda`
+      uma estatística de sinal dos traits, que `summary_stats()` ainda não tem. Falta testar com
+      árvore e paisagem variando, detecção imperfeita e modelo errado.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código.
