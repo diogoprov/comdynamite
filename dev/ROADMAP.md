@@ -4,7 +4,8 @@ Atualizado em 2026-11-07. Versão atual: 0.6.1, com `0.6.1.9000` em desenvolvime
 conceito `10.5281/zenodo.23993533`). Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que
 faltava da v0.5.0, `v0.5.2`, `v0.6.0` e `v0.6.1`. O marco v0.3.0 fechou em 2026-11-07 depois da
 0.6.1, então não terá a tag `v0.3.0`: o número da versão que o publica está por decidir. A
-`v0.4.0` segue em aberto. Todas as pendências das etapas anteriores estão fechadas.
+`v0.4.0` começou com `mc_data()` e tem 4 itens abertos. Todas as pendências das etapas
+anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -443,9 +444,9 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 - [ ] Estimação e escolha de modelos com `abc` (Csilléry et al. 2012) e `abcrf` (Pudlo
       et al. 2015), em `Suggests`. Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.
-- [ ] Custo: cerca de 0,2 s por simulação pequena (36 espécies, 20 sítios, 300 passos),
-      ou 6 h por 100 mil simulações em um núcleo. Guzman et al. (2022) usaram 100
-      manchas, 50 espécies e 2200 passos.
+- [x] Custo, medido em `data-raw/benchmark_dynamics.R`: 0,7 s para 50 espécies, 100 sítios
+      e 2200 passos, como em Guzman et al. (2022), ou cerca de 19 h por 100 mil simulações em
+      um núcleo; a grade 5 x 5 do piloto levou 1,1 min por 5200 simulações em 6 núcleos.
 - [ ] Recuperação em dados simulados com parâmetros conhecidos: viés e cobertura.
 
 Avaliação do modelo, sempre em conjunto com a inferência:
@@ -536,7 +537,8 @@ Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 
 - [ ] Vários eixos ambientais (hoje há um só).
 - [ ] Paisagens irregulares ou lidas de coordenadas, além da grade.
-- [ ] Null models restritos com bordas para preditores contínuos e para o simulador.
+- [ ] Null models restritos com bordas para preditores contínuos e para o simulador. Em
+      `pcps_test()`, o toro numa grade com bordas rejeitou 6% a 25% sem relação real.
       `patch_permutations()` cobre só eventos; candidato: Constant Moran permutation
       (Arthur 2024), a testar.
 - [ ] Gerador de ambiente temporal fiel ao de Thompson et al. (2020), como alternativa
