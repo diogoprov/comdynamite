@@ -54,6 +54,8 @@
 <ul><li>
 <code><a href="../reference/species_traits.html">species_traits()</a></code>: <code>optima</code>, <code>sigma</code> and <code>r_max</code> take values from elsewhere, such as mvMORPH, by species name or in the order of the species. The traits not given are drawn as before, and with the same seed they are the same as without the external ones. <code>rescale_optima = FALSE</code> keeps external optima on their own scale.</li>
 <li>
+<code><a href="../reference/simulate_metacommunity.html">simulate_metacommunity()</a></code> and <code><a href="../reference/mc_dynamics.html">mc_dynamics()</a></code>: <code>pool</code> limits each species to the sites where it can occur, such as its range or a biogeographic reconstruction, and <code>initial</code> gives the abundances or presences at the start. Without them, results with the same seed are the same as before.</li>
+<li>
 <code><a href="../reference/summary_stats.html">summary_stats()</a></code>: new statistic <code>trait_k</code>, Blomberg’s K of the trait over the species shared by <code>trait</code> and <code>tree</code>, as <code><a href="https://rdrr.io/pkg/picante/man/Kcalc.html" class="external-link">picante::Kcalc()</a></code> gives it. It is <code>NA</code> without a tree or a trait.</li>
 </ul></div>
     <div class="section level2">

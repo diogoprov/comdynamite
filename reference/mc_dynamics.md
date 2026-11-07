@@ -19,7 +19,9 @@ mc_dynamics(
   record_steps = NULL,
   sites = NULL,
   species = NULL,
-  extirpation = 0
+  extirpation = 0,
+  pool = NULL,
+  initial = NULL
 )
 ```
 
@@ -72,10 +74,21 @@ mc_dynamics(
   Probability that a population is lost at each time step, one value or
   one per species.
 
+- pool:
+
+  Optional matrix (sites x species), logical or 0/1, with the sites
+  where each species can occur.
+
+- initial:
+
+  Optional matrix (sites x species) of abundances or 0/1 presences at
+  the start, only where `pool` allows.
+
 ## Value
 
 List with `abundance` and `history`, as in
-[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+and `pool` as a logical matrix, or `NULL` without it.
 
 ## Examples
 

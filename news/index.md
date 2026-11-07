@@ -8,6 +8,13 @@
   not given are drawn as before, and with the same seed they are the
   same as without the external ones. `rescale_optima = FALSE` keeps
   external optima on their own scale.
+- [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
+  `pool` limits each species to the sites where it can occur, such as
+  its range or a biogeographic reconstruction, and `initial` gives the
+  abundances or presences at the start. Without them, results with the
+  same seed are the same as before.
 - [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md):
   new statistic `trait_k`, Blomberg’s K of the trait over the species
   shared by `trait` and `tree`, as

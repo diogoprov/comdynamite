@@ -23,7 +23,9 @@ simulate_metacommunity(
   seed_steps = seq(10, 100, 10),
   seed_mean = 0.5,
   record_steps = NULL,
-  extirpation = 0
+  extirpation = 0,
+  pool = NULL,
+  initial = NULL
 )
 ```
 
@@ -78,12 +80,22 @@ simulate_metacommunity(
   Probability that a population is lost at each time step, one value or
   one per species.
 
+- pool:
+
+  Optional matrix (sites x species), logical or 0/1, with the sites
+  where each species can occur.
+
+- initial:
+
+  Optional matrix (sites x species) of abundances or 0/1 presences at
+  the start, only where `pool` allows.
+
 ## Value
 
 An `mc_sim` object: a list with `abundance` (sites x species matrix at
 the last step), `history` (sites x species x recorded steps array, or
-`NULL`), and the `landscape`, `traits`, `alpha`, `dispersal` and
-`extirpation` used, and `tree` when the traits came from
+`NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`,
+`extirpation` and `pool` used, and `tree` when the traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
 with a tree.
 
@@ -115,6 +127,24 @@ During colonisation, Poisson(`seed_mean`) individuals of every species
 are added to every site at each of the `seed_steps`. After the last of
 these, species absent from all sites can never return and are no longer
 computed.
+
+Distributions from elsewhere, such as ranges, biogeographic
+reconstructions or the output of gen3sis, enter as `pool` and `initial`.
+With `pool`, a species can only occur where its value is `TRUE` (or 1):
+seeds go only there, and individuals that disperse to other sites are
+lost, as in a hostile matrix. A species without any site in `pool` dies
+out. `initial` replaces the first draw of Poisson(`seed_mean`)
+individuals with given abundances, or with one individual where a matrix
+of presences has 1; seeding still follows `seed_steps`, so use
+`seed_steps = numeric(0)` to start from `initial` alone. Both take one
+row per site and one column per species, named by species. Rows are
+matched by name when they have names (`site1`, `site2` and so on in
+`simulate_metacommunity()`) and by position otherwise. Without them,
+results with the same seed are the same as before they existed. A tree
+from elsewhere, such as one simulated with gen3sis or a model of
+state-dependent diversification, enters through
+[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md);
+drop extinct lineages first, since they have no distribution.
 
 ## Article and archived code
 

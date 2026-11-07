@@ -70,7 +70,9 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  record_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sites <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  species <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  extirpation <span class="op">=</span> <span class="fl">0</span></span>
+<span>  extirpation <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pool <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  initial <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -122,11 +124,21 @@ site at each seeding step (and at the start).</p></dd>
 <dd><p>Probability that a population is lost at each time step,
 one value or one per species.</p></dd>
 
+
+<dt id="arg-pool">pool<a class="anchor" aria-label="anchor" href="#arg-pool"></a></dt>
+<dd><p>Optional matrix (sites x species), logical or 0/1, with the sites where each
+species can occur.</p></dd>
+
+
+<dt id="arg-initial">initial<a class="anchor" aria-label="anchor" href="#arg-initial"></a></dt>
+<dd><p>Optional matrix (sites x species) of abundances or 0/1 presences at the start,
+only where <code>pool</code> allows.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List with <code>abundance</code> and <code>history</code>, as in
-<code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>.</p>
+<code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>, and <code>pool</code> as a logical matrix, or <code>NULL</code> without it.</p>
     </div>
 
     <div class="section level2">
