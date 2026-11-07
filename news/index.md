@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.6.1
 
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
   the tests of fractions `a` and `c`, and of the semipartials, now use
