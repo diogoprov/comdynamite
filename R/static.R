@@ -68,14 +68,18 @@
 simulate_static <- function(traits, env, incidence = FALSE,
                             sampling = c("poisson", "binomial", "expected")) {
   sampling <- match.arg(sampling)
-  trait_list <- if (is.data.frame(traits)) list(traits) else traits
+  trait_list <- if (is.list(traits) && !is.data.frame(traits)) traits else list(traits)
+  trait_list <- lapply(trait_list, as_traits)
   env_list <- if (is.list(env)) as.list(env) else list(env)
   stopifnot(sampling == "poisson" || !incidence, length(trait_list) == length(env_list),
             all(vapply(env_list, is.numeric, logical(1))),
             length(unique(lengths(env_list))) == 1, length(env_list[[1]]) >= 1,
-            all(vapply(trait_list, function(x) all(x$r_max >= 0), logical(1))),
-            all(vapply(trait_list, function(x) identical(rownames(x), rownames(trait_list[[1]])),
-                       logical(1))))
+            all(vapply(trait_list, function(x) all(x$r_max >= 0), logical(1))))
+  species <- rownames(trait_list[[1]])
+  if (!all(vapply(trait_list, function(x) setequal(rownames(x), species), logical(1)))) {
+    stop("sets of traits have different species", call. = FALSE)
+  }
+  trait_list <- lapply(trait_list, function(x) x[species, , drop = FALSE])
   expected <- Reduce(`*`, Map(growth_rates, unname(env_list), trait_list))
   if (sampling == "binomial" && any(expected > 1)) {
     stop("binomial sampling needs expected values of at most 1, so set r_max accordingly",

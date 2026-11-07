@@ -1,6 +1,6 @@
 # Type I error and power of the framework of Peres-Neto et al. (2012), following the
 # simulations of their Tables 1 to 5. Species respond to the environment with unimodal
-# curves. Their stacked test at alpha / 2 is mean(p_site, p_taxa) <= 0.025.
+# curves. Their stacked test at alpha / 2 is mean(p_site, p_species) <= 0.025.
 library(comdynamite)
 library(parallel)
 n_rep <- 1000
@@ -25,14 +25,15 @@ fourth_corner <- function(comm, trait, env, n_perm) {
   trait <- as.matrix(trait[colnames(comm)])
   env <- as.matrix(env)
   observed <- abs(comdynamite:::corner_correlation(comm, trait, env)[1])
-  nulls <- comdynamite:::corner_nulls(comm, trait, env, n_perm, NULL)
+  nulls <- comdynamite:::corner_nulls(comm, trait, env, env,
+                                      t(replicate(n_perm, sample.int(nrow(comm)))), n_perm)
   p_site <- comdynamite:::permutation_p(abs(nulls$site), observed)
-  p_taxa <- comdynamite:::permutation_p(abs(nulls$taxa), observed)
-  list(p_site = p_site, p_taxa = p_taxa, p_max = max(p_site, p_taxa))
+  p_species <- comdynamite:::permutation_p(abs(nulls$taxa), observed)
+  list(p_site = p_site, p_species = p_species, p_max = max(p_site, p_species))
 }
 rejected <- function(x, alpha = 0.05) {
-  c(row = x$p_site <= alpha, column = x$p_taxa <= alpha, max = x$p_max <= alpha,
-    stacked = mean(c(x$p_site, x$p_taxa)) <= alpha / 2)
+  c(row = x$p_site <= alpha, column = x$p_species <= alpha, max = x$p_max <= alpha,
+    stacked = mean(c(x$p_site, x$p_species)) <= alpha / 2)
 }
 
 # Table 4: one trait

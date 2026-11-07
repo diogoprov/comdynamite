@@ -50,7 +50,7 @@ test_that("pseudo-F and R2 equal a distance-based redundancy analysis in vegan",
   n <- nrow(d$comm)
   out <- phylo_beta_test(d$comm, d$tree, env, n_perm = 2)
   expect_equal(out$statistic, reference$F[1])
-  expect_equal(out$r2, 1 - (1 - reference$R2[1]) * (n - 1) / (n - 3))
+  expect_equal(out$r2_adjusted, 1 - (1 - reference$R2[1]) * (n - 1) / (n - 3))
 })
 
 test_that("scores reproduce the predicted variation", {
@@ -71,9 +71,9 @@ test_that("the test detects composition linked to phylogeny and environment", {
   out <- phylo_beta_test(d$comm, d$tree, d$env, n_perm = 99)
   expect_s3_class(out, "mc_phylo_beta")
   expect_lt(out$p_site, 0.05)
-  expect_lt(out$p_taxa, 0.05)
-  expect_equal(out$p_max, max(out$p_site, out$p_taxa))
-  expect_gt(out$r2, 0)
+  expect_lt(out$p_species, 0.05)
+  expect_equal(out$p_max, max(out$p_site, out$p_species))
+  expect_gt(out$r2_adjusted, 0)
   expect_output(print(out), "p \\(max\\)")
 })
 
@@ -90,7 +90,7 @@ test_that("species order and the scale of predictors do not matter", {
   a <- phylo_beta_test(d$comm, d$tree, d$env, n_perm = 2)
   b <- phylo_beta_test(d$comm[, rev(colnames(d$comm))], d$tree, 3 * d$env + 7, n_perm = 2)
   expect_equal(a$statistic, b$statistic)
-  expect_equal(a$r2, b$r2)
+  expect_equal(a$r2_adjusted, b$r2_adjusted)
 })
 
 test_that("site permutations can be supplied", {

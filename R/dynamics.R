@@ -41,8 +41,8 @@
 #'
 #' @param landscape An `mc_landscape` object.
 #' @param traits Species traits from [species_traits()].
-#' @param alpha Competition matrix from [competition_matrix()], with species
-#'   in the same order as the rows of `traits`.
+#' @param alpha Competition matrix from [competition_matrix()]. Species are matched to the
+#'   rows of `traits` by name, or by position if `alpha` has no names.
 #' @param dispersal Emigration probability, one value or one per species.
 #' @param extirpation Probability that a population is lost at each time step,
 #'   one value or one per species.
@@ -77,13 +77,16 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0) {
   stopifnot(inherits(landscape, "mc_landscape"))
-  missing_traits <- setdiff(c("optimum", "sigma", "r_max"), names(traits))
-  if (length(missing_traits) > 0) {
-    stop("`traits` needs the columns of `species_traits()`; missing: ",
-         paste(missing_traits, collapse = ", "), call. = FALSE)
-  }
+  traits <- as_traits(traits)
   if (!identical(dim(alpha), rep(nrow(traits), 2L))) {
     stop("`alpha` needs one row and one column per species (", nrow(traits), ")", call. = FALSE)
+  }
+  species <- rownames(traits)
+  if (!is.null(rownames(alpha)) && !is.null(colnames(alpha))) {
+    if (!setequal(rownames(alpha), species) || !setequal(colnames(alpha), species)) {
+      stop("names of species in `alpha` and `traits` differ", call. = FALSE)
+    }
+    alpha <- alpha[species, species]
   }
   sites <- paste0("site", seq_along(landscape$env))
   r <- if (is.null(env_time)) {

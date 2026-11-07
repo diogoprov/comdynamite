@@ -7,7 +7,7 @@
 plot_trait_partition(
   x,
   value = c("r2_adjusted", "r2", "r2_component"),
-  test = c("max", "site", "taxa"),
+  test = c("max", "site", "species"),
   level = 0.05,
   col = "#0072B2",
   labels = c("Environment", "Space"),
@@ -23,7 +23,7 @@ plot_trait_partition(
 \code{"r2_component"} for the share of the mean or variance component.}
 
 \item{test}{Permutation test: \code{"max"} for the larger p-value of sites and species,
-\code{"site"} or \code{"taxa"}.}
+\code{"site"} or \code{"species"}.}
 
 \item{level}{Significance level.}
 

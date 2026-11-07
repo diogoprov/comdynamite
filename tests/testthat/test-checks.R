@@ -13,7 +13,7 @@ test_that("sites are matched by name in any order", {
   one <- pcc_test(d$comm, d$tree, d$env, n_perm = 9)
   set.seed(1)
   other <- pcc_test(d$comm, d$tree, d$env[20:1, ], n_perm = 9)
-  expect_equal(one$r2, other$r2)
+  expect_equal(one$r2_mean, other$r2_mean)
   different <- d$env
   rownames(different)[1] <- "elsewhere"
   expect_error(pcc_test(d$comm, d$tree, different, n_perm = 9), "different names: elsewhere, s1")
@@ -33,7 +33,7 @@ test_that("predictors with problems are named", {
   missing_value <- d$env
   missing_value[2, 1] <- NA
   expect_error(phylo_vector(d$comm, d$tree, missing_value[, 1], n_perm = 2),
-               "`predictor` has missing values in 1 sites")
+               "`env` has missing values in 1 sites")
   constant <- d$env
   constant[, "b"] <- 1
   expect_error(node_test(d$comm, node_contrasts(d$tree), constant, n_perm = 2),
@@ -95,7 +95,7 @@ test_that("species without individuals do not change the analyses", {
   set.seed(2)
   two <- pcc_test(absent[, pruned$tip.label], pruned, d$env, n_perm = 9)
   expect_equal(one$r2_adjusted, two$r2_adjusted)
-  expect_equal(one$p_taxa, two$p_taxa)
+  expect_equal(one$p_species, two$p_species)
   # traits of absent species cannot reach present ones
   traits <- setNames(c(5, 5, 1, 1, 1, 1, 1, 2), colnames(absent))
   expect_s3_class(trait_partition(absent, traits, d$env[, 1], d$env[, 2], n_perm = 5),
@@ -165,4 +165,74 @@ test_that("the simulator explains wrong input", {
 test_that("patch_permutations() explains repeated sites", {
   expect_error(patch_permutations(cbind(rep(1:3, each = 3), 0), cbind(rep(c(1, -1, 0), 3))),
                "share their coordinates")
+})
+
+test_that("phylo_vector() accepts empty sites and the old name of `env`", {
+  set.seed(8)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(96, 2), 16, dimnames = list(NULL, tree$tip.label))
+  comm[c(1, 7), ] <- 0
+  env <- rnorm(16)
+  moves <- torus_permutations(4)[1:9, ]
+  expect_error(phylo_vector(comm, tree, env, n_perm = 3), "every site")
+  out <- phylo_vector(comm, tree, env, n_perm = 3, n_sim = 3, site_permutations = moves)
+  expect_equal(out$permutations$sites, 9)
+  full <- comm + 1
+  set.seed(9)
+  one <- phylo_vector(full, tree, env, n_perm = 3, n_sim = 3)
+  set.seed(9)
+  expect_warning(other <- phylo_vector(full, tree, predictor = env, n_perm = 3, n_sim = 3),
+                 "use `env`")
+  expect_equal(one$p_max, other$p_max)
+})
+
+test_that("traits can be a matrix or lack row names, and alpha follows them", {
+  set.seed(10)
+  traits <- species_traits(4)
+  expect_equal(growth_rates(1:3, as.matrix(traits)), growth_rates(1:3, traits))
+  plain <- traits
+  rownames(plain) <- NULL
+  expect_equal(colnames(growth_rates(1:3, plain)), paste0("sp", 1:4))
+  expect_equal(colnames(simulate_static(traits, 1:3, sampling = "expected")$abundance),
+               rownames(traits))
+  land <- landscape_implicit(3)
+  alpha <- matrix(0.01, 4, 4, dimnames = list(rownames(traits), rownames(traits)))
+  alpha["sp1", "sp2"] <- 0.5
+  order <- c(3, 1, 4, 2)
+  set.seed(1)
+  one <- simulate_metacommunity(land, traits, alpha, n_steps = 20, seed_steps = 1)
+  set.seed(1)
+  other <- simulate_metacommunity(land, traits, alpha[order, order], n_steps = 20, seed_steps = 1)
+  expect_equal(one$abundance, other$abundance)
+  wrong <- alpha
+  rownames(wrong)[1] <- "other"
+  expect_error(simulate_metacommunity(land, traits, wrong), "differ")
+})
+
+test_that("sets of traits are matched by name", {
+  set.seed(11)
+  first <- species_traits(3)
+  second <- species_traits(3)
+  expected <- simulate_static(list(first, second), list(1:2, 2:3), sampling = "expected")
+  shuffled <- simulate_static(list(first, second[3:1, ]), list(1:2, 2:3), sampling = "expected")
+  expect_equal(expected$abundance, shuffled$abundance)
+  other <- second
+  rownames(other)[1] <- "other"
+  expect_error(simulate_static(list(first, other), list(1:2, 2:3)), "different species")
+})
+
+test_that("assemble_community() warns when it invents names", {
+  expect_warning(out <- assemble_community(c(1, 5, 9, 13), 2, rule = "neutral"), "no names")
+  expect_true(all(out$community %in% paste0("sp", 1:4)))
+  expect_silent(assemble_community(c(a = 1, b = 5, c = 9), 2, rule = "neutral"))
+})
+
+test_that("predictors must vary among occupied sites", {
+  set.seed(12)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(96, 2) + 1, 16, dimnames = list(NULL, tree$tip.label))
+  comm[1, ] <- 0
+  env <- c(5, rep(1, 15))
+  moves <- torus_permutations(4)[1:3, ]
+  expect_error(pcc_test(comm, tree, env, n_perm = 2, site_permutations = moves), "without variance")
 })

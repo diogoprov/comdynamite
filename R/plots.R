@@ -152,7 +152,7 @@ check_node_tree <- function(x, tree) {
 
 # one row for each significant test, in the sets of predictors and events
 node_marks <- function(x, test, alpha) {
-  field <- c(max = "p_partial", site = "p_partial_site", joint = "p_partial_joint")[[test]]
+  field <- c(max = "p_partial_max", site = "p_partial_site", joint = "p_partial_joint")[[test]]
   one_set <- function(p, set, offset = 0) {
     if (is.null(p)) return(NULL)
     table <- data.frame(node = rep(rownames(p), ncol(p)), set = set,
@@ -217,7 +217,7 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' @param value Column of the fractions to show: `"r2_adjusted"`, `"r2"`, or
 #'   `"r2_component"` for the share of the mean or variance component.
 #' @param test Permutation test: `"max"` for the larger p-value of sites and species,
-#'   `"site"` or `"taxa"`.
+#'   `"site"` or `"species"`.
 #' @param level Significance level.
 #' @param alpha Deprecated, use `level`.
 #' @param col Colour of significant segments.
@@ -245,12 +245,16 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' plot_trait_partition(out)
 #' @export
 plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
-                                 test = c("max", "site", "taxa"), level = 0.05,
+                                 test = c("max", "site", "species"), level = 0.05,
                                  col = "#0072B2", labels = c("Environment", "Space"),
                                  cex = 0.9, ..., alpha = NULL) {
   level <- deprecated_level(level, alpha)
   stopifnot(inherits(x, "mc_trait_partition"), length(labels) == 2)
   value <- match.arg(value)
+  if (identical(test, "taxa")) {
+    warning("`test = \"taxa\"` is deprecated, use `\"species\"`", call. = FALSE)
+    test <- "species"
+  }
   test <- match.arg(test)
   table <- x$fractions
   shown <- table[match(c("a", "b", "c", "d"), table$fraction), ]

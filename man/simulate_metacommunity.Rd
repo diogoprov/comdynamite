@@ -22,8 +22,8 @@ simulate_metacommunity(
 
 \item{traits}{Species traits from \code{\link[=species_traits]{species_traits()}}.}
 
-\item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}, with species
-in the same order as the rows of \code{traits}.}
+\item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}. Species are matched to the
+rows of \code{traits} by name, or by position if \code{alpha} has no names.}
 
 \item{dispersal}{Emigration probability, one value or one per species.}
 

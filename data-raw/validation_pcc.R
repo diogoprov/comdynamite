@@ -20,7 +20,7 @@ one_replicate <- function(scenario, tolerance) {
   used <- if (scenario %in% c("environment", "both")) env else runif(100, 0, 100)
   keep <- rowSums(comm) > 0
   out <- pcc_test(comm[keep, ], tree, used[keep], n_perm = 99)
-  c(max = out$p_max, site = out$p_site, taxa = out$p_taxa)
+  c(max = out$p_max, site = out$p_site, taxa = out$p_species)
 }
 
 one_cell <- function(i) {

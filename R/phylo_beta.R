@@ -68,8 +68,8 @@ phylo_beta <- function(comm, tree) {
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites. Empty sites are then allowed, because they are part of the
 #'   landscape: they leave the analysis but their predictors can reach occupied sites.
-#' @return List of class `mc_phylo_beta` with `r2`, the adjusted R2; `statistic`,
-#'   the pseudo-F; `p_site`, `p_taxa` and `p_max`; `scores`, the sites on the
+#' @return List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2; `statistic`,
+#'   the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`, the sites on the
 #'   principal coordinates of the predicted matrix, which the authors suggest
 #'   using to order sites in a heatmap of the community matrix; and `permutations`.
 #' @references
@@ -106,7 +106,7 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   check_permutations(site_permutations, comm)
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
-  env <- landscape_env[draws$occupied, , drop = FALSE]
+  env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
   stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
   env_basis <- function(x) qr.Q(qr(sweep(x, 2, colMeans(x))))
   basis <- env_basis(env)
@@ -123,9 +123,9 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
     beta_fit(gower_centre(beta_matrix(shuffled, distances)), basis)$statistic
   }, "Species"))
   p_site <- (sum(null_site >= fit$statistic) + 1) / (length(null_site) + 1)
-  p_taxa <- (sum(null_taxa >= fit$statistic) + 1) / (length(null_taxa) + 1)
-  structure(list(r2 = fit$r2, statistic = fit$statistic, p_site = p_site, p_taxa = p_taxa,
-                 p_max = max(p_site, p_taxa), scores = predicted_scores(centred, basis),
+  p_species <- (sum(null_taxa >= fit$statistic) + 1) / (length(null_taxa) + 1)
+  structure(list(r2_adjusted = fit$r2, statistic = fit$statistic, p_site = p_site, p_species = p_species,
+                 p_max = max(p_site, p_species), scores = predicted_scores(centred, basis),
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_phylo_beta")
 }
@@ -133,11 +133,11 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
 #' @export
 print.mc_phylo_beta <- function(x, ...) {
   cat("<mc_phylo_beta> phylogenetic beta diversity\n")
-  cat("adjusted R2:", format(x$r2, digits = 3), " pseudo-F:",
+  cat("adjusted R2:", format(x$r2_adjusted, digits = 3), " pseudo-F:",
       format(x$statistic, digits = 3), "\n")
   permutation_line(x$permutations)
   cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
   invisible(x)
 }
 

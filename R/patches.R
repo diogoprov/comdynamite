@@ -18,11 +18,20 @@
 #'
 #' This method was built for this package and has no published evaluation. In
 #' `data-raw/validation_edges.R`, with communities that followed a hidden autocorrelated
-#' environment and areas without effect, it rejected 3.0% to 6.3% of the tests at the 5% level
-#' in a square, a strip and an irregular band, against 44% to 55% with free permutations (see
-#' the article on analysing clades). With autocorrelation at scales up to that of the
-#' landscape it rejected 2.2% to 6.0%, and free permutations 49% to 75%. Areas much larger
-#' than those simulated were not evaluated.
+#' environment and areas without effect placed at random, it rejected 3.0% to 6.3% of the
+#' tests at the 5% level in a square, a strip and an irregular band, against 44% to 55% with
+#' free permutations (see the article on analysing clades). With autocorrelation at scales up
+#' to that of the landscape it rejected 2.2% to 6.0%, and free permutations 49% to 75%.
+#'
+#' These rates average over places of areas, and a real analysis has one. Patches are placed
+#' independently of each other, so the distance between the two sides of an event is not kept,
+#' and sides tend to end close together. With areas fixed in a square of 20 by 20 sites, the
+#' rate was 0.4% to 2% for adjacent areas, and 6% to 10% for areas in opposite corners or
+#' halves of the landscape. The test is therefore liberal for sides far apart, as across a
+#' barrier, and conservative for neighbouring sides. With 25% to 40% of the sites of that
+#' square and areas in opposite corners, it rejected 15% to 16% with the default `gap` and 5%
+#' to 6% with a `gap` of 3. It is still far better than free permutations, which rejected 48%
+#' to 74%, but p-values near the threshold need caution.
 #'
 #' @param coords Matrix or data frame with the two coordinates of each site, in the order of
 #'   the rows of `biogeography`.

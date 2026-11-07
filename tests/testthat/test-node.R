@@ -68,7 +68,7 @@ test_that("the joint test breaks both links", {
   x <- node_contrasts(daphniids$tree)
   out <- node_test(daphniids$comm, x, daphniids$env, n_perm = 9)
   expect_true(all(out$nodes$p_joint > 0, na.rm = TRUE))
-  expect_equal(dim(out$p_partial_joint), dim(out$p_partial))
+  expect_equal(dim(out$p_partial_joint), dim(out$p_partial_max))
 })
 
 test_that("the daphniids run from the data of the package", {
@@ -76,7 +76,7 @@ test_that("the daphniids run from the data of the package", {
   out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env,
                    biogeography = daphniids$biogeography[, 1:2], n_perm = 2)
   expect_equal(dim(out$p_partial_site), c(12, 9))
-  expect_true(all(out$p_partial >= out$p_partial_site, na.rm = TRUE))
+  expect_true(all(out$p_partial_max >= out$p_partial_site, na.rm = TRUE))
   expect_equal(dim(out$biogeography$p_partial_site), c(12, 2))
 })
 
@@ -88,7 +88,7 @@ test_that("biogeographic events use only their sites and control for the environ
   event <- sample(c(-1, 0, 1), n, replace = TRUE)
   out <- node_test(d$comm, x, d$env, biogeography = cbind(north_south = event), n_perm = 3)
   expect_identical(colnames(out$biogeography$semipartial), "north_south")
-  expect_equal(dim(out$biogeography$p_partial), c(ncol(x), 1))
+  expect_equal(dim(out$biogeography$p_partial_max), c(ncol(x), 1))
   sites <- event != 0
   m <- which(x[, 1] != 0)
   direct <- node_fit(d$comm[sites, names(m), drop = FALSE], x[m, 1],
@@ -107,7 +107,7 @@ test_that("the test detects clades that differ in their response", {
   expect_s3_class(out, "mc_node_test")
   expect_equal(nrow(out$nodes), ncol(node_contrasts(d$tree)))
   expect_lt(min(out$nodes$p_site, na.rm = TRUE), 0.05)
-  expect_equal(out$nodes$p_max, pmax(out$nodes$p_site, out$nodes$p_taxa))
+  expect_equal(out$nodes$p_max, pmax(out$nodes$p_site, out$nodes$p_species))
   expect_output(print(out), "tested")
 })
 
@@ -130,7 +130,7 @@ test_that("several predictors give one partial value each", {
   env <- cbind(temperature = d$env, noise = runif(nrow(d$comm)))
   out <- node_test(d$comm, node_contrasts(d$tree), env, n_perm = 5)
   expect_identical(colnames(out$semipartial), colnames(env))
-  expect_equal(dim(out$p_partial), dim(out$semipartial))
+  expect_equal(dim(out$p_partial_max), dim(out$semipartial))
   unnamed <- node_test(d$comm, node_contrasts(d$tree), unname(env), n_perm = 2)
   expect_identical(colnames(unnamed$semipartial), c("predictor1", "predictor2"))
 })
@@ -243,7 +243,7 @@ test_that("with one predictor, the global and partial tests rank draws alike", {
   set.seed(7)
   nodes <- node_contrasts(daphniids$tree)
   out <- node_test(daphniids$comm, nodes, daphniids$env[, "PHEQ", drop = FALSE], n_perm = 19)
-  expect_equal(unname(out$p_partial[, 1]), out$nodes$p_max)
+  expect_equal(unname(out$p_partial_max[, 1]), out$nodes$p_max)
   expect_equal(unname(out$p_partial_joint[, 1]), out$nodes$p_joint)
 })
 
@@ -405,6 +405,7 @@ test_that("result methods give tables and plots", {
   part <- trait_partition(comm, traits, env, rnorm(30), n_perm = 3)
   expect_equal(as.data.frame(part), summary(part))
   expect_silent(plot(part))
+  expect_warning(plot(part, test = "taxa"), "use `\"species\"`")
   out <- node_test(comm, node_contrasts(tree), env, n_perm = 3)
   expect_silent(plot(out, tree, level = 0.5))
 })

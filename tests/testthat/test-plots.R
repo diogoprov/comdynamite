@@ -17,7 +17,7 @@ test_that("each significant test gets a symbol, with the correction per set", {
 
 test_that("the three tests read their own p-values", {
   out <- daphniid_result(NULL)
-  expect_equal(nrow(node_marks(out, "max", 0.2)), sum(out$p_partial <= 0.2, na.rm = TRUE))
+  expect_equal(nrow(node_marks(out, "max", 0.2)), sum(out$p_partial_max <= 0.2, na.rm = TRUE))
   expect_equal(nrow(node_marks(out, "joint", 0.2)), sum(out$p_partial_joint <= 0.2, na.rm = TRUE))
 })
 

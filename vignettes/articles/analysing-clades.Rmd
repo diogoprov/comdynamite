@@ -114,6 +114,13 @@ The hidden environment above had a kernel bandwidth of 3 sites. With bandwidths 
 rejected 2.2% to 6.0% and free permutations 49% to 75%. It was conservative for one area
 against the others (2.2% to 3.9%). The torus rejected 5.6% to 9.5% in the square.
 
+These rates average over places of areas. Patches are placed independently, so the distance
+between the two sides of an event is not kept. With areas fixed in the square, the rate was
+0.4% to 2% for adjacent areas and 6% to 10% for areas in opposite corners or halves of the
+landscape, and 15% to 16% with sparse sites and the default `gap`. The test is thus liberal for
+sides far apart and conservative for neighbouring sides, and p-values near the threshold need
+caution.
+
 This is a method of this package without published evaluation, tested only in these
 simulations. Coordinates should be projected, and landscapes with parts far apart may give
 patches that cross the gaps.

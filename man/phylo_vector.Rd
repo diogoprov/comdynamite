@@ -7,12 +7,13 @@
 phylo_vector(
   comm,
   tree,
-  predictor,
+  env = NULL,
   n_perm = 999,
   level = 0.05,
   n_sim = 1000,
   site_permutations = NULL,
-  alpha = NULL
+  alpha = NULL,
+  predictor = NULL
 )
 }
 \arguments{
@@ -21,7 +22,7 @@ at least one individual.}
 
 \item{tree}{A \code{phylo} object.}
 
-\item{predictor}{Numeric vector with the value of each site. The authors estimate one
+\item{env}{Numeric vector with the value of each site. The authors estimate one
 vector for each predictor.}
 
 \item{n_perm}{Number of permutations of sites and of species.}
@@ -31,13 +32,17 @@ vector for each predictor.}
 \item{n_sim}{Number of Brownian vectors.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per
-row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations.}
+row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations.
+Empty sites are then allowed: they leave the analysis but their values can reach
+occupied sites.}
 
 \item{alpha}{Deprecated, use \code{level}.}
+
+\item{predictor}{Deprecated, use \code{env}.}
 }
 \value{
 List of class \code{mc_phylo_vector} with \code{correlation}, the correlations of \code{pev}
-and \code{pev_brown}; \code{p_site}, \code{p_taxa} and \code{p_max} of the global test; \code{selected}, the
+and \code{pev_brown}; \code{p_site}, \code{p_species} and \code{p_max} of the global test; \code{selected}, the
 columns of \code{eigenvectors} retained; \code{pev} and \code{pev_brown}, named vectors or \code{NULL}
 when the global test is not significant or no eigenvector is retained;
 \code{eigenvectors}; \code{eigenvalues}; \code{eigenvector_correlation}; and \code{permutations}. Check

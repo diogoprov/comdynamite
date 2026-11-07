@@ -5,13 +5,31 @@
   original code; `n_draws`, the valid draws of sites. Errors in parallel workers now stop the
   function. The default of `n_perm` is 999, as in the other functions.
 - `trait_partition()`: `site_permutations`.
-- `pcc_test()`, `phylo_beta_test()` and `trait_partition()` accept empty sites with
-  `site_permutations`, since these sites are part of the landscape.
+- `pcc_test()`, `phylo_beta_test()`, `phylo_vector()` and `trait_partition()` accept empty sites
+  with `site_permutations`, since these sites are part of the landscape.
 - The significance level is now `level` in `phylo_vector()`, `plot_node_test()`,
   `plot_node_heatmap()` and `plot_trait_partition()`, because `alpha` also names the
   competition matrix. `alpha` still works, with a warning.
+- Names of results, which break code that reads them: `p_taxa` is now `p_species`,
+  `p_partial_taxa` is `p_partial_species`, and `p_partial`, the larger of two p-values, is
+  `p_partial_max`, as in `p_max`. `r2` of `pcc_test()` is `r2_mean` and that of
+  `phylo_beta_test()` is `r2_adjusted`, which say what they hold. In `node_test()` and
+  `trait_partition()`, `r2` is unchanged. `statistic` stays, as the test statistic of each
+  function.
+- `phylo_vector()`: `predictor` is now `env`, as in the other functions, and
+  `plot_trait_partition()`: `test = "taxa"` is now `"species"`. The old forms work, with a
+  warning.
 - `patch_permutations()`: evaluated with autocorrelation up to the scale of the landscape, and
-  advice on `gap` for sparse sites.
+  advice on `gap` for sparse sites. The rates given in 0.6.0 averaged over random places of
+  areas. With fixed areas the test is liberal for sides far apart (6% to 10% at the 5% level)
+  and conservative for neighbouring sides, and the help now says so.
+- `simulate_metacommunity()` matches `alpha` to `traits` by name. Before, a matrix with
+  species in another order gave wrong results without warning.
+- `growth_rates()`, `simulate_static()` and `simulate_metacommunity()` accept traits as a matrix
+  or a tibble, and species without names are called sp1, sp2, ... `simulate_static()` matches
+  sets of traits by name. `assemble_community()` warns when it invents names.
+- Predictors must vary among occupied sites with `site_permutations`.
+- Help: weights of `node_test()`, and what the tests of fractions of `trait_partition()` ask.
 - `pcc_test()` gives an `r2` of 0, not `NaN`, when no adjusted R2 is positive.
 - `node_contrasts()` accepts clades with branches of length zero, and `plot_node_heatmap()`
   accepts a predictor and an event with the same name.

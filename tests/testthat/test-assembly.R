@@ -50,7 +50,7 @@ test_that("multivariate traits and output structure", {
 test_that("traits without row names get default species names", {
   set.seed(1)
   x <- matrix(rnorm(12), 6, 2)
-  out <- assemble_community(x, size = 3, rule = "neutral")
+  expect_warning(out <- assemble_community(x, size = 3, rule = "neutral"), "no names")
   expect_length(out$community, 3)
   expect_true(all(out$community %in% paste0("sp", 1:6)))
 })
