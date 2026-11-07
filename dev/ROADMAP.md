@@ -244,8 +244,15 @@ v0.6.0 por decisão de 2026-11-06.
       sites sem efeito, comunidade seguindo ambiente oculto autocorrelacionado), rejeição por
       nó a 5%: .451 com permutação livre e .048 com o toro; ao menos um nó em 89% e 26% das
       réplicas, sem correção. Só testado com toro.
-- [ ] Nulo restrito para paisagens com borda, como os refúgios: hoje o usuário precisa
-      fornecer a matriz. Avaliar antes de aplicar a dados reais.
+- [x] Nulo restrito para paisagens com borda: `patch_permutations()` e `area_permutations`
+      em `node_test()`. Nenhum método publicado cobre permutação exata, bordas, área
+      irregular e variável binária, então é método próprio. Em
+      `data-raw/validation_edges.R` (200 réplicas; quadrado, faixa e banda irregular; blocos,
+      áreas em manchas e área contra as outras), rejeição por nó a 5% sem efeito: .030 a .063,
+      contra .44 a .55 com permutação livre. Descartados no protótipo: curva de Hilbert com
+      deslocamento cíclico (.16 a .19), rotação rígida (lenta; .06 a .12) e mancha única por
+      lado (conservador em áreas com várias manchas, .02 a .03, e menos poder). Falta aplicar a
+      dados reais; não avaliado com autocorrelação na escala da paisagem.
 - [x] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
       (2018), além da cor.
 - [x] Citar Leibold & Chase (2018) em `biogeography_matrix()`.
@@ -422,8 +429,9 @@ Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 
 - [ ] Vários eixos ambientais (hoje há um só).
 - [ ] Paisagens irregulares ou lidas de coordenadas, além da grade.
-- [ ] Null models restritos para paisagens com bordas. `torus_permutations()` só vale
-      em toro, e isso limita o uso com dados reais.
+- [ ] Null models restritos com bordas para preditores contínuos e para o simulador.
+      `patch_permutations()` cobre só eventos; candidato: Constant Moran permutation
+      (Arthur 2024), a testar.
 - [ ] Gerador de ambiente temporal fiel ao de Thompson et al. (2020), como alternativa
       a `env_over_time()`.
 

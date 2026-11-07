@@ -41,6 +41,7 @@ reference:
   - phylo_beta
   - node_test
   - biogeography_matrix
+  - patch_permutations
   - node_contrasts
   - plot_node_test
   - plot_node_heatmap

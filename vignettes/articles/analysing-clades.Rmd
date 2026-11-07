@@ -88,8 +88,30 @@ hidden autocorrelated environment and two blocks of 25 sites placed at random, s
 had no effect (`data-raw/validation_events.R`). Free permutations rejected 45.1% of the tests
 of a node at the 5% level, and permutations from `torus_permutations()`, given in
 `site_permutations`, rejected 4.8%. The events in the figures above used free permutations,
-so they should be read with this in mind. Landscapes with edges need a restricted null model
-chosen for them, and a matrix of permutations of any origin can be given.
+so they should be read with this in mind.
+
+A torus does not fit real landscapes, which have edges. `patch_permutations()` splits each
+area into patches of neighbouring sites and places each patch around a site drawn at random,
+which keeps the number and size of patches but not their shape or place.
+
+```{r, eval = FALSE}
+area_moves <- patch_permutations(coords, events, n_perm = 999)
+node_test(comm, nodes, env, events, area_permutations = area_moves)
+```
+
+We evaluated it in a square of 20 by 20 sites, a strip of 50 by 8 and an irregular band of
+436 sites, with 200 replicates of each scenario (`data-raw/validation_edges.R`). Areas were
+two compact blocks, irregular areas of several patches, or one such area against all other
+sites. Without effect of areas, free permutations rejected 44% to 55% of the tests of a node
+at the 5% level, and `patch_permutations()` 3.0% to 6.3%. Permutations of a torus, used in the
+square although it has edges, rejected 5.8% to 7.1%. When areas moved the environment of their
+sites, the rejection rate of `patch_permutations()` rose to 11% to 32%. It was lowest for
+compact blocks and highest for one area against the others, and the effect of an area does not
+reach all nodes, so these values are not the power for a node with an effect.
+
+This is a method of this package without published evaluation, tested only in these
+simulations. Coordinates should be projected, and landscapes with parts far apart may give
+patches that cross the gaps.
 
 ## How much of the phylogenetic structure is due to environment and space?
 

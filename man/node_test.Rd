@@ -11,7 +11,8 @@ node_test(
   biogeography = NULL,
   n_perm = 9999,
   cores = 1,
-  site_permutations = NULL
+  site_permutations = NULL,
+  area_permutations = NULL
 )
 }
 \arguments{
@@ -38,6 +39,10 @@ cores.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row,
 for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites.}
+
+\item{area_permutations}{Optional list with one matrix per event, from
+\code{\link[=patch_permutations]{patch_permutations()}}, to use for the events instead of \code{site_permutations} or free
+permutations. Sites must be in the order of \code{comm}.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
@@ -91,7 +96,8 @@ the community has spatial structure of its own, they reject too often: 45\% of t
 the 5\% level in a simulation with areas placed at random, against 5\% with
 \code{\link[=torus_permutations]{torus_permutations()}} (see the article on analysing clades). \code{site_permutations} accepts
 a restricted null model. For events, each row moves the areas across the sites, which
-keep their community and predictors.
+keep their community and predictors. In a landscape with edges, \code{\link[=patch_permutations]{patch_permutations()}}
+gives the permutations of each event for \code{area_permutations}.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 \code{MetacommunityPhylogenetics} of the authors, checked in Octave. Four parts of that
@@ -152,7 +158,8 @@ traits-environment relationships in the fourth-corner problem. \emph{Ecology}, 9
 1525--1526.
 }
 \seealso{
-\code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events. \code{\link[=plot_node_test]{plot_node_test()}} and
+\code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events and \code{\link[=patch_permutations]{patch_permutations()}} moves them in
+a landscape with edges. \code{\link[=plot_node_test]{plot_node_test()}} and
 \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results. \code{\link[=pcc_test]{pcc_test()}} and
 \code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
 }
