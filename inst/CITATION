@@ -1,14 +1,14 @@
 bibentry(
   bibtype = "Manual",
-  title = "comdynamite: Process-Based Metacommunity Simulations with Phylogenetic Structure",
+  title = "comdynamite: Linking Traits, Phylogenies and Biogeography in Metacommunities",
   author = person("Diogo B.", "Provete"),
   year = "2026",
   note = paste("R package version", meta$Version),
   url = "https://github.com/diogoprov/comdynamite",
   doi = "10.5281/zenodo.23993533",
   textVersion = paste0(
-    "Provete, D. B. (2026). comdynamite: Process-based metacommunity ",
-    "simulations with phylogenetic structure. R package version ",
+    "Provete, D. B. (2026). comdynamite: Linking traits, phylogenies and ",
+    "biogeography in metacommunities. R package version ",
     meta$Version, ". https://doi.org/10.5281/zenodo.23993533"
   )
 )

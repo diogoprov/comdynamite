@@ -20,7 +20,6 @@ reference:
   - landscape_grid
   - dispersal_kernel
   - env_over_time
-  - torus_permutations
 - title: Species traits
   desc: Traits with phylogenetic signal and evolutionary regimes.
   contents:
@@ -32,22 +31,32 @@ reference:
   desc: Interspecific competition, optionally structured by relatedness.
   contents:
   - competition_matrix
-- title: Testing methods
-  desc: Analyses of phylogenetic community structure.
+- title: Clades and biogeography
+  desc: Which clades respond to the environment or to biogeographic events?
+  contents:
+  - node_contrasts
+  - biogeography_matrix
+  - node_test
+  - plot_node_test
+  - plot_node_heatmap
+- title: The whole tree
+  desc: Does phylogenetic composition follow the environment?
   contents:
   - pcc_test
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta
-  - node_test
-  - biogeography_matrix
-  - patch_permutations
-  - node_contrasts
-  - plot_node_test
-  - plot_node_heatmap
+- title: Environment and space
+  desc: Phylogenetic vectors and the partition of trait variation.
+  contents:
   - phylo_vector
   - trait_partition
   - plot_trait_partition
+- title: Restricted null models
+  desc: Permutations for sites that are neighbours.
+  contents:
+  - torus_permutations
+  - patch_permutations
 - title: Data
   contents:
   - daphniids
@@ -55,3 +64,23 @@ reference:
   desc: Community assembly without population dynamics.
   contents:
   - assemble_community
+
+articles:
+- title: Analysing data
+  navbar: Analysing data
+  contents:
+  - articles/preparing-data
+  - articles/analysing-clades
+  - articles/whole-tree
+- title: Simulating data
+  navbar: Simulating data
+  contents:
+  - comdynamite
+  - phylogenetic-structure
+  - evaluating-methods
+  - articles/watching-assembly
+- title: Validation
+  navbar: Validation
+  contents:
+  - articles/validation
+  - articles/validation-gradient

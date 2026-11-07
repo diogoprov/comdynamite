@@ -1,7 +1,7 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.5.2 (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, e `v0.5.2`. `v0.3.0` e `v0.4.0`
+Atualizado em 2026-11-06. Versão atual: 0.6.0 (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2` e `v0.6.0`. `v0.3.0` e `v0.4.0`
 não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
 v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
@@ -17,8 +17,7 @@ Peres-Neto et al. (2012), são pouco usados por isso e têm prioridade.
 
 Para isso funcionar, o pacote precisa de uma estrutura de dados comum, dependências
 leves (pacotes grandes em `Suggests`) e convenção de nomes (`simulate_*` para gerar,
-e um prefixo a definir para analisar). O título e o `Description` mudam quando os
-primeiros métodos entrarem.
+e um prefixo a definir para analisar). O título e o `Description` mudaram na 0.6.0.
 
 ## Feito
 
@@ -133,7 +132,7 @@ funções escritos à mão, o que indica o que falta no pacote.
       exclusão regional continuou até 3000 passos, e hoje nada avisa o usuário.
 - [ ] Saída em formato longo (tibble) a partir de `history`.
 - [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
-      mostrar ganho real, como foi feito no treeshapesim. O ABC da v0.6.0 depende disso.
+      mostrar ganho real, como foi feito no treeshapesim. O ABC depende disso.
 - [ ] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
       (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
@@ -141,7 +140,7 @@ funções escritos à mão, o que indica o que falta no pacote.
       temporais aumentaram o poder explicativo em até 59%, e a dispersão dependeu delas.
 - [ ] Piloto de identificabilidade, com poucos parâmetros: quanto dá para recuperar a
       partir dessas estatísticas, com um levantamento único e com séries temporais? É o
-      ponto de decisão para a v0.6.0, e o desenho deve ser combinado antes de rodar.
+      ponto de decisão para o ABC, e o desenho deve ser combinado antes de rodar.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código.
@@ -273,7 +272,7 @@ v0.6.0 por decisão de 2026-11-06.
 
 Da auditoria, para antes da 1.0:
 
-- [ ] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
+- [x] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
       e Description, artigo sobre preparar dados próprios e artigo de `pcc_test()` e
       `phylo_beta_test()`.
 - [ ] Nomes: `alpha` tem três sentidos, `r2` e `statistic` mudam entre funções, `p_partial`
@@ -288,8 +287,8 @@ Da auditoria, para antes da 1.0:
       menos de 8 sites, `mc_dynamics()` com um site, `pcc_test()` com `r2` NaN, número de
       sorteios válidos, erro dentro de `cores`, checagens do simulador, formas dos traits.
 
-Situação em 2026-11-06: marco fechado na 0.5.2. O nulo para paisagens com borda segue em
-aberto: sem ele, o teste de eventos não deve ser usado com dados reais de refúgios.
+Situação em 2026-11-06: marco fechado na 0.5.2. O nulo com borda e a descoberta saíram na
+0.6.0.
 
 Opção, sem data: calanoides como segundo exemplo, se as espécies estiverem nas tabelas
 públicas da EMAP. A topologia sairia da Fig. 9.5b, e os resultados do livro não foram
@@ -301,7 +300,16 @@ vários triângulos: vale perguntar aos autores.
 I dos eventos estiver medido com sites agregados no espaço e os achados da auditoria
 estiverem resolvidos ou registrados aqui.
 
-## v0.6.0: inferência por ABC
+## v0.6.0: nulo com borda e descoberta (concluída em 2026-11-06)
+
+`patch_permutations()`, `area_permutations` em `node_test()`, novo título e documentação por
+pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
+
+- [ ] Avaliar `patch_permutations()` com autocorrelação na escala da paisagem (bandas de 6,
+      12 e 25 sites, contra 3 na validação), sem efeito das áreas. Simulação em andamento.
+- [ ] Aplicar aos refúgios da Mata Atlântica antes de usar em manuscrito.
+
+## Inferência por ABC (planejada como v0.6.0, número a definir)
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0 e da estrutura comum da v0.4.0.
