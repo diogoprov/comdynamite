@@ -4,6 +4,10 @@
   by species name or in the order of the species. The traits not given are drawn as before, and
   with the same seed they are the same as without the external ones. `rescale_optima = FALSE`
   keeps external optima on their own scale.
+- `simulate_metacommunity()` and `mc_dynamics()`: `pool` limits each species to the sites
+  where it can occur, such as its range or a biogeographic reconstruction, and `initial` gives
+  the abundances or presences at the start. Without them, results with the same seed are the
+  same as before.
 - `summary_stats()`: new statistic `trait_k`, Blomberg's K of the trait over the species shared
   by `trait` and `tree`, as `picante::Kcalc()` gives it. It is `NA` without a tree or a trait.
 

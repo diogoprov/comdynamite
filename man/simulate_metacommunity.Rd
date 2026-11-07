@@ -14,7 +14,9 @@ simulate_metacommunity(
   seed_steps = seq(10, 100, 10),
   seed_mean = 0.5,
   record_steps = NULL,
-  extirpation = 0
+  extirpation = 0,
+  pool = NULL,
+  initial = NULL
 )
 }
 \arguments{
@@ -42,11 +44,17 @@ site at each seeding step (and at the start).}
 
 \item{extirpation}{Probability that a population is lost at each time step,
 one value or one per species.}
+
+\item{pool}{Optional matrix (sites x species), logical or 0/1, with the sites where each
+species can occur.}
+
+\item{initial}{Optional matrix (sites x species) of abundances or 0/1 presences at the start,
+only where \code{pool} allows.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
-\code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal} and \code{extirpation}
+\code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
 used, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a tree.
 }
 \description{
@@ -80,6 +88,19 @@ competition-colonisation scenario and no extirpation in the others.
 During colonisation, Poisson(\code{seed_mean}) individuals of every species are
 added to every site at each of the \code{seed_steps}. After the last of these,
 species absent from all sites can never return and are no longer computed.
+
+Distributions from elsewhere, such as ranges, biogeographic reconstructions or the output of
+gen3sis, enter as \code{pool} and \code{initial}. With \code{pool}, a species can only occur where its value
+is \code{TRUE} (or 1): seeds go only there, and individuals that disperse to other sites are lost,
+as in a hostile matrix. A species without any site in \code{pool} dies out. \code{initial} replaces the
+first draw of Poisson(\code{seed_mean}) individuals with given abundances, or with one individual
+where a matrix of presences has 1; seeding still follows \code{seed_steps}, so use
+\code{seed_steps = numeric(0)} to start from \code{initial} alone. Both take one row per site and one
+column per species, named by species. Rows are matched by name when they have names (\code{site1},
+\code{site2} and so on in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}) and by position otherwise. Without them,
+results with the same seed are the same as before they existed. A tree from elsewhere, such as
+one simulated with gen3sis or a model of state-dependent diversification, enters through
+\code{\link[=species_traits]{species_traits()}}; drop extinct lineages first, since they have no distribution.
 }
 \section{Article and archived code}{
 

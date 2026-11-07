@@ -175,8 +175,11 @@ com outros pacotes. As versões seguintes dependem desta.
 - [x] Estrutura de dados comum: `mc_data()` e `as_mc_data()`, com comunidade, árvore, traits,
       ambiente, coordenadas, áreas e série temporal, e checagem de nomes. As análises aceitam o
       objeto no primeiro argumento, e as simulações guardam a árvore.
-- [ ] Árvore e distribuições como entrada: pool regional por sítio e estado inicial
-      vindos de fora. Cobre gen3sis, modelos de SSE e reconstruções biogeográficas.
+- [x] Árvore e distribuições como entrada: `pool` (onde cada espécie pode ocorrer) e
+      `initial` (estado inicial) em `simulate_metacommunity()` e `mc_dynamics()`; a árvore
+      já entrava por `species_traits()`. Cobre gen3sis, modelos de SSE e reconstruções
+      biogeográficas, sem leitor próprio: o formato de saída do gen3sis não foi conferido.
+      Pool que muda no tempo (expansões de área) fica para quando houver uso.
 - [x] `species_traits()` aceita traits vindos de fora (`optima`, `sigma`, `r_max`), por
       exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
 - [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
