@@ -132,14 +132,16 @@ base sem dinâmica.
 Objetivo: reduzir o código que o usuário repete. As vignettes precisaram de laços e
 funções escritos à mão, o que indica o que falta no pacote.
 
-- [ ] Função para rodar grades de cenários com réplicas pareadas por árvore e
-      paisagem e semente controlada, com paralelismo pelo Futureverse (`future`,
-      `furrr` ou `future.apply` em `Suggests`).
-- [ ] Diagnóstico de equilíbrio. Com competição filogenética e dispersão alta, a
+- [x] `run_scenarios()`: grades de cenários com réplicas pareadas por árvore e
+      paisagem e semente por célula, com paralelismo por `future.apply` em `Suggests`.
+- [x] `equilibrium_check()`: diagnóstico de equilíbrio. Com competição filogenética e dispersão alta, a
       exclusão regional continuou até 3000 passos, e hoje nada avisa o usuário.
-- [ ] Saída em formato longo (tibble) a partir de `history`.
-- [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
-      mostrar ganho real, como foi feito no treeshapesim. O ABC depende disso.
+- [x] Saída em formato longo a partir de `history`: `as.data.frame()`, e `as_tibble()` por cima.
+- [x] Benchmark de `mc_dynamics()`, em `data-raw/benchmark_dynamics.R`: 0,7 s para 50
+      espécies, 100 sítios e 2200 passos, ou cerca de 19 h por 100 mil simulações em um núcleo.
+      O sorteio de números aleatórios (`rmultinom`, `rpois`, `rbinom`) toma cerca de 60% do
+      tempo e já é C, então código compilado não traria ganho que justifique. O ABC paraleliza
+      por simulação.
 - [x] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
       (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
@@ -557,6 +559,9 @@ Objetivo: API estável e pacote no CRAN.
   e a redução U(0,5; 1) entra uma vez por gradiente, enquanto o Appendix C a aplica uma
   vez. `simulate_logistic()` adotou esses valores na 0.5.1, e a redução fica uma só, como
   no Appendix C. O resultado da Tabela 5 está no artigo de validação.
+- **Validar `simulate_logistic()` com PGLMM.** Ideia de 2026-11-07, sem compromisso: ajustar
+  `phyr::pglmm()` (CRAN, GPL-3), ou `pez::communityPGLMM()`, aos dados simulados e ver se recupera
+  as variâncias e o sinal filogenético. Só em `data-raw`, sem copiar código para o pacote (MIT).
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
   assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver

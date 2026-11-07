@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- `run_scenarios()`: grids of scenarios with replicates paired by what `setup` draws, a seed per
+  cell and optional parallel runs.
+- `equilibrium_check()`: warns when a simulation is still changing at the end of its record.
+- `as.data.frame()` for `mc_sim`: long table from `history`.
 - Permutations of `pcc_test()`, `pcps_test()`, `phylo_beta_test()` and `trait_partition()` run in
   parallel under a plan of the future package, which is optional.
 - Install from r-universe, as the README now shows.
