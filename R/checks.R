@@ -84,13 +84,15 @@ permutation_record <- function(n_perm, site_permutations = NULL, area_permutatio
   restricted <- !is.null(site_permutations)
   record <- list(species = n_perm, sites = if (restricted) nrow(site_permutations) else n_perm,
                  null = if (restricted) "restricted" else "free")
-  if (!is.null(area_permutations)) record$areas <- min(vapply(area_permutations, nrow, 1L))
+  if (!is.null(area_permutations)) record$areas <- vapply(area_permutations, nrow, 1L)
   record
 }
 
 permutation_line <- function(record) {
   cat("permutations: ", record$sites, " ", record$null, " of sites, ", record$species, " of species",
-      if (!is.null(record$areas)) paste0(", ", record$areas, " of areas"),
+      if (!is.null(record$areas)) {
+        paste0(", of areas ", paste(names(record$areas), record$areas, collapse = ", "))
+      },
       "; smallest possible p: ",
       format(1 / (min(record$sites, record$species, record$areas) + 1), digits = 2), "\n",
       sep = "")

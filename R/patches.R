@@ -31,7 +31,8 @@
 #' barrier, and conservative for neighbouring sides. With 25% to 40% of the sites of that
 #' square and areas in opposite corners, it rejected 15% to 16% with the default `gap` and 5%
 #' to 6% with a `gap` of 3. It is still far better than free permutations, which rejected 48%
-#' to 74%, but p-values near the threshold need caution.
+#' to 74%, but p-values near the threshold need caution. [rigid_permutations()] keeps those
+#' distances, and is the better choice for sides close enough to have room to move.
 #'
 #' @param coords Matrix or data frame with the two coordinates of each site, in the order of
 #'   the rows of `biogeography`.
@@ -43,7 +44,8 @@
 #' @return List with one integer matrix per event, each with one permutation per row and the
 #'   names of the sites as column names, for `area_permutations` in [node_test()]. Rows only
 #'   move the areas of that event, so they should not be used as `site_permutations`.
-#' @seealso [torus_permutations()] for a torus. [biogeography_matrix()] codes the events.
+#' @seealso [rigid_permutations()] keeps the shape of the sides and the distances between
+#'   them, and [torus_permutations()] gives a torus. [biogeography_matrix()] codes the events.
 #' @examples
 #' coords <- expand.grid(x = 1:10, y = 1:6)
 #' event <- ifelse(coords$x <= 3 & coords$y <= 3, 1, ifelse(coords$x >= 8, -1, 0))
@@ -53,19 +55,9 @@
 #' matrix(event[permutations$barrier[1, ]], 10)
 #' @export
 patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
-  check_numeric_columns(coords, "`coords`", "Keep only the two coordinates.")
+  check_event_coords(coords, biogeography)
   coords <- as.matrix(coords)
   biogeography <- as.matrix(biogeography)
-  if (!is.numeric(coords) || ncol(coords) != 2 || anyNA(coords)) {
-    stop("`coords` needs two numeric columns without missing values", call. = FALSE)
-  }
-  if (nrow(coords) != nrow(biogeography)) {
-    stop("`coords` has ", nrow(coords), " rows and `biogeography` has ", nrow(biogeography),
-         call. = FALSE)
-  }
-  if (!all(biogeography %in% c(-1, 0, 1))) {
-    stop("`biogeography` needs values of 1, -1 and 0", call. = FALSE)
-  }
   stopifnot(n_perm >= 1)
   distances <- as.matrix(stats::dist(coords))
   if (is.null(gap)) {
@@ -89,6 +81,23 @@ patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
   })
   names(events) <- colnames(biogeography) %||% paste0("event", seq_along(events))
   events
+}
+
+# coordinates and events of the permutations of events
+check_event_coords <- function(coords, biogeography) {
+  check_numeric_columns(coords, "`coords`", "Keep only the two coordinates.")
+  coords <- as.matrix(coords)
+  biogeography <- as.matrix(biogeography)
+  if (!is.numeric(coords) || ncol(coords) != 2 || anyNA(coords)) {
+    stop("`coords` needs two numeric columns without missing values", call. = FALSE)
+  }
+  if (nrow(coords) != nrow(biogeography)) {
+    stop("`coords` has ", nrow(coords), " rows and `biogeography` has ", nrow(biogeography),
+         call. = FALSE)
+  }
+  if (!all(biogeography %in% c(-1, 0, 1))) {
+    stop("`biogeography` needs values of 1, -1 and 0", call. = FALSE)
+  }
 }
 
 # groups of sites of an area linked by steps no longer than `gap`

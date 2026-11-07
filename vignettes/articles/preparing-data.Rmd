@@ -90,7 +90,9 @@ table(events)
 ```
 
 Sites of an area are usually neighbours, and free permutations then reject too often.
-`patch_permutations()` gives a null model for landscapes with edges. Coordinates should be
+`patch_permutations()` gives a null model for landscapes with edges, and
+`rigid_permutations()` another that keeps the distance between the sides of an event, for sides
+with room to move (see the article on analysing clades). Coordinates should be
 projected, because distances are Euclidean; `sf::st_transform()` does this.
 
 ```{r}

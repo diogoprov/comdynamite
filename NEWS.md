@@ -1,6 +1,14 @@
 # comdynamite (development version)
 
 - `as.data.frame()`, `summary()` and `plot()` methods for the results of the analyses.
+- `rigid_permutations()`: restricted null model for the events of `node_test()` that moves the
+  whole event by a rotation or a reflection and a translation, so it keeps the shape of the
+  sides and the distance between them. It is better than `patch_permutations()` for sides with
+  room to move, and gives few or no placements for events that span the landscape. Its
+  `independent` argument covers those at the price of an assumption on the range of
+  autocorrelation, and remains liberal in some layouts. See its help for the rates.
+- `node_test()`: `permutations$areas` now gives the number of permutations of each event, which
+  may differ, and `print()` shows them.
 - `plot_phylo_beta()`: community matrix with sites ordered by `phylo_beta_test()` and species
   by the tree, as Peres-Neto & Kembel (2015) suggest.
 - `node_test()`: `r2_weighted`, which stays between 0 and 1, unlike `r2`, inherited from the

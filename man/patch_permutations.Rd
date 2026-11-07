@@ -56,7 +56,8 @@ halves of the landscape. The test is therefore liberal for sides far apart, as a
 barrier, and conservative for neighbouring sides. With 25\% to 40\% of the sites of that
 square and areas in opposite corners, it rejected 15\% to 16\% with the default \code{gap} and 5\%
 to 6\% with a \code{gap} of 3. It is still far better than free permutations, which rejected 48\%
-to 74\%, but p-values near the threshold need caution.
+to 74\%, but p-values near the threshold need caution. \code{\link[=rigid_permutations]{rigid_permutations()}} keeps those
+distances, and is the better choice for sides close enough to have room to move.
 }
 \examples{
 coords <- expand.grid(x = 1:10, y = 1:6)
@@ -67,5 +68,6 @@ permutations <- patch_permutations(coords, cbind(barrier = event), n_perm = 3)
 matrix(event[permutations$barrier[1, ]], 10)
 }
 \seealso{
-\code{\link[=torus_permutations]{torus_permutations()}} for a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
+\code{\link[=rigid_permutations]{rigid_permutations()}} keeps the shape of the sides and the distances between
+them, and \code{\link[=torus_permutations]{torus_permutations()}} gives a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
 }

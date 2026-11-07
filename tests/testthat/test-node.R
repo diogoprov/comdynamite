@@ -348,9 +348,9 @@ test_that("node_test() uses area_permutations for events only", {
   rownames(events) <- rownames(comm)
   drawn <- patch_permutations(coords, events, n_perm = 7)
   out <- node_test(comm, nodes, env, events, n_perm = 9, area_permutations = drawn)
-  expect_equal(out$permutations$areas, 7)
+  expect_equal(out$permutations$areas, c(e = 7L))
   expect_equal(out$permutations$null, "free")
-  expect_output(print(out), "7 of areas")
+  expect_output(print(out), "of areas e 7")
   expect_gte(min(out$biogeography$p_partial_site, na.rm = TRUE), 1 / 8)
   expect_error(node_test(comm, nodes, env, n_perm = 3, area_permutations = drawn),
                "needs `biogeography`")
