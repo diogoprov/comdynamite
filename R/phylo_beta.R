@@ -86,7 +86,8 @@ phylo_beta <- function(comm, tree) {
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
-#' @seealso [pcc_test()], the other framework of the same article.
+#' @seealso [plot_phylo_beta()] shows the result. [pcc_test()] is the other framework of the
+#'   same article.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)

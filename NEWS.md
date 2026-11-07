@@ -1,6 +1,8 @@
 # comdynamite (development version)
 
 - `as.data.frame()`, `summary()` and `plot()` methods for the results of the analyses.
+- `plot_phylo_beta()`: community matrix with sites ordered by `phylo_beta_test()` and species
+  by the tree, as Peres-Neto & Kembel (2015) suggest.
 - `node_test()`: `r2_weighted`, which stays between 0 and 1, unlike `r2`, inherited from the
   original code; `n_draws`, the valid draws of sites. Errors in parallel workers now stop the
   function. The default of `n_perm` is 999, as in the other functions.

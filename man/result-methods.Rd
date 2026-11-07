@@ -9,6 +9,7 @@
 \alias{summary.mc_pcc}
 \alias{as.data.frame.mc_phylo_beta}
 \alias{summary.mc_phylo_beta}
+\alias{plot.mc_phylo_beta}
 \alias{as.data.frame.mc_phylo_vector}
 \alias{summary.mc_phylo_vector}
 \alias{as.data.frame.mc_trait_partition}
@@ -30,6 +31,8 @@
 
 \method{summary}{mc_phylo_beta}(object, ...)
 
+\method{plot}{mc_phylo_beta}(x, comm, tree, ...)
+
 \method{as.data.frame}{mc_phylo_vector}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{summary}{mc_phylo_vector}(object, ...)
@@ -48,7 +51,9 @@
 
 \item{...}{Passed to the plot function, and not used otherwise.}
 
-\item{tree}{The \code{phylo} object that gave the contrasts of \code{\link[=node_contrasts]{node_contrasts()}}.}
+\item{tree}{The \code{phylo} object of the analysis.}
+
+\item{comm}{The community matrix given to \code{\link[=phylo_beta_test]{phylo_beta_test()}}.}
 }
 \value{
 A data frame, or for \code{plot()} the value of the plot function.
@@ -56,7 +61,7 @@ A data frame, or for \code{plot()} the value of the plot function.
 \description{
 \code{as.data.frame()} gives the main table of a result. \code{summary()} gives the same table, with
 the tests of \code{\link[=node_test]{node_test()}} in order of \code{p_adjusted}. \code{plot()} calls \code{\link[=plot_node_test]{plot_node_test()}} or
-\code{\link[=plot_trait_partition]{plot_trait_partition()}}.
+\code{\link[=plot_trait_partition]{plot_trait_partition()}} or \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}.
 }
 \examples{
 nodes <- node_contrasts(daphniids$tree)

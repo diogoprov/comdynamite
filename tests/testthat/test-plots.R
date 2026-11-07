@@ -103,3 +103,19 @@ test_that("the second label goes to the side with more room", {
     p_max = c(0.01, NA, 0.2, NA))), class = "mc_trait_partition")
   expect_equal(plot_trait_partition(x)$shown, c(0.5, 0.1, 0.3, 0.1))
 })
+
+test_that("plot_phylo_beta() orders sites and species", {
+  set.seed(13)
+  tree <- ape::rcoal(8)
+  env <- seq(0, 100, length.out = 30)
+  traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(5, 30))
+  comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+  keep <- rowSums(comm) > 0
+  out <- phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 3)
+  shown <- plot_phylo_beta(out, comm[keep, ], tree)
+  expect_equal(dim(shown), c(sum(keep), sum(colSums(comm) > 0)))
+  expect_equal(sort(rowSums(shown)), sort(rowSums(comm[keep, ])))
+  expect_silent(plot(out, comm[keep, ], tree, axis = 1))
+  expect_error(plot_phylo_beta(out, comm[keep, ][-1, ], tree), "occupied sites")
+  expect_error(plot_phylo_beta(out, comm[keep, ], tree, axis = 99), "`axis`")
+})
