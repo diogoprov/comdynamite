@@ -3,18 +3,24 @@
 #' A restricted null model for the events of [node_test()] that keeps the shape of each side
 #' and the distances between the sides. Each permutation moves all the sites of an event
 #' together, by a rotation or a reflection and a translation. A move is kept when its sites
-#' land on the landscape. Sites that land where there is no site, as in a hole of a sparse
+#' land inside the landscape: within `gap` of a site, or in a hole between sites, but not
+#' beyond an edge. Sites that land where there is no site, as in a hole of a sparse
 #' landscape, go to the nearest free site within twice `gap`, and a fraction `outside` of the
 #' sites of an event may land beyond the landscape and be brought in the same way. Moves are
 #' never carried across the landscape, as in a torus, which would split a side. This is the
 #' torus-translation test of Harms et al. (2001) without the wrap-around.
 #'
-#' Sites on a regular lattice get all the moves of the lattice, enumerated, so the
-#' permutations are distinct placements of the event, up to the sign of the contrast, which
-#' does not change the test. Other coordinates get random rotations and translations, with the
-#' sites snapped to the nearest free sites. In an event without zeros where one side has up
-#' to a third of the sites, only that side moves and the other is the rest of the landscape,
-#' as when one area is compared with all the others.
+#' The moves are enumerated, so the permutations are distinct placements of the event, up to
+#' the sign of the contrast, which does not change the test, and drawn at random when there
+#' are more than `n_perm`. Sites on a regular lattice get all the moves of the lattice: its
+#' symmetries with every translation in cells. Other coordinates get rotations in steps that
+#' move the site farthest from the centre of the event by about `gap`, at least 4 and at most
+#' 360 of them, each with and without a reflection, and the translations that put the site
+#' nearest the centre on each site of the landscape; the other sites go to the nearest free
+#' sites. Which moves fit is then fixed by the landscape, and only the draw among them
+#' changes between runs. In an event without zeros where one side has up to a third of the
+#' sites, only that side moves and the other is the rest of the landscape, as when one area
+#' is compared with all the others.
 #'
 #' An event that spans the landscape, as two halves, two strips along opposite edges or areas
 #' in opposite corners, has few placements, sometimes none, because a move would push a side
@@ -28,9 +34,9 @@
 #' far apart, as across a barrier, at the price of assuming that the community is not spatially
 #' autocorrelated beyond `independent`. When that assumption fails the test is liberal, and no
 #' value of `independent` can be checked from the data alone, so results should be compared
-#' across values. Off a lattice, a large part in an irregular region seldom fits after a random
-#' move. It then has few moves and stays nearly in place while the small parts move, which
-#' gives many placements that say little, and the function warns.
+#' across values. A large part in an irregular region may have few moves that fit. It then
+#' stays nearly in place while the small parts move, which gives many placements that say
+#' little, and the function warns.
 #'
 #' This method was built for this package and has no published evaluation. In
 #' `data-raw/validation_rigid.R`, with communities that followed a hidden autocorrelated
@@ -40,19 +46,36 @@
 #' 2.2% to 3.5% for adjacent areas and for several small areas, and 4.2% to 4.8% for adjacent
 #' areas, an L shape and two areas at a short distance when the hidden environment had an
 #' exponential covariance. [patch_permutations()] rejected 1.4% to 6.4% in those cases, and is
-#' conservative for adjacent areas. With 25% to 40% of the sites of the square and areas in
-#' opposite corners, the default rejected less than 1%, with 13 to 28 placements, and
-#' [patch_permutations()] 15% to 19%. Where the event had room to move, power was equal to or
+#' conservative for adjacent areas. Where the event had room to move, power was equal to or
 #' higher than that of [patch_permutations()], up to twice for adjacent areas (24% against 13%);
 #' with few placements it was lower (4% against 13% for blocks in the band).
+#'
+#' With sparse sites (`data-raw/validation_gap.R`, 150 replicates and 99 permutations), the
+#' default rejected 5.5% to 6.1% where the event had room to move: irregular areas with 40% of
+#' the sites of the square, adjacent areas with 60% and random blocks with 80%. Areas in
+#' opposite corners with 25% to 40% of the sites, and irregular areas on seven clusters of
+#' sites, had no placement or fewer than five, so the default does not test them.
+#'
+#' Off a lattice (`data-raw/validation_offgrid.R`, 150 replicates and 99 permutations), the
+#' default rejected 4.7% for adjacent areas in the square with jitter and 5.9% in 400 sites
+#' placed at random, and 6.8% to 8.0% for two blocks placed at random in those landscapes, in
+#' the band with jitter and in a crescent of random sites, where it is liberal.
+#' [patch_permutations()] rejected 1.2% to 6.3% in those cases. With a second generator in an
+#' L-shaped region of random sites (`data-raw/validation_nulls_check.R`, 150 replicates and 199
+#' permutations), it rejected 7.0% for two fixed areas and 8.7% for areas placed at random,
+#' against 5.5% and 6.6% with [patch_permutations()]. Off a lattice this function is thus
+#' liberal, and [patch_permutations()] is the safer choice unless its conservatism for
+#' adjacent areas matters. Power for adjacent areas with jitter was 23% against 12%. With 400 sites, the enumeration and 99 placements took 0.3 to
+#' 2.8 s; with 750 sites placed at random and an event of 57 sites, 999 placements took 9 s,
+#' and with 750 sites on a lattice with jitter and an event of 225 sites, 701 placements took
+#' 12 min, since every site of a large event has to be moved to a free site in each try.
 #'
 #' Sides far apart remain a problem. In an irregular band most random areas had no placement
 #' or fewer than 20, so the default does not test them. With `independent = 10`, random areas
 #' in the three landscapes gave 3.9% to 5.5%, but areas in opposite corners of the square gave
 #' 6% to 7% with autocorrelation over 3 or 4 sites and 12% over 12 sites, strips along opposite
-#' edges 8% to 9% (2% to 3% with [patch_permutations()]), areas in opposite corners with sparse
-#' sites 8%, and the two farthest clusters of a clustered landscape 9%. On coordinates off a lattice, the only case evaluated, a square
-#' with jitter and 60 replicates, rates were 2% to 9%, so this branch is less precise.
+#' edges 8% to 9% (2% to 3% with [patch_permutations()]), and areas in opposite corners with
+#' sparse sites 10% to 12%.
 #'
 #' @param coords Matrix or data frame with the two coordinates of each site, in the order of
 #'   the rows of `biogeography`. Distances are Euclidean, so they should be projected.
@@ -61,19 +84,22 @@
 #' @param n_perm Largest number of permutations. Fewer are returned when fewer distinct
 #'   placements of the event exist.
 #' @param gap A moved site counts as inside the landscape when it is closer than `gap` to a
-#'   site. The default, the 90th percentile of the distances to the nearest site, makes a
-#'   site just beyond the edge of a regular grid count as outside and lets sites land in the
-#'   holes of a sparse landscape. With few holes it is too small, as most sites have a
-#'   neighbour one step away, and holes count as outside; `gap` should then be raised. It is
-#'   not the `gap` of [patch_permutations()].
+#'   site, or in a hole narrower than twice `gap` between sites (four times `gap` off a
+#'   lattice, where sites leave larger voids between neighbours), but not beyond an edge. A
+#'   site that lands inside but not on a site goes to the nearest free site within twice
+#'   `gap`. The default is the median distance from a site to its fourth nearest site: the
+#'   step of a full grid, where it makes a site just beyond the edge count as outside, and
+#'   the spacing of sparse sites, so that holes count as inside. It is not the `gap` of
+#'   [patch_permutations()], which is 1.5 times this one by default.
 #' @param outside Largest fraction of the sites of an event that may land outside the
 #'   landscape in a move. Those sites go to the nearest free site within twice `gap`, and the
 #'   move is dropped when one has none.
 #' @param independent Distance beyond which parts of an event move independently of each
 #'   other, while staying at least that far apart. The default, `Inf`, moves the whole event
 #'   together and assumes nothing about the range of autocorrelation.
-#' @param max_tries Largest number of moves tried when they cannot all be enumerated, that
-#'   is, with several independent parts or with coordinates that are not on a lattice.
+#' @param max_tries Largest number of moves tried: of the enumerated moves of one part, in
+#'   random order, when placements fail or repeat a layout, or of the combinations of several
+#'   independent parts, which cannot all be enumerated.
 #' @return List with one integer matrix per event, each with one permutation per row and the
 #'   names of the sites as column names, for `area_permutations` in [node_test()]. Rows only
 #'   move the sites of that event, so they should not be used as `site_permutations`.
@@ -99,17 +125,16 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
   n <- nrow(coords)
   distances <- as.matrix(stats::dist(coords))
   if (is.null(gap)) {
-    nearest <- apply(distances + diag(Inf, n), 1, min)
-    gap <- stats::quantile(nearest, 0.9, names = FALSE)
+    gap <- neighbour_distance(distances, 4)
     if (gap == 0) {
-      stop("most sites share their coordinates with another site: remove repeated sites or ",
+      stop("most sites share their coordinates with other sites: remove repeated sites or ",
            "give `gap`", call. = FALSE)
     }
   }
   stopifnot(gap > 0)
   # strictly closer than `gap`, so that a site one step beyond a regular grid is outside
   gap <- gap * (1 - 1e-6)
-  lattice <- lattice_of(coords, gap)
+  landscape <- landscape_of(coords, gap)
   sites <- rownames(biogeography)
   events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
   out <- lapply(seq_len(ncol(biogeography)), function(e) {
@@ -120,7 +145,7 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
     } else {
       list(which(moving))
     }
-    drawn <- event_draws(coords, distances, lattice, groups, event, n_perm, gap, outside,
+    drawn <- event_draws(coords, distances, landscape, groups, event, n_perm, gap, outside,
                          independent, max_tries)
     if (is.null(drawn)) {
       stop("no placement of ", events[e], " other than the observed one fits the landscape: ",
@@ -164,9 +189,65 @@ layout_key <- function(event, permutation) {
   paste(moved * first, collapse = "")
 }
 
+# median distance from a site to its k-th nearest site: the step of a full grid when k is at
+# most 4, and the spacing of sparse sites
+neighbour_distance <- function(distances, k = 4) {
+  n <- nrow(distances)
+  k <- min(k, n - 1)
+  stats::median(apply(distances + diag(Inf, n), 1, function(d) sort(d)[k]))
+}
+
+# the geometry of the landscape: a regular lattice when the sites lie on one, else a raster
+# with cells of half of `gap`. Both hold the cells inside the landscape: those near a site
+# and those of holes between sites, but not the rim beyond an edge. On a lattice a cell is
+# near a site when closer than `gap`; off a lattice, where sites leave larger voids between
+# neighbours, when closer than twice `gap`
+landscape_of <- function(coords, gap) {
+  lattice_of(coords, gap) %||% raster_of(coords, gap)
+}
+
+# the cells of a raster that count as inside the landscape: those closer than `radius` to a
+# site, and those of a hole narrower than twice `radius` between them. Cells beyond an edge
+# are not inside. `cells` are the cells of the sites, `origin` the coordinates of the centre
+# of cell (1, 1) and `steps` the size of a cell
+inside_cells <- function(coords, cells, extent, origin, steps, radius) {
+  reach <- ceiling(radius / steps)
+  offsets <- as.matrix(expand.grid(-reach[1]:reach[1], -reach[2]:reach[2]))
+  offsets <- offsets[(offsets[, 1] * steps[1])^2 + (offsets[, 2] * steps[2])^2 < radius^2, ,
+                     drop = FALSE]
+  # a cell is near a site when its centre is closer than `radius` to the site
+  n <- nrow(coords)
+  n_off <- nrow(offsets)
+  candidate <- cells[rep(seq_len(n), each = n_off), , drop = FALSE] +
+    offsets[rep(seq_len(n_off), n), , drop = FALSE]
+  centre <- sweep(sweep(candidate - 1, 2, steps, "*"), 2, origin, "+")
+  d2 <- rowSums((centre - coords[rep(seq_len(n), each = n_off), , drop = FALSE])^2)
+  keep <- d2 < radius^2 & candidate[, 1] >= 1 & candidate[, 1] <= extent[1] &
+    candidate[, 2] >= 1 & candidate[, 2] <= extent[2]
+  near <- matrix(FALSE, extent[1], extent[2])
+  near[candidate[keep, , drop = FALSE]] <- TRUE
+  # a cell is inside when every cell within `radius` of it is near a site: holes between
+  # sites stay inside, the rim beyond an edge does not
+  inside <- near
+  rows <- seq_len(extent[1])
+  cols <- seq_len(extent[2])
+  for (o in seq_len(n_off)) {
+    from_rows <- rows + offsets[o, 1]
+    from_cols <- cols + offsets[o, 2]
+    ok_rows <- from_rows >= 1 & from_rows <= extent[1]
+    ok_cols <- from_cols >= 1 & from_cols <= extent[2]
+    shifted <- matrix(FALSE, extent[1], extent[2])
+    shifted[rows[ok_rows], cols[ok_cols]] <- near[from_rows[ok_rows], from_cols[ok_cols]]
+    inside <- inside & shifted
+  }
+  # the cells of the sites are inside, including those of isolated sites
+  inside[cells] <- TRUE
+  inside
+}
+
 # a regular lattice: the step of each axis, the cell of each site, the site of each cell,
-# the cells closer than `gap` to a site and the symmetries. NULL when the coordinates do not
-# lie on a lattice
+# the cells inside the landscape and the symmetries. NULL when the coordinates do not lie
+# on a lattice
 lattice_of <- function(coords, gap) {
   steps <- apply(coords, 2, function(x) {
     u <- sort(unique(x))
@@ -182,21 +263,17 @@ lattice_of <- function(coords, gap) {
   cells <- sweep(sweep(coords, 2, origin), 2, steps, "/")
   if (any(abs(cells - round(cells)) > 1e-6)) return(NULL)
   cells <- unname(round(cells))
-  margin <- ceiling(gap / steps)
+  # moves may carry a site up to `gap` beyond the sites
+  reach <- ceiling(gap / steps)
+  margin <- reach
   extent <- apply(cells, 2, max) + 2 * margin + 1
   # rounded coordinates fall on a lattice far finer than the sites
   if (prod(extent) > 50 * nrow(coords)) return(NULL)
+  cells <- sweep(cells, 2, margin + 1, "+")
+  origin <- origin - margin * steps
   index <- matrix(0L, extent[1], extent[2])
-  index[cbind(cells[, 1] + margin[1] + 1, cells[, 2] + margin[2] + 1)] <- seq_len(nrow(coords))
-  grid <- as.matrix(expand.grid(seq_len(extent[1]) - margin[1] - 1,
-                                seq_len(extent[2]) - margin[2] - 1))
-  grid_xy <- sweep(sweep(grid, 2, steps, "*"), 2, origin, "+")
-  near <- matrix(FALSE, extent[1], extent[2])
-  for (rows in split(seq_len(nrow(grid)), ceiling(seq_len(nrow(grid)) / 2000))) {
-    d2 <- outer(grid_xy[rows, 1], coords[, 1], "-")^2 + outer(grid_xy[rows, 2], coords[, 2], "-")^2
-    near[cbind(grid[rows, 1] + margin[1] + 1, grid[rows, 2] + margin[2] + 1)] <-
-      apply(d2, 1, min) < gap^2
-  }
+  index[cells] <- seq_len(nrow(coords))
+  near <- inside_cells(coords, cells, extent, origin, steps, gap)
   # the symmetries of the lattice: 8 when the steps are equal, else the 4 that keep the axes
   maps <- list(function(x, y) cbind(x, y), function(x, y) cbind(-x, y),
                function(x, y) cbind(x, -y), function(x, y) cbind(-x, -y))
@@ -204,31 +281,63 @@ lattice_of <- function(coords, gap) {
     maps <- c(maps, list(function(x, y) cbind(y, x), function(x, y) cbind(-y, x),
                          function(x, y) cbind(y, -x), function(x, y) cbind(-y, -x)))
   }
-  list(steps = steps, origin = origin, cells = cells, margin = margin, index = index,
-       near = near, extent = extent, maps = maps)
+  list(kind = "lattice", steps = steps, origin = origin, cells = cells, index = index,
+       near = near, extent = extent, maps = maps, land = apply(cells, 2, range), reach = reach)
 }
 
-# the moves of a lattice that keep enough of a group inside the landscape: one row per
-# move, with the symmetry and the translation in cells
+# a raster over coordinates that are not on a lattice, with square cells of half of `gap`,
+# a margin of twice `gap` around the sites and the cells inside the landscape
+raster_of <- function(coords, gap) {
+  step <- gap / 2
+  origin <- unname(apply(coords, 2, min)) - 2 * gap
+  extent <- unname(floor((apply(coords, 2, max) + 2 * gap - origin) / step)) + 1
+  cells <- unname(floor(sweep(sweep(coords, 2, origin), 2, step, "/"))) + 1
+  near <- inside_cells(coords, cells, extent, origin, c(step, step), 2 * gap)
+  list(kind = "raster", steps = c(step, step), origin = origin, near = near, extent = extent,
+       gap = gap)
+}
+
+# the moves of a landscape that keep enough of a group inside it: one row per move
+landscape_moves <- function(group, coords, landscape, outside) {
+  if (landscape$kind == "lattice") {
+    lattice_moves(group, landscape, outside)
+  } else {
+    raster_moves(group, coords, landscape, outside)
+  }
+}
+
+# the image of a group under move `pick` of `moves`: coordinates and the site of each image
+# when it lands on one, else 0
+landscape_image <- function(group, moves, pick, coords, landscape) {
+  if (landscape$kind == "lattice") {
+    lattice_image(group, moves[pick, ], landscape)
+  } else {
+    raster_image(moves[pick, ], attr(moves, "orientation"), coords)
+  }
+}
+
+# the moves of a lattice that keep enough of a group inside the landscape: the symmetry and
+# the translation in cells
 lattice_moves <- function(group, lattice, outside) {
   cells <- lattice$cells[group, , drop = FALSE]
   m <- nrow(cells)
-  margin <- lattice$margin
   extent <- lattice$extent
   near <- lattice$near
-  land <- apply(lattice$cells, 2, range)
+  land <- lattice$land
+  reach <- lattice$reach
   accepted <- list()
   for (s in seq_along(lattice$maps)) {
     image <- lattice$maps[[s]](cells[, 1], cells[, 2])
     box <- apply(image, 2, range)
-    tx <- seq(land[1, 1] - margin[1] - box[2, 1], land[2, 1] + margin[1] - box[1, 1])
-    ty <- seq(land[1, 2] - margin[2] - box[2, 2], land[2, 2] + margin[2] - box[1, 2])
+    # translations that keep the group within `gap` of the sites
+    tx <- seq(land[1, 1] - reach[1] - box[2, 1], land[2, 1] + reach[1] - box[1, 1])
+    ty <- seq(land[1, 2] - reach[2] - box[2, 2], land[2, 2] + reach[2] - box[1, 2])
     for (dx in tx) {
-      ix <- image[, 1] + dx + margin[1] + 1
+      ix <- image[, 1] + dx
       in_x <- ix >= 1 & ix <= extent[1]
       if (sum(!in_x) > outside * m) next
       for (dy in ty) {
-        iy <- image[, 2] + dy + margin[2] + 1
+        iy <- image[, 2] + dy
         inside <- in_x & iy >= 1 & iy <= extent[2]
         far <- m - sum(inside)
         if (far > outside * m) next
@@ -241,62 +350,67 @@ lattice_moves <- function(group, lattice, outside) {
   do.call(rbind, accepted)
 }
 
-# the image of a group under a move of the lattice: coordinates and the site of each image
-# when it lands on one, else 0
+# the image of a group under a move of the lattice
 lattice_image <- function(group, move, lattice) {
   cells <- lattice$cells[group, , drop = FALSE]
   image <- lattice$maps[[move[1]]](cells[, 1], cells[, 2])
   image <- sweep(image, 2, move[2:3], "+")
-  ix <- image[, 1] + lattice$margin[1] + 1
-  iy <- image[, 2] + lattice$margin[2] + 1
-  inside <- ix >= 1 & ix <= lattice$extent[1] & iy >= 1 & iy <= lattice$extent[2]
+  inside <- image[, 1] >= 1 & image[, 1] <= lattice$extent[1] &
+    image[, 2] >= 1 & image[, 2] <= lattice$extent[2]
   site <- integer(nrow(cells))
-  site[inside] <- lattice$index[cbind(ix[inside], iy[inside])]
-  list(xy = sweep(sweep(image, 2, lattice$steps, "*"), 2, lattice$origin, "+"), site = site)
+  site[inside] <- lattice$index[image[inside, , drop = FALSE]]
+  list(xy = sweep(sweep(image - 1, 2, lattice$steps, "*"), 2, lattice$origin, "+"),
+       site = site)
 }
 
-# a pool of random rigid moves of a group of coordinates that are not on a lattice, each
-# with the nearest sites of every moved site, so that placing a move is cheap. A move is
-# kept when few enough of its sites land outside the landscape
-continuous_pool <- function(group, coords, gap, outside, size, max_tries, k = 12) {
+# the orientations of a group off a lattice: rotations in steps that move the site farthest
+# from the anchor by about `gap`, at least 4 and at most 360 of them, each with and without
+# a reflection, as matrices. The anchor is the site of the group nearest its centre and the
+# coordinates are relative to it. A group of one site has one orientation
+group_orientations <- function(group, coords, gap) {
   from <- coords[group, , drop = FALSE]
-  m <- nrow(from)
-  n <- nrow(coords)
-  k <- min(k, n)
-  pool <- vector("list", size)
-  found <- 0
-  for (t in seq_len(max_tries)) {
-    angle <- stats::runif(1, 0, 2 * pi)
-    rotation <- matrix(c(cos(angle), sin(angle), -sin(angle), cos(angle)), 2)
-    if (stats::runif(1) < 0.5) rotation[, 1] <- -rotation[, 1]
-    image <- sweep(from, 2, from[sample.int(m, 1), ]) %*% rotation
-    image <- sweep(image, 2, coords[sample.int(n, 1), ], "+")
-    d2 <- outer(image[, 1], coords[, 1], "-")^2 + outer(image[, 2], coords[, 2], "-")^2
-    if (sum(apply(d2, 1, min) >= gap^2) > outside * m) next
-    nearest <- apply(d2, 1, function(d) order(d)[seq_len(k)])
-    nearest_d2 <- matrix(d2[cbind(rep(seq_len(m), each = k), as.vector(nearest))], k)
-    found <- found + 1
-    pool[[found]] <- list(nearest = nearest, d2 = nearest_d2)
-    if (found == size) break
+  centre <- colMeans(from)
+  anchor <- which.min(rowSums(sweep(from, 2, centre)^2))
+  relative <- sweep(from, 2, from[anchor, ])
+  if (nrow(from) == 1) {
+    return(list(anchor = anchor, relative = relative, rotations = list(diag(2))))
   }
-  if (found == 0) return(NULL)
-  pool[seq_len(found)]
+  radius <- sqrt(max(rowSums(relative^2)))
+  n_angles <- min(360, max(4, 4 * ceiling(2 * pi * radius / gap / 4)))
+  angles <- 2 * pi * (seq_len(n_angles) - 1) / n_angles
+  rotations <- lapply(angles, function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2))
+  reflected <- lapply(rotations, function(r) r * c(-1, -1, 1, 1))
+  list(anchor = anchor, relative = relative, rotations = c(rotations, reflected))
 }
 
-# where the sites of a pooled move go: each to its nearest free site within `reach` among
-# the sites kept for it, the nearest first; NULL when one has none
-place_pooled <- function(move, free, reach) {
-  m <- ncol(move$nearest)
-  target <- integer(m)
-  for (i in order(move$d2[1, ])) {
-    sites <- move$nearest[, i]
-    open <- free[sites] & move$d2[, i] <= reach^2
-    if (!any(open)) return(NULL)
-    site <- sites[which(open)[1]]
-    target[i] <- site
-    free[site] <- FALSE
-  }
-  target
+# the moves of a group off a lattice that keep enough of it inside the landscape: each
+# orientation with the translations that put the anchor on each site, as the index of the
+# orientation and the site, with the orientations as an attribute
+raster_moves <- function(group, coords, raster, outside) {
+  orientation <- group_orientations(group, coords, raster$gap)
+  m <- length(group)
+  extent <- raster$extent
+  accepted <- lapply(seq_along(orientation$rotations), function(o) {
+    image <- orientation$relative %*% orientation$rotations[[o]]
+    ix <- floor((outer(image[, 1], coords[, 1], "+") - raster$origin[1]) / raster$steps[1]) + 1
+    iy <- floor((outer(image[, 2], coords[, 2], "+") - raster$origin[2]) / raster$steps[2]) + 1
+    inside <- ix >= 1 & ix <= extent[1] & iy >= 1 & iy <= extent[2]
+    inside[inside] <- raster$near[cbind(ix[inside], iy[inside])]
+    far <- m - colSums(inside)
+    sites <- which(far <= outside * m)
+    if (length(sites) == 0) return(NULL)
+    cbind(o, sites)
+  })
+  # the move that keeps the group in place always fits, so there is at least one
+  structure(do.call(rbind, accepted), orientation = orientation)
+}
+
+# the image of a group under a move off a lattice: only the anchor lands on a site
+raster_image <- function(move, orientation, coords) {
+  image <- orientation$relative %*% orientation$rotations[[move[1]]]
+  site <- integer(nrow(image))
+  site[orientation$anchor] <- move[2]
+  list(xy = sweep(image, 2, coords[move[2], ], "+"), site = site)
 }
 
 # where the sites of an image go: to their site when it is free, else to the nearest free
@@ -309,87 +423,92 @@ place_image <- function(image, coords, free, reach) {
   loose <- which(target == 0)
   if (length(loose) > 0) {
     xy <- image$xy[loose, , drop = FALSE]
-    d2 <- outer(xy[, 1], coords[, 1], "-")^2 + outer(xy[, 2], coords[, 2], "-")^2
-    d2 <- d2 + stats::runif(length(d2), 0, 1e-9)
-    for (row in order(apply(d2, 1, min))) {
+    # only the free sites within `reach` of the loose images can take them
+    near <- which(free & coords[, 1] >= min(xy[, 1]) - reach & coords[, 1] <= max(xy[, 1]) + reach &
+                    coords[, 2] >= min(xy[, 2]) - reach & coords[, 2] <= max(xy[, 2]) + reach)
+    if (length(near) < length(loose)) return(NULL)
+    d2 <- outer(xy[, 1], coords[near, 1], "-")^2 + outer(xy[, 2], coords[near, 2], "-")^2
+    # ties between sites, as in the holes of a lattice, are broken at random
+    d2 <- d2 + rep(stats::runif(length(near), 0, 1e-9), each = length(loose))
+    d2[d2 > reach^2] <- Inf
+    open <- rep(TRUE, length(near))
+    for (row in order(d2[cbind(seq_along(loose), max.col(-d2, "first"))])) {
       d <- d2[row, ]
-      d[!free] <- Inf
+      d[!open] <- Inf
       site <- which.min(d)
-      if (d[site] > reach^2) return(NULL)
-      target[loose[row]] <- site
-      free[site] <- FALSE
+      if (d[site] == Inf) return(NULL)
+      target[loose[row]] <- near[site]
+      open[site] <- FALSE
     }
   }
   target
 }
 
 # the distinct permutations of one event, or NULL when none differs from the observed
-event_draws <- function(coords, distances, lattice, groups, event, n_perm, gap, outside,
+event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap, outside,
                         independent, max_tries) {
   n <- nrow(coords)
   moving <- unlist(groups)
   rest <- setdiff(seq_len(n), moving)
   observed <- layout_key(event, seq_len(n))
-  if (!is.null(lattice)) {
-    moves <- lapply(groups, lattice_moves, lattice, outside)
-  } else {
-    moves <- lapply(groups, continuous_pool, coords, gap, outside, 2 * n_perm, max_tries)
-  }
-  if (any(vapply(moves, is.null, logical(1)))) return(NULL)
-  # one group: all its moves, or a sample of them when there are many
-  enumerate <- length(groups) == 1
-  if (enumerate) {
-    rows <- if (!is.null(lattice)) nrow(moves[[1]]) else length(moves[[1]])
-    chosen <- if (rows > 2 * n_perm) sample.int(rows, 2 * n_perm) else seq_len(rows)
-    tries <- length(chosen)
-  } else {
-    tries <- max_tries
-  }
-  placement <- function(group, g, pick, free) {
-    if (!is.null(lattice)) {
-      place_image(lattice_image(group, moves[[g]][pick, ], lattice), coords, free, 2 * gap)
-    } else {
-      place_pooled(moves[[g]][[pick]], free, 2 * gap)
-    }
-  }
+  moves <- lapply(groups, landscape_moves, coords, landscape, outside)
   perms <- vector("list", n_perm)
   keys <- character(n_perm)
   found <- 0
-  for (t in seq_len(tries)) {
+  # one try: the groups placed, or NULL when one does not fit after the others. With one
+  # group `pick` is its move; with several, each group draws its own until they stay apart
+  one_try <- function(pick) {
     free <- rep(TRUE, n)
     target <- integer(n)
-    placed <- TRUE
     for (g in seq_along(groups)) {
       group <- groups[[g]]
       attempt <- 0
       repeat {
         attempt <- attempt + 1
-        pick <- if (enumerate) chosen[t] else sample.int(NROW(moves[[g]]), 1)
-        where <- placement(group, g, pick, free)
+        if (length(groups) > 1) pick <- sample.int(nrow(moves[[g]]), 1)
+        image <- landscape_image(group, moves[[g]], pick, coords, landscape)
+        where <- place_image(image, coords, free, 2 * gap)
         if (!is.null(where)) {
           apart <- g == 1 || min(distances[where, target[target > 0], drop = FALSE]) > independent
           if (apart) break
         }
-        if (attempt >= 30) {
-          placed <- FALSE
-          break
-        }
+        if (attempt >= 30) return(NULL)
       }
-      if (!placed) break
       target[group] <- where
       free[where] <- FALSE
     }
-    if (!placed) next
     permutation <- integer(n)
     permutation[target[moving]] <- moving
     permutation[free] <- rest[sample.int(length(rest))]
-    key <- layout_key(event, permutation)
-    if (key == observed || key %in% keys[seq_len(found)]) next
-    found <- found + 1
-    perms[[found]] <- permutation
-    keys[found] <- key
-    if (found == n_perm) break
+    permutation
+  }
+  # the distinct layouts among the tries, until `n_perm` are found
+  draw <- function(picks) {
+    for (pick in picks) {
+      permutation <- one_try(pick)
+      if (is.null(permutation)) next
+      key <- layout_key(event, permutation)
+      if (key == observed || key %in% keys[seq_len(found)]) next
+      found <<- found + 1
+      perms[[found]] <<- permutation
+      keys[found] <<- key
+      if (found == n_perm) break
+    }
+  }
+  if (length(groups) > 1) {
+    draw(rep(NA_integer_, max_tries))
+  } else {
+    # the moves in random order: twice `n_perm` of them, then the others up to `max_tries`
+    # when placements fail or repeat a layout
+    rows <- nrow(moves[[1]])
+    first <- sample.int(rows, min(rows, 2 * n_perm, max_tries))
+    draw(first)
+    if (found < n_perm && rows > length(first)) {
+      others <- setdiff(seq_len(rows), first)
+      others <- others[sample.int(length(others), min(length(others), max_tries - length(first)))]
+      draw(others)
+    }
   }
   if (found == 0) return(NULL)
-  structure(do.call(rbind, perms[seq_len(found)]), moves = vapply(moves, NROW, integer(1)))
+  structure(do.call(rbind, perms[seq_len(found)]), moves = vapply(moves, nrow, integer(1)))
 }
