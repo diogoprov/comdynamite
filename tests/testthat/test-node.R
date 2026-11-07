@@ -288,3 +288,78 @@ test_that("each parallel call gets its own streams", {
 test_that("a test without valid draws has no p-value", {
   expect_true(is.na(permutation_p(c(NA_real_, NA_real_), 1)))
 })
+
+test_that("patch_permutations() keeps the number and size of patches", {
+  set.seed(1)
+  coords <- expand.grid(x = 1:12, y = 1:8)
+  event <- rep(0, 96)
+  event[coords$x <= 3 & coords$y <= 3] <- 1
+  event[coords$x == 12 & coords$y <= 2] <- 1
+  event[coords$x >= 7 & coords$x <= 9 & coords$y >= 6] <- -1
+  drawn <- patch_permutations(coords, cbind(a = event), n_perm = 30)
+  expect_named(drawn, "a")
+  expect_equal(dim(drawn$a), c(30, 96))
+  expect_true(all(apply(drawn$a, 1, function(row) all(sort(row) == 1:96))))
+  moved <- apply(drawn$a, 1, function(row) event[row])
+  expect_true(all(colSums(moved == 1) == 11))
+  expect_true(all(colSums(moved == -1) == 9))
+  # places change among permutations
+  expect_gt(nrow(unique(t(moved))), 20)
+  # a patch of one site is kept
+  lone <- rep(0, 96)
+  lone[c(1, 50)] <- c(1, -1)
+  expect_true(all(apply(patch_permutations(coords, cbind(lone), 5)$lone, 1,
+                        function(row) sum(lone[row] != 0)) == 2))
+})
+
+test_that("patches are found with the distance between sites", {
+  coords <- cbind(c(1, 2, 3, 10, 11), 0)
+  d <- as.matrix(dist(coords))
+  expect_equal(lengths(area_patches(rep(TRUE, 5), d, 1.5)), c(3, 2))
+  expect_length(area_patches(rep(TRUE, 5), d, 8), 1)
+  expect_length(area_patches(rep(FALSE, 5), d, 1.5), 0)
+})
+
+test_that("a side without other sites takes what is left", {
+  set.seed(2)
+  coords <- expand.grid(x = 1:6, y = 1:6)
+  event <- ifelse(coords$x <= 2 & coords$y <= 2, 1, -1)
+  drawn <- patch_permutations(coords, cbind(event), n_perm = 10, gap = 1.5)$event
+  expect_true(all(apply(drawn, 1, function(row) sum(event[row] == 1)) == 4))
+})
+
+test_that("patch_permutations() rejects wrong input", {
+  coords <- expand.grid(1:3, 1:3)
+  event <- cbind(rep(c(1, 0, -1), 3))
+  expect_error(patch_permutations(coords[-1, ], event), "rows")
+  expect_error(patch_permutations(cbind(coords, 1), event), "two numeric")
+  expect_error(patch_permutations(coords, event * 2), "values of 1")
+  expect_error(patch_permutations(data.frame(a = letters[1:9], b = 1:9), event), "not numeric")
+})
+
+test_that("node_test() uses area_permutations for events only", {
+  set.seed(3)
+  tree <- ape::rcoal(6)
+  nodes <- node_contrasts(tree)
+  coords <- expand.grid(x = 1:6, y = 1:5)
+  comm <- matrix(rpois(180, 3), 30, dimnames = list(paste0("s", 1:30), tree$tip.label))
+  env <- cbind(a = rnorm(30))
+  events <- cbind(e = ifelse(coords$x <= 2, 1, ifelse(coords$x >= 5, -1, 0)))
+  rownames(events) <- rownames(comm)
+  drawn <- patch_permutations(coords, events, n_perm = 7)
+  out <- node_test(comm, nodes, env, events, n_perm = 9, area_permutations = drawn)
+  expect_equal(out$permutations$areas, 7)
+  expect_equal(out$permutations$null, "free")
+  expect_output(print(out), "7 of areas")
+  expect_gte(min(out$biogeography$p_partial_site, na.rm = TRUE), 1 / 8)
+  expect_error(node_test(comm, nodes, env, n_perm = 3, area_permutations = drawn),
+               "needs `biogeography`")
+  expect_error(node_test(comm, nodes, env, events, n_perm = 3, area_permutations = drawn[[1]]),
+               "one matrix per event")
+  expect_error(node_test(comm, nodes, env, events, n_perm = 3,
+                         area_permutations = list(drawn[[1]][, -1])), "`area_permutations` needs")
+  rownames(comm) <- rev(rownames(comm))
+  rownames(env) <- rownames(comm)
+  expect_error(node_test(comm, nodes, env, events, n_perm = 3, area_permutations = drawn),
+               "order of `comm`")
+})

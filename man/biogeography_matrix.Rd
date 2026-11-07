@@ -44,7 +44,7 @@ and is better seen as exploratory.
 A site on both sides of an event gets 0.
 
 The sites of an area are often neighbours, so their number overstates the information
-in an event. See \code{site_permutations} in \code{\link[=node_test]{node_test()}}.
+in an event. See \code{site_permutations} in \code{\link[=node_test]{node_test()}} and \code{\link[=patch_permutations]{patch_permutations()}}.
 }
 \examples{
 area <- rep(c("north", "centre", "south", NA), c(8, 6, 6, 10))

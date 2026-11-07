@@ -118,7 +118,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' the 5% level in a simulation with areas placed at random, against 5% with
 #' [torus_permutations()] (see the article on analysing clades). `site_permutations` accepts
 #' a restricted null model. For events, each row moves the areas across the sites, which
-#' keep their community and predictors.
+#' keep their community and predictors. In a landscape with edges, [patch_permutations()]
+#' gives the permutations of each event for `area_permutations`.
 #'
 #' R2, adjusted R2 and the statistic equal those of the MATLAB function
 #' `MetacommunityPhylogenetics` of the authors, checked in Octave. Four parts of that
@@ -164,6 +165,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   `site_permutations`, only of species.
 #' @param site_permutations Optional matrix of site indices with one permutation per row,
 #'   for example from [torus_permutations()], to use instead of free permutations of sites.
+#' @param area_permutations Optional list with one matrix per event, from
+#'   [patch_permutations()], to use for the events instead of `site_permutations` or free
+#'   permutations. Sites must be in the order of `comm`.
 #' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
 #'   where one core is used. For reproducible p-values with more than one core, call
 #'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results still depend on the number of
@@ -191,7 +195,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits-environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526.
-#' @seealso [biogeography_matrix()] codes the events. [plot_node_test()] and
+#' @seealso [biogeography_matrix()] codes the events and [patch_permutations()] moves them in
+#'   a landscape with edges. [plot_node_test()] and
 #'   [plot_node_heatmap()] show the results. [pcc_test()] and
 #'   [phylo_beta_test()] test the whole tree at once.
 #' @examples
@@ -204,7 +209,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' plot_node_test(out, daphniids$tree, test = "site")
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1,
-                      site_permutations = NULL) {
+                      site_permutations = NULL, area_permutations = NULL) {
   if (inherits(nodes, "phylo")) {
     stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
   }
@@ -214,6 +219,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
   stopifnot(n_perm >= 1, cores >= 1)
   check_permutations(site_permutations, comm)
   if (!is.null(biogeography)) biogeography <- check_biogeography(biogeography, comm)
+  check_area_permutations(area_permutations, biogeography, comm)
   species <- match_species(comm, rownames(nodes), "`nodes`")
   comm <- comm[, species, drop = FALSE]
   nodes <- nodes[species, , drop = FALSE]
@@ -241,9 +247,9 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
     rows <- if (is.null(site_permutations)) sample.int(nrow(comm)) else site_permutations[r, ]
     list(comm = comm[rows, , drop = FALSE], env = env)
   }
-  shuffle_areas <- function(event) {
+  shuffle_areas <- function(event, permutations) {
     function(r) {
-      moved <- event[site_permutations[r, ]]
+      moved <- event[permutations[r, ]]
       sites <- moved != 0
       list(comm = comm[sites, , drop = FALSE],
            env = cbind(moved[sites], env[sites, , drop = FALSE]))
@@ -265,16 +271,18 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                      sites <- biogeography[, e] != 0
                      predictors <- cbind(biogeography[sites, e], env[sites, , drop = FALSE])
                      local_comm <- comm[sites, , drop = FALSE]
-                     shuffle <- if (is.null(site_permutations)) {
+                     permutations <- area_permutations[[e]] %||% site_permutations
+                     shuffle <- if (is.null(permutations)) {
                        function(r) {
                          list(comm = local_comm[sample.int(nrow(local_comm)), , drop = FALSE],
                               env = predictors)
                        }
                      } else {
-                       shuffle_areas(biogeography[, e])
+                       shuffle_areas(biogeography[, e], permutations)
                      }
+                     n_area <- if (is.null(permutations)) n_perm else nrow(permutations)
                      per_node(function(contrast) {
-                       one_node(local_comm, contrast, predictors, n_perm, shuffle, n_site)
+                       one_node(local_comm, contrast, predictors, n_perm, shuffle, n_area)
                      }, paste("Nodes,", events[e]))
                    })
                    first <- function(field) {
@@ -290,7 +298,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                         p_partial_site = shaped(first("p_partial_site")),
                         p_partial_joint = shaped(first("p_partial_joint")))
                  },
-                 permutations = permutation_record(n_perm, site_permutations)),
+                 permutations = permutation_record(n_perm, site_permutations,
+                                                   area_permutations)),
             class = "mc_node_test")
 }
 
@@ -310,7 +319,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
 #' A site on both sides of an event gets 0.
 #'
 #' The sites of an area are often neighbours, so their number overstates the information
-#' in an event. See `site_permutations` in [node_test()].
+#' in an event. See `site_permutations` in [node_test()] and [patch_permutations()].
 #'
 #' @param area Area of each site, with `NA` for sites outside all areas, or a matrix or data
 #'   frame with one row per site and one column per area, with 1 or `TRUE` for the sites of
@@ -405,6 +414,24 @@ check_biogeography <- function(biogeography, comm) {
          "the area of each site", call. = FALSE)
   }
   biogeography
+}
+
+check_area_permutations <- function(permutations, biogeography, comm) {
+  if (is.null(permutations)) return(invisible())
+  if (is.null(biogeography)) {
+    stop("`area_permutations` needs `biogeography`", call. = FALSE)
+  }
+  if (!is.list(permutations) || length(permutations) != ncol(biogeography)) {
+    stop("`area_permutations` needs one matrix per event, as given by `patch_permutations()`",
+         call. = FALSE)
+  }
+  for (event in permutations) {
+    check_permutations(event, comm, "`area_permutations`")
+    if (!is.null(colnames(event)) && !is.null(rownames(comm)) &&
+          !identical(colnames(event), rownames(comm))) {
+      stop("sites of `area_permutations` are not in the order of `comm`", call. = FALSE)
+    }
+  }
 }
 
 #' @export

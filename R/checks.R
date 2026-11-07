@@ -61,15 +61,15 @@ check_numeric_columns <- function(x, name, advice) {
   }
 }
 
-check_permutations <- function(permutations, comm) {
+check_permutations <- function(permutations, comm, name = "`site_permutations`") {
   if (is.null(permutations)) return(invisible())
   n <- nrow(comm)
   if (!is.matrix(permutations) || ncol(permutations) != n) {
-    stop("`site_permutations` needs one column per site (", n, ") and one row per permutation",
+    stop(name, " needs one column per site (", n, ") and one row per permutation",
          call. = FALSE)
   }
   if (!all(apply(permutations, 1, function(row) all(sort(row) == seq_len(n))))) {
-    stop("each row of `site_permutations` must hold each site once", call. = FALSE)
+    stop("each row of ", name, " must hold each site once", call. = FALSE)
   }
 }
 
@@ -80,14 +80,18 @@ progress_map <- function(x, f, name) {
 }
 
 # what the null models used, kept in the results and shown when they are printed
-permutation_record <- function(n_perm, site_permutations = NULL) {
+permutation_record <- function(n_perm, site_permutations = NULL, area_permutations = NULL) {
   restricted <- !is.null(site_permutations)
-  list(species = n_perm, sites = if (restricted) nrow(site_permutations) else n_perm,
-       null = if (restricted) "restricted" else "free")
+  record <- list(species = n_perm, sites = if (restricted) nrow(site_permutations) else n_perm,
+                 null = if (restricted) "restricted" else "free")
+  if (!is.null(area_permutations)) record$areas <- min(vapply(area_permutations, nrow, 1L))
+  record
 }
 
 permutation_line <- function(record) {
-  cat("permutations:", record$sites, record$null, "of sites,", record$species,
-      "of species; smallest possible p:",
-      format(1 / (min(record$sites, record$species) + 1), digits = 2), "\n")
+  cat("permutations: ", record$sites, " ", record$null, " of sites, ", record$species, " of species",
+      if (!is.null(record$areas)) paste0(", ", record$areas, " of areas"),
+      "; smallest possible p: ",
+      format(1 / (min(record$sites, record$species, record$areas) + 1), digits = 2), "\n",
+      sep = "")
 }
