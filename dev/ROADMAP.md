@@ -1,9 +1,10 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.6.1 (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2` e `v0.6.0`. `v0.3.0` e `v0.4.0`
-não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
-v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
+Atualizado em 2026-11-07. Versão atual: 0.6.1, com `0.6.1.9000` em desenvolvimento (DOI de
+conceito `10.5281/zenodo.23993533`). Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que
+faltava da v0.5.0, `v0.5.2`, `v0.6.0` e `v0.6.1`. O marco v0.3.0 fechou em 2026-11-07 depois da
+0.6.1, então não terá a tag `v0.3.0`: o número da versão que o publica está por decidir. A
+`v0.4.0` segue em aberto. Todas as pendências das etapas anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -31,6 +32,7 @@ e um prefixo a definir para analisar). O título e o `Description` mudaram na 0.
 | Simulador estático | `simulate_static()`, na versão de desenvolvimento |
 | Vignettes | `comdynamite`, `phylogenetic-structure` e `evaluating-methods` |
 | Documentação | `\value` e exemplos em todas as funções exportadas; `Description` atualizada |
+| Desde a 0.6.1 | `pcps_test()`, toro retangular, `summary_stats()`, `run_scenarios()`, `equilibrium_check()`, saída longa, paralelismo opcional, nulo restrito por conjunto em `trait_partition()`, piloto de identificabilidade |
 
 ## v0.1.0: primeira versão citável (concluída em 2026-11-05)
 
@@ -127,7 +129,7 @@ base sem dinâmica.
       que o artigo afirma, e o pseudo-F não exige isso. A nota antiga de que o picante não traz
       as funções que o artigo anuncia não diz quais são: fica fora do texto até ser conferida.
 
-## v0.3.0: fluxo de estudos de simulação
+## v0.3.0: fluxo de estudos de simulação (concluída em 2026-11-07)
 
 Objetivo: reduzir o código que o usuário repete. As vignettes precisaram de laços e
 funções escritos à mão, o que indica o que falta no pacote.
@@ -160,7 +162,9 @@ funções escritos à mão, o que indica o que falta no pacote.
       árvore e paisagem variando, detecção imperfeita e modelo errado.
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
-menos código.
+menos código. A `phylogenetic-structure` mostra o desenho com `run_scenarios()`; os
+resultados salvos não foram refeitos. As vignettes de avaliação de nulos usam laços de outro
+tipo e não mudaram.
 
 ## v0.4.0: base do hub
 
@@ -403,7 +407,10 @@ versão em desenvolvimento (item da v0.6.0).
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
-piloto da v0.3.0 e da estrutura comum da v0.4.0.
+piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
+
+- [ ] Estatística de sinal filogenético dos traits em `summary_stats()`: no piloto, `lambda`
+      não foi recuperado (R2 <= 0,07) com as estatísticas atuais.
 
 Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
