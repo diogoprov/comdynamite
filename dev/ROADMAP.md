@@ -309,7 +309,10 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       sites, 200 réplicas, sem efeito): rejeição de .022 a .060, contra .49 a .75 com
       permutação livre e .056 a .095 com o toro no quadrado. Conservador para área contra as
       outras (.022 a .039). Em `data-raw/validation_edges_scale.rds`.
-- [ ] Aplicar aos refúgios da Mata Atlântica antes de usar em manuscrito.
+- [x] Aplicado aos refúgios da Mata Atlântica, fora deste repositório (dados não publicados).
+      Com células esparsas, o resultado depende muito de `gap`.
+- [ ] Critério para escolher `gap` com sítios esparsos, com simulação nesse cenário: as
+      validações usaram grades completas.
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
