@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.5.2
 
 - [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md):
   events of
