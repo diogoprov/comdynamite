@@ -4,7 +4,7 @@
 #'     [node_contrasts()] codes the nodes, [biogeography_matrix()] the events and
 #'     [node_test()] tests them. [plot_node_test()] and [plot_node_heatmap()] show the results.
 #'   \item Does phylogenetic composition follow the environment across the whole tree?
-#'     [pcc_test()] works on phylogenetic eigenvectors and [phylo_beta_test()] on the
+#'     [pcc_test()] and [pcps_test()] work on phylogenetic eigenvectors and [phylo_beta_test()] on the
 #'     phylogenetic distances between communities, from [phylo_beta()], shown by
 #'     [plot_phylo_beta()].
 #'   \item Which phylogenetic axis relates to a predictor? [phylo_vector()].

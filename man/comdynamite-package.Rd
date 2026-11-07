@@ -17,7 +17,7 @@ Methods that link traits, phylogenies, biogeography and metacommunities, to anal
 \code{\link[=node_contrasts]{node_contrasts()}} codes the nodes, \code{\link[=biogeography_matrix]{biogeography_matrix()}} the events and
 \code{\link[=node_test]{node_test()}} tests them. \code{\link[=plot_node_test]{plot_node_test()}} and \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results.
 \item Does phylogenetic composition follow the environment across the whole tree?
-\code{\link[=pcc_test]{pcc_test()}} works on phylogenetic eigenvectors and \code{\link[=phylo_beta_test]{phylo_beta_test()}} on the
+\code{\link[=pcc_test]{pcc_test()}} and \code{\link[=pcps_test]{pcps_test()}} work on phylogenetic eigenvectors and \code{\link[=phylo_beta_test]{phylo_beta_test()}} on the
 phylogenetic distances between communities, from \code{\link[=phylo_beta]{phylo_beta()}}, shown by
 \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}.
 \item Which phylogenetic axis relates to a predictor? \code{\link[=phylo_vector]{phylo_vector()}}.

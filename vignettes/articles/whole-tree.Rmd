@@ -55,9 +55,34 @@ sites when composition follows the environment.
 plot_phylo_beta(beta, comm, tree)
 ```
 
+## Principal coordinates of phylogenetic structure
+
+`pcps_test()` is the method of the package PCPS. Each species shares its relative abundance
+with its relatives, in proportion to their similarity on the tree, and the principal coordinates
+of the resulting matrix order sites by phylogenetic composition. The test covers all the
+dissimilarity and, separately, each axis in `axes`, whose `share` is its part of the variation.
+
+```{r}
+pcps <- pcps_test(comm, tree, env, n_perm = 199)
+pcps
+```
+
+Unlike the method of `pcc_test()`, which works on eigenvectors of the tree, this one takes
+eigenvectors of the sites, so `scores` can be plotted against the environment.
+
+```{r}
+plot(env, pcps$scores[, 1], xlab = "Environment", ylab = "PCPS 1")
+```
+
+When sites are neighbours and the environment and the communities are both autocorrelated, free
+permutations of sites reject far too often. `site_permutations` takes a restricted null model,
+such as `torus_permutations()` on a complete grid, in `pcc_test()`, `phylo_beta_test()` and
+`pcps_test()` alike. The help of `pcps_test()` gives the rates, including those in a landscape
+with edges, where the torus still rejects too often when fields are broad.
+
 ## Reading the two p-values
 
-Both functions permute sites, which breaks the link between composition and environment, and
+All these functions permute sites, which breaks the link between composition and environment, and
 species across the tips, which breaks the link between composition and phylogeny. The association
 requires both links, so the p-value to report is `p_max`, the larger of the two. A small
 `p_site` with a large `p_species` says that composition follows the environment, but that the

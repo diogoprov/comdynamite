@@ -56,6 +56,18 @@ summary.mc_pcc <- function(object, ...) {
 
 #' @rdname result-methods
 #' @export
+as.data.frame.mc_pcps <- function(x, row.names = NULL, optional = FALSE, ...) {
+  x$tests
+}
+
+#' @rdname result-methods
+#' @export
+summary.mc_pcps <- function(object, ...) {
+  object$tests
+}
+
+#' @rdname result-methods
+#' @export
 as.data.frame.mc_phylo_beta <- function(x, row.names = NULL, optional = FALSE, ...) {
   whole_tree_row(x, "r2_adjusted")
 }

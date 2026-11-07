@@ -4,22 +4,37 @@
 \alias{torus_permutations}
 \title{Site permutations that keep the structure of a torus}
 \usage{
-torus_permutations(side)
+torus_permutations(side, symmetries = TRUE, n_perm = NULL)
 }
 \arguments{
-\item{side}{Number of cells per side, as in \code{\link[=landscape_grid]{landscape_grid()}}.}
+\item{side}{Number of cells per side, as in \code{\link[=landscape_grid]{landscape_grid()}}, or two numbers for a
+rectangular grid, the first for the coordinate that runs fastest.}
+
+\item{symmetries}{Combine the translations with the reflections and rotations of the grid?}
+
+\item{n_perm}{Number of permutations to keep, drawn without replacement. The default keeps
+all of them.}
 }
 \value{
-Integer matrix with one permutation of the site indices per row,
-excluding the identity (\code{8 * side^2 - 1} rows when \code{side > 2}).
+Integer matrix with one permutation of the site indices per row, excluding the
+identity (\code{8 * side^2 - 1} rows on a square grid with \code{side > 2}).
 }
 \description{
-The translations of a \code{side} x \code{side} torus combined with the eight
-symmetries of the square keep all distances among sites, and therefore the
-spatial autocorrelation of the environment. They give a restricted null
-model for spatially explicit metacommunities (see the vignette).
+The translations of a torus combined with the symmetries of the grid keep all distances
+among sites, and therefore the spatial autocorrelation of the environment. They give a
+restricted null model for spatially explicit metacommunities (see the vignette), as the
+torus-translation test of Harms et al. (2001). A square grid has eight symmetries and a
+rectangular one four. Sites are numbered with the first coordinate running fastest, as in
+\code{expand.grid(x, y)} and \code{\link[=landscape_grid]{landscape_grid()}}. A real landscape has edges, and this null
+treats opposite edges as adjacent: see \code{\link[=rigid_permutations]{rigid_permutations()}} and \code{\link[=patch_permutations]{patch_permutations()}}.
 }
 \examples{
 p <- torus_permutations(4)
 dim(p)
+dim(torus_permutations(c(6, 4), symmetries = FALSE))
+}
+\references{
+Harms, K. E., Condit, R., Hubbell, S. P., & Foster, R. B. (2001). Habitat
+associations of trees and shrubs in a 50-ha neotropical forest plot. \emph{Journal of
+Ecology}, 89, 947--959.
 }

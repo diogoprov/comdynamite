@@ -7,6 +7,8 @@
 \alias{plot.mc_node_test}
 \alias{as.data.frame.mc_pcc}
 \alias{summary.mc_pcc}
+\alias{as.data.frame.mc_pcps}
+\alias{summary.mc_pcps}
 \alias{as.data.frame.mc_phylo_beta}
 \alias{summary.mc_phylo_beta}
 \alias{plot.mc_phylo_beta}
@@ -26,6 +28,10 @@
 \method{as.data.frame}{mc_pcc}(x, row.names = NULL, optional = FALSE, ...)
 
 \method{summary}{mc_pcc}(object, ...)
+
+\method{as.data.frame}{mc_pcps}(x, row.names = NULL, optional = FALSE, ...)
+
+\method{summary}{mc_pcps}(object, ...)
 
 \method{as.data.frame}{mc_phylo_beta}(x, row.names = NULL, optional = FALSE, ...)
 

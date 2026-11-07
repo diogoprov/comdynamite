@@ -86,33 +86,53 @@ dispersal_kernel <- function(dist, scale) {
 
 #' Site permutations that keep the structure of a torus
 #'
-#' The translations of a `side` x `side` torus combined with the eight
-#' symmetries of the square keep all distances among sites, and therefore the
-#' spatial autocorrelation of the environment. They give a restricted null
-#' model for spatially explicit metacommunities (see the vignette).
+#' The translations of a torus combined with the symmetries of the grid keep all distances
+#' among sites, and therefore the spatial autocorrelation of the environment. They give a
+#' restricted null model for spatially explicit metacommunities (see the vignette), as the
+#' torus-translation test of Harms et al. (2001). A square grid has eight symmetries and a
+#' rectangular one four. Sites are numbered with the first coordinate running fastest, as in
+#' `expand.grid(x, y)` and [landscape_grid()]. A real landscape has edges, and this null
+#' treats opposite edges as adjacent: see [rigid_permutations()] and [patch_permutations()].
 #'
-#' @param side Number of cells per side, as in [landscape_grid()].
-#' @return Integer matrix with one permutation of the site indices per row,
-#'   excluding the identity (`8 * side^2 - 1` rows when `side > 2`).
+#' @param side Number of cells per side, as in [landscape_grid()], or two numbers for a
+#'   rectangular grid, the first for the coordinate that runs fastest.
+#' @param symmetries Combine the translations with the reflections and rotations of the grid?
+#' @param n_perm Number of permutations to keep, drawn without replacement. The default keeps
+#'   all of them.
+#' @return Integer matrix with one permutation of the site indices per row, excluding the
+#'   identity (`8 * side^2 - 1` rows on a square grid with `side > 2`).
+#' @references Harms, K. E., Condit, R., Hubbell, S. P., & Foster, R. B. (2001). Habitat
+#'   associations of trees and shrubs in a 50-ha neotropical forest plot. *Journal of
+#'   Ecology*, 89, 947--959.
 #' @examples
 #' p <- torus_permutations(4)
 #' dim(p)
+#' dim(torus_permutations(c(6, 4), symmetries = FALSE))
 #' @export
-torus_permutations <- function(side) {
-  stopifnot(side >= 2)
-  xy <- expand.grid(x = seq_len(side) - 1, y = seq_len(side) - 1)
-  maps <- list(function(x, y) cbind(x, y), function(x, y) cbind(y, x),
-               function(x, y) cbind(-x, y), function(x, y) cbind(x, -y),
-               function(x, y) cbind(-x, -y), function(x, y) cbind(-y, x),
-               function(x, y) cbind(y, -x), function(x, y) cbind(-y, -x))
+torus_permutations <- function(side, symmetries = TRUE, n_perm = NULL) {
+  stopifnot(is.numeric(side), length(side) %in% 1:2, side >= 2, side == round(side))
+  sides <- rep_len(side, 2)
+  xy <- expand.grid(x = seq_len(sides[1]) - 1, y = seq_len(sides[2]) - 1)
+  maps <- list(function(x, y) cbind(x, y))
+  if (symmetries) {
+    maps <- c(maps, function(x, y) cbind(-x, y), function(x, y) cbind(x, -y),
+              function(x, y) cbind(-x, -y))
+    if (sides[1] == sides[2]) {
+      maps <- c(maps, function(x, y) cbind(y, x), function(x, y) cbind(-y, x),
+                function(x, y) cbind(y, -x), function(x, y) cbind(-y, -x))
+    }
+  }
   perms <- list()
-  for (f in maps) for (sx in seq_len(side) - 1) for (sy in seq_len(side) - 1) {
+  for (f in maps) for (sx in seq_len(sides[1]) - 1) for (sy in seq_len(sides[2]) - 1) {
     p <- f(xy$x, xy$y)
-    p <- cbind((p[, 1] + sx) %% side, (p[, 2] + sy) %% side)
-    perms[[length(perms) + 1]] <- as.integer(p[, 1] + side * p[, 2] + 1)
+    p <- cbind((p[, 1] + sx) %% sides[1], (p[, 2] + sy) %% sides[2])
+    perms[[length(perms) + 1]] <- as.integer(p[, 1] + sides[1] * p[, 2] + 1)
   }
   perms <- unique(do.call(rbind, perms))
-  perms[!apply(perms, 1, function(p) all(p == seq_len(side^2))), , drop = FALSE]
+  perms <- perms[!apply(perms, 1, function(p) all(p == seq_len(prod(sides)))), , drop = FALSE]
+  if (is.null(n_perm)) return(perms)
+  stopifnot(n_perm >= 1)
+  perms[sample.int(nrow(perms), min(n_perm, nrow(perms))), , drop = FALSE]
 }
 
 #' Environment that changes over time

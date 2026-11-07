@@ -43,6 +43,7 @@ reference:
   desc: Does phylogenetic composition follow the environment?
   contents:
   - pcc_test
+  - pcps_test
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta
