@@ -111,6 +111,100 @@ for environment passed in 37% of the data sets. In those, the rejection rate was
 fraction `a` and 0.03 for fraction `c`, as expected for a vector estimated for environment
 alone.
 
+### Tests of the fractions
+
+The code of the authors permutes environment and space with the same order of sites and
+compares fractions `a` and `c` themselves with their null values, so each is compared with
+what is expected when neither set matters. The fraction is not a pivotal statistic: when the
+other set explains much, the observed fraction is a share of what that set leaves, and the null
+fraction is a share of everything, so the test loses its power. Up to version 0.6.0 the package
+did the same; `trait_partition()` now tests `a` and `c` with the share of the component that the other set
+leaves unexplained, which is a monotone function of the partial F statistic, under the same
+permutations (Anderson & Legendre 1999 found that permutation of raw data with a pivotal
+statistic has the right size except with outliers in the covariable). The shared fraction `b`
+is tested with `shared_null`, following `adespatial::envspace.test()` (Bauman et al. 2019):
+`env` is replaced by surrogates that keep its spatial autocorrelation, built by Moran spectral
+randomisation (Wagner & Dray 2015) or by moves of the whole map on a grid, while the response
+and `space` stay fixed.
+
+The script `data-raw/validation_fractions.R` measures type I error and power on a complete
+grid of 8 by 8 sites, with `space` holding the six broadest Moran's eigenvector maps, 20 species
+with Gaussian responses to a gradient that combines the environment (weight alpha) and a smooth
+field in the span of `space` (weight beta), 199 permutations and 500 data sets per scenario,
+with seeds separate from the 200 data sets used to choose the statistic and the null models.
+The environment is independent noise (iid), a smooth field in the span of `space` plus noise
+(broad), or a field at scales that `space` does not hold (fine). In the last scenario the
+composition follows another trait than the one analysed, so the null hypothesis of the
+permutation of species is true for every fraction. Rates at the 5% level have standard errors
+of 0.010 or less; a true null hypothesis is marked by an asterisk.
+
+Fractions `a` and `c`, with the fraction (old) and the share left by the other set (new) as
+statistic, by free permutations of sites, by moves of the whole map with
+`torus_permutations()` (grid), by permutations of species, and with the larger p-value of sites
+and species:
+
+| Scenario | [a] old, sites | [a] new, sites | [a] new, grid | [a] new, species | [a] new, larger p | [c] old, sites | [c] new, sites | [c] new, grid | [c] new, species | [c] new, larger p |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Neither acts, env iid | 0.062* | 0.052* | 0.052* | 0.074* | 0.040* | 0.044* | 0.042* | 0.060* | 0.068* | 0.038* |
+| Space acts, env iid | 0.000* | 0.058* | 0.078* | 0.072* | 0.044* | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Space acts, env broad | 0.000* | 0.056* | 0.082* | 0.058* | 0.042* | 1.000 | 1.000 | 0.986 | 1.000 | 1.000 |
+| Env acts, env iid | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000* | 0.038* | 0.190* | 0.040* | 0.022* |
+| Env acts, env broad | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 0.000* | 0.100* | 0.000* | 0.028* | 0.024* |
+| Both act, env broad | 0.818 | 1.000 | 1.000 | 1.000 | 1.000 | 0.962 | 1.000 | 0.948 | 1.000 | 1.000 |
+| Weak env and space, env broad | 0.150 | 1.000 | 0.998 | 0.998 | 0.998 | 0.996 | 1.000 | 0.980 | 1.000 | 1.000 |
+| Space acts, env fine | 0.000* | 0.114* | 0.014* | 0.056* | 0.040* | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Env acts through another trait | 0.360* | 0.454* | 0.442* | 0.062* | 0.062* | 0.096* | 0.172* | 0.034* | 0.074* | 0.064* |
+
+The old test never rejected `a` when space acted and the environment did not, nor `c` in the
+mirror case, and had little power for a weak effect of the environment beside space. The new
+statistic holds the level there and in the tuning run gave the same rates as permutation of
+the residuals of the reduced model (Freedman & Lane 1983) and as permutation of the predictor
+of interest alone, which do not support `site_permutations` and the permutation of species.
+Three limits remain. When the environment has spatial structure at scales that `space` does not
+hold, the free permutation of sites rejects `a` too often (0.114), because the residuals keep
+spatial structure that the environment matches by chance; moves of the whole map hold the
+level (0.014). When a strong, spatially structured environment acts alone, the free permutation
+rejects `c` in 10% of the data sets: the species respond to the environment with Gaussian
+curves, the linear fit leaves a spatially structured remainder, and space explains it, which
+the larger p-value does not take as significant (0.024). The moves of the map are nearly
+degenerate for `c`, because moving Moran's eigenvector maps rigidly on the grid changes little
+of what they explain, and the test of `c` with `site_permutations` was liberal when the
+environment explained much (0.190) and never rejected when the environment was spatially
+structured. With a trait unrelated to the composition, the permutation of sites rejects `a` in
+about half the data sets and the larger p-value holds the level, as intended. The permutation
+of species alone, with 20 species, is slightly liberal when nothing acts (0.066 to 0.080 with
+either statistic), and the larger p-value is not.
+
+The shared fraction `b`, with `env` replaced by free permutations of its values, by Moran
+spectral randomisations (MSR, `shared_null = "msr"`) and by moves of the whole map
+(`shared_null = "sites"` with `torus_permutations()`), by permutations of species, and with
+the larger p-value. `Tested` is the number of data sets, out of 500, where `env` was related to
+`space` and `b` was tested with the MSR:
+
+| Scenario | Tested | [b] free env | [b] MSR | [b] grid | [b] species | [b] larger p, MSR | [b] larger p, grid |
+|---|---|---|---|---|---|---|---|
+| Neither acts, env iid | 22 | 0.043* | 0.045* | 0.045* | 0.000* | 0.000* | 0.000* |
+| Space acts, env iid | 28 | 0.103* | 0.000* | 0.097* | 0.643* | 0.000* | 0.097* |
+| Space acts, env broad | 500 | 0.476* | 0.056* | 0.110* | 0.770* | 0.056* | 0.110* |
+| Env acts, env iid | 15 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Env acts, env broad | 500 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| Both act, env broad | 500 | 0.898 | 0.432 | 0.618 | 0.926 | 0.432 | 0.618 |
+| Weak env and space, env broad | 500 | 0.634 | 0.282 | 0.272 | 0.748 | 0.282 | 0.272 |
+| Space acts, env fine | 0 | | | | | | |
+| Env acts through another trait | 500 | 0.786* | 0.542* | 0.678* | 0.048* | 0.048* | 0.050* |
+
+`b` is left untested when `env` is unrelated to `space` at the 5% level, which happened in
+94% to 97% of the data sets with an iid environment and in all those with structure outside
+`space`; the rates above leave those data sets out, and with fewer than 30 of them they say
+little. With an environment that is spatially structured but has no effect, free permutations
+of `env` reject `b` in 48% of the data sets, the Moran spectral randomisation holds the level
+(0.056), and moves on the grid are liberal (0.110), which we did not expect and leave as a
+limit of that null model. The permutation of species asks whether the trait matters, not whether the shared
+structure is spurious, so it rejects when space acts through the trait; conversely, with a trait
+unrelated to the composition, the randomisation of `env` alone rejects often and only the
+larger p-value holds the level. Power is complete when the environment alone acts and moderate
+when space also acts on its own.
+
 ## The daphniids of Leibold et al. (2010)
 
 The data set `daphniids` rebuilds the data of the article from the public survey. With the
@@ -156,6 +250,18 @@ rivers by longitude.
 
 ## References
 
+Anderson, M. J., & Legendre, P. (1999). An empirical comparison of permutation methods for
+tests of partial regression coefficients in a linear model. *Journal of Statistical Computation
+and Simulation*, 62, 271--303. https://doi.org/10.1080/00949659908811936
+
+Bauman, D., Vleminckx, J., Hardy, O. J., & Drouet, T. (2019). Testing and interpreting the
+shared space-environment fraction in variation partitioning analyses of ecological data.
+*Oikos*, 128, 274--285. https://doi.org/10.1111/oik.05496
+
+Freedman, D., & Lane, D. (1983). A nonstochastic interpretation of reported significance
+levels. *Journal of Business & Economic Statistics*, 1, 292--298.
+https://doi.org/10.1080/07350015.1983.10509354
+
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics:
 separating the roles of environmental filters and historical biogeography. *Ecology
 Letters*, 13, 1290--1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
@@ -163,3 +269,7 @@ Letters*, 13, 1290--1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial
 contingency and environmental filtering on metacommunity phylogenetics. *Ecology*, 93,
 S14--S30. https://doi.org/10.1890/11-0494.1
+
+Wagner, H. H., & Dray, S. (2015). Generating spatially constrained null models for irregularly
+spaced data using Moran spectral randomization methods. *Methods in Ecology and Evolution*, 6,
+1169--1178. https://doi.org/10.1111/2041-210X.12407

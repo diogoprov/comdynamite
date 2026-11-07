@@ -327,15 +327,31 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       execuções. Candidato: enumerar ângulos e translações, como na grade.
 - [ ] Critério para escolher `gap` com sítios esparsos: com 25% a 40% da grade e áreas em cantos
       opostos, .15 a .16 com o padrão e .05 a .06 com `gap` 3.
-- [ ] Testes das frações `a` e `c` de `trait_partition()`: permutar sob o modelo reduzido, em
-      vez de ambiente e espaço juntos. Hoje são conservadores. Conferir o MATLAB de
-      Peres-Neto et al. (2012) antes de mudar.
-- [ ] Testar a fração compartilhada `b` de `trait_partition()`, hoje sem teste, com o esquema de
-      `adespatial::envspace.test()` (Clappe et al. 2018): substituir `env` por versões que mantêm
-      a autocorrelação, por toro em grade completa ou Moran spectral randomization (`msr()`) nas
-      outras, e recalcular `b`. A função só testa se `env` tiver estrutura espacial. A resposta
-      aqui é ponderada por sítio e há também a permutação de espécies, então é preciso definir
-      o p a relatar e medir erro tipo I e poder. `adespatial` já está em `Suggests`.
+- [x] Testes das frações `a` e `c` de `trait_partition()`. O MATLAB permuta ambiente e espaço
+      com a mesma ordem de sítios e compara a própria fração (calcula o F parcial e não usa).
+      Em vez de trocar a permutação, trocamos a estatística pela parcela do componente que o
+      outro conjunto deixa (monótona no F parcial), o que mantém `site_permutations` e a
+      permutação de espécies. No tuning (200 réplicas, grade 8 por 8) ela equivale ao
+      Freedman-Lane e à permutação só de `env`; resultados do holdout (500 réplicas) em
+      `data-raw/validation_fractions.R` e no artigo de validação. Limites registrados: com
+      `env` estruturado em escalas fora de `space` o teste livre de `a` infla, e o toro
+      segura; o toro é quase degenerado para `c`, porque mover os MEMs rigidamente quase não
+      muda o espectro deles.
+- [x] Teste da fração compartilhada `b` com `shared_null`: `"msr"` (Moran spectral
+      randomization de `env` a partir de `coords`, via `adespatial::msr()` com a base de
+      `dbmem()`) ou `"sites"` (`env` sozinho movido por `site_permutations`). Só testa se `env`
+      estiver relacionado a `space` (`level`), como `envspace.test()`. p de sítios do MSR, p de
+      espécies da permutação de traits já existente, `p_max` o maior; a permutação de espécies
+      responde se o trait importa, não se a estrutura compartilhada é espúria, e o teste de
+      `p_max` precisa dos dois (com trait oculto, o MSR sozinho rejeita 54%). Holdout com
+      `env` estruturado e sem efeito: permutação livre de `env` .48, MSR .056, toro .11
+      (liberal, sem explicação; fica como limite). Poder: 1.0 só ambiente, .43 com espaço
+      agindo também, .28 com ambiente fraco. Referência verificada: Bauman et al. (2019,
+      Oikos); Clappe et al. (2018) trata da partição com MSR, não do teste de `b`.
+- [ ] Nulo restrito para `c` em `trait_partition()`: `site_permutations` move `env` e `space`
+      juntos, e mover MEMs de uma grade quase não muda o que explicam; no holdout o toro foi
+      liberal para `c` com `env` forte. Candidato: mover só `env` nos testes de `a` e manter
+      `c` com permutação livre, ou documentar `c` como descritivo com nulo restrito.
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 

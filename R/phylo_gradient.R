@@ -180,11 +180,52 @@ print.mc_phylo_vector <- function(x, ...) {
 #'
 #' The total variation includes both the mean and the dispersion within sites, so `r2`
 #' answers how much of all the variation each fraction holds, and `r2_component` how much
-#' of the component. Fractions `b` and `d` cannot be tested. Tests of `a` and `c` permute
-#' environment and space together, so they compare each fraction with what is expected when
-#' neither matters, not with the other set held fixed. They are conservative when the other
-#' set explains much: in an audit with noise as environment and a real effect of space, `a`
-#' was never rejected in 100 replicates.
+#' of the component. Each fraction is tested by permutations of sites, which move the
+#' predictors of all sites together, and by permutations of the trait values among species,
+#' and `p_max` is the larger p-value, as in [phylo_vector()]. The statistic of `a` and `c` is
+#' the share of the component that the other set leaves unexplained, `a / (a + d)` within the
+#' component, which is a monotone function of the partial F statistic of the set given the
+#' other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
+#' not, and its test loses most of its power when the other set explains much: see the
+#' section on simulations. `d` cannot be tested.
+#'
+#' The shared fraction `b` has no test by these permutations, because a permutation of sites
+#' breaks the relation between environment and space, and is tested with `shared_null` by the
+#' scheme of `adespatial::envspace.test()` (Bauman et al. 2019): the response and `space`
+#' stay fixed, `env` is replaced by surrogates that keep its spatial autocorrelation, and `b`
+#' is computed again. Moran spectral randomisation (Wagner & Dray 2015) builds them from
+#' `coords` for any design, and `site_permutations` from [torus_permutations()] move the
+#' whole map of `env` on a complete grid. The p-value of species comes from the same
+#' permutations of species as the other fractions. A positive `b` can arise from two
+#' spatially structured variables without relation, which free permutations do not take
+#' into account (Clappe et al. 2018). The test asks whether `b` is larger than expected, so
+#' a negative `b` is never significant. It is only meaningful when `env` holds some of the
+#' structure in `space`, so `env` is first tested against `space` with free permutations of
+#' sites, and when that test is not significant at `level`, `b` is left untested and
+#' `shared$tested` is `FALSE`.
+#'
+#' @section Simulations:
+#' `data-raw/validation_fractions.R` and the article on validation measure the tests on a
+#' grid of 8 by 8 sites, with 500 data sets per scenario and 199 permutations, at the 5%
+#' level. Where space acted and the environment did not, the fraction `a` itself was never
+#' rejected, and the share left by space was rejected in 5.6% to 5.8% of data sets with
+#' free permutations of sites and in 4.2% to 4.4% with the larger p-value; where the
+#' environment had a weak effect beside space, the fraction was rejected in 15% and the
+#' share in 100%. Two limits: with an environment structured at scales that `space` does
+#' not hold, free permutations rejected `a` in 11.4% (moves of the map with
+#' [torus_permutations()]: 1.4%, larger p-value: 4.0%); and with a strong, spatially
+#' structured environment and no effect of space, free permutations rejected `c` in 10%
+#' (larger p-value: 2.4%), where the residuals of the linear fit of the environment keep
+#' spatial structure. `site_permutations` are nearly degenerate for `c`, since moving
+#' Moran's eigenvector maps rigidly changes little of what they explain: 19% with a strong
+#' environment without structure.
+#'
+#' For `b`, with an environment that was spatially structured but had no effect, free
+#' permutations of `env` rejected 48% of data sets, Moran spectral randomisation 5.6% and
+#' moves of the map 11%. With a trait unrelated to the composition, the randomisation alone
+#' rejected 54% and the larger p-value 4.8%: the permutation of species is needed, as for the
+#' other fractions. Power was 100% when the environment alone acted, 43% when space also
+#' acted on its own, and 28% with a weak environment beside space.
 #'
 #' @param comm Matrix with one row per site and one column per species. Every site needs
 #'   at least one individual.
@@ -200,14 +241,25 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   example from [torus_permutations()], to use instead of free permutations of sites. Empty
 #'   sites are then allowed: they leave the analysis but their predictors can reach occupied
 #'   sites.
+#' @param shared_null Null model of the test of the shared fraction `b`: `"none"` leaves it
+#'   untested, `"msr"` replaces `env` by Moran spectral randomisations built from `coords`
+#'   with `adespatial::msr()`, and `"sites"` moves `env` alone with `site_permutations`, for a
+#'   complete grid. `"msr"` needs the package adespatial.
+#' @param coords Matrix of site coordinates with one row per site of `comm`, for
+#'   `shared_null = "msr"`. The spatial weights are those of `adespatial::dbmem()`.
+#' @param level Significance level of the test of `env` against `space` that decides whether
+#'   `b` is tested.
 #' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
-#'   `r2_adjusted`, `r2_component`, `p_site`, `p_species` and `p_max`; `component`;
-#'   `component_share`, the share of the total variation in the component; `semipartial`,
-#'   a matrix of predictors by traits; and `p_partial_max`, `p_partial_site` and
+#'   `r2_adjusted`, `r2_component`, `statistic`, the value tested, `p_site`, `p_species` and
+#'   `p_max`, which are `NA` for `d`, for `b` without `shared_null`, and for a fraction
+#'   that cannot be estimated, as when a set of predictors has as many columns as sites;
+#'   `component`; `component_share`, the share of the total variation in the component;
+#'   `semipartial`, a matrix of predictors by traits; `p_partial_max`, `p_partial_site` and
 #'   `p_partial_species`, with the larger p-value and those of sites and of species, all
-#'   `NA` if predictors are collinear; and `permutations`.
+#'   `NA` if predictors are collinear; `shared`, with `null`, `draws`, `p_env_space`, the
+#'   p-value of `env` against `space`, and `tested`; and `permutations`.
 #' @note Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
 #'   supplement of Peres-Neto et al. (2012).
 #' @section Article and original code:
@@ -234,6 +286,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   \item The code runs `n_perm` - 1 permutations in each null distribution.
 #'   \item The text stacks two null distributions, and here we report the larger of the
 #'     two p-values, as in [phylo_vector()].
+#'   \item Tests of `a` and `c`: the code permutes environment and space with the same
+#'     order of sites, as here, and compares the fractions themselves, which depend on how
+#'     much the other set explains. It computes the partial F statistics but does not use
+#'     them. Here the statistic is the share of the component left by the other set, which
+#'     is monotone in that F.
 #' }
 #' Moran's eigenvector maps of the function `MEM` of the supplement are the same as those
 #' of `adespatial::dbmem()`, checked in Octave. Appendix A recommends centring them with
@@ -246,14 +303,27 @@ print.mc_phylo_vector <- function(x, ...) {
 #' regressions and not in Octave. Appendix A calculates the model without the predictor
 #' with the slopes of the full model, which it had just fitted again without it, and here
 #' we use the second slopes. With several traits it gives no rule, so here each trait has its own
-#' value, relative to the variation of that trait. They are tested as the fractions are,
-#' with the loss of R2 as the statistic, and with many predictors they need a correction.
+#' value, relative to the variation of that trait. They are tested as `a` and `c` are, with
+#' the loss of R2 relative to what the model of all predictors leaves unexplained in that
+#' trait as the statistic, and with many predictors they need a correction.
 #'
 #' This function partitions variation and does not test each trait against each
 #' predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging
 #' regressions combined by the max test, in the package
 #' [TraitEnvMLMWA](https://github.com/CajoterBraak/TraitEnvMLMWA).
 #' @references
+#' Anderson, M. J., & Legendre, P. (1999). An empirical comparison of permutation methods
+#' for tests of partial regression coefficients in a linear model. *Journal of Statistical
+#' Computation and Simulation*, 62, 271--303. \doi{10.1080/00949659908811936}
+#'
+#' Bauman, D., Vleminckx, J., Hardy, O. J., & Drouet, T. (2019). Testing and interpreting
+#' the shared space-environment fraction in variation partitioning analyses of ecological
+#' data. *Oikos*, 128, 274--285. \doi{10.1111/oik.05496}
+#'
+#' Clappe, S., Dray, S., & Peres-Neto, P. R. (2018). Beyond neutrality: disentangling the
+#' effects of species sorting and spurious correlations in community analysis. *Ecology*,
+#' 99, 1737--1747. \doi{10.1002/ecy.2376}
+#'
 #' Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning
 #' of species data matrices: estimation and comparison of fractions. *Ecology*, 87,
 #' 2614--2625. \doi{10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2}
@@ -265,24 +335,37 @@ print.mc_phylo_vector <- function(x, ...) {
 #' ter Braak, C. J. F. (2019). New robust weighted averaging- and model-based methods for
 #' assessing trait-environment relationships. *Methods in Ecology and Evolution*, 10,
 #' 1962--1971. \doi{10.1111/2041-210X.13278}
+#'
+#' Wagner, H. H., & Dray, S. (2015). Generating spatially constrained null models for
+#' irregularly spaced data using Moran spectral randomization methods. *Methods in Ecology
+#' and Evolution*, 6, 1169--1178. \doi{10.1111/2041-210X.12407}
 #' @examplesIf requireNamespace("adespatial", quietly = TRUE)
 #' set.seed(1)
+#' coords <- cbind(1:40)
 #' env <- runif(40, 0, 100)
-#' space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
+#' space <- as.matrix(adespatial::dbmem(coords, silent = TRUE))[, 1:3]
 #' trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 #' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 #' colnames(comm) <- names(trait)
 #' out <- trait_partition(comm, trait, env, space, n_perm = 49)
 #' out
 #' plot_trait_partition(out)
+#' # the shared fraction, with an environment that follows the transect
+#' env <- 50 + 30 * sin(1:40 / 6) + rnorm(40, 0, 5)
+#' comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
+#' colnames(comm) <- names(trait)
+#' trait_partition(comm, trait, env, space, n_perm = 49, shared_null = "msr", coords = coords)
 #' @export
 trait_partition <- function(comm, traits, env, space, component = c("mean", "variance"),
-                            n_perm = 999, site_permutations = NULL) {
+                            n_perm = 999, site_permutations = NULL,
+                            shared_null = c("none", "msr", "sites"), coords = NULL,
+                            level = 0.05) {
   component <- match.arg(component)
+  shared_null <- match.arg(shared_null)
   if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)
   traits <- as.matrix(traits)
   if (!is.numeric(traits)) stop("`traits` is not numeric", call. = FALSE)
-  stopifnot(n_perm >= 1)
+  stopifnot(n_perm >= 1, level > 0, level < 1)
   comm <- check_species_comm(comm, rownames(traits), "`traits`", !is.null(site_permutations))
   comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
@@ -296,6 +379,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   draws <- site_draws(comm, n_perm, site_permutations)
   landscape_env <- env
   landscape_space <- space
+  shared_env <- shared_nulls(shared_null, landscape_env, coords, site_permutations, n_perm)
   comm <- comm[draws$occupied, , drop = FALSE]
   env <- check_env(env[draws$occupied, , drop = FALSE], comm, collinear = TRUE)
   space <- check_env(space[draws$occupied, , drop = FALSE], comm, "`space`", collinear = TRUE)
@@ -306,30 +390,36 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
               colnames(space) %||% paste0("space", seq_len(ncol(space))))
   total <- ncol(traits) * sum(comm)
 
+  standardised <- function(x) weighted_standardise(x, site_weights)
   components <- function(response, env, space) {
-    env <- weighted_standardise(env, site_weights)
-    space <- weighted_standardise(space, site_weights)
+    env <- standardised(env)
+    space <- standardised(space)
     c(abc = explained_ss(cbind(env, space), response, site_weights),
       ab = explained_ss(env, response, site_weights),
       bc = explained_ss(space, response, site_weights))
   }
-  tested <- function(ss) {
-    r2 <- ss / total
-    c(r2, a = r2[["abc"]] - r2[["bc"]], c = r2[["abc"]] - r2[["ab"]])
+  # statistics of the tests: fractions of the total for the whole models and `b`, and for
+  # `a` and `c` the share of the component that the other set leaves unexplained, which is
+  # monotone in the partial F statistic; the raw fraction is not, and its test is
+  # conservative when the other set explains much
+  tested <- function(ss, component_ss) {
+    c(ss / total, b = (ss[["ab"]] + ss[["bc"]] - ss[["abc"]]) / total,
+      a = share_left(ss[["abc"]] - ss[["bc"]], component_ss - ss[["bc"]], component_ss),
+      c = share_left(ss[["abc"]] - ss[["ab"]], component_ss - ss[["ab"]], component_ss))
   }
-  all_predictors <- function(env, space) {
-    cbind(weighted_standardise(env, site_weights), weighted_standardise(space, site_weights))
-  }
-  # fractions and the loss of R2 of each predictor for each trait
+  # with, for each predictor and trait, the loss of R2 when the predictor leaves the model
+  # of all predictors, relative to what that model leaves unexplained
   statistics <- function(response, env, space) {
-    loss <- unique_ss(all_predictors(env, space), response, site_weights) / sum(comm)
-    c(tested(components(response, env, space)),
-      stats::setNames(as.vector(loss), paste0("loss", seq_along(loss))))
+    full <- full_model(cbind(standardised(env), standardised(space)), response, site_weights)
+    component <- rep(column_ss(response, site_weights), each = nrow(full$loss))
+    partial <- share_left(full$loss, full$loss + component - rep(full$fitted, each = nrow(full$loss)),
+                          component)
+    c(tested(components(response, env, space), sum(column_ss(response, site_weights))),
+      stats::setNames(as.vector(partial), paste0("loss", seq_along(partial))))
   }
 
   response <- trait_response(comm, traits, component)
-  component_ss <- sum(site_weights * sweep(response, 2, colSums(site_weights * response) /
-                                             sum(site_weights))^2)
+  component_ss <- sum(column_ss(response, site_weights))
   share <- sum(site_weights * response^2) / total
   ss <- components(response, env, space)
   observed <- statistics(response, env, space)
@@ -346,19 +436,41 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   p_species <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
                    numeric(1))
 
-  by_trait <- function(x) {
-    matrix(x[grep("^loss", names(x))], length(labels),
-           dimnames = list(labels, colnames(traits) %||% paste0("trait", seq_len(ncol(traits)))))
+  # the shared fraction: sites move `env` alone, with its spatial structure, and species are
+  # permuted as above; neither applies when `env` is unrelated to `space`
+  shared <- list(null = shared_null, draws = length(shared_env), p_env_space = NA_real_,
+                 tested = FALSE)
+  p_site[["b"]] <- p_species[["b"]] <- NA_real_
+  if (shared_null != "none") {
+    shared$p_env_space <- spatial_structure_p(env, space, site_weights, n_perm)
+    shared$tested <- shared$p_env_space <= level
   }
-  slopes <- crossprod(all_predictors(env, space), site_weights * response)
+  if (shared$tested) {
+    space_std <- standardised(space)
+    null_shared <- vapply(shared_env, function(e) {
+      e <- standardised(e[draws$occupied, , drop = FALSE])
+      (explained_ss(e, response, site_weights) + ss[["bc"]] -
+         explained_ss(cbind(e, space_std), response, site_weights)) / total
+    }, numeric(1))
+    p_site[["b"]] <- permutation_p(null_shared, observed[["b"]])
+    p_species[["b"]] <- permutation_p(null_taxa["b", ], observed[["b"]])
+  }
+
+  names_by_trait <- list(labels, colnames(traits) %||% paste0("trait", seq_len(ncol(traits))))
+  by_trait <- function(x) matrix(x[grep("^loss", names(x))], length(labels), dimnames = names_by_trait)
+  all_predictors <- cbind(standardised(env), standardised(space))
+  slopes <- crossprod(all_predictors, site_weights * response)
+  loss <- full_model(all_predictors, response, site_weights)$loss / sum(comm)
   # p-values stay NA where the statistic is NA
   tested_p <- function(p) by_trait(p) + 0 * by_trait(observed)
-  structure(list(fractions = partition_table(ss, total, component_ss, sizes, n, p_site, p_species),
+  structure(list(fractions = partition_table(ss, total, component_ss, sizes, n, observed, p_site,
+                                             p_species),
                  component = component, component_share = share,
-                 semipartial = sqrt(by_trait(observed)) * sign(slopes),
+                 semipartial = matrix(sqrt(loss) * sign(slopes), length(labels),
+                                      dimnames = names_by_trait),
                  p_partial_max = pmax(tested_p(p_site), tested_p(p_species)),
                  p_partial_site = tested_p(p_site), p_partial_species = tested_p(p_species),
-                 permutations = permutation_record(n_perm, site_permutations)),
+                 shared = shared, permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_trait_partition")
 }
 
@@ -367,8 +479,58 @@ print.mc_trait_partition <- function(x, ...) {
   cat("<mc_trait_partition>", x$component, "component,", format(x$component_share, digits = 3),
       "of the total variation\n")
   permutation_line(x$permutations)
+  if (x$shared$null != "none") {
+    cat("shared fraction b: ",
+        if (x$shared$tested) {
+          paste0(x$shared$draws, if (x$shared$null == "msr") {
+            " Moran spectral randomisations of env"
+          } else " moves of env alone with `site_permutations`")
+        } else "not tested, env is unrelated to space",
+        " (env against space: p = ", format(x$shared$p_env_space, digits = 3), ")\n", sep = "")
+  }
   print(format(x$fractions, digits = 3), quote = FALSE)
   invisible(x)
+}
+
+# null environments for the shared fraction, with one row per site of the landscape: Moran
+# spectral randomisations keep the autocorrelation of each variable (Wagner & Dray 2015), and
+# restricted permutations of a complete grid move the whole map
+shared_nulls <- function(shared_null, env, coords, site_permutations, n_perm) {
+  if (shared_null == "none") return(list())
+  if (shared_null == "sites") {
+    if (is.null(site_permutations)) {
+      stop("`shared_null = \"sites\"` needs `site_permutations`, for example from ",
+           "`torus_permutations()`; use `shared_null = \"msr\"` with `coords` otherwise",
+           call. = FALSE)
+    }
+    return(lapply(seq_len(nrow(site_permutations)), function(r) {
+      env[site_permutations[r, ], , drop = FALSE]
+    }))
+  }
+  if (!has_adespatial()) {
+    stop("`shared_null = \"msr\"` needs the package adespatial", call. = FALSE)
+  }
+  if (is.null(coords)) stop("`shared_null = \"msr\"` needs `coords`", call. = FALSE)
+  coords <- as.matrix(coords)
+  if (!is.numeric(coords) || nrow(coords) != nrow(env)) {
+    stop("`coords` needs one numeric row per site (", nrow(env), ")", call. = FALSE)
+  }
+  # all eigenvectors of the spatial weights of `dbmem()`, which `msr()` takes as a basis
+  basis <- NULL
+  utils::capture.output(basis <- adespatial::dbmem(coords, MEM.autocor = "all", silent = TRUE))
+  adespatial::msr(env, basis, nrepet = n_perm, method = "singleton", simplify = FALSE)
+}
+
+has_adespatial <- function() requireNamespace("adespatial", quietly = TRUE)
+
+# p-value of the weighted R2 of `env` on `space`, with free permutations of the sites of
+# `env`: the shared fraction has no meaning when `env` has no structure that `space` holds
+spatial_structure_p <- function(env, space, site_weights, n_perm) {
+  space <- weighted_standardise(space, site_weights)
+  r2 <- function(e) explained_ss(space, e, site_weights) / sum(column_ss(e, site_weights))
+  null <- vapply(seq_len(n_perm), function(r) r2(env[sample.int(nrow(env)), , drop = FALSE]),
+                 numeric(1))
+  permutation_p(null, r2(env))
 }
 
 # weighted correlations between the columns of env and the site means of the columns of
@@ -389,9 +551,9 @@ corner_nulls <- function(comm, traits, env, landscape_env, rows, n_perm) {
 }
 
 # a permutation can leave a variable without variance, and then it does not count; if
-# none counts, there is no test
+# none counts, or the statistic itself cannot be estimated, there is no test
 permutation_p <- function(null, observed) {
-  if (all(is.na(null))) return(NA_real_)
+  if (is.na(observed) || all(is.na(null))) return(NA_real_)
   (sum(null >= observed, na.rm = TRUE) + 1) / (sum(!is.na(null)) + 1)
 }
 
@@ -426,27 +588,38 @@ trait_response <- function(comm, traits, component) {
   sqrt(pmax(comm %*% standardised^2 / site_weights - means^2, 0))
 }
 
-# weighted sum of squares explained by centred predictors, around the weighted mean
-explained_ss <- function(predictors, response, site_weights) {
-  root <- sqrt(site_weights)
-  centred <- sweep(response, 2, colSums(site_weights * response) / sum(site_weights))
-  sum(qr.fitted(qr(root * predictors), root * centred)^2)
+# share of what a model leaves (`left`) that another gains (`gain`); not estimable when
+# nothing is left, as when the model has as many predictors as sites
+share_left <- function(gain, left, scale) {
+  ifelse(left > sqrt(.Machine$double.eps) * scale, gain / left, NA_real_)
 }
 
-# loss of explained sum of squares when each predictor leaves the model, for each
-# column of the response; beta^2 / the diagonal of the inverse of X'WX gives it without
-# fitting one model per predictor
-unique_ss <- function(predictors, response, site_weights) {
+# weighted sums of squares of each column around its weighted mean
+column_ss <- function(response, site_weights) {
+  colSums(site_weights * sweep(response, 2, colSums(site_weights * response) / sum(site_weights))^2)
+}
+
+# weighted sum of squares explained by centred predictors, around the weighted mean
+explained_ss <- function(predictors, response, site_weights) {
+  sum(full_model(predictors, response, site_weights)$fitted)
+}
+
+# the model of all predictors: `fitted`, the explained sum of squares of each column of the
+# response, and `loss`, the loss of that sum when each predictor leaves the model, for each
+# column; beta^2 / the diagonal of the inverse of X'WX gives it without fitting one model
+# per predictor, and it is NA when predictors are collinear
+full_model <- function(predictors, response, site_weights) {
   root <- sqrt(site_weights)
   centred <- sweep(response, 2, colSums(site_weights * response) / sum(site_weights))
   fit <- qr(root * predictors)
+  fitted <- colSums(qr.fitted(fit, root * centred)^2)
   if (fit$rank < ncol(predictors)) {
-    return(matrix(NA_real_, ncol(predictors), ncol(response)))
+    return(list(fitted = fitted, loss = matrix(NA_real_, ncol(predictors), ncol(response))))
   }
-  qr.coef(fit, root * centred)^2 / diag(chol2inv(qr.R(fit)))
+  list(fitted = fitted, loss = qr.coef(fit, root * centred)^2 / diag(chol2inv(qr.R(fit))))
 }
 
-partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_species) {
+partition_table <- function(ss, total, component_ss, sizes, n, observed, p_site, p_species) {
   fractions <- function(x) {
     c(x, a = x[["abc"]] - x[["bc"]], b = x[["ab"]] + x[["bc"]] - x[["abc"]],
       c = x[["abc"]] - x[["ab"]], d = 1 - x[["abc"]])
@@ -456,6 +629,7 @@ partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_species
                       r2 = fractions(r2),
                       r2_adjusted = fractions(1 - (n - 1) / (n - sizes - 1) * (1 - r2)),
                       r2_component = fractions(ss / component_ss), row.names = NULL)
+  table$statistic <- unname(observed[table$fraction])
   table$p_site <- unname(p_site[table$fraction])
   table$p_species <- unname(p_species[table$fraction])
   table$p_max <- pmax(table$p_site, table$p_species)

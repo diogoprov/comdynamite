@@ -102,6 +102,9 @@ test_that("the second label goes to the side with more room", {
     fraction = c("a", "b", "c", "d"), r2_adjusted = c(0.5, 0.1, 0.3, 0.1),
     p_max = c(0.01, NA, 0.2, NA))), class = "mc_trait_partition")
   expect_equal(plot_trait_partition(x)$shown, c(0.5, 0.1, 0.3, 0.1))
+  # a tested shared fraction is coloured like the others
+  x$fractions$p_max[2] <- 0.01
+  expect_silent(plot_trait_partition(x))
 })
 
 test_that("plot_phylo_beta() orders sites and species", {
