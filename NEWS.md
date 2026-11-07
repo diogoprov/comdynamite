@@ -3,6 +3,9 @@
 - Permutations of `pcc_test()`, `pcps_test()`, `phylo_beta_test()` and `trait_partition()` run in
   parallel under a plan of the future package, which is optional.
 - Install from r-universe, as the README now shows.
+- `summary_stats()`: the same statistics for simulated and observed data, covering diversity,
+  occupancy, abundance distribution, SES MPD and MNTD, distance decay, trait-environment relation
+  and, with more than one step, temporal variation.
 - `pcps_test()`: principal coordinates of phylogenetic structure of Duarte et al. (2016), the
   method of the package PCPS, with tests of all the dissimilarity and of each axis, and
   `site_permutations` for a restricted null model, which that package does not have. Its

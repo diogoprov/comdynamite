@@ -140,7 +140,7 @@ funções escritos à mão, o que indica o que falta no pacote.
 - [ ] Saída em formato longo (tibble) a partir de `history`.
 - [ ] Benchmark de `mc_dynamics()`. Avaliar código compilado só se o benchmark
       mostrar ganho real, como foi feito no treeshapesim. O ABC depende disso.
-- [ ] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
+- [x] `summary_stats()`: as mesmas estatísticas para dados simulados e observados
       (alfa, beta, gama, ocupação, SAD, equitabilidade, SES MPD e MNTD, decaimento com
       a distância, relação entre traits e ambiente) e, com mais de um tempo, variação
       temporal, como o CV das abundâncias. Em Guzman et al. (2022), estatísticas
