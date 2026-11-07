@@ -360,6 +360,13 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
+- [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
+      restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
+      sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
+      iguais (`"variance"`, `"correlation"`), matrizes proporcionais (`"proportional"`) ou
+      compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
+      usa vários traits: distância multivariada na similaridade limitante, nicho
+      multidimensional no filtro.
 - [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore.
 
