@@ -440,6 +440,369 @@ rejection rate was 0.99 for fraction <code>a</code> and 0.03 for
 fraction <code>c</code>, as expected for a vector estimated for
 environment alone.</p>
 </div>
+<div class="section level3">
+<h3 id="tests-of-the-fractions">Tests of the fractions<a class="anchor" aria-label="anchor" href="#tests-of-the-fractions"></a>
+</h3>
+<p>The code of the authors permutes environment and space with the same
+order of sites and compares fractions <code>a</code> and <code>c</code>
+themselves with their null values, so each is compared with what is
+expected when neither set matters. The fraction is not a pivotal
+statistic: when the other set explains much, the observed fraction is a
+share of what that set leaves, and the null fraction is a share of
+everything, so the test loses its power. Up to version 0.6.0 the package
+did the same; <code><a href="../reference/trait_partition.html">trait_partition()</a></code> now tests <code>a</code>
+and <code>c</code> with the share of the component that the other set
+leaves unexplained, which is a monotone function of the partial F
+statistic, under the same permutations (Anderson &amp; Legendre 1999
+found that permutation of raw data with a pivotal statistic has the
+right size except with outliers in the covariable). The shared fraction
+<code>b</code> is tested with <code>shared_null</code>, following
+<code><a href="http://adeverse.github.io/adespatial/reference/envspace.test.html" class="external-link">adespatial::envspace.test()</a></code> (Bauman et al. 2019):
+<code>env</code> is replaced by surrogates that keep its spatial
+autocorrelation, built by Moran spectral randomisation (Wagner &amp;
+Dray 2015) or by moves of the whole map on a grid, while the response
+and <code>space</code> stay fixed.</p>
+<p>The script <code>data-raw/validation_fractions.R</code> measures type
+I error and power on a complete grid of 8 by 8 sites, with
+<code>space</code> holding the six broadest Moran’s eigenvector maps, 20
+species with Gaussian responses to a gradient that combines the
+environment (weight alpha) and a smooth field in the span of
+<code>space</code> (weight beta), 199 permutations and 500 data sets per
+scenario, with seeds separate from the 200 data sets used to choose the
+statistic and the null models. The environment is independent noise
+(iid), a smooth field in the span of <code>space</code> plus noise
+(broad), or a field at scales that <code>space</code> does not hold
+(fine). In the last scenario the composition follows another trait than
+the one analysed, so the null hypothesis of the permutation of species
+is true for every fraction. Rates at the 5% level have standard errors
+of 0.010 or less; a true null hypothesis is marked by an asterisk.</p>
+<p>Fractions <code>a</code> and <code>c</code>, with the fraction (old)
+and the share left by the other set (new) as statistic, by free
+permutations of sites, by moves of the whole map with
+<code><a href="../reference/torus_permutations.html">torus_permutations()</a></code> (grid), by permutations of species,
+and with the larger p-value of sites and species:</p>
+<table class="table">
+<colgroup>
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+<col width="9%">
+</colgroup>
+<thead><tr class="header">
+<th>Scenario</th>
+<th>[a] old, sites</th>
+<th>[a] new, sites</th>
+<th>[a] new, grid</th>
+<th>[a] new, species</th>
+<th>[a] new, larger p</th>
+<th>[c] old, sites</th>
+<th>[c] new, sites</th>
+<th>[c] new, grid</th>
+<th>[c] new, species</th>
+<th>[c] new, larger p</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Neither acts, env iid</td>
+<td>0.062*</td>
+<td>0.052*</td>
+<td>0.052*</td>
+<td>0.074*</td>
+<td>0.040*</td>
+<td>0.044*</td>
+<td>0.042*</td>
+<td>0.060*</td>
+<td>0.068*</td>
+<td>0.038*</td>
+</tr>
+<tr class="even">
+<td>Space acts, env iid</td>
+<td>0.000*</td>
+<td>0.058*</td>
+<td>0.078*</td>
+<td>0.072*</td>
+<td>0.044*</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="odd">
+<td>Space acts, env broad</td>
+<td>0.000*</td>
+<td>0.056*</td>
+<td>0.082*</td>
+<td>0.058*</td>
+<td>0.042*</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>0.986</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>Env acts, env iid</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>0.000*</td>
+<td>0.038*</td>
+<td>0.190*</td>
+<td>0.040*</td>
+<td>0.022*</td>
+</tr>
+<tr class="odd">
+<td>Env acts, env broad</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>0.000*</td>
+<td>0.100*</td>
+<td>0.000*</td>
+<td>0.028*</td>
+<td>0.024*</td>
+</tr>
+<tr class="even">
+<td>Both act, env broad</td>
+<td>0.818</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>0.962</td>
+<td>1.000</td>
+<td>0.948</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="odd">
+<td>Weak env and space, env broad</td>
+<td>0.150</td>
+<td>1.000</td>
+<td>0.998</td>
+<td>0.998</td>
+<td>0.998</td>
+<td>0.996</td>
+<td>1.000</td>
+<td>0.980</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>Space acts, env fine</td>
+<td>0.000*</td>
+<td>0.114*</td>
+<td>0.014*</td>
+<td>0.056*</td>
+<td>0.040*</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="odd">
+<td>Env acts through another trait</td>
+<td>0.360*</td>
+<td>0.454*</td>
+<td>0.442*</td>
+<td>0.062*</td>
+<td>0.062*</td>
+<td>0.096*</td>
+<td>0.172*</td>
+<td>0.034*</td>
+<td>0.074*</td>
+<td>0.064*</td>
+</tr>
+</tbody>
+</table>
+<p>The old test never rejected <code>a</code> when space acted and the
+environment did not, nor <code>c</code> in the mirror case, and had
+little power for a weak effect of the environment beside space. The new
+statistic holds the level there and in the tuning run gave the same
+rates as permutation of the residuals of the reduced model (Freedman
+&amp; Lane 1983) and as permutation of the predictor of interest alone,
+which do not support <code>site_permutations</code> and the permutation
+of species. Three limits remain. When the environment has spatial
+structure at scales that <code>space</code> does not hold, the free
+permutation of sites rejects <code>a</code> too often (0.114), because
+the residuals keep spatial structure that the environment matches by
+chance; moves of the whole map hold the level (0.014). When a strong,
+spatially structured environment acts alone, the free permutation
+rejects <code>c</code> in 10% of the data sets: the species respond to
+the environment with Gaussian curves, the linear fit leaves a spatially
+structured remainder, and space explains it, which the larger p-value
+does not take as significant (0.024). The moves of the map are nearly
+degenerate for <code>c</code>, because moving Moran’s eigenvector maps
+rigidly on the grid changes little of what they explain, and the test of
+<code>c</code> with <code>site_permutations</code> was liberal when the
+environment explained much (0.190) and never rejected when the
+environment was spatially structured. With a trait unrelated to the
+composition, the permutation of sites rejects <code>a</code> in about
+half the data sets and the larger p-value holds the level, as intended.
+The permutation of species alone, with 20 species, is slightly liberal
+when nothing acts (0.066 to 0.080 with either statistic), and the larger
+p-value is not.</p>
+<p>A second generator
+(<code>data-raw/validation_fractions_check.R</code>: counts, a grid of
+10 by 10 sites, 8 Moran’s eigenvector maps, 200 data sets) gave larger
+values for these two limits. With a hidden field that <code>space</code>
+holds only in part, free permutations rejected <code>a</code> in 21% of
+the data sets (larger p-value: 2%), and with a structured environment
+acting alone they rejected <code>c</code> in 25% (larger p-value: 7.5%).
+So <code>p_max</code>, not the p-value of sites alone, is the one to
+read.</p>
+<p>The shared fraction <code>b</code>, with <code>env</code> replaced by
+free permutations of its values, by Moran spectral randomisations (MSR,
+<code>shared_null = "msr"</code>) and by moves of the whole map
+(<code>shared_null = "sites"</code> with
+<code><a href="../reference/torus_permutations.html">torus_permutations()</a></code>), by permutations of species, and with
+the larger p-value. <code>Tested</code> is the number of data sets, out
+of 500, where <code>env</code> was related to <code>space</code> and
+<code>b</code> was tested with the MSR:</p>
+<table class="table">
+<colgroup>
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+</colgroup>
+<thead><tr class="header">
+<th>Scenario</th>
+<th>Tested</th>
+<th>[b] free env</th>
+<th>[b] MSR</th>
+<th>[b] grid</th>
+<th>[b] species</th>
+<th>[b] larger p, MSR</th>
+<th>[b] larger p, grid</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Neither acts, env iid</td>
+<td>22</td>
+<td>0.043*</td>
+<td>0.045*</td>
+<td>0.045*</td>
+<td>0.000*</td>
+<td>0.000*</td>
+<td>0.000*</td>
+</tr>
+<tr class="even">
+<td>Space acts, env iid</td>
+<td>28</td>
+<td>0.103*</td>
+<td>0.000*</td>
+<td>0.097*</td>
+<td>0.643*</td>
+<td>0.000*</td>
+<td>0.097*</td>
+</tr>
+<tr class="odd">
+<td>Space acts, env broad</td>
+<td>500</td>
+<td>0.476*</td>
+<td>0.056*</td>
+<td>0.110*</td>
+<td>0.770*</td>
+<td>0.056*</td>
+<td>0.110*</td>
+</tr>
+<tr class="even">
+<td>Env acts, env iid</td>
+<td>15</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="odd">
+<td>Env acts, env broad</td>
+<td>500</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>Both act, env broad</td>
+<td>500</td>
+<td>0.898</td>
+<td>0.432</td>
+<td>0.618</td>
+<td>0.926</td>
+<td>0.432</td>
+<td>0.618</td>
+</tr>
+<tr class="odd">
+<td>Weak env and space, env broad</td>
+<td>500</td>
+<td>0.634</td>
+<td>0.282</td>
+<td>0.272</td>
+<td>0.748</td>
+<td>0.282</td>
+<td>0.272</td>
+</tr>
+<tr class="even">
+<td>Space acts, env fine</td>
+<td>0</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Env acts through another trait</td>
+<td>500</td>
+<td>0.786*</td>
+<td>0.542*</td>
+<td>0.678*</td>
+<td>0.048*</td>
+<td>0.048*</td>
+<td>0.050*</td>
+</tr>
+</tbody>
+</table>
+<p><code>b</code> is left untested when <code>env</code> is unrelated to
+<code>space</code> at the 5% level, which happened in 94% to 97% of the
+data sets with an iid environment and in all those with structure
+outside <code>space</code>; the rates above leave those data sets out,
+and with fewer than 30 of them they say little. With an environment that
+is spatially structured but has no effect, free permutations of
+<code>env</code> reject <code>b</code> in 48% of the data sets, the
+Moran spectral randomisation holds the level (0.056), and moves on the
+grid are liberal (0.110), which we did not expect and leave as a limit
+of that null model. The permutation of species asks whether the trait
+matters, not whether the shared structure is spurious, so it rejects
+when space acts through the trait; conversely, with a trait unrelated to
+the composition, the randomisation of <code>env</code> alone rejects
+often and only the larger p-value holds the level. Power is complete
+when the environment alone acts and moderate when space also acts on its
+own.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="the-daphniids-of-leibold-et-al--2010">The daphniids of Leibold et al. (2010)<a class="anchor" aria-label="anchor" href="#the-daphniids-of-leibold-et-al--2010"></a>
@@ -589,6 +952,17 @@ rivers by longitude.</p>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Anderson, M. J., &amp; Legendre, P. (1999). An empirical comparison
+of permutation methods for tests of partial regression coefficients in a
+linear model. <em>Journal of Statistical Computation and
+Simulation</em>, 62, 271–303. <a href="https://doi.org/10.1080/00949659908811936" class="external-link uri">https://doi.org/10.1080/00949659908811936</a></p>
+<p>Bauman, D., Vleminckx, J., Hardy, O. J., &amp; Drouet, T. (2019).
+Testing and interpreting the shared space-environment fraction in
+variation partitioning analyses of ecological data. <em>Oikos</em>, 128,
+274–285. <a href="https://doi.org/10.1111/oik.05496" class="external-link uri">https://doi.org/10.1111/oik.05496</a></p>
+<p>Freedman, D., &amp; Lane, D. (1983). A nonstochastic interpretation
+of reported significance levels. <em>Journal of Business &amp; Economic
+Statistics</em>, 1, 292–298. <a href="https://doi.org/10.1080/07350015.1983.10509354" class="external-link uri">https://doi.org/10.1080/07350015.1983.10509354</a></p>
 <p>Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010).
 Metacommunity phylogenetics: separating the roles of environmental
 filters and historical biogeography. <em>Ecology Letters</em>, 13,
@@ -596,6 +970,10 @@ filters and historical biogeography. <em>Ecology Letters</em>, 13,
 <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing
 the effects of spatial contingency and environmental filtering on
 metacommunity phylogenetics. <em>Ecology</em>, 93, S14–S30. <a href="https://doi.org/10.1890/11-0494.1" class="external-link uri">https://doi.org/10.1890/11-0494.1</a></p>
+<p>Wagner, H. H., &amp; Dray, S. (2015). Generating spatially
+constrained null models for irregularly spaced data using Moran spectral
+randomization methods. <em>Methods in Ecology and Evolution</em>, 6,
+1169–1178. <a href="https://doi.org/10.1111/2041-210X.12407" class="external-link uri">https://doi.org/10.1111/2041-210X.12407</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

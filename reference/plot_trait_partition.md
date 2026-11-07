@@ -5,8 +5,9 @@ Draws the total variation as a line divided into the fractions of
 with one bar for the environment and one for space, as in Figure 1 of
 Desdevises et al. (2003). The two bars overlap in `b`, the variation
 they share. `a` is explained by the environment alone, `c` by space
-alone, and `d` is unexplained. Dark segments are significant, and `b`
-has no test, so it is grey.
+alone, and `d` is unexplained. Dark segments are significant, and `b` is
+grey when it was not tested (see `shared_null` in
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)).
 
 ## Usage
 

@@ -75,7 +75,10 @@ alone; <code>b</code>, shared; <code>c</code>, space alone; and <code>d</code>, 
 <span>  <span class="va">space</span>,</span>
 <span>  component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"variance"</span><span class="op">)</span>,</span>
 <span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  shared_null <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"msr"</span>, <span class="st">"sites"</span><span class="op">)</span>,</span>
+<span>  coords <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  level <span class="op">=</span> <span class="fl">0.05</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -114,31 +117,100 @@ example from <code><a href="torus_permutations.html">torus_permutations()</a></c
 sites are then allowed: they leave the analysis but their predictors can reach occupied
 sites.</p></dd>
 
+
+<dt id="arg-shared-null">shared_null<a class="anchor" aria-label="anchor" href="#arg-shared-null"></a></dt>
+<dd><p>Null model of the test of the shared fraction <code>b</code>: <code>"none"</code> leaves it
+untested, <code>"msr"</code> replaces <code>env</code> by Moran spectral randomisations built from <code>coords</code>
+with <code><a href="http://adeverse.github.io/adespatial/reference/msr.html" class="external-link">adespatial::msr()</a></code>, and <code>"sites"</code> moves <code>env</code> alone with <code>site_permutations</code>, for a
+complete grid. <code>"msr"</code> needs the package adespatial.</p></dd>
+
+
+<dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
+<dd><p>Matrix of site coordinates with one row per site of <code>comm</code>, for
+<code>shared_null = "msr"</code>. The spatial weights are those of <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>.</p></dd>
+
+
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
+<dd><p>Significance level of the test of <code>env</code> against <code>space</code> that decides whether
+<code>b</code> is tested.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_trait_partition</code> with <code>fractions</code>, a data frame with one row
 for each of <code>abc</code>, <code>ab</code>, <code>bc</code>, <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code>, and the columns <code>r2</code>,
-<code>r2_adjusted</code>, <code>r2_component</code>, <code>p_site</code>, <code>p_species</code> and <code>p_max</code>; <code>component</code>;
-<code>component_share</code>, the share of the total variation in the component; <code>semipartial</code>,
-a matrix of predictors by traits; and <code>p_partial_max</code>, <code>p_partial_site</code> and
+<code>r2_adjusted</code>, <code>r2_component</code>, <code>statistic</code>, the value tested, <code>p_site</code>, <code>p_species</code> and
+<code>p_max</code>, which are <code>NA</code> for <code>d</code>, for <code>b</code> without <code>shared_null</code>, and for a fraction
+that cannot be estimated, as when a set of predictors has as many columns as sites;
+<code>component</code>; <code>component_share</code>, the share of the total variation in the component;
+<code>semipartial</code>, a matrix of predictors by traits; <code>p_partial_max</code>, <code>p_partial_site</code> and
 <code>p_partial_species</code>, with the larger p-value and those of sites and of species, all
-<code>NA</code> if predictors are collinear; and <code>permutations</code>.</p>
+<code>NA</code> if predictors are collinear; <code>shared</code>, with <code>null</code>, <code>draws</code>, <code>p_env_space</code>, the
+p-value of <code>env</code> against <code>space</code>, and <code>tested</code>; and <code>permutations</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The total variation includes both the mean and the dispersion within sites, so <code>r2</code>
 answers how much of all the variation each fraction holds, and <code>r2_component</code> how much
-of the component. Fractions <code>b</code> and <code>d</code> cannot be tested. Tests of <code>a</code> and <code>c</code> permute
-environment and space together, so they compare each fraction with what is expected when
-neither matters, not with the other set held fixed. They are conservative when the other
-set explains much: in an audit with noise as environment and a real effect of space, <code>a</code>
-was never rejected in 100 replicates.</p>
+of the component. Each fraction is tested by permutations of sites, which move the
+predictors of all sites together, and by permutations of the trait values among species,
+and <code>p_max</code> is the larger p-value, as in <code><a href="phylo_vector.html">phylo_vector()</a></code>. The statistic of <code>a</code> and <code>c</code> is
+the share of the component that the other set leaves unexplained, <code>a / (a + d)</code> within the
+component, which is a monotone function of the partial F statistic of the set given the
+other (Anderson &amp; Legendre 1999). The fraction itself, which the original code tests, is
+not, and its test loses most of its power when the other set explains much: see the
+section on simulations. <code>d</code> cannot be tested.</p>
+<p>The shared fraction <code>b</code> has no test by these permutations, because a permutation of sites
+breaks the relation between environment and space, and is tested with <code>shared_null</code> by the
+scheme of <code><a href="http://adeverse.github.io/adespatial/reference/envspace.test.html" class="external-link">adespatial::envspace.test()</a></code> (Bauman et al. 2019): the response and <code>space</code>
+stay fixed, <code>env</code> is replaced by surrogates that keep its spatial autocorrelation, and <code>b</code>
+is computed again. Moran spectral randomisation (Wagner &amp; Dray 2015) builds them from
+<code>coords</code> for any design, and <code>site_permutations</code> from <code><a href="torus_permutations.html">torus_permutations()</a></code> move the
+whole map of <code>env</code> on a complete grid. The p-value of species comes from the same
+permutations of species as the other fractions. A positive <code>b</code> can arise from two
+spatially structured variables without relation, which free permutations do not take
+into account (Clappe et al. 2018). The test asks whether <code>b</code> is larger than expected, so
+a negative <code>b</code> is never significant. It is only meaningful when <code>env</code> holds some of the
+structure in <code>space</code>, so <code>env</code> is first tested against <code>space</code> with free permutations of
+sites, and when that test is not significant at <code>level</code>, <code>b</code> is left untested and
+<code>shared$tested</code> is <code>FALSE</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
     <p>Adapted from the MATLAB function <code>PartitionRDATwoDataMatricesPhylogeny</code> in the
 supplement of Peres-Neto et al. (2012).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="simulations">Simulations<a class="anchor" aria-label="anchor" href="#simulations"></a></h2>
+
+
+<p><code>data-raw/validation_fractions.R</code> and the article on validation measure the tests on a
+grid of 8 by 8 sites, with 500 data sets per scenario and 199 permutations, at the 5%
+level. Where space acted and the environment did not, the fraction <code>a</code> itself was never
+rejected, and the share left by space was rejected in 5.6% to 5.8% of data sets with
+free permutations of sites and in 4.2% to 4.4% with the larger p-value; where the
+environment had a weak effect beside space, the fraction was rejected in 15% and the
+share in 100%. Two limits: with an environment structured at scales that <code>space</code> does
+not hold, free permutations rejected <code>a</code> in 11.4% (moves of the map with
+<code><a href="torus_permutations.html">torus_permutations()</a></code>: 1.4%, larger p-value: 4.0%); and with a strong, spatially
+structured environment and no effect of space, free permutations rejected <code>c</code> in 10%
+(larger p-value: 2.4%), where the residuals of the linear fit of the environment keep
+spatial structure. <code>site_permutations</code> are nearly degenerate for <code>c</code>, since moving
+Moran's eigenvector maps rigidly changes little of what they explain: 19% with a strong
+environment without structure.</p>
+<p>These limits were larger with a second generator (<code>data-raw/validation_fractions_check.R</code>:
+counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden
+field that <code>space</code> holds only in part drove the species: free permutations rejected <code>a</code> in
+21% (larger p-value: 2%), and with a structured environment acting alone they rejected <code>c</code>
+in 25% (larger p-value: 7.5%). The p-value of sites alone should not be read when residuals
+can keep spatial structure; <code>p_max</code> should. Without effects, the rates there were 4.5% to
+6.1% with free permutations, and Moran spectral randomisation rejected <code>b</code> in 5% to 6%.</p>
+<p>For <code>b</code>, with an environment that was spatially structured but had no effect, free
+permutations of <code>env</code> rejected 48% of data sets, Moran spectral randomisation 5.6% and
+moves of the map 11%. With a trait unrelated to the composition, the randomisation alone
+rejected 54% and the larger p-value 4.8%: the permutation of species is needed, as for the
+other fractions. Power was 100% when the environment alone acted, 43% when space also
+acted on its own, and 28% with a weak environment beside space.</p>
     </div>
     <div class="section level2">
     <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
@@ -165,6 +237,11 @@ not include. None of this is done here.</p></li>
 <li><p>The code runs <code>n_perm</code> - 1 permutations in each null distribution.</p></li>
 <li><p>The text stacks two null distributions, and here we report the larger of the
 two p-values, as in <code><a href="phylo_vector.html">phylo_vector()</a></code>.</p></li>
+<li><p>Tests of <code>a</code> and <code>c</code>: the code permutes environment and space with the same
+order of sites, as here, and compares the fractions themselves, which depend on how
+much the other set explains. It computes the partial F statistics but does not use
+them. Here the statistic is the share of the component left by the other set, which
+is monotone in that F.</p></li>
 </ul><p>Moran's eigenvector maps of the function <code>MEM</code> of the supplement are the same as those
 of <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>, checked in Octave. Appendix A recommends centring them with
 site weights and the code does not, but orthogonality is not needed to partition
@@ -175,8 +252,9 @@ alone. The supplement has no code for them, so they were checked against separat
 regressions and not in Octave. Appendix A calculates the model without the predictor
 with the slopes of the full model, which it had just fitted again without it, and here
 we use the second slopes. With several traits it gives no rule, so here each trait has its own
-value, relative to the variation of that trait. They are tested as the fractions are,
-with the loss of R2 as the statistic, and with many predictors they need a correction.</p>
+value, relative to the variation of that trait. They are tested as <code>a</code> and <code>c</code> are, with
+the loss of R2 relative to what the model of all predictors leaves unexplained in that
+trait as the statistic, and with many predictors they need a correction.</p>
 <p>This function partitions variation and does not test each trait against each
 predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging
 regressions combined by the max test, in the package
@@ -184,7 +262,16 @@ regressions combined by the max test, in the package
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Peres-Neto, P. R., Legendre, P., Dray, S., &amp; Borcard, D. (2006). Variation partitioning
+    <p>Anderson, M. J., &amp; Legendre, P. (1999). An empirical comparison of permutation methods
+for tests of partial regression coefficients in a linear model. <em>Journal of Statistical
+Computation and Simulation</em>, 62, 271–303. <a href="https://doi.org/10.1080/00949659908811936" class="external-link">doi:10.1080/00949659908811936</a></p>
+<p>Bauman, D., Vleminckx, J., Hardy, O. J., &amp; Drouet, T. (2019). Testing and interpreting
+the shared space-environment fraction in variation partitioning analyses of ecological
+data. <em>Oikos</em>, 128, 274–285. <a href="https://doi.org/10.1111/oik.05496" class="external-link">doi:10.1111/oik.05496</a></p>
+<p>Clappe, S., Dray, S., &amp; Peres-Neto, P. R. (2018). Beyond neutrality: disentangling the
+effects of species sorting and spurious correlations in community analysis. <em>Ecology</em>,
+99, 1737–1747. <a href="https://doi.org/10.1002/ecy.2376" class="external-link">doi:10.1002/ecy.2376</a></p>
+<p>Peres-Neto, P. R., Legendre, P., Dray, S., &amp; Borcard, D. (2006). Variation partitioning
 of species data matrices: estimation and comparison of fractions. <em>Ecology</em>, 87,
 2614–2625. <a href="https://doi.org/10.1890/0012-9658%282006%2987%5B2614%3AVPOSDM%5D2.0.CO%3B2" class="external-link">doi:10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2</a></p>
 <p>Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects of spatial
@@ -193,6 +280,9 @@ contingency and environmental filtering on metacommunity phylogenetics. <em>Ecol
 <p>ter Braak, C. J. F. (2019). New robust weighted averaging- and model-based methods for
 assessing trait-environment relationships. <em>Methods in Ecology and Evolution</em>, 10,
 1962–1971. <a href="https://doi.org/10.1111/2041-210X.13278" class="external-link">doi:10.1111/2041-210X.13278</a></p>
+<p>Wagner, H. H., &amp; Dray, S. (2015). Generating spatially constrained null models for
+irregularly spaced data using Moran spectral randomization methods. <em>Methods in Ecology
+and Evolution</em>, 6, 1169–1178. <a href="https://doi.org/10.1111/2041-210X.12407" class="external-link">doi:10.1111/2041-210X.12407</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -202,8 +292,9 @@ assessing trait-environment relationships. <em>Methods in Ecology and Evolution<
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">adespatial</span><span class="fu">::</span><span class="fu"><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">dbmem</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span><span class="op">)</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="va">space</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu">adespatial</span><span class="fu">::</span><span class="fu"><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">dbmem</a></span><span class="op">(</span><span class="va">coords</span>, silent <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html" class="external-link">setNames</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">15</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">15</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">env</span>, <span class="va">trait</span>, <span class="kw">function</span><span class="op">(</span><span class="va">e</span>, <span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">e</span> <span class="op">-</span> <span class="va">t</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trait</span><span class="op">)</span></span></span>
@@ -211,16 +302,32 @@ assessing trait-environment relationships. <em>Methods in Ecology and Evolution<
 <span class="r-in"><span><span class="va">out</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_trait_partition&gt; mean component, 0.511 of the total variation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   fraction       r2 r2_adjusted r2_component p_site p_species p_max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.490557      0.4323      0.96059   0.02      0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.489712      0.4763      0.95894   0.02      0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       bc 0.020911     -0.0607      0.04095   0.58      0.02  0.58</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        a 0.469647      0.4930      0.91965   0.02      0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        b 0.020065     -0.0167      0.03929     NA        NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6        c 0.000846     -0.0439      0.00166   0.98      0.06  0.98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7        d 0.509443      0.5677      0.03941     NA        NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fraction       r2 r2_adjusted r2_component statistic p_site p_species p_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.490557      0.4323      0.96059    0.4906   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.489712      0.4763      0.95894    0.4897   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       bc 0.020911     -0.0607      0.04095    0.0209   0.58      0.02  0.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        a 0.469647      0.4930      0.91965    0.9589   0.02      0.14  0.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        b 0.020065     -0.0167      0.03929    0.0201     NA        NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        c 0.000846     -0.0439      0.00166    0.0403   0.62      0.28  0.62</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        d 0.509443      0.5677      0.03941        NA     NA        NA    NA</span>
 <span class="r-in"><span><span class="fu"><a href="plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="trait_partition-1.png" alt="" width="700" height="433"></span>
+<span class="r-in"><span><span class="co"># the shared fraction, with an environment that follows the transect</span></span></span>
+<span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fl">50</span> <span class="op">+</span> <span class="fl">30</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span> <span class="op">/</span> <span class="fl">6</span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">40</span>, <span class="fl">0</span>, <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/outer.html" class="external-link">outer</a></span><span class="op">(</span><span class="va">env</span>, <span class="va">trait</span>, <span class="kw">function</span><span class="op">(</span><span class="va">e</span>, <span class="va">t</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="op">-</span><span class="op">(</span><span class="va">e</span> <span class="op">-</span> <span class="va">t</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span> <span class="op">/</span> <span class="fl">800</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">trait</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">trait_partition</span><span class="op">(</span><span class="va">comm</span>, <span class="va">trait</span>, <span class="va">env</span>, <span class="va">space</span>, n_perm <span class="op">=</span> <span class="fl">49</span>, shared_null <span class="op">=</span> <span class="st">"msr"</span>, coords <span class="op">=</span> <span class="va">coords</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_trait_partition&gt; mean component, 0.404 of the total variation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> shared fraction b: 49 Moran spectral randomisations of env (env against space: p = 0.02)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fraction      r2 r2_adjusted r2_component statistic p_site p_species p_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.39600      0.3270      0.97986     0.396   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.39484      0.3789      0.97697     0.395   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       bc 0.35841      0.3049      0.88684     0.358   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        a 0.03759      0.0220      0.09302     0.822   0.02      0.14  0.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        b 0.35724      0.3569      0.88395     0.357   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        c 0.00117     -0.0519      0.00289     0.125   0.12      0.70  0.70</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        d 0.60400      0.6730      0.02014        NA     NA        NA    NA</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
