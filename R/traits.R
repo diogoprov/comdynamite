@@ -100,11 +100,24 @@ trait_bm <- function(tree, lambda = 1) {
 #' round(g, 2)
 #' @export
 growth_rates <- function(env, traits) {
-  stopifnot(all(c("optimum", "sigma", "r_max") %in% names(traits)))
+  traits <- as_traits(traits)
   r <- exp(-sweep(outer(env, traits$optimum, "-")^2, 2, 2 * traits$sigma^2, "/"))
   r <- sweep(r, 2, traits$r_max, "*")
   dimnames(r) <- list(names(env), rownames(traits))
   r
+}
+
+# traits of species_traits() as a data frame with names of species, also from a matrix or a
+# tibble, which has no row names
+as_traits <- function(traits) {
+  traits <- as.data.frame(traits)
+  missing_traits <- setdiff(c("optimum", "sigma", "r_max"), names(traits))
+  if (length(missing_traits) > 0) {
+    stop("`traits` needs the columns of `species_traits()`; missing: ",
+         paste(missing_traits, collapse = ", "), call. = FALSE)
+  }
+  if (.row_names_info(traits) < 0) rownames(traits) <- paste0("sp", seq_len(nrow(traits)))
+  traits
 }
 
 rank_to_marginal <- function(x, target) {

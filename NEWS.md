@@ -20,7 +20,16 @@
   `plot_trait_partition()`: `test = "taxa"` is now `"species"`. The old forms work, with a
   warning.
 - `patch_permutations()`: evaluated with autocorrelation up to the scale of the landscape, and
-  advice on `gap` for sparse sites.
+  advice on `gap` for sparse sites. The rates given in 0.6.0 averaged over random places of
+  areas. With fixed areas the test is liberal for sides far apart (6% to 10% at the 5% level)
+  and conservative for neighbouring sides, and the help now says so.
+- `simulate_metacommunity()` matches `alpha` to `traits` by name. Before, a matrix with
+  species in another order gave wrong results without warning.
+- `growth_rates()`, `simulate_static()` and `simulate_metacommunity()` accept traits as a matrix
+  or a tibble, and species without names are called sp1, sp2, ... `simulate_static()` matches
+  sets of traits by name. `assemble_community()` warns when it invents names.
+- Predictors must vary among occupied sites with `site_permutations`.
+- Help: weights of `node_test()`, and what the tests of fractions of `trait_partition()` ask.
 - `pcc_test()` gives an `r2` of 0, not `NaN`, when no adjusted R2 is positive.
 - `node_contrasts()` accepts clades with branches of length zero, and `plot_node_heatmap()`
   accepts a predictor and an event with the same name.

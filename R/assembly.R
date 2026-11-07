@@ -57,7 +57,11 @@ assemble_community <- function(traits, size,
                                optimum = "ancestral", min_distance = NULL) {
   rule <- match.arg(rule)
   x <- as.matrix(traits)
-  if (is.null(rownames(x))) rownames(x) <- names(traits) %||% paste0("sp", seq_len(nrow(x)))
+  if (is.null(rownames(x))) {
+    named <- if (is.null(dim(traits))) names(traits)
+    if (is.null(named)) warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
+    rownames(x) <- named %||% paste0("sp", seq_len(nrow(x)))
+  }
   sp <- rownames(x)
   n <- nrow(x)
   stopifnot(size >= 1, size <= n)

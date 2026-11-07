@@ -54,7 +54,11 @@ alone; \code{b}, shared; \code{c}, space alone; and \code{d}, unexplained.
 \details{
 The total variation includes both the mean and the dispersion within sites, so \code{r2}
 answers how much of all the variation each fraction holds, and \code{r2_component} how much
-of the component. Fractions \code{b} and \code{d} cannot be tested.
+of the component. Fractions \code{b} and \code{d} cannot be tested. Tests of \code{a} and \code{c} permute
+environment and space together, so they compare each fraction with what is expected when
+neither matters, not with the other set held fixed. They are conservative when the other
+set explains much: in an audit with noise as environment and a real effect of space, \code{a}
+was never rejected in 100 replicates.
 }
 \note{
 Adapted from the MATLAB function \code{PartitionRDATwoDataMatricesPhylogeny} in the

@@ -86,7 +86,7 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
   check_permutations(site_permutations, comm)
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
-  env <- landscape_env[draws$occupied, , drop = FALSE]
+  env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
   stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
   vectors <- phylo_eigenvectors(tree, squared = squared)
   observed <- pcc_r2(comm, vectors, env)

@@ -285,7 +285,8 @@ Da auditoria, para antes da 1.0:
 - [x] Baixa gravidade: ramos zero em `node_contrasts()`, nomes repetidos e heatmap só com NA,
       `logistic_gradients()` com poucos sites, `mc_dynamics()` com um site, `r2` NaN em
       `pcc_test()`, `n_draws`, erro dentro de `cores`, checagens do simulador.
-- [ ] "Formas dos traits", da auditoria: não recuperei o que era; rever.
+- [x] Formas dos traits, na auditoria com Fable (2026-11-07): `alpha` alinhado por nome em
+      `simulate_metacommunity()`, `as_traits()` para matriz e tibble, aviso de nomes inventados.
 
 Situação em 2026-11-06: marco fechado na 0.5.2. O nulo com borda e a descoberta saíram na
 0.6.0.
@@ -311,8 +312,16 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       outras (.022 a .039). Em `data-raw/validation_edges_scale.rds`.
 - [x] Aplicado aos refúgios da Mata Atlântica, fora deste repositório (dados não publicados).
       Com células esparsas, o resultado depende muito de `gap`.
-- [ ] Critério para escolher `gap` com sítios esparsos, com simulação nesse cenário: as
-      validações usaram grades completas.
+- [ ] `patch_permutations()` não preserva a distância entre os lados do evento. Com áreas fixas
+      no quadrado 20 por 20: adjacentes .004 a .02; cantos opostos e metades .06 a .10 (.065 e
+      .064 na minha conferência, 150 réplicas; .078 a .101 na auditoria, 60 réplicas). A
+      validação sorteava as áreas, o que tira a média disso. Candidato: mover o conjunto de
+      manchas de um evento junto, com deslocamento e rotação comuns.
+- [ ] Critério para escolher `gap` com sítios esparsos: com 25% a 40% da grade e áreas em cantos
+      opostos, .15 a .16 com o padrão e .05 a .06 com `gap` 3.
+- [ ] Testes das frações `a` e `c` de `trait_partition()`: permutar sob o modelo reduzido, em
+      vez de ambiente e espaço juntos. Hoje são conservadores. Conferir o MATLAB de
+      Peres-Neto et al. (2012) antes de mudar.
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 

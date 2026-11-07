@@ -106,7 +106,7 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   check_permutations(site_permutations, comm)
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
-  env <- landscape_env[draws$occupied, , drop = FALSE]
+  env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
   stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
   env_basis <- function(x) qr.Q(qr(sweep(x, 2, colMeans(x))))
   basis <- env_basis(env)

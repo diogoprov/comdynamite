@@ -117,7 +117,7 @@ phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_s
   check_permutations(site_permutations, comm)
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
-  env <- landscape_env[draws$occupied, , drop = FALSE]
+  env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
   species <- colnames(comm)
 
   # with the square root of path lengths as distance, D^2 / 2 is half the path length
@@ -180,7 +180,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #'
 #' The total variation includes both the mean and the dispersion within sites, so `r2`
 #' answers how much of all the variation each fraction holds, and `r2_component` how much
-#' of the component. Fractions `b` and `d` cannot be tested.
+#' of the component. Fractions `b` and `d` cannot be tested. Tests of `a` and `c` permute
+#' environment and space together, so they compare each fraction with what is expected when
+#' neither matters, not with the other set held fixed. They are conservative when the other
+#' set explains much: in an audit with noise as environment and a real effect of space, `a`
+#' was never rejected in 100 replicates.
 #'
 #' @param comm Matrix with one row per site and one column per species. Every site needs
 #'   at least one individual.
@@ -293,8 +297,8 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   landscape_env <- env
   landscape_space <- space
   comm <- comm[draws$occupied, , drop = FALSE]
-  env <- env[draws$occupied, , drop = FALSE]
-  space <- space[draws$occupied, , drop = FALSE]
+  env <- check_env(env[draws$occupied, , drop = FALSE], comm, collinear = TRUE)
+  space <- check_env(space[draws$occupied, , drop = FALSE], comm, "`space`", collinear = TRUE)
   site_weights <- rowSums(comm)
   n <- nrow(comm)
   sizes <- c(abc = ncol(env) + ncol(space), ab = ncol(env), bc = ncol(space))

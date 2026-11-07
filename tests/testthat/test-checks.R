@@ -185,3 +185,54 @@ test_that("phylo_vector() accepts empty sites and the old name of `env`", {
                  "use `env`")
   expect_equal(one$p_max, other$p_max)
 })
+
+test_that("traits can be a matrix or lack row names, and alpha follows them", {
+  set.seed(10)
+  traits <- species_traits(4)
+  expect_equal(growth_rates(1:3, as.matrix(traits)), growth_rates(1:3, traits))
+  plain <- traits
+  rownames(plain) <- NULL
+  expect_equal(colnames(growth_rates(1:3, plain)), paste0("sp", 1:4))
+  expect_equal(colnames(simulate_static(traits, 1:3, sampling = "expected")$abundance),
+               rownames(traits))
+  land <- landscape_implicit(3)
+  alpha <- matrix(0.01, 4, 4, dimnames = list(rownames(traits), rownames(traits)))
+  alpha["sp1", "sp2"] <- 0.5
+  order <- c(3, 1, 4, 2)
+  set.seed(1)
+  one <- simulate_metacommunity(land, traits, alpha, n_steps = 20, seed_steps = 1)
+  set.seed(1)
+  other <- simulate_metacommunity(land, traits, alpha[order, order], n_steps = 20, seed_steps = 1)
+  expect_equal(one$abundance, other$abundance)
+  wrong <- alpha
+  rownames(wrong)[1] <- "other"
+  expect_error(simulate_metacommunity(land, traits, wrong), "differ")
+})
+
+test_that("sets of traits are matched by name", {
+  set.seed(11)
+  first <- species_traits(3)
+  second <- species_traits(3)
+  expected <- simulate_static(list(first, second), list(1:2, 2:3), sampling = "expected")
+  shuffled <- simulate_static(list(first, second[3:1, ]), list(1:2, 2:3), sampling = "expected")
+  expect_equal(expected$abundance, shuffled$abundance)
+  other <- second
+  rownames(other)[1] <- "other"
+  expect_error(simulate_static(list(first, other), list(1:2, 2:3)), "different species")
+})
+
+test_that("assemble_community() warns when it invents names", {
+  expect_warning(out <- assemble_community(c(1, 5, 9, 13), 2, rule = "neutral"), "no names")
+  expect_true(all(out$community %in% paste0("sp", 1:4)))
+  expect_silent(assemble_community(c(a = 1, b = 5, c = 9), 2, rule = "neutral"))
+})
+
+test_that("predictors must vary among occupied sites", {
+  set.seed(12)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(96, 2) + 1, 16, dimnames = list(NULL, tree$tip.label))
+  comm[1, ] <- 0
+  env <- c(5, rep(1, 15))
+  moves <- torus_permutations(4)[1:3, ]
+  expect_error(pcc_test(comm, tree, env, n_perm = 2, site_permutations = moves), "without variance")
+})

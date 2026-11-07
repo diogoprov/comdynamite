@@ -83,7 +83,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' Implements the regression of Leibold et al. (2010). For each node, sites without
 #' species of that node are removed, the contrast is standardised with species
 #' weights and summed within sites, and the result is regressed on the predictors
-#' standardised with site weights, using site richness as weights. Each node shows
+#' standardised with site weights, using the total of each site as weights, which is its
+#' richness with incidence data. Each node shows
 #' whether the two clades that split there differ in their response to the predictors.
 #'
 #' The test statistic is the explained over the residual sum of squares. It is

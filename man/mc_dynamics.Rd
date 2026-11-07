@@ -22,8 +22,8 @@ mc_dynamics(
 \item{r}{Sites x species matrix of density-independent growth rates, or a
 function of the time step that returns such a matrix.}
 
-\item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}, with species
-in the same order as the rows of \code{traits}.}
+\item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}. Species are matched to the
+rows of \code{traits} by name, or by position if \code{alpha} has no names.}
 
 \item{dispersal}{Emigration probability, one value or one per species.}
 
