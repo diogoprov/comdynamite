@@ -106,6 +106,13 @@ Permutations for sites that are neighbours.
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   : Permutations that move the patches of biogeographic events
 
+## Summary statistics
+
+The same statistics for simulated and observed data.
+
+- [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+  : Summary statistics of a metacommunity
+
 ## Results
 
 Tables, summaries and plots of results.
