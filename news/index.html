@@ -51,7 +51,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="comdynamite-development-version">comdynamite (development version)<a class="anchor" aria-label="anchor" href="#comdynamite-development-version"></a></h2>
-<ul><li>
+<ul><li>Permutations of <code><a href="../reference/pcc_test.html">pcc_test()</a></code>, <code><a href="../reference/pcps_test.html">pcps_test()</a></code>, <code><a href="../reference/phylo_beta_test.html">phylo_beta_test()</a></code> and <code><a href="../reference/trait_partition.html">trait_partition()</a></code> run in parallel under a plan of the future package, which is optional.</li>
+<li>Install from r-universe, as the README now shows.</li>
+<li>
 <code><a href="../reference/summary_stats.html">summary_stats()</a></code>: the same statistics for simulated and observed data, covering diversity, occupancy, abundance distribution, SES MPD and MNTD, distance decay, trait-environment relation and, with more than one step, temporal variation.</li>
 <li>
 <code><a href="../reference/pcps_test.html">pcps_test()</a></code>: principal coordinates of phylogenetic structure of Duarte et al. (2016), the method of the package PCPS, with tests of all the dissimilarity and of each axis, and <code>site_permutations</code> for a restricted null model, which that package does not have. Its statistics match those of PCPS 1.0.9 (<code>data-raw/validation_pcps.R</code>). With autocorrelated fields unrelated to each other, free permutations of sites rejected 29-80% at the 5% level; the torus rejected 4-7% when fields wrap around the grid and 6-25% when they stop at its edges.</li>

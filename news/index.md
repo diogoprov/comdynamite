@@ -2,6 +2,14 @@
 
 ## comdynamite (development version)
 
+- Permutations of
+  [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  and
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  run in parallel under a plan of the future package, which is optional.
+- Install from r-universe, as the README now shows.
 - [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md):
   the same statistics for simulated and observed data, covering
   diversity, occupancy, abundance distribution, SES MPD and MNTD,

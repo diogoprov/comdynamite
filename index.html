@@ -185,12 +185,23 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"diogoprov/comdynamite"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"comdynamite"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://diogoprov.r-universe.dev"</span>,</span>
+<span>                                          <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># or</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"diogoprov/comdynamite"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="large-analyses">Large analyses<a class="anchor" aria-label="anchor" href="#large-analyses"></a>
+</h2>
+<p>The permutations of <code><a href="reference/pcc_test.html">pcc_test()</a></code>, <code><a href="reference/pcps_test.html">pcps_test()</a></code>, <code><a href="reference/phylo_beta_test.html">phylo_beta_test()</a></code> and <code><a href="reference/trait_partition.html">trait_partition()</a></code> run in parallel when you choose a plan with the future package, and results can be reproduced with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for any number of workers. <code><a href="reference/node_test.html">node_test()</a></code> has its own <code>cores</code> argument: it took about 4 minutes with 600 species, 100 sites and 999 permutations on one core.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<p>Inputs can be tibbles of numeric columns, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> or <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> turn results into tables.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://provetelab.org/comdynamite/">comdynamite</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span>
@@ -217,7 +228,7 @@
 </li>
 <li>
 <p><strong><a href="https://github.com/diogoprov/treeshapesim" class="external-link">treeshapesim</a></strong> simulates trees with separately controlled imbalance and branching times, to use as regional pools in comdynamite. Tree shape can then be a factor in the design of a simulation study:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">40</span>, beta <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, c <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="reference/landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="reference/species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tr</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                              <span class="fu"><a href="reference/competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tr</span>, type <span class="op">=</span> <span class="st">"phylo"</span><span class="op">)</span>,</span>
@@ -274,6 +285,7 @@
 <div class="dev-status">
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
+<li><a href="https://diogoprov.r-universe.dev/comdynamite" class="external-link"><img src="https://diogoprov.r-universe.dev/badges/comdynamite" alt="r-universe"></a></li>
 <li><a href="https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 <li><a href="https://provetelab.org/comdynamite/"><img src="https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg" alt="pkgdown"></a></li>
 <li><a href="https://doi.org/10.5281/zenodo.23993533" class="external-link"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg" alt="DOI"></a></li>

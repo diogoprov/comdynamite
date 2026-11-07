@@ -34,8 +34,37 @@ gives the same map.
 
 ``` r
 
+install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev",
+                                          "https://cloud.r-project.org"))
+# or
 remotes::install_github("diogoprov/comdynamite")
 ```
+
+## Large analyses
+
+The permutations of
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+[`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+and
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+run in parallel when you choose a plan with the future package, and
+results can be reproduced with
+[`set.seed()`](https://rdrr.io/r/base/Random.html) for any number of
+workers.
+[`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+has its own `cores` argument: it took about 4 minutes with 600 species,
+100 sites and 999 permutations on one core.
+
+``` r
+
+future::plan(future::multisession, workers = 4)
+```
+
+Inputs can be tibbles of numeric columns, and
+[`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) or
+[`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
+turn results into tables.
 
 ## Example
 
