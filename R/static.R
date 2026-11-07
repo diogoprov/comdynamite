@@ -197,7 +197,11 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #' head(logistic_gradients(6))
 #' @export
 logistic_gradients <- function(scenario, n_sites = 31) {
-  stopifnot(length(scenario) == 1, scenario %in% 1:7, n_sites >= 4)
+  stopifnot(length(scenario) == 1, scenario %in% 1:7)
+  minimum <- if (scenario >= 5) 8 else 4
+  if (n_sites < minimum) {
+    stop("scenario ", scenario, " needs at least ", minimum, " sites", call. = FALSE)
+  }
   x <- seq(-15, 15, length.out = n_sites)
   y <- sample(x)
   to_range <- function(v) rescale(v, c(-15, 15))

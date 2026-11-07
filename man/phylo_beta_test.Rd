@@ -19,7 +19,8 @@ site.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation
 per row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free
-permutations of sites.}
+permutations of sites. Empty sites are then allowed, because they are part of the
+landscape: they leave the analysis but their predictors can reach occupied sites.}
 }
 \value{
 List of class \code{mc_phylo_beta} with \code{r2}, the adjusted R2; \code{statistic},

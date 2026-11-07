@@ -22,7 +22,8 @@
 #' @param tree A `phylo` object.
 #' @param predictor Numeric vector with the value of each site. The authors estimate one
 #'   vector for each predictor.
-#' @param alpha Significance level of the global test and of the selection.
+#' @param level Significance level of the global test and of the selection.
+#' @param alpha Deprecated, use `level`.
 #' @param n_sim Number of Brownian vectors.
 #' @param n_perm Number of permutations of sites and of species.
 #' @param site_permutations Optional matrix of site indices with one permutation per
@@ -60,7 +61,7 @@
 #'     predictors, and the code tests its simple correlation. We follow the code.
 #'   \item Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
 #'     permutation strategy, although Appendix A gives alpha / 2 only for the stacked
-#'     test. Here the larger p-value is compared with `alpha`.
+#'     test. Here the larger p-value is compared with `level`.
 #'   \item p-value of the global test with row permutations: the code divides by twice the
 #'     number of permutations, which halves it.
 #'   \item No significant result: the code returns random normal vectors, which can then
@@ -97,14 +98,15 @@
 #' keep <- rowSums(comm) > 0
 #' phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 #' @export
-phylo_vector <- function(comm, tree, predictor, n_perm = 999, alpha = 0.05, n_sim = 1000,
-                         site_permutations = NULL) {
+phylo_vector <- function(comm, tree, predictor, n_perm = 999, level = 0.05, n_sim = 1000,
+                         site_permutations = NULL, alpha = NULL) {
+  level <- deprecated_level(level, alpha)
   matched <- present_species(check_phylo_comm(comm, tree))
   comm <- matched$comm
   tree <- matched$tree
   predictor <- check_env(predictor, comm, "`predictor`")
   if (ncol(predictor) != 1) stop("`predictor` must be a single variable", call. = FALSE)
-  stopifnot(n_perm >= 1, n_sim >= 1, alpha > 0, alpha < 1)
+  stopifnot(n_perm >= 1, n_sim >= 1, level > 0, level < 1)
   check_permutations(site_permutations, comm)
   species <- colnames(comm)
 
@@ -120,13 +122,13 @@ phylo_vector <- function(comm, tree, predictor, n_perm = 999, alpha = 0.05, n_si
               pev_brown = NULL, eigenvectors = pcoa$vectors, eigenvalues = pcoa$values,
               eigenvector_correlation = observed,
               permutations = permutation_record(n_perm, site_permutations))
-  if (out$p_max <= alpha) {
+  if (out$p_max <= level) {
     ranked <- order(abs(observed), decreasing = TRUE)
     p_each <- pmax(vapply(ranked, function(j) permutation_p(abs(nulls$site[, j]), abs(observed[j])),
                           numeric(1)),
                    vapply(ranked, function(j) permutation_p(abs(nulls$taxa[, j]), abs(observed[j])),
                           numeric(1)))
-    out$selected <- ranked[cumsum(p_each > alpha) == 0]
+    out$selected <- ranked[cumsum(p_each > level) == 0]
   }
   if (length(out$selected) > 0) {
     pev <- drop(pcoa$vectors[, out$selected, drop = FALSE] %*% observed[out$selected])
@@ -180,6 +182,10 @@ print.mc_phylo_vector <- function(x, ...) {
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
 #' @param n_perm Number of permutations of sites and of species.
+#' @param site_permutations Optional matrix of site indices with one permutation per row, for
+#'   example from [torus_permutations()], to use instead of free permutations of sites. Empty
+#'   sites are then allowed: they leave the analysis but their predictors can reach occupied
+#'   sites.
 #' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
@@ -257,13 +263,13 @@ print.mc_phylo_vector <- function(x, ...) {
 #' plot_trait_partition(out)
 #' @export
 trait_partition <- function(comm, traits, env, space, component = c("mean", "variance"),
-                            n_perm = 999) {
+                            n_perm = 999, site_permutations = NULL) {
   component <- match.arg(component)
   if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)
   traits <- as.matrix(traits)
   if (!is.numeric(traits)) stop("`traits` is not numeric", call. = FALSE)
   stopifnot(n_perm >= 1)
-  comm <- check_species_comm(comm, rownames(traits), "`traits`")
+  comm <- check_species_comm(comm, rownames(traits), "`traits`", !is.null(site_permutations))
   comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
   if (anyNA(traits)) stop("`traits` has missing values", call. = FALSE)
@@ -272,6 +278,13 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   }
   env <- check_env(env, comm, collinear = TRUE)
   space <- check_env(space, comm, "`space`", collinear = TRUE)
+  check_permutations(site_permutations, comm)
+  draws <- site_draws(comm, n_perm, site_permutations)
+  landscape_env <- env
+  landscape_space <- space
+  comm <- comm[draws$occupied, , drop = FALSE]
+  env <- env[draws$occupied, , drop = FALSE]
+  space <- space[draws$occupied, , drop = FALSE]
   site_weights <- rowSums(comm)
   n <- nrow(comm)
   sizes <- c(abc = ncol(env) + ncol(space), ab = ncol(env), bc = ncol(space))
@@ -306,9 +319,9 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   share <- sum(site_weights * response^2) / total
   ss <- components(response, env, space)
   observed <- statistics(response, env, space)
-  null_site <- do.call(cbind, progress_map(seq_len(n_perm), function(r) {
-    i <- sample.int(n)
-    statistics(response, env[i, , drop = FALSE], space[i, , drop = FALSE])
+  null_site <- do.call(cbind, progress_map(seq_len(nrow(draws$rows)), function(r) {
+    i <- draws$rows[r, ]
+    statistics(response, landscape_env[i, , drop = FALSE], landscape_space[i, , drop = FALSE])
   }, "Sites"))
   null_taxa <- do.call(cbind, progress_map(seq_len(n_perm), function(r) {
     shuffled <- traits[sample.int(nrow(traits)), , drop = FALSE]
@@ -331,7 +344,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
                  semipartial = sqrt(by_trait(observed)) * sign(slopes),
                  p_partial = pmax(tested_p(p_site), tested_p(p_taxa)),
                  p_partial_site = tested_p(p_site), p_partial_taxa = tested_p(p_taxa),
-                 permutations = permutation_record(n_perm)),
+                 permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_trait_partition")
 }
 

@@ -76,8 +76,15 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    n_steps = 1000, env_time = NULL,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0) {
-  stopifnot(inherits(landscape, "mc_landscape"), nrow(alpha) == nrow(traits),
-            ncol(alpha) == nrow(traits))
+  stopifnot(inherits(landscape, "mc_landscape"))
+  missing_traits <- setdiff(c("optimum", "sigma", "r_max"), names(traits))
+  if (length(missing_traits) > 0) {
+    stop("`traits` needs the columns of `species_traits()`; missing: ",
+         paste(missing_traits, collapse = ", "), call. = FALSE)
+  }
+  if (!identical(dim(alpha), rep(nrow(traits), 2L))) {
+    stop("`alpha` needs one row and one column per species (", nrow(traits), ")", call. = FALSE)
+  }
   sites <- paste0("site", seq_along(landscape$env))
   r <- if (is.null(env_time)) {
     growth_rates(stats::setNames(landscape$env, sites), traits)
@@ -125,6 +132,9 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   dispersal <- rep_len(dispersal, k_all)
   extirpation <- rep_len(extirpation, k_all)
   stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
+  if (m == 1 && any(dispersal > 0)) {
+    stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
+  }
   sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
   species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
   record_steps <- sort(unique(record_steps[record_steps >= 1 & record_steps <= n_steps]))

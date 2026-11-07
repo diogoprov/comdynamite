@@ -9,9 +9,10 @@ phylo_vector(
   tree,
   predictor,
   n_perm = 999,
-  alpha = 0.05,
+  level = 0.05,
   n_sim = 1000,
-  site_permutations = NULL
+  site_permutations = NULL,
+  alpha = NULL
 )
 }
 \arguments{
@@ -25,12 +26,14 @@ vector for each predictor.}
 
 \item{n_perm}{Number of permutations of sites and of species.}
 
-\item{alpha}{Significance level of the global test and of the selection.}
+\item{level}{Significance level of the global test and of the selection.}
 
 \item{n_sim}{Number of Brownian vectors.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per
 row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations.}
+
+\item{alpha}{Deprecated, use \code{level}.}
 }
 \value{
 List of class \code{mc_phylo_vector} with \code{correlation}, the correlations of \code{pev}
@@ -89,7 +92,7 @@ predictor.
 predictors, and the code tests its simple correlation. We follow the code.
 \item Significance level: Appendix B uses 0.05, and the code uses alpha / 2 for every
 permutation strategy, although Appendix A gives alpha / 2 only for the stacked
-test. Here the larger p-value is compared with \code{alpha}.
+test. Here the larger p-value is compared with \code{level}.
 \item p-value of the global test with row permutations: the code divides by twice the
 number of permutations, which halves it.
 \item No significant result: the code returns random normal vectors, which can then

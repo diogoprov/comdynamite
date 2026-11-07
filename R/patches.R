@@ -11,7 +11,10 @@
 #' Patches take a compact form near their random site, so their shape is not kept, and a
 #' patch next to an edge or to another patch may take an elongated form or be split.
 #' Distances are Euclidean, so coordinates should be projected. A landscape with holes or
-#' with parts far apart, such as islands, may give patches that cross the gaps.
+#' with parts far apart, such as islands, may give patches that cross the gaps. With sparse
+#' sites, as cells with records in a large region, the default `gap` splits areas into many
+#' patches of one site, which move almost freely, so `gap` should follow the scale of the
+#' area. Results should be compared across values of `gap`.
 #'
 #' This method was built for this package and has no published evaluation. In
 #' `data-raw/validation_edges.R`, with communities that followed a hidden autocorrelated
@@ -59,6 +62,10 @@ patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
   if (is.null(gap)) {
     nearest <- apply(distances + diag(Inf, nrow(distances)), 1, min)
     gap <- 1.5 * stats::median(nearest)
+    if (gap == 0) {
+      stop("most sites share their coordinates with another site: remove repeated sites or ",
+           "give `gap`", call. = FALSE)
+    }
   }
   stopifnot(gap > 0)
   sites <- rownames(biogeography)

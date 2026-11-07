@@ -95,3 +95,21 @@ permutation_line <- function(record) {
       format(1 / (min(record$sites, record$species, record$areas) + 1), digits = 2), "\n",
       sep = "")
 }
+
+# `alpha` also names the competition matrix, so significance levels are called `level`
+deprecated_level <- function(level, alpha) {
+  if (is.null(alpha)) return(level)
+  warning("`alpha` is deprecated, use `level`", call. = FALSE)
+  alpha
+}
+
+# sites with individuals. With restricted permutations, empty sites stay in the landscape, so
+# draws take the predictors of any site and keep those that land on occupied sites. Row r of
+# the result gives the rows of the predictors for the occupied sites
+site_draws <- function(comm, n_perm, site_permutations) {
+  occupied <- rowSums(comm) > 0
+  if (is.null(site_permutations)) {
+    return(list(occupied = occupied, rows = t(replicate(n_perm, sample.int(nrow(comm))))))
+  }
+  list(occupied = occupied, rows = site_permutations[, occupied, drop = FALSE])
+}

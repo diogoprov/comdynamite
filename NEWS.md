@@ -1,3 +1,23 @@
+# comdynamite (development version)
+
+- `as.data.frame()`, `summary()` and `plot()` methods for the results of the analyses.
+- `node_test()`: `r2_weighted`, which stays between 0 and 1, unlike `r2`, inherited from the
+  original code; `n_draws`, the valid draws of sites. Errors in parallel workers now stop the
+  function. The default of `n_perm` is 999, as in the other functions.
+- `trait_partition()`: `site_permutations`.
+- `pcc_test()`, `phylo_beta_test()` and `trait_partition()` accept empty sites with
+  `site_permutations`, since these sites are part of the landscape.
+- The significance level is now `level` in `phylo_vector()`, `plot_node_test()`,
+  `plot_node_heatmap()` and `plot_trait_partition()`, because `alpha` also names the
+  competition matrix. `alpha` still works, with a warning.
+- `patch_permutations()`: evaluated with autocorrelation up to the scale of the landscape, and
+  advice on `gap` for sparse sites.
+- `pcc_test()` gives an `r2` of 0, not `NaN`, when no adjusted R2 is positive.
+- `node_contrasts()` accepts clades with branches of length zero, and `plot_node_heatmap()`
+  accepts a predictor and an event with the same name.
+- Clearer errors in `simulate_metacommunity()`, `mc_dynamics()` with one site,
+  `logistic_gradients()` and `plot_node_heatmap()` without tested nodes.
+
 # comdynamite 0.6.0
 
 - `patch_permutations()`: restricted null model for the events of `node_test()` in landscapes

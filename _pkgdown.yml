@@ -57,6 +57,10 @@ reference:
   contents:
   - torus_permutations
   - patch_permutations
+- title: Results
+  desc: Tables, summaries and plots of results.
+  contents:
+  - result-methods
 - title: Data
   contents:
   - daphniids

@@ -54,9 +54,11 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @param squared Passed to [phylo_eigenvectors()].
 #' @param site_permutations Optional matrix of site indices with one permutation
 #'   per row, for example from [torus_permutations()], to use instead of free
-#'   permutations of sites.
+#'   permutations of sites. Empty sites are then allowed, because they are part of the
+#'   landscape: they leave the analysis but their predictors can reach occupied sites.
 #' @return List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
-#'   values, which is the value the authors recommend reporting; `statistic`, the
+#'   values, which is the value the authors recommend reporting, or 0 if none is positive;
+#'   `statistic`, the
 #'   variance of the adjusted R2 across eigenvectors; `p_site`, `p_taxa` and
 #'   `p_max`; `r2_adjusted`, with one value per eigenvector; and `permutations`.
 #' @references
@@ -76,30 +78,29 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @export
 pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
                      site_permutations = NULL) {
-  matched <- present_species(check_phylo_comm(comm, tree), minimum = 3)
+  matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
+                             minimum = 3)
   comm <- matched$comm
   tree <- matched$tree
-  env <- check_env(env, comm)
-  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  landscape_env <- check_env(env, comm)
   check_permutations(site_permutations, comm)
+  draws <- site_draws(comm, n_perm, site_permutations)
+  comm <- comm[draws$occupied, , drop = FALSE]
+  env <- landscape_env[draws$occupied, , drop = FALSE]
+  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
   vectors <- phylo_eigenvectors(tree, squared = squared)
   observed <- pcc_r2(comm, vectors, env)
   statistic <- stats::var(observed)
 
-  sites <- if (is.null(site_permutations)) {
-    t(replicate(n_perm, sample.int(nrow(comm))))
-  } else {
-    site_permutations
-  }
-  null_site <- unlist(progress_map(seq_len(nrow(sites)), function(r) {
-    stats::var(pcc_r2(comm, vectors, env[sites[r, ], , drop = FALSE]))
+  null_site <- unlist(progress_map(seq_len(nrow(draws$rows)), function(r) {
+    stats::var(pcc_r2(comm, vectors, landscape_env[draws$rows[r, ], , drop = FALSE]))
   }, "Sites"))
   null_taxa <- unlist(progress_map(seq_len(n_perm), function(r) {
     stats::var(pcc_r2(comm[, sample.int(ncol(comm)), drop = FALSE], vectors, env))
   }, "Species"))
   p_site <- (sum(null_site >= statistic) + 1) / (length(null_site) + 1)
   p_taxa <- (sum(null_taxa >= statistic) + 1) / (length(null_taxa) + 1)
-  structure(list(r2 = mean(observed[observed > 0]), statistic = statistic, p_site = p_site,
+  structure(list(r2 = sum(pmax(observed, 0)) / max(sum(observed > 0), 1), statistic = statistic, p_site = p_site,
                  p_taxa = p_taxa, p_max = max(p_site, p_taxa), r2_adjusted = observed,
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_pcc")

@@ -61,6 +61,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
   side_values <- function(node, sign) {
     if (!branch_lengths) return(spread(node, sign))
     values <- shared(node, 0)
+    # a clade with branches of length zero has equal weights
+    if (sum(values) == 0) values[] <- 1
     sign * values / sum(values)
   }
   informative <- Filter(function(node) cherries || any(children[[node]] > n_tips), names(children))
@@ -89,8 +91,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
 #' et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 #' `p_adjusted` gives the false discovery rate that the article uses. This correction
-#' needs many permutations, as the smallest p-value is 1 / (`n_perm` + 1), so the default
-#' is the 9999 of the article.
+#' needs many permutations, as the smallest p-value is 1 / (`n_perm` + 1). The article used
+#' 9999, which is advisable with many nodes.
 #'
 #' The article permutes sites and species at once, which is `p_joint`. This tests the
 #' null hypothesis that neither the environment nor the phylogeny matters, so it is not
@@ -142,8 +144,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' }
 #'
 #' As in the original, R2 sums squares without site weights, although the fit
-#' uses them, so it is not the R2 of a weighted regression, and the adjusted R2
-#' uses the degrees of freedom of an unweighted model.
+#' uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
+#' R2 uses the degrees of freedom of an unweighted model. `r2_weighted` sums squares with the
+#' site weights, stays between 0 and 1, and is the value to report as a proportion.
 #'
 #' Nodes for which a predictor has no variance among the remaining sites, with too
 #' few sites, or with a clade without individuals get `NA`. The original stops with an
@@ -173,8 +176,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results still depend on the number of
 #'   cores.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
-#'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `statistic`,
-#'   `p_site`, `p_taxa`, `p_max`, `p_joint` and `p_adjusted`; `semipartial`, a matrix of
+#'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `r2_weighted`, `statistic`,
+#'   `p_site`, `p_taxa`, `p_max`, `p_joint`, `n_draws`, the valid draws of sites, since a
+#'   draw without variance does not count, and `p_adjusted`; `semipartial`, a matrix of
 #'   nodes by predictors; `p_partial`, with the larger of the two p-values for each of
 #'   them; `p_partial_site`, with the p-values of sites alone; `p_partial_joint`, with
 #'   those of the permutation of the article; `biogeography`, a list with the same
@@ -208,7 +212,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' round(out$semipartial, 2)
 #' plot_node_test(out, daphniids$tree, test = "site")
 #' @export
-node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1,
+node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores = 1,
                       site_permutations = NULL, area_permutations = NULL) {
   if (inherits(nodes, "phylo")) {
     stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
@@ -236,7 +240,13 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
       if (workers > 1) stats::runif(1)
       parallel::mclapply(batch, function(i) run(nodes[, i]), mc.cores = workers)
     }, name)
-    unlist(results, recursive = FALSE)
+    results <- unlist(results, recursive = FALSE)
+    failed <- vapply(results, inherits, logical(1), "try-error")
+    if (any(failed)) {
+      stop("a node failed in a parallel worker: ", conditionMessage(attr(results[[which(failed)[1]]],
+                                                                         "condition")), call. = FALSE)
+    }
+    results
   }
   matrix_of <- function(results, field, names) {
     matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
@@ -456,9 +466,10 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   blank <- rep(NA_real_, ncol(env))
   if (is.na(observed$statistic)) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
-                                     r2 = NA_real_, r2_adjusted = NA_real_, statistic = NA_real_,
+                                     r2 = NA_real_, r2_adjusted = NA_real_,
+                                     r2_weighted = NA_real_, statistic = NA_real_,
                                      p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_,
-                                     p_joint = NA_real_),
+                                     p_joint = NA_real_, n_draws = NA_integer_),
                 semipartial = blank, p_partial = blank, p_partial_site = blank,
                 p_partial_joint = blank))
   }
@@ -492,8 +503,10 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   partial_joint <- partial_p(by_both)
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
+                            r2_weighted = observed$r2_weighted,
                             statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
-                            p_max = max(p_site, p_taxa), p_joint = p_joint),
+                            p_max = max(p_site, p_taxa), p_joint = p_joint,
+                            n_draws = sum(!is.na(by_site[, 1]))),
        semipartial = observed$semipartial, p_partial = pmax(partial_site, partial_taxa),
        p_partial_site = partial_site, p_partial_joint = partial_joint)
 }
@@ -529,6 +542,7 @@ node_fit <- function(incidence, values, env) {
   mean_residual <- residual / (n - p - 1)
   list(statistic = explained / residual, f = explained / p / mean_residual,
        partial_f = partial_r2 * total / mean_residual, r2 = r2,
+       r2_weighted = sum(site_weights * fit^2) / sum(site_weights * response^2),
        r2_adjusted = 1 - (n - 1) / (n - p - 1) * (1 - r2),
        semipartial = sign(slopes) * sqrt(pmax(partial_r2, 0)), n_sites = n)
 }

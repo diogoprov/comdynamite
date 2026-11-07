@@ -10,7 +10,8 @@ trait_partition(
   env,
   space,
   component = c("mean", "variance"),
-  n_perm = 999
+  n_perm = 999,
+  site_permutations = NULL
 )
 }
 \arguments{
@@ -28,6 +29,11 @@ order, and those in only one of the two are dropped with a warning.}
 dispersion.}
 
 \item{n_perm}{Number of permutations of sites and of species.}
+
+\item{site_permutations}{Optional matrix of site indices with one permutation per row, for
+example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Empty
+sites are then allowed: they leave the analysis but their predictors can reach occupied
+sites.}
 }
 \value{
 List of class \code{mc_trait_partition} with \code{fractions}, a data frame with one row

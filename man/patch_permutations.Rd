@@ -36,14 +36,18 @@ because a landscape with edges does not wrap around.
 Patches take a compact form near their random site, so their shape is not kept, and a
 patch next to an edge or to another patch may take an elongated form or be split.
 Distances are Euclidean, so coordinates should be projected. A landscape with holes or
-with parts far apart, such as islands, may give patches that cross the gaps.
+with parts far apart, such as islands, may give patches that cross the gaps. With sparse
+sites, as cells with records in a large region, the default \code{gap} splits areas into many
+patches of one site, which move almost freely, so \code{gap} should follow the scale of the
+area. Results should be compared across values of \code{gap}.
 
 This method was built for this package and has no published evaluation. In
 \code{data-raw/validation_edges.R}, with communities that followed a hidden autocorrelated
 environment and areas without effect, it rejected 3.0\% to 6.3\% of the tests at the 5\% level
 in a square, a strip and an irregular band, against 44\% to 55\% with free permutations (see
-the article on analysing clades). Autocorrelation at a scale close to that of the
-landscape, areas much larger than those simulated and real landscapes were not evaluated.
+the article on analysing clades). With autocorrelation at scales up to that of the
+landscape it rejected 2.2\% to 6.0\%, and free permutations 49\% to 75\%. Areas much larger
+than those simulated were not evaluated.
 }
 \examples{
 coords <- expand.grid(x = 1:10, y = 1:6)

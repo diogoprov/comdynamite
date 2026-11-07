@@ -100,7 +100,7 @@ test_that("the phylogenetic vector follows a phylogenetic response", {
 test_that("no vector comes from a predictor without relation", {
   d <- simulated()
   set.seed(3)
-  out <- phylo_vector(d$comm, d$tree, rnorm(length(d$env)), n_perm = 99, alpha = 0.001, n_sim = 5)
+  out <- phylo_vector(d$comm, d$tree, rnorm(length(d$env)), n_perm = 99, level = 0.001, n_sim = 5)
   expect_null(out$pev)
   expect_length(out$selected, 0)
   expect_output(print(out), "0 retained")

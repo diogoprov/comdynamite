@@ -363,3 +363,61 @@ test_that("node_test() uses area_permutations for events only", {
   expect_error(node_test(comm, nodes, env, events, n_perm = 3, area_permutations = drawn),
                "order of `comm`")
 })
+
+test_that("node_test() has a weighted R2 and counts draws", {
+  set.seed(5)
+  nodes <- node_contrasts(daphniids$tree)
+  out <- node_test(daphniids$comm, nodes, daphniids$env[, 1:2], n_perm = 5)
+  tested <- out$nodes[!is.na(out$nodes$r2), ]
+  expect_true(all(tested$r2_weighted >= 0 & tested$r2_weighted <= 1))
+  expect_true(all(tested$n_draws <= 5))
+  expect_equal(nrow(as.data.frame(out)), ncol(nodes))
+  expect_false(is.unsorted(summary(out)$p_adjusted))
+})
+
+test_that("clades with branches of length zero have equal weights", {
+  tree <- ape::read.tree(text = "((a:0,b:0):0,(c:1,d:1):1);")
+  contrasts <- node_contrasts(tree, branch_lengths = TRUE)
+  expect_equal(unname(contrasts[c("a", "b"), 1]), c(-0.5, -0.5))
+})
+
+test_that("a failure in a worker stops node_test()", {
+  skip_on_os("windows")
+  nodes <- node_contrasts(daphniids$tree)
+  local_mocked_bindings(one_node = function(...) stop("broken"))
+  expect_error(suppressWarnings(node_test(daphniids$comm, nodes, daphniids$env[, 1:2],
+                                          n_perm = 2, cores = 2)), "broken")
+})
+
+test_that("result methods give tables and plots", {
+  set.seed(6)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(180, 2) + 1, 30, dimnames = list(NULL, tree$tip.label))
+  env <- rnorm(30)
+  pcc <- pcc_test(comm, tree, env, n_perm = 3)
+  beta <- phylo_beta_test(comm, tree, env, n_perm = 3)
+  expect_equal(as.data.frame(pcc), summary(pcc))
+  expect_equal(as.data.frame(beta)$p_max, summary(beta)$p_max)
+  vector <- phylo_vector(comm, tree, env, n_perm = 3, level = 0.5, n_sim = 3)
+  expect_equal(as.data.frame(vector), summary(vector))
+  traits <- cbind(t1 = rnorm(6))
+  rownames(traits) <- tree$tip.label
+  part <- trait_partition(comm, traits, env, rnorm(30), n_perm = 3)
+  expect_equal(as.data.frame(part), summary(part))
+  expect_silent(plot(part))
+  out <- node_test(comm, node_contrasts(tree), env, n_perm = 3)
+  expect_silent(plot(out, tree, level = 0.5))
+})
+
+test_that("the heatmap handles repeated names and empty results", {
+  set.seed(7)
+  tree <- ape::rcoal(5)
+  comm <- matrix(rpois(100, 3), 20, dimnames = list(NULL, tree$tip.label))
+  env <- cbind(same = rnorm(20))
+  events <- cbind(same = rep(c(1, -1), 10))
+  out <- node_test(comm, node_contrasts(tree), env, events, n_perm = 3)
+  expect_equal(ncol(plot_node_heatmap(out, level = 1)), 2)
+  out$semipartial[] <- NA
+  out$biogeography$semipartial[] <- NA
+  expect_error(plot_node_heatmap(out), "no node was tested")
+})

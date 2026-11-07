@@ -20,7 +20,8 @@
 #'   See [node_test()] for what each one tests.
 #' @param type `"phylogram"`, as in the article, or `"fan"`, for very large trees, with the
 #'   names of the variables along the radii so that they stay clear of the species.
-#' @param alpha Significance level.
+#' @param level Significance level.
+#' @param alpha Deprecated, use `level`.
 #' @param col Colours of predictors and biogeographic events.
 #' @param cex Size of the text.
 #' @param legend Add a legend?
@@ -50,13 +51,14 @@
 #' }
 #' @export
 plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
-                           type = c("phylogram", "fan"), alpha = 0.05,
-                           col = c("#0072B2", "#D55E00"), cex = 0.8, legend = TRUE, ...) {
+                           type = c("phylogram", "fan"), level = 0.05,
+                           col = c("#0072B2", "#D55E00"), cex = 0.8, legend = TRUE, ..., alpha = NULL) {
+  level <- deprecated_level(level, alpha)
   stopifnot(inherits(x, "mc_node_test"), inherits(tree, "phylo"), length(col) == 2)
   test <- match.arg(test)
   type <- match.arg(type)
   check_node_tree(x, tree)
-  marks <- node_marks(x, test, alpha)
+  marks <- node_marks(x, test, level)
   # names of species and of variables can go beyond the plot region
   old <- graphics::par(xpd = NA)
   on.exit(graphics::par(old))
@@ -109,12 +111,14 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #'                  n_perm = 49)
 #' plot_node_heatmap(out, test = "site")
 #' @export
-plot_node_heatmap <- function(x, test = c("max", "site", "joint"), alpha = 0.05,
-                              col = c("#0072B2", "#D55E00"), cex = 0.8, ...) {
+plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
+                              col = c("#0072B2", "#D55E00"), cex = 0.8, ..., alpha = NULL) {
+  level <- deprecated_level(level, alpha)
   stopifnot(inherits(x, "mc_node_test"), length(col) == 2)
   test <- match.arg(test)
   values <- cbind(x$semipartial, x$biogeography$semipartial)
-  marks <- node_marks(x, test, alpha)
+  if (all(is.na(values))) stop("no node was tested, so there is nothing to show", call. = FALSE)
+  marks <- node_marks(x, test, level)
   n_nodes <- nrow(values)
   n_variables <- ncol(values)
   rows <- rev(seq_len(n_nodes))
@@ -127,13 +131,13 @@ plot_node_heatmap <- function(x, test = c("max", "site", "joint"), alpha = 0.05,
   graphics::axis(1, seq_len(n_variables), colnames(values), las = 2, tick = FALSE, cex.axis = cex)
   graphics::axis(2, seq_len(n_nodes), rownames(values)[rows], las = 1, tick = FALSE, cex.axis = cex)
   graphics::box()
-  significant <- matrix(0, n_nodes, n_variables, dimnames = dimnames(values))
-  significant[cbind(marks$node, marks$variable)] <- 1 + marks$corrected
+  significant <- matrix(0, n_nodes, n_variables)
+  significant[cbind(match(marks$node, rownames(values)), marks$column)] <- 1 + marks$corrected
   cells <- which(!is.na(values), arr.ind = TRUE)
-  level <- significant[cells]
+  strength <- significant[cells]
   graphics::text(cells[, 2], n_nodes + 1 - cells[, 1],
-                 paste0(format(round(values[cells], 2), nsmall = 2), c("", "", "*")[level + 1]),
-                 font = ifelse(level > 0, 2, 1), cex = cex * 0.85)
+                 paste0(format(round(values[cells], 2), nsmall = 2), c("", "", "*")[strength + 1]),
+                 font = ifelse(strength > 0, 2, 1), cex = cex * 0.85)
   invisible(values)
 }
 
@@ -149,17 +153,18 @@ check_node_tree <- function(x, tree) {
 # one row for each significant test, in the sets of predictors and events
 node_marks <- function(x, test, alpha) {
   field <- c(max = "p_partial", site = "p_partial_site", joint = "p_partial_joint")[[test]]
-  one_set <- function(p, set) {
+  one_set <- function(p, set, offset = 0) {
     if (is.null(p)) return(NULL)
     table <- data.frame(node = rep(rownames(p), ncol(p)), set = set,
-                        variable = rep(colnames(p), each = nrow(p)), p = as.vector(p),
+                        variable = rep(colnames(p), each = nrow(p)),
+                        column = rep(seq_len(ncol(p)), each = nrow(p)) + offset, p = as.vector(p),
                         p_adjusted = stats::p.adjust(as.vector(p), "BH"))
     table <- table[!is.na(table$p) & table$p <= alpha, ]
     table$corrected <- table$p_adjusted <= alpha
     table
   }
   marks <- rbind(one_set(x[[field]], "environment"),
-                 one_set(x$biogeography[[field]], "biogeography"))
+                 one_set(x$biogeography[[field]], "biogeography", ncol(x[[field]])))
   rownames(marks) <- NULL
   marks
 }
@@ -213,7 +218,8 @@ label_place <- function(x, y, width, gap, angle, room) {
 #'   `"r2_component"` for the share of the mean or variance component.
 #' @param test Permutation test: `"max"` for the larger p-value of sites and species,
 #'   `"site"` or `"taxa"`.
-#' @param alpha Significance level.
+#' @param level Significance level.
+#' @param alpha Deprecated, use `level`.
 #' @param col Colour of significant segments.
 #' @param labels Names of the two sets of predictors.
 #' @param cex Size of the text.
@@ -239,9 +245,10 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' plot_trait_partition(out)
 #' @export
 plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
-                                 test = c("max", "site", "taxa"), alpha = 0.05,
+                                 test = c("max", "site", "taxa"), level = 0.05,
                                  col = "#0072B2", labels = c("Environment", "Space"),
-                                 cex = 0.9, ...) {
+                                 cex = 0.9, ..., alpha = NULL) {
+  level <- deprecated_level(level, alpha)
   stopifnot(inherits(x, "mc_trait_partition"), length(labels) == 2)
   value <- match.arg(value)
   test <- match.arg(test)
@@ -250,7 +257,7 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   shown$shown <- pmax(shown[[value]], 0)
   p <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
   fill <- function(fraction) {
-    if (p[[fraction]] <= alpha) col else grDevices::adjustcolor(col, 0.3)
+    if (p[[fraction]] <= level) col else grDevices::adjustcolor(col, 0.3)
   }
   edges <- c(0, cumsum(shown$shown))
   old <- graphics::par(mar = c(3, 1, 3, 1), xpd = NA)

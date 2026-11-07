@@ -9,7 +9,7 @@ node_test(
   nodes,
   env,
   biogeography = NULL,
-  n_perm = 9999,
+  n_perm = 999,
   cores = 1,
   site_permutations = NULL,
   area_permutations = NULL
@@ -46,8 +46,9 @@ permutations. Sites must be in the order of \code{comm}.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
-node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{statistic},
-\code{p_site}, \code{p_taxa}, \code{p_max}, \code{p_joint} and \code{p_adjusted}; \code{semipartial}, a matrix of
+node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{r2_weighted}, \code{statistic},
+\code{p_site}, \code{p_taxa}, \code{p_max}, \code{p_joint}, \code{n_draws}, the valid draws of sites, since a
+draw without variance does not count, and \code{p_adjusted}; \code{semipartial}, a matrix of
 nodes by predictors; \code{p_partial}, with the larger of the two p-values for each of
 them; \code{p_partial_site}, with the p-values of sites alone; \code{p_partial_joint}, with
 those of the permutation of the article; \code{biogeography}, a list with the same
@@ -67,8 +68,8 @@ tested by permuting sites, and by replacing the species of the node with a rando
 set of the same size from all species. Following Peres-Neto et al. (2012) and ter Braak
 et al. (2012), the p-value to report is the larger of the two tests. With many nodes these p-values need a correction, and
 \code{p_adjusted} gives the false discovery rate that the article uses. This correction
-needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1), so the default
-is the 9999 of the article.
+needs many permutations, as the smallest p-value is 1 / (\code{n_perm} + 1). The article used
+9999, which is advisable with many nodes.
 
 The article permutes sites and species at once, which is \code{p_joint}. This tests the
 null hypothesis that neither the environment nor the phylogeny matters, so it is not
@@ -120,8 +121,9 @@ p-values of sites alone are the same, but those that use species differ.
 }
 
 As in the original, R2 sums squares without site weights, although the fit
-uses them, so it is not the R2 of a weighted regression, and the adjusted R2
-uses the degrees of freedom of an unweighted model.
+uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
+R2 uses the degrees of freedom of an unweighted model. \code{r2_weighted} sums squares with the
+site weights, stays between 0 and 1, and is the value to report as a proportion.
 
 Nodes for which a predictor has no variance among the remaining sites, with too
 few sites, or with a clade without individuals get \code{NA}. The original stops with an

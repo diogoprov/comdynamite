@@ -28,9 +28,9 @@ nodes <- node_contrasts(daphniids$tree)
 dim(nodes)
 ```
 
-`node_test()` regresses each contrast on the predictors. The default of 9999 permutations
-suits the false discovery rate. We use 999 here to keep the page quick to build, with
-nodes in parallel on two cores.
+`node_test()` regresses each contrast on the predictors. The 9999 permutations of the
+article suit the false discovery rate. We use the default of 999 here to keep the page quick
+to build, with nodes in parallel on two cores.
 
 ```{r}
 set.seed(1)
