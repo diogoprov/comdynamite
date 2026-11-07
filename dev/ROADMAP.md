@@ -273,7 +273,7 @@ v0.6.0 por decisão de 2026-11-06.
 
 Da auditoria, para antes da 1.0:
 
-- [ ] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
+- [x] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
       e Description, artigo sobre preparar dados próprios e artigo de `pcc_test()` e
       `phylo_beta_test()`.
 - [ ] Nomes: `alpha` tem três sentidos, `r2` e `statistic` mudam entre funções, `p_partial`

@@ -4,12 +4,47 @@
 \name{comdynamite-package}
 \alias{comdynamite}
 \alias{comdynamite-package}
-\title{comdynamite: Process-Based Metacommunity Simulations with Phylogenetic Structure}
+\title{comdynamite: Linking Traits, Phylogenies and Biogeography in Metacommunities}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Simulates metacommunity dynamics with the process-based model of Thompson et al. (2020) \doi{10.1111/ele.13568}: density-independent growth that depends on the match between each species' environmental optimum and the local environment, Beverton-Holt competition, Poisson demographic stochasticity, and emigration and immigration among sites. Landscapes can be spatially implicit, with uniform dispersal, or explicit grids with an exponential dispersal kernel and a spatially autocorrelated environment, and the environment can change over time. Species traits (environmental optima, niche breadths and maximum growth rates) can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process with one or several optima, and interspecific competition can be structured by relatedness. Rule-based assembly without population dynamics (limiting similarity, habitat filtering and neutral assembly) follows Kraft et al. (2007) \doi{10.1086/519400}, and static metacommunities with unimodal species responses follow Peres-Neto et al. (2012) \doi{10.1890/11-0494.1}. The model was implemented from the published equations.
+Methods that link traits, phylogenies, biogeography and metacommunities, to analyse data and to simulate it. Analyses include the node regression of Leibold et al. (2010) \doi{10.1111/j.1461-0248.2010.01523.x}, with biogeographic events and restricted null models, the phylogenetic gradient analysis of Peres-Neto et al. (2012) \doi{10.1890/11-0494.1}, and the phylogenetic community composition and beta diversity tests of Peres-Neto and Kembel (2015) \doi{10.1007/s11258-014-0405-0}. Simulations follow the process-based model of Thompson et al. (2020) \doi{10.1111/ele.13568}, with environmental filtering, competition, demographic stochasticity and dispersal in spatially implicit or grid landscapes. Species traits can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process, and competition can be structured by relatedness. Rule-based assembly follows Kraft et al. (2007) \doi{10.1086/519400}. Models were implemented from the published equations.
 }
+\section{Analyse data}{
+
+\itemize{
+\item Which clades respond to the environment or to biogeographic events?
+\code{\link[=node_contrasts]{node_contrasts()}} codes the nodes, \code{\link[=biogeography_matrix]{biogeography_matrix()}} the events and
+\code{\link[=node_test]{node_test()}} tests them. \code{\link[=plot_node_test]{plot_node_test()}} and \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results.
+\item Does phylogenetic composition follow the environment across the whole tree?
+\code{\link[=pcc_test]{pcc_test()}} works on phylogenetic eigenvectors and \code{\link[=phylo_beta_test]{phylo_beta_test()}} on the
+phylogenetic distances between communities, from \code{\link[=phylo_beta]{phylo_beta()}}.
+\item Which phylogenetic axis relates to a predictor? \code{\link[=phylo_vector]{phylo_vector()}}.
+\item How much of trait or phylogenetic variation is due to environment and space?
+\code{\link[=trait_partition]{trait_partition()}} and \code{\link[=plot_trait_partition]{plot_trait_partition()}}.
+\item Are sites neighbours? \code{\link[=torus_permutations]{torus_permutations()}} gives restricted null models for a
+torus and \code{\link[=patch_permutations]{patch_permutations()}} for the events of a landscape with edges.
+}
+}
+
+\section{Simulate data}{
+
+\itemize{
+\item Dynamics with growth, competition and dispersal: \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, from
+\code{\link[=landscape_implicit]{landscape_implicit()}} or \code{\link[=landscape_grid]{landscape_grid()}}, \code{\link[=species_traits]{species_traits()}} and
+\code{\link[=competition_matrix]{competition_matrix()}}.
+\item Static communities along gradients: \code{\link[=simulate_static]{simulate_static()}} and \code{\link[=simulate_logistic]{simulate_logistic()}}.
+\item Assembly by rules, without dynamics: \code{\link[=assemble_community]{assemble_community()}}.
+\item Traits on a tree: \code{\link[=species_traits]{species_traits()}}, \code{\link[=trait_bm]{trait_bm()}} and \code{\link[=traits_ou]{traits_ou()}}.
+}
+}
+
+\section{Where to start}{
+
+The articles at \url{https://provetelab.org/comdynamite/articles/} go through each question.
+"Preparing your data" shows the format that the analyses expect.
+}
+
 \seealso{
 Useful links:
 \itemize{

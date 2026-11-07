@@ -1,0 +1,76 @@
+---
+title: "Testing the whole tree"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 5)
+```
+
+`node_test()` asks which clades respond to the environment. Peres-Neto & Kembel (2015)
+proposed two frameworks that ask whether phylogenetic composition follows the environment
+across the whole tree, and both are in the package. The results below are simulated.
+
+```{r}
+library(comdynamite)
+
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(20)
+traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101), rmax_range = c(0, 30))
+env <- runif(50, 0, 100)
+comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+keep <- rowSums(comm) > 0
+comm <- comm[keep, ]
+env <- env[keep]
+```
+
+## Phylogenetic community composition
+
+`pcc_test()` takes the principal coordinates of the distances among species, averages them
+within sites, and regresses each average on the predictors. The test statistic is the variance
+of the adjusted R2 across eigenvectors, and the value to report is the mean of the positive
+adjusted R2.
+
+```{r}
+pcc <- pcc_test(comm, tree, env, n_perm = 199)
+pcc
+```
+
+## Phylogenetic beta diversity
+
+`phylo_beta_test()` starts from the distance between communities given by `phylo_beta()`, the
+mean phylogenetic distance between their species, and fits a distance-based redundancy
+analysis.
+
+```{r}
+beta <- phylo_beta_test(comm, tree, env, n_perm = 199)
+beta
+```
+
+`scores` holds the sites on the principal coordinates of the predicted matrix, which the
+authors suggest using to order sites in a heatmap of the community matrix.
+
+```{r}
+plot(env, beta$scores[, 1], xlab = "Environment", ylab = "First axis of the predicted matrix")
+```
+
+## Reading the two p-values
+
+Both functions permute sites, which breaks the link between composition and environment, and
+species across the tips, which breaks the link between composition and phylogeny. The association
+requires both links, so the p-value to report is `p_max`, the larger of the two. A small
+`p_site` with a large `p_taxa` says that composition follows the environment, but that the
+phylogeny adds nothing to it.
+
+The scripts `data-raw/validation_pcc.R` and `data-raw/validation_phylo_beta.R` compare the
+rejection rates of these tests with those published.
+
+## Sites that are neighbours
+
+Permutations of sites treat them as exchangeable. When they are neighbours, `site_permutations`
+takes a restricted null model, such as those of `torus_permutations()` for a grid on a torus.
+
+## Reference
+
+Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental
+drivers of phylogenetic variation across ecological communities. *Plant Ecology*, 216,
+709--724. <https://doi.org/10.1007/s11258-014-0405-0>

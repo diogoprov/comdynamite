@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
-title: "comdynamite: Process-Based Metacommunity Simulations with Phylogenetic Structure"
+title: "comdynamite: Linking Traits, Phylogenies and Biogeography in Metacommunities"
 version: 0.5.2
 authors:
   - family-names: Provete

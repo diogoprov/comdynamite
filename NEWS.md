@@ -5,6 +5,11 @@
   3.0% to 6.3% of tests at the 5% level in `data-raw/validation_edges.R`, against 44% to 55%
   with free permutations.
 - `node_test()`: `area_permutations` takes one matrix of permutations per event.
+- New title and description, since the package now covers analyses as well as simulations.
+- `?comdynamite` and the README map questions to functions, and the reference and articles on
+  the website are grouped by question.
+- New articles: "Preparing your data" and "Testing the whole tree", on `pcc_test()` and
+  `phylo_beta_test()`.
 
 # comdynamite 0.5.2
 
