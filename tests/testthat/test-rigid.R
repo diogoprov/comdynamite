@@ -108,3 +108,28 @@ test_that("node_test() reports the permutations of each event", {
   expect_equal(out$permutations$areas, c(a = 9L, b = 1L))
   expect_output(print(out), "of areas a 9, b 1")
 })
+
+test_that("coordinates that only look like a lattice are not treated as one", {
+  # steps within the tolerance, but drifting away from the lattice
+  drift <- cumsum(c(0, rep(c(1, 1 + 5e-7), 6)))
+  expect_null(lattice_of(cbind(drift, drift), 1))
+  # a true lattice, but far finer than its sites
+  expect_null(lattice_of(cbind(c(0, 0.5, 100, 200), c(0, 0.5, 100, 200)), 1))
+})
+
+test_that("off a lattice, an event with no move that fits stops", {
+  set.seed(7)
+  coords <- as.matrix(square) + matrix(runif(288, -0.2, 0.2), ncol = 2)
+  halves <- ifelse(square$x <= 6, 1, -1)
+  expect_null(continuous_pool(seq_len(144), coords, 1, 0, 5, 3))
+  expect_error(rigid_permutations(coords, cbind(h = halves), n_perm = 5, outside = 0,
+                                  max_tries = 3),
+               "no placement of h")
+})
+
+test_that("a pooled move without a free site within reach is dropped", {
+  move <- list(nearest = matrix(1:2, 2), d2 = matrix(c(0, 1), 2))
+  expect_null(place_pooled(move, c(FALSE, FALSE), 2))
+  expect_null(place_pooled(move, c(FALSE, TRUE), 0.5))
+  expect_equal(place_pooled(move, c(FALSE, TRUE), 2), 2L)
+})
