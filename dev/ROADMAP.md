@@ -369,17 +369,26 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       (liberal, sem explicação; fica como limite). Poder: 1.0 só ambiente, .43 com espaço
       agindo também, .28 com ambiente fraco. Referência verificada: Bauman et al. (2019,
       Oikos); Clappe et al. (2018) trata da partição com MSR, não do teste de `b`.
-- [ ] Nulo restrito para `c` em `trait_partition()`: `site_permutations` move `env` e `space`
+- [x] Nulo restrito para `c` em `trait_partition()`: `site_permutations` move `env` e `space`
       juntos, e mover MEMs de uma grade quase não muda o que explicam; no holdout o toro foi
       liberal para `c` com `env` forte. Candidato: mover só `env` nos testes de `a` e manter
       `c` com permutação livre, ou documentar `c` como descritivo com nulo restrito.
+      Resultado (`data-raw/validation_fractions_null.R`): cada conjunto passa a se mover
+      sozinho (`env` para `a`, `space` para `c`), o que segura o nível nos dois geradores
+      (`a` .037 a .071 e `c` .030 a .080, contra .20 e .24 da permutação livre) e derruba a
+      premissa de degenerescência (os MEMs movidos têm em média 30% da variância fora do span
+      dos originais), mas o teste restrito de `c` só tem poder com campo no span de `space`
+      (1.0; .25 a .28 com campo exponencial que `space` segura em parte, contra .98 livre),
+      porque pergunta se esses mapas explicam mais do que os mesmos mapas em outro lugar da
+      grade, não se o resíduo tem estrutura espacial.
 
 ## v0.6.1: nulo rígido e testes das frações (concluída em 2026-11-07)
 
 `rigid_permutations()`, enumeração fora de grade, critério para `gap`, testes das frações
 `a`, `b` e `c` de `trait_partition()`, `plot_phylo_beta()`, métodos de resultados e os nomes
 padronizados. Substitui a `v0.6.0` para citação: a tag `v0.6.0` traz as taxas antigas de
-`patch_permutations()` e não teve release. Mantém-se aberto o nulo restrito para `c`.
+`patch_permutations()` e não teve release. O nulo restrito para `c` fechou depois, na
+versão em desenvolvimento (item da v0.6.0).
 
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
