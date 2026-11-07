@@ -17,7 +17,8 @@ species_traits(
   optima = NULL,
   sigma = NULL,
   r_max = NULL,
-  rescale_optima = TRUE
+  rescale_optima = TRUE,
+  nodes = FALSE
 )
 }
 \arguments{
@@ -45,10 +46,16 @@ of the species, as a vector or a one-column matrix or data frame. They replace t
 drawn for that trait.}
 
 \item{rescale_optima}{Rescale external optima to \code{optima_range}?}
+
+\item{nodes}{Also give the optima at the internal nodes of the tree, as \code{\link[=trait_bm]{trait_bm()}} does?
+They are drawn after all other values, so the traits are the same as with
+\code{nodes = FALSE} and the same seed, and rescaled as the optima of the tips, so they may fall
+outside \code{optima_range}. Not available with external optima or \code{uniform_optima}.}
 }
 \value{
 Data frame with columns \code{optimum}, \code{sigma} and \code{r_max}, one row per
-species, with species names as row names.
+species, with species names as row names. With a tree, the attribute \code{tree} holds it, and
+with \code{nodes = TRUE} the attribute \code{nodes} holds the optima at its internal nodes.
 }
 \description{
 Environmental optima evolve by Brownian motion with Pagel's lambda and are

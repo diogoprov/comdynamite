@@ -34,6 +34,7 @@ Suggests:
     future,
     future.apply,
     knitr,
+    phytools,
     picante,
     rmarkdown,
     testthat (>= 3.0.0),

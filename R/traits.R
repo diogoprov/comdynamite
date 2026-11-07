@@ -31,8 +31,13 @@
 #'   of the species, as a vector or a one-column matrix or data frame. They replace the values
 #'   drawn for that trait.
 #' @param rescale_optima Rescale external optima to `optima_range`?
+#' @param nodes Also give the optima at the internal nodes of the tree, as [trait_bm()] does?
+#'   They are drawn after all other values, so the traits are the same as with
+#'   `nodes = FALSE` and the same seed, and rescaled as the optima of the tips, so they may fall
+#'   outside `optima_range`. Not available with external optima or `uniform_optima`.
 #' @return Data frame with columns `optimum`, `sigma` and `r_max`, one row per
-#'   species, with species names as row names.
+#'   species, with species names as row names. With a tree, the attribute `tree` holds it, and
+#'   with `nodes = TRUE` the attribute `nodes` holds the optima at its internal nodes.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -46,7 +51,7 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
                            uniform_optima = FALSE, sigma_mean = 10, sigma_sd = 10,
                            rmax_range = c(2, 8), sigma_signal = FALSE,
                            rmax_signal = FALSE, optima = NULL, sigma = NULL, r_max = NULL,
-                           rescale_optima = TRUE) {
+                           rescale_optima = TRUE, nodes = FALSE) {
   if (inherits(species, "phylo")) {
     k <- ape::Ntip(species)
     sp <- species$tip.label
@@ -56,6 +61,10 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
       stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`")
     k <- as.integer(species)
     sp <- paste0("sp", seq_len(k))
+  }
+  if (nodes && (!inherits(species, "phylo") || !is.null(optima) || uniform_optima)) {
+    stop("`nodes` needs a tree and optima drawn by `species_traits()` without `uniform_optima`",
+         call. = FALSE)
   }
   given <- list(optima = external_trait(optima, sp, "optima"),
                 sigma = external_trait(sigma, sp, "sigma"),
@@ -68,6 +77,7 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
   }
   # values are drawn even when given, so the other traits do not depend on what was given
   u <- if (inherits(species, "phylo")) trait_bm(species, lambda) else stats::rnorm(k)
+  drawn <- u
   if (!is.null(given$optima)) u <- given$optima
   if (is.null(given$optima) || rescale_optima) {
     u <- if (uniform_optima) {
@@ -90,6 +100,11 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
   out <- data.frame(optimum = unname(u), sigma = unname(sigma), r_max = unname(r_max),
                     row.names = sp)
   if (inherits(species, "phylo")) attr(out, "tree") <- species
+  if (nodes) {
+    at_nodes <- bm_nodes(species, lambda, drawn)
+    attr(out, "nodes") <- optima_range[1] + (at_nodes - min(drawn)) / diff(range(drawn)) *
+      diff(optima_range)
+  }
   out
 }
 
@@ -101,17 +116,25 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #'
 #' @param tree A `phylo` tree with branch lengths.
 #' @param lambda Pagel's lambda, in \[0, 1\].
-#' @return Named numeric vector with the simulated trait value of each tip.
+#' @param nodes Also draw the values at the internal nodes? They are drawn after the tips,
+#'   given them, so the tips are the same as with `nodes = FALSE` and the same seed. Under
+#'   lambda, the nodes are those of the tree whose internal branches are multiplied by lambda
+#'   and whose terminal branches are lengthened to keep the tips where they were.
+#' @return Named numeric vector with the simulated trait value of each tip. With `nodes = TRUE`,
+#'   the attribute `nodes` holds the values at the internal nodes, named by their numbers in
+#'   `tree$edge`, the root first.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
 #' @export
-trait_bm <- function(tree, lambda = 1) {
+trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
   stopifnot(lambda >= 0, lambda <= 1)
   cv <- ape::vcv.phylo(tree)
   cv <- lambda * cv + (1 - lambda) * diag(diag(cv))
   x <- drop(crossprod(chol(cv), stats::rnorm(ape::Ntip(tree))))
-  stats::setNames(x, tree$tip.label)
+  x <- stats::setNames(x, tree$tip.label)
+  if (nodes) attr(x, "nodes") <- bm_nodes(tree, lambda, x)
+  x
 }
 
 #' Growth rates of each species at each site

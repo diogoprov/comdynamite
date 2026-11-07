@@ -182,7 +182,15 @@ com outros pacotes. As versões seguintes dependem desta.
       Pool que muda no tempo (expansões de área) fica para quando houver uso.
 - [x] `species_traits()` aceita traits vindos de fora (`optima`, `sigma`, `r_max`), por
       exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
-- [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
+- [x] Registrar a história dos traits ao longo dos ramos: valores nos nós em `trait_bm()`,
+      `species_traits()` (`nodes = TRUE`, sem mudar os outros valores com a mesma semente) e
+      `traits_ou()`; `trait_mk()` para trait discreto (Mk), no formato simmap do phytools
+      (conferido contra `phytools::sim.history()`); `tip_history_metrics()` com as métricas
+      de Luza et al. (2021) como o código de `calc_tip_based_trait_evo()` as calcula (nós,
+      não mudanças dentro dos ramos), mais `changes` e `time_since_change` em tempo contínuo.
+      O Herodotools não foi instalado (depende do daee, fora do CRAN): a equivalência vem da
+      leitura do código, não de uma comparação rodada. Taxas variando entre ramos (relaxed
+      BM, BAMM) como modelo gerador ficam para depois.
 - [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
       lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
       Com a história conhecida, a simulação pode validar esses métodos.

@@ -4,15 +4,22 @@
 \alias{trait_bm}
 \title{Trait evolution by Brownian motion with Pagel's lambda}
 \usage{
-trait_bm(tree, lambda = 1)
+trait_bm(tree, lambda = 1, nodes = FALSE)
 }
 \arguments{
 \item{tree}{A \code{phylo} tree with branch lengths.}
 
 \item{lambda}{Pagel's lambda, in [0, 1].}
+
+\item{nodes}{Also draw the values at the internal nodes? They are drawn after the tips,
+given them, so the tips are the same as with \code{nodes = FALSE} and the same seed. Under
+lambda, the nodes are those of the tree whose internal branches are multiplied by lambda
+and whose terminal branches are lengthened to keep the tips where they were.}
 }
 \value{
-Named numeric vector with the simulated trait value of each tip.
+Named numeric vector with the simulated trait value of each tip. With \code{nodes = TRUE},
+the attribute \code{nodes} holds the values at the internal nodes, named by their numbers in
+\code{tree$edge}, the root first.
 }
 \description{
 Draws from a multivariate normal distribution with covariance
