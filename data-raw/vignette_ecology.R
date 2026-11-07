@@ -24,7 +24,7 @@ summarise_sim <- function(sim, pool_dist) {
 
 results <- do.call(rbind, lapply(seq_len(n_rep), function(i) {
   # tree, landscape and traits are shared by the scenarios of a replicate
-  tree <- ape::rcoal(30)
+  tree <- treeshapesim::sim_tree_shape(30)
   pool_dist <- cophenetic(tree)
   land <- landscape_implicit(25)
   traits <- list(`0` = species_traits(tree, lambda = 0, sigma_mean = 8, sigma_sd = 2),

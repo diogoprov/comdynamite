@@ -29,6 +29,7 @@ Imports:
     graphics,
     grDevices,
     parallel,
+    purrr,
     stats
 Suggests:
     adespatial,

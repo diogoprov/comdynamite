@@ -63,10 +63,10 @@
 #'   process-based metacommunity framework linking local and regional scale
 #'   community ecology. *Ecology Letters*, 23, 1314--1329.
 #'   \doi{10.1111/ele.13568}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' ls <- landscape_implicit(30)
-#' tr <- ape::rcoal(20)
+#' tr <- treeshapesim::sim_tree_shape(20)
 #' sim <- simulate_metacommunity(ls, species_traits(tr),
 #'                               competition_matrix(tr, "phylo"),
 #'                               dispersal = 0.01, n_steps = 200)

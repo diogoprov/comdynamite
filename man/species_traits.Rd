@@ -51,8 +51,10 @@ then assigned to species by the ranks of a Brownian-motion trait, which
 keeps their marginal distribution.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tr <- ape::rcoal(10)
+tr <- treeshapesim::sim_tree_shape(10)
 species_traits(tr, lambda = 1, sigma_signal = TRUE)
 species_traits(5)
+\dontshow{\}) # examplesIf}
 }

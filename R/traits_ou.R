@@ -37,9 +37,9 @@
 #'   of adaptation. *Evolution*, 51, 1341--1351.
 #'   \doi{10.1111/j.1558-5646.1997.tb01457.x}
 #' @seealso [paint_regimes()] to assign regimes to clades.
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tr <- ape::rcoal(20)
+#' tr <- treeshapesim::sim_tree_shape(20)
 #' # Brownian motion
 #' traits_ou(tr, alpha = 0)[1:3, ]
 #' # two optima: the clade of node 25 evolves towards 10, the rest towards 0

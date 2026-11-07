@@ -20,6 +20,8 @@ Draws from a multivariate normal distribution with covariance
 covariance matrix of \code{tree}.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-trait_bm(ape::rcoal(5), lambda = 0.5)
+trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
+\dontshow{\}) # examplesIf}
 }

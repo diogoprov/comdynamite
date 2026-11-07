@@ -23,9 +23,9 @@
 #'   carry phylogenetic signal (Brownian motion)?
 #' @return Data frame with columns `optimum`, `sigma` and `r_max`, one row per
 #'   species, with species names as row names.
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tr <- ape::rcoal(10)
+#' tr <- treeshapesim::sim_tree_shape(10)
 #' species_traits(tr, lambda = 1, sigma_signal = TRUE)
 #' species_traits(5)
 #' @export
@@ -69,9 +69,9 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #' @param tree A `phylo` tree with branch lengths.
 #' @param lambda Pagel's lambda, in \[0, 1\].
 #' @return Named numeric vector with the simulated trait value of each tip.
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' trait_bm(ape::rcoal(5), lambda = 0.5)
+#' trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
 #' @export
 trait_bm <- function(tree, lambda = 1) {
   stopifnot(lambda >= 0, lambda <= 1)

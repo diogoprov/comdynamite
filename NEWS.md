@@ -5,6 +5,38 @@
 - `node_test()`: `site_permutations` gives a restricted null model. For events, it moves the
   areas across the sites.
 - `plot_node_test()`: biogeographic events are triangles, as in Leibold & Chase (2018).
+- `plot_trait_partition()`: two overlapping bars along the total variation, as in Figure 1 of
+  Desdevises et al. (2003), so that the shared fraction is seen as shared. New `labels`.
+- Progress bars with an estimate of the time left in `node_test()`, `pcc_test()`,
+  `phylo_beta_test()`, `phylo_vector()` and `trait_partition()`, in interactive sessions.
+- Examples, README and vignettes use trees of treeshapesim, in Suggests. The results of
+  `vignette("phylogenetic-structure")` and `vignette("evaluating-methods")` were run again.
+- The help of functions adapted from the MATLAB code of the supplements says so.
+
+Corrections that change results:
+
+- `node_test()`: draws are now ranked on F statistics. The statistic of each predictor, taken
+  from the original code, depended on the scale of the response, and neither statistic took
+  into account that draws of species occupy different numbers of sites. `p_partial`,
+  `p_partial_joint`, `p_taxa`, `p_max` and `p_joint` differ from those of 0.5.1, and so do the
+  same p-values of events. `statistic`, `p_site` and `p_partial_site` of predictors do not.
+- `node_test()`: a node with a clade without individuals is no longer tested, as it was a
+  repeat of another node.
+- `node_test()`: with `cores` above 1, each call now uses its own random streams.
+- `pcc_test()` and `phylo_beta_test()`: species without individuals leave the analysis. In
+  `pcc_test()` they could turn numerical noise into an axis.
+- `trait_partition()`: species without individuals leave the analysis, which could stop it.
+
+Checks of data:
+
+- All analysis functions match sites by name when the data have row names, and stop if the
+  names differ. Before, misordered predictors gave a wrong result without warning.
+- Missing values, predictors without variance and columns that are not numeric now stop with
+  a message that names them. `phylo_vector()` gave p = 1 in these cases.
+- `node_test()` checks `biogeography` before the permutations and explains a tree in `nodes`.
+- Results keep the numbers of permutations and the null model, and `print()` shows them
+  with the smallest possible p-value. Nodes that were not tested are reported, and
+  `phylo_vector()` says when no vector was retained.
 
 # comdynamite 0.5.1
 

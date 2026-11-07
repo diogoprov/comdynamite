@@ -31,7 +31,10 @@
 #'   and `pev_brown`; `p_site`, `p_taxa` and `p_max` of the global test; `selected`, the
 #'   columns of `eigenvectors` retained; `pev` and `pev_brown`, named vectors or `NULL`
 #'   when the global test is not significant or no eigenvector is retained;
-#'   `eigenvectors`; `eigenvalues`; and `eigenvector_correlation`.
+#'   `eigenvectors`; `eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
+#'   `pev` before combining gradients with `cbind()`, which drops a `NULL` without warning.
+#' @note Adapted from the MATLAB functions `TraitEnvCor`, `ModelSelectionStochastic` and
+#'   `PCoAWeigthed` in the supplement of Peres-Neto et al. (2012).
 #' @section Article and original code:
 #' The functions `TraitEnvCor`, `ModelSelectionStochastic` and `PCoAWeigthed` and the
 #' script `ScriptDemo` of the supplement differ from the article and its appendices in the
@@ -84,9 +87,9 @@
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits--environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526. \doi{10.1890/12-0126.1}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tree <- ape::rcoal(20)
+#' tree <- treeshapesim::sim_tree_shape(20)
 #' traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100),
 #'                          rmax_range = c(0, 30))
 #' env <- runif(50, 0, 100)
@@ -96,14 +99,14 @@
 #' @export
 phylo_vector <- function(comm, tree, predictor, n_perm = 999, alpha = 0.05, n_sim = 1000,
                          site_permutations = NULL) {
-  matched <- check_phylo_comm(comm, tree)
+  matched <- present_species(check_phylo_comm(comm, tree))
   comm <- matched$comm
   tree <- matched$tree
-  stopifnot(length(predictor) == nrow(comm), n_perm >= 1, n_sim >= 1, alpha > 0, alpha < 1)
-  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
-  comm <- comm[, colSums(comm) > 0, drop = FALSE]
+  predictor <- check_env(predictor, comm, "`predictor`")
+  if (ncol(predictor) != 1) stop("`predictor` must be a single variable", call. = FALSE)
+  stopifnot(n_perm >= 1, n_sim >= 1, alpha > 0, alpha < 1)
+  check_permutations(site_permutations, comm)
   species <- colnames(comm)
-  predictor <- as.matrix(predictor)
 
   # with the square root of path lengths as distance, D^2 / 2 is half the path length
   pcoa <- weighted_pcoa(ape::cophenetic.phylo(tree)[species, species] / 2, colSums(comm))
@@ -115,7 +118,8 @@ phylo_vector <- function(comm, tree, predictor, n_perm = 999, alpha = 0.05, n_si
   out <- list(correlation = c(pev = NA_real_, pev_brown = NA_real_), p_site = p_site,
               p_taxa = p_taxa, p_max = max(p_site, p_taxa), selected = integer(), pev = NULL,
               pev_brown = NULL, eigenvectors = pcoa$vectors, eigenvalues = pcoa$values,
-              eigenvector_correlation = observed)
+              eigenvector_correlation = observed,
+              permutations = permutation_record(n_perm, site_permutations))
   if (out$p_max <= alpha) {
     ranked <- order(abs(observed), decreasing = TRUE)
     p_each <- pmax(vapply(ranked, function(j) permutation_p(abs(nulls$site[, j]), abs(observed[j])),
@@ -140,8 +144,13 @@ phylo_vector <- function(comm, tree, predictor, n_perm = 999, alpha = 0.05, n_si
 #' @export
 print.mc_phylo_vector <- function(x, ...) {
   cat("<mc_phylo_vector>", ncol(x$eigenvectors), "eigenvectors,", length(x$selected), "retained\n")
+  permutation_line(x$permutations)
   cat("global test: p (sites):", format(x$p_site, digits = 3), " p (species):",
       format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+  if (length(x$selected) == 0) {
+    cat("no vector retained: `pev` and `pev_brown` are NULL, so this gradient cannot enter",
+        "`trait_partition()`\n")
+  }
   if (length(x$selected) > 0) {
     cat("correlation: PEV", format(x$correlation[["pev"]], digits = 3), " PEV-B",
         format(x$correlation[["pev_brown"]], digits = 3), "\n")
@@ -177,8 +186,10 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`;
 #'   `component_share`, the share of the total variation in the component; `semipartial`,
 #'   a matrix of predictors by traits; and `p_partial`, `p_partial_site` and
-#'   `p_partial_taxa`, with the larger p-value and those of sites and of species. All are
-#'   `NA` if predictors are collinear.
+#'   `p_partial_taxa`, with the larger p-value and those of sites and of species, all
+#'   `NA` if predictors are collinear; and `permutations`.
+#' @note Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
+#'   supplement of Peres-Neto et al. (2012).
 #' @section Article and original code:
 #' Raw and adjusted fractions of the total for the mean component agree with
 #' `PartitionRDATwoDataMatricesPhylogeny` of the supplement, checked in Octave. The code
@@ -248,12 +259,19 @@ print.mc_phylo_vector <- function(x, ...) {
 trait_partition <- function(comm, traits, env, space, component = c("mean", "variance"),
                             n_perm = 999) {
   component <- match.arg(component)
+  if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)
   traits <- as.matrix(traits)
-  env <- as.matrix(env)
-  space <- as.matrix(space)
-  stopifnot(is.numeric(traits), nrow(env) == nrow(comm), nrow(space) == nrow(comm), n_perm >= 1)
+  if (!is.numeric(traits)) stop("`traits` is not numeric", call. = FALSE)
+  stopifnot(n_perm >= 1)
   comm <- check_species_comm(comm, rownames(traits), "`traits`")
+  comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
+  if (anyNA(traits)) stop("`traits` has missing values", call. = FALSE)
+  if (any(apply(traits, 2, stats::var) == 0)) {
+    stop("traits without variance among the species with individuals", call. = FALSE)
+  }
+  env <- check_env(env, comm, collinear = TRUE)
+  space <- check_env(space, comm, "`space`", collinear = TRUE)
   site_weights <- rowSums(comm)
   n <- nrow(comm)
   sizes <- c(abc = ncol(env) + ncol(space), ab = ncol(env), bc = ncol(space))
@@ -288,14 +306,14 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   share <- sum(site_weights * response^2) / total
   ss <- components(response, env, space)
   observed <- statistics(response, env, space)
-  null_site <- replicate(n_perm, {
+  null_site <- do.call(cbind, progress_map(seq_len(n_perm), function(r) {
     i <- sample.int(n)
     statistics(response, env[i, , drop = FALSE], space[i, , drop = FALSE])
-  })
-  null_taxa <- replicate(n_perm, {
+  }, "Sites"))
+  null_taxa <- do.call(cbind, progress_map(seq_len(n_perm), function(r) {
     shuffled <- traits[sample.int(nrow(traits)), , drop = FALSE]
     statistics(trait_response(comm, shuffled, component), env, space)
-  })
+  }, "Species"))
   p_site <- vapply(names(observed), function(f) permutation_p(null_site[f, ], observed[[f]]),
                    numeric(1))
   p_taxa <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
@@ -312,7 +330,8 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
                  component = component, component_share = share,
                  semipartial = sqrt(by_trait(observed)) * sign(slopes),
                  p_partial = pmax(tested_p(p_site), tested_p(p_taxa)),
-                 p_partial_site = tested_p(p_site), p_partial_taxa = tested_p(p_taxa)),
+                 p_partial_site = tested_p(p_site), p_partial_taxa = tested_p(p_taxa),
+                 permutations = permutation_record(n_perm)),
             class = "mc_trait_partition")
 }
 
@@ -320,6 +339,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
 print.mc_trait_partition <- function(x, ...) {
   cat("<mc_trait_partition>", x$component, "component,", format(x$component_share, digits = 3),
       "of the total variation\n")
+  permutation_line(x$permutations)
   print(format(x$fractions, digits = 3), quote = FALSE)
   invisible(x)
 }
@@ -341,13 +361,15 @@ corner_nulls <- function(comm, traits, env, n_perm, site_permutations) {
   }
   permuted <- matrix(env[as.vector(t(sites)), 1], nrow(comm))
   list(site = corner_correlation(comm, traits, permuted),
-       taxa = t(replicate(n_perm, {
+       taxa = do.call(rbind, progress_map(seq_len(n_perm), function(r) {
          corner_correlation(comm, traits[sample.int(nrow(traits)), , drop = FALSE], env)[1, ]
-       })) |> matrix(n_perm))
+       }, "Species")))
 }
 
-# a permutation can leave a variable without variance, and then it does not count
+# a permutation can leave a variable without variance, and then it does not count; if
+# none counts, there is no test
 permutation_p <- function(null, observed) {
+  if (all(is.na(null))) return(NA_real_)
   (sum(null >= observed, na.rm = TRUE) + 1) / (sum(!is.na(null)) + 1)
 }
 

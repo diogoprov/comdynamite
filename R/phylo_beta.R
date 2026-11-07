@@ -27,9 +27,9 @@
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tree <- ape::rcoal(5)
+#' tree <- treeshapesim::sim_tree_shape(5)
 #' comm <- matrix(rbinom(20, 1, 0.7) + diag(1, 4, 5), 4,
 #'                dimnames = list(NULL, tree$tip.label))
 #' phylo_beta(comm > 0, tree)
@@ -68,9 +68,9 @@ phylo_beta <- function(comm, tree) {
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites.
 #' @return List of class `mc_phylo_beta` with `r2`, the adjusted R2; `statistic`,
-#'   the pseudo-F; `p_site`, `p_taxa` and `p_max`; and `scores`, the sites on the
+#'   the pseudo-F; `p_site`, `p_taxa` and `p_max`; `scores`, the sites on the
 #'   principal coordinates of the predicted matrix, which the authors suggest
-#'   using to order sites in a heatmap of the community matrix.
+#'   using to order sites in a heatmap of the community matrix; and `permutations`.
 #' @references
 #' Legendre, P., & Anderson, M. J. (1999). Distance-based redundancy analysis:
 #' testing multispecies responses in multifactorial ecological experiments.
@@ -86,9 +86,9 @@ phylo_beta <- function(comm, tree) {
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
 #' @seealso [pcc_test()], the other framework of the same article.
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tree <- ape::rcoal(20)
+#' tree <- treeshapesim::sim_tree_shape(20)
 #' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
 #'                          rmax_range = c(0, 30))
 #' env <- runif(50, 0, 100)
@@ -97,15 +97,13 @@ phylo_beta <- function(comm, tree) {
 #' phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #' @export
 phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL) {
-  matched <- check_phylo_comm(comm, tree)
+  matched <- present_species(check_phylo_comm(comm, tree))
   comm <- matched$comm
   tree <- matched$tree
-  env <- as.matrix(env)
-  stopifnot(nrow(env) == nrow(comm), nrow(comm) > ncol(env) + 1, n_perm >= 1)
-  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
-  decomposition <- qr(sweep(env, 2, colMeans(env)))
-  if (decomposition$rank < ncol(env)) stop("predictors are collinear", call. = FALSE)
-  basis <- qr.Q(decomposition)
+  env <- check_env(env, comm)
+  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  check_permutations(site_permutations, comm)
+  basis <- qr.Q(qr(sweep(env, 2, colMeans(env))))
   weights <- comm / rowSums(comm)
   distances <- tip_distances(tree)
   centred <- gower_centre(beta_matrix(weights, distances))
@@ -116,17 +114,18 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   } else {
     site_permutations
   }
-  null_site <- apply(sites, 1, function(i) {
-    beta_fit(centred, basis[i, , drop = FALSE])$statistic
-  })
-  null_taxa <- replicate(n_perm, {
+  null_site <- unlist(progress_map(seq_len(nrow(sites)), function(r) {
+    beta_fit(centred, basis[sites[r, ], , drop = FALSE])$statistic
+  }, "Sites"))
+  null_taxa <- unlist(progress_map(seq_len(n_perm), function(r) {
     shuffled <- weights[, sample.int(ncol(weights)), drop = FALSE]
     beta_fit(gower_centre(beta_matrix(shuffled, distances)), basis)$statistic
-  })
+  }, "Species"))
   p_site <- (sum(null_site >= fit$statistic) + 1) / (length(null_site) + 1)
   p_taxa <- (sum(null_taxa >= fit$statistic) + 1) / (length(null_taxa) + 1)
   structure(list(r2 = fit$r2, statistic = fit$statistic, p_site = p_site, p_taxa = p_taxa,
-                 p_max = max(p_site, p_taxa), scores = predicted_scores(centred, basis)),
+                 p_max = max(p_site, p_taxa), scores = predicted_scores(centred, basis),
+                 permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_phylo_beta")
 }
 
@@ -135,6 +134,7 @@ print.mc_phylo_beta <- function(x, ...) {
   cat("<mc_phylo_beta> phylogenetic beta diversity\n")
   cat("adjusted R2:", format(x$r2, digits = 3), " pseudo-F:",
       format(x$statistic, digits = 3), "\n")
+  permutation_line(x$permutations)
   cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
       format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
   invisible(x)
@@ -142,18 +142,35 @@ print.mc_phylo_beta <- function(x, ...) {
 
 # the community and the tree with the same species, in the order of the tips
 check_phylo_comm <- function(comm, tree) {
-  stopifnot(inherits(tree, "phylo"))
+  if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
   comm <- check_species_comm(comm, tree$tip.label, "the phylogeny")
   tree <- ape::drop.tip(tree, setdiff(tree$tip.label, colnames(comm)))
   list(comm = comm[, tree$tip.label, drop = FALSE], tree = tree)
 }
 
+# species without individuals have no weight, so they leave the analysis
+present_species <- function(matched, minimum = 2) {
+  present <- colSums(matched$comm) > 0
+  if (sum(present) < minimum) {
+    stop("at least ", minimum, " species need individuals", call. = FALSE)
+  }
+  tree <- ape::keep.tip(matched$tree, colnames(matched$comm)[present])
+  list(comm = matched$comm[, tree$tip.label, drop = FALSE], tree = tree)
+}
+
 # numeric community with the species in `species`, in that order, and no empty site
 check_species_comm <- function(comm, species, source) {
-  comm <- as.matrix(comm) * 1
-  stopifnot(all(comm >= 0))
+  comm <- check_comm(comm)
+  already_empty <- sum(rowSums(comm) == 0)
   comm <- comm[, match_species(comm, species, source), drop = FALSE]
-  if (any(rowSums(comm) == 0)) stop("every site needs at least one individual", call. = FALSE)
+  empty <- rowSums(comm) == 0
+  if (any(empty)) {
+    stop("every site needs at least one individual, and ", sum(empty), " have none",
+         if (sum(empty) > already_empty) " of the species shared with " else "",
+         if (sum(empty) > already_empty) source else "",
+         if (!is.null(rownames(comm))) paste0(": ", species_list(rownames(comm)[empty])) else "",
+         call. = FALSE)
+  }
   comm
 }
 

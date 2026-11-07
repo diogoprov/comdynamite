@@ -18,6 +18,8 @@
 #' @param branch_lengths Use the branch lengths of `tree`?
 #' @return Matrix with one row per tip and one column per node, named by the node
 #'   numbers of `tree`.
+#' @note Adapted from the MATLAB function `CreateNodeContrasts` in the supplement of
+#'   Leibold et al. (2010).
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -119,7 +121,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' keep their community and predictors.
 #'
 #' R2, adjusted R2 and the statistic equal those of the MATLAB function
-#' `MetacommunityPhylogenetics` of the authors, checked in Octave. Three parts of that
+#' `MetacommunityPhylogenetics` of the authors, checked in Octave. Four parts of that
 #' function differ from this one:
 #' \itemize{
 #'   \item In the original, the species permutations shuffle only the first columns
@@ -130,14 +132,24 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   \item The semipartial values of the original use the raw predictors, without an
 #'     intercept, and multiply by the absolute slope. The article uses standardised
 #'     predictors and divides by it, to keep only the sign, which is what we do.
+#'   \item The original compares the permuted statistics as they are. The one of each
+#'     predictor divides a proportion by a sum of squares, so it depends on the scale of the
+#'     response, and with one predictor it does not rank draws as the global one does. Neither
+#'     takes into account that draws of species occupy different numbers of sites. Here
+#'     draws are ranked on F statistics. `statistic` is still the one of the original, and
+#'     p-values of sites alone are the same, but those that use species differ.
 #' }
 #'
 #' As in the original, R2 sums squares without site weights, although the fit
 #' uses them, so it is not the R2 of a weighted regression, and the adjusted R2
 #' uses the degrees of freedom of an unweighted model.
 #'
-#' Nodes for which a predictor has no variance among the remaining sites, or with too
-#' few sites, get `NA`. The original stops with an error.
+#' Nodes for which a predictor has no variance among the remaining sites, with too
+#' few sites, or with a clade without individuals get `NA`. The original stops with an
+#' error.
+#'
+#' Sites are matched by name when `comm`, `env` and `biogeography` all have row names, and
+#' otherwise by position.
 #'
 #' @param comm Matrix with one row per site and one column per species. Species are
 #'   matched to the rows of `nodes` by name, in any order, and those in only one of the
@@ -148,19 +160,24 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   site.
 #' @param biogeography Optional matrix of biogeographic events with one row per site
 #'   and values of 1, -1 and 0.
-#' @param n_perm Number of permutations of sites, of species and of both.
+#' @param n_perm Number of permutations of sites, of species and of both. With
+#'   `site_permutations`, only of species.
 #' @param site_permutations Optional matrix of site indices with one permutation per row,
 #'   for example from [torus_permutations()], to use instead of free permutations of sites.
 #' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
 #'   where one core is used. For reproducible p-values with more than one core, call
-#'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`.
+#'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results still depend on the number of
+#'   cores.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `statistic`,
 #'   `p_site`, `p_taxa`, `p_max`, `p_joint` and `p_adjusted`; `semipartial`, a matrix of
 #'   nodes by predictors; `p_partial`, with the larger of the two p-values for each of
 #'   them; `p_partial_site`, with the p-values of sites alone; `p_partial_joint`, with
-#'   those of the permutation of the article; and `biogeography`, a list with the same
-#'   four matrices for the events, or `NULL`.
+#'   those of the permutation of the article; `biogeography`, a list with the same
+#'   four matrices for the events, or `NULL`; and `permutations`, the numbers of
+#'   permutations and whether those of sites were free or restricted.
+#' @note Adapted from the MATLAB function `MetacommunityPhylogenetics` in the supplement of
+#'   Leibold et al. (2010), with the differences listed in Details.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -188,11 +205,15 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, cores = 1,
                       site_permutations = NULL) {
-  comm <- as.matrix(comm) * 1
+  if (inherits(nodes, "phylo")) {
+    stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
+  }
+  comm <- check_comm(comm)
   nodes <- as.matrix(nodes)
-  env <- as.matrix(env)
-  stopifnot(nrow(env) == nrow(comm), n_perm >= 1, cores >= 1, all(comm >= 0))
-  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
+  env <- check_env(env, comm)
+  stopifnot(n_perm >= 1, cores >= 1)
+  check_permutations(site_permutations, comm)
+  if (!is.null(biogeography)) biogeography <- check_biogeography(biogeography, comm)
   species <- match_species(comm, rownames(nodes), "`nodes`")
   comm <- comm[, species, drop = FALSE]
   nodes <- nodes[species, , drop = FALSE]
@@ -200,8 +221,16 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
   env_names <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
   # forking is not available on Windows
   workers <- if (.Platform$OS.type == "windows") 1L else cores
-  per_node <- function(run) {
-    parallel::mclapply(seq_len(ncol(nodes)), function(i) run(nodes[, i]), mc.cores = workers)
+  # nodes run in batches, one per worker, so the progress bar can follow them
+  per_node <- function(run, name) {
+    columns <- seq_len(ncol(nodes))
+    batches <- unname(split(columns, (columns - 1) %/% workers))
+    results <- progress_map(batches, function(batch) {
+      # moves the parent generator on, so each batch gets its own streams
+      if (workers > 1) stats::runif(1)
+      parallel::mclapply(batch, function(i) run(nodes[, i]), mc.cores = workers)
+    }, name)
+    unlist(results, recursive = FALSE)
   }
   matrix_of <- function(results, field, names) {
     matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
@@ -223,7 +252,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
   n_site <- if (is.null(site_permutations)) n_perm else nrow(site_permutations)
   results <- per_node(function(contrast) {
     one_node(comm, contrast, env, n_perm, shuffle_sites, n_site)
-  })
+  }, "Nodes")
   table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
@@ -231,8 +260,6 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                  p_partial_site = matrix_of(results, "p_partial_site", env_names),
                  p_partial_joint = matrix_of(results, "p_partial_joint", env_names),
                  biogeography = if (!is.null(biogeography)) {
-                   biogeography <- as.matrix(biogeography)
-                   stopifnot(nrow(biogeography) == nrow(comm), all(biogeography %in% c(-1, 0, 1)))
                    events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
                    by_event <- lapply(seq_len(ncol(biogeography)), function(e) {
                      sites <- biogeography[, e] != 0
@@ -248,7 +275,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                      }
                      per_node(function(contrast) {
                        one_node(local_comm, contrast, predictors, n_perm, shuffle, n_site)
-                     })
+                     }, paste("Nodes,", events[e]))
                    })
                    first <- function(field) {
                      vapply(by_event, function(event) {
@@ -262,7 +289,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 9999, core
                         p_partial = shaped(first("p_partial")),
                         p_partial_site = shaped(first("p_partial_site")),
                         p_partial_joint = shaped(first("p_partial_joint")))
-                 }),
+                 },
+                 permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_node_test")
 }
 
@@ -369,12 +397,28 @@ check_events <- function(contrast, areas) {
   }
 }
 
+# events with one row per site, in the order of `comm`
+check_biogeography <- function(biogeography, comm) {
+  biogeography <- check_sites(as.matrix(biogeography), comm, "`biogeography`")
+  if (!all(biogeography %in% c(-1, 0, 1))) {
+    stop("`biogeography` needs values of 1, -1 and 0. `biogeography_matrix()` builds it from ",
+         "the area of each site", call. = FALSE)
+  }
+  biogeography
+}
+
 #' @export
 print.mc_node_test <- function(x, ...) {
   tested <- x$nodes[!is.na(x$nodes$p_max), ]
   cat("<mc_node_test>", nrow(x$nodes), "nodes,", nrow(tested), "tested\n")
+  permutation_line(x$permutations)
   cat("nodes with p (max) <= 0.05:", sum(tested$p_max <= 0.05), "before correction,",
       sum(tested$p_adjusted <= 0.05), "after\n")
+  untested <- nrow(x$nodes) - nrow(tested)
+  if (untested > 0) {
+    cat("nodes not tested:", untested, "(a clade without individuals, too few sites or a",
+        "predictor without variance in the sites of the node)\n")
+  }
   invisible(x)
 }
 
@@ -382,9 +426,6 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   members <- which(contrast != 0)
   values <- contrast[members]
   observed <- node_fit(comm[, members, drop = FALSE], values, env)
-  count <- function(null, value) {
-    (sum(null >= value, na.rm = TRUE) + 1) / (sum(!is.na(null)) + 1)
-  }
   blank <- rep(NA_real_, ncol(env))
   if (is.na(observed$statistic)) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
@@ -397,7 +438,7 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   null_of <- function(n, draw) {
     t(vapply(seq_len(n), function(r) {
       fit <- draw(r)
-      c(fit$statistic, fit$partial_f)
+      c(fit$f, fit$partial_f)
     }, numeric(ncol(env) + 1)))
   }
   by_site <- null_of(n_site, function(r) {
@@ -412,18 +453,16 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
     node_fit(moved$comm[, sample.int(ncol(comm), length(members)), drop = FALSE], values,
              moved$env)
   })
-  p_site <- count(by_site[, 1], observed$statistic)
-  p_taxa <- count(by_taxa[, 1], observed$statistic)
-  p_joint <- count(by_both[, 1], observed$statistic)
-  partial_site <- vapply(seq_len(ncol(env)), function(j) {
-    count(by_site[, j + 1], observed$partial_f[j])
-  }, numeric(1))
-  partial_taxa <- vapply(seq_len(ncol(env)), function(j) {
-    count(by_taxa[, j + 1], observed$partial_f[j])
-  }, numeric(1))
-  partial_joint <- vapply(seq_len(ncol(env)), function(j) {
-    count(by_both[, j + 1], observed$partial_f[j])
-  }, numeric(1))
+  p_site <- permutation_p(by_site[, 1], observed$f)
+  p_taxa <- permutation_p(by_taxa[, 1], observed$f)
+  p_joint <- permutation_p(by_both[, 1], observed$f)
+  partial_p <- function(null) {
+    vapply(seq_len(ncol(env)), function(j) permutation_p(null[, j + 1], observed$partial_f[j]),
+           numeric(1))
+  }
+  partial_site <- partial_p(by_site)
+  partial_taxa <- partial_p(by_taxa)
+  partial_joint <- partial_p(by_both)
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
                             statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
@@ -432,19 +471,21 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
        p_partial_site = partial_site, p_partial_joint = partial_joint)
 }
 
-# statistics of one node; all NA when the model cannot be fitted
+# statistics of one node; all NA when the model cannot be fitted. `statistic` is that of
+# the original code. Draws are ranked on F, which is free of the scale of the response and
+# takes into account that draws can occupy different numbers of sites
 node_fit <- function(incidence, values, env) {
   occupied <- rowSums(incidence) > 0
   incidence <- incidence[occupied, , drop = FALSE]
   env <- env[occupied, , drop = FALSE]
   n <- nrow(incidence)
   p <- ncol(env)
-  failed <- list(statistic = NA_real_, partial_f = rep(NA_real_, p), n_sites = n)
+  failed <- list(statistic = NA_real_, f = NA_real_, partial_f = rep(NA_real_, p), n_sites = n)
   site_weights <- rowSums(incidence)
   species_weights <- colSums(incidence)
-  if (n < p + 2 || any(apply(env, 2, stats::var) == 0)) return(failed)
+  both_clades <- any(species_weights[values > 0] > 0) && any(species_weights[values < 0] > 0)
+  if (!both_clades || n < p + 2 || any(apply(env, 2, stats::var) == 0)) return(failed)
   standard <- weighted_standardise(matrix(values), species_weights)
-  if (any(!is.finite(standard))) return(failed)
   response <- drop(incidence %*% standard)
   predictors <- weighted_standardise(env, site_weights)
   fit <- weighted_fit(predictors, response, site_weights)
@@ -458,7 +499,9 @@ node_fit <- function(incidence, values, env) {
     r2 - sum(weighted_fit(predictors[, -j, drop = FALSE], response, site_weights)^2) / total
   }, numeric(1))
   slopes <- colSums(site_weights * predictors * response)
-  list(statistic = explained / residual, partial_f = partial_r2 / residual, r2 = r2,
+  mean_residual <- residual / (n - p - 1)
+  list(statistic = explained / residual, f = explained / p / mean_residual,
+       partial_f = partial_r2 * total / mean_residual, r2 = r2,
        r2_adjusted = 1 - (n - 1) / (n - p - 1) * (1 - r2),
        semipartial = sign(slopes) * sqrt(pmax(partial_r2, 0)), n_sites = n)
 }

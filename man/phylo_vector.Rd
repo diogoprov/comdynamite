@@ -37,7 +37,8 @@ List of class \code{mc_phylo_vector} with \code{correlation}, the correlations o
 and \code{pev_brown}; \code{p_site}, \code{p_taxa} and \code{p_max} of the global test; \code{selected}, the
 columns of \code{eigenvectors} retained; \code{pev} and \code{pev_brown}, named vectors or \code{NULL}
 when the global test is not significant or no eigenvector is retained;
-\code{eigenvectors}; \code{eigenvalues}; and \code{eigenvector_correlation}.
+\code{eigenvectors}; \code{eigenvalues}; \code{eigenvector_correlation}; and \code{permutations}. Check
+\code{pev} before combining gradients with \code{cbind()}, which drops a \code{NULL} without warning.
 }
 \description{
 The phylogenetic representation of Peres-Neto et al. (2012). Eigenvectors of the
@@ -57,6 +58,10 @@ are meant for \code{\link[=trait_partition]{trait_partition()}} after a signific
 Species are matched to the tips of \code{tree} by name, in any order, and those in only one
 of the two are dropped with a warning. Species without individuals have no weight and
 are left out.
+}
+\note{
+Adapted from the MATLAB functions \code{TraitEnvCor}, \code{ModelSelectionStochastic} and
+\code{PCoAWeigthed} in the supplement of Peres-Neto et al. (2012).
 }
 \section{Article and original code}{
 
@@ -106,14 +111,16 @@ partition.
 }
 
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial

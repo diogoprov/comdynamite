@@ -32,6 +32,10 @@ of the node. Species that share history get less weight, and each side still sum
 to 1. The supplement proposes this coding for trees in which all species are equally
 distant from the root.
 }
+\note{
+Adapted from the MATLAB function \code{CreateNodeContrasts} in the supplement of
+Leibold et al. (2010).
+}
 \examples{
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
 

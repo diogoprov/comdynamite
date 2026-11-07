@@ -103,7 +103,7 @@ base sem dinâmica.
 - [x] `pcc_test()` e `phylo_eigenvectors()`: PCC de Peres-Neto & Kembel (2015), vindo do
       pcps-sim, com permutações restritas opcionais. Em `data-raw/validation_pcc.R`, as
       taxas de neither e environment batem com a Tabela 1 (erro tipo I do teste de
-      espécies 0,045 e 0,068 contra 0,054 e 0,052). O poder (0,88 e 0,84 contra 0,945 e
+      espécies 0,049 e 0,040 contra 0,054 e 0,052). O poder (0,87 e 0,85 contra 0,945 e
       0,947) e o teste de espécies em phylogeny (0,20 e 0,19 contra 0,27 e 0,28) ficam
       abaixo, como esperado sem a árvore deles.
 - [x] `phylo_beta_test()` e `phylo_beta()`: framework de beta diversidade filogenética do
@@ -189,9 +189,9 @@ máquina.
       grandes, vetorizar `node_fit()`.
 - [x] Leibold et al. (2010): `node_test()` e `node_contrasts()`. R2, R2 ajustado e F iguais
       ao MATLAB no Octave 11.3 (diferença abaixo de 1e-15), e os 13 contrastes de
-      `CreateNodeContrasts` iguais. Em `data-raw/validation_node.R`, por nó, sites .049 e
-      espécies .052 sob a nula dupla; p máximo .043 só com ambiente e .025 só com filogenia.
-      Poder por nó .08, e ao menos um nó em 77% das réplicas, mas 26% sob a nula: é preciso
+      `CreateNodeContrasts` iguais. Em `data-raw/validation_node.R` (refeito na v0.5.2, com F), por nó, sites .053 e
+      espécies .049 sob a nula dupla; p máximo .049 só com ambiente e .021 só com filogenia.
+      Poder por nó .07, e ao menos um nó em 76% das réplicas, mas 24% sob a nula: é preciso
       corrigir para testes múltiplos. Os erros do original foram confirmados na leitura e
       corrigidos, com a diferença descrita em `?node_test`.
 - [x] Semiparcial, FDR e eventos biogeográficos conforme o texto de Leibold et al. (2010).
@@ -242,15 +242,44 @@ v0.6.0 por decisão de 2026-11-06.
 - [x] `site_permutations` em `node_test()`: para eventos, cada linha move as áreas pelos
       sites. Em `data-raw/validation_events.R` (1000 réplicas, toro de 15 por 15, blocos de 25
       sites sem efeito, comunidade seguindo ambiente oculto autocorrelacionado), rejeição por
-      nó a 5%: .448 com permutação livre e .049 com o toro; ao menos um nó em 89% e 28% das
+      nó a 5%: .451 com permutação livre e .048 com o toro; ao menos um nó em 89% e 26% das
       réplicas, sem correção. Só testado com toro.
 - [ ] Nulo restrito para paisagens com borda, como os refúgios: hoje o usuário precisa
       fornecer a matriz. Avaliar antes de aplicar a dados reais.
 - [x] `plot_node_test()`: triângulos para eventos, como a Fig. 9.5 de Leibold & Chase
       (2018), além da cor.
 - [x] Citar Leibold & Chase (2018) em `biogeography_matrix()`.
-- [ ] Auditoria do código com foco em experiência de uso: nomes e argumentos, mensagens de
-      erro, saídas de `print`, exemplos e o caminho de um usuário novo, além de bugs.
+- [x] Auditoria do código com foco em experiência de uso, com dois revisores (2026-11-06).
+      Corrigidos os erros que mudam resultados e as falhas silenciosas: F nos sorteios de
+      `node_test()` (a estatística parcial do MATLAB dependia da escala), nós com clado
+      ausente, espécies ausentes em `pcc_test()`, `phylo_beta_test()` e `trait_partition()`,
+      `cores`, sites por nome, checagens em `R/checks.R` e `permutations` nos resultados.
+- [x] `plot_trait_partition()`: barras sobrepostas, como a Fig. 1 de Desdevises et al. (2003).
+- [x] Exemplos, README e vinhetas com `treeshapesim::sim_tree_shape()`. Testes seguem com
+      `ape`. Os `.rds` das vinhetas foram refeitos: com a árvore nova, SES MPD fica em -1,3
+      (era -1,7), e o toro rejeitou .08 e .07 (eram .035 e .050, com erro padrão .015).
+- [x] Nota "Adapted from the MATLAB" em `node_test()`, `node_contrasts()`, `phylo_vector()` e
+      `trait_partition()`. Ver a pendência sobre licença do código.
+- [x] Barra de progresso com `purrr` e estimativa de tempo em sessões interativas, em
+      `node_test()`, `pcc_test()`, `phylo_beta_test()`, `phylo_vector()` e `trait_partition()`.
+      `purrr` entra em `Imports`.
+
+Da auditoria, para antes da 1.0:
+
+- [ ] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
+      e Description, artigo sobre preparar dados próprios e artigo de `pcc_test()` e
+      `phylo_beta_test()`.
+- [ ] Nomes: `alpha` tem três sentidos, `r2` e `statistic` mudam entre funções, `p_partial`
+      é o máximo, `p_taxa` e "species", `n_perm` tem dois padrões, `predictor` e `env`.
+- [ ] Métodos `summary()`, `plot()` e `as.data.frame()` para os resultados.
+- [ ] R2 de `node_test()` acima de 1 (herdado do original): avisar na ajuda e somar uma
+      coluna com o R2 ponderado.
+- [ ] `site_permutations` em `trait_partition()`, e sites vazios com permutações restritas,
+      hoje um beco sem saída em `pcc_test()`.
+- [ ] Baixa gravidade: lados com ramos zero em `node_contrasts()`, predictor e evento com o
+      mesmo nome em `plot_node_heatmap()`, heatmap só com NA, `logistic_gradients()` com
+      menos de 8 sites, `mc_dynamics()` com um site, `pcc_test()` com `r2` NaN, número de
+      sorteios válidos, erro dentro de `cores`, checagens do simulador, formas dos traits.
 
 Opção, sem data: calanoides como segundo exemplo, se as espécies estiverem nas tabelas
 públicas da EMAP. A topologia sairia da Fig. 9.5b, e os resultados do livro não foram
@@ -413,7 +442,7 @@ Objetivo: API estável e pacote no CRAN.
 - **Erros no artigo de Thompson et al. (2020).** Tabela 1 (beta), faixa de dispersão,
   conversão do ambiente em postos e metade dos imigrantes no cenário de
   competição-colonização não batem com o código. Vale citar isso no artigo do pacote.
-- **Dependências do hub.** Hoje o pacote só importa `ape` e pacotes base (`graphics`, `grDevices`, `parallel`, `stats`). Tidyverse, Futureverse
+- **Dependências do hub.** Hoje o pacote só importa `ape`, `purrr` e pacotes base (`graphics`, `grDevices`, `parallel`, `stats`). Tidyverse, Futureverse
   e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
   equações e citar; se for copiar a estrutura do código, falar com os autores.
@@ -450,6 +479,7 @@ Objetivo: API estável e pacote no CRAN.
 
 ## Referências citadas neste roadmap
 
+- Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). *Evolution*, 57, 2647–2652. https://doi.org/10.1111/j.0014-3820.2003.tb01508.x
 - Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population Biology 59. Princeton University Press. https://doi.org/10.2307/j.ctt1wf4d24
 
 Conferidas no Crossref em 2026-11-05.

@@ -35,7 +35,7 @@ permutations of sites.}
 List of class \code{mc_pcc} with \code{r2}, the mean of the positive adjusted R2
 values, which is the value the authors recommend reporting; \code{statistic}, the
 variance of the adjusted R2 across eigenvectors; \code{p_site}, \code{p_taxa} and
-\code{p_max}; and \code{r2_adjusted}, with one value per eigenvector.
+\code{p_max}; \code{r2_adjusted}, with one value per eigenvector; and \code{permutations}.
 }
 \description{
 Implements the phylogenetic community composition (PCC) framework of
@@ -50,17 +50,19 @@ the larger of the two.
 }
 \details{
 The authors used presences and absences. Abundances are accepted, with
-species and site totals as weights.
+species and site totals as weights. Species without individuals leave the analysis.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 pcc_test(comm[keep, ], tree, env[keep], n_perm = 99)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:

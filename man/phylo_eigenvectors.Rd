@@ -20,8 +20,10 @@ Principal coordinates of the patristic distances among species, the first
 step of the phylogenetic community composition of Peres-Neto & Kembel (2015).
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-dim(phylo_eigenvectors(ape::rcoal(10)))
+dim(phylo_eigenvectors(treeshapesim::sim_tree_shape(10)))
+\dontshow{\}) # examplesIf}
 }
 \references{
 Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:

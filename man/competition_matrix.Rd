@@ -45,7 +45,9 @@ distribution of coefficients stays the same as with \code{"random"}.
 }
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tr <- ape::rcoal(5)
+tr <- treeshapesim::sim_tree_shape(5)
 round(competition_matrix(tr, "phylo", inter_max = 0.5), 3)
+\dontshow{\}) # examplesIf}
 }

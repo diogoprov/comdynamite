@@ -85,9 +85,9 @@ other refugia. It needs no hypothesis about how areas relate, so it asks a weake
 Sites of an area are often neighbours, and free permutations then reject too often. We
 simulated 1000 metacommunities on a torus of 15 by 15 sites, with communities that followed a
 hidden autocorrelated environment and two blocks of 25 sites placed at random, so that events
-had no effect (`data-raw/validation_events.R`). Free permutations rejected 44.8% of the tests
+had no effect (`data-raw/validation_events.R`). Free permutations rejected 45.1% of the tests
 of a node at the 5% level, and permutations from `torus_permutations()`, given in
-`site_permutations`, rejected 4.9%. The events in the figures above used free permutations,
+`site_permutations`, rejected 4.8%. The events in the figures above used free permutations,
 so they should be read with this in mind. Landscapes with edges need a restricted null model
 chosen for them, and a matrix of permutations of any origin can be given.
 
@@ -98,10 +98,8 @@ simulate them with the generator of Appendix C of Peres-Neto et al. (2012). In t
 scenario, two independent gradients act on species.
 
 ```{r}
-set.seed(2)
-tree <- ape::stree(32, "balanced")
-tree$edge.length <- rep(1, nrow(tree$edge))
-tree$tip.label <- paste0("sp", 1:32)
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(32, beta = 10)
 gradients <- logistic_gradients(1)
 sim <- simulate_logistic(tree, gradients[c("x", "y")])
 keep <- rowSums(sim$abundance) > 0
@@ -111,7 +109,7 @@ x <- gradients$x[keep]
 y <- gradients$y[keep]
 ```
 
-`phylo_vector()` tests whether a gradient is related to the phylogeny and, if so, gives a
+A high `beta` gives a balanced tree, as in that appendix. `phylo_vector()` tests whether a gradient is related to the phylogeny and, if so, gives a
 vector of species values for the next step. Here we ask this for each gradient.
 
 ```{r}
@@ -130,8 +128,8 @@ partition
 round(partition$semipartial, 2)
 ```
 
-```{r, fig.height = 3.5, fig.alt = "Bars of the fractions explained by environment, by space and by both."}
-plot_trait_partition(partition)
+```{r, fig.height = 3.5, fig.alt = "Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction."}
+plot_trait_partition(partition, labels = c("Gradient x", "Gradient y"))
 ```
 
 The test of each trait against each predictor is a different question, for which ter Braak

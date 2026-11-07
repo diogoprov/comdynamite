@@ -35,7 +35,7 @@ the unrelated predictor measures the type I error.
 ```{r, eval = FALSE}
 library(comdynamite)
 side <- 10
-tree <- ape::rcoal(30)
+tree <- treeshapesim::sim_tree_shape(30)
 land <- landscape_grid(side, env_bandwidth = 2, disp_scale = 2)
 unrelated <- landscape_grid(side, env_bandwidth = 2)$env
 
@@ -119,8 +119,9 @@ unrelated predictor are spatially autocorrelated, so they tend to match by
 chance, and permuting sites freely breaks this structure in the null
 distribution but not in the observed statistic (Legendre 1993).
 
-**Torus permutations keep the nominal level.** Their rejection rates (0.035 and
-0.050) are consistent with 5%, and their p-values are close to uniform.
+**Torus permutations come close to the nominal level.** Their rejection rates (0.08 and
+0.07) are about two standard errors above 5%, and their p-values are much closer to
+uniform. More replicates would be needed to tell whether this small excess is real.
 
 **This setting does not discriminate power.** Both null models reject the true
 environment in all replicates, because the effect is strong. Power cannot be
@@ -146,8 +147,8 @@ information.
 
 ## Tree shape as a factor of the design
 
-The results above use coalescent trees from `ape::rcoal()`, and the statistic
-ignores the tree, so tree shape cannot affect them. For a method that uses
+The results above use trees from `treeshapesim::sim_tree_shape()` with its default
+shape, and the statistic ignores the tree, so tree shape cannot affect them. For a method that uses
 phylogenetic information, tree shape should be part of the design. The
 [treeshapesim](https://provetelab.org/treeshapesim/) package simulates trees
 in which imbalance (`beta`) and branching times (`c`) are set separately.
@@ -164,7 +165,7 @@ knitr::kable(cbind(shapes, measured), digits = 2)
 
 The table gives the mean gamma statistic and normalized Colless index of 100
 trees for each combination. Each tree is a `phylo` object, so it replaces
-`ape::rcoal()` in step 1 without other changes. To aim at given values of gamma
+the tree in step 1 without other changes. To aim at given values of gamma
 and Colless, use `shape_grid()` and `sim_tree_target()` from the same package. The
 [treeshapesim article on comdynamite](https://provetelab.org/treeshapesim/articles/comdynamite.html)
 shows the two packages together.

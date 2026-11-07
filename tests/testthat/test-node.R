@@ -238,3 +238,53 @@ test_that("restricted permutations reach sites and events", {
   expect_equal(fixed$nodes$p_site[tested], rep(1, sum(tested)))
   expect_error(node_test(comm, nodes, env, n_perm = 3, site_permutations = same[, -1]))
 })
+
+test_that("with one predictor, the global and partial tests rank draws alike", {
+  set.seed(7)
+  nodes <- node_contrasts(daphniids$tree)
+  out <- node_test(daphniids$comm, nodes, daphniids$env[, "PHEQ", drop = FALSE], n_perm = 19)
+  expect_equal(unname(out$p_partial[, 1]), out$nodes$p_max)
+  expect_equal(unname(out$p_partial_joint[, 1]), out$nodes$p_joint)
+})
+
+test_that("the partial statistic does not depend on the scale of the response", {
+  set.seed(8)
+  comm <- matrix(rbinom(240, 1, 0.5), 60)
+  env <- cbind(runif(60), runif(60))
+  one <- node_fit(comm, c(1, 1, -1, -1), env)
+  two <- node_fit(cbind(comm, comm), rep(c(1, 1, -1, -1), 2), env)
+  expect_equal(one$partial_f, two$partial_f)
+  expect_equal(one$f, two$f)
+})
+
+test_that("a node with an absent clade is not tested", {
+  comm <- matrix(rbinom(120, 1, 0.5), 30, dimnames = list(NULL, letters[1:4]))
+  comm[, "d"] <- 0
+  env <- runif(30)
+  expect_true(is.na(node_fit(comm[, 3:4], c(1, -1), cbind(env))$statistic))
+  expect_false(is.na(node_fit(comm[, 1:2], c(1, -1), cbind(env))$statistic))
+})
+
+test_that("mistakes in the arguments of node_test() come early and explained", {
+  nodes <- node_contrasts(daphniids$tree)
+  expect_error(node_test(daphniids$comm, daphniids$tree, daphniids$env), "use `node_contrasts")
+  expect_error(node_test(daphniids$comm, nodes, daphniids$env, 999), "1 rows and `comm`")
+  expect_error(node_test(daphniids$comm, nodes, daphniids$env, cbind(rep("a", 314))),
+               "biogeography_matrix")
+})
+
+test_that("each parallel call gets its own streams", {
+  skip_on_os("windows")
+  kind <- RNGkind("L'Ecuyer-CMRG")
+  on.exit(RNGkind(kind[1]))
+  set.seed(9)
+  nodes <- node_contrasts(daphniids$tree)
+  env <- daphniids$env[, 1:2]
+  one <- node_test(daphniids$comm, nodes, env, n_perm = 9, cores = 2)$nodes$p_site
+  two <- node_test(daphniids$comm, nodes, env, n_perm = 9, cores = 2)$nodes$p_site
+  expect_false(identical(one, two))
+})
+
+test_that("a test without valid draws has no p-value", {
+  expect_true(is.na(permutation_p(c(NA_real_, NA_real_), 1)))
+})

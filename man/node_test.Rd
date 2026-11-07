@@ -28,11 +28,13 @@ site.}
 \item{biogeography}{Optional matrix of biogeographic events with one row per site
 and values of 1, -1 and 0.}
 
-\item{n_perm}{Number of permutations of sites, of species and of both.}
+\item{n_perm}{Number of permutations of sites, of species and of both. With
+\code{site_permutations}, only of species.}
 
 \item{cores}{Number of cores, with nodes run in parallel. Not available on Windows,
 where one core is used. For reproducible p-values with more than one core, call
-\code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}.}
+\code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}. Results still depend on the number of
+cores.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row,
 for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites.}
@@ -43,8 +45,9 @@ node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adj
 \code{p_site}, \code{p_taxa}, \code{p_max}, \code{p_joint} and \code{p_adjusted}; \code{semipartial}, a matrix of
 nodes by predictors; \code{p_partial}, with the larger of the two p-values for each of
 them; \code{p_partial_site}, with the p-values of sites alone; \code{p_partial_joint}, with
-those of the permutation of the article; and \code{biogeography}, a list with the same
-four matrices for the events, or \code{NULL}.
+those of the permutation of the article; \code{biogeography}, a list with the same
+four matrices for the events, or \code{NULL}; and \code{permutations}, the numbers of
+permutations and whether those of sites were free or restricted.
 }
 \description{
 Implements the regression of Leibold et al. (2010). For each node, sites without
@@ -91,7 +94,7 @@ a restricted null model. For events, each row moves the areas across the sites, 
 keep their community and predictors.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
-\code{MetacommunityPhylogenetics} of the authors, checked in Octave. Three parts of that
+\code{MetacommunityPhylogenetics} of the authors, checked in Octave. Four parts of that
 function differ from this one:
 \itemize{
 \item In the original, the species permutations shuffle only the first columns
@@ -102,14 +105,28 @@ species. Here it is recalculated.
 \item The semipartial values of the original use the raw predictors, without an
 intercept, and multiply by the absolute slope. The article uses standardised
 predictors and divides by it, to keep only the sign, which is what we do.
+\item The original compares the permuted statistics as they are. The one of each
+predictor divides a proportion by a sum of squares, so it depends on the scale of the
+response, and with one predictor it does not rank draws as the global one does. Neither
+takes into account that draws of species occupy different numbers of sites. Here
+draws are ranked on F statistics. \code{statistic} is still the one of the original, and
+p-values of sites alone are the same, but those that use species differ.
 }
 
 As in the original, R2 sums squares without site weights, although the fit
 uses them, so it is not the R2 of a weighted regression, and the adjusted R2
 uses the degrees of freedom of an unweighted model.
 
-Nodes for which a predictor has no variance among the remaining sites, or with too
-few sites, get \code{NA}. The original stops with an error.
+Nodes for which a predictor has no variance among the remaining sites, with too
+few sites, or with a clade without individuals get \code{NA}. The original stops with an
+error.
+
+Sites are matched by name when \code{comm}, \code{env} and \code{biogeography} all have row names, and
+otherwise by position.
+}
+\note{
+Adapted from the MATLAB function \code{MetacommunityPhylogenetics} in the supplement of
+Leibold et al. (2010), with the differences listed in Details.
 }
 \examples{
 # daphniids of Leibold et al. (2010)

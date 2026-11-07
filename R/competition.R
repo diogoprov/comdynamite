@@ -22,9 +22,9 @@
 #' @param scale Multiplier of all coefficients.
 #' @return Square matrix: element \[j, k\] is the effect of species k on
 #'   species j.
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tr <- ape::rcoal(5)
+#' tr <- treeshapesim::sim_tree_shape(5)
 #' round(competition_matrix(tr, "phylo", inter_max = 0.5), 3)
 #' @export
 competition_matrix <- function(species, type = c("none", "random", "phylo"),

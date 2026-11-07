@@ -19,7 +19,7 @@ and keep the abundances at the steps to be drawn.
 
 ```{r, eval = FALSE}
 library(comdynamite)
-tree <- ape::rcoal(30)
+tree <- treeshapesim::sim_tree_shape(30)
 land <- landscape_grid(20, env_bandwidth = 3, disp_scale = 1.5)
 traits <- species_traits(tree, lambda = 1, sigma_mean = 8, sigma_sd = 2)
 alpha <- competition_matrix(tree, "phylo", inter_max = 0.5)

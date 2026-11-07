@@ -45,9 +45,9 @@
 #'   Trait evolution, community assembly, and the phylogenetic structure of
 #'   ecological communities. *The American Naturalist*, 170, 271--283.
 #'   \doi{10.1086/519400}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tr <- ape::rcoal(32)
+#' tr <- treeshapesim::sim_tree_shape(32)
 #' x <- traits_ou(tr, n_traits = 2)
 #' assemble_community(x, size = 16, rule = "limiting_similarity")$community
 #' assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community

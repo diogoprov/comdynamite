@@ -51,9 +51,9 @@
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tr <- ape::rcoal(20)
+#' tr <- treeshapesim::sim_tree_shape(20)
 #' traits <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
 #'                          rmax_range = c(0, 30))
 #' sim <- simulate_static(traits, env = runif(100, 0, 100))

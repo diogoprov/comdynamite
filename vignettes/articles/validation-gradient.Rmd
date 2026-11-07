@@ -121,10 +121,10 @@ tree of 24 species, 60 sites, 300 data sets, 99 permutations, `data-raw/validati
 
 | What acts | Sites | Species | Larger p | Joint |
 |---|---|---|---|---|
-| Neither | 0.047 | 0.045 | 0.018 | 0.046 |
-| Environment | 0.770 | 0.048 | 0.048 | 0.759 |
-| Phylogeny | 0.057 | 0.061 | 0.024 | 0.060 |
-| Both | 0.798 | 0.087 | 0.087 | 0.793 |
+| Neither | 0.053 | 0.049 | 0.021 | 0.050 |
+| Environment | 0.777 | 0.049 | 0.049 | 0.764 |
+| Phylogeny | 0.046 | 0.050 | 0.021 | 0.050 |
+| Both | 0.803 | 0.073 | 0.073 | 0.795 |
 
 The joint test is valid only when neither acts. With the environment alone it behaves as
 the permutation of sites, so it does not separate an effect of the environment from an

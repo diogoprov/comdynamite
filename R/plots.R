@@ -199,9 +199,10 @@ label_place <- function(x, y, width, gap, angle, room) {
 
 #' Plot the fractions of a trait partition
 #'
-#' Draws one bar for each fraction of [trait_partition()]: `a` for the environment alone,
-#' `b` for what the environment and space share, and `c` for space alone. The unexplained
-#' fraction `d` is given below the plot, as it would hide the others. Dark bars are
+#' Draws the total variation as a line divided into the fractions of [trait_partition()],
+#' with one bar for the environment and one for space, as in Figure 1 of Desdevises et al.
+#' (2003). The two bars overlap in `b`, the variation they share. `a` is explained by the
+#' environment alone, `c` by space alone, and `d` is unexplained. Dark segments are
 #' significant, and `b` has no test, so it is grey.
 #'
 #' Negative fractions are shown as zero, following Legendre (2008). The result of
@@ -213,11 +214,17 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' @param test Permutation test: `"max"` for the larger p-value of sites and species,
 #'   `"site"` or `"taxa"`.
 #' @param alpha Significance level.
-#' @param col Colour of significant bars.
-#' @param ... Other arguments of [graphics::barplot()].
-#' @return Invisibly, the rows of `x$fractions` for `a`, `b` and `c`, with `shown`, the
-#'   values of the bars.
+#' @param col Colour of significant segments.
+#' @param labels Names of the two sets of predictors.
+#' @param cex Size of the text.
+#' @param ... Other arguments of [graphics::plot.window()].
+#' @return Invisibly, the rows of `x$fractions` for `a`, `b`, `c` and `d`, with `shown`, the
+#'   values drawn.
 #' @references
+#' Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). Quantifying
+#' phylogenetically structured environmental variation. *Evolution*, 57, 2647--2652.
+#' \doi{10.1111/j.0014-3820.2003.tb01508.x}
+#'
 #' Legendre, P. (2008). Studying beta diversity: ecological variation partitioning by
 #' multiple regression and canonical analysis. *Journal of Plant Ecology*, 1, 3--8.
 #' \doi{10.1093/jpe/rtm001}
@@ -233,23 +240,59 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' @export
 plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
                                  test = c("max", "site", "taxa"), alpha = 0.05,
-                                 col = "#0072B2", ...) {
-  stopifnot(inherits(x, "mc_trait_partition"))
+                                 col = "#0072B2", labels = c("Environment", "Space"),
+                                 cex = 0.9, ...) {
+  stopifnot(inherits(x, "mc_trait_partition"), length(labels) == 2)
   value <- match.arg(value)
   test <- match.arg(test)
   table <- x$fractions
-  shown <- table[match(c("c", "b", "a"), table$fraction), ]
+  shown <- table[match(c("a", "b", "c", "d"), table$fraction), ]
   shown$shown <- pmax(shown[[value]], 0)
-  p <- shown[[paste0("p_", test)]]
-  fill <- ifelse(is.na(p), "grey70", ifelse(p <= alpha, col, grDevices::adjustcolor(col, 0.3)))
-  old <- graphics::par(mar = c(5, 9, 3, 2))
+  p <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
+  fill <- function(fraction) {
+    if (p[[fraction]] <= alpha) col else grDevices::adjustcolor(col, 0.3)
+  }
+  edges <- c(0, cumsum(shown$shown))
+  old <- graphics::par(mar = c(3, 1, 3, 1), xpd = NA)
   on.exit(graphics::par(old))
-  graphics::barplot(shown$shown, horiz = TRUE, names.arg = c("Space [c]", "Shared [b]",
-                                                                "Environment [a]"),
-                    col = fill, border = NA, las = 1, xlab = value,
-                    main = paste(x$component, "component"),
-                    sub = paste("Unexplained [d]:",
-                                format(max(table[[value]][table$fraction == "d"], 0), digits = 3)), ...)
-  graphics::abline(v = 0)
-  invisible(shown[3:1, ])
+  graphics::plot.new()
+  graphics::plot.window(xlim = c(0, edges[5]), ylim = c(0, 3), ...)
+  segment <- function(i, y, colour) {
+    graphics::rect(edges[i], y, edges[i + 1], y + 0.7, col = colour, border = "white")
+  }
+  segment(1, 2, fill("a"))
+  segment(2, 2, "grey70")
+  segment(2, 1.1, "grey70")
+  segment(3, 1.1, fill("c"))
+  graphics::text(edges[1], 2.85, labels[1], adj = c(0, 0), cex = cex)
+  # beside its bar, on the side with more room
+  on_right <- edges[5] - edges[4] >= edges[2]
+  gap <- graphics::strwidth("n", cex = cex)
+  graphics::text(if (on_right) edges[4] + gap else edges[2] - gap, 1.45, labels[2],
+                 adj = c(1 - on_right, 0.5), cex = cex)
+  graphics::text(mean(edges[4:5]), 2.35, "Unexplained", cex = cex)
+  graphics::segments(edges[1], 0.9, edges[5], 0.9, lwd = 4)
+  graphics::segments(edges, 0.75, edges, 1.05)
+  graphics::text(fraction_positions(edges, graphics::strwidth("[a] 0.00", cex = cex)), 0.45,
+                 paste0("[", shown$fraction, "] ", format(round(shown$shown, 2), nsmall = 2)),
+                 cex = cex)
+  graphics::title(main = paste(x$component, "component"))
+  graphics::legend("bottom", c("Significant", "Not significant", "Shared, no test"), bty = "n",
+                   fill = c(col, grDevices::adjustcolor(col, 0.3), "grey70"), border = NA,
+                   horiz = TRUE, cex = cex * 0.9, inset = c(0, -0.08))
+  invisible(shown)
+}
+
+# centres of the fractions, moved apart so that their labels do not overlap
+fraction_positions <- function(edges, width) {
+  centres <- (edges[-1] + edges[-length(edges)]) / 2
+  for (i in seq_along(centres)[-1]) centres[i] <- max(centres[i], centres[i - 1] + width)
+  excess <- centres[length(centres)] + width / 2 - edges[length(edges)]
+  if (excess > 0) {
+    centres[length(centres)] <- centres[length(centres)] - excess
+    for (i in rev(seq_along(centres)[-length(centres)])) {
+      centres[i] <- min(centres[i], centres[i + 1] - width)
+    }
+  }
+  centres
 }

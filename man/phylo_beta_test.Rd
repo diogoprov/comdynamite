@@ -23,9 +23,9 @@ permutations of sites.}
 }
 \value{
 List of class \code{mc_phylo_beta} with \code{r2}, the adjusted R2; \code{statistic},
-the pseudo-F; \code{p_site}, \code{p_taxa} and \code{p_max}; and \code{scores}, the sites on the
+the pseudo-F; \code{p_site}, \code{p_taxa} and \code{p_max}; \code{scores}, the sites on the
 principal coordinates of the predicted matrix, which the authors suggest
-using to order sites in a heatmap of the community matrix.
+using to order sites in a heatmap of the community matrix; and \code{permutations}.
 }
 \description{
 Implements the phylogenetic beta-diversity framework of Peres-Neto & Kembel
@@ -49,14 +49,16 @@ The authors used presences and absences. Abundances are accepted, as weights
 in \code{\link[=phylo_beta]{phylo_beta()}}.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Legendre, P., & Anderson, M. J. (1999). Distance-based redundancy analysis:

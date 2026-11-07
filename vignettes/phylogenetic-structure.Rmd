@@ -41,7 +41,7 @@ rates and competition types.
 ```{r, eval = FALSE}
 library(comdynamite)
 
-tree <- ape::rcoal(30)
+tree <- treeshapesim::sim_tree_shape(30)
 land <- landscape_implicit(25)
 traits <- species_traits(tree, lambda = 1, sigma_mean = 8, sigma_sd = 2)
 alpha <- competition_matrix(tree, "phylo", inter_max = 0.5)
@@ -99,8 +99,8 @@ Four patterns stand out.
 
 **Clustering needs both conserved niches and limited dispersal.** Without
 competition and with `lambda = 1`, communities are clustered at low dispersal
-(SES MPD near -1.7) and the signal fades as dispersal increases, reaching zero
-at 0.5. Niche conservatism alone does not produce clustering: immigrants keep
+(SES MPD near -1.3) and the signal weakens as dispersal increases, to between
+-0.3 and -0.5 at the highest rates. Niche conservatism alone does not produce clustering: immigrants keep
 species in sites that do not suit them, so composition no longer reflects the
 match between niches and environment.
 
@@ -110,10 +110,10 @@ even though species are strongly sorted by the environment at low dispersal
 (beta near 0.8).
 
 **Competition among relatives can hide filtering.** With `lambda = 1`,
-competition among relatives moves SES MPD from about -1.7 to about -0.3 at the
+competition among relatives moves SES MPD from about -1.3 to about zero at the
 lowest dispersal rate, which is close to the random expectation although both
 processes are acting strongly. At higher dispersal, communities become
-overdispersed. A value near zero therefore does not imply that assembly is
+slightly overdispersed. A value near zero therefore does not imply that assembly is
 random.
 
 **Taxonomic beta diversity does not see the phylogenetic signal.** Beta diversity

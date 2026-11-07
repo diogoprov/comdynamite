@@ -55,14 +55,16 @@ optima play no role. Each branch belongs to a single regime, so a shift in
 optimum happens at the start of the branch where the regime changes.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 # Brownian motion
 traits_ou(tr, alpha = 0)[1:3, ]
 # two optima: the clade of node 25 evolves towards 10, the rest towards 0
 reg <- paint_regimes(tr, nodes = 25)
 x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 round(x[, 1], 1)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis: a

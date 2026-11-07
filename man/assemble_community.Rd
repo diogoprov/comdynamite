@@ -59,11 +59,13 @@ Distances are Euclidean, so several traits can be used at once (one column
 each). Ties are broken at random.
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tr <- ape::rcoal(32)
+tr <- treeshapesim::sim_tree_shape(32)
 x <- traits_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
+\dontshow{\}) # examplesIf}
 }
 \references{
 Colwell, R. K., & Winkler, D. W. (1984). A null model for null models in

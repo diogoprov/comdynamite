@@ -12,9 +12,9 @@
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' dim(phylo_eigenvectors(ape::rcoal(10)))
+#' dim(phylo_eigenvectors(treeshapesim::sim_tree_shape(10)))
 #' @export
 phylo_eigenvectors <- function(tree, squared = FALSE) {
   stopifnot(inherits(tree, "phylo"))
@@ -42,7 +42,7 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' the larger of the two.
 #'
 #' The authors used presences and absences. Abundances are accepted, with
-#' species and site totals as weights.
+#' species and site totals as weights. Species without individuals leave the analysis.
 #'
 #' @param comm Matrix with one row per site and one column per species. Species are
 #'   matched to the tips of `tree` by name, in any order, and those in only one of the
@@ -58,15 +58,15 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @return List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
 #'   values, which is the value the authors recommend reporting; `statistic`, the
 #'   variance of the adjusted R2 across eigenvectors; `p_site`, `p_taxa` and
-#'   `p_max`; and `r2_adjusted`, with one value per eigenvector.
+#'   `p_max`; `r2_adjusted`, with one value per eigenvector; and `permutations`.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
-#' @examples
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
-#' tree <- ape::rcoal(20)
+#' tree <- treeshapesim::sim_tree_shape(20)
 #' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
 #'                          rmax_range = c(0, 30))
 #' env <- runif(50, 0, 100)
@@ -76,12 +76,12 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @export
 pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
                      site_permutations = NULL) {
-  matched <- check_phylo_comm(comm, tree)
+  matched <- present_species(check_phylo_comm(comm, tree), minimum = 3)
   comm <- matched$comm
   tree <- matched$tree
-  env <- as.matrix(env)
-  stopifnot(nrow(env) == nrow(comm), nrow(comm) > ncol(env) + 1, n_perm >= 1)
-  if (!is.null(site_permutations)) stopifnot(ncol(site_permutations) == nrow(comm))
+  env <- check_env(env, comm)
+  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  check_permutations(site_permutations, comm)
   vectors <- phylo_eigenvectors(tree, squared = squared)
   observed <- pcc_r2(comm, vectors, env)
   statistic <- stats::var(observed)
@@ -91,16 +91,17 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
   } else {
     site_permutations
   }
-  null_site <- apply(sites, 1, function(i) {
-    stats::var(pcc_r2(comm, vectors, env[i, , drop = FALSE]))
-  })
-  null_taxa <- replicate(n_perm, {
+  null_site <- unlist(progress_map(seq_len(nrow(sites)), function(r) {
+    stats::var(pcc_r2(comm, vectors, env[sites[r, ], , drop = FALSE]))
+  }, "Sites"))
+  null_taxa <- unlist(progress_map(seq_len(n_perm), function(r) {
     stats::var(pcc_r2(comm[, sample.int(ncol(comm)), drop = FALSE], vectors, env))
-  })
+  }, "Species"))
   p_site <- (sum(null_site >= statistic) + 1) / (length(null_site) + 1)
   p_taxa <- (sum(null_taxa >= statistic) + 1) / (length(null_taxa) + 1)
   structure(list(r2 = mean(observed[observed > 0]), statistic = statistic, p_site = p_site,
-                 p_taxa = p_taxa, p_max = max(p_site, p_taxa), r2_adjusted = observed),
+                 p_taxa = p_taxa, p_max = max(p_site, p_taxa), r2_adjusted = observed,
+                 permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_pcc")
 }
 
@@ -108,6 +109,7 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
 print.mc_pcc <- function(x, ...) {
   cat("<mc_pcc> phylogenetic community composition\n")
   cat("mean positive adjusted R2:", format(x$r2, digits = 3), "\n")
+  permutation_line(x$permutations)
   cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
       format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
   invisible(x)

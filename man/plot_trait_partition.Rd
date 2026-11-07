@@ -10,6 +10,8 @@ plot_trait_partition(
   test = c("max", "site", "taxa"),
   alpha = 0.05,
   col = "#0072B2",
+  labels = c("Environment", "Space"),
+  cex = 0.9,
   ...
 )
 }
@@ -24,18 +26,23 @@ plot_trait_partition(
 
 \item{alpha}{Significance level.}
 
-\item{col}{Colour of significant bars.}
+\item{col}{Colour of significant segments.}
 
-\item{...}{Other arguments of \code{\link[graphics:barplot]{graphics::barplot()}}.}
+\item{labels}{Names of the two sets of predictors.}
+
+\item{cex}{Size of the text.}
+
+\item{...}{Other arguments of \code{\link[graphics:plot.window]{graphics::plot.window()}}.}
 }
 \value{
-Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b} and \code{c}, with \code{shown}, the
-values of the bars.
+Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b}, \code{c} and \code{d}, with \code{shown}, the
+values drawn.
 }
 \description{
-Draws one bar for each fraction of \code{\link[=trait_partition]{trait_partition()}}: \code{a} for the environment alone,
-\code{b} for what the environment and space share, and \code{c} for space alone. The unexplained
-fraction \code{d} is given below the plot, as it would hide the others. Dark bars are
+Draws the total variation as a line divided into the fractions of \code{\link[=trait_partition]{trait_partition()}},
+with one bar for the environment and one for space, as in Figure 1 of Desdevises et al.
+(2003). The two bars overlap in \code{b}, the variation they share. \code{a} is explained by the
+environment alone, \code{c} by space alone, and \code{d} is unexplained. Dark segments are
 significant, and \code{b} has no test, so it is grey.
 }
 \details{
@@ -53,6 +60,10 @@ out <- trait_partition(comm, trait, env, space, n_perm = 49)
 plot_trait_partition(out)
 }
 \references{
+Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). Quantifying
+phylogenetically structured environmental variation. \emph{Evolution}, 57, 2647--2652.
+\doi{10.1111/j.0014-3820.2003.tb01508.x}
+
 Legendre, P. (2008). Studying beta diversity: ecological variation partitioning by
 multiple regression and canonical analysis. \emph{Journal of Plant Ecology}, 1, 3--8.
 \doi{10.1093/jpe/rtm001}

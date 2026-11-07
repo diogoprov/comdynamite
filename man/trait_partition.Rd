@@ -35,8 +35,8 @@ for each of \code{abc}, \code{ab}, \code{bc}, \code{a}, \code{b}, \code{c} and \
 \code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_taxa} and \code{p_max}; \code{component};
 \code{component_share}, the share of the total variation in the component; \code{semipartial},
 a matrix of predictors by traits; and \code{p_partial}, \code{p_partial_site} and
-\code{p_partial_taxa}, with the larger p-value and those of sites and of species. All are
-\code{NA} if predictors are collinear.
+\code{p_partial_taxa}, with the larger p-value and those of sites and of species, all
+\code{NA} if predictors are collinear; and \code{permutations}.
 }
 \description{
 The phylogenetic gradient analysis of Peres-Neto et al. (2012). Trait values are
@@ -49,6 +49,10 @@ alone; \code{b}, shared; \code{c}, space alone; and \code{d}, unexplained.
 The total variation includes both the mean and the dispersion within sites, so \code{r2}
 answers how much of all the variation each fraction holds, and \code{r2_component} how much
 of the component. Fractions \code{b} and \code{d} cannot be tested.
+}
+\note{
+Adapted from the MATLAB function \code{PartitionRDATwoDataMatricesPhylogeny} in the
+supplement of Peres-Neto et al. (2012).
 }
 \section{Article and original code}{
 

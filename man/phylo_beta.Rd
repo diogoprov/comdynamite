@@ -32,11 +32,13 @@ and should coincide, yet their distance is not zero. The pseudo-F of
 2001).
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tree <- ape::rcoal(5)
+tree <- treeshapesim::sim_tree_shape(5)
 comm <- matrix(rbinom(20, 1, 0.7) + diag(1, 4, 5), 4,
                dimnames = list(NULL, tree$tip.label))
 phylo_beta(comm > 0, tree)
+\dontshow{\}) # examplesIf}
 }
 \references{
 McArdle, B. H., & Anderson, M. J. (2001). Fitting multivariate models to

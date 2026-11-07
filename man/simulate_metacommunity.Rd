@@ -95,13 +95,15 @@ website for the complete list.
 }
 
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 ls <- landscape_implicit(30)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 sim <- simulate_metacommunity(ls, species_traits(tr),
                               competition_matrix(tr, "phylo"),
                               dispersal = 0.01, n_steps = 200)
 sim
+\dontshow{\}) # examplesIf}
 }
 \references{
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,

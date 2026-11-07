@@ -24,7 +24,7 @@ p_value <- function(y, x, perms) {
 }
 
 one_replicate <- function(i) {
-  tree <- ape::rcoal(30)
+  tree <- treeshapesim::sim_tree_shape(30)
   land <- landscape_grid(side, env_bandwidth = 2, disp_scale = 2)
   # autocorrelated like the environment, but unrelated to the community
   unrelated <- landscape_grid(side, env_bandwidth = 2)$env

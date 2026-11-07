@@ -66,8 +66,8 @@ test_that("the partition plot returns the three fractions in order", {
   colnames(comm) <- names(trait)
   out <- trait_partition(comm, trait, env, space, n_perm = 9)
   shown <- plot_trait_partition(out)
-  expect_equal(shown$fraction, c("a", "b", "c"))
-  expect_equal(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c"),
+  expect_equal(shown$fraction, c("a", "b", "c", "d"))
+  expect_equal(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c", "d"),
                                                                   out$fractions$fraction)])
   expect_true(any(shown$r2_adjusted < 0))
   expect_equal(shown$shown, pmax(shown$r2_adjusted, 0))
@@ -84,4 +84,22 @@ test_that("the heatmap holds predictors and events, with blanks where there is n
   expect_true(anyNA(values))
   only_env <- daphniid_result(NULL)
   expect_equal(ncol(plot_node_heatmap(only_env, alpha = 0)), ncol(daphniids$env))
+})
+
+test_that("labels of small fractions stay apart and inside the line", {
+  edges <- c(0, 0.01, 0.02, 0.03, 1)
+  at <- fraction_positions(edges, 0.1)
+  expect_true(all(diff(at) >= 0.1 - 1e-9))
+  crowded <- fraction_positions(c(0, 0.97, 0.98, 0.99, 1), 0.1)
+  expect_true(all(diff(crowded) >= 0.1 - 1e-9))
+  expect_lte(crowded[4] + 0.05, 1)
+})
+
+test_that("the second label goes to the side with more room", {
+  pdf(NULL)
+  on.exit(dev.off())
+  x <- structure(list(component = "mean", fractions = data.frame(
+    fraction = c("a", "b", "c", "d"), r2_adjusted = c(0.5, 0.1, 0.3, 0.1),
+    p_max = c(0.01, NA, 0.2, NA))), class = "mc_trait_partition")
+  expect_equal(plot_trait_partition(x)$shown, c(0.5, 0.1, 0.3, 0.1))
 })

@@ -56,8 +56,9 @@ species has its own response to each gradient and the expected abundance is
 the product of the responses, as in Peres-Neto et al. (2012).
 }
 \examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 sim <- simulate_static(traits, env = runif(100, 0, 100))
@@ -68,6 +69,7 @@ space <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
                         rmax_range = c(1, 1))
 gradients <- data.frame(env = runif(100, 0, 100), space = 1:100)
 simulate_static(list(traits, space), gradients)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Dray, S., & Legendre, P. (2008). Testing the species traits-environment
