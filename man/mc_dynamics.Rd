@@ -15,7 +15,9 @@ mc_dynamics(
   record_steps = NULL,
   sites = NULL,
   species = NULL,
-  extirpation = 0
+  extirpation = 0,
+  pool = NULL,
+  initial = NULL
 )
 }
 \arguments{
@@ -43,10 +45,16 @@ site at each seeding step (and at the start).}
 
 \item{extirpation}{Probability that a population is lost at each time step,
 one value or one per species.}
+
+\item{pool}{Optional matrix (sites x species), logical or 0/1, with the sites where each
+species can occur.}
+
+\item{initial}{Optional matrix (sites x species) of abundances or 0/1 presences at the start,
+only where \code{pool} allows.}
 }
 \value{
 List with \code{abundance} and \code{history}, as in
-\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}.
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, and \code{pool} as a logical matrix, or \code{NULL} without it.
 }
 \description{
 The engine of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, for users who want to supply
