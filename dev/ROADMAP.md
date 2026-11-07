@@ -39,8 +39,8 @@ CI em macOS, Windows e Linux; 100% de cobertura de linhas; `inst/CITATION` e
 
 - [x] Submissão ao r-universe: `comdynamite` incluído em `packages.json`, no repositório
       `diogoprov/diogoprov.r-universe.dev`.
-- [ ] Confirmar o build em https://diogoprov.r-universe.dev/comdynamite. Depois, pôr o
-      badge e a instalação pelo r-universe no README, como no treeshapesim.
+- [x] Build confirmado em https://diogoprov.r-universe.dev/comdynamite (0.6.1, OK em
+      Linux, macOS, Windows e wasm); badge e instalação pelo r-universe no README.
 
 ## v0.2.0: validação e geradores estáticos
 
@@ -122,10 +122,10 @@ base sem dinâmica.
       e .060 (.091, .064). O PCC teve poder de .888 e .856 nos mesmos dados, ao contrário
       do artigo, onde fica à frente (.945, .947), e um erro de .058 onde a outra rodada
       deu .068, o que mostra o ruído desses valores.
-- [ ] Heatmaps do artigo para visualizar os eixos de `scores`.
-- [ ] Avisar os autores ou registrar no texto: a matriz de MPD não é sempre euclidiana,
-      ao contrário do que o artigo afirma (exemplo em `?phylo_beta`), e o picante não traz
-      as funções que o artigo anuncia.
+- [x] Heatmaps do artigo para visualizar os eixos de `scores`: `plot_phylo_beta()`, com `axis`.
+- [x] Registrado em `?phylo_beta`: a matriz de MPD não é sempre euclidiana, ao contrário do
+      que o artigo afirma, e o pseudo-F não exige isso. A nota antiga de que o picante não traz
+      as funções que o artigo anuncia não diz quais são: fica fora do texto até ser conferida.
 
 ## v0.3.0: fluxo de estudos de simulação
 
@@ -191,8 +191,9 @@ máquina.
       A diferença está no artigo de validação; para fechar, só perguntando aos autores.
 - [x] Semiparciais de `trait_partition()`, do Apêndice A, com testes. O suplemento não
       tem código para elas, então a conferência foi feita contra regressões separadas.
-- [ ] `node_test()` roda nós em paralelo com `cores`. Se ainda for lento em árvores
-      grandes, vetorizar `node_fit()`.
+- [x] `node_test()` roda nós em paralelo com `cores`. Medido em um núcleo, com 100 sítios e
+      999 permutações: 0,5 min com 100 espécies, 1,7 com 300 e 3,9 com 600, linear nos nós.
+      Não é lento, então `node_fit()` não foi vetorizado.
 - [x] Leibold et al. (2010): `node_test()` e `node_contrasts()`. R2, R2 ajustado e F iguais
       ao MATLAB no Octave 11.3 (diferença abaixo de 1e-15), e os 13 contrastes de
       `CreateNodeContrasts` iguais. Em `data-raw/validation_node.R` (refeito na v0.5.2, com F), por nó, sites .053 e
@@ -219,8 +220,9 @@ máquina.
       `adespatial`). `trait_partition()` cita ter Braak (2019) e o TraitEnvMLMWA para o
       teste de cada traço.
 - [x] `plot_node_heatmap()`: nós por preditores com `semipartial`, como a Tabela S1.
-- [ ] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro;
-      permutações em paralelo com o Futureverse.
+- [x] Estilo tidyverse na entrada e na saída, com álgebra de matrizes por dentro: tibbles
+      numéricos entram, `as.data.frame()` e `as_tibble()` saem. Permutações em paralelo com
+      `future.apply`, em `Suggests`, sob o `plan()` do usuário; `node_test()` segue com `cores`.
 - [x] Testar a tradução contra o MATLAB em dados fixos, antes de corrigir qualquer
       coisa: R e Octave concordam até 1e-13, e as divergências estão nos helps.
 - [x] Artigo "Analysing clades and traits in a metacommunity", com dafinídeos e simulação.

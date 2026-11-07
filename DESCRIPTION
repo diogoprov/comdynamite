@@ -31,10 +31,13 @@ Imports:
     stats
 Suggests:
     adespatial,
+    future,
+    future.apply,
     knitr,
     picante,
     rmarkdown,
     testthat (>= 3.0.0),
+    tibble,
     treeshapesim,
     vegan
 Additional_repositories: https://diogoprov.r-universe.dev
