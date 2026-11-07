@@ -1,9 +1,10 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-07. Versão atual: 0.6.2 (DOI de conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-07. Versão atual: 0.6.2, com `0.6.2.9000` em desenvolvimento (DOI de
+conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2`, `v0.6.0`,
 `v0.6.1` e `v0.6.2`. O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`. A
-`v0.4.0` começou com `mc_data()` e tem 4 itens abertos. Todas as pendências das etapas
+`v0.4.0` começou com `mc_data()` e traits externos e tem 3 itens abertos. Todas as pendências das etapas
 anteriores estão fechadas.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
