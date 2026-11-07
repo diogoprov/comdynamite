@@ -46,6 +46,7 @@ reference:
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta
+  - plot_phylo_beta
 - title: Environment and space
   desc: Phylogenetic vectors and the partition of trait variation.
   contents:

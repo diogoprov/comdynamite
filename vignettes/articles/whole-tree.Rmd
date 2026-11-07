@@ -47,10 +47,12 @@ beta
 ```
 
 `scores` holds the sites on the principal coordinates of the predicted matrix, which the
-authors suggest using to order sites in a heatmap of the community matrix.
+authors suggest using to order sites in a heatmap of the community matrix. `plot_phylo_beta()`
+draws it, with species in the order of the tree, so that clades replace each other along the
+sites when composition follows the environment.
 
 ```{r}
-plot(env, beta$scores[, 1], xlab = "Environment", ylab = "First axis of the predicted matrix")
+plot_phylo_beta(beta, comm, tree)
 ```
 
 ## Reading the two p-values

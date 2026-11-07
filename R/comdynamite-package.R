@@ -5,7 +5,8 @@
 #'     [node_test()] tests them. [plot_node_test()] and [plot_node_heatmap()] show the results.
 #'   \item Does phylogenetic composition follow the environment across the whole tree?
 #'     [pcc_test()] works on phylogenetic eigenvectors and [phylo_beta_test()] on the
-#'     phylogenetic distances between communities, from [phylo_beta()].
+#'     phylogenetic distances between communities, from [phylo_beta()], shown by
+#'     [plot_phylo_beta()].
 #'   \item Which phylogenetic axis relates to a predictor? [phylo_vector()].
 #'   \item How much of trait or phylogenetic variation is due to environment and space?
 #'     [trait_partition()] and [plot_trait_partition()].

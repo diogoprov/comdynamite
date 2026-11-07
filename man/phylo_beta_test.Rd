@@ -77,5 +77,6 @@ communities. \emph{Plant Ecology}, 216, 709--724.
 \doi{10.1007/s11258-014-0405-0}
 }
 \seealso{
-\code{\link[=pcc_test]{pcc_test()}}, the other framework of the same article.
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}} shows the result. \code{\link[=pcc_test]{pcc_test()}} is the other framework of the
+same article.
 }

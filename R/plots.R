@@ -307,3 +307,67 @@ fraction_positions <- function(edges, width) {
   }
   centres
 }
+
+#' Community matrix ordered by phylogenetic beta diversity
+#'
+#' The heatmap that Peres-Neto & Kembel (2015) suggest for [phylo_beta_test()]: sites follow
+#' an axis of the matrix predicted by the environment and species follow the tree, so that a
+#' link between environment and phylogeny appears as clades that replace each other along the
+#' sites.
+#'
+#' @param x Result of [phylo_beta_test()].
+#' @param comm The community matrix given to [phylo_beta_test()].
+#' @param tree The `phylo` object given to [phylo_beta_test()].
+#' @param axis Axis of `x$scores` that orders the sites.
+#' @param col Colour of the largest value, with white for absences.
+#' @param cex Size of the text.
+#' @param ... Passed to [graphics::image()].
+#' @return The ordered matrix, invisibly.
+#' @references
+#' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
+#' environmental drivers of phylogenetic variation across ecological
+#' communities. *Plant Ecology*, 216, 709--724.
+#' \doi{10.1007/s11258-014-0405-0}
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
+#'                          rmax_range = c(0, 30))
+#' env <- runif(50, 0, 100)
+#' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+#' keep <- rowSums(comm) > 0
+#' out <- phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 9)
+#' plot_phylo_beta(out, comm[keep, ], tree)
+#' @export
+plot_phylo_beta <- function(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...) {
+  stopifnot(inherits(x, "mc_phylo_beta"), inherits(tree, "phylo"))
+  matched <- present_species(check_phylo_comm(comm, tree, allow_empty = TRUE))
+  comm <- matched$comm[rowSums(matched$comm) > 0, , drop = FALSE]
+  scores <- as.matrix(x$scores)
+  if (nrow(scores) != nrow(comm)) {
+    stop("`comm` has ", nrow(comm), " occupied sites and `x` has ", nrow(scores),
+         ": use the community given to `phylo_beta_test()`", call. = FALSE)
+  }
+  if (axis < 1 || axis > ncol(scores)) {
+    stop("`axis` must be between 1 and ", ncol(scores), call. = FALSE)
+  }
+  tree <- ape::ladderize(matched$tree)
+  tips <- tree$edge[tree$edge[, 2] <= length(tree$tip.label), 2]
+  ordered <- comm[order(scores[, axis]), tree$tip.label[tips], drop = FALSE]
+  n_species <- ncol(ordered)
+  n_sites <- nrow(ordered)
+  old <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old))
+  graphics::layout(matrix(1:2), heights = c(1, 3))
+  # without the extra 4% of the axis, tips line up with the columns of the image
+  graphics::par(mar = c(0, 4, 1, 1), xaxs = "i")
+  ape::plot.phylo(tree, direction = "downwards", show.tip.label = FALSE,
+                  x.lim = c(0.5, n_species + 0.5), no.margin = FALSE)
+  graphics::par(mar = c(7, 4, 0, 1))
+  ramp <- grDevices::colorRampPalette(c("white", col))(max(2, min(max(ordered) + 1, 50)))
+  graphics::image(seq_len(n_species), seq_len(n_sites), t(ordered), col = ramp, axes = FALSE,
+                  xlab = "", ylab = paste("Sites, ordered by axis", axis), ...)
+  graphics::axis(1, seq_len(n_species), colnames(ordered), las = 2, tick = FALSE, cex.axis = cex)
+  graphics::box()
+  invisible(ordered)
+}
