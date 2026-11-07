@@ -17,7 +17,7 @@ data and to simulate it.
 | Question | Functions | Article |
 |---|---|---|
 | Which clades respond to the environment or to biogeographic events? | `node_contrasts()`, `biogeography_matrix()`, `node_test()` | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
-| Does phylogenetic composition follow the environment across the whole tree? | `pcc_test()`, `phylo_beta_test()` | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
+| Does phylogenetic composition follow the environment across the whole tree? | `pcc_test()`, `pcps_test()`, `phylo_beta_test()` | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
 | Which phylogenetic axis relates to a predictor? | `phylo_vector()` | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
 | How much of trait or phylogenetic variation is due to environment and space? | `trait_partition()`, `plot_trait_partition()` | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
 | My sites are neighbours: which null model? | `torus_permutations()`, `rigid_permutations()`, `patch_permutations()` | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |

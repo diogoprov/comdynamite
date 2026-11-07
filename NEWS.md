@@ -1,3 +1,14 @@
+# comdynamite (development version)
+
+- `pcps_test()`: principal coordinates of phylogenetic structure of Duarte et al. (2016), the
+  method of the package PCPS, with tests of all the dissimilarity and of each axis, and
+  `site_permutations` for a restricted null model, which that package does not have. Its
+  statistics match those of PCPS 1.0.9 (`data-raw/validation_pcps.R`). With autocorrelated
+  fields unrelated to each other, free permutations of sites rejected 29-80% at the 5% level;
+  the torus rejected 4-7% when fields wrap around the grid and 6-25% when they stop at its edges.
+- `torus_permutations()`: rectangular grids, with `side` of length two, and new `symmetries`
+  and `n_perm`.
+
 # comdynamite 0.6.1
 
 - `trait_partition()`: the tests of fractions `a` and `c`, and of the semipartials, now use the

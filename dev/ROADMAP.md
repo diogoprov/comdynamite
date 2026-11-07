@@ -1,6 +1,6 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.6.0 (DOI de conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-06. Versão atual: 0.6.1 (DOI de conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2` e `v0.6.0`. `v0.3.0` e `v0.4.0`
 não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
 v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
@@ -105,6 +105,13 @@ base sem dinâmica.
       espécies 0,049 e 0,040 contra 0,054 e 0,052). O poder (0,87 e 0,85 contra 0,945 e
       0,947) e o teste de espécies em phylogeny (0,20 e 0,19 contra 0,27 e 0,28) ficam
       abaixo, como esperado sem a árvore deles.
+- [x] `pcps_test()`: PCPS de Duarte et al. (2016), com teste de toda a dissimilaridade e de
+      cada eixo e `site_permutations`, que o pacote PCPS não tem. `torus_permutations()`
+      aceita grade retangular, `symmetries` e `n_perm`. Estatísticas iguais às do PCPS 1.0.9
+      (diferença 8e-15 em 20 comunidades) e p compatíveis. Em `data-raw/validation_pcps.R`,
+      grade 10 x 10 sem relação real: livre rejeita 29-80% (`p_max` 3-24%), toro 4-7% com
+      campos periódicos (`p_max` 1-4%) e 6-25% com bordas (`p_max` 1-10%). O PR ao PCPS
+      fica para depois do aceite do manuscrito.
 - [x] `phylo_beta_test()` e `phylo_beta()`: framework de beta diversidade filogenética do
       mesmo artigo (db-RDA sobre MPD entre comunidades), que não existia no pcps-sim. F e
       R2 iguais aos do `vegan::adonis2()`, e métrica igual a `picante::comdist()`. Em
