@@ -18,7 +18,8 @@ node_test(
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are
 matched to the rows of \code{nodes} by name, in any order, and those in only one of the
-two are dropped with a warning.}
+two are dropped with a warning.
+Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments left out (its tree gives \code{nodes}).}
 
 \item{nodes}{Matrix of contrasts with one row per species, from
 \code{\link[=node_contrasts]{node_contrasts()}}.}

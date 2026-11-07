@@ -39,7 +39,7 @@ the code of Ives & Helmus (2011). Appendix C does not give this value.}
 List of class \code{mc_sim} with \code{abundance}, a 0/1 matrix with one row per
 site and one column per species; \code{probability}, the matrix of probabilities;
 \code{env}, the gradients; and \code{traits}, a list with the matrices \code{intercept}
-and \code{slope}, with one row per species and one column per gradient.
+and \code{slope}, with one row per species and one column per gradient; and \code{tree}.
 }
 \description{
 The two-gradient simulation of Appendix C of Peres-Neto et al. (2012), after

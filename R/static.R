@@ -33,8 +33,9 @@
 #'   draws counts, `"binomial"` draws presences and absences, which needs
 #'   expected values of at most 1, and `"expected"` returns the expected values.
 #' @return List of class `mc_sim` with `abundance`, a matrix with one row per
-#'   site and one column per species, plus `env` and `traits`. Sites and species
-#'   with no individuals are kept, so remove them if a method requires it.
+#'   site and one column per species, plus `env`, `traits` and, when the traits came from
+#'   [species_traits()] with a tree, `tree`. Sites and species with no individuals are kept,
+#'   so remove them if a method requires it.
 #' @references
 #' Dray, S., & Legendre, P. (2008). Testing the species traits-environment
 #' relationships: the fourth-corner problem revisited. *Ecology*, 89,
@@ -92,8 +93,8 @@ simulate_static <- function(traits, env, incidence = FALSE,
                         rownames(expected) %||% paste0("site", seq_along(env_list[[1]])),
                         rownames(trait_list[[1]])))
   if (incidence) abundance[] <- (abundance > 0) * 1L
-  structure(list(abundance = abundance, history = NULL, env = env, traits = traits),
-            class = "mc_sim")
+  structure(list(abundance = abundance, history = NULL, env = env, traits = traits,
+                 tree = attr(traits, "tree")), class = "mc_sim")
 }
 
 #' Simulate presences and absences from logistic responses
@@ -125,7 +126,7 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' @return List of class `mc_sim` with `abundance`, a 0/1 matrix with one row per
 #'   site and one column per species; `probability`, the matrix of probabilities;
 #'   `env`, the gradients; and `traits`, a list with the matrices `intercept`
-#'   and `slope`, with one row per species and one column per gradient.
+#'   and `slope`, with one row per species and one column per gradient; and `tree`.
 #' @references
 #' Ives, A. R., & Helmus, M. R. (2011). Generalized linear mixed models for
 #' phylogenetic analyses of community structure. *Ecological Monographs*, 81,
@@ -164,7 +165,7 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
   value <- if (draw == "uniform") stats::runif(n * k) else stats::rnorm(n * k)
   abundance <- (value < probability) * 1L
   structure(list(abundance = abundance, history = NULL, probability = probability,
-                 env = gradients, traits = list(intercept = a, slope = b)),
+                 env = gradients, traits = list(intercept = a, slope = b), tree = tree),
             class = "mc_sim")
 }
 

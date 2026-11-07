@@ -16,7 +16,8 @@ pcc_test(
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are
 matched to the tips of \code{tree} by name, in any order, and those in only one of the
-two are dropped with a warning. Every site needs at least one individual.}
+two are dropped with a warning. Every site needs at least one individual.
+Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments left out.}
 
 \item{tree}{A \code{phylo} object.}
 

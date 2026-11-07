@@ -4,6 +4,10 @@ template:
   bootstrap: 5
 
 reference:
+- title: Data
+  desc: Community, tree, traits, environment and coordinates in one object.
+  contents:
+  - mc_data
 - title: Simulate metacommunities
   desc: The process-based model, from landscape and traits to abundances.
   contents:
@@ -71,7 +75,7 @@ reference:
   desc: Tables, summaries and plots of results.
   contents:
   - result-methods
-- title: Data
+- title: Example data
   contents:
   - daphniids
 - title: Rule-based assembly

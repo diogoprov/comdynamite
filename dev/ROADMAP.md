@@ -171,8 +171,9 @@ tipo e não mudaram.
 Objetivo: uma interface comum, para que simulação e métodos troquem dados entre si e
 com outros pacotes. As versões seguintes dependem desta.
 
-- [ ] Estrutura de dados comum: comunidade, árvore, traits, ambiente e coordenadas,
-      com checagem de nomes. Serve para dados simulados e reais.
+- [x] Estrutura de dados comum: `mc_data()` e `as_mc_data()`, com comunidade, árvore, traits,
+      ambiente, coordenadas, áreas e série temporal, e checagem de nomes. As análises aceitam o
+      objeto no primeiro argumento, e as simulações guardam a árvore.
 - [ ] Árvore e distribuições como entrada: pool regional por sítio e estado inicial
       vindos de fora. Cobre gen3sis, modelos de SSE e reconstruções biogeográficas.
 - [ ] `species_traits()` aceitar traits vindos de fora, por exemplo do mvMORPH.

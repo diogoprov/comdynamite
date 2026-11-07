@@ -16,6 +16,7 @@
 #'
 #' @param comm Matrix with one row per site and one column per species, named
 #'   as the tips of `tree`. Every site needs at least one individual.
+#'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object with the same species as `comm`.
 #' @return A `dist` object.
 #' @references
@@ -35,6 +36,10 @@
 #' phylo_beta(comm > 0, tree)
 #' @export
 phylo_beta <- function(comm, tree) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(tree)) tree <- data_part(comm, "tree")
+    comm <- comm$comm
+  }
   matched <- check_phylo_comm(comm, tree)
   stats::as.dist(beta_matrix(matched$comm / rowSums(matched$comm), tip_distances(matched$tree)))
 }
@@ -99,6 +104,11 @@ phylo_beta <- function(comm, tree) {
 #' phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #' @export
 phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(tree)) tree <- data_part(comm, "tree")
+    if (missing(env)) env <- data_part(comm, "env")
+    comm <- comm$comm
+  }
   restricted <- !is.null(site_permutations)
   matched <- present_species(check_phylo_comm(comm, tree, allow_empty = restricted))
   comm <- matched$comm

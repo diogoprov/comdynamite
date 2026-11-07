@@ -14,11 +14,13 @@ summary_stats(
 )
 }
 \arguments{
-\item{x}{An \code{mc_sim} object, a matrix with one row per site and one column per species, or
+\item{x}{An \code{\link[=mc_data]{mc_data()}} object, an \code{mc_sim} object, a matrix with one row per site and one column per species, or
 an array of sites x species x steps. In an array, the last step gives the statistics that
 are not temporal. From an \code{mc_sim}, these come from \code{abundance} and the temporal ones
 from \code{history}, and \code{env}, \code{coords} and \code{trait} default to those of the simulation, the
-trait being the environmental optimum.}
+trait being the environmental optimum. From an \code{mc_data} object, they default to its
+parts: the trait is the column \code{optimum}, or the only numeric column of \code{traits}, and
+\code{env} the only numeric column of \code{env}.}
 
 \item{tree}{Optional \code{phylo} object, matched to species by name.}
 

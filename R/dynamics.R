@@ -57,7 +57,7 @@
 #' @return An `mc_sim` object: a list with `abundance` (sites x species matrix
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal` and `extirpation`
-#'   used.
+#'   used, and `tree` when the traits came from [species_traits()] with a tree.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
 #'   Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 #'   process-based metacommunity framework linking local and regional scale
@@ -100,7 +100,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation)
   structure(c(out, list(landscape = landscape, traits = traits, alpha = alpha,
-                        dispersal = dispersal, extirpation = extirpation)), class = "mc_sim")
+                        dispersal = dispersal, extirpation = extirpation,
+                        tree = attr(traits, "tree"))), class = "mc_sim")
 }
 
 #' Metacommunity dynamics from growth rates

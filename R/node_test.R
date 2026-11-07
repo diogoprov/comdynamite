@@ -159,6 +159,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @param comm Matrix with one row per site and one column per species. Species are
 #'   matched to the rows of `nodes` by name, in any order, and those in only one of the
 #'   two are dropped with a warning.
+#'   Or an [mc_data()] object, whose parts fill the arguments left out (its tree gives `nodes`).
 #' @param nodes Matrix of contrasts with one row per species, from
 #'   [node_contrasts()].
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
@@ -216,6 +217,11 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores = 1,
                       site_permutations = NULL, area_permutations = NULL) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(nodes)) nodes <- node_contrasts(data_part(comm, "tree", "nodes"))
+    if (missing(env)) env <- data_part(comm, "env")
+    comm <- comm$comm
+  }
   if (inherits(nodes, "phylo")) {
     stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
   }

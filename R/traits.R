@@ -56,8 +56,10 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
   r_max <- stats::runif(k, rmax_range[1], rmax_range[2])
   if (sigma_signal) sigma <- rank_to_marginal(trait_bm(species, 1), sigma)
   if (rmax_signal) r_max <- rank_to_marginal(trait_bm(species, 1), r_max)
-  data.frame(optimum = unname(u), sigma = unname(sigma), r_max = unname(r_max),
-             row.names = sp)
+  out <- data.frame(optimum = unname(u), sigma = unname(sigma), r_max = unname(r_max),
+                    row.names = sp)
+  if (inherits(species, "phylo")) attr(out, "tree") <- species
+  out
 }
 
 #' Trait evolution by Brownian motion with Pagel's lambda

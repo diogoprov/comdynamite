@@ -19,7 +19,8 @@ trait_partition(
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Every site needs
-at least one individual.}
+at least one individual.
+Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments left out.}
 
 \item{traits}{Numeric vector or matrix with one row per species, which can hold traits
 or the vectors of \code{\link[=phylo_vector]{phylo_vector()}}. Species are matched to \code{comm} by name, in any

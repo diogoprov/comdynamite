@@ -8,7 +8,8 @@ phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species, named
-as the tips of \code{tree}. Every site needs at least one individual.}
+as the tips of \code{tree}. Every site needs at least one individual.
+Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments left out.}
 
 \item{tree}{A \code{phylo} object with the same species as \code{comm}.}
 
