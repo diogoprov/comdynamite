@@ -61,7 +61,11 @@ with the same pool. This is the only part that uses random numbers.
 \code{decay} needs \code{coords}. It is the correlation between Bray-Curtis dissimilarity and distance
 among occupied sites. \code{trait_env} needs \code{trait} and \code{env}: the correlation between the mean
 trait of each site, weighted by abundance, and the environment. \code{trait_sd} is the standard
-deviation of the trait among all individuals.
+deviation of the trait among all individuals. \code{trait_k} needs \code{trait} and \code{tree}: Blomberg's
+K (Blomberg et al. 2003) of the trait over all the species shared by \code{trait} and \code{tree},
+including those without individuals, as \code{picante::Kcalc()} gives it. For a simulation the
+trait is the optimum, which is not observed in the field; the K of a measured trait carries
+less of the signal of the optima.
 
 The temporal statistics need at least two steps, from \code{history} or an array. \code{cv_population},
 \code{cv_site} and \code{cv_regional} are mean coefficients of variation over time: of each species
@@ -81,6 +85,10 @@ round(summary_stats(sim, tree, n_null = 19), 3)
 \dontshow{\}) # examplesIf}
 }
 \references{
+Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for phylogenetic
+signal in comparative data: behavioral traits are more labile. \emph{Evolution}, 57, 717--745.
+\doi{10.1111/j.0014-3820.2003.tb00285.x}
+
 Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
 Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P., Anton-Pardo, M., Langenheder, S., De
 Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple

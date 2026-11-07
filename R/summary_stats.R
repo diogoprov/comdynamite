@@ -23,7 +23,11 @@
 #' `decay` needs `coords`. It is the correlation between Bray-Curtis dissimilarity and distance
 #' among occupied sites. `trait_env` needs `trait` and `env`: the correlation between the mean
 #' trait of each site, weighted by abundance, and the environment. `trait_sd` is the standard
-#' deviation of the trait among all individuals.
+#' deviation of the trait among all individuals. `trait_k` needs `trait` and `tree`: Blomberg's
+#' K (Blomberg et al. 2003) of the trait over all the species shared by `trait` and `tree`,
+#' including those without individuals, as `picante::Kcalc()` gives it. For a simulation the
+#' trait is the optimum, which is not observed in the field; the K of a measured trait carries
+#' less of the signal of the optima.
 #'
 #' The temporal statistics need at least two steps, from `history` or an array. `cv_population`,
 #' `cv_site` and `cv_regional` are mean coefficients of variation over time: of each species
@@ -46,7 +50,11 @@
 #'   columns.
 #' @param n_null Number of shuffles of species for `ses_mpd` and `ses_mntd`.
 #' @return Named numeric vector.
-#' @references Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
+#' @references Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for phylogenetic
+#'   signal in comparative data: behavioral traits are more labile. *Evolution*, 57, 717--745.
+#'   \doi{10.1111/j.0014-3820.2003.tb00285.x}
+#'
+#'   Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
 #'   Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P., Anton-Pardo, M., Langenheder, S., De
 #'   Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple
 #'   biodiversity patterns improves the inference of metacommunity processes. *Ecology*, 103,
@@ -92,7 +100,7 @@ summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NUL
     stop("`coords` needs one row per site", call. = FALSE)
   }
   c(community_stats(comm), phylo_stats(comm, tree, n_null), decay = decay_stat(comm, coords),
-    trait_stats(comm, trait, env), temporal_stats(series))
+    trait_stats(comm, trait, env), trait_k = blomberg_k(trait, tree), temporal_stats(series))
 }
 
 community_stats <- function(comm) {
@@ -192,6 +200,24 @@ trait_stats <- function(comm, trait, env) {
   c(trait_env = if (is.null(env)) NA_real_ else {
     safe_cor(drop(comm %*% values)[sums > 0] / sums[sums > 0], env[sums > 0])
   }, trait_sd = if (sum(comm) > 0) sqrt(sum(regional * (values - centre)^2)) else NA_real_)
+}
+
+# Blomberg's K over the species shared by the trait and the tree
+blomberg_k <- function(trait, tree) {
+  if (is.null(trait) || is.null(tree)) return(NA_real_)
+  shared <- intersect(tree$tip.label, names(trait))
+  if (length(shared) < 3) return(NA_real_)
+  tree <- ape::keep.tip(tree, shared)
+  x <- trait[tree$tip.label]
+  if (stats::var(x) == 0) return(NA_real_)
+  covariance <- ape::vcv(tree)
+  inverse <- solve(covariance)
+  n <- length(x)
+  centre <- sum(inverse %*% x) / sum(inverse)
+  deviation <- x - centre
+  observed <- sum(deviation^2) / drop(t(deviation) %*% inverse %*% deviation)
+  expected <- (sum(diag(covariance)) - n / sum(inverse)) / (n - 1)
+  observed / expected
 }
 
 temporal_stats <- function(series) {
