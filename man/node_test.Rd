@@ -47,9 +47,9 @@ permutations. Sites must be in the order of \code{comm}.}
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
 node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{r2_weighted}, \code{statistic},
-\code{p_site}, \code{p_taxa}, \code{p_max}, \code{p_joint}, \code{n_draws}, the valid draws of sites, since a
+\code{p_site}, \code{p_species}, \code{p_max}, \code{p_joint}, \code{n_draws}, the valid draws of sites, since a
 draw without variance does not count, and \code{p_adjusted}; \code{semipartial}, a matrix of
-nodes by predictors; \code{p_partial}, with the larger of the two p-values for each of
+nodes by predictors; \code{p_partial_max}, with the larger of the two p-values for each of
 them; \code{p_partial_site}, with the p-values of sites alone; \code{p_partial_joint}, with
 those of the permutation of the article; \code{biogeography}, a list with the same
 four matrices for the events, or \code{NULL}; and \code{permutations}, the numbers of

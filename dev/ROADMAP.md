@@ -275,13 +275,13 @@ Da auditoria, para antes da 1.0:
 - [x] Descoberta: tabela de pergunta para função no README, página `?comdynamite`, novo Title
       e Description, artigo sobre preparar dados próprios e artigo de `pcc_test()` e
       `phylo_beta_test()`.
-- [x] Nomes: `level` no lugar de `alpha` para significância (com aviso), `n_perm` com padrão
-      999 em tudo. Ficaram para decidir: `r2` e `statistic` mudam entre funções, `p_partial`
-      é o máximo, `p_taxa` e "species", `predictor` e `env`.
+- [x] Nomes: `level` no lugar de `alpha` para significância, `n_perm` com padrão 999, `env` em
+      `phylo_vector()`, `p_species`, `p_partial_max`, `r2_mean` em `pcc_test()` e `r2_adjusted`
+      em `phylo_beta_test()`. `statistic` fica: é a estatística de cada teste, descrita na ajuda.
 - [x] Métodos `summary()`, `plot()` e `as.data.frame()` para os resultados, em `R/methods.R`.
 - [x] R2 de `node_test()` acima de 1 (herdado do original): aviso na ajuda e `r2_weighted`.
 - [x] `site_permutations` em `trait_partition()`, e sites vazios com permutações restritas em
-      `pcc_test()`, `phylo_beta_test()` e `trait_partition()`. `phylo_vector()` segue sem isso.
+      `pcc_test()`, `phylo_beta_test()`, `phylo_vector()` e `trait_partition()`.
 - [x] Baixa gravidade: ramos zero em `node_contrasts()`, nomes repetidos e heatmap só com NA,
       `logistic_gradients()` com poucos sites, `mc_dynamics()` com um site, `r2` NaN em
       `pcc_test()`, `n_draws`, erro dentro de `cores`, checagens do simulador.

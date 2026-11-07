@@ -33,10 +33,10 @@ permutations of sites. Empty sites are then allowed, because they are part of th
 landscape: they leave the analysis but their predictors can reach occupied sites.}
 }
 \value{
-List of class \code{mc_pcc} with \code{r2}, the mean of the positive adjusted R2
+List of class \code{mc_pcc} with \code{r2_mean}, the mean of the positive adjusted R2
 values, which is the value the authors recommend reporting, or 0 if none is positive;
 \code{statistic}, the
-variance of the adjusted R2 across eigenvectors; \code{p_site}, \code{p_taxa} and
+variance of the adjusted R2 across eigenvectors; \code{p_site}, \code{p_species} and
 \code{p_max}; \code{r2_adjusted}, with one value per eigenvector; and \code{permutations}.
 }
 \description{

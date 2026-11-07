@@ -64,7 +64,8 @@ test_that("several traits add to the total variation", {
 test_that("nulls have one row per permutation", {
   a <- example_a()
   set.seed(1)
-  out <- corner_nulls(a$comm, as.matrix(a$trait), as.matrix(a$env), 2, NULL)
+  out <- corner_nulls(a$comm, as.matrix(a$trait), as.matrix(a$env), as.matrix(a$env),
+                      t(replicate(2, sample.int(nrow(a$comm)))), 2)
   expect_equal(dim(out$site), c(2, 1))
   expect_equal(dim(out$taxa), c(2, 1))
 })
@@ -139,7 +140,7 @@ test_that("semipartials are the loss of R2 of separate weighted regressions", {
   slope <- coef(lm(y ~ e1, x, weights = w))[["e1"]]
   expect_equal(out$semipartial["e1", "t1"], sign(slope) * sqrt(loss / sum(d$comm)))
   expect_equal(dimnames(out$semipartial), list(c("e1", "e2", "space1", "space2"), c("t1", "t2")))
-  expect_equal(out$p_partial, pmax(out$p_partial_site, out$p_partial_taxa))
+  expect_equal(out$p_partial_max, pmax(out$p_partial_site, out$p_partial_species))
 })
 
 test_that("the sign of a semipartial follows the predictor", {
@@ -155,5 +156,5 @@ test_that("collinear predictors give no semipartials", {
   d <- partition_data()
   out <- trait_partition(d$comm, d$trait, d$env, cbind(d$env[, 1], d$space), n_perm = 2)
   expect_true(all(is.na(out$semipartial)))
-  expect_true(all(is.na(out$p_partial)))
+  expect_true(all(is.na(out$p_partial_max)))
 })

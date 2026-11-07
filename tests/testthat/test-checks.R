@@ -13,7 +13,7 @@ test_that("sites are matched by name in any order", {
   one <- pcc_test(d$comm, d$tree, d$env, n_perm = 9)
   set.seed(1)
   other <- pcc_test(d$comm, d$tree, d$env[20:1, ], n_perm = 9)
-  expect_equal(one$r2, other$r2)
+  expect_equal(one$r2_mean, other$r2_mean)
   different <- d$env
   rownames(different)[1] <- "elsewhere"
   expect_error(pcc_test(d$comm, d$tree, different, n_perm = 9), "different names: elsewhere, s1")
@@ -33,7 +33,7 @@ test_that("predictors with problems are named", {
   missing_value <- d$env
   missing_value[2, 1] <- NA
   expect_error(phylo_vector(d$comm, d$tree, missing_value[, 1], n_perm = 2),
-               "`predictor` has missing values in 1 sites")
+               "`env` has missing values in 1 sites")
   constant <- d$env
   constant[, "b"] <- 1
   expect_error(node_test(d$comm, node_contrasts(d$tree), constant, n_perm = 2),
@@ -95,7 +95,7 @@ test_that("species without individuals do not change the analyses", {
   set.seed(2)
   two <- pcc_test(absent[, pruned$tip.label], pruned, d$env, n_perm = 9)
   expect_equal(one$r2_adjusted, two$r2_adjusted)
-  expect_equal(one$p_taxa, two$p_taxa)
+  expect_equal(one$p_species, two$p_species)
   # traits of absent species cannot reach present ones
   traits <- setNames(c(5, 5, 1, 1, 1, 1, 1, 2), colnames(absent))
   expect_s3_class(trait_partition(absent, traits, d$env[, 1], d$env[, 2], n_perm = 5),
@@ -165,4 +165,23 @@ test_that("the simulator explains wrong input", {
 test_that("patch_permutations() explains repeated sites", {
   expect_error(patch_permutations(cbind(rep(1:3, each = 3), 0), cbind(rep(c(1, -1, 0), 3))),
                "share their coordinates")
+})
+
+test_that("phylo_vector() accepts empty sites and the old name of `env`", {
+  set.seed(8)
+  tree <- ape::rcoal(6)
+  comm <- matrix(rpois(96, 2), 16, dimnames = list(NULL, tree$tip.label))
+  comm[c(1, 7), ] <- 0
+  env <- rnorm(16)
+  moves <- torus_permutations(4)[1:9, ]
+  expect_error(phylo_vector(comm, tree, env, n_perm = 3), "every site")
+  out <- phylo_vector(comm, tree, env, n_perm = 3, n_sim = 3, site_permutations = moves)
+  expect_equal(out$permutations$sites, 9)
+  full <- comm + 1
+  set.seed(9)
+  one <- phylo_vector(full, tree, env, n_perm = 3, n_sim = 3)
+  set.seed(9)
+  expect_warning(other <- phylo_vector(full, tree, predictor = env, n_perm = 3, n_sim = 3),
+                 "use `env`")
+  expect_equal(one$p_max, other$p_max)
 })

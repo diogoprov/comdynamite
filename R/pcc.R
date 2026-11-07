@@ -56,10 +56,10 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites. Empty sites are then allowed, because they are part of the
 #'   landscape: they leave the analysis but their predictors can reach occupied sites.
-#' @return List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
+#' @return List of class `mc_pcc` with `r2_mean`, the mean of the positive adjusted R2
 #'   values, which is the value the authors recommend reporting, or 0 if none is positive;
 #'   `statistic`, the
-#'   variance of the adjusted R2 across eigenvectors; `p_site`, `p_taxa` and
+#'   variance of the adjusted R2 across eigenvectors; `p_site`, `p_species` and
 #'   `p_max`; `r2_adjusted`, with one value per eigenvector; and `permutations`.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
@@ -99,9 +99,10 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
     stats::var(pcc_r2(comm[, sample.int(ncol(comm)), drop = FALSE], vectors, env))
   }, "Species"))
   p_site <- (sum(null_site >= statistic) + 1) / (length(null_site) + 1)
-  p_taxa <- (sum(null_taxa >= statistic) + 1) / (length(null_taxa) + 1)
-  structure(list(r2 = sum(pmax(observed, 0)) / max(sum(observed > 0), 1), statistic = statistic, p_site = p_site,
-                 p_taxa = p_taxa, p_max = max(p_site, p_taxa), r2_adjusted = observed,
+  p_species <- (sum(null_taxa >= statistic) + 1) / (length(null_taxa) + 1)
+  structure(list(r2_mean = sum(pmax(observed, 0)) / max(sum(observed > 0), 1),
+                 statistic = statistic, p_site = p_site,
+                 p_species = p_species, p_max = max(p_site, p_species), r2_adjusted = observed,
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_pcc")
 }
@@ -109,10 +110,10 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
 #' @export
 print.mc_pcc <- function(x, ...) {
   cat("<mc_pcc> phylogenetic community composition\n")
-  cat("mean positive adjusted R2:", format(x$r2, digits = 3), "\n")
+  cat("mean positive adjusted R2:", format(x$r2_mean, digits = 3), "\n")
   permutation_line(x$permutations)
   cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
   invisible(x)
 }
 

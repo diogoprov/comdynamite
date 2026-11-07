@@ -44,32 +44,32 @@ plot.mc_node_test <- function(x, tree, ...) {
 #' @rdname result-methods
 #' @export
 as.data.frame.mc_pcc <- function(x, row.names = NULL, optional = FALSE, ...) {
-  whole_tree_row(x)
+  whole_tree_row(x, "r2_mean")
 }
 
 #' @rdname result-methods
 #' @export
 summary.mc_pcc <- function(object, ...) {
-  whole_tree_row(object)
+  whole_tree_row(object, "r2_mean")
 }
 
 #' @rdname result-methods
 #' @export
 as.data.frame.mc_phylo_beta <- function(x, row.names = NULL, optional = FALSE, ...) {
-  whole_tree_row(x)
+  whole_tree_row(x, "r2_adjusted")
 }
 
 #' @rdname result-methods
 #' @export
 summary.mc_phylo_beta <- function(object, ...) {
-  whole_tree_row(object)
+  whole_tree_row(object, "r2_adjusted")
 }
 
 #' @rdname result-methods
 #' @export
 as.data.frame.mc_phylo_vector <- function(x, row.names = NULL, optional = FALSE, ...) {
   data.frame(vector = names(x$correlation), correlation = unname(x$correlation),
-             p_site = x$p_site, p_taxa = x$p_taxa, p_max = x$p_max)
+             p_site = x$p_site, p_species = x$p_species, p_max = x$p_max)
 }
 
 #' @rdname result-methods
@@ -96,7 +96,6 @@ plot.mc_trait_partition <- function(x, ...) {
   plot_trait_partition(x, ...)
 }
 
-whole_tree_row <- function(x) {
-  data.frame(r2 = x$r2, statistic = x$statistic, p_site = x$p_site, p_taxa = x$p_taxa,
-             p_max = x$p_max)
+whole_tree_row <- function(x, r2) {
+  as.data.frame(x[c(r2, "statistic", "p_site", "p_species", "p_max")])
 }

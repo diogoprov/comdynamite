@@ -5,11 +5,20 @@
   original code; `n_draws`, the valid draws of sites. Errors in parallel workers now stop the
   function. The default of `n_perm` is 999, as in the other functions.
 - `trait_partition()`: `site_permutations`.
-- `pcc_test()`, `phylo_beta_test()` and `trait_partition()` accept empty sites with
-  `site_permutations`, since these sites are part of the landscape.
+- `pcc_test()`, `phylo_beta_test()`, `phylo_vector()` and `trait_partition()` accept empty sites
+  with `site_permutations`, since these sites are part of the landscape.
 - The significance level is now `level` in `phylo_vector()`, `plot_node_test()`,
   `plot_node_heatmap()` and `plot_trait_partition()`, because `alpha` also names the
   competition matrix. `alpha` still works, with a warning.
+- Names of results, which break code that reads them: `p_taxa` is now `p_species`,
+  `p_partial_taxa` is `p_partial_species`, and `p_partial`, the larger of two p-values, is
+  `p_partial_max`, as in `p_max`. `r2` of `pcc_test()` is `r2_mean` and that of
+  `phylo_beta_test()` is `r2_adjusted`, which say what they hold. In `node_test()` and
+  `trait_partition()`, `r2` is unchanged. `statistic` stays, as the test statistic of each
+  function.
+- `phylo_vector()`: `predictor` is now `env`, as in the other functions, and
+  `plot_trait_partition()`: `test = "taxa"` is now `"species"`. The old forms work, with a
+  warning.
 - `patch_permutations()`: evaluated with autocorrelation up to the scale of the landscape, and
   advice on `gap` for sparse sites.
 - `pcc_test()` gives an `r2` of 0, not `NaN`, when no adjusted R2 is positive.

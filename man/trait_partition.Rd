@@ -38,10 +38,10 @@ sites.}
 \value{
 List of class \code{mc_trait_partition} with \code{fractions}, a data frame with one row
 for each of \code{abc}, \code{ab}, \code{bc}, \code{a}, \code{b}, \code{c} and \code{d}, and the columns \code{r2},
-\code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_taxa} and \code{p_max}; \code{component};
+\code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_species} and \code{p_max}; \code{component};
 \code{component_share}, the share of the total variation in the component; \code{semipartial},
-a matrix of predictors by traits; and \code{p_partial}, \code{p_partial_site} and
-\code{p_partial_taxa}, with the larger p-value and those of sites and of species, all
+a matrix of predictors by traits; and \code{p_partial_max}, \code{p_partial_site} and
+\code{p_partial_species}, with the larger p-value and those of sites and of species, all
 \code{NA} if predictors are collinear; and \code{permutations}.
 }
 \description{

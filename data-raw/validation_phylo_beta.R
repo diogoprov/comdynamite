@@ -22,8 +22,8 @@ one_replicate <- function(scenario, tolerance) {
   keep <- rowSums(comm) > 0
   beta <- phylo_beta_test(comm[keep, ], tree, used[keep], n_perm = 99)
   pcc <- pcc_test(comm[keep, ], tree, used[keep], n_perm = 99)
-  c(beta_max = beta$p_max, beta_site = beta$p_site, beta_taxa = beta$p_taxa,
-    pcc_max = pcc$p_max, pcc_site = pcc$p_site, pcc_taxa = pcc$p_taxa, beta_r2 = beta$r2)
+  c(beta_max = beta$p_max, beta_site = beta$p_site, beta_taxa = beta$p_species,
+    pcc_max = pcc$p_max, pcc_site = pcc$p_site, pcc_taxa = pcc$p_species, beta_r2 = beta$r2)
 }
 
 one_cell <- function(i) {

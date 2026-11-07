@@ -20,7 +20,8 @@
 #' @param comm Matrix with one row per site and one column per species. Every site needs
 #'   at least one individual.
 #' @param tree A `phylo` object.
-#' @param predictor Numeric vector with the value of each site. The authors estimate one
+#' @param predictor Deprecated, use `env`.
+#' @param env Numeric vector with the value of each site. The authors estimate one
 #'   vector for each predictor.
 #' @param level Significance level of the global test and of the selection.
 #' @param alpha Deprecated, use `level`.
@@ -28,8 +29,10 @@
 #' @param n_perm Number of permutations of sites and of species.
 #' @param site_permutations Optional matrix of site indices with one permutation per
 #'   row, for example from [torus_permutations()], to use instead of free permutations.
+#'   Empty sites are then allowed: they leave the analysis but their values can reach
+#'   occupied sites.
 #' @return List of class `mc_phylo_vector` with `correlation`, the correlations of `pev`
-#'   and `pev_brown`; `p_site`, `p_taxa` and `p_max` of the global test; `selected`, the
+#'   and `pev_brown`; `p_site`, `p_species` and `p_max` of the global test; `selected`, the
 #'   columns of `eigenvectors` retained; `pev` and `pev_brown`, named vectors or `NULL`
 #'   when the global test is not significant or no eigenvector is retained;
 #'   `eigenvectors`; `eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
@@ -98,27 +101,34 @@
 #' keep <- rowSums(comm) > 0
 #' phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 #' @export
-phylo_vector <- function(comm, tree, predictor, n_perm = 999, level = 0.05, n_sim = 1000,
-                         site_permutations = NULL, alpha = NULL) {
+phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_sim = 1000,
+                         site_permutations = NULL, alpha = NULL, predictor = NULL) {
   level <- deprecated_level(level, alpha)
-  matched <- present_species(check_phylo_comm(comm, tree))
+  if (!is.null(predictor)) {
+    warning("`predictor` is deprecated, use `env`", call. = FALSE)
+    env <- predictor
+  }
+  matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)))
   comm <- matched$comm
   tree <- matched$tree
-  predictor <- check_env(predictor, comm, "`predictor`")
-  if (ncol(predictor) != 1) stop("`predictor` must be a single variable", call. = FALSE)
+  landscape_env <- check_env(env, comm)
+  if (ncol(landscape_env) != 1) stop("`env` must be a single variable", call. = FALSE)
   stopifnot(n_perm >= 1, n_sim >= 1, level > 0, level < 1)
   check_permutations(site_permutations, comm)
+  draws <- site_draws(comm, n_perm, site_permutations)
+  comm <- comm[draws$occupied, , drop = FALSE]
+  env <- landscape_env[draws$occupied, , drop = FALSE]
   species <- colnames(comm)
 
   # with the square root of path lengths as distance, D^2 / 2 is half the path length
   pcoa <- weighted_pcoa(ape::cophenetic.phylo(tree)[species, species] / 2, colSums(comm))
-  observed <- corner_correlation(comm, pcoa$vectors, predictor)[1, ]
-  nulls <- corner_nulls(comm, pcoa$vectors, predictor, n_perm, site_permutations)
+  observed <- corner_correlation(comm, pcoa$vectors, env)[1, ]
+  nulls <- corner_nulls(comm, pcoa$vectors, env, landscape_env, draws$rows, n_perm)
   global <- sum(observed^2 * pcoa$values)
   p_site <- permutation_p(nulls$site^2 %*% pcoa$values, global)
-  p_taxa <- permutation_p(nulls$taxa^2 %*% pcoa$values, global)
+  p_species <- permutation_p(nulls$taxa^2 %*% pcoa$values, global)
   out <- list(correlation = c(pev = NA_real_, pev_brown = NA_real_), p_site = p_site,
-              p_taxa = p_taxa, p_max = max(p_site, p_taxa), selected = integer(), pev = NULL,
+              p_species = p_species, p_max = max(p_site, p_species), selected = integer(), pev = NULL,
               pev_brown = NULL, eigenvectors = pcoa$vectors, eigenvalues = pcoa$values,
               eigenvector_correlation = observed,
               permutations = permutation_record(n_perm, site_permutations))
@@ -133,11 +143,11 @@ phylo_vector <- function(comm, tree, predictor, n_perm = 999, level = 0.05, n_si
   if (length(out$selected) > 0) {
     pev <- drop(pcoa$vectors[, out$selected, drop = FALSE] %*% observed[out$selected])
     candidates <- pev + brownian_vectors(ape::vcv(tree)[species, species], n_sim)
-    fit <- corner_correlation(comm, candidates, predictor)[1, ]
+    fit <- corner_correlation(comm, candidates, env)[1, ]
     best <- which.max(abs(fit))
     out$pev <- stats::setNames(pev, species)
     out$pev_brown <- stats::setNames(candidates[, best], species)
-    out$correlation <- c(pev = corner_correlation(comm, as.matrix(pev), predictor)[1],
+    out$correlation <- c(pev = corner_correlation(comm, as.matrix(pev), env)[1],
                          pev_brown = fit[best])
   }
   structure(out, class = "mc_phylo_vector")
@@ -148,7 +158,7 @@ print.mc_phylo_vector <- function(x, ...) {
   cat("<mc_phylo_vector>", ncol(x$eigenvectors), "eigenvectors,", length(x$selected), "retained\n")
   permutation_line(x$permutations)
   cat("global test: p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_taxa, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
   if (length(x$selected) == 0) {
     cat("no vector retained: `pev` and `pev_brown` are NULL, so this gradient cannot enter",
         "`trait_partition()`\n")
@@ -189,10 +199,10 @@ print.mc_phylo_vector <- function(x, ...) {
 #' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
-#'   `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and `p_max`; `component`;
+#'   `r2_adjusted`, `r2_component`, `p_site`, `p_species` and `p_max`; `component`;
 #'   `component_share`, the share of the total variation in the component; `semipartial`,
-#'   a matrix of predictors by traits; and `p_partial`, `p_partial_site` and
-#'   `p_partial_taxa`, with the larger p-value and those of sites and of species, all
+#'   a matrix of predictors by traits; and `p_partial_max`, `p_partial_site` and
+#'   `p_partial_species`, with the larger p-value and those of sites and of species, all
 #'   `NA` if predictors are collinear; and `permutations`.
 #' @note Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
 #'   supplement of Peres-Neto et al. (2012).
@@ -329,7 +339,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   }, "Species"))
   p_site <- vapply(names(observed), function(f) permutation_p(null_site[f, ], observed[[f]]),
                    numeric(1))
-  p_taxa <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
+  p_species <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
                    numeric(1))
 
   by_trait <- function(x) {
@@ -339,11 +349,11 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   slopes <- crossprod(all_predictors(env, space), site_weights * response)
   # p-values stay NA where the statistic is NA
   tested_p <- function(p) by_trait(p) + 0 * by_trait(observed)
-  structure(list(fractions = partition_table(ss, total, component_ss, sizes, n, p_site, p_taxa),
+  structure(list(fractions = partition_table(ss, total, component_ss, sizes, n, p_site, p_species),
                  component = component, component_share = share,
                  semipartial = sqrt(by_trait(observed)) * sign(slopes),
-                 p_partial = pmax(tested_p(p_site), tested_p(p_taxa)),
-                 p_partial_site = tested_p(p_site), p_partial_taxa = tested_p(p_taxa),
+                 p_partial_max = pmax(tested_p(p_site), tested_p(p_species)),
+                 p_partial_site = tested_p(p_site), p_partial_species = tested_p(p_species),
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_trait_partition")
 }
@@ -366,13 +376,8 @@ corner_correlation <- function(comm, traits, env) {
 }
 
 # one row per permutation and one column per column of traits
-corner_nulls <- function(comm, traits, env, n_perm, site_permutations) {
-  sites <- if (is.null(site_permutations)) {
-    t(replicate(n_perm, sample.int(nrow(comm))))
-  } else {
-    site_permutations
-  }
-  permuted <- matrix(env[as.vector(t(sites)), 1], nrow(comm))
+corner_nulls <- function(comm, traits, env, landscape_env, rows, n_perm) {
+  permuted <- matrix(landscape_env[as.vector(t(rows)), 1], nrow(comm))
   list(site = corner_correlation(comm, traits, permuted),
        taxa = do.call(rbind, progress_map(seq_len(n_perm), function(r) {
          corner_correlation(comm, traits[sample.int(nrow(traits)), , drop = FALSE], env)[1, ]
@@ -437,7 +442,7 @@ unique_ss <- function(predictors, response, site_weights) {
   qr.coef(fit, root * centred)^2 / diag(chol2inv(qr.R(fit)))
 }
 
-partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_taxa) {
+partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_species) {
   fractions <- function(x) {
     c(x, a = x[["abc"]] - x[["bc"]], b = x[["ab"]] + x[["bc"]] - x[["abc"]],
       c = x[["abc"]] - x[["ab"]], d = 1 - x[["abc"]])
@@ -448,7 +453,7 @@ partition_table <- function(ss, total, component_ss, sizes, n, p_site, p_taxa) {
                       r2_adjusted = fractions(1 - (n - 1) / (n - sizes - 1) * (1 - r2)),
                       r2_component = fractions(ss / component_ss), row.names = NULL)
   table$p_site <- unname(p_site[table$fraction])
-  table$p_taxa <- unname(p_taxa[table$fraction])
-  table$p_max <- pmax(table$p_site, table$p_taxa)
+  table$p_species <- unname(p_species[table$fraction])
+  table$p_max <- pmax(table$p_site, table$p_species)
   table
 }

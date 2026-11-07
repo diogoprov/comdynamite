@@ -177,9 +177,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   cores.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `r2_weighted`, `statistic`,
-#'   `p_site`, `p_taxa`, `p_max`, `p_joint`, `n_draws`, the valid draws of sites, since a
+#'   `p_site`, `p_species`, `p_max`, `p_joint`, `n_draws`, the valid draws of sites, since a
 #'   draw without variance does not count, and `p_adjusted`; `semipartial`, a matrix of
-#'   nodes by predictors; `p_partial`, with the larger of the two p-values for each of
+#'   nodes by predictors; `p_partial_max`, with the larger of the two p-values for each of
 #'   them; `p_partial_site`, with the p-values of sites alone; `p_partial_joint`, with
 #'   those of the permutation of the article; `biogeography`, a list with the same
 #'   four matrices for the events, or `NULL`; and `permutations`, the numbers of
@@ -272,7 +272,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
-                 p_partial = matrix_of(results, "p_partial", env_names),
+                 p_partial_max = matrix_of(results, "p_partial_max", env_names),
                  p_partial_site = matrix_of(results, "p_partial_site", env_names),
                  p_partial_joint = matrix_of(results, "p_partial_joint", env_names),
                  biogeography = if (!is.null(biogeography)) {
@@ -304,7 +304,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
                      matrix(x, ncol(nodes), length(events), dimnames = list(node_names, events))
                    }
                    list(semipartial = shaped(first("semipartial")),
-                        p_partial = shaped(first("p_partial")),
+                        p_partial_max = shaped(first("p_partial_max")),
                         p_partial_site = shaped(first("p_partial_site")),
                         p_partial_joint = shaped(first("p_partial_joint")))
                  },
@@ -468,9 +468,9 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                                      r2 = NA_real_, r2_adjusted = NA_real_,
                                      r2_weighted = NA_real_, statistic = NA_real_,
-                                     p_site = NA_real_, p_taxa = NA_real_, p_max = NA_real_,
+                                     p_site = NA_real_, p_species = NA_real_, p_max = NA_real_,
                                      p_joint = NA_real_, n_draws = NA_integer_),
-                semipartial = blank, p_partial = blank, p_partial_site = blank,
+                semipartial = blank, p_partial_max = blank, p_partial_site = blank,
                 p_partial_joint = blank))
   }
   null_of <- function(n, draw) {
@@ -492,7 +492,7 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
              moved$env)
   })
   p_site <- permutation_p(by_site[, 1], observed$f)
-  p_taxa <- permutation_p(by_taxa[, 1], observed$f)
+  p_species <- permutation_p(by_taxa[, 1], observed$f)
   p_joint <- permutation_p(by_both[, 1], observed$f)
   partial_p <- function(null) {
     vapply(seq_len(ncol(env)), function(j) permutation_p(null[, j + 1], observed$partial_f[j]),
@@ -504,10 +504,10 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
                             r2_weighted = observed$r2_weighted,
-                            statistic = observed$statistic, p_site = p_site, p_taxa = p_taxa,
-                            p_max = max(p_site, p_taxa), p_joint = p_joint,
+                            statistic = observed$statistic, p_site = p_site, p_species = p_species,
+                            p_max = max(p_site, p_species), p_joint = p_joint,
                             n_draws = sum(!is.na(by_site[, 1]))),
-       semipartial = observed$semipartial, p_partial = pmax(partial_site, partial_taxa),
+       semipartial = observed$semipartial, p_partial_max = pmax(partial_site, partial_taxa),
        p_partial_site = partial_site, p_partial_joint = partial_joint)
 }
 
