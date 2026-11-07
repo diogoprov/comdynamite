@@ -17,7 +17,8 @@ node_test(
   biogeography = NULL,
   n_perm = 9999,
   cores = 1,
-  site_permutations = NULL
+  site_permutations = NULL,
+  area_permutations = NULL
 )
 ```
 
@@ -63,6 +64,13 @@ node_test(
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
   to use instead of free permutations of sites.
+
+- area_permutations:
+
+  Optional list with one matrix per event, from
+  [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
+  to use for the events instead of `site_permutations` or free
+  permutations. Sites must be in the order of `comm`.
 
 ## Value
 
@@ -121,7 +129,10 @@ areas placed at random, against 5% with
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
 (see the article on analysing clades). `site_permutations` accepts a
 restricted null model. For events, each row moves the areas across the
-sites, which keep their community and predictors.
+sites, which keep their community and predictors. In a landscape with
+edges,
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+gives the permutations of each event for `area_permutations`.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
 `MetacommunityPhylogenetics` of the authors, checked in Octave. Four
@@ -183,7 +194,9 @@ species traits-environment relationships in the fourth-corner problem.
 ## See also
 
 [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
-codes the events.
+codes the events and
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+moves them in a landscape with edges.
 [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
 and
 [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
@@ -202,7 +215,7 @@ set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
 #> <mc_node_test> 12 nodes, 11 tested
-#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 
+#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02
 #> nodes with p (max) <= 0.05: 0 before correction, 0 after
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 round(out$semipartial, 2)

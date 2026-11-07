@@ -168,7 +168,7 @@ colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
 out
 #> <mc_trait_partition> mean component, 0.511 of the total variation
-#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 
+#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02
 #>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max
 #> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02
 #> 2       ab 0.489712      0.4763      0.95894   0.02   0.02  0.02

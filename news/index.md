@@ -1,5 +1,17 @@
 # Changelog
 
+## comdynamite (development version)
+
+- [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md):
+  restricted null model for the events of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  in landscapes with edges, which moves the patches of each area and
+  keeps their number and size. It rejected 3.0% to 6.3% of tests at the
+  5% level in `data-raw/validation_edges.R`, against 44% to 55% with
+  free permutations.
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `area_permutations` takes one matrix of permutations per event.
+
 ## comdynamite 0.5.2
 
 - [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md):

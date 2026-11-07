@@ -91,6 +91,6 @@ keep <- rowSums(comm) > 0
 pcc_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #> <mc_pcc> phylogenetic community composition
 #> mean positive adjusted R2: 0.0965 
-#> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 
+#> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01
 #> p (sites): 0.01  p (species): 0.01  p (max): 0.01 
 ```

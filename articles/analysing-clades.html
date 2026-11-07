@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -105,8 +105,8 @@ cores.</p>
 <span>                 cores <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 12 nodes, 11 tested</span></span>
-<span><span class="co">#&gt; permutations: 999 free of sites, 999 of species; smallest possible p: 0.001 </span></span>
-<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span></span>
+<span><span class="co">#&gt; permutations: 999 free of sites, 999 of species; smallest possible p: 0.001</span></span>
+<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 1 before correction, 0 after</span></span>
 <span><span class="co">#&gt; nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span></span></code></pre></div>
 <p>The p-values answer different questions, so this choice comes first.
 <code>p_max</code> tests the association between predictors and
@@ -162,9 +162,33 @@ had no effect (<code>data-raw/validation_events.R</code>). Free
 permutations rejected 45.1% of the tests of a node at the 5% level, and
 permutations from <code><a href="../reference/torus_permutations.html">torus_permutations()</a></code>, given in
 <code>site_permutations</code>, rejected 4.8%. The events in the figures
-above used free permutations, so they should be read with this in mind.
-Landscapes with edges need a restricted null model chosen for them, and
-a matrix of permutations of any origin can be given.</p>
+above used free permutations, so they should be read with this in
+mind.</p>
+<p>A torus does not fit real landscapes, which have edges.
+<code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> splits each area into patches of
+neighbouring sites and places each patch around a site drawn at random,
+which keeps the number and size of patches but not their shape or
+place.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">area_moves</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/patch_permutations.html">patch_permutations</a></span><span class="op">(</span><span class="va">coords</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">999</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/node_test.html">node_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, <span class="va">events</span>, area_permutations <span class="op">=</span> <span class="va">area_moves</span><span class="op">)</span></span></code></pre></div>
+<p>We evaluated it in a square of 20 by 20 sites, a strip of 50 by 8 and
+an irregular band of 436 sites, with 200 replicates of each scenario
+(<code>data-raw/validation_edges.R</code>). Areas were two compact
+blocks, irregular areas of several patches, or one such area against all
+other sites. Without effect of areas, free permutations rejected 44% to
+55% of the tests of a node at the 5% level, and
+<code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> 3.0% to 6.3%. Permutations of a torus,
+used in the square although it has edges, rejected 5.8% to 7.1%. When
+areas moved the environment of their sites, the rejection rate of
+<code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> rose to 11% to 32%. It was lowest for
+compact blocks and highest for one area against the others, and the
+effect of an area does not reach all nodes, so these values are not the
+power for a node with an effect.</p>
+<p>This is a method of this package without published evaluation, tested
+only in these simulations. Coordinates should be projected, and
+landscapes with parts far apart may give patches that cross the
+gaps.</p>
 </div>
 <div class="section level2">
 <h2 id="how-much-of-the-phylogenetic-structure-is-due-to-environment-and-space">How much of the phylogenetic structure is due to environment and
@@ -174,7 +198,7 @@ space?<a class="anchor" aria-label="anchor" href="#how-much-of-the-phylogenetic-
 coordinates, so we simulate them with the generator of Appendix C of
 Peres-Neto et al. (2012). In the first scenario, two independent
 gradients act on species.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span>, beta <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">gradients</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logistic_gradients.html">logistic_gradients</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -188,7 +212,7 @@ gradients act on species.</p>
 <code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> tests whether a gradient is related to the
 phylogeny and, if so, gives a vector of species values for the next
 step. Here we ask this for each gradient.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">x</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">second</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">p_max</span>, <span class="va">second</span><span class="op">$</span><span class="va">p_max</span><span class="op">)</span></span>
@@ -196,27 +220,27 @@ step. Here we ask this for each gradient.</p>
 <p><code><a href="../reference/trait_partition.html">trait_partition()</a></code> then splits the variation of these
 vectors among sites. The vectors are chosen to fit the gradients, so
 this step only makes sense after a significant global test.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">vectors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">pev_brown</span>, <span class="va">second</span><span class="op">$</span><span class="va">pev_brown</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_partition.html">trait_partition</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">vectors</span>, <span class="va">x</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">partition</span></span>
-<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.559 of the total variation</span></span>
-<span><span class="co">#&gt; permutations: 199 free of sites, 199 of species; smallest possible p: 0.005 </span></span>
+<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.476 of the total variation</span></span>
+<span><span class="co">#&gt; permutations: 199 free of sites, 199 of species; smallest possible p: 0.005</span></span>
 <span><span class="co">#&gt;   fraction     r2 r2_adjusted r2_component p_site p_taxa p_max</span></span>
-<span><span class="co">#&gt; 1      abc 0.4392      0.3991        0.785  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 2       ab 0.2613      0.2358        0.467  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 3       bc 0.2607      0.2352        0.466  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 4        a 0.1784      0.1639        0.319  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 5        b 0.0828      0.0719        0.148     NA     NA    NA</span></span>
-<span><span class="co">#&gt; 6        c 0.1779      0.1633        0.318  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 7        d 0.5608      0.6009        0.215     NA     NA    NA</span></span>
+<span><span class="co">#&gt; 1      abc 0.3754       0.331        0.789  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 2       ab 0.2076       0.180        0.436  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 3       bc 0.2348       0.208        0.493  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 4        a 0.1405       0.122        0.295  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 5        b 0.0671       0.058        0.141     NA     NA    NA</span></span>
+<span><span class="co">#&gt; 6        c 0.1678       0.150        0.352  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 7        d 0.6246       0.669        0.211     NA     NA    NA</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">partition</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        trait1 trait2</span></span>
-<span><span class="co">#&gt; env1     0.52  -0.29</span></span>
-<span><span class="co">#&gt; space1  -0.24   0.55</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; env1     0.50  -0.17</span></span>
+<span><span class="co">#&gt; space1  -0.27   0.51</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gradient x"</span>, <span class="st">"Gradient y"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="analysing-clades_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
+<p><img src="analysing-clades_files/figure-html/unnamed-chunk-12-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
 <p>The test of each trait against each predictor is a different
 question, for which ter Braak (2019) is the reference.</p>
 </div>

@@ -69,6 +69,8 @@ Analyses of phylogenetic community structure.
   : Test clades against the environment, node by node
 - [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
   : Matrix of biogeographic events
+- [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+  : Permutations that move the patches of biogeographic events
 - [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
   : Node contrasts of a phylogeny
 - [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)

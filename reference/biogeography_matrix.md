@@ -62,7 +62,9 @@ A site on both sides of an event gets 0.
 
 The sites of an area are often neighbours, so their number overstates
 the information in an event. See `site_permutations` in
-[`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md).
+[`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+and
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md).
 
 ## References
 

@@ -40,8 +40,8 @@ out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography, n
                  cores = 2)
 out
 #> <mc_node_test> 12 nodes, 11 tested
-#> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001 
-#> nodes with p (max) <= 0.05: 0 before correction, 0 after
+#> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001
+#> nodes with p (max) <= 0.05: 1 before correction, 0 after
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 ```
 
@@ -124,8 +124,37 @@ from
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
 given in `site_permutations`, rejected 4.8%. The events in the figures
 above used free permutations, so they should be read with this in mind.
-Landscapes with edges need a restricted null model chosen for them, and
-a matrix of permutations of any origin can be given.
+
+A torus does not fit real landscapes, which have edges.
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+splits each area into patches of neighbouring sites and places each
+patch around a site drawn at random, which keeps the number and size of
+patches but not their shape or place.
+
+``` r
+
+area_moves <- patch_permutations(coords, events, n_perm = 999)
+node_test(comm, nodes, env, events, area_permutations = area_moves)
+```
+
+We evaluated it in a square of 20 by 20 sites, a strip of 50 by 8 and an
+irregular band of 436 sites, with 200 replicates of each scenario
+(`data-raw/validation_edges.R`). Areas were two compact blocks,
+irregular areas of several patches, or one such area against all other
+sites. Without effect of areas, free permutations rejected 44% to 55% of
+the tests of a node at the 5% level, and
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+3.0% to 6.3%. Permutations of a torus, used in the square although it
+has edges, rejected 5.8% to 7.1%. When areas moved the environment of
+their sites, the rejection rate of
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+rose to 11% to 32%. It was lowest for compact blocks and highest for one
+area against the others, and the effect of an area does not reach all
+nodes, so these values are not the power for a node with an effect.
+
+This is a method of this package without published evaluation, tested
+only in these simulations. Coordinates should be projected, and
+landscapes with parts far apart may give patches that cross the gaps.
 
 ## How much of the phylogenetic structure is due to environment and space?
 
@@ -171,20 +200,20 @@ significant global test.
 vectors <- cbind(first$pev_brown, second$pev_brown)
 partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
 partition
-#> <mc_trait_partition> mean component, 0.559 of the total variation
-#> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005 
+#> <mc_trait_partition> mean component, 0.476 of the total variation
+#> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005
 #>   fraction     r2 r2_adjusted r2_component p_site p_taxa p_max
-#> 1      abc 0.4392      0.3991        0.785  0.005  0.005 0.005
-#> 2       ab 0.2613      0.2358        0.467  0.005  0.005 0.005
-#> 3       bc 0.2607      0.2352        0.466  0.005  0.005 0.005
-#> 4        a 0.1784      0.1639        0.319  0.005  0.005 0.005
-#> 5        b 0.0828      0.0719        0.148     NA     NA    NA
-#> 6        c 0.1779      0.1633        0.318  0.005  0.005 0.005
-#> 7        d 0.5608      0.6009        0.215     NA     NA    NA
+#> 1      abc 0.3754       0.331        0.789  0.005  0.005 0.005
+#> 2       ab 0.2076       0.180        0.436  0.005  0.005 0.005
+#> 3       bc 0.2348       0.208        0.493  0.005  0.005 0.005
+#> 4        a 0.1405       0.122        0.295  0.005  0.005 0.005
+#> 5        b 0.0671       0.058        0.141     NA     NA    NA
+#> 6        c 0.1678       0.150        0.352  0.005  0.005 0.005
+#> 7        d 0.6246       0.669        0.211     NA     NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
-#> env1     0.52  -0.29
-#> space1  -0.24   0.55
+#> env1     0.50  -0.17
+#> space1  -0.27   0.51
 ```
 
 ``` r
@@ -194,7 +223,7 @@ plot_trait_partition(partition, labels = c("Gradient x", "Gradient y"))
 
 ![Two overlapping bars along the total variation, for environment and
 space, sharing the fraction b, followed by the unexplained
-fraction.](analysing-clades_files/figure-html/unnamed-chunk-11-1.png)
+fraction.](analysing-clades_files/figure-html/unnamed-chunk-12-1.png)
 
 The test of each trait against each predictor is a different question,
 for which ter Braak (2019) is the reference.

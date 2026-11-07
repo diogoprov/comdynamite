@@ -15,7 +15,7 @@ whether the two clades that split there differ in their response to the predicto
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,7 +67,8 @@ whether the two clades that split there differ in their response to the predicto
 <span>  biogeography <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_perm <span class="op">=</span> <span class="fl">9999</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  area_permutations <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -112,6 +113,12 @@ cores.</p></dd>
 <dd><p>Optional matrix of site indices with one permutation per row,
 for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations of sites.</p></dd>
 
+
+<dt id="arg-area-permutations">area_permutations<a class="anchor" aria-label="anchor" href="#arg-area-permutations"></a></dt>
+<dd><p>Optional list with one matrix per event, from
+<code><a href="patch_permutations.html">patch_permutations()</a></code>, to use for the events instead of <code>site_permutations</code> or free
+permutations. Sites must be in the order of <code>comm</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -155,7 +162,8 @@ the community has spatial structure of its own, they reject too often: 45% of te
 the 5% level in a simulation with areas placed at random, against 5% with
 <code><a href="torus_permutations.html">torus_permutations()</a></code> (see the article on analysing clades). <code>site_permutations</code> accepts
 a restricted null model. For events, each row moves the areas across the sites, which
-keep their community and predictors.</p>
+keep their community and predictors. In a landscape with edges, <code><a href="patch_permutations.html">patch_permutations()</a></code>
+gives the permutations of each event for <code>area_permutations</code>.</p>
 <p>R2, adjusted R2 and the statistic equal those of the MATLAB function
 <code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Four parts of that
 function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
@@ -201,7 +209,8 @@ traits-environment relationships in the fourth-corner problem. <em>Ecology</em>,
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="biogeography_matrix.html">biogeography_matrix()</a></code> codes the events. <code><a href="plot_node_test.html">plot_node_test()</a></code> and
+    <div class="dont-index"><p><code><a href="biogeography_matrix.html">biogeography_matrix()</a></code> codes the events and <code><a href="patch_permutations.html">patch_permutations()</a></code> moves them in
+a landscape with edges. <code><a href="plot_node_test.html">plot_node_test()</a></code> and
 <code><a href="plot_node_heatmap.html">plot_node_heatmap()</a></code> show the results. <code><a href="pcc_test.html">pcc_test()</a></code> and
 <code><a href="phylo_beta_test.html">phylo_beta_test()</a></code> test the whole tree at once.</p></div>
     </div>
@@ -214,7 +223,7 @@ traits-environment relationships in the fourth-corner problem. <em>Ecology</em>,
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">node_test</span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_node_test&gt; 12 nodes, 11 tested</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span></span>
