@@ -365,6 +365,13 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       liberal para `c` com `env` forte. Candidato: mover só `env` nos testes de `a` e manter
       `c` com permutação livre, ou documentar `c` como descritivo com nulo restrito.
 
+## v0.6.1: nulo rígido e testes das frações (concluída em 2026-11-07)
+
+`rigid_permutations()`, enumeração fora de grade, critério para `gap`, testes das frações
+`a`, `b` e `c` de `trait_partition()`, `plot_phylo_beta()`, métodos de resultados e os nomes
+padronizados. Substitui a `v0.6.0` para citação: a tag `v0.6.0` traz as taxas antigas de
+`patch_permutations()` e não teve release. Mantém-se aberto o nulo restrito para `c`.
+
 ## Inferência por ABC (planejada como v0.6.0, número a definir)
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
