@@ -419,8 +419,13 @@ versão em desenvolvimento (item da v0.6.0).
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
 
-- [ ] Estatística de sinal filogenético dos traits em `summary_stats()`: no piloto, `lambda`
-      não foi recuperado (R2 <= 0,07) com as estatísticas atuais.
+- [x] Estatística de sinal filogenético dos traits em `summary_stats()`: `trait_k`, K de
+      Blomberg, igual ao `picante::Kcalc()`. Piloto repetido (`pilot_identifiability_k*.rds`):
+      com 5000 simulações, nada passa de novo (cobertura baixa); com 50 mil e tolerância 0,01,
+      `lambda` passa por pouco, R2 0,53 e cobertura 90-91%, com intervalo de 61-63% da amplitude.
+      Os outros três seguem como antes. Ressalva: o K é dos ótimos, que não se observam no
+      campo; com um trait medido, a recuperação de `lambda` deve ser pior. Com 30 espécies o K
+      é ruidoso; árvores maiores devem ajudar (não testado).
 
 Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas

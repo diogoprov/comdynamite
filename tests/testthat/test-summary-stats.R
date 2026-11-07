@@ -50,6 +50,21 @@ test_that("phylogenetic statistics match picante", {
   expect_lt(abs(ours[["ses_mntd"]] - mean(theirs$mntd.obs.z, na.rm = TRUE)), 0.05)
 })
 
+test_that("trait_k is Blomberg's K, as picante gives it", {
+  skip_if_not_installed("picante")
+  set.seed(3)
+  big_tree <- ape::rcoal(15)
+  trait <- stats::setNames(ape::rTraitCont(big_tree), big_tree$tip.label)
+  comm <- matrix(rpois(5 * 15, 2), 5, dimnames = list(NULL, big_tree$tip.label))
+  out <- summary_stats(comm, big_tree, trait = trait, n_null = 2)
+  expect_equal(out[["trait_k"]], drop(picante::Kcalc(trait[big_tree$tip.label], big_tree)))
+  expect_equal(blomberg_k(trait[1:2], big_tree), NA_real_)
+  expect_equal(blomberg_k(trait * 0, big_tree), NA_real_)
+  expect_equal(blomberg_k(trait, NULL), NA_real_)
+  expect_equal(blomberg_k(trait[-1], big_tree),
+               drop(picante::Kcalc(trait[big_tree$tip.label[-1]], ape::drop.tip(big_tree, 1))))
+})
+
 test_that("decay and traits follow their definitions", {
   coords <- cbind(c(0, 1, 3, 9), 0)
   out <- summary_stats(small, coords = coords)

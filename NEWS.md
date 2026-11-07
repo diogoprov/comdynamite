@@ -4,6 +4,8 @@
   by species name or in the order of the species. The traits not given are drawn as before, and
   with the same seed they are the same as without the external ones. `rescale_optima = FALSE`
   keeps external optima on their own scale.
+- `summary_stats()`: new statistic `trait_k`, Blomberg's K of the trait over the species shared
+  by `trait` and `tree`, as `picante::Kcalc()` gives it. It is `NA` without a tree or a trait.
 
 # comdynamite 0.6.2
 

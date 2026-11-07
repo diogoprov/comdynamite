@@ -7,6 +7,8 @@
 # After seeing that coverage rose with the tolerance, a larger table was run as a sensitivity
 # analysis, not part of the plan: N_REF=50000 TOLS=0.002,0.005,0.01,0.05
 # OUTPUT=data-raw/pilot_identifiability_large.rds
+# Both runs were repeated after trait_k (Blomberg's K) was added to summary_stats(), with
+# OUTPUT=data-raw/pilot_identifiability_k.rds and data-raw/pilot_identifiability_k_large.rds.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "5000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))
