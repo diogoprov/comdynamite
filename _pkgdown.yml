@@ -60,6 +60,10 @@ reference:
   - torus_permutations
   - rigid_permutations
   - patch_permutations
+- title: Summary statistics
+  desc: The same statistics for simulated and observed data.
+  contents:
+  - summary_stats
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:

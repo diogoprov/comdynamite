@@ -1,6 +1,7 @@
 # comdynamite <img src="man/figures/logo.png" align="right" height="139" alt="comdynamite hex sticker" />
 
 <!-- badges: start -->
+[![r-universe](https://diogoprov.r-universe.dev/badges/comdynamite)](https://diogoprov.r-universe.dev/comdynamite)
 [![R-CMD-check](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
@@ -38,8 +39,25 @@ In R, `?comdynamite` gives the same map.
 ## Installation
 
 ```r
+install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev",
+                                          "https://cloud.r-project.org"))
+# or
 remotes::install_github("diogoprov/comdynamite")
 ```
+
+## Large analyses
+
+The permutations of `pcc_test()`, `pcps_test()`, `phylo_beta_test()` and `trait_partition()` run
+in parallel when you choose a plan with the future package, and results can be reproduced with `set.seed()` for any number of workers. `node_test()` has its own
+`cores` argument: it took about 4 minutes with 600 species, 100 sites and 999 permutations on
+one core.
+
+```r
+future::plan(future::multisession, workers = 4)
+```
+
+Inputs can be tibbles of numeric columns, and `as.data.frame()` or `tibble::as_tibble()` turn
+results into tables.
 
 ## Example
 

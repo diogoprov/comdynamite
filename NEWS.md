@@ -7,14 +7,23 @@
   environment that no longer explained anything: on a grid it rejected 22% of data sets with a
   strong environment without structure and never with a structured one. In
   `data-raw/validation_fractions_null.R` (choice on one generator, check on another), moving
-  `env` alone rejected `a` in 3.7% to 7.1% of null data sets, where free permutations reached
-  20% with an environment structured outside `space`, and moving `space` alone rejected `c` in
-  3.0% to 8.0%, where free permutations reached 24% with a strong, structured environment.
+  `env` alone rejected `a` in 3.7% to 7.1% of data sets where the environment had no effect, where
+  free permutations reached 20% with an environment structured outside `space`, and moving `space`
+  alone rejected `c` in 3.0% to 8.0% of null data sets, where free permutations reached 24% with
+  a strong, structured environment. When the environment acts on a trait other than the one
+  analysed, the test of sites of `a` still rejects, in 45% to 75%, as with free permutations:
+  read `p_max`, which stayed at 2% to 4%.
   The power of that test of `c` was complete for a field in the span of `space` and 25% to 28%
   for a field that `space` holds only in part, since the maps moved around the grid explain
   such a field about as well: it asks whether the maps in `space` matter beyond the same maps
   elsewhere, not whether the remainder has any spatial structure. The result records
   `permutations$moved` and the print says which set moves. Free permutations are unchanged.
+- Permutations of `pcc_test()`, `pcps_test()`, `phylo_beta_test()` and `trait_partition()` run in
+  parallel under a plan of the future package, which is optional.
+- Install from r-universe, as the README now shows.
+- `summary_stats()`: the same statistics for simulated and observed data, covering diversity,
+  occupancy, abundance distribution, SES MPD and MNTD, distance decay, trait-environment relation
+  and, with more than one step, temporal variation.
 - `pcps_test()`: principal coordinates of phylogenetic structure of Duarte et al. (2016), the
   method of the package PCPS, with tests of all the dissimilarity and of each axis, and
   `site_permutations` for a restricted null model, which that package does not have. Its
