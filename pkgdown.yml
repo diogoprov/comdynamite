@@ -6,10 +6,12 @@ articles:
   comdynamite: comdynamite.html
   evaluating-methods: evaluating-methods.html
   phylogenetic-structure: phylogenetic-structure.html
+  articles/preparing-data: preparing-data.html
   articles/validation-gradient: validation-gradient.html
   articles/validation: validation.html
   articles/watching-assembly: watching-assembly.html
-last_built: 2026-11-07T03:02Z
+  articles/whole-tree: whole-tree.html
+last_built: 2026-11-07T03:10Z
 urls:
   reference: https://provetelab.org/comdynamite/reference
   article: https://provetelab.org/comdynamite/articles

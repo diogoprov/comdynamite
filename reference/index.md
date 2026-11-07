@@ -29,8 +29,6 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Exponential dispersal kernel
 - [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md)
   : Environment that changes over time
-- [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
-  : Site permutations that keep the structure of a torus
 
 ## Species traits
 
@@ -53,9 +51,24 @@ Interspecific competition, optionally structured by relatedness.
 - [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md)
   : Competition matrix
 
-## Testing methods
+## Clades and biogeography
 
-Analyses of phylogenetic community structure.
+Which clades respond to the environment or to biogeographic events?
+
+- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
+  : Node contrasts of a phylogeny
+- [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
+  : Matrix of biogeographic events
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  : Test clades against the environment, node by node
+- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
+  : Plot the results of a node test on the phylogeny
+- [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+  : Plot the semipartial correlations of a node test
+
+## The whole tree
+
+Does phylogenetic composition follow the environment?
 
 - [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
   : Test phylogenetic community composition against the environment
@@ -65,18 +78,11 @@ Analyses of phylogenetic community structure.
   : Test phylogenetic beta diversity against the environment
 - [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md)
   : Phylogenetic beta diversity between communities
-- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
-  : Test clades against the environment, node by node
-- [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
-  : Matrix of biogeographic events
-- [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
-  : Permutations that move the patches of biogeographic events
-- [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
-  : Node contrasts of a phylogeny
-- [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
-  : Plot the results of a node test on the phylogeny
-- [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
-  : Plot the semipartial correlations of a node test
+
+## Environment and space
+
+Phylogenetic vectors and the partition of trait variation.
+
 - [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   : Represent a phylogeny by one vector related to a predictor
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
@@ -84,6 +90,15 @@ Analyses of phylogenetic community structure.
   space
 - [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
   : Plot the fractions of a trait partition
+
+## Restricted null models
+
+Permutations for sites that are neighbours.
+
+- [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
+  : Site permutations that keep the structure of a torus
+- [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+  : Permutations that move the patches of biogeographic events
 
 ## Data
 

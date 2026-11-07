@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.6.0
 
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md):
   restricted null model for the events of
@@ -11,6 +11,15 @@
   free permutations.
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `area_permutations` takes one matrix of permutations per event.
+- New title and description, since the package now covers analyses as
+  well as simulations.
+- [`?comdynamite`](https://provetelab.org/comdynamite/reference/comdynamite-package.md)
+  and the README map questions to functions, and the reference and
+  articles on the website are grouped by question.
+- New articles: “Preparing your data” and “Testing the whole tree”, on
+  [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
+  and
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md).
 
 ## comdynamite 0.5.2
 

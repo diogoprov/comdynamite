@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,12 +19,20 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
-    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Analysing data</h6></li>
+    <li><a class="dropdown-item" href="../articles/preparing-data.html">Preparing your data</a></li>
+    <li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="../articles/whole-tree.html">Testing the whole tree</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
-    <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
-    <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
+    <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
+    <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
+    <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -128,13 +136,6 @@
 
         </dt>
         <dd>Environment that changes over time</dd>
-
-        <dt>
-
-          <code><a href="torus_permutations.html">torus_permutations()</a></code>
-
-        </dt>
-        <dd>Site permutations that keep the structure of a torus</dd>
       </dl></div><div class="section level2">
       <h2 id="species-traits">Species traits<a class="anchor" aria-label="anchor" href="#species-traits"></a></h2>
 
@@ -189,9 +190,53 @@
         </dt>
         <dd>Competition matrix</dd>
       </dl></div><div class="section level2">
-      <h2 id="testing-methods">Testing methods<a class="anchor" aria-label="anchor" href="#testing-methods"></a></h2>
+      <h2 id="clades-and-biogeography">Clades and biogeography<a class="anchor" aria-label="anchor" href="#clades-and-biogeography"></a></h2>
 
-      <div class="section-desc"><p>Analyses of phylogenetic community structure.</p></div>
+      <div class="section-desc"><p>Which clades respond to the environment or to biogeographic events?</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="node_contrasts.html">node_contrasts()</a></code>
+
+        </dt>
+        <dd>Node contrasts of a phylogeny</dd>
+
+        <dt>
+
+          <code><a href="biogeography_matrix.html">biogeography_matrix()</a></code>
+
+        </dt>
+        <dd>Matrix of biogeographic events</dd>
+
+        <dt>
+
+          <code><a href="node_test.html">node_test()</a></code>
+
+        </dt>
+        <dd>Test clades against the environment, node by node</dd>
+
+        <dt>
+
+          <code><a href="plot_node_test.html">plot_node_test()</a></code>
+
+        </dt>
+        <dd>Plot the results of a node test on the phylogeny</dd>
+
+        <dt>
+
+          <code><a href="plot_node_heatmap.html">plot_node_heatmap()</a></code>
+
+        </dt>
+        <dd>Plot the semipartial correlations of a node test</dd>
+      </dl></div><div class="section level2">
+      <h2 id="the-whole-tree">The whole tree<a class="anchor" aria-label="anchor" href="#the-whole-tree"></a></h2>
+
+      <div class="section-desc"><p>Does phylogenetic composition follow the environment?</p></div>
 
       <dl></dl></div><div class="section level2">
 
@@ -225,50 +270,17 @@
 
         </dt>
         <dd>Phylogenetic beta diversity between communities</dd>
+      </dl></div><div class="section level2">
+      <h2 id="environment-and-space">Environment and space<a class="anchor" aria-label="anchor" href="#environment-and-space"></a></h2>
 
-        <dt>
+      <div class="section-desc"><p>Phylogenetic vectors and the partition of trait variation.</p></div>
 
-          <code><a href="node_test.html">node_test()</a></code>
+      <dl></dl></div><div class="section level2">
 
-        </dt>
-        <dd>Test clades against the environment, node by node</dd>
 
-        <dt>
 
-          <code><a href="biogeography_matrix.html">biogeography_matrix()</a></code>
 
-        </dt>
-        <dd>Matrix of biogeographic events</dd>
-
-        <dt>
-
-          <code><a href="patch_permutations.html">patch_permutations()</a></code>
-
-        </dt>
-        <dd>Permutations that move the patches of biogeographic events</dd>
-
-        <dt>
-
-          <code><a href="node_contrasts.html">node_contrasts()</a></code>
-
-        </dt>
-        <dd>Node contrasts of a phylogeny</dd>
-
-        <dt>
-
-          <code><a href="plot_node_test.html">plot_node_test()</a></code>
-
-        </dt>
-        <dd>Plot the results of a node test on the phylogeny</dd>
-
-        <dt>
-
-          <code><a href="plot_node_heatmap.html">plot_node_heatmap()</a></code>
-
-        </dt>
-        <dd>Plot the semipartial correlations of a node test</dd>
-
-        <dt>
+      <dl><dt>
 
           <code><a href="phylo_vector.html">phylo_vector()</a></code>
 
@@ -288,6 +300,29 @@
 
         </dt>
         <dd>Plot the fractions of a trait partition</dd>
+      </dl></div><div class="section level2">
+      <h2 id="restricted-null-models">Restricted null models<a class="anchor" aria-label="anchor" href="#restricted-null-models"></a></h2>
+
+      <div class="section-desc"><p>Permutations for sites that are neighbours.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="torus_permutations.html">torus_permutations()</a></code>
+
+        </dt>
+        <dd>Site permutations that keep the structure of a torus</dd>
+
+        <dt>
+
+          <code><a href="patch_permutations.html">patch_permutations()</a></code>
+
+        </dt>
+        <dd>Permutations that move the patches of biogeographic events</dd>
       </dl></div><div class="section level2">
       <h2 id="data">Data<a class="anchor" aria-label="anchor" href="#data"></a></h2>
 

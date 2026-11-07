@@ -1,29 +1,34 @@
 # comdynamite
 
-Process-based metacommunity simulations in R, with phylogenetic
-structure.
+Methods that link traits, phylogenies, biogeography and metacommunities
+in R, to analyse data and to simulate it.
 
-comdynamite implements the model of Thompson et al. (2020):
-density-independent growth set by the match between each species’
-environmental optimum and the local environment, Beverton–Holt
-competition, Poisson demographic stochasticity, and dispersal among
-sites. On top of the original model it offers:
+## What do you want to do?
 
-- **phylogenetic structure**: optima, niche breadths and maximum growth
-  rates with phylogenetic signal (Pagel’s lambda), traits under single-
-  or multi-optimum Ornstein-Uhlenbeck processes, and competition that is
-  stronger between close relatives;
-- **spatially implicit or explicit landscapes**: uniform dispersal among
-  exchangeable sites, or a grid (optionally a torus) with an exponential
-  dispersal kernel and a spatially autocorrelated environment;
-- **restricted null models** for grids: site permutations of a torus
-  that keep its spatial structure;
-- an environment that can change over time, and abundances recorded at
-  chosen steps;
-- **rule-based assembly** without population dynamics, as in Kraft et
-  al. (2007): limiting similarity (the GAUSE algorithm of Colwell &
-  Winkler 1984), habitat filtering and neutral assembly, on one or
-  several traits.
+**Analyse data**
+
+| Question | Functions | Article |
+|----|----|----|
+| Which clades respond to the environment or to biogeographic events? | [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md), [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md), [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md) | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
+| Does phylogenetic composition follow the environment across the whole tree? | [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md), [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md) | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
+| Which phylogenetic axis relates to a predictor? | [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md) | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
+| How much of trait or phylogenetic variation is due to environment and space? | [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md), [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md) | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
+| My sites are neighbours: which null model? | [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md), [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md) | [Analysing clades](https://provetelab.org/comdynamite/articles/analysing-clades.html) |
+| How do I format my own data? |  | [Preparing your data](https://provetelab.org/comdynamite/articles/preparing-data.html) |
+
+**Simulate data**
+
+| Question | Functions | Article |
+|----|----|----|
+| Dynamics with growth, competition and dispersal, as in Thompson et al. (2020) | [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
+| Static communities along gradients | [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md), [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md) | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
+| Assembly by rules, without dynamics, as in Kraft et al. (2007) | [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md) | [Watching assembly](https://provetelab.org/comdynamite/articles/watching-assembly.html) |
+| Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
+| Does a method work? Type I error and power by simulation | all of the above | [Evaluating methods](https://provetelab.org/comdynamite/articles/evaluating-methods.html) |
+
+In R,
+[`?comdynamite`](https://provetelab.org/comdynamite/reference/comdynamite-package.md)
+gives the same map.
 
 ## Installation
 
@@ -49,16 +54,9 @@ sim <- simulate_metacommunity(
 sim$abundance  # sites x species
 ```
 
-See
-[`vignette("comdynamite")`](https://provetelab.org/comdynamite/articles/comdynamite.md)
-for species sorting vs. mass effects, grids and time-varying
-environments,
-[`vignette("phylogenetic-structure")`](https://provetelab.org/comdynamite/articles/phylogenetic-structure.md)
-for an ecological question worked through simulations, and
-[`vignette("evaluating-methods")`](https://provetelab.org/comdynamite/articles/evaluating-methods.md)
-for the evaluation of a statistical method. The
-[website](https://provetelab.org/comdynamite/) has the articles and the
-function reference.
+The [website](https://provetelab.org/comdynamite/) has the articles and
+the function reference. To read the vignettes in R, install with
+`build_vignettes = TRUE`.
 
 ## Related packages
 
@@ -105,8 +103,8 @@ function reference.
 
 ## Citation
 
-Provete, D. B. (2026). comdynamite: Process-based metacommunity
-simulations with phylogenetic structure. R package.
+Provete, D. B. (2026). comdynamite: Linking traits, phylogenies and
+biogeography in metacommunities. R package.
 <https://doi.org/10.5281/zenodo.23993533>
 
 This DOI always points to the latest version; each release also has its

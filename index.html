@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Process-Based Metacommunity Simulations with Phylogenetic Structure • comdynamite</title>
+<title>Linking Traits, Phylogenies and Biogeography in Metacommunities • comdynamite</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -14,9 +14,9 @@
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Process-Based Metacommunity Simulations with Phylogenetic Structure">
-<meta name="description" content="Simulates metacommunity dynamics with the process-based model of Thompson et al. (2020) &lt;doi:10.1111/ele.13568&gt;: density-independent growth that depends on the match between each species' environmental optimum and the local environment, Beverton-Holt competition, Poisson demographic stochasticity, and emigration and immigration among sites. Landscapes can be spatially implicit, with uniform dispersal, or explicit grids with an exponential dispersal kernel and a spatially autocorrelated environment, and the environment can change over time. Species traits (environmental optima, niche breadths and maximum growth rates) can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process with one or several optima, and interspecific competition can be structured by relatedness. Rule-based assembly without population dynamics (limiting similarity, habitat filtering and neutral assembly) follows Kraft et al. (2007) &lt;doi:10.1086/519400&gt;, and static metacommunities with unimodal species responses follow Peres-Neto et al. (2012) &lt;doi:10.1890/11-0494.1&gt;. The model was implemented from the published equations.">
-<meta property="og:description" content="Simulates metacommunity dynamics with the process-based model of Thompson et al. (2020) &lt;doi:10.1111/ele.13568&gt;: density-independent growth that depends on the match between each species' environmental optimum and the local environment, Beverton-Holt competition, Poisson demographic stochasticity, and emigration and immigration among sites. Landscapes can be spatially implicit, with uniform dispersal, or explicit grids with an exponential dispersal kernel and a spatially autocorrelated environment, and the environment can change over time. Species traits (environmental optima, niche breadths and maximum growth rates) can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process with one or several optima, and interspecific competition can be structured by relatedness. Rule-based assembly without population dynamics (limiting similarity, habitat filtering and neutral assembly) follows Kraft et al. (2007) &lt;doi:10.1086/519400&gt;, and static metacommunities with unimodal species responses follow Peres-Neto et al. (2012) &lt;doi:10.1890/11-0494.1&gt;. The model was implemented from the published equations.">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Linking Traits, Phylogenies and Biogeography in Metacommunities">
+<meta name="description" content="Methods that link traits, phylogenies, biogeography and metacommunities, to analyse data and to simulate it. Analyses include the node regression of Leibold et al. (2010) &lt;doi:10.1111/j.1461-0248.2010.01523.x&gt;, with biogeographic events and restricted null models, the phylogenetic gradient analysis of Peres-Neto et al. (2012) &lt;doi:10.1890/11-0494.1&gt;, and the phylogenetic community composition and beta diversity tests of Peres-Neto and Kembel (2015) &lt;doi:10.1007/s11258-014-0405-0&gt;. Simulations follow the process-based model of Thompson et al. (2020) &lt;doi:10.1111/ele.13568&gt;, with environmental filtering, competition, demographic stochasticity and dispersal in spatially implicit or grid landscapes. Species traits can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process, and competition can be structured by relatedness. Rule-based assembly follows Kraft et al. (2007) &lt;doi:10.1086/519400&gt;. Models were implemented from the published equations.">
+<meta property="og:description" content="Methods that link traits, phylogenies, biogeography and metacommunities, to analyse data and to simulate it. Analyses include the node regression of Leibold et al. (2010) &lt;doi:10.1111/j.1461-0248.2010.01523.x&gt;, with biogeographic events and restricted null models, the phylogenetic gradient analysis of Peres-Neto et al. (2012) &lt;doi:10.1890/11-0494.1&gt;, and the phylogenetic community composition and beta diversity tests of Peres-Neto and Kembel (2015) &lt;doi:10.1007/s11258-014-0405-0&gt;. Simulations follow the process-based model of Thompson et al. (2020) &lt;doi:10.1111/ele.13568&gt;, with environmental filtering, competition, demographic stochasticity and dispersal in spatially implicit or grid landscapes. Species traits can carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process, and competition can be structured by relatedness. Rule-based assembly follows Kraft et al. (2007) &lt;doi:10.1086/519400&gt;. Models were implemented from the published equations.">
 <meta property="og:image" content="https://provetelab.org/comdynamite/logo.png">
 </head>
 <body>
@@ -27,7 +27,7 @@
 
     <a class="navbar-brand me-2" href="index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.2.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,12 +41,20 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
-    <li><a class="dropdown-item" href="articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Analysing data</h6></li>
+    <li><a class="dropdown-item" href="articles/preparing-data.html">Preparing your data</a></li>
+    <li><a class="dropdown-item" href="articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
+    <li><a class="dropdown-item" href="articles/whole-tree.html">Testing the whole tree</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
-    <li><a class="dropdown-item" href="articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
-    <li><a class="dropdown-item" href="articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
+    <li><a class="dropdown-item" href="articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
+    <li><a class="dropdown-item" href="articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
+    <li><a class="dropdown-item" href="articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -70,19 +78,109 @@
 </div>
 <!-- badges: start -->
 
-<p>Process-based metacommunity simulations in R, with phylogenetic structure.</p>
-<p>comdynamite implements the model of Thompson et al. (2020): density-independent growth set by the match between each species’ environmental optimum and the local environment, Beverton–Holt competition, Poisson demographic stochasticity, and dispersal among sites. On top of the original model it offers:</p>
-<ul>
-<li>
-<strong>phylogenetic structure</strong>: optima, niche breadths and maximum growth rates with phylogenetic signal (Pagel’s lambda), traits under single- or multi-optimum Ornstein-Uhlenbeck processes, and competition that is stronger between close relatives;</li>
-<li>
-<strong>spatially implicit or explicit landscapes</strong>: uniform dispersal among exchangeable sites, or a grid (optionally a torus) with an exponential dispersal kernel and a spatially autocorrelated environment;</li>
-<li>
-<strong>restricted null models</strong> for grids: site permutations of a torus that keep its spatial structure;</li>
-<li>an environment that can change over time, and abundances recorded at chosen steps;</li>
-<li>
-<strong>rule-based assembly</strong> without population dynamics, as in Kraft et al. (2007): limiting similarity (the GAUSE algorithm of Colwell &amp; Winkler 1984), habitat filtering and neutral assembly, on one or several traits.</li>
-</ul>
+<p>Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse data and to simulate it.</p>
+<div class="section level2">
+<h2 id="what-do-you-want-to-do">What do you want to do?<a class="anchor" aria-label="anchor" href="#what-do-you-want-to-do"></a>
+</h2>
+<p><strong>Analyse data</strong></p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Question</th>
+<th>Functions</th>
+<th>Article</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Which clades respond to the environment or to biogeographic events?</td>
+<td>
+<code><a href="reference/node_contrasts.html">node_contrasts()</a></code>, <code><a href="reference/biogeography_matrix.html">biogeography_matrix()</a></code>, <code><a href="reference/node_test.html">node_test()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/analysing-clades.html">Analysing clades</a></td>
+</tr>
+<tr>
+<td>Does phylogenetic composition follow the environment across the whole tree?</td>
+<td>
+<code><a href="reference/pcc_test.html">pcc_test()</a></code>, <code><a href="reference/phylo_beta_test.html">phylo_beta_test()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/whole-tree.html">Testing the whole tree</a></td>
+</tr>
+<tr>
+<td>Which phylogenetic axis relates to a predictor?</td>
+<td><code><a href="reference/phylo_vector.html">phylo_vector()</a></code></td>
+<td><a href="https://provetelab.org/comdynamite/articles/analysing-clades.html">Analysing clades</a></td>
+</tr>
+<tr>
+<td>How much of trait or phylogenetic variation is due to environment and space?</td>
+<td>
+<code><a href="reference/trait_partition.html">trait_partition()</a></code>, <code><a href="reference/plot_trait_partition.html">plot_trait_partition()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/analysing-clades.html">Analysing clades</a></td>
+</tr>
+<tr>
+<td>My sites are neighbours: which null model?</td>
+<td>
+<code><a href="reference/torus_permutations.html">torus_permutations()</a></code>, <code><a href="reference/patch_permutations.html">patch_permutations()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/analysing-clades.html">Analysing clades</a></td>
+</tr>
+<tr>
+<td>How do I format my own data?</td>
+<td></td>
+<td><a href="https://provetelab.org/comdynamite/articles/preparing-data.html">Preparing your data</a></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Simulate data</strong></p>
+<table class="table">
+<colgroup>
+<col width="33%">
+<col width="33%">
+<col width="33%">
+</colgroup>
+<thead><tr>
+<th>Question</th>
+<th>Functions</th>
+<th>Article</th>
+</tr></thead>
+<tbody>
+<tr>
+<td>Dynamics with growth, competition and dispersal, as in Thompson et al. (2020)</td>
+<td><code><a href="reference/simulate_metacommunity.html">simulate_metacommunity()</a></code></td>
+<td><a href="https://provetelab.org/comdynamite/articles/comdynamite.html">Get started</a></td>
+</tr>
+<tr>
+<td>Static communities along gradients</td>
+<td>
+<code><a href="reference/simulate_static.html">simulate_static()</a></code>, <code><a href="reference/simulate_logistic.html">simulate_logistic()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/whole-tree.html">Testing the whole tree</a></td>
+</tr>
+<tr>
+<td>Assembly by rules, without dynamics, as in Kraft et al. (2007)</td>
+<td><code><a href="reference/assemble_community.html">assemble_community()</a></code></td>
+<td><a href="https://provetelab.org/comdynamite/articles/watching-assembly.html">Watching assembly</a></td>
+</tr>
+<tr>
+<td>Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes</td>
+<td>
+<code><a href="reference/species_traits.html">species_traits()</a></code>, <code><a href="reference/traits_ou.html">traits_ou()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/comdynamite.html">Get started</a></td>
+</tr>
+<tr>
+<td>Does a method work? Type I error and power by simulation</td>
+<td>all of the above</td>
+<td><a href="https://provetelab.org/comdynamite/articles/evaluating-methods.html">Evaluating methods</a></td>
+</tr>
+</tbody>
+</table>
+<p>In R, <code><a href="reference/comdynamite-package.html">?comdynamite</a></code> gives the same map.</p>
+</div>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -104,7 +202,7 @@
 <span>  n_steps    <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">sim</span><span class="op">$</span><span class="va">abundance</span>  <span class="co"># sites x species</span></span></code></pre></div>
-<p>See <code><a href="articles/comdynamite.html">vignette("comdynamite")</a></code> for species sorting vs. mass effects, grids and time-varying environments, <code><a href="articles/phylogenetic-structure.html">vignette("phylogenetic-structure")</a></code> for an ecological question worked through simulations, and <code><a href="articles/evaluating-methods.html">vignette("evaluating-methods")</a></code> for the evaluation of a statistical method. The <a href="https://provetelab.org/comdynamite/">website</a> has the articles and the function reference.</p>
+<p>The <a href="https://provetelab.org/comdynamite/">website</a> has the articles and the function reference. To read the vignettes in R, install with <code>build_vignettes = TRUE</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="related-packages">Related packages<a class="anchor" aria-label="anchor" href="#related-packages"></a>
@@ -130,7 +228,7 @@
 <div class="section level2">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
-<p>Provete, D. B. (2026). comdynamite: Process-based metacommunity simulations with phylogenetic structure. R package. <a href="https://doi.org/10.5281/zenodo.23993533" class="external-link uri">https://doi.org/10.5281/zenodo.23993533</a></p>
+<p>Provete, D. B. (2026). comdynamite: Linking traits, phylogenies and biogeography in metacommunities. R package. <a href="https://doi.org/10.5281/zenodo.23993533" class="external-link uri">https://doi.org/10.5281/zenodo.23993533</a></p>
 <p>This DOI always points to the latest version; each release also has its own DOI on Zenodo. In R, <code>citation("comdynamite")</code> gives the entry with the installed version.</p>
 </div>
 <div class="section level2">
