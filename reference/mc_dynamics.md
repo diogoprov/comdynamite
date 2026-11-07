@@ -33,8 +33,9 @@ mc_dynamics(
 - alpha:
 
   Competition matrix from
-  [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md),
-  with species in the same order as the rows of `traits`.
+  [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md).
+  Species are matched to the rows of `traits` by name, or by position if
+  `alpha` has no names.
 
 - dispersal:
 

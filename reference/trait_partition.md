@@ -65,19 +65,24 @@ trait_partition(
 
 List of class `mc_trait_partition` with `fractions`, a data frame with
 one row for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the
-columns `r2`, `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and
+columns `r2`, `r2_adjusted`, `r2_component`, `p_site`, `p_species` and
 `p_max`; `component`; `component_share`, the share of the total
 variation in the component; `semipartial`, a matrix of predictors by
-traits; and `p_partial`, `p_partial_site` and `p_partial_taxa`, with the
-larger p-value and those of sites and of species, all `NA` if predictors
-are collinear; and `permutations`.
+traits; and `p_partial_max`, `p_partial_site` and `p_partial_species`,
+with the larger p-value and those of sites and of species, all `NA` if
+predictors are collinear; and `permutations`.
 
 ## Details
 
 The total variation includes both the mean and the dispersion within
 sites, so `r2` answers how much of all the variation each fraction
 holds, and `r2_component` how much of the component. Fractions `b` and
-`d` cannot be tested.
+`d` cannot be tested. Tests of `a` and `c` permute environment and space
+together, so they compare each fraction with what is expected when
+neither matters, not with the other set held fixed. They are
+conservative when the other set explains much: in an audit with noise as
+environment and a real effect of space, `a` was never rejected in 100
+replicates.
 
 ## Note
 
@@ -179,13 +184,13 @@ out <- trait_partition(comm, trait, env, space, n_perm = 49)
 out
 #> <mc_trait_partition> mean component, 0.511 of the total variation
 #> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02
-#>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max
-#> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02
-#> 2       ab 0.489712      0.4763      0.95894   0.02   0.02  0.02
-#> 3       bc 0.020911     -0.0607      0.04095   0.58   0.02  0.58
-#> 4        a 0.469647      0.4930      0.91965   0.02   0.02  0.02
-#> 5        b 0.020065     -0.0167      0.03929     NA     NA    NA
-#> 6        c 0.000846     -0.0439      0.00166   0.98   0.06  0.98
-#> 7        d 0.509443      0.5677      0.03941     NA     NA    NA
+#>   fraction       r2 r2_adjusted r2_component p_site p_species p_max
+#> 1      abc 0.490557      0.4323      0.96059   0.02      0.02  0.02
+#> 2       ab 0.489712      0.4763      0.95894   0.02      0.02  0.02
+#> 3       bc 0.020911     -0.0607      0.04095   0.58      0.02  0.58
+#> 4        a 0.469647      0.4930      0.91965   0.02      0.02  0.02
+#> 5        b 0.020065     -0.0167      0.03929     NA        NA    NA
+#> 6        c 0.000846     -0.0439      0.00166   0.98      0.06  0.98
+#> 7        d 0.509443      0.5677      0.03941     NA        NA    NA
 plot_trait_partition(out)
 ```

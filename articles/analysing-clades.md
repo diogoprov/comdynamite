@@ -160,6 +160,14 @@ rejected 2.2% to 6.0% and free permutations 49% to 75%. It was
 conservative for one area against the others (2.2% to 3.9%). The torus
 rejected 5.6% to 9.5% in the square.
 
+These rates average over places of areas. Patches are placed
+independently, so the distance between the two sides of an event is not
+kept. With areas fixed in the square, the rate was 0.4% to 2% for
+adjacent areas and 6% to 10% for areas in opposite corners or halves of
+the landscape, and 15% to 16% with sparse sites and the default `gap`.
+The test is thus liberal for sides far apart and conservative for
+neighbouring sides, and p-values near the threshold need caution.
+
 This is a method of this package without published evaluation, tested
 only in these simulations. Coordinates should be projected, and
 landscapes with parts far apart may give patches that cross the gaps.
@@ -210,14 +218,14 @@ partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
 partition
 #> <mc_trait_partition> mean component, 0.476 of the total variation
 #> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005
-#>   fraction     r2 r2_adjusted r2_component p_site p_taxa p_max
-#> 1      abc 0.3754       0.331        0.789  0.005  0.005 0.005
-#> 2       ab 0.2076       0.180        0.436  0.005  0.005 0.005
-#> 3       bc 0.2348       0.208        0.493  0.005  0.005 0.005
-#> 4        a 0.1405       0.122        0.295  0.005  0.005 0.005
-#> 5        b 0.0671       0.058        0.141     NA     NA    NA
-#> 6        c 0.1678       0.150        0.352  0.005  0.005 0.005
-#> 7        d 0.6246       0.669        0.211     NA     NA    NA
+#>   fraction     r2 r2_adjusted r2_component p_site p_species p_max
+#> 1      abc 0.3754       0.331        0.789  0.005     0.005 0.005
+#> 2       ab 0.2076       0.180        0.436  0.005     0.005 0.005
+#> 3       bc 0.2348       0.208        0.493  0.005     0.005 0.005
+#> 4        a 0.1405       0.122        0.295  0.005     0.005 0.005
+#> 5        b 0.0671       0.058        0.141     NA        NA    NA
+#> 6        c 0.1678       0.150        0.352  0.005     0.005 0.005
+#> 7        d 0.6246       0.669        0.211     NA        NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
 #> env1     0.50  -0.17

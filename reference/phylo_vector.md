@@ -14,12 +14,13 @@ correlations as weights (`pev`). Brownian vectors are then added to
 phylo_vector(
   comm,
   tree,
-  predictor,
+  env = NULL,
   n_perm = 999,
   level = 0.05,
   n_sim = 1000,
   site_permutations = NULL,
-  alpha = NULL
+  alpha = NULL,
+  predictor = NULL
 )
 ```
 
@@ -34,7 +35,7 @@ phylo_vector(
 
   A `phylo` object.
 
-- predictor:
+- env:
 
   Numeric vector with the value of each site. The authors estimate one
   vector for each predictor.
@@ -56,16 +57,21 @@ phylo_vector(
   Optional matrix of site indices with one permutation per row, for
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
-  to use instead of free permutations.
+  to use instead of free permutations. Empty sites are then allowed:
+  they leave the analysis but their values can reach occupied sites.
 
 - alpha:
 
   Deprecated, use `level`.
 
+- predictor:
+
+  Deprecated, use `env`.
+
 ## Value
 
 List of class `mc_phylo_vector` with `correlation`, the correlations of
-`pev` and `pev_brown`; `p_site`, `p_taxa` and `p_max` of the global
+`pev` and `pev_brown`; `p_site`, `p_species` and `p_max` of the global
 test; `selected`, the columns of `eigenvectors` retained; `pev` and
 `pev_brown`, named vectors or `NULL` when the global test is not
 significant or no eigenvector is retained; `eigenvectors`;

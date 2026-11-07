@@ -73,7 +73,7 @@ Both functions permute sites, which breaks the link between composition
 and environment, and species across the tips, which breaks the link
 between composition and phylogeny. The association requires both links,
 so the p-value to report is `p_max`, the larger of the two. A small
-`p_site` with a large `p_taxa` says that composition follows the
+`p_site` with a large `p_species` says that composition follows the
 environment, but that the phylogeny adds nothing to it.
 
 The scripts `data-raw/validation_pcc.R` and

@@ -3,9 +3,10 @@
 Implements the regression of Leibold et al. (2010). For each node, sites
 without species of that node are removed, the contrast is standardised
 with species weights and summed within sites, and the result is
-regressed on the predictors standardised with site weights, using site
-richness as weights. Each node shows whether the two clades that split
-there differ in their response to the predictors.
+regressed on the predictors standardised with site weights, using the
+total of each site as weights, which is its richness with incidence
+data. Each node shows whether the two clades that split there differ in
+their response to the predictors.
 
 ## Usage
 
@@ -76,11 +77,11 @@ node_test(
 
 List of class `mc_node_test` with `nodes`, a data frame with one row per
 node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`,
-`r2_weighted`, `statistic`, `p_site`, `p_taxa`, `p_max`, `p_joint`,
+`r2_weighted`, `statistic`, `p_site`, `p_species`, `p_max`, `p_joint`,
 `n_draws`, the valid draws of sites, since a draw without variance does
 not count, and `p_adjusted`; `semipartial`, a matrix of nodes by
-predictors; `p_partial`, with the larger of the two p-values for each of
-them; `p_partial_site`, with the p-values of sites alone;
+predictors; `p_partial_max`, with the larger of the two p-values for
+each of them; `p_partial_site`, with the p-values of sites alone;
 `p_partial_joint`, with those of the permutation of the article;
 `biogeography`, a list with the same four matrices for the events, or
 `NULL`; and `permutations`, the numbers of permutations and whether

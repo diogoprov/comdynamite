@@ -74,12 +74,13 @@ sum with the largest correlation is kept (<code>pev_brown</code>).</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">phylo_vector</span><span class="op">(</span></span>
 <span>  <span class="va">comm</span>,</span>
 <span>  <span class="va">tree</span>,</span>
-<span>  <span class="va">predictor</span>,</span>
+<span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  level <span class="op">=</span> <span class="fl">0.05</span>,</span>
 <span>  n_sim <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  predictor <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -96,7 +97,7 @@ at least one individual.</p></dd>
 <dd><p>A <code>phylo</code> object.</p></dd>
 
 
-<dt id="arg-predictor">predictor<a class="anchor" aria-label="anchor" href="#arg-predictor"></a></dt>
+<dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
 <dd><p>Numeric vector with the value of each site. The authors estimate one
 vector for each predictor.</p></dd>
 
@@ -115,17 +116,23 @@ vector for each predictor.</p></dd>
 
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
 <dd><p>Optional matrix of site indices with one permutation per
-row, for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations.</p></dd>
+row, for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations.
+Empty sites are then allowed: they leave the analysis but their values can reach
+occupied sites.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Deprecated, use <code>level</code>.</p></dd>
 
+
+<dt id="arg-predictor">predictor<a class="anchor" aria-label="anchor" href="#arg-predictor"></a></dt>
+<dd><p>Deprecated, use <code>env</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_phylo_vector</code> with <code>correlation</code>, the correlations of <code>pev</code>
-and <code>pev_brown</code>; <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code> of the global test; <code>selected</code>, the
+and <code>pev_brown</code>; <code>p_site</code>, <code>p_species</code> and <code>p_max</code> of the global test; <code>selected</code>, the
 columns of <code>eigenvectors</code> retained; <code>pev</code> and <code>pev_brown</code>, named vectors or <code>NULL</code>
 when the global test is not significant or no eigenvector is retained;
 <code>eigenvectors</code>; <code>eigenvalues</code>; <code>eigenvector_correlation</code>; and <code>permutations</code>. Check

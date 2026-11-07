@@ -119,17 +119,21 @@ sites.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_trait_partition</code> with <code>fractions</code>, a data frame with one row
 for each of <code>abc</code>, <code>ab</code>, <code>bc</code>, <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code>, and the columns <code>r2</code>,
-<code>r2_adjusted</code>, <code>r2_component</code>, <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code>; <code>component</code>;
+<code>r2_adjusted</code>, <code>r2_component</code>, <code>p_site</code>, <code>p_species</code> and <code>p_max</code>; <code>component</code>;
 <code>component_share</code>, the share of the total variation in the component; <code>semipartial</code>,
-a matrix of predictors by traits; and <code>p_partial</code>, <code>p_partial_site</code> and
-<code>p_partial_taxa</code>, with the larger p-value and those of sites and of species, all
+a matrix of predictors by traits; and <code>p_partial_max</code>, <code>p_partial_site</code> and
+<code>p_partial_species</code>, with the larger p-value and those of sites and of species, all
 <code>NA</code> if predictors are collinear; and <code>permutations</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The total variation includes both the mean and the dispersion within sites, so <code>r2</code>
 answers how much of all the variation each fraction holds, and <code>r2_component</code> how much
-of the component. Fractions <code>b</code> and <code>d</code> cannot be tested.</p>
+of the component. Fractions <code>b</code> and <code>d</code> cannot be tested. Tests of <code>a</code> and <code>c</code> permute
+environment and space together, so they compare each fraction with what is expected when
+neither matters, not with the other set held fixed. They are conservative when the other
+set explains much: in an audit with noise as environment and a real effect of space, <code>a</code>
+was never rejected in 100 replicates.</p>
     </div>
     <div class="section level2">
     <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
@@ -207,14 +211,14 @@ assessing trait-environment relationships. <em>Methods in Ecology and Evolution<
 <span class="r-in"><span><span class="va">out</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_trait_partition&gt; mean component, 0.511 of the total variation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.489712      0.4763      0.95894   0.02   0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3       bc 0.020911     -0.0607      0.04095   0.58   0.02  0.58</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4        a 0.469647      0.4930      0.91965   0.02   0.02  0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5        b 0.020065     -0.0167      0.03929     NA     NA    NA</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6        c 0.000846     -0.0439      0.00166   0.98   0.06  0.98</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7        d 0.509443      0.5677      0.03941     NA     NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fraction       r2 r2_adjusted r2_component p_site p_species p_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.490557      0.4323      0.96059   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.489712      0.4763      0.95894   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3       bc 0.020911     -0.0607      0.04095   0.58      0.02  0.58</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        a 0.469647      0.4930      0.91965   0.02      0.02  0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        b 0.020065     -0.0167      0.03929     NA        NA    NA</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        c 0.000846     -0.0439      0.00166   0.98      0.06  0.98</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        d 0.509443      0.5677      0.03941     NA        NA    NA</span>
 <span class="r-in"><span><span class="fu"><a href="plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">out</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="trait_partition-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>

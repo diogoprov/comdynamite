@@ -47,11 +47,11 @@ phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
 
 ## Value
 
-List of class `mc_phylo_beta` with `r2`, the adjusted R2; `statistic`,
-the pseudo-F; `p_site`, `p_taxa` and `p_max`; `scores`, the sites on the
-principal coordinates of the predicted matrix, which the authors suggest
-using to order sites in a heatmap of the community matrix; and
-`permutations`.
+List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2;
+`statistic`, the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`,
+the sites on the principal coordinates of the predicted matrix, which
+the authors suggest using to order sites in a heatmap of the community
+matrix; and `permutations`.
 
 ## Details
 

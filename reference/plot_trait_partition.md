@@ -14,7 +14,7 @@ has no test, so it is grey.
 plot_trait_partition(
   x,
   value = c("r2_adjusted", "r2", "r2_component"),
-  test = c("max", "site", "taxa"),
+  test = c("max", "site", "species"),
   level = 0.05,
   col = "#0072B2",
   labels = c("Environment", "Space"),
@@ -39,7 +39,7 @@ plot_trait_partition(
 - test:
 
   Permutation test: `"max"` for the larger p-value of sites and species,
-  `"site"` or `"taxa"`.
+  `"site"` or `"species"`.
 
 - level:
 

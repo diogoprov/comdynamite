@@ -61,10 +61,10 @@ pcc_test(
 
 ## Value
 
-List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
-values, which is the value the authors recommend reporting, or 0 if none
-is positive; `statistic`, the variance of the adjusted R2 across
-eigenvectors; `p_site`, `p_taxa` and `p_max`; `r2_adjusted`, with one
+List of class `mc_pcc` with `r2_mean`, the mean of the positive adjusted
+R2 values, which is the value the authors recommend reporting, or 0 if
+none is positive; `statistic`, the variance of the adjusted R2 across
+eigenvectors; `p_site`, `p_species` and `p_max`; `r2_adjusted`, with one
 value per eigenvector; and `permutations`.
 
 ## Details
