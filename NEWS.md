@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.6.0
 
 - `patch_permutations()`: restricted null model for the events of `node_test()` in landscapes
   with edges, which moves the patches of each area and keeps their number and size. It rejected

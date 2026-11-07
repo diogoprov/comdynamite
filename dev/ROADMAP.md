@@ -288,8 +288,8 @@ Da auditoria, para antes da 1.0:
       menos de 8 sites, `mc_dynamics()` com um site, `pcc_test()` com `r2` NaN, número de
       sorteios válidos, erro dentro de `cores`, checagens do simulador, formas dos traits.
 
-Situação em 2026-11-06: marco fechado na 0.5.2. O nulo para paisagens com borda segue em
-aberto: sem ele, o teste de eventos não deve ser usado com dados reais de refúgios.
+Situação em 2026-11-06: marco fechado na 0.5.2. O nulo com borda e a descoberta saíram na
+0.6.0.
 
 Opção, sem data: calanoides como segundo exemplo, se as espécies estiverem nas tabelas
 públicas da EMAP. A topologia sairia da Fig. 9.5b, e os resultados do livro não foram
@@ -301,7 +301,12 @@ vários triângulos: vale perguntar aos autores.
 I dos eventos estiver medido com sites agregados no espaço e os achados da auditoria
 estiverem resolvidos ou registrados aqui.
 
-## v0.6.0: inferência por ABC
+## v0.6.0: nulo com borda e descoberta (concluída em 2026-11-06)
+
+`patch_permutations()`, `area_permutations` em `node_test()`, novo título e documentação por
+pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
+
+## Inferência por ABC (planejada como v0.6.0, número a definir)
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0 e da estrutura comum da v0.4.0.
