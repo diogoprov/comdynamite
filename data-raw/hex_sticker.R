@@ -1,14 +1,16 @@
 # Hex sticker for comdynamite with hexSticker. Run from the package root after
-# choosing an option (1-4 from hex_options.R, "A"-"E" from hex_options2.R);
+# choosing an option (1-4 from hex_options.R, "A"-"E" from hex_options2.R,
+# "F1"-"F3" from hex_options3.R);
 # writes man/figures/logo.png. Needs ggplot2, ape and
 # hexSticker. The subplots come from data-raw/hex_options.R, drawn in the
 # coordinates of the hexagon, so s_x/s_y/s_width/s_height place them where the
 # previews show them; adjust p_size if the name does not fit.
 library(hexSticker)
-option <- "E"
+option <- "F1"
 FRAME <- FALSE
 source("data-raw/hex_options.R")
 source("data-raw/hex_options2.R")
+source("data-raw/hex_options3.R")
 looks <- list(
   list(p = g1, fill = "#1D3557", border = "#E63946", text = "#F1FAEE", p_y = 0.5),
   list(p = g2, fill = "#264653", border = "#E9C46A", text = "#E9C46A", p_y = 0.47),
@@ -18,7 +20,8 @@ looks <- list(
   B = list(p = pB, fill = "#F1FAEE", border = "#1D3557", text = "#1D3557", p_y = 0.52),
   C = list(p = pC, fill = "#1D3557", border = "#F4A261", text = "#F4A261", p_y = 0.5),
   D = list(p = pD, fill = "#2A9D8F", border = "#264653", text = "#F1FAEE", p_y = 0.5),
-  E = list(p = pE, fill = "#264653", border = "#E9C46A", text = "#E9C46A", p_y = 0.47)
+  E = list(p = pE, fill = "#264653", border = "#E9C46A", text = "#E9C46A", p_y = 0.47),
+  F1 = list(p = pF1, fill = "#264653", border = "#E9C46A", text = "#E9C46A", p_y = 0.47)
 )
 look <- looks[[option]]
 dir.create("man/figures", showWarnings = FALSE, recursive = TRUE)

@@ -26,7 +26,7 @@ e um prefixo a definir para analisar). O título e o `Description` mudaram na 0.
 | Modelo | Thompson et al. (2020) com traits e competição filogenéticos; paisagens implícitas e em grade; permutações do toro; ambiente variável no tempo |
 | Montagem por regras | `assemble_community()`: similaridade limitante, filtragem e neutra |
 | Traits | `traits_ou()` (um ou vários ótimos) e `paint_regimes()`, no lugar de `traits_bm()` |
-| Identidade | hex sticker (opção E) e `data-raw/hex_sticker.R` |
+| Identidade | hex sticker (opção F1) e `data-raw/hex_sticker.R` |
 | Site | pkgdown em https://provetelab.org/comdynamite/, com build automático no `main` |
 | Simulador estático | `simulate_static()`, na versão de desenvolvimento |
 | Vignettes | `comdynamite`, `phylogenetic-structure` e `evaluating-methods` |
