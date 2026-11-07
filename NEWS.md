@@ -32,7 +32,7 @@
   nearest site, the step of a full grid and the spacing of sparse sites, instead of the
   nearest one. `rigid_permutations()` thus no longer stops on a grid with holes, and the holes
   between sites count as inside the landscape while the rim beyond an edge does not. The
-  default of `patch_permutations()` is unchanged on a full grid of at least 8 by 8 sites and
+  default of `patch_permutations()` is unchanged on a full grid where most sites are off the edge, and
   larger with sparse or irregular sites, where it changes the patches and the results: with
   25% to 40% of the sites of a square and areas in opposite corners it rejected 5.6% to 5.9%,
   against 15% to 17% before (`data-raw/validation_gap.R`).

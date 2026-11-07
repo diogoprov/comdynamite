@@ -163,14 +163,16 @@ strips along opposite edges 8% to 9%, against 2% to 3% with `patch_permutations(
 null model that is valid for sides far apart at any range of autocorrelation, so that range has
 to be argued from outside the data, and results should be compared across values.
 
-As a guide, use `rigid_permutations()` when the sides have room to move, and compare it with
-`patch_permutations()` and values of `independent` when they do not. Coordinates off a regular
+As a guide, on a grid use `rigid_permutations()` when the sides have room to move, and compare
+it with `patch_permutations()` and values of `independent` when they do not. Off a grid,
+`patch_permutations()` is the safer choice, for the reason below. Coordinates off a regular
 lattice get an enumerated grid of rotations, reflections and translations, with the moved sites
 taken to the nearest free sites. There (`data-raw/validation_offgrid.R`, 150 replicates and 99
 permutations) it rejected 4.7% and 5.9% for adjacent areas in a square with jitter and in sites
 placed at random, but 6.8% to 8.0% for two blocks placed at random in four landscapes, where it
-is liberal, against 1.2% to 6.3% with `patch_permutations()`; power for adjacent areas was 23%
-against 12%. A large part of an event in an irregular region may have few moves that fit; it
+is liberal, against 1.2% to 6.3% with `patch_permutations()`. With a second generator in an
+L-shaped region of random sites (`data-raw/validation_nulls_check.R`) it rejected 7.0% and 8.7%,
+against 5.5% and 6.6%. Power for adjacent areas was 23% against 12%. A large part of an event in an irregular region may have few moves that fit; it
 then stays nearly in place while small parts move, and the function warns.
 
 Both are methods of this package without published evaluation, tested only in these

@@ -330,7 +330,9 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       quatro paisagens .068 a .080, liberal; `patch_permutations()` .012 a .063; poder 23%
       contra 12%. Fica pendente: blocos aleatórios fora de grade acima de .07, e eventos
       grandes em grade com jitter são lentos (225 sítios em 750: 701 encaixes em 12 min).
-      Nos refúgios, a parte grande tem um único encaixe, de forma determinística.
+      Nos refúgios, a parte grande tem um único encaixe, de forma determinística. Conferência
+      independente (região em L, `data-raw/validation_nulls_check.R`): .070 e .087 fora de
+      grade, contra .055 e .066 com `patch_permutations()`; grade esparsa .057 e .061.
 - [x] Critério para `gap`: mediana da distância ao quarto sítio mais próximo (passo da grade
       cheia; espaçamento com sítios esparsos). `patch_permutations()` usa 1,5 vez isso (cantos
       com 25% a 40% da grade: .056 a .059, contra .15 a .17 com o padrão antigo; holdout .021

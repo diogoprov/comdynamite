@@ -60,8 +60,12 @@
 #' default rejected 4.7% for adjacent areas in the square with jitter and 5.9% in 400 sites
 #' placed at random, and 6.8% to 8.0% for two blocks placed at random in those landscapes, in
 #' the band with jitter and in a crescent of random sites, where it is liberal.
-#' [patch_permutations()] rejected 1.2% to 6.3% in those cases. Power for adjacent areas with
-#' jitter was 23% against 12%. With 400 sites, the enumeration and 99 placements took 0.3 to
+#' [patch_permutations()] rejected 1.2% to 6.3% in those cases. With a second generator in an
+#' L-shaped region of random sites (`data-raw/validation_nulls_check.R`, 150 replicates and 199
+#' permutations), it rejected 7.0% for two fixed areas and 8.7% for areas placed at random,
+#' against 5.5% and 6.6% with [patch_permutations()]. Off a lattice this function is thus
+#' liberal, and [patch_permutations()] is the safer choice unless its conservatism for
+#' adjacent areas matters. Power for adjacent areas with jitter was 23% against 12%. With 400 sites, the enumeration and 99 placements took 0.3 to
 #' 2.8 s; with 750 sites placed at random and an event of 57 sites, 999 placements took 9 s,
 #' and with 750 sites on a lattice with jitter and an event of 225 sites, 701 placements took
 #' 12 min, since every site of a large event has to be moved to a free site in each try.
