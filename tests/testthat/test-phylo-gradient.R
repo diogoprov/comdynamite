@@ -265,6 +265,62 @@ test_that("the shared fraction is tested with moves of env on a grid", {
   expect_true(with_empty$shared$tested)
 })
 
+test_that("restricted permutations move each set alone against the other", {
+  skip_if_not_installed("adespatial")
+  d <- shared_data()
+  env <- cbind(d$env, noise = rnorm(36))
+  traits <- cbind(t1 = d$trait, t2 = rnorm(12))
+  moves <- torus_permutations(6)[1:19, ]
+  set.seed(4)
+  out <- trait_partition(d$comm, traits, env, d$space, n_perm = 19, site_permutations = moves)
+  expect_equal(out$permutations$moved, "each set alone")
+  expect_output(print(out), "sites move env alone for ab, a and its semipartials, space alone")
+  f <- out$fractions
+  rownames(f) <- f$fraction
+  # the same null distributions, built by hand: env alone, space alone, or both for abc
+  comm <- d$comm
+  w <- rowSums(comm)
+  y <- trait_response(comm, traits, "mean")
+  total <- ncol(traits) * sum(comm)
+  comp <- sum(column_ss(y, w))
+  std <- function(x) weighted_standardise(x, w)
+  ess <- function(x) explained_ss(x, y, w)
+  stat <- function(i_env, i_space) {
+    e <- std(env[i_env, , drop = FALSE])
+    s <- std(d$space[i_space, , drop = FALSE])
+    full <- full_model(cbind(e, s), y, w)
+    left <- unname(column_ss(y, w) - full$fitted)
+    c(abc = ess(cbind(e, s)) / total, ab = ess(e) / total, bc = ess(s) / total,
+      a = (ess(cbind(e, s)) - ess(s)) / (comp - ess(s)),
+      c = (ess(cbind(e, s)) - ess(e)) / (comp - ess(e)),
+      loss_env1_t2 = full$loss[1, 2] / (full$loss[1, 2] + left[2]),
+      loss_space2_t1 = full$loss[4, 1] / (full$loss[4, 1] + left[1]))
+  }
+  id <- 1:36
+  observed <- stat(id, id)
+  nulls <- lapply(list(both = c(TRUE, TRUE), env = c(TRUE, FALSE), space = c(FALSE, TRUE)),
+                  function(move) {
+                    sapply(1:19, function(r) {
+                      stat(if (move[1]) moves[r, ] else id, if (move[2]) moves[r, ] else id)
+                    })
+                  })
+  p <- function(null, name) permutation_p(nulls[[null]][name, ], observed[[name]])
+  expect_equal(f["abc", "p_site"], p("both", "abc"))
+  expect_equal(f["ab", "p_site"], p("env", "ab"))
+  expect_equal(f["a", "p_site"], p("env", "a"))
+  expect_equal(f["bc", "p_site"], p("space", "bc"))
+  expect_equal(f["c", "p_site"], p("space", "c"))
+  expect_equal(out$p_partial_site["e", "t2"], p("env", "loss_env1_t2"))
+  expect_equal(out$p_partial_site["MEM2", "t1"], p("space", "loss_space2_t1"))
+  # the test of c is not the test with both sets moved
+  expect_false(isTRUE(all.equal(f["c", "p_site"], p("both", "c"))))
+  # free permutations keep moving both sets together
+  set.seed(4)
+  free <- trait_partition(d$comm, traits, env, d$space, n_perm = 19)
+  expect_equal(free$permutations$moved, "together")
+  expect_false(any(grepl("move env alone", capture.output(print(free)))))
+})
+
 test_that("the shared test explains what it needs", {
   skip_if_not_installed("adespatial")
   d <- shared_data()
