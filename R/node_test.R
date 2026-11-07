@@ -241,7 +241,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
       # moves the parent generator on, so each batch gets its own streams
       if (workers > 1) stats::runif(1)
       parallel::mclapply(batch, function(i) run(nodes[, i]), mc.cores = workers)
-    }, name)
+    }, name, parallel = FALSE)
     results <- unlist(results, recursive = FALSE)
     failed <- vapply(results, inherits, logical(1), "try-error")
     if (any(failed)) {

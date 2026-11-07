@@ -75,8 +75,17 @@ check_permutations <- function(permutations, comm, name = "`site_permutations`")
 
 # a loop with a progress bar and an estimate of the time left, which appears only in
 # interactive sessions and when the loop takes more than a few seconds
-progress_map <- function(x, f, name) {
+progress_map <- function(x, f, name, parallel = TRUE) {
+  if (parallel && future_workers() > 1) {
+    return(future.apply::future_lapply(x, f, future.seed = TRUE))
+  }
   purrr::map(x, f, .progress = if (interactive()) name else FALSE)
+}
+
+# workers of the plan the user chose with future::plan(), 1 without one
+future_workers <- function(installed = requireNamespace("future.apply", quietly = TRUE)) {
+  if (!installed) return(1)
+  future::nbrOfWorkers()
 }
 
 # what the null models used, kept in the results and shown when they are printed
