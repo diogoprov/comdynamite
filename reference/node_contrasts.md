@@ -41,6 +41,11 @@ Species that share history get less weight, and each side still sums
 to 1. The supplement proposes this coding for trees in which all species
 are equally distant from the root.
 
+## Note
+
+Adapted from the MATLAB function `CreateNodeContrasts` in the supplement
+of Leibold et al. (2010).
+
 ## References
 
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity

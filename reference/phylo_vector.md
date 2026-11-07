@@ -64,7 +64,10 @@ List of class `mc_phylo_vector` with `correlation`, the correlations of
 test; `selected`, the columns of `eigenvectors` retained; `pev` and
 `pev_brown`, named vectors or `NULL` when the global test is not
 significant or no eigenvector is retained; `eigenvectors`;
-`eigenvalues`; and `eigenvector_correlation`.
+`eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
+`pev` before combining gradients with
+[`cbind()`](https://rdrr.io/r/base/cbind.html), which drops a `NULL`
+without warning.
 
 ## Details
 
@@ -80,6 +83,12 @@ after a significant global test.
 Species are matched to the tips of `tree` by name, in any order, and
 those in only one of the two are dropped with a warning. Species without
 individuals have no weight and are left out.
+
+## Note
+
+Adapted from the MATLAB functions `TraitEnvCor`,
+`ModelSelectionStochastic` and `PCoAWeigthed` in the supplement of
+Peres-Neto et al. (2012).
 
 ## Article and original code
 
@@ -163,14 +172,15 @@ species traits–environment relationships in the fourth-corner problem.
 
 ``` r
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
-#> <mc_phylo_vector> 18 eigenvectors, 1 retained
+#> <mc_phylo_vector> 18 eigenvectors, 2 retained
+#> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 
 #> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 
-#> correlation: PEV 0.513  PEV-B 0.602 
+#> correlation: PEV 0.61  PEV-B 0.588 
 ```

@@ -88,12 +88,12 @@ ecological communities. *The American Naturalist*, 170, 271–283.
 
 ``` r
 set.seed(1)
-tr <- ape::rcoal(32)
+tr <- treeshapesim::sim_tree_shape(32)
 x <- traits_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
-#>  [1] "t26" "t16" "t21" "t12" "t7"  "t27" "t19" "t3"  "t11" "t20" "t9"  "t31"
-#> [13] "t32" "t28" "t2"  "t23"
+#>  [1] "t1"  "t2"  "t3"  "t7"  "t8"  "t12" "t13" "t14" "t16" "t22" "t23" "t25"
+#> [13] "t26" "t29" "t30" "t32"
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
-#>  [1] "t26" "t29" "t24" "t10" "t16" "t21" "t12" "t7"  "t30" "t27" "t3"  "t11"
-#> [13] "t9"  "t5"  "t23" "t25"
+#>  [1] "t1"  "t2"  "t3"  "t6"  "t7"  "t9"  "t10" "t11" "t13" "t14" "t15" "t16"
+#> [13] "t17" "t18" "t31" "t32"
 ```

@@ -106,14 +106,19 @@ for each of <code>abc</code>, <code>ab</code>, <code>bc</code>, <code>a</code>, 
 <code>r2_adjusted</code>, <code>r2_component</code>, <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code>; <code>component</code>;
 <code>component_share</code>, the share of the total variation in the component; <code>semipartial</code>,
 a matrix of predictors by traits; and <code>p_partial</code>, <code>p_partial_site</code> and
-<code>p_partial_taxa</code>, with the larger p-value and those of sites and of species. All are
-<code>NA</code> if predictors are collinear.</p>
+<code>p_partial_taxa</code>, with the larger p-value and those of sites and of species, all
+<code>NA</code> if predictors are collinear; and <code>permutations</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The total variation includes both the mean and the dispersion within sites, so <code>r2</code>
 answers how much of all the variation each fraction holds, and <code>r2_component</code> how much
 of the component. Fractions <code>b</code> and <code>d</code> cannot be tested.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>Adapted from the MATLAB function <code>PartitionRDATwoDataMatricesPhylogeny</code> in the
+supplement of Peres-Neto et al. (2012).</p>
     </div>
     <div class="section level2">
     <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
@@ -185,6 +190,7 @@ assessing trait-environment relationships. <em>Methods in Ecology and Evolution<
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">trait_partition</span><span class="op">(</span><span class="va">comm</span>, <span class="va">trait</span>, <span class="va">env</span>, <span class="va">space</span>, n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_trait_partition&gt; mean component, 0.511 of the total variation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2       ab 0.489712      0.4763      0.95894   0.02   0.02  0.02</span>

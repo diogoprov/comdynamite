@@ -26,7 +26,7 @@ power; testing the unrelated predictor measures the type I error.
 
 library(comdynamite)
 side <- 10
-tree <- ape::rcoal(30)
+tree <- treeshapesim::sim_tree_shape(30)
 land <- landscape_grid(side, env_bandwidth = 2, disp_scale = 2)
 unrelated <- landscape_grid(side, env_bandwidth = 2)$env
 
@@ -97,14 +97,14 @@ knitr::kable(rates, digits = 3)
 
 | predictor   | null_model | lambda | rejection_rate |    se |
 |:------------|:-----------|-------:|---------------:|------:|
-| environment | free       |      0 |          1.000 | 0.000 |
-| unrelated   | free       |      0 |          0.735 | 0.031 |
-| environment | torus      |      0 |          1.000 | 0.000 |
-| unrelated   | torus      |      0 |          0.050 | 0.015 |
-| environment | free       |      1 |          1.000 | 0.000 |
-| unrelated   | free       |      1 |          0.760 | 0.030 |
-| environment | torus      |      1 |          1.000 | 0.000 |
-| unrelated   | torus      |      1 |          0.035 | 0.013 |
+| environment | free       |      0 |           1.00 | 0.000 |
+| unrelated   | free       |      0 |           0.76 | 0.030 |
+| environment | torus      |      0 |           1.00 | 0.000 |
+| unrelated   | torus      |      0 |           0.08 | 0.019 |
+| environment | free       |      1 |           1.00 | 0.000 |
+| unrelated   | free       |      1 |           0.74 | 0.031 |
+| environment | torus      |      1 |           1.00 | 0.000 |
+| unrelated   | torus      |      1 |           0.07 | 0.018 |
 
 Under a true null hypothesis, p-values should be uniform:
 
@@ -136,9 +136,10 @@ so they tend to match by chance, and permuting sites freely breaks this
 structure in the null distribution but not in the observed statistic
 (Legendre 1993).
 
-**Torus permutations keep the nominal level.** Their rejection rates
-(0.035 and 0.050) are consistent with 5%, and their p-values are close
-to uniform.
+**Torus permutations come close to the nominal level.** Their rejection
+rates (0.08 and 0.07) are about two standard errors above 5%, and their
+p-values are much closer to uniform. More replicates would be needed to
+tell whether this small excess is real.
 
 **This setting does not discriminate power.** Both null models reject
 the true environment in all replicates, because the effect is strong.
@@ -166,13 +167,14 @@ matter for a method that uses phylogenetic information.
 
 ## Tree shape as a factor of the design
 
-The results above use coalescent trees from
-[`ape::rcoal()`](https://rdrr.io/pkg/ape/man/rtree.html), and the
-statistic ignores the tree, so tree shape cannot affect them. For a
-method that uses phylogenetic information, tree shape should be part of
-the design. The [treeshapesim](https://provetelab.org/treeshapesim/)
-package simulates trees in which imbalance (`beta`) and branching times
-(`c`) are set separately.
+The results above use trees from
+[`treeshapesim::sim_tree_shape()`](https://provetelab.org/treeshapesim/reference/sim_tree_shape.html)
+with its default shape, and the statistic ignores the tree, so tree
+shape cannot affect them. For a method that uses phylogenetic
+information, tree shape should be part of the design. The
+[treeshapesim](https://provetelab.org/treeshapesim/) package simulates
+trees in which imbalance (`beta`) and branching times (`c`) are set
+separately.
 
 ``` r
 
@@ -194,10 +196,9 @@ knitr::kable(cbind(shapes, measured), digits = 2)
 
 The table gives the mean gamma statistic and normalized Colless index of
 100 trees for each combination. Each tree is a `phylo` object, so it
-replaces [`ape::rcoal()`](https://rdrr.io/pkg/ape/man/rtree.html) in
-step 1 without other changes. To aim at given values of gamma and
-Colless, use `shape_grid()` and `sim_tree_target()` from the same
-package. The [treeshapesim article on
+replaces the tree in step 1 without other changes. To aim at given
+values of gamma and Colless, use `shape_grid()` and `sim_tree_target()`
+from the same package. The [treeshapesim article on
 comdynamite](https://provetelab.org/treeshapesim/articles/comdynamite.html)
 shows the two packages together.
 

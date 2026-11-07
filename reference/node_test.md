@@ -46,14 +46,16 @@ node_test(
 
 - n_perm:
 
-  Number of permutations of sites, of species and of both.
+  Number of permutations of sites, of species and of both. With
+  `site_permutations`, only of species.
 
 - cores:
 
   Number of cores, with nodes run in parallel. Not available on Windows,
   where one core is used. For reproducible p-values with more than one
   core, call `RNGkind("L'Ecuyer-CMRG")` before
-  [`set.seed()`](https://rdrr.io/r/base/Random.html).
+  [`set.seed()`](https://rdrr.io/r/base/Random.html). Results still
+  depend on the number of cores.
 
 - site_permutations:
 
@@ -70,8 +72,9 @@ node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`,
 `semipartial`, a matrix of nodes by predictors; `p_partial`, with the
 larger of the two p-values for each of them; `p_partial_site`, with the
 p-values of sites alone; `p_partial_joint`, with those of the
-permutation of the article; and `biogeography`, a list with the same
-four matrices for the events, or `NULL`.
+permutation of the article; `biogeography`, a list with the same four
+matrices for the events, or `NULL`; and `permutations`, the numbers of
+permutations and whether those of sites were free or restricted.
 
 ## Details
 
@@ -121,7 +124,7 @@ restricted null model. For events, each row moves the areas across the
 sites, which keep their community and predictors.
 
 R2, adjusted R2 and the statistic equal those of the MATLAB function
-`MetacommunityPhylogenetics` of the authors, checked in Octave. Three
+`MetacommunityPhylogenetics` of the authors, checked in Octave. Four
 parts of that function differ from this one:
 
 - In the original, the species permutations shuffle only the first
@@ -136,12 +139,30 @@ parts of that function differ from this one:
   standardised predictors and divides by it, to keep only the sign,
   which is what we do.
 
+- The original compares the permuted statistics as they are. The one of
+  each predictor divides a proportion by a sum of squares, so it depends
+  on the scale of the response, and with one predictor it does not rank
+  draws as the global one does. Neither takes into account that draws of
+  species occupy different numbers of sites. Here draws are ranked on F
+  statistics. `statistic` is still the one of the original, and p-values
+  of sites alone are the same, but those that use species differ.
+
 As in the original, R2 sums squares without site weights, although the
 fit uses them, so it is not the R2 of a weighted regression, and the
 adjusted R2 uses the degrees of freedom of an unweighted model.
 
 Nodes for which a predictor has no variance among the remaining sites,
-or with too few sites, get `NA`. The original stops with an error.
+with too few sites, or with a clade without individuals get `NA`. The
+original stops with an error.
+
+Sites are matched by name when `comm`, `env` and `biogeography` all have
+row names, and otherwise by position.
+
+## Note
+
+Adapted from the MATLAB function `MetacommunityPhylogenetics` in the
+supplement of Leibold et al. (2010), with the differences listed in
+Details.
 
 ## References
 
@@ -181,7 +202,9 @@ set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
 #> <mc_node_test> 12 nodes, 11 tested
+#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 
 #> nodes with p (max) <= 0.05: 0 before correction, 0 after
+#> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 round(out$semipartial, 2)
 #>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP
 #> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00

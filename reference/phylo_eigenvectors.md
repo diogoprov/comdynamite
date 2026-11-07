@@ -36,6 +36,6 @@ ecological communities. *Plant Ecology*, 216, 709–724.
 
 ``` r
 set.seed(1)
-dim(phylo_eigenvectors(ape::rcoal(10)))
+dim(phylo_eigenvectors(treeshapesim::sim_tree_shape(10)))
 #> [1] 10  9
 ```

@@ -40,7 +40,9 @@ out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography, n
                  cores = 2)
 out
 #> <mc_node_test> 12 nodes, 11 tested
-#> nodes with p (max) <= 0.05: 0 before correction, 0 after
+#> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001 
+#> nodes with p (max) <= 0.05: 1 before correction, 0 after
+#> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 ```
 
 The p-values answer different questions, so this choice comes first.
@@ -117,10 +119,10 @@ too often. We simulated 1000 metacommunities on a torus of 15 by 15
 sites, with communities that followed a hidden autocorrelated
 environment and two blocks of 25 sites placed at random, so that events
 had no effect (`data-raw/validation_events.R`). Free permutations
-rejected 44.8% of the tests of a node at the 5% level, and permutations
+rejected 45.1% of the tests of a node at the 5% level, and permutations
 from
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
-given in `site_permutations`, rejected 4.9%. The events in the figures
+given in `site_permutations`, rejected 4.8%. The events in the figures
 above used free permutations, so they should be read with this in mind.
 Landscapes with edges need a restricted null model chosen for them, and
 a matrix of permutations of any origin can be given.
@@ -134,10 +136,8 @@ gradients act on species.
 
 ``` r
 
-set.seed(2)
-tree <- ape::stree(32, "balanced")
-tree$edge.length <- rep(1, nrow(tree$edge))
-tree$tip.label <- paste0("sp", 1:32)
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(32, beta = 10)
 gradients <- logistic_gradients(1)
 sim <- simulate_logistic(tree, gradients[c("x", "y")])
 keep <- rowSums(sim$abundance) > 0
@@ -147,6 +147,7 @@ x <- gradients$x[keep]
 y <- gradients$y[keep]
 ```
 
+A high `beta` gives a balanced tree, as in that appendix.
 [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
 tests whether a gradient is related to the phylogeny and, if so, gives a
 vector of species values for the next step. Here we ask this for each
@@ -157,7 +158,7 @@ gradient.
 first <- phylo_vector(comm, tree, x, n_perm = 199)
 second <- phylo_vector(comm, tree, y, n_perm = 199)
 c(first$p_max, second$p_max)
-#> [1] 0.005 0.005
+#> [1] 0.005 0.010
 ```
 
 [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
@@ -170,28 +171,30 @@ significant global test.
 vectors <- cbind(first$pev_brown, second$pev_brown)
 partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
 partition
-#> <mc_trait_partition> mean component, 0.595 of the total variation
-#>   fraction    r2 r2_adjusted r2_component p_site p_taxa p_max
-#> 1      abc 0.479       0.441        0.804  0.005  0.005 0.005
-#> 2       ab 0.314       0.290        0.527  0.005  0.005 0.005
-#> 3       bc 0.300       0.276        0.505  0.005  0.005 0.005
-#> 4        a 0.178       0.165        0.299  0.005  0.005 0.005
-#> 5        b 0.136       0.125        0.228     NA     NA    NA
-#> 6        c 0.165       0.151        0.277  0.005  0.005 0.005
-#> 7        d 0.521       0.559        0.196     NA     NA    NA
+#> <mc_trait_partition> mean component, 0.559 of the total variation
+#> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005 
+#>   fraction     r2 r2_adjusted r2_component p_site p_taxa p_max
+#> 1      abc 0.4392      0.3991        0.785  0.005  0.005 0.005
+#> 2       ab 0.2613      0.2358        0.467  0.005  0.005 0.005
+#> 3       bc 0.2607      0.2352        0.466  0.005  0.005 0.005
+#> 4        a 0.1784      0.1639        0.319  0.005  0.005 0.005
+#> 5        b 0.0828      0.0719        0.148     NA     NA    NA
+#> 6        c 0.1779      0.1633        0.318  0.005  0.005 0.005
+#> 7        d 0.5608      0.6009        0.215     NA     NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
-#> env1     0.49   0.34
-#> space1   0.35   0.45
+#> env1     0.52  -0.29
+#> space1  -0.24   0.55
 ```
 
 ``` r
 
-plot_trait_partition(partition)
+plot_trait_partition(partition, labels = c("Gradient x", "Gradient y"))
 ```
 
-![Bars of the fractions explained by environment, by space and by
-both.](analysing-clades_files/figure-html/unnamed-chunk-11-1.png)
+![Two overlapping bars along the total variation, for environment and
+space, sharing the fraction b, followed by the unexplained
+fraction.](analysing-clades_files/figure-html/unnamed-chunk-11-1.png)
 
 The test of each trait against each predictor is a different question,
 for which ter Braak (2019) is the reference.

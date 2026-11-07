@@ -96,7 +96,7 @@ signal;</li>
 signal (Brownian motion, <code>lambda = 1</code>), and let close
 relatives compete more strongly.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span>
 <span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tr</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">alpha</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tr</span>, type <span class="op">=</span> <span class="st">"phylo"</span>, inter_max <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
 <span><span class="va">land</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span>n_sites <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
@@ -104,8 +104,8 @@ relatives compete more strongly.</p>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="va">land</span>, <span class="va">traits</span>, <span class="va">alpha</span>, dispersal <span class="op">=</span> <span class="fl">0.01</span>, n_steps <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="va">sim</span></span>
 <span><span class="co">#&gt; &lt;mc_sim&gt; 50 sites x 40 species</span></span>
-<span><span class="co">#&gt; species persisting: 29 of 40 </span></span>
-<span><span class="co">#&gt; mean local richness: 10.9</span></span></code></pre></div>
+<span><span class="co">#&gt; species persisting: 33 of 40 </span></span>
+<span><span class="co">#&gt; mean local richness: 10.5</span></span></code></pre></div>
 <p><code>sim$abundance</code> holds the abundance of each species at
 each site at the last step. Ordering sites by their environment and
 species by their optimum shows the sorting of species along the
@@ -133,8 +133,8 @@ environment less closely.</p>
 <span>  persisting <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">s</span><span class="op">$</span><span class="va">abundance</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span></span>
 <span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;               sorting mass_effects</span></span>
-<span><span class="co">#&gt; mean_richness   10.74        19.74</span></span>
-<span><span class="co">#&gt; persisting      30.00        21.00</span></span></code></pre></div>
+<span><span class="co">#&gt; mean_richness   10.16        22.34</span></span>
+<span><span class="co">#&gt; persisting      32.00        24.00</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="spatially-explicit-landscapes">Spatially explicit landscapes<a class="anchor" aria-label="anchor" href="#spatially-explicit-landscapes"></a>
@@ -151,8 +151,8 @@ exponential dispersal kernel.</p>
 <code class="sourceCode R"><span><span class="va">sim_sp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="va">grid</span>, <span class="va">traits</span>, <span class="va">alpha</span>, dispersal <span class="op">=</span> <span class="fl">0.1</span>, n_steps <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span>
 <span><span class="va">sim_sp</span></span>
 <span><span class="co">#&gt; &lt;mc_sim&gt; 100 sites x 40 species</span></span>
-<span><span class="co">#&gt; species persisting: 29 of 40 </span></span>
-<span><span class="co">#&gt; mean local richness: 19.4</span></span></code></pre></div>
+<span><span class="co">#&gt; species persisting: 34 of 40 </span></span>
+<span><span class="co">#&gt; mean local richness: 21.3</span></span></code></pre></div>
 <p>With spatial structure, sites are no longer exchangeable, so
 permuting sites at random is not a valid null model.
 <code><a href="../reference/torus_permutations.html">torus_permutations()</a></code> gives the rearrangements of a torus
@@ -178,7 +178,7 @@ fluctuations to the environment of each site, and
 <span>                                env_time <span class="op">=</span> <span class="va">et</span>, record_steps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">100</span>, <span class="fl">500</span>, <span class="fl">100</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">sim_t</span><span class="op">$</span><span class="va">history</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">3</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; step100 step200 step300 step400 step500 </span></span>
-<span><span class="co">#&gt;   12.96   10.18    9.84    9.22    9.54</span></span></code></pre></div>
+<span><span class="co">#&gt;   11.56    9.68    9.58    9.80    9.10</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="traits-under-one-or-several-adaptive-optima">Traits under one or several adaptive optima<a class="anchor" aria-label="anchor" href="#traits-under-one-or-several-adaptive-optima"></a>
@@ -189,14 +189,14 @@ motion; with <code>alpha &gt; 0</code> traits are pulled towards an
 optimum, and <code><a href="../reference/paint_regimes.html">paint_regimes()</a></code> gives clades their own optimum
 (multi-peak OU; Butler &amp; King 2004).</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
 <span><span class="va">node</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/mrca.html" class="external-link">getMRCA</a></span><span class="op">(</span><span class="va">pool</span>, <span class="va">pool</span><span class="op">$</span><span class="va">tip.label</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">in_clade</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="fu"><a href="../reference/traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">pool</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/drop.tip.html" class="external-link">extract.clade</a></span><span class="op">(</span><span class="va">pool</span>, <span class="va">node</span><span class="op">)</span><span class="op">$</span><span class="va">tip.label</span></span>
 <span><span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/paint_regimes.html">paint_regimes</a></span><span class="op">(</span><span class="va">pool</span>, nodes <span class="op">=</span> <span class="va">node</span><span class="op">)</span></span>
 <span><span class="va">x_ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">pool</span>, alpha <span class="op">=</span> <span class="fl">2</span>, theta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`0` <span class="op">=</span> <span class="fl">0</span>, `1` <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, regimes <span class="op">=</span> <span class="va">reg</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x_ou</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">in_clade</span>, <span class="st">"clade (optimum 5)"</span>, <span class="st">"rest (optimum 0)"</span><span class="op">)</span>, <span class="va">mean</span><span class="op">)</span></span>
 <span><span class="co">#&gt; clade (optimum 5)  rest (optimum 0) </span></span>
-<span><span class="co">#&gt;         4.7336002         0.2932017</span></span></code></pre></div>
+<span><span class="co">#&gt;         3.8228309         0.1872388</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="rule-based-assembly-kraft-et-al--2007">Rule-based assembly (Kraft et al. 2007)<a class="anchor" aria-label="anchor" href="#rule-based-assembly-kraft-et-al--2007"></a>
@@ -220,11 +220,11 @@ first.</li>
 <code>"neutral"</code>: species are drawn at random.</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">pool</span>, n_traits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/assemble_community.html">assemble_community</a></span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">16</span>, rule <span class="op">=</span> <span class="st">"limiting_similarity"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span>
-<span><span class="co">#&gt;  [1] "t18" "t25" "t31" "t29" "t8"  "t1"  "t4"  "t12" "t17" "t19" "t27" "t5" </span></span>
-<span><span class="co">#&gt; [13] "t15" "t13" "t3"  "t9"</span></span></code></pre></div>
+<span><span class="co">#&gt;  [1] "t1"  "t3"  "t6"  "t9"  "t10" "t13" "t14" "t17" "t19" "t22" "t26" "t27"</span></span>
+<span><span class="co">#&gt; [13] "t29" "t30" "t31" "t32"</span></span></code></pre></div>
 <p>Over many pools, the mean phylogenetic distance (MPD) among community
 members shows the expected contrast when traits evolve by Brownian
 motion:</p>
@@ -232,13 +232,13 @@ motion:</p>
 <code class="sourceCode R"><span><span class="va">mpd</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tree</span>, <span class="va">sp</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/dist.html" class="external-link">as.dist</a></span><span class="op">(</span><span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/cophenetic.phylo.html" class="external-link">cophenetic.phylo</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span><span class="op">[</span><span class="va">sp</span>, <span class="va">sp</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">rules</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"limiting_similarity"</span>, <span class="st">"filtering"</span>, <span class="st">"neutral"</span><span class="op">)</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span><span class="fl">100</span>, <span class="op">{</span></span>
-<span>  <span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
+<span>  <span class="va">pool</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span>
 <span>  <span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">pool</span>, n_traits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">rules</span>, <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu">mpd</span><span class="op">(</span><span class="va">pool</span>, <span class="fu"><a href="../reference/assemble_community.html">assemble_community</a></span><span class="op">(</span><span class="va">x</span>, <span class="fl">16</span>, <span class="va">r</span><span class="op">)</span><span class="op">$</span><span class="va">community</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
 <span><span class="co">#&gt; limiting_similarity           filtering             neutral </span></span>
-<span><span class="co">#&gt;            2.152022            1.620627            2.052095</span></span></code></pre></div>
+<span><span class="co">#&gt;            1.551878            1.444317            1.502199</span></span></code></pre></div>
 <p>On average, limiting similarity keeps more distant relatives than
 neutral assembly (higher MPD), and filtering keeps closer relatives
 (lower MPD), although single replicates vary.</p>

@@ -1,11 +1,12 @@
 # Plot the fractions of a trait partition
 
-Draws one bar for each fraction of
-[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md):
-`a` for the environment alone, `b` for what the environment and space
-share, and `c` for space alone. The unexplained fraction `d` is given
-below the plot, as it would hide the others. Dark bars are significant,
-and `b` has no test, so it is grey.
+Draws the total variation as a line divided into the fractions of
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md),
+with one bar for the environment and one for space, as in Figure 1 of
+Desdevises et al. (2003). The two bars overlap in `b`, the variation
+they share. `a` is explained by the environment alone, `c` by space
+alone, and `d` is unexplained. Dark segments are significant, and `b`
+has no test, so it is grey.
 
 ## Usage
 
@@ -16,6 +17,8 @@ plot_trait_partition(
   test = c("max", "site", "taxa"),
   alpha = 0.05,
   col = "#0072B2",
+  labels = c("Environment", "Space"),
+  cex = 0.9,
   ...
 )
 ```
@@ -43,17 +46,25 @@ plot_trait_partition(
 
 - col:
 
-  Colour of significant bars.
+  Colour of significant segments.
+
+- labels:
+
+  Names of the two sets of predictors.
+
+- cex:
+
+  Size of the text.
 
 - ...:
 
   Other arguments of
-  [`graphics::barplot()`](https://rdrr.io/r/graphics/barplot.html).
+  [`graphics::plot.window()`](https://rdrr.io/r/graphics/plot.window.html).
 
 ## Value
 
-Invisibly, the rows of `x$fractions` for `a`, `b` and `c`, with `shown`,
-the values of the bars.
+Invisibly, the rows of `x$fractions` for `a`, `b`, `c` and `d`, with
+`shown`, the values drawn.
 
 ## Details
 
@@ -63,6 +74,11 @@ result of
 keeps them, because all fractions sum to one only with them.
 
 ## References
+
+Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003).
+Quantifying phylogenetically structured environmental variation.
+*Evolution*, 57, 2647–2652.
+[doi:10.1111/j.0014-3820.2003.tb01508.x](https://doi.org/10.1111/j.0014-3820.2003.tb01508.x)
 
 Legendre, P. (2008). Studying beta diversity: ecological variation
 partitioning by multiple regression and canonical analysis. *Journal of

@@ -46,9 +46,10 @@ phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
 ## Value
 
 List of class `mc_phylo_beta` with `r2`, the adjusted R2; `statistic`,
-the pseudo-F; `p_site`, `p_taxa` and `p_max`; and `scores`, the sites on
-the principal coordinates of the predicted matrix, which the authors
-suggest using to order sites in a heatmap of the community matrix.
+the pseudo-F; `p_site`, `p_taxa` and `p_max`; `scores`, the sites on the
+principal coordinates of the predicted matrix, which the authors suggest
+using to order sites in a heatmap of the community matrix; and
+`permutations`.
 
 ## Details
 
@@ -91,7 +92,7 @@ the other framework of the same article.
 
 ``` r
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
@@ -99,6 +100,7 @@ comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #> <mc_phylo_beta> phylogenetic beta diversity
-#> adjusted R2: 0.315  pseudo-F: 23.6 
+#> adjusted R2: 0.221  pseudo-F: 14.9 
+#> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 
 #> p (sites): 0.01  p (species): 0.01  p (max): 0.01 
 ```

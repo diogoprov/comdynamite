@@ -38,7 +38,7 @@ remotes::install_github("diogoprov/comdynamite")
 
 library(comdynamite)
 set.seed(1)
-tr <- ape::rcoal(40)
+tr <- treeshapesim::sim_tree_shape(40)
 sim <- simulate_metacommunity(
   landscape  = landscape_implicit(50),
   traits     = species_traits(tr, lambda = 1),

@@ -115,7 +115,8 @@ row, for example from <code><a href="torus_permutations.html">torus_permutations
 and <code>pev_brown</code>; <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code> of the global test; <code>selected</code>, the
 columns of <code>eigenvectors</code> retained; <code>pev</code> and <code>pev_brown</code>, named vectors or <code>NULL</code>
 when the global test is not significant or no eigenvector is retained;
-<code>eigenvectors</code>; <code>eigenvalues</code>; and <code>eigenvector_correlation</code>.</p>
+<code>eigenvectors</code>; <code>eigenvalues</code>; <code>eigenvector_correlation</code>; and <code>permutations</code>. Check
+<code>pev</code> before combining gradients with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code>, which drops a <code>NULL</code> without warning.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -127,6 +128,11 @@ are meant for <code><a href="trait_partition.html">trait_partition()</a></code> 
 <p>Species are matched to the tips of <code>tree</code> by name, in any order, and those in only one
 of the two are dropped with a warning. Species without individuals have no weight and
 are left out.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>Adapted from the MATLAB functions <code>TraitEnvCor</code>, <code>ModelSelectionStochastic</code> and
+<code>PCoAWeigthed</code> in the supplement of Peres-Neto et al. (2012).</p>
     </div>
     <div class="section level2">
     <h2 id="article-and-original-code">Article and original code<a class="anchor" aria-label="anchor" href="#article-and-original-code"></a></h2>
@@ -186,16 +192,17 @@ traits–environment relationships in the fourth-corner problem. <em>Ecology</em
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span>, optima_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_static.html">simulate_static</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">env</span>, incidence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">abundance</span></span></span>
 <span class="r-in"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">phylo_vector</span><span class="op">(</span><span class="va">comm</span><span class="op">[</span><span class="va">keep</span>, <span class="op">]</span>, <span class="va">tree</span>, <span class="va">env</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, n_perm <span class="op">=</span> <span class="fl">99</span>, n_sim <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_vector&gt; 18 eigenvectors, 1 retained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_vector&gt; 18 eigenvectors, 2 retained</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.513  PEV-B 0.602 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B 0.588 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

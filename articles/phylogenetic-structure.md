@@ -32,7 +32,7 @@ shared across dispersal rates and competition types.
 
 library(comdynamite)
 
-tree <- ape::rcoal(30)
+tree <- treeshapesim::sim_tree_shape(30)
 land <- landscape_implicit(25)
 traits <- species_traits(tree, lambda = 1, sigma_mean = 8, sigma_sd = 2)
 alpha <- competition_matrix(tree, "phylo", inter_max = 0.5)
@@ -71,26 +71,26 @@ knitr::kable(means, digits = 2)
 
 | dispersal | lambda | competition | alpha | gamma | beta | ses_mpd |
 |----------:|-------:|:------------|------:|------:|-----:|--------:|
-|      0.00 |      0 | none        |  7.43 | 29.37 | 0.80 |    0.06 |
-|      0.01 |      0 | none        | 10.08 | 29.43 | 0.74 |    0.05 |
-|      0.05 |      0 | none        | 17.08 | 29.37 | 0.51 |   -0.06 |
-|      0.10 |      0 | none        | 20.95 | 29.23 | 0.36 |    0.01 |
-|      0.50 |      0 | none        | 24.01 | 25.07 | 0.07 |   -0.07 |
-|      0.00 |      1 | none        |  7.33 | 29.47 | 0.80 |   -1.65 |
-|      0.01 |      1 | none        |  9.93 | 29.43 | 0.74 |   -0.97 |
-|      0.05 |      1 | none        | 16.81 | 29.43 | 0.51 |   -0.41 |
-|      0.10 |      1 | none        | 20.78 | 29.30 | 0.36 |   -0.25 |
-|      0.50 |      1 | none        | 23.73 | 24.83 | 0.07 |    0.00 |
-|      0.00 |      0 | phylo       |  3.35 | 18.80 | 0.85 |    0.61 |
-|      0.01 |      0 | phylo       |  4.71 | 18.83 | 0.80 |    0.49 |
-|      0.05 |      0 | phylo       |  8.71 | 18.60 | 0.61 |    0.52 |
-|      0.10 |      0 | phylo       | 11.08 | 17.93 | 0.46 |    0.58 |
-|      0.50 |      0 | phylo       | 10.79 | 11.37 | 0.08 |    0.72 |
-|      0.00 |      1 | phylo       |  3.01 | 16.23 | 0.84 |   -0.29 |
-|      0.01 |      1 | phylo       |  4.13 | 16.63 | 0.80 |   -0.15 |
-|      0.05 |      1 | phylo       |  7.46 | 16.00 | 0.61 |    0.29 |
-|      0.10 |      1 | phylo       |  9.73 | 15.63 | 0.46 |    0.41 |
-|      0.50 |      1 | phylo       | 10.03 | 10.60 | 0.08 |    0.79 |
+|      0.00 |      0 | none        |  7.37 | 28.97 | 0.79 |   -0.08 |
+|      0.01 |      0 | none        | 10.01 | 29.03 | 0.73 |    0.03 |
+|      0.05 |      0 | none        | 16.98 | 29.07 | 0.49 |    0.04 |
+|      0.10 |      0 | none        | 20.81 | 28.97 | 0.34 |   -0.01 |
+|      0.50 |      0 | none        | 23.70 | 24.80 | 0.07 |   -0.02 |
+|      0.00 |      1 | none        |  7.16 | 29.13 | 0.80 |   -1.28 |
+|      0.01 |      1 | none        |  9.70 | 29.20 | 0.74 |   -0.87 |
+|      0.05 |      1 | none        | 16.51 | 29.13 | 0.51 |   -0.51 |
+|      0.10 |      1 | none        | 20.37 | 28.93 | 0.36 |   -0.33 |
+|      0.50 |      1 | none        | 23.36 | 24.47 | 0.07 |   -0.50 |
+|      0.00 |      0 | phylo       |  3.33 | 18.30 | 0.84 |    0.47 |
+|      0.01 |      0 | phylo       |  4.63 | 18.27 | 0.80 |    0.41 |
+|      0.05 |      0 | phylo       |  8.48 | 18.20 | 0.61 |    0.51 |
+|      0.10 |      0 | phylo       | 11.03 | 17.73 | 0.45 |    0.62 |
+|      0.50 |      0 | phylo       | 10.78 | 11.40 | 0.09 |    0.71 |
+|      0.00 |      1 | phylo       |  2.99 | 17.53 | 0.85 |   -0.02 |
+|      0.01 |      1 | phylo       |  4.28 | 17.57 | 0.80 |   -0.06 |
+|      0.05 |      1 | phylo       |  7.80 | 17.33 | 0.62 |    0.10 |
+|      0.10 |      1 | phylo       | 10.23 | 16.77 | 0.46 |    0.20 |
+|      0.50 |      1 | phylo       | 10.11 | 10.70 | 0.09 |    0.30 |
 
 ``` r
 
@@ -124,11 +124,11 @@ Four patterns stand out.
 
 **Clustering needs both conserved niches and limited dispersal.**
 Without competition and with `lambda = 1`, communities are clustered at
-low dispersal (SES MPD near -1.7) and the signal fades as dispersal
-increases, reaching zero at 0.5. Niche conservatism alone does not
-produce clustering: immigrants keep species in sites that do not suit
-them, so composition no longer reflects the match between niches and
-environment.
+low dispersal (SES MPD near -1.3) and the signal weakens as dispersal
+increases, to between -0.3 and -0.5 at the highest rates. Niche
+conservatism alone does not produce clustering: immigrants keep species
+in sites that do not suit them, so composition no longer reflects the
+match between niches and environment.
 
 **Without phylogenetic signal, filtering leaves no phylogenetic trace.**
 With `lambda = 0` and no competition, SES MPD stays near zero at all
@@ -136,11 +136,11 @@ dispersal rates, even though species are strongly sorted by the
 environment at low dispersal (beta near 0.8).
 
 **Competition among relatives can hide filtering.** With `lambda = 1`,
-competition among relatives moves SES MPD from about -1.7 to about -0.3
+competition among relatives moves SES MPD from about -1.3 to about zero
 at the lowest dispersal rate, which is close to the random expectation
 although both processes are acting strongly. At higher dispersal,
-communities become overdispersed. A value near zero therefore does not
-imply that assembly is random.
+communities become slightly overdispersed. A value near zero therefore
+does not imply that assembly is random.
 
 **Taxonomic beta diversity does not see the phylogenetic signal.** Beta
 diversity depends on dispersal and competition but is the same for

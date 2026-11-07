@@ -183,14 +183,14 @@ community ecology. <em>Ecology Letters</em>, 23, 1314–1329.
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ls</span> <span class="op">&lt;-</span> <span class="fu"><a href="landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu">simulate_metacommunity</span><span class="op">(</span><span class="va">ls</span>, <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tr</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                              <span class="fu"><a href="competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tr</span>, <span class="st">"phylo"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                              dispersal <span class="op">=</span> <span class="fl">0.01</span>, n_steps <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">sim</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_sim&gt; 30 sites x 20 species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> species persisting: 17 of 20 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 8 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> species persisting: 18 of 20 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> mean local richness: 6.87 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -62,12 +62,14 @@ pcc_test(
 List of class `mc_pcc` with `r2`, the mean of the positive adjusted R2
 values, which is the value the authors recommend reporting; `statistic`,
 the variance of the adjusted R2 across eigenvectors; `p_site`, `p_taxa`
-and `p_max`; and `r2_adjusted`, with one value per eigenvector.
+and `p_max`; `r2_adjusted`, with one value per eigenvector; and
+`permutations`.
 
 ## Details
 
 The authors used presences and absences. Abundances are accepted, with
-species and site totals as weights.
+species and site totals as weights. Species without individuals leave
+the analysis.
 
 ## References
 
@@ -80,7 +82,7 @@ ecological communities. *Plant Ecology*, 216, 709–724.
 
 ``` r
 set.seed(1)
-tree <- ape::rcoal(20)
+tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 env <- runif(50, 0, 100)
@@ -88,6 +90,7 @@ comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 pcc_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #> <mc_pcc> phylogenetic community composition
-#> mean positive adjusted R2: 0.0893 
+#> mean positive adjusted R2: 0.0965 
+#> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 
 #> p (sites): 0.01  p (species): 0.01  p (max): 0.01 
 ```

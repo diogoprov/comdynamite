@@ -28,7 +28,7 @@ Named numeric vector with the simulated trait value of each tip.
 
 ``` r
 set.seed(1)
-trait_bm(ape::rcoal(5), lambda = 0.5)
-#>         t2         t5         t4         t3         t1 
-#>  1.0262565  0.6694432 -0.4217225 -1.5578819  0.4996051 
+trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
+#>           t1           t2           t3           t4           t5 
+#> -0.005767173  2.275670676  0.763593461 -0.554890164 -1.062009857 
 ```

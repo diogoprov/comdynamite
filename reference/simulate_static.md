@@ -95,14 +95,14 @@ metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 
 ``` r
 set.seed(1)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
                          rmax_range = c(0, 30))
 sim <- simulate_static(traits, env = runif(100, 0, 100))
 sim
 #> <mc_sim> 100 sites x 20 species
 #> species persisting: 19 of 20 
-#> mean local richness: 9 
+#> mean local richness: 8.35 
 
 # an environmental and a spatial gradient
 space <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
@@ -110,6 +110,6 @@ space <- species_traits(tr, lambda = 1, optima_range = c(-1, 101),
 gradients <- data.frame(env = runif(100, 0, 100), space = 1:100)
 simulate_static(list(traits, space), gradients)
 #> <mc_sim> 100 sites x 20 species
-#> species persisting: 19 of 20 
-#> mean local richness: 3.58 
+#> species persisting: 18 of 20 
+#> mean local richness: 4.01 
 ```

@@ -148,19 +148,19 @@ of adaptation. <em>Evolution</em>, 51, 1341–1351.
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># Brownian motion</span></span></span>
 <span class="r-in"><span><span class="fu">traits_ou</span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        t8        t7       t11 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.7324355 1.0476049 0.6082487 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         t1         t2         t3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -0.6621385 -0.5839205 -0.7438592 </span>
 <span class="r-in"><span><span class="co"># two optima: the clade of node 25 evolves towards 10, the rest towards 0</span></span></span>
 <span class="r-in"><span><span class="va">reg</span> <span class="op">&lt;-</span> <span class="fu"><a href="paint_regimes.html">paint_regimes</a></span><span class="op">(</span><span class="va">tr</span>, nodes <span class="op">=</span> <span class="fl">25</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu">traits_ou</span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">2</span>, theta <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>`0` <span class="op">=</span> <span class="fl">0</span>, `1` <span class="op">=</span> <span class="fl">10</span><span class="op">)</span>, regimes <span class="op">=</span> <span class="va">reg</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">x</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   t8   t7  t11  t17   t4  t13  t20   t9  t15  t19  t16  t18   t5  t14  t10  t12 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.5  0.5  0.6  0.7  0.6  0.4  6.8  6.9  0.8  0.1  0.5 -0.3 -0.3 -0.3  0.0  0.2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   t6   t1   t3   t2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.2  0.3 -0.1 -0.2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   t1   t2   t3   t4   t5   t6   t7   t8   t9  t10  t11  t12  t13  t14  t15  t16 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0  0.2  0.2  7.4  8.0  8.0  8.4  7.9  8.3  8.6  8.8  8.2  8.5  8.5  0.7  0.0 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  t17  t18  t19  t20 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0 -0.3 -0.7  0.9 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

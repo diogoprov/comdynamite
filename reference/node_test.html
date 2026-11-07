@@ -97,13 +97,15 @@ and values of 1, -1 and 0.</p></dd>
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Number of permutations of sites, of species and of both.</p></dd>
+<dd><p>Number of permutations of sites, of species and of both. With
+<code>site_permutations</code>, only of species.</p></dd>
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores, with nodes run in parallel. Not available on Windows,
 where one core is used. For reproducible p-values with more than one core, call
-<code>RNGkind("L'Ecuyer-CMRG")</code> before <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>.</p></dd>
+<code>RNGkind("L'Ecuyer-CMRG")</code> before <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. Results still depend on the number of
+cores.</p></dd>
 
 
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
@@ -118,8 +120,9 @@ node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code
 <code>p_site</code>, <code>p_taxa</code>, <code>p_max</code>, <code>p_joint</code> and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of
 nodes by predictors; <code>p_partial</code>, with the larger of the two p-values for each of
 them; <code>p_partial_site</code>, with the p-values of sites alone; <code>p_partial_joint</code>, with
-those of the permutation of the article; and <code>biogeography</code>, a list with the same
-four matrices for the events, or <code>NULL</code>.</p>
+those of the permutation of the article; <code>biogeography</code>, a list with the same
+four matrices for the events, or <code>NULL</code>; and <code>permutations</code>, the numbers of
+permutations and whether those of sites were free or restricted.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -154,7 +157,7 @@ the 5% level in a simulation with areas placed at random, against 5% with
 a restricted null model. For events, each row moves the areas across the sites, which
 keep their community and predictors.</p>
 <p>R2, adjusted R2 and the statistic equal those of the MATLAB function
-<code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Three parts of that
+<code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Four parts of that
 function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
 of the community matrix, as many as there are species in the node, so they
 do not draw from all species. Here they do.</p></li>
@@ -163,11 +166,25 @@ species. Here it is recalculated.</p></li>
 <li><p>The semipartial values of the original use the raw predictors, without an
 intercept, and multiply by the absolute slope. The article uses standardised
 predictors and divides by it, to keep only the sign, which is what we do.</p></li>
+<li><p>The original compares the permuted statistics as they are. The one of each
+predictor divides a proportion by a sum of squares, so it depends on the scale of the
+response, and with one predictor it does not rank draws as the global one does. Neither
+takes into account that draws of species occupy different numbers of sites. Here
+draws are ranked on F statistics. <code>statistic</code> is still the one of the original, and
+p-values of sites alone are the same, but those that use species differ.</p></li>
 </ul><p>As in the original, R2 sums squares without site weights, although the fit
 uses them, so it is not the R2 of a weighted regression, and the adjusted R2
 uses the degrees of freedom of an unweighted model.</p>
-<p>Nodes for which a predictor has no variance among the remaining sites, or with too
-few sites, get <code>NA</code>. The original stops with an error.</p>
+<p>Nodes for which a predictor has no variance among the remaining sites, with too
+few sites, or with a clade without individuals get <code>NA</code>. The original stops with an
+error.</p>
+<p>Sites are matched by name when <code>comm</code>, <code>env</code> and <code>biogeography</code> all have row names, and
+otherwise by position.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="note">Note<a class="anchor" aria-label="anchor" href="#note"></a></h2>
+    <p>Adapted from the MATLAB function <code>MetacommunityPhylogenetics</code> in the supplement of
+Leibold et al. (2010), with the differences listed in Details.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -197,7 +214,9 @@ traits-environment relationships in the fourth-corner problem. <em>Ecology</em>,
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">node_test</span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_node_test&gt; 12 nodes, 11 tested</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00</span>

@@ -54,12 +54,12 @@ ecological communities. *Plant Ecology*, 216, 709–724.
 
 ``` r
 set.seed(1)
-tree <- ape::rcoal(5)
+tree <- treeshapesim::sim_tree_shape(5)
 comm <- matrix(rbinom(20, 1, 0.7) + diag(1, 4, 5), 4,
                dimnames = list(NULL, tree$tip.label))
 phylo_beta(comm > 0, tree)
-#>           1         2         3
-#> 2 0.5908140                    
-#> 3 0.5037303 0.5908140          
-#> 4 0.5908140 0.6007950 0.5908140
+#>          1        2        3
+#> 2 1.168432                  
+#> 3 1.097033 1.108714         
+#> 4 1.251324 1.261214 1.251324
 ```

@@ -100,9 +100,9 @@ permutations of sites.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_phylo_beta</code> with <code>r2</code>, the adjusted R2; <code>statistic</code>,
-the pseudo-F; <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code>; and <code>scores</code>, the sites on the
+the pseudo-F; <code>p_site</code>, <code>p_taxa</code> and <code>p_max</code>; <code>scores</code>, the sites on the
 principal coordinates of the predicted matrix, which the authors suggest
-using to order sites in a heatmap of the community matrix.</p>
+using to order sites in a heatmap of the community matrix; and <code>permutations</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -138,7 +138,7 @@ communities. <em>Plant Ecology</em>, 216, 709–724.
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span>, optima_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">101</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span></span>
@@ -146,7 +146,8 @@ communities. <em>Plant Ecology</em>, 216, 709–724.
 <span class="r-in"><span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span></span>
 <span class="r-in"><span><span class="fu">phylo_beta_test</span><span class="op">(</span><span class="va">comm</span><span class="op">[</span><span class="va">keep</span>, <span class="op">]</span>, <span class="va">tree</span>, <span class="va">env</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_beta&gt; phylogenetic beta diversity</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> adjusted R2: 0.315  pseudo-F: 23.6 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> adjusted R2: 0.221  pseudo-F: 14.9 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> p (sites): 0.01  p (species): 0.01  p (max): 0.01 </span>
 </code></pre></div>
     </div>

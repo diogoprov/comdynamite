@@ -139,12 +139,12 @@ community ecology. *Ecology Letters*, 23, 1314–1329.
 ``` r
 set.seed(1)
 ls <- landscape_implicit(30)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 sim <- simulate_metacommunity(ls, species_traits(tr),
                               competition_matrix(tr, "phylo"),
                               dispersal = 0.01, n_steps = 200)
 sim
 #> <mc_sim> 30 sites x 20 species
-#> species persisting: 17 of 20 
-#> mean local richness: 8 
+#> species persisting: 18 of 20 
+#> mean local richness: 6.87 
 ```

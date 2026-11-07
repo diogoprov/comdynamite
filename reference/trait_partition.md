@@ -59,8 +59,8 @@ columns `r2`, `r2_adjusted`, `r2_component`, `p_site`, `p_taxa` and
 `p_max`; `component`; `component_share`, the share of the total
 variation in the component; `semipartial`, a matrix of predictors by
 traits; and `p_partial`, `p_partial_site` and `p_partial_taxa`, with the
-larger p-value and those of sites and of species. All are `NA` if
-predictors are collinear.
+larger p-value and those of sites and of species, all `NA` if predictors
+are collinear; and `permutations`.
 
 ## Details
 
@@ -68,6 +68,11 @@ The total variation includes both the mean and the dispersion within
 sites, so `r2` answers how much of all the variation each fraction
 holds, and `r2_component` how much of the component. Fractions `b` and
 `d` cannot be tested.
+
+## Note
+
+Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny`
+in the supplement of Peres-Neto et al. (2012).
 
 ## Article and original code
 
@@ -163,6 +168,7 @@ colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
 out
 #> <mc_trait_partition> mean component, 0.511 of the total variation
+#> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02 
 #>   fraction       r2 r2_adjusted r2_component p_site p_taxa p_max
 #> 1      abc 0.490557      0.4323      0.96059   0.02   0.02  0.02
 #> 2       ab 0.489712      0.4763      0.95894   0.02   0.02  0.02

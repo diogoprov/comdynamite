@@ -24,7 +24,7 @@ more strongly.
 
 ``` r
 
-tr <- ape::rcoal(40)
+tr <- treeshapesim::sim_tree_shape(40)
 traits <- species_traits(tr, lambda = 1)
 alpha <- competition_matrix(tr, type = "phylo", inter_max = 0.1)
 land <- landscape_implicit(n_sites = 50)
@@ -32,8 +32,8 @@ land <- landscape_implicit(n_sites = 50)
 sim <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 500)
 sim
 #> <mc_sim> 50 sites x 40 species
-#> species persisting: 29 of 40 
-#> mean local richness: 10.9
+#> species persisting: 33 of 40 
+#> mean local richness: 10.5
 ```
 
 `sim$abundance` holds the abundance of each species at each site at the
@@ -67,8 +67,8 @@ sapply(res, function(s) c(
   persisting = sum(colSums(s$abundance) > 0)
 ))
 #>               sorting mass_effects
-#> mean_richness   10.74        19.74
-#> persisting      30.00        21.00
+#> mean_richness   10.16        22.34
+#> persisting      32.00        24.00
 ```
 
 ## Spatially explicit landscapes
@@ -91,8 +91,8 @@ image(matrix(grid$env, 10, 10), asp = 1, axes = FALSE,
 sim_sp <- simulate_metacommunity(grid, traits, alpha, dispersal = 0.1, n_steps = 500)
 sim_sp
 #> <mc_sim> 100 sites x 40 species
-#> species persisting: 29 of 40 
-#> mean local richness: 19.4
+#> species persisting: 34 of 40 
+#> mean local richness: 21.3
 ```
 
 With spatial structure, sites are no longer exchangeable, so permuting
@@ -124,7 +124,7 @@ sim_t <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps =
                                 env_time = et, record_steps = seq(100, 500, 100))
 apply(sim_t$history > 0, 3, function(x) mean(rowSums(x)))
 #> step100 step200 step300 step400 step500 
-#>   12.96   10.18    9.84    9.22    9.54
+#>   11.56    9.68    9.58    9.80    9.10
 ```
 
 ## Traits under one or several adaptive optima
@@ -138,14 +138,14 @@ gives clades their own optimum (multi-peak OU; Butler & King 2004).
 
 ``` r
 
-pool <- ape::rcoal(32)
+pool <- treeshapesim::sim_tree_shape(32)
 node <- ape::getMRCA(pool, pool$tip.label[1:8])
 in_clade <- rownames(traits_ou(pool)) %in% ape::extract.clade(pool, node)$tip.label
 reg <- paint_regimes(pool, nodes = node)
 x_ou <- traits_ou(pool, alpha = 2, theta = c(`0` = 0, `1` = 5), regimes = reg)
 tapply(x_ou[, 1], ifelse(in_clade, "clade (optimum 5)", "rest (optimum 0)"), mean)
 #> clade (optimum 5)  rest (optimum 0) 
-#>         4.7336002         0.2932017
+#>         3.8228309         0.1872388
 ```
 
 ## Rule-based assembly (Kraft et al. 2007)
@@ -165,11 +165,11 @@ size:
 
 ``` r
 
-pool <- ape::rcoal(32)
+pool <- treeshapesim::sim_tree_shape(32)
 x <- traits_ou(pool, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
-#>  [1] "t18" "t25" "t31" "t29" "t8"  "t1"  "t4"  "t12" "t17" "t19" "t27" "t5" 
-#> [13] "t15" "t13" "t3"  "t9"
+#>  [1] "t1"  "t3"  "t6"  "t9"  "t10" "t13" "t14" "t17" "t19" "t22" "t26" "t27"
+#> [13] "t29" "t30" "t31" "t32"
 ```
 
 Over many pools, the mean phylogenetic distance (MPD) among community
@@ -181,13 +181,13 @@ motion:
 mpd <- function(tree, sp) mean(as.dist(ape::cophenetic.phylo(tree)[sp, sp]))
 rules <- c("limiting_similarity", "filtering", "neutral")
 res <- replicate(100, {
-  pool <- ape::rcoal(32)
+  pool <- treeshapesim::sim_tree_shape(32)
   x <- traits_ou(pool, n_traits = 2)
   sapply(rules, function(r) mpd(pool, assemble_community(x, 16, r)$community))
 })
 rowMeans(res)
 #> limiting_similarity           filtering             neutral 
-#>            2.152022            1.620627            2.052095
+#>            1.551878            1.444317            1.502199
 ```
 
 On average, limiting similarity keeps more distant relatives than

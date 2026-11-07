@@ -135,14 +135,14 @@ ecological communities. <em>The American Naturalist</em>, 170, 271–283.
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, n_traits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">assemble_community</span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">16</span>, rule <span class="op">=</span> <span class="st">"limiting_similarity"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t26" "t16" "t21" "t12" "t7"  "t27" "t19" "t3"  "t11" "t20" "t9"  "t31"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t32" "t28" "t2"  "t23"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t1"  "t2"  "t3"  "t7"  "t8"  "t12" "t13" "t14" "t16" "t22" "t23" "t25"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t26" "t29" "t30" "t32"</span>
 <span class="r-in"><span><span class="fu">assemble_community</span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">16</span>, rule <span class="op">=</span> <span class="st">"filtering"</span>, optimum <span class="op">=</span> <span class="st">"derived"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t26" "t29" "t24" "t10" "t16" "t21" "t12" "t7"  "t30" "t27" "t3"  "t11"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t9"  "t5"  "t23" "t25"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t1"  "t2"  "t3"  "t6"  "t7"  "t9"  "t10" "t11" "t13" "t14" "t15" "t16"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t17" "t18" "t31" "t32"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

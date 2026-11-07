@@ -90,17 +90,17 @@ to assign regimes to clades.
 
 ``` r
 set.seed(1)
-tr <- ape::rcoal(20)
+tr <- treeshapesim::sim_tree_shape(20)
 # Brownian motion
 traits_ou(tr, alpha = 0)[1:3, ]
-#>        t8        t7       t11 
-#> 0.7324355 1.0476049 0.6082487 
+#>         t1         t2         t3 
+#> -0.6621385 -0.5839205 -0.7438592 
 # two optima: the clade of node 25 evolves towards 10, the rest towards 0
 reg <- paint_regimes(tr, nodes = 25)
 x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 round(x[, 1], 1)
-#>   t8   t7  t11  t17   t4  t13  t20   t9  t15  t19  t16  t18   t5  t14  t10  t12 
-#>  0.5  0.5  0.6  0.7  0.6  0.4  6.8  6.9  0.8  0.1  0.5 -0.3 -0.3 -0.3  0.0  0.2 
-#>   t6   t1   t3   t2 
-#>  0.2  0.3 -0.1 -0.2 
+#>   t1   t2   t3   t4   t5   t6   t7   t8   t9  t10  t11  t12  t13  t14  t15  t16 
+#>  0.0  0.2  0.2  7.4  8.0  8.0  8.4  7.9  8.3  8.6  8.8  8.2  8.5  8.5  0.7  0.0 
+#>  t17  t18  t19  t20 
+#>  0.0 -0.3 -0.7  0.9 
 ```

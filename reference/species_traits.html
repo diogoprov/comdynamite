@@ -128,26 +128,26 @@ species, with species names as row names.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/rtree.html" class="external-link">rcoal</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">species_traits</span><span class="op">(</span><span class="va">tr</span>, lambda <span class="op">=</span> <span class="fl">1</span>, sigma_signal <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       optimum     sigma    r_max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t6   65.34866  6.057100 4.140361</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t4    2.75498  9.406866 4.588842</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t9    0.00000  8.354764 2.889269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t8   35.42721  3.112443 2.078465</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t2   67.23493  7.466383 6.293396</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t7   46.93207  2.925048 2.619105</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t1  100.00000 17.631757 4.677706</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t3   80.94664 15.566632 5.840606</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t10  37.44939 21.000254 7.951032</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t5   30.26917 16.969634 4.973561</span>
-<span class="r-in"><span><span class="fu">species_traits</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        optimum     sigma    r_max</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sp1  22.027020  8.648214 7.318706</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sp2  88.968198 21.780870 5.020037</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sp3 100.000000 15.939462 7.262345</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sp4   0.000000 13.329504 3.135162</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sp5   3.141045 20.630998 6.548618</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t1   81.014935  5.218499 4.731647</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t2   87.432733  9.461950 4.460504</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t3   99.189329 14.179416 6.865221</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t4  100.000000  8.972123 5.629600</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t5   54.609559  5.850054 5.928344</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t6    0.000000  9.406866 4.119184</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t7   29.662989  6.057100 3.621561</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t8   38.305851 23.586796 7.956104</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t9   35.050894 13.876716 5.800960</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> t10   5.656532 21.000254 3.279249</span>
+<span class="r-in"><span><span class="fu">species_traits</span><span class="op">(</span><span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       optimum      sigma    r_max</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sp1  29.94562  0.6590237 2.382851</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sp2 100.00000 12.9144624 4.012925</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sp3  41.12514  5.5670813 6.342356</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sp4   0.00000 10.0110535 4.025692</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sp5  45.81600 10.7434132 5.782485</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

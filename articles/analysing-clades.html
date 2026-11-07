@@ -105,7 +105,9 @@ cores.</p>
 <span>                 cores <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 12 nodes, 11 tested</span></span>
-<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span></span></code></pre></div>
+<span><span class="co">#&gt; permutations: 999 free of sites, 999 of species; smallest possible p: 0.001 </span></span>
+<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 1 before correction, 0 after</span></span>
+<span><span class="co">#&gt; nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span></span></code></pre></div>
 <p>The p-values answer different questions, so this choice comes first.
 <code>p_max</code> tests the association between predictors and
 phylogeny, and it needs both permutations to reject. With 13 species,
@@ -157,9 +159,9 @@ reject too often. We simulated 1000 metacommunities on a torus of 15 by
 15 sites, with communities that followed a hidden autocorrelated
 environment and two blocks of 25 sites placed at random, so that events
 had no effect (<code>data-raw/validation_events.R</code>). Free
-permutations rejected 44.8% of the tests of a node at the 5% level, and
+permutations rejected 45.1% of the tests of a node at the 5% level, and
 permutations from <code><a href="../reference/torus_permutations.html">torus_permutations()</a></code>, given in
-<code>site_permutations</code>, rejected 4.9%. The events in the figures
+<code>site_permutations</code>, rejected 4.8%. The events in the figures
 above used free permutations, so they should be read with this in mind.
 Landscapes with edges need a restricted null model chosen for them, and
 a matrix of permutations of any origin can be given.</p>
@@ -173,10 +175,8 @@ coordinates, so we simulate them with the generator of Appendix C of
 Peres-Neto et al. (2012). In the first scenario, two independent
 gradients act on species.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
-<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/stree.html" class="external-link">stree</a></span><span class="op">(</span><span class="fl">32</span>, <span class="st">"balanced"</span><span class="op">)</span></span>
-<span><span class="va">tree</span><span class="op">$</span><span class="va">edge.length</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">tree</span><span class="op">$</span><span class="va">edge</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">tree</span><span class="op">$</span><span class="va">tip.label</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"sp"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">32</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span>, beta <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">gradients</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/logistic_gradients.html">logistic_gradients</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_logistic.html">simulate_logistic</a></span><span class="op">(</span><span class="va">tree</span>, <span class="va">gradients</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x"</span>, <span class="st">"y"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="va">keep</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">abundance</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span></span>
@@ -184,14 +184,15 @@ gradients act on species.</p>
 <span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="va">comm</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">comm</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">]</span></span>
 <span><span class="va">x</span> <span class="op">&lt;-</span> <span class="va">gradients</span><span class="op">$</span><span class="va">x</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">gradients</span><span class="op">$</span><span class="va">y</span><span class="op">[</span><span class="va">keep</span><span class="op">]</span></span></code></pre></div>
-<p><code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> tests whether a gradient is related to
-the phylogeny and, if so, gives a vector of species values for the next
+<p>A high <code>beta</code> gives a balanced tree, as in that appendix.
+<code><a href="../reference/phylo_vector.html">phylo_vector()</a></code> tests whether a gradient is related to the
+phylogeny and, if so, gives a vector of species values for the next
 step. Here we ask this for each gradient.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">first</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">x</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">second</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/phylo_vector.html">phylo_vector</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">p_max</span>, <span class="va">second</span><span class="op">$</span><span class="va">p_max</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.005 0.005</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.005 0.010</span></span></code></pre></div>
 <p><code><a href="../reference/trait_partition.html">trait_partition()</a></code> then splits the variation of these
 vectors among sites. The vectors are chosen to fit the gradients, so
 this step only makes sense after a significant global test.</p>
@@ -199,22 +200,23 @@ this step only makes sense after a significant global test.</p>
 <code class="sourceCode R"><span><span class="va">vectors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">pev_brown</span>, <span class="va">second</span><span class="op">$</span><span class="va">pev_brown</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_partition.html">trait_partition</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">vectors</span>, <span class="va">x</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">partition</span></span>
-<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.595 of the total variation</span></span>
-<span><span class="co">#&gt;   fraction    r2 r2_adjusted r2_component p_site p_taxa p_max</span></span>
-<span><span class="co">#&gt; 1      abc 0.479       0.441        0.804  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 2       ab 0.314       0.290        0.527  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 3       bc 0.300       0.276        0.505  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 4        a 0.178       0.165        0.299  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 5        b 0.136       0.125        0.228     NA     NA    NA</span></span>
-<span><span class="co">#&gt; 6        c 0.165       0.151        0.277  0.005  0.005 0.005</span></span>
-<span><span class="co">#&gt; 7        d 0.521       0.559        0.196     NA     NA    NA</span></span>
+<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.559 of the total variation</span></span>
+<span><span class="co">#&gt; permutations: 199 free of sites, 199 of species; smallest possible p: 0.005 </span></span>
+<span><span class="co">#&gt;   fraction     r2 r2_adjusted r2_component p_site p_taxa p_max</span></span>
+<span><span class="co">#&gt; 1      abc 0.4392      0.3991        0.785  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 2       ab 0.2613      0.2358        0.467  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 3       bc 0.2607      0.2352        0.466  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 4        a 0.1784      0.1639        0.319  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 5        b 0.0828      0.0719        0.148     NA     NA    NA</span></span>
+<span><span class="co">#&gt; 6        c 0.1779      0.1633        0.318  0.005  0.005 0.005</span></span>
+<span><span class="co">#&gt; 7        d 0.5608      0.6009        0.215     NA     NA    NA</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">partition</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        trait1 trait2</span></span>
-<span><span class="co">#&gt; env1     0.49   0.34</span></span>
-<span><span class="co">#&gt; space1   0.35   0.45</span></span></code></pre></div>
+<span><span class="co">#&gt; env1     0.52  -0.29</span></span>
+<span><span class="co">#&gt; space1  -0.24   0.55</span></span></code></pre></div>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span><span class="op">)</span></span></code></pre></div>
-<p><img src="analysing-clades_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Bars of the fractions explained by environment, by space and by both." width="672"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gradient x"</span>, <span class="st">"Gradient y"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="analysing-clades_files/figure-html/unnamed-chunk-11-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
 <p>The test of each trait against each predictor is a different
 question, for which ter Braak (2019) is the reference.</p>
 </div>
