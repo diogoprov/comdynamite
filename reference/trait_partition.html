@@ -113,9 +113,9 @@ dispersion.</p></dd>
 
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
 <dd><p>Optional matrix of site indices with one permutation per row, for
-example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations of sites. Empty
-sites are then allowed: they leave the analysis but their predictors can reach occupied
-sites.</p></dd>
+example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free permutations of sites. Each
+set of predictors is then moved alone in its tests (see Details). Empty sites are
+allowed: they leave the analysis but their predictors can reach occupied sites.</p></dd>
 
 
 <dt id="arg-shared-null">shared_null<a class="anchor" aria-label="anchor" href="#arg-shared-null"></a></dt>
@@ -146,7 +146,8 @@ that cannot be estimated, as when a set of predictors has as many columns as sit
 <code>semipartial</code>, a matrix of predictors by traits; <code>p_partial_max</code>, <code>p_partial_site</code> and
 <code>p_partial_species</code>, with the larger p-value and those of sites and of species, all
 <code>NA</code> if predictors are collinear; <code>shared</code>, with <code>null</code>, <code>draws</code>, <code>p_env_space</code>, the
-p-value of <code>env</code> against <code>space</code>, and <code>tested</code>; and <code>permutations</code>.</p>
+p-value of <code>env</code> against <code>space</code>, and <code>tested</code>; and <code>permutations</code>, whose <code>moved</code> is
+<code>"together"</code> with free permutations and <code>"each set alone"</code> with <code>site_permutations</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -160,6 +161,13 @@ component, which is a monotone function of the partial F statistic of the set gi
 other (Anderson &amp; Legendre 1999). The fraction itself, which the original code tests, is
 not, and its test loses most of its power when the other set explains much: see the
 section on simulations. <code>d</code> cannot be tested.</p>
+<p>With <code>site_permutations</code>, the moves keep the spatial structure of what they move, so each
+set is moved alone while the response and the other set stay in place: <code>env</code> for <code>ab</code>, <code>a</code>
+and the semipartials of its predictors, and <code>space</code> for <code>bc</code>, <code>c</code> and the semipartials of
+its predictors; <code>abc</code> moves both. Moving both sets together, as free permutations do,
+tests <code>c</code> against an environment that no longer explains the response, and on a grid that
+test was liberal when the environment was strong and had no power when it was spatially
+structured (see the simulations). The result records this in <code>permutations$moved</code>.</p>
 <p>The shared fraction <code>b</code> has no test by these permutations, because a permutation of sites
 breaks the relation between environment and space, and is tested with <code>shared_null</code> by the
 scheme of <code><a href="http://adeverse.github.io/adespatial/reference/envspace.test.html" class="external-link">adespatial::envspace.test()</a></code> (Bauman et al. 2019): the response and <code>space</code>
@@ -195,9 +203,27 @@ not hold, free permutations rejected <code>a</code> in 11.4% (moves of the map w
 <code><a href="torus_permutations.html">torus_permutations()</a></code>: 1.4%, larger p-value: 4.0%); and with a strong, spatially
 structured environment and no effect of space, free permutations rejected <code>c</code> in 10%
 (larger p-value: 2.4%), where the residuals of the linear fit of the environment keep
-spatial structure. <code>site_permutations</code> are nearly degenerate for <code>c</code>, since moving
-Moran's eigenvector maps rigidly changes little of what they explain: 19% with a strong
-environment without structure.</p>
+spatial structure. Up to version 0.6.1, <code>site_permutations</code> moved both sets together in
+every test, and that test of <code>c</code> rejected 19% with a strong environment without structure
+and never with a structured one.</p>
+<p><code>data-raw/validation_fractions_null.R</code> chose what the moves of <code>site_permutations</code> should
+move, with <code><a href="torus_permutations.html">torus_permutations()</a></code>, on the first generator (300 data sets) and checked the
+choice on the second (200 data sets). For <code>a</code>, moving <code>env</code> alone held the level wherever
+the environment had no effect, in both generators (3.7% to 5.7% and 4.5% to 7.1% with the
+p-value of sites, standard errors of 0.011 to 0.018), including an environment structured at
+scales outside <code>space</code>, where free permutations rejected 9.7% and 20%, and its power was the
+same. When the environment acted on a trait other than the one analysed, the p-value of
+sites rejected 45% and 75%, as with free permutations, and <code>p_max</code> 2% and 4%. For
+<code>c</code>, moving <code>space</code> alone held the level (3.0% to 7.0% and 3.5% to 8.0%; larger p-value at
+most 3%) where free permutations rejected 8.0% and 24% with a strong, structured
+environment acting alone, and moving both sets together rejected 22% with a strong
+environment without structure. Its power depends on the question: it was complete when
+the species followed a field in the span of <code>space</code>, and 25% to 28% when they followed a
+field of exponential covariance that <code>space</code> holds only in part (free permutations: 98%),
+because the maps moved around the grid explain such a field about as well as the maps in
+place. The restricted test of <code>c</code> asks whether the maps in <code>space</code> explain more than the
+same maps elsewhere on the grid, not whether the remainder has any spatial structure. For
+that question, use free permutations and read <code>p_max</code>.</p>
 <p>These limits were larger with a second generator (<code>data-raw/validation_fractions_check.R</code>:
 counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden
 field that <code>space</code> holds only in part drove the species: free permutations rejected <code>a</code> in

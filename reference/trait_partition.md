@@ -60,7 +60,8 @@ trait_partition(
   Optional matrix of site indices with one permutation per row, for
   example from
   [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
-  to use instead of free permutations of sites. Empty sites are then
+  to use instead of free permutations of sites. Each set of predictors
+  is then moved alone in its tests (see Details). Empty sites are
   allowed: they leave the analysis but their predictors can reach
   occupied sites.
 
@@ -97,7 +98,9 @@ as when a set of predictors has as many columns as sites; `component`;
 `p_partial_site` and `p_partial_species`, with the larger p-value and
 those of sites and of species, all `NA` if predictors are collinear;
 `shared`, with `null`, `draws`, `p_env_space`, the p-value of `env`
-against `space`, and `tested`; and `permutations`.
+against `space`, and `tested`; and `permutations`, whose `moved` is
+`"together"` with free permutations and `"each set alone"` with
+`site_permutations`.
 
 ## Details
 
@@ -115,6 +118,16 @@ other (Anderson & Legendre 1999). The fraction itself, which the
 original code tests, is not, and its test loses most of its power when
 the other set explains much: see the section on simulations. `d` cannot
 be tested.
+
+With `site_permutations`, the moves keep the spatial structure of what
+they move, so each set is moved alone while the response and the other
+set stay in place: `env` for `ab`, `a` and the semipartials of its
+predictors, and `space` for `bc`, `c` and the semipartials of its
+predictors; `abc` moves both. Moving both sets together, as free
+permutations do, tests `c` against an environment that no longer
+explains the response, and on a grid that test was liberal when the
+environment was strong and had no power when it was spatially structured
+(see the simulations). The result records this in `permutations$moved`.
 
 The shared fraction `b` has no test by these permutations, because a
 permutation of sites breaks the relation between environment and space,
@@ -157,10 +170,35 @@ rejected `a` in 11.4% (moves of the map with
 1.4%, larger p-value: 4.0%); and with a strong, spatially structured
 environment and no effect of space, free permutations rejected `c` in
 10% (larger p-value: 2.4%), where the residuals of the linear fit of the
-environment keep spatial structure. `site_permutations` are nearly
-degenerate for `c`, since moving Moran's eigenvector maps rigidly
-changes little of what they explain: 19% with a strong environment
-without structure.
+environment keep spatial structure. Up to version 0.6.1,
+`site_permutations` moved both sets together in every test, and that
+test of `c` rejected 19% with a strong environment without structure and
+never with a structured one.
+
+`data-raw/validation_fractions_null.R` chose what the moves of
+`site_permutations` should move, with
+[`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
+on the first generator (300 data sets) and checked the choice on the
+second (200 data sets). For `a`, moving `env` alone held the level
+wherever the environment had no effect, in both generators (3.7% to 5.7%
+and 4.5% to 7.1% with the p-value of sites, standard errors of 0.011 to
+0.018), including an environment structured at scales outside `space`,
+where free permutations rejected 9.7% and 20%, and its power was the
+same. When the environment acted on a trait other than the one analysed,
+the p-value of sites rejected 45% and 75%, as with free permutations,
+and `p_max` 2% and 4%. For `c`, moving `space` alone held the level
+(3.0% to 7.0% and 3.5% to 8.0%; larger p-value at most 3%) where free
+permutations rejected 8.0% and 24% with a strong, structured environment
+acting alone, and moving both sets together rejected 22% with a strong
+environment without structure. Its power depends on the question: it was
+complete when the species followed a field in the span of `space`, and
+25% to 28% when they followed a field of exponential covariance that
+`space` holds only in part (free permutations: 98%), because the maps
+moved around the grid explain such a field about as well as the maps in
+place. The restricted test of `c` asks whether the maps in `space`
+explain more than the same maps elsewhere on the grid, not whether the
+remainder has any spatial structure. For that question, use free
+permutations and read `p_max`.
 
 These limits were larger with a second generator
 (`data-raw/validation_fractions_check.R`: counts, a grid of 10 by 10
