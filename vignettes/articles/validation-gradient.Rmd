@@ -166,11 +166,12 @@ spatial structure that the environment matches by chance; moves of the whole map
 level (0.014). When a strong, spatially structured environment acts alone, the free permutation
 rejects `c` in 10% of the data sets: the species respond to the environment with Gaussian
 curves, the linear fit leaves a spatially structured remainder, and space explains it, which
-the larger p-value does not take as significant (0.024). The moves of the map are nearly
-degenerate for `c`, because moving Moran's eigenvector maps rigidly on the grid changes little
-of what they explain, and the test of `c` with `site_permutations` was liberal when the
-environment explained much (0.190) and never rejected when the environment was spatially
-structured. With a trait unrelated to the composition, the permutation of sites rejects `a` in
+the larger p-value does not take as significant (0.024). The column `grid` moves both sets
+together, which was what `site_permutations` did up to version 0.6.1: that test of `c` was
+liberal when the environment explained much (0.190) and never rejected when the environment
+was spatially structured, because it compares space with an environment that no longer
+explains the response. The next section measures what the moves should move. With a trait
+unrelated to the composition, the permutation of sites rejects `a` in
 about half the data sets and the larger p-value holds the level, as intended. The permutation
 of species alone, with 20 species, is slightly liberal when nothing acts (0.066 to 0.080 with
 either statistic), and the larger p-value is not.
@@ -180,6 +181,53 @@ A second generator (`data-raw/validation_fractions_check.R`: counts, a grid of 1
 hidden field that `space` holds only in part, free permutations rejected `a` in 21% of the data
 sets (larger p-value: 2%), and with a structured environment acting alone they rejected `c` in
 25% (larger p-value: 7.5%). So `p_max`, not the p-value of sites alone, is the one to read.
+
+### What the moves of a grid should move
+
+A restricted permutation keeps the spatial structure of what it moves, so the question is
+which set to move in each test. The script `data-raw/validation_fractions_null.R` compares,
+with `torus_permutations()`, moves of both sets together (the behaviour up to version 0.6.1),
+of `env` alone and of `space` alone, against free permutations, on the first generator above
+(300 data sets, seeds separate from the holdout), and then checks the choice on the second
+generator (200 data sets) through `trait_partition()` itself, which from this version moves
+`env` alone for `ab`, `a` and the semipartials of `env`, `space` alone for `bc`, `c` and the
+semipartials of `space`, and both for `abc`. Rates at the 5% level with the p-value of sites,
+and in parentheses the larger p-value where the p-value of sites alone rejects 8% or more of
+the data sets under a true null hypothesis; standard errors are 0.013 or less for rates near
+the level on the first generator and 0.018 or less on the second.
+
+| Generator | Scenario | [a] free | [a] both moved | [a] env moved | [c] free | [c] both moved | [c] space moved |
+|---|---|---|---|---|---|---|---|
+| First | Neither acts, env iid | 0.043* | 0.033* | 0.037* | 0.063* | 0.040* | 0.030* |
+| First | Space acts, env iid | 0.050* | 0.067* | 0.040* | 1.000 | 1.000 | 1.000 |
+| First | Space acts, env broad | 0.047* | 0.073* | 0.057* | 1.000 | 0.993 | 1.000 |
+| First | Env acts, env iid | 1.000 | 1.000 | 1.000 | 0.050* | 0.220* (0.040) | 0.040* |
+| First | Env acts, env broad | 1.000 | 1.000 | 1.000 | 0.080* (0.013) | 0.000* | 0.060* (0.000) |
+| First | Both act, env broad | 1.000 | 1.000 | 0.997 | 1.000 | 0.960 | 0.997 |
+| First | Space acts, env fine | 0.097* (0.027) | 0.010* | 0.050* | 1.000 | 1.000 | 1.000 |
+| First | Env acts through another trait | 0.463* (0.023) | 0.440* (0.023) | 0.453* (0.023) | 0.187* (0.043) | 0.047* | 0.070* (0.007) |
+| Second | Neither acts | 0.061* | 0.066* | 0.071* | 0.066* | 0.040* | 0.035* |
+| Second | Space acts, env iid | 0.065* | 0.040* | 0.045* | 0.975 | 0.260 | 0.280 |
+| Second | Space acts, env structured | 0.200* (0.020) | 0.055* | 0.045* | 0.975 | 0.255 | 0.255 |
+| Second | Env acts, env structured | 1.000 | 1.000 | 1.000 | 0.236* (0.085) | 0.000* | 0.055* |
+| Second | Env acts through another trait | 0.775* (0.035) | 0.750* (0.040) | 0.750* (0.040) | 0.120* (0.045) | 0.015* | 0.080* (0.030) |
+| Second | Both act | 1.000 | 0.995 | 1.000 | 0.980 | 0.550 | 0.250 |
+
+For `a`, moving `env` alone holds the level in every null scenario of both generators, where
+free permutations reach 0.097 and 0.200 with an environment structured at scales outside
+`space`, and moving both together is conservative there (0.010); its power is the same. For
+`c`, moving `space` alone holds the level where free permutations reach 0.080 and 0.236 with a
+strong, structured environment acting alone, and where moving both together reaches 0.220 with
+a strong environment without structure. The premise that moves of the grid barely change
+what Moran's eigenvector maps explain did not hold: on the grid of 8 by 8, a moved map has on
+average 30% of its variance outside the span of the six maps in place. The power of the
+restricted test of `c` depends on the question. It is complete when the species follow a
+field in the span of `space`, and 0.25 to 0.28 when they follow a field of exponential
+covariance that `space` holds only in part (free permutations: 0.975 to 0.980), because the
+maps moved around the grid explain such a field about as well as the maps in place. That test
+asks whether the maps in `space` explain more than the same maps elsewhere on the grid, not
+whether the remainder of the environment has any spatial structure; for the second question,
+use free permutations and read `p_max`.
 
 The shared fraction `b`, with `env` replaced by free permutations of its values, by Moran
 spectral randomisations (MSR, `shared_null = "msr"`) and by moves of the whole map

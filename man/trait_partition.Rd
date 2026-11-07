@@ -34,9 +34,9 @@ dispersion.}
 \item{n_perm}{Number of permutations of sites and of species.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row, for
-example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Empty
-sites are then allowed: they leave the analysis but their predictors can reach occupied
-sites.}
+example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Each
+set of predictors is then moved alone in its tests (see Details). Empty sites are
+allowed: they leave the analysis but their predictors can reach occupied sites.}
 
 \item{shared_null}{Null model of the test of the shared fraction \code{b}: \code{"none"} leaves it
 untested, \code{"msr"} replaces \code{env} by Moran spectral randomisations built from \code{coords}
@@ -59,7 +59,8 @@ that cannot be estimated, as when a set of predictors has as many columns as sit
 \code{semipartial}, a matrix of predictors by traits; \code{p_partial_max}, \code{p_partial_site} and
 \code{p_partial_species}, with the larger p-value and those of sites and of species, all
 \code{NA} if predictors are collinear; \code{shared}, with \code{null}, \code{draws}, \code{p_env_space}, the
-p-value of \code{env} against \code{space}, and \code{tested}; and \code{permutations}.
+p-value of \code{env} against \code{space}, and \code{tested}; and \code{permutations}, whose \code{moved} is
+\code{"together"} with free permutations and \code{"each set alone"} with \code{site_permutations}.
 }
 \description{
 The phylogenetic gradient analysis of Peres-Neto et al. (2012). Trait values are
@@ -79,6 +80,14 @@ component, which is a monotone function of the partial F statistic of the set gi
 other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
 not, and its test loses most of its power when the other set explains much: see the
 section on simulations. \code{d} cannot be tested.
+
+With \code{site_permutations}, the moves keep the spatial structure of what they move, so each
+set is moved alone while the response and the other set stay in place: \code{env} for \code{ab}, \code{a}
+and the semipartials of its predictors, and \code{space} for \code{bc}, \code{c} and the semipartials of
+its predictors; \code{abc} moves both. Moving both sets together, as free permutations do,
+tests \code{c} against an environment that no longer explains the response, and on a grid that
+test was liberal when the environment was strong and had no power when it was spatially
+structured (see the simulations). The result records this in \code{permutations$moved}.
 
 The shared fraction \code{b} has no test by these permutations, because a permutation of sites
 breaks the relation between environment and space, and is tested with \code{shared_null} by the
@@ -112,9 +121,26 @@ not hold, free permutations rejected \code{a} in 11.4\% (moves of the map with
 \code{\link[=torus_permutations]{torus_permutations()}}: 1.4\%, larger p-value: 4.0\%); and with a strong, spatially
 structured environment and no effect of space, free permutations rejected \code{c} in 10\%
 (larger p-value: 2.4\%), where the residuals of the linear fit of the environment keep
-spatial structure. \code{site_permutations} are nearly degenerate for \code{c}, since moving
-Moran's eigenvector maps rigidly changes little of what they explain: 19\% with a strong
-environment without structure.
+spatial structure. Up to version 0.6.1, \code{site_permutations} moved both sets together in
+every test, and that test of \code{c} rejected 19\% with a strong environment without structure
+and never with a structured one.
+
+\code{data-raw/validation_fractions_null.R} chose what the moves of \code{site_permutations} should
+move, with \code{\link[=torus_permutations]{torus_permutations()}}, on the first generator (300 data sets) and checked the
+choice on the second (200 data sets). For \code{a}, moving \code{env} alone held the level in every
+null scenario of both generators (3.7\% to 5.7\% and 4.5\% to 7.1\% with the p-value of sites,
+standard errors of 0.011 to 0.018), including an environment structured at scales outside
+\code{space}, where free permutations rejected 9.7\% and 20\%, and its power was the same. For
+\code{c}, moving \code{space} alone held the level (3.0\% to 7.0\% and 3.5\% to 8.0\%; larger p-value at
+most 3\%) where free permutations rejected 8.0\% and 24\% with a strong, structured
+environment acting alone, and moving both sets together rejected 22\% with a strong
+environment without structure. Its power depends on the question: it was complete when
+the species followed a field in the span of \code{space}, and 25\% to 28\% when they followed a
+field of exponential covariance that \code{space} holds only in part (free permutations: 98\%),
+because the maps moved around the grid explain such a field about as well as the maps in
+place. The restricted test of \code{c} asks whether the maps in \code{space} explain more than the
+same maps elsewhere on the grid, not whether the remainder has any spatial structure. For
+that question, use free permutations and read \code{p_max}.
 
 These limits were larger with a second generator (\code{data-raw/validation_fractions_check.R}:
 counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden

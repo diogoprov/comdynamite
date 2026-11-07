@@ -189,6 +189,14 @@ print.mc_phylo_vector <- function(x, ...) {
 #' not, and its test loses most of its power when the other set explains much: see the
 #' section on simulations. `d` cannot be tested.
 #'
+#' With `site_permutations`, the moves keep the spatial structure of what they move, so each
+#' set is moved alone while the response and the other set stay in place: `env` for `ab`, `a`
+#' and the semipartials of its predictors, and `space` for `bc`, `c` and the semipartials of
+#' its predictors; `abc` moves both. Moving both sets together, as free permutations do,
+#' tests `c` against an environment that no longer explains the response, and on a grid that
+#' test was liberal when the environment was strong and had no power when it was spatially
+#' structured (see the simulations). The result records this in `permutations$moved`.
+#'
 #' The shared fraction `b` has no test by these permutations, because a permutation of sites
 #' breaks the relation between environment and space, and is tested with `shared_null` by the
 #' scheme of `adespatial::envspace.test()` (Bauman et al. 2019): the response and `space`
@@ -216,9 +224,26 @@ print.mc_phylo_vector <- function(x, ...) {
 #' [torus_permutations()]: 1.4%, larger p-value: 4.0%); and with a strong, spatially
 #' structured environment and no effect of space, free permutations rejected `c` in 10%
 #' (larger p-value: 2.4%), where the residuals of the linear fit of the environment keep
-#' spatial structure. `site_permutations` are nearly degenerate for `c`, since moving
-#' Moran's eigenvector maps rigidly changes little of what they explain: 19% with a strong
-#' environment without structure.
+#' spatial structure. Up to version 0.6.1, `site_permutations` moved both sets together in
+#' every test, and that test of `c` rejected 19% with a strong environment without structure
+#' and never with a structured one.
+#'
+#' `data-raw/validation_fractions_null.R` chose what the moves of `site_permutations` should
+#' move, with [torus_permutations()], on the first generator (300 data sets) and checked the
+#' choice on the second (200 data sets). For `a`, moving `env` alone held the level in every
+#' null scenario of both generators (3.7% to 5.7% and 4.5% to 7.1% with the p-value of sites,
+#' standard errors of 0.011 to 0.018), including an environment structured at scales outside
+#' `space`, where free permutations rejected 9.7% and 20%, and its power was the same. For
+#' `c`, moving `space` alone held the level (3.0% to 7.0% and 3.5% to 8.0%; larger p-value at
+#' most 3%) where free permutations rejected 8.0% and 24% with a strong, structured
+#' environment acting alone, and moving both sets together rejected 22% with a strong
+#' environment without structure. Its power depends on the question: it was complete when
+#' the species followed a field in the span of `space`, and 25% to 28% when they followed a
+#' field of exponential covariance that `space` holds only in part (free permutations: 98%),
+#' because the maps moved around the grid explain such a field about as well as the maps in
+#' place. The restricted test of `c` asks whether the maps in `space` explain more than the
+#' same maps elsewhere on the grid, not whether the remainder has any spatial structure. For
+#' that question, use free permutations and read `p_max`.
 #'
 #' These limits were larger with a second generator (`data-raw/validation_fractions_check.R`:
 #' counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden
@@ -246,9 +271,9 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   dispersion.
 #' @param n_perm Number of permutations of sites and of species.
 #' @param site_permutations Optional matrix of site indices with one permutation per row, for
-#'   example from [torus_permutations()], to use instead of free permutations of sites. Empty
-#'   sites are then allowed: they leave the analysis but their predictors can reach occupied
-#'   sites.
+#'   example from [torus_permutations()], to use instead of free permutations of sites. Each
+#'   set of predictors is then moved alone in its tests (see Details). Empty sites are
+#'   allowed: they leave the analysis but their predictors can reach occupied sites.
 #' @param shared_null Null model of the test of the shared fraction `b`: `"none"` leaves it
 #'   untested, `"msr"` replaces `env` by Moran spectral randomisations built from `coords`
 #'   with `adespatial::msr()`, and `"sites"` moves `env` alone with `site_permutations`, for a
@@ -267,7 +292,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   `semipartial`, a matrix of predictors by traits; `p_partial_max`, `p_partial_site` and
 #'   `p_partial_species`, with the larger p-value and those of sites and of species, all
 #'   `NA` if predictors are collinear; `shared`, with `null`, `draws`, `p_env_space`, the
-#'   p-value of `env` against `space`, and `tested`; and `permutations`.
+#'   p-value of `env` against `space`, and `tested`; and `permutations`, whose `moved` is
+#'   `"together"` with free permutations and `"each set alone"` with `site_permutations`.
 #' @note Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
 #'   supplement of Peres-Neto et al. (2012).
 #' @section Article and original code:
@@ -431,18 +457,37 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   share <- sum(site_weights * response^2) / total
   ss <- components(response, env, space)
   observed <- statistics(response, env, space)
-  null_site <- do.call(cbind, progress_map(seq_len(nrow(draws$rows)), function(r) {
-    i <- draws$rows[r, ]
-    statistics(response, landscape_env[i, , drop = FALSE], landscape_space[i, , drop = FALSE])
-  }, "Sites"))
+  # row r gives the rows of the landscape that env and space take in draw r
+  site_null <- function(env_rows, space_rows, name) {
+    do.call(cbind, progress_map(seq_len(nrow(env_rows)), function(r) {
+      statistics(response, landscape_env[env_rows[r, ], , drop = FALSE],
+                 landscape_space[space_rows[r, ], , drop = FALSE])
+    }, name))
+  }
+  null_site <- site_null(draws$rows, draws$rows, "Sites")
   null_taxa <- do.call(cbind, progress_map(seq_len(n_perm), function(r) {
     shuffled <- traits[sample.int(nrow(traits)), , drop = FALSE]
     statistics(trait_response(comm, shuffled, component), env, space)
   }, "Species"))
-  p_site <- vapply(names(observed), function(f) permutation_p(null_site[f, ], observed[[f]]),
-                   numeric(1))
-  p_species <- vapply(names(observed), function(f) permutation_p(null_taxa[f, ], observed[[f]]),
-                   numeric(1))
+  p_values <- function(null, tests) {
+    vapply(tests, function(f) permutation_p(null[f, ], observed[[f]]), numeric(1))
+  }
+  p_site <- p_values(null_site, names(observed))
+  p_species <- p_values(null_taxa, names(observed))
+  # restricted permutations keep the structure of what they move, so each set moves alone
+  # against the response and the other set, which stays where it is: `env` for `ab`, `a` and
+  # the semipartials of its predictors, `space` for `bc`, `c` and its predictors. Moving both
+  # together tests `c` against an environment that no longer explains anything, and that test
+  # was liberal with a strong environment (see the simulations). `abc` still moves both
+  moved <- if (is.null(site_permutations)) "together" else "each set alone"
+  if (moved == "each set alone") {
+    fixed <- matrix(which(draws$occupied), nrow(draws$rows), n, byrow = TRUE)
+    of_env <- (seq_len(sum(grepl("^loss", names(observed)))) - 1) %% length(labels) < ncol(env)
+    env_tests <- c("ab", "a", grep("^loss", names(observed), value = TRUE)[of_env])
+    space_tests <- c("bc", "c", grep("^loss", names(observed), value = TRUE)[!of_env])
+    p_site[env_tests] <- p_values(site_null(draws$rows, fixed, "Sites (env)"), env_tests)
+    p_site[space_tests] <- p_values(site_null(fixed, draws$rows, "Sites (space)"), space_tests)
+  }
 
   # the shared fraction: sites move `env` alone, with its spatial structure, and species are
   # permuted as above; neither applies when `env` is unrelated to `space`
@@ -478,7 +523,8 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
                                       dimnames = names_by_trait),
                  p_partial_max = pmax(tested_p(p_site), tested_p(p_species)),
                  p_partial_site = tested_p(p_site), p_partial_species = tested_p(p_species),
-                 shared = shared, permutations = permutation_record(n_perm, site_permutations)),
+                 shared = shared,
+                 permutations = c(permutation_record(n_perm, site_permutations), moved = moved)),
             class = "mc_trait_partition")
 }
 
@@ -487,6 +533,10 @@ print.mc_trait_partition <- function(x, ...) {
   cat("<mc_trait_partition>", x$component, "component,", format(x$component_share, digits = 3),
       "of the total variation\n")
   permutation_line(x$permutations)
+  if (x$permutations$moved == "each set alone") {
+    cat("sites move env alone for ab, a and its semipartials, space alone for bc, c and its",
+        "semipartials, both for abc\n")
+  }
   if (x$shared$null != "none") {
     cat("shared fraction b: ",
         if (x$shared$tested) {
