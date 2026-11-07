@@ -158,3 +158,124 @@ test_that("collinear predictors give no semipartials", {
   expect_true(all(is.na(out$semipartial)))
   expect_true(all(is.na(out$p_partial_max)))
 })
+
+test_that("the statistic of a and c is the share of the component left by the other set", {
+  d <- partition_data()
+  out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2)
+  f <- out$fractions
+  rownames(f) <- f$fraction
+  expect_equal(f["a", "statistic"],
+               (f["abc", "r2_component"] - f["bc", "r2_component"]) / (1 - f["bc", "r2_component"]))
+  expect_equal(f["c", "statistic"],
+               (f["abc", "r2_component"] - f["ab", "r2_component"]) / (1 - f["ab", "r2_component"]))
+  expect_equal(f[c("abc", "ab", "bc", "b"), "statistic"], f[c("abc", "ab", "bc", "b"), "r2"])
+  expect_true(is.na(f["d", "statistic"]))
+  # one environmental variable: its semipartial test is the test of a
+  one <- trait_partition(d$comm, d$trait[, 1], d$env[, 1], d$space, n_perm = 2)
+  expect_equal(one$p_partial_site[1, 1], one$fractions$p_site[one$fractions$fraction == "a"])
+  expect_equal(dimnames(one$semipartial), list(c("env1", "space1", "space2"), "trait1"))
+})
+
+test_that("a fraction that cannot be estimated has no p-value", {
+  a <- example_a()
+  set.seed(1)
+  saturated <- matrix(rnorm(90), 10)
+  out <- trait_partition(a$comm, a$trait, a$env, saturated, n_perm = 3)
+  f <- out$fractions
+  rownames(f) <- f$fraction
+  expect_equal(f["bc", "r2_component"], 1)
+  expect_true(all(is.na(f["a", c("statistic", "p_site", "p_species", "p_max")])))
+  expect_false(anyNA(f["c", c("p_site", "p_species", "p_max")]))
+  expect_true(is.na(permutation_p(c(0.1, 0.2), NA)))
+  expect_equal(permutation_p(c(0.1, NA, 0.3), 0.2), 2 / 3)
+})
+
+shared_data <- function(structured = TRUE, side = 6, k = 12) {
+  coords <- as.matrix(expand.grid(x = seq_len(side), y = seq_len(side)))
+  mems <- NULL
+  capture.output(mems <- as.matrix(adespatial::dbmem(coords, silent = TRUE)))
+  space <- mems[, 1:3]
+  env <- if (structured) 50 + 25 * mems[, 1] / max(abs(mems[, 1])) + rnorm(side^2, 0, 3) else {
+    runif(side^2, 0, 100)
+  }
+  trait <- setNames(seq(0, 100, length.out = k), paste0("sp", seq_len(k)))
+  comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800)) + 0.01
+  colnames(comm) <- names(trait)
+  list(comm = comm, trait = trait, env = cbind(e = env), space = space, coords = coords)
+}
+
+test_that("the shared fraction is tested with Moran spectral randomisation", {
+  skip_if_not_installed("adespatial")
+  d <- shared_data()
+  set.seed(1)
+  out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19, shared_null = "msr",
+                         coords = d$coords)
+  f <- out$fractions
+  rownames(f) <- f$fraction
+  expect_equal(out$shared[c("null", "draws", "tested")], list(null = "msr", draws = 19L, tested = TRUE))
+  expect_lte(out$shared$p_env_space, 0.05)
+  expect_false(anyNA(f["b", c("p_site", "p_species", "p_max")]))
+  expect_equal(f["b", "p_max"], max(f["b", c("p_site", "p_species")]))
+  expect_true(is.na(f["d", "p_max"]))
+  expect_output(print(out), "19 Moran spectral randomisations of env")
+  # the other fractions do not depend on the request
+  set.seed(1)
+  plain <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19)
+  expect_equal(plain$fractions[c("r2", "statistic")], f[c("r2", "statistic")], ignore_attr = TRUE)
+  expect_true(all(is.na(plain$fractions$p_max[plain$fractions$fraction == "b"])))
+  expect_equal(plain$shared, list(null = "none", draws = 0L, p_env_space = NA_real_, tested = FALSE))
+  expect_output(print(plain), "permutations:")
+  expect_false(any(grepl("shared", capture.output(print(plain)))))
+})
+
+test_that("the shared fraction stays untested when env is unrelated to space", {
+  skip_if_not_installed("adespatial")
+  d <- shared_data(structured = FALSE)
+  set.seed(2)
+  out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19, shared_null = "msr",
+                         coords = d$coords)
+  expect_false(out$shared$tested)
+  expect_gt(out$shared$p_env_space, 0.05)
+  expect_true(all(is.na(out$fractions[out$fractions$fraction == "b", c("p_site", "p_species")])))
+  expect_output(print(out), "not tested, env is unrelated to space")
+  # a lenient level tests it
+  set.seed(2)
+  lenient <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19, shared_null = "msr",
+                             coords = d$coords, level = 0.999)
+  expect_true(lenient$shared$tested)
+})
+
+test_that("the shared fraction is tested with moves of env on a grid", {
+  skip_if_not_installed("adespatial")
+  d <- shared_data()
+  moves <- torus_permutations(6)[1:19, ]
+  set.seed(3)
+  out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19, site_permutations = moves,
+                         shared_null = "sites")
+  expect_equal(out$shared$null, "sites")
+  expect_equal(out$shared$draws, 19L)
+  expect_true(out$shared$tested)
+  expect_false(anyNA(out$fractions$p_max[out$fractions$fraction == "b"]))
+  expect_output(print(out), "19 moves of env alone")
+  # empty sites stay in the landscape that env moves over
+  empty <- d$comm
+  empty[c(1, 8), ] <- 0
+  with_empty <- trait_partition(empty, d$trait, d$env, d$space, n_perm = 19,
+                                site_permutations = moves, shared_null = "sites")
+  expect_true(with_empty$shared$tested)
+})
+
+test_that("the shared test explains what it needs", {
+  skip_if_not_installed("adespatial")
+  d <- shared_data()
+  expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, shared_null = "sites"),
+               "needs `site_permutations`")
+  expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, shared_null = "msr"),
+               "needs `coords`")
+  expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, shared_null = "msr",
+                               coords = d$coords[-1, ]), "one numeric row per site \\(36\\)")
+  expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, level = 1), "level")
+  local_mocked_bindings(has_adespatial = function() FALSE)
+  expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, shared_null = "msr",
+                               coords = d$coords), "needs the package adespatial")
+})

@@ -1,5 +1,20 @@
 # comdynamite (development version)
 
+- `trait_partition()`: the tests of fractions `a` and `c`, and of the semipartials, now use the
+  share of the component that the other set leaves unexplained as statistic, which is monotone
+  in the partial F, instead of the fraction itself, which the original code tests. The
+  permutations are the same. The old test lost its power when the other set explained much:
+  in `data-raw/validation_fractions.R` it rejected `a` in none of 500 data sets where the
+  environment had no effect and space a strong one (new: 5.6% to 5.8%), and in 15% where the
+  environment had a weak effect beside space (new: 100%). `fractions` has a new column
+  `statistic`, and p-values are `NA` when a fraction cannot be estimated. See the validation
+  article for the limits: a free permutation of sites rejects `a` too often when `env` has
+  structure at scales outside `space`, and `site_permutations` are nearly degenerate for `c`.
+- `trait_partition()`: test of the shared fraction `b` with `shared_null`, by Moran spectral
+  randomisation of `env` from `coords` (adespatial) or by moves of `env` alone with
+  `site_permutations`, as in `adespatial::envspace.test()`. `b` is tested only when `env` is
+  related to `space` (`level`), and the result has `shared`. `plot_trait_partition()` colours
+  `b` by its test when there is one.
 - `as.data.frame()`, `summary()` and `plot()` methods for the results of the analyses.
 - `rigid_permutations()`: restricted null model for the events of `node_test()` that moves the
   whole event by a rotation or a reflection and a translation, so it keeps the shape of the

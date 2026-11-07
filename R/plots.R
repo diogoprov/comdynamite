@@ -208,7 +208,8 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' with one bar for the environment and one for space, as in Figure 1 of Desdevises et al.
 #' (2003). The two bars overlap in `b`, the variation they share. `a` is explained by the
 #' environment alone, `c` by space alone, and `d` is unexplained. Dark segments are
-#' significant, and `b` has no test, so it is grey.
+#' significant, and `b` is grey when it was not tested (see `shared_null` in
+#' [trait_partition()]).
 #'
 #' Negative fractions are shown as zero, following Legendre (2008). The result of
 #' [trait_partition()] keeps them, because all fractions sum to one only with them.
@@ -261,6 +262,7 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   shown$shown <- pmax(shown[[value]], 0)
   p <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
   fill <- function(fraction) {
+    if (is.na(p[[fraction]])) return("grey70")
     if (p[[fraction]] <= level) col else grDevices::adjustcolor(col, 0.3)
   }
   edges <- c(0, cumsum(shown$shown))
@@ -272,8 +274,8 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
     graphics::rect(edges[i], y, edges[i + 1], y + 0.7, col = colour, border = "white")
   }
   segment(1, 2, fill("a"))
-  segment(2, 2, "grey70")
-  segment(2, 1.1, "grey70")
+  segment(2, 2, fill("b"))
+  segment(2, 1.1, fill("b"))
   segment(3, 1.1, fill("c"))
   graphics::text(edges[1], 2.85, labels[1], adj = c(0, 0), cex = cex)
   # beside its bar, on the side with more room
@@ -288,7 +290,7 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
                  paste0("[", shown$fraction, "] ", format(round(shown$shown, 2), nsmall = 2)),
                  cex = cex)
   graphics::title(main = paste(x$component, "component"))
-  graphics::legend("bottom", c("Significant", "Not significant", "Shared, no test"), bty = "n",
+  graphics::legend("bottom", c("Significant", "Not significant", "Not tested"), bty = "n",
                    fill = c(col, grDevices::adjustcolor(col, 0.3), "grey70"), border = NA,
                    horiz = TRUE, cex = cex * 0.9, inset = c(0, -0.08))
   invisible(shown)

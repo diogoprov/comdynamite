@@ -11,7 +11,10 @@ trait_partition(
   space,
   component = c("mean", "variance"),
   n_perm = 999,
-  site_permutations = NULL
+  site_permutations = NULL,
+  shared_null = c("none", "msr", "sites"),
+  coords = NULL,
+  level = 0.05
 )
 }
 \arguments{
@@ -34,15 +37,29 @@ dispersion.}
 example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Empty
 sites are then allowed: they leave the analysis but their predictors can reach occupied
 sites.}
+
+\item{shared_null}{Null model of the test of the shared fraction \code{b}: \code{"none"} leaves it
+untested, \code{"msr"} replaces \code{env} by Moran spectral randomisations built from \code{coords}
+with \code{adespatial::msr()}, and \code{"sites"} moves \code{env} alone with \code{site_permutations}, for a
+complete grid. \code{"msr"} needs the package adespatial.}
+
+\item{coords}{Matrix of site coordinates with one row per site of \code{comm}, for
+\code{shared_null = "msr"}. The spatial weights are those of \code{adespatial::dbmem()}.}
+
+\item{level}{Significance level of the test of \code{env} against \code{space} that decides whether
+\code{b} is tested.}
 }
 \value{
 List of class \code{mc_trait_partition} with \code{fractions}, a data frame with one row
 for each of \code{abc}, \code{ab}, \code{bc}, \code{a}, \code{b}, \code{c} and \code{d}, and the columns \code{r2},
-\code{r2_adjusted}, \code{r2_component}, \code{p_site}, \code{p_species} and \code{p_max}; \code{component};
-\code{component_share}, the share of the total variation in the component; \code{semipartial},
-a matrix of predictors by traits; and \code{p_partial_max}, \code{p_partial_site} and
+\code{r2_adjusted}, \code{r2_component}, \code{statistic}, the value tested, \code{p_site}, \code{p_species} and
+\code{p_max}, which are \code{NA} for \code{d}, for \code{b} without \code{shared_null}, and for a fraction
+that cannot be estimated, as when a set of predictors has as many columns as sites;
+\code{component}; \code{component_share}, the share of the total variation in the component;
+\code{semipartial}, a matrix of predictors by traits; \code{p_partial_max}, \code{p_partial_site} and
 \code{p_partial_species}, with the larger p-value and those of sites and of species, all
-\code{NA} if predictors are collinear; and \code{permutations}.
+\code{NA} if predictors are collinear; \code{shared}, with \code{null}, \code{draws}, \code{p_env_space}, the
+p-value of \code{env} against \code{space}, and \code{tested}; and \code{permutations}.
 }
 \description{
 The phylogenetic gradient analysis of Peres-Neto et al. (2012). Trait values are
@@ -54,16 +71,67 @@ alone; \code{b}, shared; \code{c}, space alone; and \code{d}, unexplained.
 \details{
 The total variation includes both the mean and the dispersion within sites, so \code{r2}
 answers how much of all the variation each fraction holds, and \code{r2_component} how much
-of the component. Fractions \code{b} and \code{d} cannot be tested. Tests of \code{a} and \code{c} permute
-environment and space together, so they compare each fraction with what is expected when
-neither matters, not with the other set held fixed. They are conservative when the other
-set explains much: in an audit with noise as environment and a real effect of space, \code{a}
-was never rejected in 100 replicates.
+of the component. Each fraction is tested by permutations of sites, which move the
+predictors of all sites together, and by permutations of the trait values among species,
+and \code{p_max} is the larger p-value, as in \code{\link[=phylo_vector]{phylo_vector()}}. The statistic of \code{a} and \code{c} is
+the share of the component that the other set leaves unexplained, \code{a / (a + d)} within the
+component, which is a monotone function of the partial F statistic of the set given the
+other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
+not, and its test loses most of its power when the other set explains much: see the
+section on simulations. \code{d} cannot be tested.
+
+The shared fraction \code{b} has no test by these permutations, because a permutation of sites
+breaks the relation between environment and space, and is tested with \code{shared_null} by the
+scheme of \code{adespatial::envspace.test()} (Bauman et al. 2019): the response and \code{space}
+stay fixed, \code{env} is replaced by surrogates that keep its spatial autocorrelation, and \code{b}
+is computed again. Moran spectral randomisation (Wagner & Dray 2015) builds them from
+\code{coords} for any design, and \code{site_permutations} from \code{\link[=torus_permutations]{torus_permutations()}} move the
+whole map of \code{env} on a complete grid. The p-value of species comes from the same
+permutations of species as the other fractions. A positive \code{b} can arise from two
+spatially structured variables without relation, which free permutations do not take
+into account (Clappe et al. 2018). The test asks whether \code{b} is larger than expected, so
+a negative \code{b} is never significant. It is only meaningful when \code{env} holds some of the
+structure in \code{space}, so \code{env} is first tested against \code{space} with free permutations of
+sites, and when that test is not significant at \code{level}, \code{b} is left untested and
+\code{shared$tested} is \code{FALSE}.
 }
 \note{
 Adapted from the MATLAB function \code{PartitionRDATwoDataMatricesPhylogeny} in the
 supplement of Peres-Neto et al. (2012).
 }
+\section{Simulations}{
+
+\code{data-raw/validation_fractions.R} and the article on validation measure the tests on a
+grid of 8 by 8 sites, with 500 data sets per scenario and 199 permutations, at the 5\%
+level. Where space acted and the environment did not, the fraction \code{a} itself was never
+rejected, and the share left by space was rejected in 5.6\% to 5.8\% of data sets with
+free permutations of sites and in 4.2\% to 4.4\% with the larger p-value; where the
+environment had a weak effect beside space, the fraction was rejected in 15\% and the
+share in 100\%. Two limits: with an environment structured at scales that \code{space} does
+not hold, free permutations rejected \code{a} in 11.4\% (moves of the map with
+\code{\link[=torus_permutations]{torus_permutations()}}: 1.4\%, larger p-value: 4.0\%); and with a strong, spatially
+structured environment and no effect of space, free permutations rejected \code{c} in 10\%
+(larger p-value: 2.4\%), where the residuals of the linear fit of the environment keep
+spatial structure. \code{site_permutations} are nearly degenerate for \code{c}, since moving
+Moran's eigenvector maps rigidly changes little of what they explain: 19\% with a strong
+environment without structure.
+
+These limits were larger with a second generator (\code{data-raw/validation_fractions_check.R}:
+counts, a grid of 10 by 10 sites, 8 Moran's eigenvector maps, 200 data sets) where a hidden
+field that \code{space} holds only in part drove the species: free permutations rejected \code{a} in
+21\% (larger p-value: 2\%), and with a structured environment acting alone they rejected \code{c}
+in 25\% (larger p-value: 7.5\%). The p-value of sites alone should not be read when residuals
+can keep spatial structure; \code{p_max} should. Without effects, the rates there were 4.5\% to
+6.1\% with free permutations, and Moran spectral randomisation rejected \code{b} in 5\% to 6\%.
+
+For \code{b}, with an environment that was spatially structured but had no effect, free
+permutations of \code{env} rejected 48\% of data sets, Moran spectral randomisation 5.6\% and
+moves of the map 11\%. With a trait unrelated to the composition, the randomisation alone
+rejected 54\% and the larger p-value 4.8\%: the permutation of species is needed, as for the
+other fractions. Power was 100\% when the environment alone acted, 43\% when space also
+acted on its own, and 28\% with a weak environment beside space.
+}
+
 \section{Article and original code}{
 
 Raw and adjusted fractions of the total for the mean component agree with
@@ -89,6 +157,11 @@ not include. None of this is done here.
 \item The code runs \code{n_perm} - 1 permutations in each null distribution.
 \item The text stacks two null distributions, and here we report the larger of the
 two p-values, as in \code{\link[=phylo_vector]{phylo_vector()}}.
+\item Tests of \code{a} and \code{c}: the code permutes environment and space with the same
+order of sites, as here, and compares the fractions themselves, which depend on how
+much the other set explains. It computes the partial F statistics but does not use
+them. Here the statistic is the share of the component left by the other set, which
+is monotone in that F.
 }
 Moran's eigenvector maps of the function \code{MEM} of the supplement are the same as those
 of \code{adespatial::dbmem()}, checked in Octave. Appendix A recommends centring them with
@@ -101,8 +174,9 @@ alone. The supplement has no code for them, so they were checked against separat
 regressions and not in Octave. Appendix A calculates the model without the predictor
 with the slopes of the full model, which it had just fitted again without it, and here
 we use the second slopes. With several traits it gives no rule, so here each trait has its own
-value, relative to the variation of that trait. They are tested as the fractions are,
-with the loss of R2 as the statistic, and with many predictors they need a correction.
+value, relative to the variation of that trait. They are tested as \code{a} and \code{c} are, with
+the loss of R2 relative to what the model of all predictors leaves unexplained in that
+trait as the statistic, and with many predictors they need a correction.
 
 This function partitions variation and does not test each trait against each
 predictor. For that test, ter Braak (2019) proposed multilevel and weighted averaging
@@ -113,17 +187,35 @@ regressions combined by the max test, in the package
 \examples{
 \dontshow{if (requireNamespace("adespatial", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
+coords <- cbind(1:40)
 env <- runif(40, 0, 100)
-space <- as.matrix(adespatial::dbmem(cbind(1:40), silent = TRUE))[, 1:3]
+space <- as.matrix(adespatial::dbmem(coords, silent = TRUE))[, 1:3]
 trait <- setNames(runif(15, 0, 100), paste0("sp", 1:15))
 comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
 out
 plot_trait_partition(out)
+# the shared fraction, with an environment that follows the transect
+env <- 50 + 30 * sin(1:40 / 6) + rnorm(40, 0, 5)
+comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
+colnames(comm) <- names(trait)
+trait_partition(comm, trait, env, space, n_perm = 49, shared_null = "msr", coords = coords)
 \dontshow{\}) # examplesIf}
 }
 \references{
+Anderson, M. J., & Legendre, P. (1999). An empirical comparison of permutation methods
+for tests of partial regression coefficients in a linear model. \emph{Journal of Statistical
+Computation and Simulation}, 62, 271--303. \doi{10.1080/00949659908811936}
+
+Bauman, D., Vleminckx, J., Hardy, O. J., & Drouet, T. (2019). Testing and interpreting
+the shared space-environment fraction in variation partitioning analyses of ecological
+data. \emph{Oikos}, 128, 274--285. \doi{10.1111/oik.05496}
+
+Clappe, S., Dray, S., & Peres-Neto, P. R. (2018). Beyond neutrality: disentangling the
+effects of species sorting and spurious correlations in community analysis. \emph{Ecology},
+99, 1737--1747. \doi{10.1002/ecy.2376}
+
 Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning
 of species data matrices: estimation and comparison of fractions. \emph{Ecology}, 87,
 2614--2625. \doi{10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2}
@@ -135,6 +227,10 @@ contingency and environmental filtering on metacommunity phylogenetics. \emph{Ec
 ter Braak, C. J. F. (2019). New robust weighted averaging- and model-based methods for
 assessing trait-environment relationships. \emph{Methods in Ecology and Evolution}, 10,
 1962--1971. \doi{10.1111/2041-210X.13278}
+
+Wagner, H. H., & Dray, S. (2015). Generating spatially constrained null models for
+irregularly spaced data using Moran spectral randomization methods. \emph{Methods in Ecology
+and Evolution}, 6, 1169--1178. \doi{10.1111/2041-210X.12407}
 }
 \seealso{
 \code{\link[=plot_trait_partition]{plot_trait_partition()}}

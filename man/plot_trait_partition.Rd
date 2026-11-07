@@ -46,7 +46,8 @@ Draws the total variation as a line divided into the fractions of \code{\link[=t
 with one bar for the environment and one for space, as in Figure 1 of Desdevises et al.
 (2003). The two bars overlap in \code{b}, the variation they share. \code{a} is explained by the
 environment alone, \code{c} by space alone, and \code{d} is unexplained. Dark segments are
-significant, and \code{b} has no test, so it is grey.
+significant, and \code{b} is grey when it was not tested (see \code{shared_null} in
+\code{\link[=trait_partition]{trait_partition()}}).
 }
 \details{
 Negative fractions are shown as zero, following Legendre (2008). The result of
