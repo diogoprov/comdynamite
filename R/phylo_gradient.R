@@ -19,6 +19,7 @@
 #'
 #' @param comm Matrix with one row per site and one column per species. Every site needs
 #'   at least one individual.
+#'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param predictor Deprecated, use `env`.
 #' @param env Numeric vector with the value of each site. The authors estimate one
@@ -103,6 +104,11 @@
 #' @export
 phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_sim = 1000,
                          site_permutations = NULL, alpha = NULL, predictor = NULL) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(tree)) tree <- data_part(comm, "tree")
+    if (missing(env)) env <- one_column(comm$env, "env")
+    comm <- comm$comm
+  }
   level <- deprecated_level(level, alpha)
   if (!is.null(predictor)) {
     warning("`predictor` is deprecated, use `env`", call. = FALSE)
@@ -264,6 +270,7 @@ print.mc_phylo_vector <- function(x, ...) {
 #'
 #' @param comm Matrix with one row per site and one column per species. Every site needs
 #'   at least one individual.
+#'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param traits Numeric vector or matrix with one row per species, which can hold traits
 #'   or the vectors of [phylo_vector()]. Species are matched to `comm` by name, in any
 #'   order, and those in only one of the two are dropped with a warning.
@@ -396,6 +403,11 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
                             n_perm = 999, site_permutations = NULL,
                             shared_null = c("none", "msr", "sites"), coords = NULL,
                             level = 0.05) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(traits)) traits <- data_part(comm, "traits")
+    if (missing(env)) env <- data_part(comm, "env")
+    comm <- comm$comm
+  }
   component <- match.arg(component)
   shared_null <- match.arg(shared_null)
   if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)

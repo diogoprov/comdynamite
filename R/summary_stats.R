@@ -32,11 +32,13 @@
 #' between consecutive steps. Guzman et al. (2022) found that temporal statistics added
 #' explanatory power, and that dispersal depended on them.
 #'
-#' @param x An `mc_sim` object, a matrix with one row per site and one column per species, or
+#' @param x An [mc_data()] object, an `mc_sim` object, a matrix with one row per site and one column per species, or
 #'   an array of sites x species x steps. In an array, the last step gives the statistics that
 #'   are not temporal. From an `mc_sim`, these come from `abundance` and the temporal ones
 #'   from `history`, and `env`, `coords` and `trait` default to those of the simulation, the
-#'   trait being the environmental optimum.
+#'   trait being the environmental optimum. From an `mc_data` object, they default to its
+#'   parts: the trait is the column `optimum`, or the only numeric column of `traits`, and
+#'   `env` the only numeric column of `env`.
 #' @param tree Optional `phylo` object, matched to species by name.
 #' @param trait Optional numeric vector with one value per species, named by species.
 #' @param env Optional numeric vector with one value per site.
@@ -60,6 +62,14 @@
 summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NULL, n_null = 99) {
   stopifnot(n_null >= 2)
   series <- NULL
+  if (inherits(x, "mc_data")) {
+    tree <- tree %||% x$tree
+    trait <- trait %||% one_column(x$traits, "traits", prefer = "optimum")
+    env <- env %||% one_column(x$env, "env")
+    coords <- coords %||% x$coords
+    series <- x$series
+    x <- x$comm
+  }
   if (inherits(x, "mc_sim")) {
     comm <- x$abundance
     series <- x$history

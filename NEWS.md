@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- `mc_data()` and `as_mc_data()`: community, tree, traits, environment, coordinates, areas and
+  time series in one object, with names checked once. The analyses and `summary_stats()` take an
+  `mc_data` object as first argument and fill what the call leaves out. Simulations keep the tree
+  their traits came from, as `tree`.
 - `run_scenarios()`: grids of scenarios with replicates paired by what `setup` draws, a seed per
   cell and optional parallel runs.
 - `equilibrium_check()`: warns when a simulation is still changing at the end of its record.

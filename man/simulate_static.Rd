@@ -32,8 +32,9 @@ expected values of at most 1, and \code{"expected"} returns the expected values.
 }
 \value{
 List of class \code{mc_sim} with \code{abundance}, a matrix with one row per
-site and one column per species, plus \code{env} and \code{traits}. Sites and species
-with no individuals are kept, so remove them if a method requires it.
+site and one column per species, plus \code{env}, \code{traits} and, when the traits came from
+\code{\link[=species_traits]{species_traits()}} with a tree, \code{tree}. Sites and species with no individuals are kept,
+so remove them if a method requires it.
 }
 \description{
 Draws species abundances directly from unimodal responses to an

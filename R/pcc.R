@@ -47,6 +47,7 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @param comm Matrix with one row per site and one column per species. Species are
 #'   matched to the tips of `tree` by name, in any order, and those in only one of the
 #'   two are dropped with a warning. Every site needs at least one individual.
+#'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
 #'   site.
@@ -78,6 +79,11 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @export
 pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
                      site_permutations = NULL) {
+  if (inherits(comm, "mc_data")) {
+    if (missing(tree)) tree <- data_part(comm, "tree")
+    if (missing(env)) env <- data_part(comm, "env")
+    comm <- comm$comm
+  }
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
                              minimum = 3)
   comm <- matched$comm

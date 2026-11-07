@@ -47,7 +47,7 @@ one value or one per species.}
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal} and \code{extirpation}
-used.
+used, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a tree.
 }
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
