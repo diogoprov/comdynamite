@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.6.2
 
 - [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
   and
