@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.5.2
 
 - `biogeography_matrix()`: events of `node_test()` from the area of each site, as pairs of
   areas stated in advance or as each area against the others.

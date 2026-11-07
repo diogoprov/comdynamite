@@ -1,7 +1,7 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-06. Versão atual: 0.5.1 (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0` e `v0.5.1`, a última com o que faltava da v0.5.0. `v0.3.0` e `v0.4.0`
+Atualizado em 2026-11-06. Versão atual: 0.5.2 (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, e `v0.5.2`. `v0.3.0` e `v0.4.0`
 não têm tag porque seguem em aberto: a ordem mudou em 2026-11-06, quando os métodos da
 v0.5.0 passaram à frente, e a próxima versão depois deles será a do marco que fechar.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
@@ -280,6 +280,9 @@ Da auditoria, para antes da 1.0:
       mesmo nome em `plot_node_heatmap()`, heatmap só com NA, `logistic_gradients()` com
       menos de 8 sites, `mc_dynamics()` com um site, `pcc_test()` com `r2` NaN, número de
       sorteios válidos, erro dentro de `cores`, checagens do simulador, formas dos traits.
+
+Situação em 2026-11-06: marco fechado na 0.5.2. O nulo para paisagens com borda segue em
+aberto: sem ele, o teste de eventos não deve ser usado com dados reais de refúgios.
 
 Opção, sem data: calanoides como segundo exemplo, se as espécies estiverem nas tabelas
 públicas da EMAP. A topologia sairia da Fig. 9.5b, e os resultados do livro não foram
