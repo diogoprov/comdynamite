@@ -7,7 +7,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/diogoprov/comdynamite/blob/main/inst/CITATION)
+[`inst/CITATION`](https://github.com/diogoprov/comdynamite/blob/v0.5.2/inst/CITATION)
 
 Provete, D. B. (2026). comdynamite: Process-based metacommunity
 simulations with phylogenetic structure. R package version 0.5.2.
