@@ -55,6 +55,31 @@ z <- picante::ses.mpd(pa, cophenetic(tree), null.model = "taxa.labels",
 mean(z[is.finite(z)])
 ```
 
+[`run_scenarios()`](https://provetelab.org/comdynamite/reference/run_scenarios.md)
+runs the whole design: `setup` draws what a replicate shares, and
+[`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+gives alpha, gamma, SES MPD and others, with beta as gamma / alpha.
+
+``` r
+
+scenarios <- expand.grid(dispersal = c(0.001, 0.01, 0.1, 0.5), lambda = c(0, 1),
+                         competition = c("none", "phylo"))
+pool <- function() {
+  list(tree = treeshapesim::sim_tree_shape(30), landscape = landscape_implicit(25))
+}
+one_run <- function(scenario, shared) {
+  simulate_metacommunity(shared$landscape,
+                         species_traits(shared$tree, scenario$lambda, sigma_mean = 8, sigma_sd = 2),
+                         competition_matrix(shared$tree, as.character(scenario$competition),
+                                            inter_max = 0.5),
+                         dispersal = scenario$dispersal, n_steps = 1000)
+}
+results <- run_scenarios(scenarios, one_run, pool, n_rep = 20)
+```
+
+Here traits are drawn in each scenario. To share them across dispersal
+rates and competition types, as we did, draw them in `setup`.
+
 The null model draws from all the species in the tree, which is the
 regional pool. Using only the species that persisted would remove the
 effect of regional extinction from the comparison.
@@ -113,7 +138,7 @@ legend("bottomleft", paste0("lambda = ", groups$lambda, ", ", groups$competition
 
 ![SES MPD, local richness and beta diversity against dispersal, for the
 four combinations of phylogenetic signal and
-competition.](phylogenetic-structure_files/figure-html/unnamed-chunk-5-1.png)
+competition.](phylogenetic-structure_files/figure-html/unnamed-chunk-6-1.png)
 
 ``` r
 

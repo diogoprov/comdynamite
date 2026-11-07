@@ -106,12 +106,18 @@ Permutations for sites that are neighbours.
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   : Permutations that move the patches of biogeographic events
 
-## Summary statistics
+## Simulation studies
 
-The same statistics for simulated and observed data.
+Grids of scenarios, summaries and checks.
 
+- [`run_scenarios()`](https://provetelab.org/comdynamite/reference/run_scenarios.md)
+  : Run a grid of simulation scenarios
 - [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
   : Summary statistics of a metacommunity
+- [`equilibrium_check()`](https://provetelab.org/comdynamite/reference/equilibrium_check.md)
+  : Check whether a simulation has settled
+- [`as.data.frame(`*`<mc_sim>`*`)`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md)
+  : Simulation results as a long table
 
 ## Results
 

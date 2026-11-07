@@ -15,6 +15,7 @@
 <url><loc>https://provetelab.org/comdynamite/authors.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/news/index.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/assemble_community.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/biogeography_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/comdynamite-package.html</loc></url>
@@ -22,6 +23,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/daphniids.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/dispersal_kernel.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/env_over_time.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/equilibrium_check.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/growth_rates.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/landscape_grid.html</loc></url>
@@ -44,6 +46,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/plot_trait_partition.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/result-methods.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/rigid_permutations.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/run_scenarios.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_logistic.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_static.html</loc></url>
