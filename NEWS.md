@@ -1,5 +1,22 @@
 # comdynamite (development version)
 
+- Plots of null-model tests: `plot()` for `tstats()` and `community_index()` draws, site by
+  site, the null interval (hatched by default) with the observed value coloured by the test, or
+  the standardised effect sizes; `null_intervals()` returns the table behind it.
+- `trait_densities()` gives trait probability densities of populations and communities
+  (Carmona et al. 2016, 2019) with one bandwidth for all populations, and
+  `plot_population_traits()` draws them with adjustable transparency.
+- Classic metrics of trait spacing and spread, for use with `community_index()`: `mnnd()`,
+  `sdnnd()`, `cvnnd()`, `min_nnd()`, `max_nnd()`, `mnd()`, `sdnd()`, `cvnd()`, `mst_length()`,
+  `mst_ratio()`, `trait_range()`, `trait_kurtosis()` and `nn_distances()`. Zero distances count
+  (cati discards them), and one-trait metrics use sorted values instead of distance matrices.
+- `community_index()` accepts a named list of indices, computed on the same randomised
+  communities, and returns them in one table with an `index` column.
+- Sampling effort: `sample_individuals()` gains `cover` (measure only the most abundant species
+  of each site, as in Pakeman & Quested 2007) and `min_n`; `subsample_individuals()` applies
+  the same schemes to real data, and `trait_rarefaction()` follows any statistic over the
+  number of individuals per population or over `cover`, with a `plot()` method that marks the
+  80% rule of Pakeman & Quested (2007) with a dashed line.
 - `tstats()`: the null model of `T_IC.IR` now keeps the observed regional variance as the
   denominator. It was computed from the values drawn, which repeat individuals across sites;
   this biased the null upward and made the tests anti-conservative (about 6% of sites

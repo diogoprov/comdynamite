@@ -57,17 +57,12 @@ tstats_summary <- function(x, level = 0.05) {
     sims <- matrix(null[, , stat], dim(null)[1])
     sims[!is.finite(sims)] <- NA
     obs <- x[[stat]]
-    nperm <- nrow(sims)
-    valid <- colSums(!is.na(sims))
-    ties <- colSums(sims == rep(obs, each = nperm), na.rm = TRUE)
-    testable <- !is.na(obs) & valid > 0 & ties < valid
-    below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-    above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
-    p_low <- ifelse(testable, (1 + below) / (1 + valid), NA_real_)
-    p_high <- ifelse(testable, (1 + above) / (1 + valid), NA_real_)
-    deviation <- ifelse(p_low < level / 2, "low", ifelse(p_high < level / 2, "high", "none"))
-    ses <- null_compare(obs, sims)$ses
-    ses[!testable] <- NA_real_
+    tested <- site_tests(obs, sims, level)
+    testable <- tested$testable
+    p_low <- tested$p_low
+    p_high <- tested$p_high
+    deviation <- tested$deviation
+    ses <- tested$ses
     sites[[stat]] <- data.frame(site = x$site, trait = x$trait, statistic = stat, observed = obs,
                                 ses = ses, p_low = p_low, p_high = p_high,
                                 deviation = deviation, stringsAsFactors = FALSE)
@@ -514,8 +509,10 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' @param individuals Data frame with one row per individual.
 #' @param index Function of the trait values of a site (its first argument: a vector, or a
 #'   matrix with `multivariate = TRUE`) and optionally of their species (an argument named
-#'   `species`), returning a single number, such as `stats::var` or
-#'   `function(x, species) stats::var(tapply(x, species, mean))`.
+#'   `species`), returning a single number, such as `stats::var`, [mnnd()] or
+#'   `function(x, species) stats::var(tapply(x, species, mean))`; or a named list of such
+#'   functions, all computed on the same observed and randomised communities, such as
+#'   `list(variance = stats::var, MNND = mnnd, range = trait_range)`.
 #' @param traits Names of the columns with trait values.
 #' @param site,species Names of the columns with the site and the species.
 #' @param null Null model (see Details).
@@ -523,10 +520,11 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' @param alternative Direction of the test: `"two.sided"` (the default), `"less"` or
 #'   `"greater"`.
 #' @param multivariate If `TRUE`, the index receives all traits at once.
-#' @return A data frame with one row per site and trait (or per site with
-#'   `multivariate = TRUE`, trait `"multivariate"`) and the columns `site`, `trait`,
-#'   `observed`, and with `nperm > 0` also `ses` and `p`; the attribute `null` holds the null
-#'   values (randomisation x row). Individuals with a missing value are left out for that trait
+#' @return A data frame of class `community_index` with one row per site, trait (or
+#'   `"multivariate"` with `multivariate = TRUE`) and index, and the columns `site`, `trait`,
+#'   `index` (the name in the list, or the name of the function), `observed`, and with
+#'   `nperm > 0` also `ses` and `p`; the attribute `null` holds the null values
+#'   (randomisation x row), and [plot()][plot.community_index] draws the tests. Individuals with a missing value are left out for that trait
 #'   (for any trait with `multivariate = TRUE`).
 #' @references Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits
 #'   to detect and quantify multi-level community assembly processes. *Ecography*, 39,
@@ -542,6 +540,9 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' # variance among the population means of a site
 #' pop_var <- function(x, species) stats::var(tapply(x, species, mean))
 #' community_index(ind, pop_var, null = "local", nperm = 99)
+#' # several indices at once, on the same randomised communities
+#' community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
+#'                 null = "regional.ind", nperm = 99)
 #' @export
 community_index <- function(individuals, index, traits = "trait", site = "site",
                             species = "species",
@@ -551,7 +552,17 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
                             multivariate = FALSE) {
   null <- match.arg(null)
   alternative <- match.arg(alternative)
-  stopifnot(is.data.frame(individuals), is.function(index), is.character(traits),
+  if (is.function(index)) {
+    label <- paste(deparse(substitute(index)), collapse = "")
+    if (nchar(label) > 30 || grepl("^function", label)) label <- "index"
+    index <- stats::setNames(list(index), label)
+  }
+  if (!is.list(index) || length(index) == 0 || !all(vapply(index, is.function, logical(1))) ||
+      is.null(names(index)) || any(names(index) == "") || anyDuplicated(names(index))) {
+    stop("`index` must be a function or a list of functions with distinct names",
+         call. = FALSE)
+  }
+  stopifnot(is.data.frame(individuals), is.character(traits),
             length(traits) >= 1, isTRUE(multivariate) || isFALSE(multivariate))
   missing_columns <- setdiff(c(traits, site, species), names(individuals))
   if (length(missing_columns) > 0) {
@@ -559,13 +570,17 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   }
   nperm <- if (is.null(nperm)) 0 else nperm
   stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
-  uses_species <- "species" %in% names(formals(index))
+  index_names <- names(index)
+  n_index <- length(index)
+  uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))
   apply_index <- function(x, sp) {
-    value <- if (uses_species) index(x, species = sp) else index(x)
-    if (!is.numeric(value) || length(value) != 1) {
-      stop("`index` must return a single number", call. = FALSE)
-    }
-    as.numeric(value)
+    vapply(seq_len(n_index), function(k) {
+      value <- if (uses_species[k]) index[[k]](x, species = sp) else index[[k]](x)
+      if (!is.numeric(value) || length(value) != 1) {
+        stop("index `", index_names[k], "` must return a single number", call. = FALSE)
+      }
+      as.numeric(value)
+    }, numeric(1))
   }
   site_all <- as.character(individuals[[site]])
   species_all <- as.character(individuals[[species]])
@@ -592,15 +607,16 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
       carried <- pop_means[pop, , drop = FALSE]
     }
     rows_of <- split(seq_along(site_id), factor(site_id, site_levels))
+    # one value per site and index, sites varying fastest
     site_index <- function(v) {
-      vapply(rows_of, function(i) {
-        if (length(i) == 0) return(NA_real_)
+      as.vector(t(matrix(vapply(rows_of, function(i) {
+        if (length(i) == 0) return(rep(NA_real_, n_index))
         x <- v[i, , drop = FALSE]
         apply_index(if (multivariate) x else x[, 1], species_id[i])
-      }, numeric(1))
+      }, numeric(n_index)), n_index)))
     }
     observed <- site_index(values)
-    sims <- matrix(NA_real_, nperm, length(site_levels))
+    sims <- matrix(NA_real_, nperm, length(site_levels) * n_index)
     n <- nrow(values)
     for (r in seq_len(nperm)) {
       shuffled <- values
@@ -614,12 +630,14 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
       }
       sims[r, ] <- site_index(shuffled)
     }
-    list(table = data.frame(site = site_levels, trait = label, observed = observed,
-                            row.names = NULL, stringsAsFactors = FALSE),
+    list(table = data.frame(site = rep(site_levels, n_index), trait = label,
+                            index = rep(index_names, each = length(site_levels)),
+                            observed = observed, row.names = NULL, stringsAsFactors = FALSE),
          null = sims)
   })
   out <- do.call(rbind, lapply(per_set, `[[`, "table"))
   rownames(out) <- NULL
+  class(out) <- c("community_index", class(out))
   if (nperm == 0) return(out)
   sims <- do.call(cbind, lapply(per_set, `[[`, "null"))
   compared <- null_compare(out$observed, sims, alternative)
@@ -635,4 +653,23 @@ check_colours <- function(colours, n) {
     !inherits(try(grDevices::col2rgb(colours), silent = TRUE), "try-error")
   if (!ok) stop("`colours` must be ", n, " valid colours", call. = FALSE)
   invisible(colours)
+}
+
+# one-sided tests of each site against its null values (columns of sims), as in
+# tstats_summary(): sites with a missing observed value, no valid null value or every null value
+# tied with the observed one cannot be tested and get NA
+site_tests <- function(obs, sims, level) {
+  sims[!is.finite(sims)] <- NA
+  nperm <- nrow(sims)
+  valid <- colSums(!is.na(sims))
+  ties <- colSums(sims == rep(obs, each = nperm), na.rm = TRUE)
+  testable <- !is.na(obs) & valid > 0 & ties < valid
+  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  p_low <- ifelse(testable, (1 + below) / (1 + valid), NA_real_)
+  p_high <- ifelse(testable, (1 + above) / (1 + valid), NA_real_)
+  deviation <- ifelse(p_low < level / 2, "low", ifelse(p_high < level / 2, "high", "none"))
+  ses <- null_compare(obs, sims)$ses
+  ses[!testable] <- NA_real_
+  list(testable = testable, p_low = p_low, p_high = p_high, deviation = deviation, ses = ses)
 }

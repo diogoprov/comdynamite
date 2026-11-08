@@ -21,8 +21,10 @@ community_index(
 
 \item{index}{Function of the trait values of a site (its first argument: a vector, or a
 matrix with \code{multivariate = TRUE}) and optionally of their species (an argument named
-\code{species}), returning a single number, such as \code{stats::var} or
-\code{function(x, species) stats::var(tapply(x, species, mean))}.}
+\code{species}), returning a single number, such as \code{stats::var}, \code{\link[=mnnd]{mnnd()}} or
+\code{function(x, species) stats::var(tapply(x, species, mean))}; or a named list of such
+functions, all computed on the same observed and randomised communities, such as
+\code{list(variance = stats::var, MNND = mnnd, range = trait_range)}.}
 
 \item{traits}{Names of the columns with trait values.}
 
@@ -38,10 +40,11 @@ matrix with \code{multivariate = TRUE}) and optionally of their species (an argu
 \item{multivariate}{If \code{TRUE}, the index receives all traits at once.}
 }
 \value{
-A data frame with one row per site and trait (or per site with
-\code{multivariate = TRUE}, trait \code{"multivariate"}) and the columns \code{site}, \code{trait},
-\code{observed}, and with \code{nperm > 0} also \code{ses} and \code{p}; the attribute \code{null} holds the null
-values (randomisation x row). Individuals with a missing value are left out for that trait
+A data frame of class \code{community_index} with one row per site, trait (or
+\code{"multivariate"} with \code{multivariate = TRUE}) and index, and the columns \code{site}, \code{trait},
+\code{index} (the name in the list, or the name of the function), \code{observed}, and with
+\code{nperm > 0} also \code{ses} and \code{p}; the attribute \code{null} holds the null values
+(randomisation x row), and \link[=plot.community_index]{plot()} draws the tests. Individuals with a missing value are left out for that trait
 (for any trait with \code{multivariate = TRUE}).
 }
 \description{
@@ -84,6 +87,9 @@ community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 
 # variance among the population means of a site
 pop_var <- function(x, species) stats::var(tapply(x, species, mean))
 community_index(ind, pop_var, null = "local", nperm = 99)
+# several indices at once, on the same randomised communities
+community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
+                null = "regional.ind", nperm = 99)
 }
 \references{
 Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits
