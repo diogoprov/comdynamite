@@ -540,13 +540,37 @@ pacotes de referência em vez de reimplementá-los.
       na evolução de traits, citar também Leibold et al. (2022), evolução e montagem de
       comunidades através de escalas espaciais, e McPeek (2017), *Evolutionary Community
       Ecology*. Notas de leitura e cenários de simulação em `dev/notas-artigo-taxas.md`.
-- [ ] Função que traduz a história de uma metacomunidade simulada (colonizações, entradas e
-      saídas de parceiros, mudanças de hábitat) em taxas por ramo para `trait_rates()` e
-      `trait_mk()`, para os cenários 1, 2, 5 e 8 das notas.
+      Incluir os resultados da validação e o limite de identificabilidade (uma realização por
+      ramo).
+- [ ] Ponte direta com Leibold et al. (2022) como eixo do artigo. Os autores apontam que os
+      modelos macroecológicos não incorporam adequadamente quanto a adaptação local e a
+      montagem alteram as taxas de especiação e extinção e, por elas, as filogenias e a biota
+      regional, que por sua vez alimenta a montagem. O comdynamite pode fechar esse ciclo com
+      verdade conhecida: dinâmica da metacomunidade → história por linhagem
+      (`history_rates()`) → taxas por ramo e traits (`trait_rates()`) → montagem com esses
+      traits → estimadores de taxa por ramo. Simular os cenários que eles sugerem (frequência
+      de extinção de manchas, autocorrelação espacial do ambiente, ordem de chegada,
+      adaptações secundárias que revertem a monopolização) e as três taxas relativas da
+      Fig. 1 (colonização, regulação da comunidade, evolução) e perguntar se cada regime deixa
+      assinatura recuperável nas taxas estimadas. Interpretação nossa: eles falam de taxas em
+      escala ecológica, não de taxas por ramo; o artigo deve dizer isso.
+- [ ] `food_web_dynamics()`: cadeia recurso–consumidor–predador com dinâmica de abundâncias e
+      de traços médios de McPeek (2017, eq. 3.8–3.21 e Box 3.1), integrada em R base
+      (Runge–Kutta), com as três formas de coeficiente de ataque e gradientes numéricos de
+      ln W. Reimplementada a partir das equações publicadas; o código MATLAB do autor (sem
+      licença declarada) só serve de comparação via Octave, sem copiar nada. Validar
+      reproduzindo as Fig. 3.2–3.3 e 3.11. Depois: várias espécies por nível (cap. 5) e
+      trajetórias dos traços como taxas por linhagem para o cenário 4 das notas.
+- [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,
+      com taxa por estado (`"state"`, como O'Meara et al. 2006), explosão após cada mudança
+      que decai exponencialmente (`"burst"`, cenários 1 e 2 das notas) e dependência do número
+      de linhagens no mesmo estado (`"sympatry"`, o DDexp com geografia de Drury et al.
+      2016); `trait_rates(edge_rates = )` recebe as taxas. Validar `"sympatry"` contra
+      `RPANDA::fit_t_comp()`. Falta ligar a saída de `simulate_metacommunity()` (entradas e
+      saídas de parceiros, cenários 5 e 8).
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
-      das notas). Incluir os resultados da validação e o limite
-      de identificabilidade (uma realização por ramo).
+      das notas).
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -696,6 +720,7 @@ Objetivo: API estável e pacote no CRAN.
 ## Referências citadas neste roadmap
 
 - Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). *Evolution*, 57, 2647–2652. https://doi.org/10.1111/j.0014-3820.2003.tb01508.x
+- Drury, J., Clavel, J., Manceau, M., & Morlon, H. (2016). *Systematic Biology*, 65, 700–710. https://doi.org/10.1093/sysbio/syw020
 - Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population Biology 59. Princeton University Press. https://doi.org/10.2307/j.ctt1wf4d24
 
 Conferidas no Crossref em 2026-11-05.
@@ -721,6 +746,7 @@ Conferidas no Crossref em 2026-11-05.
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
 - McPeek, M. A. (2017). *Evolutionary Community Ecology*. Monographs in Population Biology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
+- O'Meara, B. C., Ané, C., Sanderson, M. J., & Wainwright, P. C. (2006). *Evolution*, 60, 922–933. https://doi.org/10.1111/j.0014-3820.2006.tb01171.x
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Pontarp, M., et al. (2019). *Methods in Ecology and Evolution*, 10, 450–460. https://doi.org/10.1111/2041-210x.13129
 - Prangle, D., et al. (2014). *Statistical Applications in Genetics and Molecular Biology*, 13, 67–82. https://doi.org/10.1515/sagmb-2013-0012
