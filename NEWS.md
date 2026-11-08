@@ -27,6 +27,12 @@
   and under OU within 3.1 of the covariance of Hansen (1997); `mvBM()` with the same constraint
   recovered the matrices (100 tips, median of 30 fits within 9% of each true element).
 
+- `plot.food_web()` draws the abundances, mean traits and rates of trait change from
+  `food_web_dynamics()` in stacked panels, with introductions marked; with `time` it draws the
+  state up to that time on the axes of the whole run. `animate_food_web()` turns these frames
+  into a GIF (gifski in `Suggests`); the reference page of `food_web_dynamics()` shows one,
+  made by `data-raw/food_web_gif.R`.
+
 - `food_web_dynamics()` simulates the joint dynamics of abundances and mean traits of a
   resource, a consumer and a predator, the three-trophic-level model of chapter 3 of McPeek
   (2017, *Evolutionary Community Ecology*): quadratic intrinsic rates, Holling type II feeding,
@@ -41,9 +47,17 @@
   280 and 47 times lower at iteration 3000 than at their maxima), figure 3.3 (the consumer at
   a maximum and the resource at a minimum of their fitness surfaces at the end) and the
   effect of the predator in figure 3.11: with the predator the resource evolves a trait
-  closer to its birth optimum of 12 under the three attack forms, from 16.8 to 11.5 with
-  Gaussian attack (book: 16 to 12.4), from 13.6 to 12.6 with logistic attack (15.5 to 12.9)
-  and from 10.1 to 11.6 with Michaelis-Menten attack (10 to 11.6).
+  closer to its birth optimum of 12 under the three attack forms, from 16.8 to 11.8 with
+  Gaussian attack (book: 15.6 to 12.4), from 13.6 to 12.6 with logistic attack (15.4 to 12.9)
+  and from 10.1 to 11.6 with Michaelis-Menten attack (10.1 to 11.5). The three-level
+  Michaelis-Menten panel is reproduced closely; the consumer and predator traits of the
+  logistic panel cannot be reproduced from the parameters of its caption, at which the
+  consumer cannot persist. Against the MATLAB code of the resource-consumer models published
+  with McPeek (2017, *The American Naturalist*), the fitness functions and gradients are the
+  same and the trajectories of figure 3.2 agree within 1e-4 of the author's `ode45`
+  integration; that code has no predator, and the chapter's own code was offline and not
+  archived. `trait_floor` keeps mean traits at or above a value, as the author's code does
+  at zero (the default with Michaelis-Menten attack).
 
 - `history_rates()` turns the history of a discrete character along the tree, such as the
   region or habitat of each lineage from `trait_mk()` or a stochastic map, into the rate of

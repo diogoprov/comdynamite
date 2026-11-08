@@ -44,6 +44,8 @@ reference:
   contents:
   - food_web_dynamics
   - food_web_params
+  - plot.food_web
+  - animate_food_web
 - title: Competition
   desc: Interspecific competition, optionally structured by relatedness.
   contents:
