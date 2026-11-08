@@ -14,7 +14,8 @@ RNGkind("L'Ecuyer-CMRG")
 set.seed(41)
 
 # CreateGeoObject() fails on some maps without any change of region (an RPANDA bug: object
-# 'old.Dist' not found), so such histories are drawn again
+# 'old.Dist' not found; https://github.com/hmorlon/PANDA/issues/56), so such histories are
+# drawn again
 one_history <- function(n, q) {
   repeat {
     tree <- ape::rcoal(n)
