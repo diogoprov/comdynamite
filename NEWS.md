@@ -4,6 +4,13 @@
   by species name or in the order of the species. The traits not given are drawn as before, and
   with the same seed they are the same as without the external ones. `rescale_optima = FALSE`
   keeps external optima on their own scale.
+- Trait histories along the tree, to validate reconstructions: `trait_bm(nodes = TRUE)` and
+  `species_traits(nodes = TRUE)` give the values at the internal nodes, drawn after everything
+  else so that the other values stay the same with the same seed; `traits_ou()` keeps them as
+  the attribute `nodes`. `trait_mk()` simulates a discrete trait under the Mk model and keeps
+  every change, in the `simmap` format of phytools. `tip_history_metrics()` gives the
+  tip-based metrics of Luza et al. (2021), as computed by Herodotools, from a known history,
+  plus the number of changes and the time since the last one in continuous time.
 - `simulate_metacommunity()` and `mc_dynamics()`: `pool` limits each species to the sites
   where it can occur, such as its range or a biogeographic reconstruction, and `initial` gives
   the abundances or presences at the start. Without them, results with the same seed are the

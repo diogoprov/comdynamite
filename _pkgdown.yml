@@ -30,6 +30,8 @@ reference:
   - species_traits
   - trait_bm
   - traits_ou
+  - trait_mk
+  - tip_history_metrics
   - paint_regimes
 - title: Competition
   desc: Interspecific competition, optionally structured by relatedness.

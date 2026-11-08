@@ -182,10 +182,22 @@ com outros pacotes. As versões seguintes dependem desta.
       Pool que muda no tempo (expansões de área) fica para quando houver uso.
 - [x] `species_traits()` aceita traits vindos de fora (`optima`, `sigma`, `r_max`), por
       exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
-- [ ] Registrar a história dos traits ao longo dos ramos, se hoje só houver as pontas.
+- [x] Registrar a história dos traits ao longo dos ramos: valores nos nós em `trait_bm()`,
+      `species_traits()` (`nodes = TRUE`, sem mudar os outros valores com a mesma semente) e
+      `traits_ou()`; `trait_mk()` para trait discreto (Mk), no formato simmap do phytools
+      (conferido contra `phytools::sim.history()`); `tip_history_metrics()` com as métricas
+      de Luza et al. (2021) como o código de `calc_tip_based_trait_evo()` as calcula (nós,
+      não mudanças dentro dos ramos), mais `changes` e `time_since_change` em tempo contínuo.
+      O Herodotools não foi instalado (depende do daee, fora do CRAN): a equivalência vem da
+      leitura do código, não de uma comparação rodada. Taxas variando entre ramos (relaxed
+      BM, BAMM) como modelo gerador ficam para depois.
 - [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
       lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
-      Com a história conhecida, a simulação pode validar esses métodos.
+      Com a história conhecida, a simulação pode validar esses métodos. Último item da
+      v0.4.0. Antes: instalar o daee (GitHub), rodar `calc_tip_based_trait_evo()` numa
+      história de `trait_mk()` e comparar com `tip_history_metrics()`, inclusive o
+      comprimento que o daee dá ao ramo da raiz; conferir o que `calc_ancestral_state()`
+      e as funções de áreas ancestrais leem.
 
 **Concluído quando:** um cenário simulado passar pelo Herodotools e recuperar a
 história conhecida.
@@ -491,6 +503,8 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
+- [ ] Taxas que variam entre ramos como modelo gerador (relaxed BM, saltos de taxa como no
+      BAMM), reescalando os ramos, com os valores nos nós como em `trait_bm()`.
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -514,8 +528,8 @@ Simular o cenário:
 
 - [ ] Árvore e regiões geradas juntas, por exemplo com um simulador de GeoSSE, em cenários
       que variem especiação, extinção, dispersão e tempo de colonização por região.
-- [ ] Traits discretos e filtragem por eles, como os modos reprodutivos. Hoje o modelo
-      só tem traits contínuos.
+- [ ] Filtragem por traits discretos, como os modos reprodutivos. `trait_mk()` (v0.4.0)
+      já simula o trait com a história; falta o modelo de comunidade usá-lo.
 - [ ] Duas regiões com pools próprios e dispersão limitada entre elas, usando a
       entrada da v0.4.0.
 - [ ] Amostragem imperfeita: sítios, dias de coleta e espécies não detectadas.

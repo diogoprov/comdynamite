@@ -36,7 +36,8 @@ regime.}
 }
 \value{
 Matrix with one row per tip (tip labels as row names) and one
-column per trait.
+column per trait. The attribute \code{nodes} holds the values at the internal nodes, one row
+per node named by its number in \code{tree$edge}, the root first.
 }
 \description{
 Simulates traits along a tree under the Ornstein-Uhlenbeck (OU) model of

@@ -27,7 +27,8 @@
 #'   regime.
 #' @param root Trait value at the root.
 #' @return Matrix with one row per tip (tip labels as row names) and one
-#'   column per trait.
+#'   column per trait. The attribute `nodes` holds the values at the internal nodes, one row
+#'   per node named by its number in `tree$edge`, the root first.
 #' @references
 #'   Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis: a
 #'   modeling approach for adaptive evolution. *The American Naturalist*, 164,
@@ -85,6 +86,8 @@ traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
   }
   out <- x[seq_len(n_tip), , drop = FALSE]
   dimnames(out) <- list(tree$tip.label, paste0("trait", seq_len(n_traits)))
+  attr(out, "nodes") <- x[-seq_len(n_tip), , drop = FALSE]
+  dimnames(attr(out, "nodes")) <- list(n_tip + seq_len(tree$Nnode), colnames(out))
   out
 }
 
