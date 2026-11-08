@@ -42,6 +42,11 @@ tr <- treeshapesim::sim_tree_shape(10)
 h <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 h$states
 tip_history_metrics(h)
+# rates that vary among branches
+g <- trait_mk(tr, q = 0.5, alpha = 0.3)
+round(g$edge_rates, 2)
+hr <- trait_mk(tr, q = 0.5, rate_classes = c(slow = 0.1, fast = 2), class_switch = 0.2)
+hr$classes
 \dontshow{\}) # examplesIf}
 }
 \references{

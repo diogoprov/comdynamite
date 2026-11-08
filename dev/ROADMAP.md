@@ -516,12 +516,23 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
-- [ ] Taxas que variam entre ramos como modelo gerador (relaxed BM, saltos de taxa como no
-      BAMM), reescalando os ramos, com os valores nos nós como em `trait_bm()`.
-      Antes de escolher, analisar qual modelo vale mais a pena (nota de 2026-11-07): RRphylo
-      (traits contínuos e discretos), bifrost (https://jakeberv.com/bifrost/, traits
-      contínuos) e BayesTraits (estima taxas por ramo). Conferir em cada um o modelo, o que
-      ele estima e o formato de saída das taxas por ramo, que serviria de entrada aqui.
+- [x] Taxas que variam entre ramos como modelo gerador. Avaliação da literatura (2026-11-07):
+      um gerador com a verdade conhecida, não um método de inferência; RRphylo, phytools,
+      motmot, bifrost e corHMM são GPL e só entram em `Suggests` ou `data-raw`. O RRphylo não
+      tem modelo discreto (aceita estados codificados como números, tratados como contínuos).
+      BayesTraits e RevBayes adiados (binários externos; licença do BayesTraits não
+      declarada); BAMM sem manutenção desde 2017.
+      `trait_rates()`: modos `"shift"` (mudanças herdadas ou só no ramo), `"gbm"` (log da taxa
+      por BM) e `"iid"` (lognormal por ramo), com os valores nos nós e as taxas por ramo.
+      `trait_mk()`: `alpha`/`edge_rates` (Γ por ramo, como `fitgammaMk`) e `rate_classes`
+      (classes ocultas, como corHMM). Validação em `data-raw/validation_rates.R`.
+- [ ] Artigo (vignette) sobre taxas por ramo. Citar obrigatoriamente Hubert et al. (2015),
+      modelos de especiação em metacomunidades, e Januario et al. (2025), persistência
+      metapopulacional contra taxas de especiação nas pontas (sinal filogenético, mas sem
+      relação com a especiação). Ponte: os dois tratam de taxas de diversificação; aqui as
+      taxas são de evolução de traits, e a pergunta análoga é se a dinâmica da metacomunidade
+      deixa rastro nas taxas estimadas por ramo. Incluir os resultados da validação e o limite
+      de identificabilidade (uma realização por ramo).
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -686,9 +697,11 @@ Conferidas no Crossref em 2026-11-05.
 - Goldberg, E. E., et al. (2011). *Systematic Biology*, 60, 451–465. https://doi.org/10.1093/sysbio/syr046
 - Goldberg, E. E., & Igić, B. (2012). *Evolution*, 66, 3701–3709. https://doi.org/10.1111/j.1558-5646.2012.01730.x
 - Guzman, L. M., et al. (2022). *Ecology*, 103. https://doi.org/10.1002/ecy.3683
+- Hubert, N., Calcagno, V., Etienne, R. S., & Mouquet, N. (2015). *Ecology Letters*, 18, 864–881. https://doi.org/10.1111/ele.12458
 - Harvey, M. G., & Rabosky, D. L. (2017). *Methods in Ecology and Evolution*, 9, 984–993. https://doi.org/10.1111/2041-210x.12949
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
 - Legendre, P. (2008). *Journal of Plant Ecology*, 1, 3–8. https://doi.org/10.1093/jpe/rtm001
+- Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). *Ecology Letters*, 28, e70021. https://doi.org/10.1111/ele.70021
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
