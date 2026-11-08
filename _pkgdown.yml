@@ -99,6 +99,7 @@ reference:
   - population_shifts
   - community_index
   - trait_flex
+  - plot.trait_flex
   - nested_variance
   - plot.nested_variance
 - title: Results

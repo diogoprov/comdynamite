@@ -276,3 +276,32 @@ test_that("labels of plot.nested_variance() sit inside their own segment", {
   expect_equal(text$y, (bars$ymin + bars$ymax) / 2)
   expect_equal(text$label, sprintf("%.0f%%", 100 * (bars$ymax - bars$ymin)))
 })
+
+test_that("plot() of trait_flex() shows explained and residual parts and negative covariation", {
+  skip_if_not_installed("ggplot2")
+  set.seed(5)
+  # tall species dominate wet sites, while every species gets shorter with moisture
+  env <- data.frame(site = sprintf("s%d", 1:8), moisture = 1:8)
+  ind <- do.call(rbind, lapply(1:8, function(k) {
+    sp <- sample(c("short", "tall"), 30, replace = TRUE, prob = c(9 - k, k))
+    data.frame(site = sprintf("s%d", k), species = sp,
+               height = c(short = 10, tall = 20)[sp] - 0.8 * k + rnorm(30, sd = 0.5))
+  }))
+  res <- trait_flex(ind, traits = "height", formula = ~moisture, env = env)
+  expect_s3_class(res, "trait_flex")
+  cov_total <- res$decomposition$total[res$decomposition$component == "covariation"]
+  expect_lt(cov_total, 0)
+  p <- plot(res)
+  expect_s3_class(p, "ggplot")
+  bars <- ggplot2::layer_data(p, 2)
+  expect_equal(nrow(bars), 8)
+  # each component reaches its share of the total sum of squares; covariation lies below zero
+  total_ss <- res$decomposition$total[4]
+  signed <- ifelse(bars$ymin < 0 & bars$ymax <= 0, bars$ymin - bars$ymax, bars$ymax - bars$ymin)
+  expect_equal(as.vector(tapply(signed, bars$x, sum)), res$decomposition$total / total_ss)
+  expect_true(any(bars$ymin[bars$x == 3] < 0))
+  # without a model there is one part and no legend
+  plain <- ggplot2::layer_data(plot(trait_flex(ind, traits = "height"), relative = FALSE), 2)
+  expect_equal(nrow(plain), 4)
+  expect_equal(plain$y, trait_flex(ind, traits = "height")$decomposition$total)
+})

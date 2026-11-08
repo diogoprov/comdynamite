@@ -139,7 +139,8 @@ tstats_summary <- function(x, level = 0.05) {
 #'   (`turnover`, `intraspecific`, `covariation`, `total`) and the columns `explained`,
 #'   `residual`, `total` (sums of squares) and `p` (of the regression, `NA` for the
 #'   covariation and without a model), and `sites`, a data frame with the specific and fixed
-#'   means and their difference for each site and trait.
+#'   means and their difference for each site and trait. The list has class `trait_flex`,
+#'   with a [plot()][plot.trait_flex] method.
 #' @references Lepš, J., de Bello, F., Šmilauer, P., & Doležal, J. (2011). Community trait
 #'   response to environment: disentangling species turnover vs intraspecific trait
 #'   variability effects. *Ecography*, 34, 856--863. \doi{10.1111/j.1600-0587.2010.06904.x}
@@ -151,7 +152,9 @@ tstats_summary <- function(x, level = 0.05) {
 #' env <- data.frame(site = paste0("s", 1:6), moisture = 1:6)
 #' ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] +
 #'   env$moisture[match(ind$site, env$site)] + rnorm(120)
-#' trait_flex(ind, formula = ~ moisture, env = env)$decomposition
+#' res <- trait_flex(ind, formula = ~ moisture, env = env)
+#' res$decomposition
+#' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 #' @export
 trait_flex <- function(individuals, traits = "trait", site = "site", species = "species",
                        abundance = NULL, formula = ~1, env = NULL) {
@@ -245,8 +248,70 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
                                       fixed = fixed, intraspecific = specific - fixed,
                                       row.names = NULL, stringsAsFactors = FALSE)
   }
-  list(decomposition = do.call(rbind, unname(decomposition)),
-       sites = do.call(rbind, unname(site_means)))
+  structure(list(decomposition = do.call(rbind, unname(decomposition)),
+                 sites = do.call(rbind, unname(site_means))), class = "trait_flex")
+}
+
+#' Plot the decomposition of community trait means
+#'
+#' Draws, for each trait, the sums of squares among sites of the community mean due to species
+#' turnover, intraspecific variability, their covariation and the total, from [trait_flex()].
+#' With an environmental model each bar is split into the part explained by the model and the
+#' residual part. A negative covariation (turnover and intraspecific variability moving the
+#' community mean in opposite directions) is drawn below zero. Needs the package ggplot2.
+#'
+#' @param x Result of [trait_flex()].
+#' @param relative If `TRUE` (the default), sums of squares are divided by the total sum of
+#'   squares of each trait, so that traits on different scales can be compared.
+#' @param ... Not used.
+#' @return A ggplot object, which can be changed further with ggplot2 functions.
+#' @seealso [trait_flex()].
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' ind <- data.frame(site = rep(paste0("s", 1:8), each = 20),
+#'                   species = sample(c("a", "b", "c"), 160, replace = TRUE))
+#' env <- data.frame(site = paste0("s", 1:8), moisture = 1:8)
+#' shift <- env$moisture[match(ind$site, env$site)]
+#' ind$height <- c(a = 10, b = 20, c = 30)[ind$species] + shift + rnorm(160)
+#' ind$leaf <- c(a = 3, b = 2, c = 1)[ind$species] - 0.3 * shift + rnorm(160)
+#' plot(trait_flex(ind, traits = c("height", "leaf"), formula = ~ moisture, env = env))
+#' @export
+plot.trait_flex <- function(x, relative = TRUE, ...) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("plot() of trait_flex() needs the package ggplot2", call. = FALSE) # nocov
+  }
+  stopifnot(is.logical(relative), length(relative) == 1, !is.na(relative))
+  dec <- x$decomposition
+  components <- c("turnover", "intraspecific", "covariation", "total")
+  scale <- if (relative) {
+    dec$total[dec$component == "total"][match(dec$trait, dec$trait[dec$component == "total"])]
+  } else {
+    1
+  }
+  has_model <- any(dec$explained != 0, na.rm = TRUE)
+  parts <- if (has_model) c(explained = "Explained by the model", residual = "Residual") else
+    c(total = "Sum of squares")
+  long <- do.call(rbind, lapply(names(parts), function(part) {
+    data.frame(trait = factor(dec$trait, unique(dec$trait)),
+               component = factor(dec$component, components),
+               part = factor(parts[[part]], rev(parts)), value = dec[[part]] / scale)
+  }))
+  fill <- stats::setNames(c(grDevices::hcl.colors(1, "Viridis"), "grey75")[seq_along(parts)],
+                          unname(parts))
+  .data <- ggplot2::.data
+  ggplot2::ggplot(long, ggplot2::aes(x = .data$component, y = .data$value, fill = .data$part,
+                                     group = .data$part)) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey40") +
+    ggplot2::geom_col(width = 0.7) +
+    ggplot2::facet_wrap(ggplot2::vars(.data$trait), scales = if (relative) "fixed" else "free_y") +
+    ggplot2::scale_fill_manual(values = fill, breaks = unname(parts), name = NULL,
+                               guide = if (has_model) "legend" else "none") +
+    ggplot2::scale_y_continuous(labels = if (relative) function(v) paste0(100 * v, "%") else
+      ggplot2::waiver()) +
+    ggplot2::labs(x = NULL, y = if (relative) "Share of the total sum of squares" else
+      "Sum of squares") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), legend.position = "top")
 }
 
 #' Variance components of traits across nested levels

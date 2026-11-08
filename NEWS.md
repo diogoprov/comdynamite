@@ -11,7 +11,7 @@
   that deviate), with sites that cannot be tested left out instead of given small p-values;
   `trait_flex()` splits community-weighted means into species turnover, intraspecific
   variability and covariation (Lepš et al. 2011), with environmental variables matched to sites
-  by name; `nested_variance()` gives REML variance components across nested levels (nlme in
+  by name, and a `plot()` method (ggplot2) with explained and residual sums of squares; `nested_variance()` gives REML variance components across nested levels (nlme in
   Suggests) and stops when the factors are not ordered from the broadest to the finest level,
   with a `plot()` method that draws stacked bars of the shares (ggplot2 in Suggests);
   `community_index()` compares any trait index of communities with four null models, with all

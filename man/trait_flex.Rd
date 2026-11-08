@@ -37,7 +37,8 @@ A list with \code{decomposition}, a data frame with one row per trait and compon
 (\code{turnover}, \code{intraspecific}, \code{covariation}, \code{total}) and the columns \code{explained},
 \code{residual}, \code{total} (sums of squares) and \code{p} (of the regression, \code{NA} for the
 covariation and without a model), and \code{sites}, a data frame with the specific and fixed
-means and their difference for each site and trait.
+means and their difference for each site and trait. The list has class \code{trait_flex},
+with a \link[=plot.trait_flex]{plot()} method.
 }
 \description{
 Splits the variation among sites of the community-weighted mean of a trait into the parts due
@@ -68,7 +69,9 @@ ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
 env <- data.frame(site = paste0("s", 1:6), moisture = 1:6)
 ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] +
   env$moisture[match(ind$site, env$site)] + rnorm(120)
-trait_flex(ind, formula = ~ moisture, env = env)$decomposition
+res <- trait_flex(ind, formula = ~ moisture, env = env)
+res$decomposition
+if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 }
 \references{
 Lepš, J., de Bello, F., Šmilauer, P., & Doležal, J. (2011). Community trait
