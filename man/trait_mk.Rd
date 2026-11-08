@@ -4,7 +4,16 @@
 \alias{trait_mk}
 \title{A discrete trait evolving along a tree, with its whole history}
 \usage{
-trait_mk(tree, q = 1, states = c("0", "1"), root = NULL)
+trait_mk(
+  tree,
+  q = 1,
+  states = c("0", "1"),
+  root = NULL,
+  alpha = NULL,
+  edge_rates = NULL,
+  rate_classes = NULL,
+  class_switch = 0.1
+)
 }
 \arguments{
 \item{tree}{A rooted \code{phylo} tree with branch lengths.}
@@ -16,19 +25,44 @@ its diagonal is ignored.}
 \item{states}{Names of the states, when \code{q} is one rate.}
 
 \item{root}{State at the root; \code{NULL} draws one with equal probabilities.}
+
+\item{alpha}{Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
+\code{NULL} for none. Small values make rates more uneven among branches.}
+
+\item{edge_rates}{Optional multipliers of the rates of each branch, in the order of the rows of
+\code{tree$edge}, instead of drawing them with \code{alpha}.}
+
+\item{rate_classes}{Optional multipliers of the rates in each hidden class, such as
+\code{c(slow = 0.1, fast = 1)}; classes without names are called \code{R1}, \code{R2} and so on.}
+
+\item{class_switch}{Rate of moving from one hidden class to each other one.}
 }
 \value{
 The tree, reordered "cladewise", with class \code{c("simmap", "phylo")} and, as in
 \code{phytools::sim.history()}: \code{maps}, a list with one element per edge giving the time spent in
 each state in the order they occurred; \code{mapped.edge}, the total time in each state per edge;
 \code{node.states}, the states at the start and end of each edge; and \code{states}, the states of
-the tips. \code{Q} holds the rate matrix used.
+the tips. \code{Q} holds the rate matrix used. With rates varying among branches, \code{edge_rates}
+holds the multiplier of each edge, in the new order of the edges. With \code{rate_classes},
+\code{hidden} holds the same history with the class of each segment, as states named
+\code{"state|class"}, with its own \code{maps}, \code{node.states}, \code{states} and \code{Q}, and \code{classes} holds
+the class of each tip.
 }
 \description{
 Simulates a discrete character under the Mk model (Lewis 2001): along each branch the state
 changes after exponential waiting times, with the rates of \code{q}. The result keeps every change,
 in the format of a stochastic character map of phytools (class \code{simmap}), so it is the known
 history against which reconstructions can be compared, for example by \code{\link[=tip_history_metrics]{tip_history_metrics()}}.
+}
+\details{
+Rates can vary among branches in two ways. With \code{alpha} (or \code{edge_rates}), all rates of a
+branch are multiplied by one factor, drawn for each branch from a gamma distribution with
+shape and rate \code{alpha} (mean 1), as in the model that \code{phytools::fitgammaMk()} fits (Revell
+2024). With \code{rate_classes}, the character has hidden rate classes, as in the hidden-rates
+models of corHMM (Beaulieu et al. 2013): in class k, changes between states happen at the
+rates of \code{q} times \code{rate_classes[k]}, and the lineage moves between classes at rate
+\code{class_switch} without changing its state. The class at the root is drawn with equal
+probabilities.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -37,13 +71,25 @@ tr <- treeshapesim::sim_tree_shape(10)
 h <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 h$states
 tip_history_metrics(h)
+# rates that vary among branches
+g <- trait_mk(tr, q = 0.5, alpha = 0.3)
+round(g$edge_rates, 2)
+hr <- trait_mk(tr, q = 0.5, rate_classes = c(slow = 0.1, fast = 2), class_switch = 0.2)
+hr$classes
 \dontshow{\}) # examplesIf}
 }
 \references{
+Beaulieu, J. M., O'Meara, B. C., & Donoghue, M. J. (2013). Identifying hidden rate
+changes in the evolution of a binary morphological character: the evolution of plant habit
+in campanulid angiosperms. \emph{Systematic Biology}, 62, 725--737. \doi{10.1093/sysbio/syt034}
+
 Lewis, P. O. (2001). A likelihood approach to estimating phylogeny from discrete
 morphological character data. \emph{Systematic Biology}, 50, 913--925.
 \doi{10.1080/106351501753462876}
+
+Revell, L. J. (2024). Testing for heterogeneous rates of discrete character evolution on
+phylogenies. \emph{Journal of Evolutionary Biology}, 37, 1591--1602. \doi{10.1093/jeb/voae119}
 }
 \seealso{
-\code{\link[=tip_history_metrics]{tip_history_metrics()}}
+\code{\link[=tip_history_metrics]{tip_history_metrics()}}, \code{\link[=trait_rates]{trait_rates()}} for continuous traits.
 }

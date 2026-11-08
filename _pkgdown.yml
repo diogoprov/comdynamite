@@ -31,6 +31,7 @@ reference:
   - trait_bm
   - traits_ou
   - trait_mk
+  - trait_rates
   - tip_history_metrics
   - as_herodotools
   - region_pool
