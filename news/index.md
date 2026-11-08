@@ -2,6 +2,43 @@
 
 ## comdynamite (development version)
 
+- [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md):
+  the null model of `T_IC.IR` now keeps the observed regional variance
+  as the denominator. It was computed from the values drawn, which
+  repeat individuals across sites; this biased the null upward and made
+  the tests anti-conservative (about 6% of sites rejected per tail at a
+  nominal 4% in simulations with random traits).
+
+- New functions for analyses of intraspecific trait variation, written
+  from the published definitions to replace functions of cati 0.99.6
+  that give wrong results (an audit found bugs reported as
+  adrientaudiere/cati#13 to
+  [\#21](https://github.com/diogoprov/comdynamite/issues/21)):
+  [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
+  summarises the tests of
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  (shares of sites below and above the null, test of the mean over
+  sites, the sites that deviate), with sites that cannot be tested left
+  out instead of given small p-values;
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  splits community-weighted means into species turnover, intraspecific
+  variability and covariation (Lepš et al. 2011), with environmental
+  variables matched to sites by name, and a
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method
+  (ggplot2) with explained and residual sums of squares;
+  [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md)
+  gives REML variance components across nested levels (nlme in Suggests)
+  and stops when the factors are not ordered from the broadest to the
+  finest level, with a
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
+  draws stacked bars of the shares in Okabe-Ito colours (ggplot2 in
+  Suggests);
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  compares any trait index of communities with four null models, with
+  all traits of an individual kept together in multivariate indices. The
+  standardised effect size is now `NA` when the null values do not vary,
+  as for an index that a randomisation cannot change.
+
 - [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
   estimates local adaptation (`h`) and character displacement (`c`)
   together from the population means of individuals, by a regression

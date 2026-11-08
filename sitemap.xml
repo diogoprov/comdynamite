@@ -25,6 +25,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/biogeography_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/clade_regimes.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/comdynamite-package.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/community_index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/competition_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/confint.mc_damocles_fit.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/damocles_loglik.html</loc></url>
@@ -45,6 +46,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/logistic_gradients.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/mc_data.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/mc_dynamics.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/nested_variance.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/node_contrasts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/node_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/paint_regimes.html</loc></url>
@@ -57,6 +59,8 @@
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_eigenvectors.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_vector.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.food_web.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.nested_variance.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.trait_flex.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_node_heatmap.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_node_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_phylo_beta.html</loc></url>
@@ -77,11 +81,13 @@
 <url><loc>https://provetelab.org/comdynamite/reference/tip_history_metrics.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/torus_permutations.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_bm.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/trait_flex.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_mk.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_partition.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_rates.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/traits_ou.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/tstats.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/tstats_summary.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/turnover_rates.html</loc></url>
 </urlset>
 

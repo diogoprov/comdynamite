@@ -334,12 +334,31 @@ Grids of scenarios, summaries and checks.
   : Check whether a simulation has settled
 - [`as.data.frame(`*`<mc_sim>`*`)`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md)
   : Simulation results as a long table
+
+## Trait variation among individuals
+
+Individuals sampled from simulations, T-statistics, community trait
+indices and decompositions of trait variation.
+
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   : Individuals from a simulated metacommunity
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
   T-statistics of intraspecific trait variation
+- [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
+  : Summary of the null-model tests of T-statistics
 - [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
   : Local adaptation and character displacement from population means
+- [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  : Trait indices of communities against null models
+- [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  : Intraspecific variability and species turnover in community trait
+  means
+- [`plot(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md)
+  : Plot the decomposition of community trait means
+- [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md)
+  : Variance components of traits across nested levels
+- [`plot(`*`<nested_variance>`*`)`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md)
+  : Plot the shares of variance across nested levels
 
 ## Results
 
