@@ -263,6 +263,9 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #' @param x Result of [trait_flex()].
 #' @param relative If `TRUE` (the default), sums of squares are divided by the total sum of
 #'   squares of each trait, so that traits on different scales can be compared.
+#' @param colours Two colours, for the explained and the residual parts (only the first is
+#'   used without a model). The default is the blue of the Okabe-Ito palette and a light grey,
+#'   as in [plot.nested_variance()].
 #' @param ... Not used.
 #' @return A ggplot object, which can be changed further with ggplot2 functions.
 #' @seealso [trait_flex()].
@@ -276,11 +279,12 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #' ind$leaf <- c(a = 3, b = 2, c = 1)[ind$species] - 0.3 * shift + rnorm(160)
 #' plot(trait_flex(ind, traits = c("height", "leaf"), formula = ~ moisture, env = env))
 #' @export
-plot.trait_flex <- function(x, relative = TRUE, ...) {
+plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80"), ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of trait_flex() needs the package ggplot2", call. = FALSE) # nocov
   }
   stopifnot(is.logical(relative), length(relative) == 1, !is.na(relative))
+  check_colours(colours, 2)
   dec <- x$decomposition
   components <- c("turnover", "intraspecific", "covariation", "total")
   scale <- if (relative) {
@@ -296,8 +300,7 @@ plot.trait_flex <- function(x, relative = TRUE, ...) {
                component = factor(dec$component, components),
                part = factor(parts[[part]], rev(parts)), value = dec[[part]] / scale)
   }))
-  fill <- stats::setNames(c(grDevices::hcl.colors(1, "Viridis"), "grey75")[seq_along(parts)],
-                          unname(parts))
+  fill <- stats::setNames(colours[seq_along(parts)], unname(parts))
   .data <- ggplot2::.data
   ggplot2::ggplot(long, ggplot2::aes(x = .data$component, y = .data$value, fill = .data$part,
                                      group = .data$part)) +
@@ -411,12 +414,24 @@ nested_variance <- function(data, traits, factors) {
 #' [nested_variance()], the broadest level at the bottom and the variance within the finest
 #' level (`within`, in grey) at the top. Needs the package ggplot2.
 #'
+#' The levels take colours of the Okabe-Ito palette (Okabe & Ito 2008), which stay distinct for
+#' the common forms of colour blindness, in an order that alternates darker and lighter colours
+#' so that neighbouring segments also differ in grey scale: blue, orange, bluish green, reddish
+#' purple, vermillion and sky blue. Yellow is left out because it hardly differs from the grey
+#' of `within` and from a white background. Percentages are written in white on dark colours
+#' and in black on light ones.
+#'
 #' @param x Result of [nested_variance()].
 #' @param min_label Smallest share labelled with its percentage inside the bar; 1 or more
 #'   removes the labels.
+#' @param colours Colours of the levels, one per row of `x` (the last for `within`), or `NULL`
+#'   (the default) for the Okabe-Ito colours above and a light grey for `within`. With more
+#'   than six factors, `colours` must be given.
 #' @param ... Not used.
 #' @return A ggplot object, which can be changed further with ggplot2 functions.
-#' @seealso [nested_variance()].
+#' @references Okabe, M., & Ito, K. (2008). *Color Universal Design (CUD): Colorblind Barrier
+#'   Free*. \url{https://jfly.uni-koeln.de/color/}
+#' @seealso [nested_variance()], [plot.trait_flex()].
 #' @examplesIf requireNamespace("nlme", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' d <- data.frame(region = rep(c("north", "south"), each = 60),
@@ -427,7 +442,7 @@ nested_variance <- function(data, traits, factors) {
 #' d$shape <- rnorm(120, rep(c(0, 2), each = 60))
 #' plot(nested_variance(d, c("size", "shape"), c("region", "site", "population")))
 #' @export
-plot.nested_variance <- function(x, min_label = 0.05, ...) {
+plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of nested_variance() needs the package ggplot2", call. = FALSE) # nocov
   }
@@ -439,8 +454,16 @@ plot.nested_variance <- function(x, min_label = 0.05, ...) {
                      share = unlist(lapply(traits, function(t) x[[t]]), use.names = FALSE))
   long$label <- ifelse(long$share >= min_label, sprintf("%.0f%%", 100 * long$share), "")
   n_factors <- length(levels) - 1
-  fill <- stats::setNames(c(grDevices::hcl.colors(max(n_factors, 1), "Viridis")[seq_len(n_factors)],
-                            "grey80"), levels)
+  if (is.null(colours)) {
+    okabe_ito <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9")
+    if (n_factors > length(okabe_ito)) {
+      stop("more than ", length(okabe_ito), " factors: give one colour per level in `colours`",
+           call. = FALSE)
+    }
+    colours <- c(okabe_ito[seq_len(n_factors)], "grey80")
+  }
+  check_colours(colours, length(levels))
+  fill <- stats::setNames(colours, levels)
   dark <- colSums(grDevices::col2rgb(fill) * c(0.299, 0.587, 0.114)) < 140
   long$text <- ifelse(dark[as.character(long$level)], "white", "black")
   .data <- ggplot2::.data
@@ -604,4 +627,12 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   out$p <- compared$p
   attr(out, "null") <- sims
   out
+}
+
+# stops unless `colours` holds n valid colours
+check_colours <- function(colours, n) {
+  ok <- is.character(colours) && length(colours) == n &&
+    !inherits(try(grDevices::col2rgb(colours), silent = TRUE), "try-error")
+  if (!ok) stop("`colours` must be ", n, " valid colours", call. = FALSE)
+  invisible(colours)
 }

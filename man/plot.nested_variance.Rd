@@ -4,13 +4,17 @@
 \alias{plot.nested_variance}
 \title{Plot the shares of variance across nested levels}
 \usage{
-\method{plot}{nested_variance}(x, min_label = 0.05, ...)
+\method{plot}{nested_variance}(x, min_label = 0.05, colours = NULL, ...)
 }
 \arguments{
 \item{x}{Result of \code{\link[=nested_variance]{nested_variance()}}.}
 
 \item{min_label}{Smallest share labelled with its percentage inside the bar; 1 or more
 removes the labels.}
+
+\item{colours}{Colours of the levels, one per row of \code{x} (the last for \code{within}), or \code{NULL}
+(the default) for the Okabe-Ito colours above and a light grey for \code{within}. With more
+than six factors, \code{colours} must be given.}
 
 \item{...}{Not used.}
 }
@@ -21,6 +25,14 @@ A ggplot object, which can be changed further with ggplot2 functions.
 Draws one stacked bar per trait with the share of variance of each level from
 \code{\link[=nested_variance]{nested_variance()}}, the broadest level at the bottom and the variance within the finest
 level (\code{within}, in grey) at the top. Needs the package ggplot2.
+}
+\details{
+The levels take colours of the Okabe-Ito palette (Okabe & Ito 2008), which stay distinct for
+the common forms of colour blindness, in an order that alternates darker and lighter colours
+so that neighbouring segments also differ in grey scale: blue, orange, bluish green, reddish
+purple, vermillion and sky blue. Yellow is left out because it hardly differs from the grey
+of \code{within} and from a white background. Percentages are written in white on dark colours
+and in black on light ones.
 }
 \examples{
 \dontshow{if (requireNamespace("nlme", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -34,6 +46,10 @@ d$shape <- rnorm(120, rep(c(0, 2), each = 60))
 plot(nested_variance(d, c("size", "shape"), c("region", "site", "population")))
 \dontshow{\}) # examplesIf}
 }
+\references{
+Okabe, M., & Ito, K. (2008). \emph{Color Universal Design (CUD): Colorblind Barrier
+Free}. \url{https://jfly.uni-koeln.de/color/}
+}
 \seealso{
-\code{\link[=nested_variance]{nested_variance()}}.
+\code{\link[=nested_variance]{nested_variance()}}, \code{\link[=plot.trait_flex]{plot.trait_flex()}}.
 }

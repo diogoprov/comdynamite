@@ -256,7 +256,13 @@ test_that("plot() of nested_variance() stacks the shares from the broadest level
   # each bar reaches 1 and the broadest level sits at the bottom
   expect_equal(tapply(bars$ymax, bars$x, max), c(`1` = 1, `2` = 1), ignore_attr = TRUE)
   first <- bars[bars$ymin == 0, ]
-  expect_equal(unique(first$fill), unname(grDevices::hcl.colors(3, "Viridis")[1]))
+  expect_equal(unique(first$fill), "#0072B2")
+  expect_equal(unique(bars$fill[bars$ymax == 1]), "grey80")
+  # own colours, checked for number and validity
+  own <- ggplot2::layer_data(plot(res, colours = c("red", "green", "blue", "white")), 1)
+  expect_equal(unique(own$fill[own$ymin == 0]), "red")
+  expect_error(plot(res, colours = c("red", "blue")), "4 valid colours")
+  expect_error(plot(res, colours = c("red", "green", "blue", "nocolour")), "valid colours")
   labels <- ggplot2::layer_data(plot(res, min_label = 2), 2)$label
   expect_true(all(labels == ""))
 })
@@ -295,6 +301,8 @@ test_that("plot() of trait_flex() shows explained and residual parts and negativ
   expect_s3_class(p, "ggplot")
   bars <- ggplot2::layer_data(p, 2)
   expect_equal(nrow(bars), 8)
+  expect_setequal(unique(bars$fill), c("#0072B2", "grey80"))
+  expect_error(plot(res, colours = "red"), "2 valid colours")
   # each component reaches its share of the total sum of squares; covariation lies below zero
   total_ss <- res$decomposition$total[4]
   signed <- ifelse(bars$ymin < 0 & bars$ymax <= 0, bars$ymin - bars$ymax, bars$ymax - bars$ymin)
