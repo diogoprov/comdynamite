@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.6.3
 
 - `species_traits()`: `optima`, `sigma` and `r_max` take values from elsewhere, such as mvMORPH,
   by species name or in the order of the species. The traits not given are drawn as before, and

@@ -419,6 +419,13 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
       porque pergunta se esses mapas explicam mais do que os mesmos mapas em outro lugar da
       grade, não se o resíduo tem estrutura espacial.
 
+## v0.6.3: base do hub (concluída em 2026-11-07)
+
+Publica o marco v0.4.0: `mc_data()` já saíra na 0.6.2; entram traits vindos de fora em
+`species_traits()`, `pool` e `initial` nas simulações, valores nos nós, `trait_mk()`,
+`tip_history_metrics()` e a integração com o Herodotools (`as_herodotools()`,
+`region_pool()`, `arrival_ages()`), além de `trait_k` em `summary_stats()` (marco do ABC).
+
 ## v0.6.2: fluxo de simulação, PCPS e estrutura comum (concluída em 2026-11-07)
 
 Publica o marco v0.3.0 (`run_scenarios()`, `summary_stats()`, `equilibrium_check()`, saída
