@@ -2,6 +2,7 @@ url: https://provetelab.org/comdynamite/
 
 template:
   bootstrap: 5
+  math-rendering: katex
 
 reference:
 - title: Data
