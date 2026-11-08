@@ -119,6 +119,9 @@ reference:
   - simulate_damocles
   - damocles_loglik
   - damocles_test
+  - damocles_lrt
+  - confint.mc_damocles_fit
+  - clade_regimes
 
 articles:
 - title: Analysing data

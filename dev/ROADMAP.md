@@ -710,8 +710,13 @@ pacotes de referência em vez de reimplementá-los.
       (`shared = TRUE`) feito em 2026-11-08; falta perfil de verossimilhança ou intervalo para
       as taxas, e taxas que variam entre comunidades com uma covariável. Regra de especiação
       relaxada (`sympatry`, probabilidade de as duas filhas ficarem presentes) feita em
-      2026-11-08. Próximos, em ordem de facilidade: taxas por época (constantes por intervalo)
-      e por clado definido a priori; trait discreto coevoluindo com a presença (estado
+      2026-11-08. Taxas por regime de ramo e com covariável por ramo (`regimes`,
+      `edge_covariate`, `vary`), `clade_regimes()`, `damocles_lrt()` e `confint()` por perfil
+      feitos em 2026-11-08 (PR A das ressalvas). Falta o PR B: lista de configurações
+      (amostras da posterior de BAMM/ClaDS) com resumo; teste contra partições aleatórias de
+      mesma complexidade; exemplos de conversão em data-raw com BAMMtools e RPANDA (verificar
+      no Crossref a crítica publicada à BAMM antes de citar). Próximos, em ordem de
+      facilidade: taxas por época (quadratura do fator integrante, sem EDO); trait discreto coevoluindo com a presença (estado
       presença × trait); traits contínuos e colonização dependente de parentesco só por
       simulação.
 

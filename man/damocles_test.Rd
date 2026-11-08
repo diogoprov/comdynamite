@@ -12,7 +12,10 @@ damocles_test(
   mu = NULL,
   root = c("both", "absent", "present"),
   shared = FALSE,
-  sympatry = 0
+  sympatry = 0,
+  regimes = NULL,
+  edge_covariate = NULL,
+  vary = c("both", "gamma", "mu")
 )
 }
 \arguments{
@@ -26,8 +29,10 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{n_sim}{Number of null communities of each model.}
 
 \item{gamma, mu}{Rates of local colonisation and extinction used to simulate the null
-communities, one value for all communities or one per community; \code{NULL} (the default)
-estimates both with \code{\link[=fit_damocles]{fit_damocles()}}.}
+communities, one value for all communities or one per community, or lists with one rate,
+or one rate per edge of \code{tree}, per community; \code{NULL} (the default) estimates both with
+\code{\link[=fit_damocles]{fit_damocles()}}, with \code{shared}, \code{sympatry}, \code{regimes}, \code{edge_covariate} and \code{vary} passed
+on to it.}
 
 \item{root}{Prior on the state at the root, used both in the fit and in the simulations
 (\code{"both"} draws the state of the root of each simulated community with equal
@@ -38,10 +43,23 @@ probabilities).}
 
 \item{sympatry}{Probability that a present ancestor leaves both daughters present, used in
 the simulations (see \code{\link[=simulate_damocles]{simulate_damocles()}}); \code{NULL} estimates it with the rates.}
+
+\item{regimes}{Optional regime of each edge of \code{tree}, in the order of \code{tree$edge} (a factor
+or character vector), such as from \code{\link[=clade_regimes]{clade_regimes()}} or from a configuration of rate shifts
+estimated by another method: the rates in \code{vary} are estimated separately for each regime.}
+
+\item{edge_covariate}{Optional positive number for each edge of \code{tree}, in the order of
+\code{tree$edge}, such as branch-specific rates of speciation estimated by another method: the
+rates in \code{vary} change with it as \verb{rate * (x / geometric mean of x)^beta}, with \code{rate} and
+\code{beta} estimated. Give \code{regimes} or \code{edge_covariate}, not both.}
+
+\item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
+or \code{"mu"}; the other one is a single rate for the whole tree.}
 }
 \value{
 A data frame of class \code{mc_damocles_test}, one row per community, with the richness,
-the parameters used (\code{gamma}, \code{mu}, \code{sympatry}) and their log-likelihood when estimated,
+the parameters used (\code{gamma}, \code{mu}, or the columns of the fit with \code{regimes} or
+\code{edge_covariate}, and \code{sympatry}; \code{NA} for rates given per edge) and their log-likelihood when estimated,
 and, for \code{mpd} and \code{mntd}, the observed value, the standardised effect size and p-value against the DAMOCLES
 null (\code{ses_mpd_damocles}, \code{p_mpd_damocles}, ...) and against random draws
 (\code{ses_mpd_random}, \code{p_mpd_random}, ...), plus \code{n_valid}.
