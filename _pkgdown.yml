@@ -89,9 +89,17 @@ reference:
   - summary_stats
   - equilibrium_check
   - as.data.frame.mc_sim
+- title: Trait variation among individuals
+  desc: Individuals sampled from simulations, T-statistics, community trait indices and
+    decompositions of trait variation.
+  contents:
   - sample_individuals
   - tstats
+  - tstats_summary
   - population_shifts
+  - community_index
+  - trait_flex
+  - nested_variance
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:

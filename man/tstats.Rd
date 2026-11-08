@@ -35,7 +35,8 @@ values only, much faster in simulation studies with many replicates.}
 
 \item{null_ip}{Null model of \code{T_IP.IC} for \code{method = "base"}: \code{"site"} (the default), trait
 values permuted within each site as in Taudiere & Violle (2016), or \code{"species"}, the
-populations of each species exchanged among its sites (see the section Null models).}
+means of populations exchanged among the populations of each species (see the section
+Null models).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
@@ -94,16 +95,20 @@ others), so \code{"less"} tests them. Each trait is randomised on its own.
 The null model of \code{T_IP.IC} asks only whether populations differ: permuting individuals
 within a site removes its populations, so null values are near 1, and co-occurring species
 with different means give a large negative effect size even when each population sits where
-its species would be at any site. With \code{null_ip = "species"}, the populations of each
-species, with their individuals, are instead exchanged at random among the sites where the
-species occurs. Each site keeps its species and each species its populations; only which
-population of a species sits at which site is broken. Whole populations are moved, rather
-than their means, because means of populations with different numbers of individuals are
-not exchangeable. The standardised effect size is near zero when the position of a population does not depend on
+its species would be at any site. With \code{null_ip = "species"}, the mean of each
+population is instead exchanged at random with that of another population of the same
+species, and its individuals keep their number and their deviations from the mean. Each site
+keeps its species, their abundances and the variances within populations; only which mean of
+a species sits at which site is broken. Moving whole populations instead would also break
+the match between the abundance of a species at a site and its trait, which environmental
+filtering of abundances creates, and would test that instead. The standardised effect size is near zero when the position of a population does not depend on
 the site, positive when co-occurring populations are closer than expected from their species
 (convergence, as under local adaptation to a shared environment), and negative when they are
 further apart (divergence, as under character displacement); \code{alternative = "two.sided"}
-tests both. Species found at a single site stay in place. Local adaptation and character
+tests both. Species found at a single site keep their mean. Means of populations with
+different numbers of individuals carry different sampling error and are not fully
+exchangeable, which makes the test conservative (effect sizes shrink toward zero and a test
+at 5\% rejects less often than 5\% when nothing acts) but not anti-conservative. Local adaptation and character
 displacement move this statistic in opposite directions and can cancel; see
 \code{\link[=population_shifts]{population_shifts()}} to estimate both.
 
@@ -160,5 +165,6 @@ community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 \doi{10.1016/j.tree.2011.11.014}
 }
 \seealso{
-\code{\link[=sample_individuals]{sample_individuals()}}, \code{\link[=population_shifts]{population_shifts()}}.
+\code{\link[=tstats_summary]{tstats_summary()}} to summarise the tests, \code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=population_shifts]{population_shifts()}}.
 }

@@ -36,6 +36,7 @@ Suggests:
     future.apply,
     gifski,
     knitr,
+    nlme,
     phytools,
     picante,
     purrr,

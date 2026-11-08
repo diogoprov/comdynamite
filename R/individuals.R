@@ -251,7 +251,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   V., & Messier, J. (2012). The return of the variance: intraspecific variability in
 #'   community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
 #'   \doi{10.1016/j.tree.2011.11.014}
-#' @seealso [sample_individuals()], [population_shifts()].
+#' @seealso [tstats_summary()] to summarise the tests, [sample_individuals()],
+#'   [population_shifts()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -308,19 +309,9 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   if (nperm == 0) return(out)
   null <- do.call(abind_rows, lapply(per_trait, `[[`, "null"))
   for (stat in ratios) {
-    sims <- null[, , stat, drop = FALSE][, , 1]
-    sims <- matrix(sims, nperm)
-    obs <- out[[stat]]
-    valid <- colSums(is.finite(sims))
-    null_mean <- colMeans(sims, na.rm = TRUE)
-    null_sd <- apply(sims, 2, stats::sd, na.rm = TRUE)
-    below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-    above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
-    p <- switch(alternative, less = (1 + below) / (1 + valid),
-                greater = (1 + above) / (1 + valid),
-                two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
-    out[[paste0("ses_", stat)]] <- finite_or_na((obs - null_mean) / null_sd)
-    out[[paste0("p_", stat)]] <- ifelse(is.na(obs) | valid == 0, NA_real_, p)
+    compared <- null_compare(out[[stat]], null[, , stat], alternative)
+    out[[paste0("ses_", stat)]] <- compared$ses
+    out[[paste0("p_", stat)]] <- compared$p
   }
   attr(out, "null") <- null
   out
@@ -563,6 +554,29 @@ group_var <- function(x, g, n_groups) {
   out <- group_sum((x - mean_g[g])^2, g, n_groups) / (n - 1)
   out[n < 2] <- NA_real_
   out
+}
+
+# standardised effect sizes and permutation p-values of observed values (vector of length m)
+# against null values (matrix nperm x m); NA where the observed value or every null value is
+# missing
+null_compare <- function(obs, sims, alternative = c("less", "greater", "two.sided")) {
+  alternative <- match.arg(alternative)
+  sims <- matrix(sims, ncol = length(obs))
+  sims[!is.finite(sims)] <- NA
+  nperm <- nrow(sims)
+  valid <- colSums(!is.na(sims))
+  null_mean <- colMeans(sims, na.rm = TRUE)
+  null_sd <- apply(sims, 2, function(v) if (sum(!is.na(v)) > 1) stats::sd(v, na.rm = TRUE) else NA)
+  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  p <- switch(alternative, less = (1 + below) / (1 + valid),
+              greater = (1 + above) / (1 + valid),
+              two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
+  # null values that differ only by rounding (an index the randomisation cannot change) have
+  # no spread
+  null_sd[null_sd <= 1e-10 * pmax(1, abs(null_mean))] <- NA
+  list(ses = finite_or_na((obs - null_mean) / null_sd),
+       p = ifelse(is.na(obs) | valid == 0, NA_real_, p))
 }
 
 finite_or_na <- function(v) ifelse(is.finite(v), v, NA_real_)

@@ -1,5 +1,19 @@
 # comdynamite (development version)
 
+- New functions for analyses of intraspecific trait variation, written from the published
+  definitions to replace functions of cati 0.99.6 that give wrong results (an audit found
+  bugs reported as adrientaudiere/cati#13 to #21): `tstats_summary()` summarises the tests of
+  `tstats()` (shares of sites below and above the null, test of the mean over sites, the sites
+  that deviate), with sites that cannot be tested left out instead of given small p-values;
+  `trait_flex()` splits community-weighted means into species turnover, intraspecific
+  variability and covariation (Lepš et al. 2011), with environmental variables matched to sites
+  by name; `nested_variance()` gives REML variance components across nested levels (nlme in
+  Suggests) and stops when the factors are not ordered from the broadest to the finest level;
+  `community_index()` compares any trait index of communities with four null models, with all
+  traits of an individual kept together in multivariate indices. The standardised effect size
+  is now `NA` when the null values do not vary, as for an index that a randomisation cannot
+  change.
+
 - `population_shifts()` estimates local adaptation (`h`) and character displacement (`c`)
   together from the population means of individuals, by a regression within species on the
   environment of the site and on the push predicted from co-occurring competitors, with the
