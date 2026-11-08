@@ -228,3 +228,24 @@ test_that("sample_individuals() applies character displacement within sites", {
   t_apart <- tstats(sample_individuals(sim, intraspecific_sd = 2, displacement = 5), nperm = 0)
   expect_lt(mean(t_apart$T_IP.IC, na.rm = TRUE), mean(t_none$T_IP.IC, na.rm = TRUE))
 })
+
+test_that("tstats() stacks the null values of several traits", {
+  two <- transform(toy, other = trait^2)
+  set.seed(6)
+  res <- tstats(two, traits = c("trait", "other"), nperm = 19)
+  expect_equal(nrow(res), 4)
+  expect_equal(dim(attr(res, "null")), c(19, 4, 3))
+  expect_false(anyNA(res$p_T_IP.IC))
+})
+
+test_that("character displacement leaves sites with a single species alone", {
+  sim <- small_sim()
+  sim$abundance[1, ] <- 0
+  sim$abundance[1, 1] <- 20
+  set.seed(7)
+  base <- sample_individuals(sim, intraspecific_sd = 0)
+  set.seed(7)
+  apart <- sample_individuals(sim, intraspecific_sd = 0, displacement = 3)
+  first <- rownames(sim$abundance)[1]
+  expect_equal(apart$trait[apart$site == first], base$trait[base$site == first])
+})
