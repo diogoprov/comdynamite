@@ -5,11 +5,12 @@
 # CORES sets the number of workers and GENERATIONS the length of each chain.
 # For each tree: Spearman and log-scale Pearson correlation between the mean rate per branch of
 # the posterior and the true rate, and the marginal probability of a shift on branches with and
-# without a true shift.
+# without a true shift. Convergence: effective sample size of the log-likelihood and of the
+# number of shifts after a burn-in of 20% (coda).
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 bamm <- Sys.getenv("BAMM", "bamm")
 cores <- as.integer(Sys.getenv("CORES", "6"))
-generations <- as.integer(Sys.getenv("GENERATIONS", "2000000"))
+generations <- as.integer(Sys.getenv("GENERATIONS", "10000000"))
 RNGkind("L'Ecuyer-CMRG")
 set.seed(31)
 
@@ -17,17 +18,19 @@ control <- function(dir, priors, seed) {
   lines <- c(
     "modeltype = trait", "treefile = tree.tre", "traitfile = traits.txt",
     "runInfoFilename = run_info.txt", "sampleFromPriorOnly = 0", "runMCMC = 1",
-    "loadEventData = 0", "initializeModel = 1", "useGlobalSamplingProbability = 1",
+    "loadEventData = 0", "initializeModel = 1",
     priors,
     "betaIsTimeVariablePrior = 0", "betaShiftInit = 0", "updateRateBetaShift = 0",
-    "updateRateBetaTimeMode = 0", "useObservedMinMaxAsTraitPriors = 1",
+    "updateRateBetaTimeMode = 0",
     paste("numberOfGenerations =", generations), "mcmcOutfile = mcmc_out.txt",
     paste("mcmcWriteFreq =", generations / 1000), "eventDataOutfile = event_data.txt",
     paste("eventDataWriteFreq =", generations / 1000), "printFreq = 1000000000",
     "acceptanceResetFreq = 1000", "overwrite = 1", "updateRateEventNumber = 1",
     "updateRateEventPosition = 1", "updateRateEventRate = 1", "updateRateBeta0 = 1",
-    "updateRateNodeState = 25", "initialNumberEvents = 0", "minCladeSizeForShift = 1",
-    "numberOfChains = 1", paste("seed =", seed))
+    "updateRateNodeState = 25", "initialNumberEvents = 0",
+    "numberOfChains = 1", "betaInit = 0.1", "localGlobalMoveRatio = 10.0",
+    "updateBetaInitScale = 1", "updateBetaShiftScale = 1", "updateEventLocationScale = 0.05",
+    "updateEventRateScale = 4.0", "updateNodeStateScale = 1", paste("seed =", seed))
   writeLines(lines, file.path(dir, "control.txt"))
 }
 
@@ -52,8 +55,11 @@ one_tree <- function(r) {
   status <- system2(bamm, c("-c", "control.txt"), stdout = FALSE, stderr = FALSE)
   if (status != 0 || !file.exists("event_data.txt")) {
     return(data.frame(shifts = nrow(x$shifts), spearman = NA, pearson_log = NA,
-                      prob_shift = NA, prob_none = NA))
+                      prob_shift = NA, prob_none = NA, ess_loglik = NA, ess_shifts = NA))
   }
+  chain <- utils::read.csv("mcmc_out.txt")
+  chain <- chain[-seq_len(floor(0.2 * nrow(chain))), ]
+  ess <- coda::effectiveSize(coda::as.mcmc(chain[, c("logLik", "N_shifts")]))
   events <- BAMMtools::getEventData(tree, "event_data.txt", burnin = 0.2, type = "trait",
                                     verbose = FALSE)
   mean_rate <- BAMMtools::getMeanBranchLengthTree(events, rate = "trait")$phy
@@ -65,12 +71,15 @@ one_tree <- function(r) {
              spearman = stats::cor(estimate, x$edge_rate, method = "spearman"),
              pearson_log = stats::cor(log(estimate), log(x$edge_rate)),
              prob_shift = if (any(shifted)) mean(shift_probability[shifted]) else NA,
-             prob_none = mean(shift_probability[!shifted]))
+             prob_none = mean(shift_probability[!shifted]),
+             ess_loglik = unname(ess["logLik"]), ess_shifts = unname(ess["N_shifts"]))
 }
 
 results <- do.call(rbind, parallel::mclapply(seq_len(20), one_tree, mc.cores = cores,
                                              mc.set.seed = TRUE))
 cat("BAMM against trait_rates(shift_rate = 0.3, relative = FALSE), 100 tips:\n")
 print(round(colMeans(results, na.rm = TRUE), 2))
+cat("lowest ESS:", round(min(results$ess_loglik, na.rm = TRUE)), "(logLik),",
+    round(min(results$ess_shifts, na.rm = TRUE)), "(number of shifts)\n")
 cat("failed runs:", sum(is.na(results$spearman)), "of", nrow(results), "\n")
 saveRDS(results, "data-raw/validation_bamm.rds")

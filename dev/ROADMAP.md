@@ -526,12 +526,20 @@ pacotes de referência em vez de reimplementá-los.
       por BM) e `"iid"` (lognormal por ramo), com os valores nos nós e as taxas por ramo.
       `trait_mk()`: `alpha`/`edge_rates` (Γ por ramo, como `fitgammaMk`) e `rate_classes`
       (classes ocultas, como corHMM). Validação em `data-raw/validation_rates.R`.
+      `shift_rate` (mudanças por processo de Poisson ao longo dos ramos, como no prior do
+      BAMM) e `relative = FALSE` (cada regime com taxa própria, como no BAMM e no bifrost).
+      Validação com o BAMM 2.5.0 em `data-raw/validation_bamm.R` (binário local, GPL, só
+      executado): Spearman 0,51 entre taxa média posterior e verdadeira por ramo; probabilidade
+      marginal de mudança 0,18 nos ramos com mudança verdadeira contra 0,02 nos demais.
 - [ ] Artigo (vignette) sobre taxas por ramo. Citar obrigatoriamente Hubert et al. (2015),
       modelos de especiação em metacomunidades, e Januario et al. (2025), persistência
       metapopulacional contra taxas de especiação nas pontas (sinal filogenético, mas sem
       relação com a especiação). Ponte: os dois tratam de taxas de diversificação; aqui as
       taxas são de evolução de traits, e a pergunta análoga é se a dinâmica da metacomunidade
-      deixa rastro nas taxas estimadas por ramo. Incluir os resultados da validação e o limite
+      deixa rastro nas taxas estimadas por ramo. Para o papel da montagem de metacomunidades
+      na evolução de traits, citar também Leibold et al. (2022), evolução e montagem de
+      comunidades através de escalas espaciais, e McPeek (2017), *Evolutionary Community
+      Ecology* (ainda não lidos aqui). Incluir os resultados da validação e o limite
       de identificabilidade (uma realização por ramo).
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
@@ -702,8 +710,10 @@ Conferidas no Crossref em 2026-11-05.
 - Ives, A. R., & Helmus, M. R. (2011). *Ecological Monographs*, 81, 511–525. https://doi.org/10.1890/10-1264.1
 - Legendre, P. (2008). *Journal of Plant Ecology*, 1, 3–8. https://doi.org/10.1093/jpe/rtm001
 - Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). *Ecology Letters*, 28, e70021. https://doi.org/10.1111/ele.70021
+- Leibold, M. A., Govaert, L., Loeuille, N., De Meester, L., & Urban, M. C. (2022). *Annual Review of Ecology, Evolution, and Systematics*, 53, 299–326. https://doi.org/10.1146/annurev-ecolsys-102220-024934
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
+- McPeek, M. A. (2017). *Evolutionary Community Ecology*. Monographs in Population Biology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001
 - Morlon, H., et al. (2016). *Methods in Ecology and Evolution*, 7, 589–597. https://doi.org/10.1111/2041-210x.12526
 - Nakamura, G., et al. (2023). *Journal of Biogeography*, 51, 533–543. https://doi.org/10.1111/jbi.14610
 - Pontarp, M., et al. (2019). *Methods in Ecology and Evolution*, 10, 450–460. https://doi.org/10.1111/2041-210x.13129
