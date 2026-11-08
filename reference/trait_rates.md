@@ -15,7 +15,9 @@ trait_rates(
   shifts = 1,
   shift_size = 4,
   shift_edges = NULL,
+  shift_rate = NULL,
   shift_branch = FALSE,
+  relative = TRUE,
   rate_sd = 0.5,
   root_value = 0
 )
@@ -37,21 +39,33 @@ trait_rates(
 
 - shifts:
 
-  Number of shifts, for `"shift"` when `shift_edges` is not given.
+  Number of shifts, for `"shift"` when neither `shift_edges` nor
+  `shift_rate` is given.
 
 - shift_size:
 
   Multipliers of the rate at each shift, recycled to the number of
-  shifts. Values below 1 slow evolution down.
+  shifts, or a function of the number of shifts that gives them. Values
+  below 1 slow evolution down.
 
 - shift_edges:
 
-  Optional row numbers of `tree$edge` where the shifts happen.
+  Optional row numbers of `tree$edge` at whose start the shifts happen.
+
+- shift_rate:
+
+  Optional rate of shifts per unit of branch length, for shifts as a
+  Poisson process along the branches.
 
 - shift_branch:
 
-  Should a shift change only its own branch, rather than all branches
-  descending from it?
+  Should a shift last only to the end of its branch, rather than pass to
+  all branches descending from it?
+
+- relative:
+
+  Multiply the rate before each shift by `shift_size` (`TRUE`), or set
+  the rate after it to `sigma2` times `shift_size` (`FALSE`)?
 
 - rate_sd:
 
@@ -78,8 +92,9 @@ A list with
   node number; `NULL` otherwise;
 
 - `shifts`: for `"shift"`, a data frame with the `edge` (row of
-  `tree$edge`), the `node` at its end and the `multiplier`; `NULL`
-  otherwise;
+  `tree$edge`), the `node` at its end, the `position` of the shift as
+  time from the start of the edge, the `multiplier` and the `rate` after
+  the shift; `NULL` otherwise;
 
 - `tree`: the tree given, and `scaled`: the tree with each branch length
   multiplied by its rate, under which the trait is ordinary Brownian
@@ -87,13 +102,24 @@ A list with
 
 ## Details
 
-- `"shift"`: the rate is `sigma2` at the root and is multiplied by
-  `shift_size` at a few branches. With `shift_branch = FALSE` the new
-  rate is inherited by every branch descending from the shifted one, as
-  in the models of Eastman et al. (2011), traitMedusa in motmot (Thomas
-  & Freckleton 2012) or bifrost; with `shift_branch = TRUE` only the
-  shifted branch changes. The branches are drawn with probabilities
-  proportional to their length, or given in `shift_edges`.
+- `"shift"`: the rate is `sigma2` at the root and changes at a few
+  points of the tree. With `shift_branch = FALSE` the new rate is
+  inherited by every branch descending from the shift, as in the models
+  of Eastman et al. (2011), traitMedusa in motmot (Thomas & Freckleton
+  2012), BAMM (Rabosky 2014) or bifrost; with `shift_branch = TRUE` it
+  lasts only to the end of the branch. By default `shifts` shifts happen
+  at the start of branches drawn with probabilities proportional to
+  their length, or of the branches in `shift_edges`. With `shift_rate`,
+  shifts instead happen as a Poisson process along the branches, as
+  under the prior of BAMM: their number is Poisson with mean
+  `shift_rate` times the total length of the tree, and they fall at
+  uniform positions over it, so also within branches. At each shift the
+  rate is multiplied by `shift_size` (`relative = TRUE`), or becomes
+  `sigma2` times `shift_size` whatever it was before
+  (`relative = FALSE`), as each new regime of BAMM or bifrost has a rate
+  of its own. `shift_size` can be a function of the number of shifts
+  that draws them, such as `function(n) stats::rlnorm(n, 0, 1)`. The
+  rate of a branch is its mean over the branch, weighted by time.
 
 - `"gbm"`: the logarithm of the rate evolves itself by Brownian motion
   with standard deviation `rate_sd` per square root of time, starting
@@ -111,6 +137,11 @@ nodes given the tips, as in
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md).
 
 ## References
+
+Rabosky, D. L. (2014). Automatic detection of key innovations, rate
+shifts, and diversity-dependence on phylogenetic trees. *PLoS ONE*, 9,
+e89543.
+[doi:10.1371/journal.pone.0089543](https://doi.org/10.1371/journal.pone.0089543)
 
 Eastman, J. M., Alfaro, M. E., Joyce, P., Hipp, A. L., & Harmon, L. J.
 (2011). A novel comparative method for identifying shifts in the rate of
@@ -144,15 +175,21 @@ set.seed(1)
 tr <- treeshapesim::sim_tree_shape(20)
 x <- trait_rates(tr, "shift", shifts = 1, shift_size = 8)
 x$shifts
-#>   edge node multiplier
-#> 1   38   20          8
+#>   edge node position multiplier rate
+#> 1   38   20        0          8    8
 head(x$tips)
 #>         t1         t2         t3         t4         t5         t6 
 #>  0.3876716  0.3725845  0.1821453 -0.3773427 -0.5333873 -0.5354236 
+# shifts as a Poisson process, each new regime with a rate of its own, as in BAMM
+b <- trait_rates(tr, "shift", shift_rate = 0.1, relative = FALSE,
+                 shift_size = function(n) stats::rexp(n))
+b$shifts
+#> [1] edge       node       position   multiplier rate      
+#> <0 rows> (or 0-length row.names)
 g <- trait_rates(tr, "gbm", rate_sd = 0.5)
 summary(g$edge_rate)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-#>  0.5037  0.7585  0.8401  0.8745  0.9986  1.1787 
+#>  0.3990  0.7932  0.8618  0.8986  0.9967  1.7629 
 # as the environmental optima of a metacommunity
 traits <- species_traits(tr, optima = g$tips)
 ```
