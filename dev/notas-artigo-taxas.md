@@ -49,7 +49,11 @@ identificável (correlação entre mudança verdadeira e taxa verdadeira de 0,29
   excesso impedem a adaptação), autocorrelação espacial do ambiente, ordem de chegada,
   adaptações secundárias que revertem a monopolização.
 - Métodos de partição de variância de traits: estatísticas T de Violle et al. (2012), Lepš et
-  al. (2011).
+  al. (2011). As estatísticas T estão em `cati::Tstats()` (CRAN 0.99.6, GPL >= 2; pode ir para
+  `Suggests`): T_IP.IC (variância dentro das populações sobre a variância dentro das
+  comunidades), T_IC.IR (comunidades sobre o pool regional) e T_PC.PR (entre comunidades sobre o
+  pool regional), cada uma com seu modelo nulo (local, regional.ind, regional.pop). Exigem traits
+  de indivíduos, com fatores de parcela e de espécie.
 - Interpretação nossa: eles falam de taxas de evolução relativas à colonização em escala
   ecológica, não de taxas por ramo numa filogenia.
 
@@ -100,6 +104,10 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
    reembaralhamento das comunidades e compartilhadas entre linhagens simpátricas, contra mudanças
    independentes entre linhagens.
 9. Frequência de extinção de manchas e autocorrelação espacial do ambiente (Leibold et al. 2022).
+10. Variação intraespecífica e adaptação local: gerar indivíduos a partir das abundâncias
+    simuladas, com traits em torno da média da espécie ou ajustados ao ambiente do sítio, e
+    calcular as estatísticas T com `cati::Tstats()`. Adaptação local forte deve baixar T_IP.IC
+    e mudar T_PC.PR em relação ao cenário sem adaptação.
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas

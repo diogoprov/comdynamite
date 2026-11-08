@@ -542,7 +542,10 @@ pacotes de referência em vez de reimplementá-los.
       Ecology*. Notas de leitura e cenários de simulação em `dev/notas-artigo-taxas.md`.
 - [ ] Função que traduz a história de uma metacomunidade simulada (colonizações, entradas e
       saídas de parceiros, mudanças de hábitat) em taxas por ramo para `trait_rates()` e
-      `trait_mk()`, para os cenários 1, 2, 5 e 8 das notas. Incluir os resultados da validação e o limite
+      `trait_mk()`, para os cenários 1, 2, 5 e 8 das notas.
+- [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
+      e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
+      das notas). Incluir os resultados da validação e o limite
       de identificabilidade (uma realização por ramo).
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
@@ -731,5 +734,6 @@ Conferidas no Crossref em 2026-11-05.
 - Robert, C. P., et al. (2011). *PNAS*, 108, 15112–15117. https://doi.org/10.1073/pnas.1102900108
 - Ruffley, M., et al. (2019). *Ecology and Evolution*, 9, 13218–13230. https://doi.org/10.1002/ece3.5773
 - van der Plas, F., et al. (2015). *Ecology*, 96, 1502–1515. https://doi.org/10.1890/14-0454.1
+- Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof, C., Jung, V., & Messier, J. (2012). *Trends in Ecology & Evolution*, 27, 244–252. https://doi.org/10.1016/j.tree.2011.11.014
 - Vehtari, A., et al. (2017). *Statistics and Computing*, 27, 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
 - Wood, S. N. (2010). *Nature*, 466, 1102–1104. https://doi.org/10.1038/nature09319
