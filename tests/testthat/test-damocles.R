@@ -159,3 +159,65 @@ test_that("fit_damocles with shared rates maximises the summed log-likelihood", 
   res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE)
   expect_equal(res$gamma[1], res$gamma[2])
 })
+
+test_that("sympatry relaxes the rule of allopatric speciation", {
+  tree <- ape::read.tree(text = "(a:1.3,b:1.3);")
+  gamma <- 0.7
+  mu <- 0.4
+  s <- gamma + mu
+  decay <- exp(-s * 1.3)
+  p01 <- gamma * (1 - decay) / s
+  p11 <- (gamma + mu * decay) / s
+  sym <- 0.3
+  present <- (1 - sym) * 0.5 * (p11 * (1 - p01) + p01 * (1 - p11)) + sym * p11 * (1 - p11)
+  expect_equal(damocles_loglik(c(a = 1, b = 0), tree, gamma, mu, root = "present",
+                               sympatry = sym),
+               log(present), ignore_attr = TRUE)
+  # the default is the allopatric rule
+  big <- ape::read.tree(text = "((a:0.5,b:0.5):1,(c:1.2,(d:0.3,e:0.3):0.9):0.3);")
+  patterns <- all_patterns(big$tip.label)
+  expect_equal(damocles_loglik(patterns, big, 0.9, 1.6, sympatry = 0),
+               damocles_loglik(patterns, big, 0.9, 1.6))
+  for (sym in c(0.4, 1)) {
+    expect_equal(sum(exp(damocles_loglik(patterns, big, 0.9, 1.6, sympatry = sym))), 1)
+  }
+  # without colonisation or extinction full sympatry keeps every lineage present
+  set.seed(7)
+  expect_true(all(simulate_damocles(big, 0, 0, n = 20, root = "present", sympatry = 1) == 1))
+  expect_error(simulate_damocles(big, 1, 1, sympatry = 1.2), "between 0 and 1")
+  expect_error(damocles_loglik(patterns, big, 1, 1, sympatry = c(0.1, 0.2)), "one probability")
+})
+
+test_that("simulations with sympatry have the probabilities of the likelihood", {
+  tree <- ape::read.tree(text = "((a:0.5,b:0.5):1,(c:0.8,d:0.8):0.7);")
+  patterns <- all_patterns(tree$tip.label)
+  expected <- exp(damocles_loglik(patterns, tree, 0.6, 0.9, sympatry = 0.6))
+  set.seed(8)
+  sims <- simulate_damocles(tree, 0.6, 0.9, n = 20000, sympatry = 0.6)
+  key <- function(m) apply(m[, tree$tip.label, drop = FALSE], 1, paste, collapse = "")
+  observed <- table(factor(key(sims), levels = key(patterns))) / nrow(sims)
+  expect_lt(max(abs(as.vector(observed) - expected)), 0.012)
+})
+
+test_that("fit_damocles estimates sympatry when asked", {
+  set.seed(9)
+  tree <- treeshapesim::sim_tree_shape(40)
+  comm <- simulate_damocles(tree, 1, 1, n = 5, sympatry = 0.5)
+  fixed <- fit_damocles(comm, tree, shared = TRUE)
+  free <- fit_damocles(comm, tree, shared = TRUE, sympatry = NULL)
+  expect_true(all(fixed$sympatry == 0))
+  expect_true(all(free$sympatry > 0 & free$sympatry < 1))
+  expect_gte(attr(free, "loglik_total"), attr(fixed, "loglik_total") - 1e-6)
+  expect_gte(attr(free, "loglik_total"),
+             sum(damocles_loglik(comm, tree, 1, 1, sympatry = 0.5)) - 1e-6)
+  each <- fit_damocles(comm[1:2, ], tree, sympatry = NULL)
+  expect_length(unique(each$sympatry), 2)
+  expect_error(fit_damocles(comm, tree, sympatry = -1), "between 0 and 1")
+  res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE, sympatry = NULL)
+  expect_equal(res$sympatry[1], res$sympatry[2])
+  expect_output(print(res), "sympatry")
+  given <- damocles_test(comm[1, , drop = FALSE], tree, n_sim = 19, gamma = 1, mu = 1,
+                         sympatry = 0.5)
+  expect_equal(given$sympatry, 0.5)
+  expect_error(damocles_test(comm, tree, gamma = 1, mu = 1, sympatry = NULL), "estimated too")
+})

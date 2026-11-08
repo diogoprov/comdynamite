@@ -11,7 +11,8 @@ damocles_test(
   gamma = NULL,
   mu = NULL,
   root = c("both", "absent", "present"),
-  shared = FALSE
+  shared = FALSE,
+  sympatry = 0
 )
 }
 \arguments{
@@ -34,11 +35,14 @@ probabilities).}
 
 \item{shared}{When the rates are estimated, \code{TRUE} fits one pair shared by all communities
 (see \code{\link[=fit_damocles]{fit_damocles()}}) and \code{FALSE} (the default) one pair per community.}
+
+\item{sympatry}{Probability that a present ancestor leaves both daughters present, used in
+the simulations (see \code{\link[=simulate_damocles]{simulate_damocles()}}); \code{NULL} estimates it with the rates.}
 }
 \value{
 A data frame of class \code{mc_damocles_test}, one row per community, with the richness,
-the rates used (\code{gamma}, \code{mu}) and their log-likelihood when estimated, and, for \code{mpd} and
-\code{mntd}, the observed value, the standardised effect size and p-value against the DAMOCLES
+the parameters used (\code{gamma}, \code{mu}, \code{sympatry}) and their log-likelihood when estimated,
+and, for \code{mpd} and \code{mntd}, the observed value, the standardised effect size and p-value against the DAMOCLES
 null (\code{ses_mpd_damocles}, \code{p_mpd_damocles}, ...) and against random draws
 (\code{ses_mpd_random}, \code{p_mpd_random}, ...), plus \code{n_valid}.
 }
