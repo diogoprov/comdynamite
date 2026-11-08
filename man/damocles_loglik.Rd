@@ -20,7 +20,10 @@ fit_damocles(
   root = c("both", "absent", "present"),
   start = NULL,
   shared = FALSE,
-  sympatry = 0
+  sympatry = 0,
+  regimes = NULL,
+  edge_covariate = NULL,
+  vary = c("both", "gamma", "mu")
 )
 }
 \arguments{
@@ -31,9 +34,12 @@ and species of \code{comm} missing from the tree are dropped.}
 
 \item{tree}{A rooted, fully dichotomous \code{phylo} tree with branch lengths.}
 
-\item{gamma}{Rate of local colonisation per lineage, in the units of the branch lengths.}
+\item{gamma}{Rate of local colonisation per lineage, in the units of the branch lengths: one
+rate, or one per edge of \code{tree} in the order of \code{tree$edge}.}
 
-\item{mu}{Rate of local extinction per lineage.}
+\item{mu}{Rate of local extinction per lineage, one or one per edge. With rates per edge and
+a root edge, the two edges leaving the root must have the same rates, which the root edge
+takes.}
 
 \item{root}{Prior on the state of the ancestor at the root: \code{"both"}, \code{"absent"} or
 \code{"present"}.}
@@ -45,8 +51,21 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \item{start}{Optional starting rates, \code{c(gamma = , mu = )}; by default the optimisation
 starts from four combinations of 0.2 and 2 divided by the height of the tree.}
 
-\item{shared}{If \code{TRUE}, one pair of rates shared by all communities, estimated from the sum
-of their log-likelihoods; if \code{FALSE} (the default), separate rates for each community.}
+\item{shared}{If \code{TRUE}, one set of parameters shared by all communities, estimated from the
+sum of their log-likelihoods; if \code{FALSE} (the default), separate parameters for each
+community.}
+
+\item{regimes}{Optional regime of each edge of \code{tree}, in the order of \code{tree$edge} (a factor
+or character vector), such as from \code{\link[=clade_regimes]{clade_regimes()}} or from a configuration of rate shifts
+estimated by another method: the rates in \code{vary} are estimated separately for each regime.}
+
+\item{edge_covariate}{Optional positive number for each edge of \code{tree}, in the order of
+\code{tree$edge}, such as branch-specific rates of speciation estimated by another method: the
+rates in \code{vary} change with it as \verb{rate * (x / geometric mean of x)^beta}, with \code{rate} and
+\code{beta} estimated. Give \code{regimes} or \code{edge_covariate}, not both.}
+
+\item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
+or \code{"mu"}; the other one is a single rate for the whole tree.}
 }
 \value{
 \code{damocles_loglik()}: the log-likelihood of each community. \code{fit_damocles()}: a data
@@ -102,6 +121,24 @@ community, between 0.26 and 0.81 from five and between 0.41 and 0.60 from twenty
 with shared rates, and compare the fit with that of \code{sympatry = 0} by a likelihood ratio (one
 degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
 conservative) to ask whether strictly allopatric speciation is enough.
+
+Rates can change across the tree. \code{damocles_loglik()} and \code{\link[=simulate_damocles]{simulate_damocles()}} take one rate
+per edge, and \code{fit_damocles()} estimates rates that differ among \code{regimes} of the edges (a
+partition defined a priori with \code{\link[=clade_regimes]{clade_regimes()}}, or the configuration of rate shifts of a
+method such as BAMM) or that change with an \code{edge_covariate} (such as branch-specific rates
+of speciation from a method such as ClaDS), for colonisation, extinction or both (\code{vary}).
+Either input is a plain vector in the order of \code{tree$edge}, so any method can supply it.
+Rates of diversification describe speciation and extinction of the whole lineage, not local
+colonisation and extinction: the regimes or the covariate are a hypothesis about the local
+dynamics, tested by comparing the fit with the constant model by \code{\link[=damocles_lrt]{damocles_lrt()}} (a single
+regime, or \code{beta = 0}, gives the constant model) and by intervals from
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}}. Each regime adds parameters to a likelihood that is already
+flat, so these fits need several communities with \code{shared = TRUE}; the type I error and
+power of that comparison are in \code{data-raw/validation_damocles.R}: with rates shared by 5 or
+20 communities on trees of 60 tips, the test rejected constant rates in 4--7\% of 100
+replicates without an effect and in 86--99\% with a threefold difference between clades or a
+slope of one on an autocorrelated covariate. Those communities were simulated
+independently; real communities that share their history will reject more often.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

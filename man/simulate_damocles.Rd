@@ -16,9 +16,12 @@ simulate_damocles(
 \arguments{
 \item{tree}{A rooted, fully dichotomous \code{phylo} tree with branch lengths.}
 
-\item{gamma}{Rate of local colonisation per lineage, in the units of the branch lengths.}
+\item{gamma}{Rate of local colonisation per lineage, in the units of the branch lengths: one
+rate, or one per edge of \code{tree} in the order of \code{tree$edge}.}
 
-\item{mu}{Rate of local extinction per lineage.}
+\item{mu}{Rate of local extinction per lineage, one or one per edge. With rates per edge and
+a root edge, the two edges leaving the root must have the same rates, which the root edge
+takes.}
 
 \item{n}{Number of communities to simulate.}
 
@@ -39,9 +42,9 @@ by the tips, ready to be used as \code{comm} in the other functions of the packa
 local community, as it diversifies along \code{tree}, under the dynamic null model of community
 assembly of Pigot & Etienne (2015), DAMOCLES. Along each branch the lineage is either locally
 absent (state 0) or present (state 1); an absent lineage colonises the community at rate
-\code{gamma} and a present one goes locally extinct at rate \code{mu}, the same for every lineage. At
-each speciation, which is allopatric, a locally present ancestor leaves one daughter present
-and the other absent, chosen at random, and an absent ancestor leaves two absent daughters.
+\code{gamma} and a present one goes locally extinct at rate \code{mu}, the same for every lineage
+unless rates are given for each edge. At each speciation, which is allopatric, a locally
+present ancestor leaves one daughter present and the other absent, chosen at random, and an absent ancestor leaves two absent daughters.
 The states at the tips form the community.
 }
 \details{
