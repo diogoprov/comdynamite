@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.6.3
 
 - [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md):
   `optima`, `sigma` and `r_max` take values from elsewhere, such as
