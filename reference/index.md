@@ -66,6 +66,9 @@ Traits with phylogenetic signal and evolutionary regimes.
 - [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
   : Rates of trait evolution from the turnover of partners in a
   metacommunity
+- [`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md)
+  : Rates of trait evolution from the trophic level of each lineage in a
+  food web
 - [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
   : Tip-based metrics of a known trait history
 - [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
