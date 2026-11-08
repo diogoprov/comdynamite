@@ -1,5 +1,28 @@
 # comdynamite (development version)
 
+- `sample_individuals(displacement = , displacement_width = )` adds character displacement:
+  the populations of each site sit at the equilibrium between selection toward their mean
+  without competitors and a push away from close competitors through a Gaussian competition
+  kernel, weighted by their abundance. `tstats()` now has the three null models of Taudiere &
+  Violle (2016) in base R (`nperm`, `alternative`), with standardised effect sizes and
+  p-values, so cati is needed only for comparison. The null model for T_IP.IC in
+  `cati::Tstats()` 0.99.6 puts together permutations of different sites, so its effect sizes
+  for T_IP.IC are wrong (adrientaudiere/cati#12); its regular-expression match of site names
+  was also reported upstream (adrientaudiere/cati#11). In `data-raw/demo_tstats.R`, character
+  displacement lowers T_IP.IC and raises T_PC.PR and offsets local adaptation: with
+  `local_adaptation = 0.9`, `displacement = 10` takes T_IP.IC from 0.61 to 0.011 and T_PC.PR
+  from 0.010 to 0.59.
+
+- New vignette "Rates of trait evolution that vary among branches" (`branch-rates`): rates as a
+  model (`trait_rates()`), from a history along the tree (`history_rates()`) and from
+  ecological dynamics (`turnover_rates()`, `food_web_rates()`), and how well two estimators
+  recover them, computed in advance by `data-raw/vignette_rates.R`. RRphylo follows the change
+  that happened on each branch (mean Spearman rho 0.35 to 0.37) but hardly the true rate (0.06
+  to 0.08, against a ceiling of 0.24 to 0.35 set by one realisation per branch); Brownian
+  motion with regimes in mvMORPH recovers the ratio between the rates of two habitats (medians
+  1.02, 2.12 and 5.46 for true ratios 1, 2 and 5); and the RRphylo rates of tip branches
+  follow the turnover of partners weakly (median rho 0.10).
+
 - `fit_damocles(shared = TRUE)` and `damocles_test(shared = TRUE)` estimate one pair of
   DAMOCLES rates for several communities on the same tree from the sum of their
   log-likelihoods. A single community rarely holds enough information on colonisation and

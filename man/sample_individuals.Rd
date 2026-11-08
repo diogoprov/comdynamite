@@ -11,6 +11,8 @@ sample_individuals(
   local_adaptation = 0,
   population_sd = 0,
   intraspecific_sd = 1,
+  displacement = 0,
+  displacement_width = NULL,
   step = NULL,
   env = NULL
 )
@@ -35,6 +37,14 @@ mean that do not track the environment; one value or one per species.}
 \item{intraspecific_sd}{Standard deviation of trait values among the individuals of a
 population; one value or one per species.}
 
+\item{displacement}{Strength of character displacement among the populations of a site
+(\code{c} in Details), relative to the selection that keeps each population near its mean
+without competitors; 0 (the default) for none.}
+
+\item{displacement_width}{Width \code{w} of the Gaussian competition kernel of character
+displacement, in units of the trait. The default is the mean niche breadth (\code{sigma}) of
+the species.}
+
 \item{step}{Recorded step to sample, as in \code{record_steps}; \code{NULL} (the default) uses the
 abundances at the last step.}
 
@@ -45,7 +55,8 @@ environment of the landscape; give it for simulations with \code{env_time}.}
 Data frame with one row per individual and the columns \code{site}, \code{species},
 \code{individual} (its number within the population), \code{abundance} (of the population), \code{env}
 (of the site), \code{optimum} (of the species), \code{population_mean} (the expected value of the
-population, \code{theta_j + h_j (E_i - theta_j) + d_ij}) and \code{trait}. Populations with no
+population, \code{theta_j + h_j (E_i - theta_j) + d_ij}, after character displacement) and
+\code{trait}. Populations with no
 individual measured are absent.
 }
 \description{
@@ -65,6 +76,22 @@ environment (drift, founder effects), and \code{e_ijk ~ N(0, intraspecific_sd^2)
 among individuals of a population. With \code{local_adaptation = 0} and \code{population_sd = 0} all
 populations of a species share its mean; with \code{local_adaptation = 1} every population sits on
 the environment of its site and species no longer differ within a site.
+
+With \code{displacement > 0}, the populations of each site also diverge from one another, as in
+ecological character displacement. Their means are the equilibrium of
+
+\verb{mu_ij = m_ij + c sum_k p_ik (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2))},
+
+where \code{m_ij} is the mean above (\code{theta_j + h_j (E_i - theta_j) + d_ij}), \code{c} is
+\code{displacement}, \code{p_ik} the share of species \code{k} among the individuals of the site and \code{w}
+(\code{displacement_width}) the width of a Gaussian competition kernel. Each population is pushed
+away from the populations close to it in trait, more so from abundant ones, and held near
+\code{m_ij}, so \code{c} sets the strength of competition relative to the selection that keeps the
+population near \code{m_ij}. The push from one competitor is largest at a distance \code{w} and at
+most \verb{c w exp(-1/2)}, about \verb{0.6 c w}. The equilibrium is found by damped fixed-point
+iteration from \code{m_ij}, with steps of \code{1 / (1 + c)}. Populations with the same \code{m_ij}, as
+with \code{local_adaptation = 1} and no \code{population_sd}, are not pushed apart, since the push is
+symmetric.
 
 The traits of individuals are drawn after the simulation and do not feed back on the
 dynamics: abundances are those of the species means. The function describes the pattern
