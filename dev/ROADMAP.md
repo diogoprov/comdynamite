@@ -505,6 +505,10 @@ pacotes de referência em vez de reimplementá-los.
       pelo mvMORPH (Clavel et al. 2015).
 - [ ] Taxas que variam entre ramos como modelo gerador (relaxed BM, saltos de taxa como no
       BAMM), reescalando os ramos, com os valores nos nós como em `trait_bm()`.
+      Antes de escolher, analisar qual modelo vale mais a pena (nota de 2026-11-07): RRphylo
+      (traits contínuos e discretos), bifrost (https://jakeberv.com/bifrost/, traits
+      contínuos) e BayesTraits (estima taxas por ramo). Conferir em cada um o modelo, o que
+      ele estima e o formato de saída das taxas por ramo, que serviria de entrada aqui.
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
