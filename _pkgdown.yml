@@ -30,6 +30,7 @@ reference:
   - species_traits
   - trait_bm
   - traits_ou
+  - rate_matrix
   - trait_mk
   - trait_rates
   - history_rates
@@ -88,6 +89,8 @@ reference:
   - summary_stats
   - equilibrium_check
   - as.data.frame.mc_sim
+  - sample_individuals
+  - tstats
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:

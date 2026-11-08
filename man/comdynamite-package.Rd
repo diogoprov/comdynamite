@@ -37,7 +37,8 @@ landscape with edges.
 \code{\link[=competition_matrix]{competition_matrix()}}.
 \item Static communities along gradients: \code{\link[=simulate_static]{simulate_static()}} and \code{\link[=simulate_logistic]{simulate_logistic()}}.
 \item Assembly by rules, without dynamics: \code{\link[=assemble_community]{assemble_community()}}.
-\item Traits on a tree: \code{\link[=species_traits]{species_traits()}}, \code{\link[=trait_bm]{trait_bm()}} and \code{\link[=traits_ou]{traits_ou()}}.
+\item Traits on a tree: \code{\link[=species_traits]{species_traits()}}, \code{\link[=trait_bm]{trait_bm()}} and \code{\link[=traits_ou]{traits_ou()}}, with
+correlated traits from \code{\link[=rate_matrix]{rate_matrix()}}.
 }
 }
 

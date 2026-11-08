@@ -22,7 +22,8 @@
 #'     [competition_matrix()].
 #'   \item Static communities along gradients: [simulate_static()] and [simulate_logistic()].
 #'   \item Assembly by rules, without dynamics: [assemble_community()].
-#'   \item Traits on a tree: [species_traits()], [trait_bm()] and [traits_ou()].
+#'   \item Traits on a tree: [species_traits()], [trait_bm()] and [traits_ou()], with
+#'     correlated traits from [rate_matrix()].
 #' }
 #'
 #' @section Where to start:

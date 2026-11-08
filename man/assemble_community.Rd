@@ -9,7 +9,9 @@ assemble_community(
   size,
   rule = c("limiting_similarity", "filtering", "neutral"),
   optimum = "ancestral",
-  min_distance = NULL
+  min_distance = NULL,
+  distance = c("euclidean", "standardized", "mahalanobis"),
+  trait_cov = NULL
 )
 }
 \arguments{
@@ -29,7 +31,14 @@ trait.}
 
 \item{min_distance}{For \code{rule = "limiting_similarity"}: optional end point.
 Removal stops as soon as no two remaining species are closer than this
-(a limit to similarity), even if more than \code{size} species remain.}
+(a limit to similarity), even if more than \code{size} species remain. In the units of
+\code{distance}.}
+
+\item{distance}{How to measure distances in trait space: \code{"euclidean"},
+\code{"standardized"} or \code{"mahalanobis"}; see Details.}
+
+\item{trait_cov}{For \code{distance = "mahalanobis"}, an optional covariance matrix of the
+traits, one row and column per trait, used instead of the covariance in the pool.}
 }
 \value{
 A list with \code{community} (names of the species kept) and \code{removed}
@@ -55,8 +64,31 @@ farthest from a niche optimum in trait space are removed first.
 \item \code{"neutral"}: species are drawn at random, without regard to traits.
 }
 
-Distances are Euclidean, so several traits can be used at once (one column
-each). Ties are broken at random.
+Several traits can be used at once (one column each); ties are broken at random. The
+distance between species, and between a species and the optimum, is chosen by \code{distance}:
+\itemize{
+\item \code{"euclidean"} (the default, as in Kraft et al. 2007): distances in the units of the
+traits, so a trait with a larger spread weighs more.
+\item \code{"standardized"}: Euclidean distance on traits divided by their standard deviation in
+the pool, so each trait weighs the same whatever its units.
+\item \code{"mahalanobis"}: Euclidean distance after removing the correlations between traits,
+\verb{sqrt((x - y)' S^-1 (x - y))}, with \code{S} the covariance matrix of the traits in the pool,
+or \code{trait_cov}. In the filter, removing species by decreasing Mahalanobis distance to
+the optimum is removing them by increasing value of a multivariate Gaussian niche with
+covariance \code{S} centred on the optimum (Mahalanobis 1936, reprinted 2018).
+}
+
+The choice is a statement about niche axes. With correlated traits, such as those of
+\code{\link[=traits_ou]{traits_ou()}} with a rate matrix from \code{\link[=rate_matrix]{rate_matrix()}}, Euclidean distances, standardised or
+not, count the shared direction of variation more than once: two traits that measure one
+niche axis double the weight of that axis. \code{"mahalanobis"} treats each independent
+direction of variation as one axis, and is the better choice when the traits are
+correlated because they reflect the same niche dimension; \code{"standardized"} is the better
+choice when each trait is a distinct niche dimension whatever its correlation with the
+others. With uncorrelated traits on the same scale the three give the same order of
+removal. The pool covariance needs more species than traits; with few species, or to use
+the covariance of the process that generated the traits (for example the rate matrix,
+which is free of the phylogenetic dependence among species), pass it as \code{trait_cov}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -65,6 +97,9 @@ tr <- treeshapesim::sim_tree_shape(32)
 x <- traits_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
+# correlated traits: distances that discount the correlation
+y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+assemble_community(y, size = 16, distance = "mahalanobis")$community
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -78,4 +113,8 @@ Kraft, N. J. B., Cornwell, W. K., Webb, C. O., & Ackerly, D. D. (2007).
 Trait evolution, community assembly, and the phylogenetic structure of
 ecological communities. \emph{The American Naturalist}, 170, 271--283.
 \doi{10.1086/519400}
+
+Mahalanobis, P. C. (2018). Reprint of: Mahalanobis, P. C. (1936) "On the generalised
+distance in statistics". \emph{Sankhya A}, 80(Suppl. 1), 1--7.
+\doi{10.1007/s13171-019-00164-5}
 }

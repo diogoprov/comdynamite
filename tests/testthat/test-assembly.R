@@ -54,3 +54,57 @@ test_that("traits without row names get default species names", {
   expect_length(out$community, 3)
   expect_true(all(out$community %in% paste0("sp", 1:6)))
 })
+
+test_that("distance changes trait space as documented", {
+  set.seed(10)
+  x <- cbind(a = stats::rnorm(30), b = stats::rnorm(30, sd = 10))
+  rownames(x) <- paste0("s", 1:30)
+  # standardized: the same as Euclidean on traits divided by their standard deviations
+  z <- sweep(x, 2, apply(x, 2, stats::sd), "/")
+  set.seed(1)
+  a <- assemble_community(x, 10, distance = "standardized")
+  set.seed(1)
+  b <- assemble_community(z, 10)
+  expect_identical(a, b)
+  # mahalanobis: the same as Euclidean on whitened traits
+  w <- x %*% solve(chol(stats::cov(x)))
+  set.seed(2)
+  a <- assemble_community(x, 10, rule = "filtering", optimum = c(0, 0),
+                          distance = "mahalanobis")
+  set.seed(2)
+  b <- assemble_community(w, 10, rule = "filtering", optimum = c(0, 0))
+  expect_identical(a, b)
+  # a given covariance replaces the one of the pool
+  set.seed(3)
+  a <- assemble_community(x, 10, distance = "mahalanobis",
+                          trait_cov = diag(apply(x, 2, stats::var)))
+  set.seed(3)
+  b <- assemble_community(x, 10, distance = "standardized")
+  expect_equal(a, b)
+})
+
+test_that("Mahalanobis filtering keeps species inside the niche ellipse", {
+  # two traits along one direction: Euclidean distance favours the short axis, Mahalanobis not
+  x <- rbind(along = c(2, 2), across = c(1, -1), rbind(matrix(c(1, 1, -1, -1, 3, 3, -3, -3,
+                                                                0.2, -0.2, -0.2, 0.2),
+                                                              ncol = 2, byrow = TRUE)))
+  rownames(x) <- c("along", "across", paste0("s", 1:6))
+  s <- matrix(c(1, 0.95, 0.95, 1), 2)
+  euc <- assemble_community(x, 7, rule = "filtering", optimum = c(0, 0))
+  mah <- assemble_community(x, 7, rule = "filtering", optimum = c(0, 0),
+                            distance = "mahalanobis", trait_cov = s)
+  expect_true("across" %in% euc$community)
+  expect_false("across" %in% mah$community)
+})
+
+test_that("distance checks its inputs", {
+  x <- matrix(stats::rnorm(6), 3, dimnames = list(c("a", "b", "c"), NULL))
+  expect_error(assemble_community(x[1:2, ], 1, distance = "mahalanobis"),
+               "more species than traits")
+  expect_error(assemble_community(x, 2, trait_cov = diag(2)), "only with")
+  expect_error(assemble_community(x, 2, distance = "mahalanobis", trait_cov = diag(3)),
+               "one row and column per trait")
+  expect_error(assemble_community(x, 2, distance = "mahalanobis", trait_cov = matrix(1, 2, 2)),
+               "singular")
+  expect_error(assemble_community(cbind(x, 1), 2, distance = "standardized"), "vary")
+})

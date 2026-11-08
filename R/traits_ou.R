@@ -11,33 +11,54 @@
 #' `sigma2 / (2 * alpha) * (1 - exp(-2 * alpha * t))`.
 #'
 #' With `alpha = 0` the process is Brownian motion with rate `sigma2`, and the
-#' optima play no role. Each branch belongs to a single regime, so a shift in
-#' optimum happens at the start of the branch where the regime changes.
+#' optima play no role. With regimes given as a vector, each branch belongs to a single
+#' regime, so a shift in optimum happens at the start of the branch where the regime changes.
+#' With regimes given as a mapped history (class `simmap`, from [trait_mk()] or phytools),
+#' regimes can also change within branches, at the times of the map.
+#'
+#' Several traits evolve independently with `sigma2` as one number, or correlated with an
+#' evolutionary rate matrix, whose diagonal holds the rate of each trait
+#' and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
+#' gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
+#' 2015); [rate_matrix()] builds them with the structures that mvMORPH fits. The strength of
+#' selection `alpha` and the optimum `theta` are the same for all traits. Under Brownian motion
+#' (`alpha = 0`) the traits of the tips have covariance `sum_k kronecker(R_k, C_k)`, where `R_k`
+#' is the rate matrix of regime k and `C_k` the phylogenetic covariance matrix built from the
+#' time spent in regime k (Clavel et al. 2015).
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
-#' @param n_traits Number of independent traits.
+#' @param n_traits Number of traits. Taken from the rate matrices when `sigma2` gives them.
 #' @param alpha Strength of selection towards the optimum (0 = Brownian
 #'   motion).
-#' @param sigma2 Rate of the stochastic (drift) component.
+#' @param sigma2 Rate of the stochastic (drift) component: one number for all traits, which
+#'   then evolve independently; a symmetric positive semidefinite rate matrix with one row and
+#'   column per trait, for correlated traits; or a named list or vector with a matrix or a
+#'   number per regime (names as in `regimes`). See [rate_matrix()].
 #' @param theta Optimum of each regime: one value for a single optimum, or a
 #'   named vector with one value per regime (names as in `regimes`).
 #' @param regimes Selective regime of each branch, in the order of the edges
 #'   of `tree` reordered "cladewise" (`ape::reorder.phylo(tree, "cladewise")`),
-#'   as returned by [paint_regimes()]. `NULL` puts every branch in one
+#'   as returned by [paint_regimes()]; or a tree with the same edges as `tree` and a mapped
+#'   history (class `simmap`), whose states are the regimes. `NULL` puts every branch in one
 #'   regime.
 #' @param root Trait value at the root.
 #' @return Matrix with one row per tip (tip labels as row names) and one
-#'   column per trait. The attribute `nodes` holds the values at the internal nodes, one row
+#'   column per trait, named as the columns of the rate matrix, if any. The attribute `nodes` holds the values at the internal nodes, one row
 #'   per node named by its number in `tree$edge`, the root first.
 #' @references
 #'   Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis: a
 #'   modeling approach for adaptive evolution. *The American Naturalist*, 164,
 #'   683--695. \doi{10.1086/426002}
 #'
+#'   Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package for fitting
+#'   multivariate evolutionary models to morphometric data. *Methods in Ecology and
+#'   Evolution*, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
+#'
 #'   Hansen, T. F. (1997). Stabilizing selection and the comparative analysis
 #'   of adaptation. *Evolution*, 51, 1341--1351.
 #'   \doi{10.1111/j.1558-5646.1997.tb01457.x}
-#' @seealso [paint_regimes()] to assign regimes to clades.
+#' @seealso [paint_regimes()] to assign regimes to clades, [rate_matrix()] for rate matrices,
+#'   [trait_mk()] for a history of regimes that change within branches.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -47,48 +68,123 @@
 #' reg <- paint_regimes(tr, nodes = 25)
 #' x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 #' round(x[, 1], 1)
+#' # two correlated traits
+#' r <- rate_matrix(c(1, 0.5), correlation = 0.8)
+#' y <- traits_ou(tr, sigma2 = r)
+#' cor(y)
 #' @export
 traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       regimes = NULL, root = 0) {
-  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length), n_traits >= 1,
-            alpha >= 0, sigma2 >= 0)
+  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length), n_traits >= 1, alpha >= 0)
+  order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
+  maps <- NULL
+  if (inherits(regimes, "phylo")) {
+    if (is.null(regimes$maps) || !identical(unname(regimes$edge), unname(tree$edge))) {
+      stop("a tree given as `regimes` needs a mapped history (class `simmap`) and the same ",
+           "edges as `tree`", call. = FALSE)
+    }
+    maps <- regimes$maps[order]
+    regimes <- NULL
+  }
   tree <- ape::reorder.phylo(tree, "cladewise")
   ne <- nrow(tree$edge)
-  if (is.null(regimes)) {
-    if (length(theta) != 1) stop("several optima need `regimes`")
-    th <- rep(unname(theta), ne)
-  } else {
-    stopifnot(length(regimes) == ne)
-    reg <- as.character(regimes)
-    if (length(theta) == 1 && is.null(names(theta))) {
-      th <- rep(unname(theta), ne)
-    } else {
-      if (is.null(names(theta)) || !all(reg %in% names(theta)))
-        stop("`theta` must be named with every regime in `regimes`")
-      th <- unname(theta[reg])
-    }
-  }
   t <- tree$edge.length
-  if (alpha > 0) {
-    decay <- exp(-alpha * t)
-    sd_e <- sqrt(sigma2 / (2 * alpha) * (1 - exp(-2 * alpha * t)))
+  if (is.null(maps)) {
+    if (is.null(regimes) && length(theta) != 1) stop("several optima need `regimes`")
+    if (is.null(regimes)) {
+      reg <- rep("0", ne)
+    } else {
+      stopifnot(length(regimes) == ne)
+      reg <- as.character(regimes)
+    }
+    maps <- lapply(seq_len(ne), function(e) stats::setNames(t[e], reg[e]))
+  }
+  states <- unique(unlist(lapply(maps, names), use.names = FALSE))
+  by_regime <- function(value, what) {
+    if (length(value) == 1 && !is.list(value)) {
+      return(stats::setNames(rep(list(value[[1]]), length(states)), states))
+    }
+    if (is.null(names(value)) || !all(states %in% names(value))) {
+      stop("`", what, "` must be named with every regime: ", paste(states, collapse = ", "),
+           call. = FALSE)
+    }
+    as.list(value)[states]
+  }
+  th <- unlist(by_regime(theta, "theta"))
+  rates <- if (is.matrix(sigma2)) {
+    stats::setNames(rep(list(sigma2), length(states)), states)
   } else {
-    decay <- rep(1, ne)
-    sd_e <- sqrt(sigma2 * t)
+    by_regime(sigma2, "sigma2")
+  }
+  is_matrix <- vapply(rates, is.matrix, logical(1))
+  multivariate <- any(is_matrix)
+  if (multivariate) {
+    if (!all(is_matrix)) {
+      stop("`sigma2` must be numbers or rate matrices for all regimes, not both", call. = FALSE)
+    }
+    p <- unique(vapply(rates, ncol, integer(1)))
+    if (length(p) != 1) stop("the rate matrices in `sigma2` must have the same size", call. = FALSE)
+    if (n_traits != 1 && n_traits != p) {
+      stop("`n_traits` is ", n_traits, " but the rate matrices have ", p, " traits",
+           call. = FALSE)
+    }
+    n_traits <- p
+    trait_names <- colnames(rates[[1]])
+    rates <- lapply(rates, matrix_root)
+  } else {
+    trait_names <- NULL
+    if (any(!vapply(rates, function(s) is.numeric(s) && length(s) == 1 && is.finite(s) &&
+                      s >= 0, logical(1)))) {
+      stop("`sigma2` must be zero or more", call. = FALSE)
+    }
   }
   n_tip <- ape::Ntip(tree)
   x <- matrix(0, n_tip + tree$Nnode, n_traits)
   x[n_tip + 1, ] <- root
   for (e in seq_len(ne)) {  # cladewise: parents before children
-    pa <- tree$edge[e, 1]
-    ch <- tree$edge[e, 2]
-    x[ch, ] <- th[e] + (x[pa, ] - th[e]) * decay[e] + stats::rnorm(n_traits, 0, sd_e[e])
+    value <- x[tree$edge[e, 1], ]
+    m <- maps[[e]]
+    for (k in seq_along(m)) {
+      s <- names(m)[k]
+      len <- m[[k]]
+      # same arithmetic as before rate matrices, so scalar rates give the same values
+      rate <- if (multivariate) 1 else rates[[s]]
+      if (alpha > 0) {
+        decay <- exp(-alpha * len)
+        sd_e <- sqrt(rate / (2 * alpha) * (1 - exp(-2 * alpha * len)))
+      } else {
+        decay <- 1
+        sd_e <- sqrt(rate * len)
+      }
+      noise <- if (multivariate) {
+        sd_e * drop(stats::rnorm(n_traits) %*% rates[[s]])
+      } else {
+        stats::rnorm(n_traits, 0, sd_e)
+      }
+      value <- th[[s]] + (value - th[[s]]) * decay + noise
+    }
+    x[tree$edge[e, 2], ] <- value
   }
   out <- x[seq_len(n_tip), , drop = FALSE]
-  dimnames(out) <- list(tree$tip.label, paste0("trait", seq_len(n_traits)))
+  if (is.null(trait_names)) trait_names <- paste0("trait", seq_len(n_traits))
+  dimnames(out) <- list(tree$tip.label, trait_names)
   attr(out, "nodes") <- x[-seq_len(n_tip), , drop = FALSE]
   dimnames(attr(out, "nodes")) <- list(n_tip + seq_len(tree$Nnode), colnames(out))
   out
+}
+
+# upper triangular U with crossprod(U) = m, for a symmetric positive semidefinite matrix
+matrix_root <- function(m) {
+  if (!is.numeric(m) || nrow(m) != ncol(m) || anyNA(m) || !isSymmetric(unname(m))) {
+    stop("a rate matrix must be square, symmetric and without NA", call. = FALSE)
+  }
+  u <- tryCatch(chol(m), error = function(e) NULL)
+  if (!is.null(u)) return(u)
+  ev <- eigen(m, symmetric = TRUE)
+  if (min(ev$values) < -sqrt(.Machine$double.eps) * max(1, abs(ev$values))) {
+    stop("a rate matrix must be positive semidefinite", call. = FALSE)
+  }
+  t(ev$vectors %*% diag(sqrt(pmax(ev$values, 0)), nrow(m)))
 }
 
 #' Assign selective regimes to clades
