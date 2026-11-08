@@ -94,8 +94,8 @@ expression, so a site called \code{site1} would also take the populations of \co
 under labels of equal width (\code{site01}, \code{site02}, ...) and given back their names in the
 result. And its null model for \code{T_IP.IC} puts together the permutations of different sites
 in the wrong order, so that the null values of a site come from the individuals of other
-sites; its standardised effect sizes for \code{T_IP.IC} are then wrong. \code{method = "base"} is
-recommended.
+sites; its standardised effect sizes for \code{T_IP.IC} are then wrong
+(\url{https://github.com/adrientaudiere/cati/issues/12}). \code{method = "base"} is recommended.
 }
 
 \section{Local adaptation and character displacement}{

@@ -8,7 +8,7 @@
   p-values, so cati is needed only for comparison. The null model for T_IP.IC in
   `cati::Tstats()` 0.99.6 puts together permutations of different sites, so its effect sizes
   for T_IP.IC are wrong, and its regular-expression match of site names was reported
-  upstream (adrientaudiere/cati#11). In `data-raw/demo_tstats.R`, character displacement
+  upstream (adrientaudiere/cati#11; the null model as adrientaudiere/cati#12). In `data-raw/demo_tstats.R`, character displacement
   lowers T_IP.IC and raises T_PC.PR and offsets local adaptation: with
   `local_adaptation = 0.9`, `displacement = 10` takes T_IP.IC from 0.61 to 0.011 and T_PC.PR
   from 0.010 to 0.59.

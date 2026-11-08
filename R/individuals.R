@@ -187,8 +187,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' under labels of equal width (`site01`, `site02`, ...) and given back their names in the
 #' result. And its null model for `T_IP.IC` puts together the permutations of different sites
 #' in the wrong order, so that the null values of a site come from the individuals of other
-#' sites; its standardised effect sizes for `T_IP.IC` are then wrong. `method = "base"` is
-#' recommended.
+#' sites; its standardised effect sizes for `T_IP.IC` are then wrong
+#' (\url{https://github.com/adrientaudiere/cati/issues/12}). `method = "base"` is recommended.
 #'
 #' @section Local adaptation and character displacement:
 #' With `local_adaptation` in [sample_individuals()], population means move toward the
