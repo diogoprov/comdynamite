@@ -32,6 +32,9 @@ reference:
   - traits_ou
   - trait_mk
   - tip_history_metrics
+  - as_herodotools
+  - region_pool
+  - arrival_ages
   - paint_regimes
 - title: Competition
   desc: Interspecific competition, optionally structured by relatedness.
@@ -104,3 +107,4 @@ articles:
   contents:
   - articles/validation
   - articles/validation-gradient
+  - articles/herodotools

@@ -118,18 +118,12 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root = NULL) {
 #' @inherit trait_mk examples
 #' @export
 tip_history_metrics <- function(history) {
-  if (!inherits(history, "phylo") || is.null(history$maps)) {
-    stop("`history` must be a `simmap` tree, such as from `trait_mk()`", call. = FALSE)
-  }
+  states <- history_states(history)
   edge <- history$edge
   maps <- history$maps
   n_tip <- ape::Ntip(history)
-  node_state <- character(n_tip + history$Nnode)
-  node_state[edge[, 1]] <- vapply(maps, function(m) names(m)[1], character(1))
-  tip_state <- vapply(seq_len(n_tip), function(i) {
-    m <- maps[[which(edge[, 2] == i)]]
-    names(m)[length(m)]
-  }, character(1))
+  node_state <- c(unname(states$tips), states$nodes)
+  tip_state <- unname(states$tips)
   edge_to <- match(seq_len(n_tip + history$Nnode), edge[, 2])  # NA at the root
   longest <- vapply(maps, max, numeric(1))
   rows <- lapply(seq_len(n_tip), function(i) {

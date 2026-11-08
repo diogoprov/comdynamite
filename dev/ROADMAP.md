@@ -167,7 +167,7 @@ menos código. A `phylogenetic-structure` mostra o desenho com `run_scenarios()`
 resultados salvos não foram refeitos. As vignettes de avaliação de nulos usam laços de outro
 tipo e não mudaram.
 
-## v0.4.0: base do hub
+## v0.4.0: base do hub (concluída em 2026-11-07)
 
 Objetivo: uma interface comum, para que simulação e métodos troquem dados entre si e
 com outros pacotes. As versões seguintes dependem desta.
@@ -191,13 +191,18 @@ com outros pacotes. As versões seguintes dependem desta.
       O Herodotools não foi instalado (depende do daee, fora do CRAN): a equivalência vem da
       leitura do código, não de uma comparação rodada. Taxas variando entre ramos (relaxed
       BM, BAMM) como modelo gerador ficam para depois.
-- [ ] Integração com o Herodotools (Nakamura et al. 2023): saídas nos formatos que ele
-      lê e as métricas de `calc_tip_based_trait_evo()` como resumo, com vignette.
-      Com a história conhecida, a simulação pode validar esses métodos. Último item da
-      v0.4.0. Antes: instalar o daee (GitHub), rodar `calc_tip_based_trait_evo()` numa
-      história de `trait_mk()` e comparar com `tip_history_metrics()`, inclusive o
-      comprimento que o daee dá ao ramo da raiz; conferir o que `calc_ancestral_state()`
-      e as funções de áreas ancestrais leem.
+- [x] Integração com o Herodotools (Nakamura et al. 2024): `as_herodotools()` (entradas com os
+      nomes dos argumentos dele e as áreas ancestrais verdadeiras), `region_pool()` e
+      `arrival_ages()`, artigo "Known biogeographic histories for Herodotools" e
+      `data-raw/validation_herodotools.R` (Herodotools 2.0.1, instalado à parte: o rexpokit do
+      BioGeoBEARS não compila neste macOS, usado o binário do CRAN). Resultados: com a história
+      verdadeira no lugar dos mapas, as métricas por ponta são idênticas às de
+      `tip_history_metrics()` em 30 de 30 histórias. Das pontas, a correlação de Spearman com a
+      verdade cai com a taxa: estase 0,97 a 0,69, transições 0,68 a 0,38; as transições nos nós
+      perdem as mudanças dentro dos ramos (1,81 contra 3,01 por ponta na taxa mais alta). Idade
+      de chegada com áreas verdadeiras: 0,70 a 0,89; com áreas por ML (`ape::ace`): 0,24 a 0,58,
+      porque um nó profundo errado muda a idade de um clado inteiro. Herodotools fora do
+      `Suggests` por não estar no CRAN.
 
 **Concluído quando:** um cenário simulado passar pelo Herodotools e recuperar a
 história conhecida.
@@ -505,6 +510,10 @@ pacotes de referência em vez de reimplementá-los.
       pelo mvMORPH (Clavel et al. 2015).
 - [ ] Taxas que variam entre ramos como modelo gerador (relaxed BM, saltos de taxa como no
       BAMM), reescalando os ramos, com os valores nos nós como em `trait_bm()`.
+      Antes de escolher, analisar qual modelo vale mais a pena (nota de 2026-11-07): RRphylo
+      (traits contínuos e discretos), bifrost (https://jakeberv.com/bifrost/, traits
+      contínuos) e BayesTraits (estima taxas por ramo). Conferir em cada um o modelo, o que
+      ele estima e o formato de saída das taxas por ramo, que serviria de entrada aqui.
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
