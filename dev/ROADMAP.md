@@ -516,6 +516,8 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
+      Covariância entre traits feita em `traits_ou()` e `rate_matrix()`, conferida contra o
+      mvMORPH (item "Funções que usam traits" abaixo).
 - [x] Taxas que variam entre ramos como modelo gerador. Avaliação da literatura (2026-11-07):
       um gerador com a verdade conhecida, não um método de inferência; RRphylo, phytools,
       motmot, bifrost e corHMM são GPL e só entram em `Suggests` ou `data-raw`. O RRphylo não
@@ -597,6 +599,31 @@ pacotes de referência em vez de reimplementá-los.
       compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
       usa vários traits: distância multivariada na similaridade limitante, nicho
       multidimensional no filtro.
+      Feito (estrutura entre traits): `traits_ou(sigma2 = )` aceita matriz de taxas ou lista
+      nomeada com uma matriz (ou taxa) por regime, e `regimes` aceita um mapa simmap (de
+      `trait_mk()`), com regimes, ótimos e taxas mudando dentro dos ramos; com `sigma2`
+      escalar os valores são os mesmos de antes com a mesma semente. `rate_matrix()` monta as
+      estruturas do `mvBM()`: `"default"`, `"diagonal"`, `"equaldiagonal"`, `"equal"` e, entre
+      regimes, `"proportional"`, `"shared"` (mesmos autovetores), `"variance"`, `"correlation"`.
+      Todas fazem sentido aqui porque o pacote já tem regimes (`paint_regimes()`, simmap). A
+      matriz de índices inteiros do mvMORPH (restrições definidas pelo usuário) só serve para
+      ajuste: na simulação o usuário passa a matriz. Validação em
+      `data-raw/validation_mvtraits.R` (mvMORPH 1.2.3): covariâncias das pontas dentro de 2,9
+      erros de Monte Carlo de `sum_k kronecker(R_k, C_k)` (mvSIM: 2,8), OU dentro de 3,1, e
+      `mvBM()` recuperou as matrizes (mediana de 30 ajustes a menos de 9% de cada elemento).
+      Ficou de fora: `alpha` matricial e `theta` por trait no OU (como `mvOU()`), e taxas por
+      ramo de `trait_rates()` vezes uma matriz (estrutura proporcional por ramo), para não
+      mexer em `R/traits_rates.R` enquanto `history_rates()` é ligada à metacomunidade.
+      Falta (proposta, não implementada): (1) `assemble_community(distance = )` com
+      `"euclidean"` (atual; já aceita várias colunas), `"standardized"` (traits em desvios
+      padrão) e `"mahalanobis"` (com a covariância do pool ou uma matriz dada, como a de
+      `rate_matrix()`), porque com traits correlacionados a distância euclidiana conta duas
+      vezes os eixos correlacionados; o filtro passaria a ordenar pela distância de Mahalanobis
+      ao ótimo, que é o nicho gaussiano multidimensional com matriz de largura. (2) Na
+      dinâmica, ambiente com vários eixos (sítios x eixos), ótimos em matriz e
+      `growth_rates()` com `r_max * exp(-0.5 * d2)`, `d2` a distância de Mahalanobis entre
+      ambiente e ótimo; competição por distância multivariada nos traits. (2) muda
+      `species_traits()`, `growth_rates()` e as paisagens, e é o maior.
 - [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore.
 

@@ -1,5 +1,20 @@
 # comdynamite (development version)
 
+- `traits_ou()` simulates several correlated traits: `sigma2` can be an evolutionary rate
+  matrix, or a named list with one matrix (or one rate) per selective regime, as in the
+  multi-rate models of mvMORPH (Clavel et al. 2015). `regimes` can also be a mapped history
+  (class `simmap`, such as from `trait_mk()`), so that regimes, optima and rates change within
+  branches. With one number as `sigma2` the values are the same as before for the same seed.
+  `rate_matrix()` builds rate matrices with the structures that `mvMORPH::mvBM()` fits: any
+  matrix (`"default"`), independent traits (`"diagonal"`, `"equaldiagonal"`), equal rates with
+  correlations (`"equal"`), and, across regimes, proportional matrices (`"proportional"`),
+  shared eigenvectors (`"shared"`), equal variances (`"variance"`) or equal correlations
+  (`"correlation"`). `data-raw/validation_mvtraits.R` checks them against mvMORPH 1.2.3: over
+  20000 simulations with two regimes changing within branches, the covariances of the tips
+  stayed within 2.9 Monte Carlo standard errors of `sum_k kronecker(R_k, C_k)` (mvSIM: 2.8),
+  and under OU within 3.1 of the covariance of Hansen (1997); `mvBM()` with the same constraint
+  recovered the matrices (100 tips, median of 30 fits within 9% of each true element).
+
 - `food_web_dynamics()` simulates the joint dynamics of abundances and mean traits of a
   resource, a consumer and a predator, the three-trophic-level model of chapter 3 of McPeek
   (2017, *Evolutionary Community Ecology*): quadratic intrinsic rates, Holling type II feeding,
