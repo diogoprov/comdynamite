@@ -70,6 +70,15 @@ Traits with phylogenetic signal and evolutionary regimes.
 - [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
   : Assign selective regimes to clades
 
+## Coevolution in food webs
+
+Abundances and mean traits of a resource, a consumer and a predator.
+
+- [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
+  : Coevolution of a resource, a consumer and a predator
+- [`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md)
+  : Parameters of the three-trophic-level eco-evolutionary model
+
 ## Competition
 
 Interspecific competition, optionally structured by relatedness.

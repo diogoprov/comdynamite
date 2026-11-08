@@ -2,6 +2,32 @@
 
 ## comdynamite (development version)
 
+- [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
+  simulates the joint dynamics of abundances and mean traits of a
+  resource, a consumer and a predator, the three-trophic-level model of
+  chapter 3 of McPeek (2017, *Evolutionary Community Ecology*):
+  quadratic intrinsic rates, Holling type II feeding, optional omnivory,
+  and attack coefficients that are Gaussian, logistic or
+  Michaelis-Menten functions of the traits. Mean traits follow the
+  selection gradients, computed numerically from the fitness of a
+  phenotype among individuals at the mean; everything is integrated by a
+  fixed-step Runge-Kutta method in base R. Levels can be absent or
+  introduced at given times, and the output keeps the selection
+  gradients and the rates of trait change, for later use as rates per
+  lineage.
+  [`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md)
+  holds the parameters with the names of the book.
+  `data-raw/validation_food_web.R` reproduces figure 3.2 (consumer peak
+  of 10.2 at iteration 198, final traits 17.1 and 15.6, attack
+  coefficient 0.091, rates of trait change 280 and 47 times lower at
+  iteration 3000 than at their maxima), figure 3.3 (the consumer at a
+  maximum and the resource at a minimum of their fitness surfaces at the
+  end) and the effect of the predator in figure 3.11: with the predator
+  the resource evolves a trait closer to its birth optimum of 12 under
+  the three attack forms, from 16.8 to 11.5 with Gaussian attack (book:
+  16 to 12.4), from 13.6 to 12.6 with logistic attack (15.5 to 12.9) and
+  from 10.1 to 11.6 with Michaelis-Menten attack (10 to 11.6).
+
 - [`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md)
   turns the history of a discrete character along the tree, such as the
   region or habitat of each lineage from
