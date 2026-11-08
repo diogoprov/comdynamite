@@ -1,3 +1,5 @@
+# comdynamite (development version)
+
 # comdynamite 0.6.3
 
 - `species_traits()`: `optima`, `sigma` and `r_max` take values from elsewhere, such as mvMORPH,

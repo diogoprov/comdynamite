@@ -424,7 +424,8 @@ pergunta. Os detalhes estão na seção da v0.5.2, onde os itens nasceram.
 Publica o marco v0.4.0: `mc_data()` já saíra na 0.6.2; entram traits vindos de fora em
 `species_traits()`, `pool` e `initial` nas simulações, valores nos nós, `trait_mk()`,
 `tip_history_metrics()` e a integração com o Herodotools (`as_herodotools()`,
-`region_pool()`, `arrival_ages()`), além de `trait_k` em `summary_stats()` (marco do ABC).
+`region_pool()`, `arrival_ages()`), além de `trait_k` em `summary_stats()` (marco do ABC). DOI da versão:
+`10.5281/zenodo.24046171`.
 
 ## v0.6.2: fluxo de simulação, PCPS e estrutura comum (concluída em 2026-11-07)
 
