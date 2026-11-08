@@ -91,6 +91,7 @@ reference:
   - as.data.frame.mc_sim
   - sample_individuals
   - tstats
+  - population_shifts
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:
