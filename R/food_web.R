@@ -255,6 +255,11 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
 
 #' @export
 print.food_web <- function(x, ...) {
+  # a subset (head(), tail(), selected columns) loses the attributes: print it as a data frame
+  needed <- c("time", "R", "N", "P", "z_R", "z_N", "z_P")
+  if (is.null(attr(x, "attack")) || !all(needed %in% names(x))) {
+    return(print(as.data.frame(unclass(x)), ...))
+  }
   last <- x[nrow(x), ]
   cat("<food_web>", nrow(x), "times from", format(x$time[1]), "to", format(last$time),
       "\n")

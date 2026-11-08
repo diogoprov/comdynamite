@@ -200,3 +200,9 @@ test_that("input errors are reported", {
                                  params = food_web_params(c0 = 10, d = 0.2, a0 = 1),
                                  dt = 3), "diverged")
 })
+
+test_that("subsets of the output print as data frames", {
+  x <- food_web_dynamics(seq(0, 20, 10))
+  expect_output(print(x), "<food_web>")
+  expect_output(print(utils::tail(x[, c("time", "R")], 1)), "time")
+})
