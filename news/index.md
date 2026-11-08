@@ -2,6 +2,30 @@
 
 ## comdynamite (development version)
 
+- [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  estimates local adaptation (`h`) and character displacement (`c`)
+  together from the population means of individuals, by a regression
+  within species on the environment of the site and on the push
+  predicted from co-occurring competitors, with the individuals of each
+  population split in halves against the bias of sampling error and the
+  kernel width profiled. `tstats(null_ip = "species")` adds a null model
+  for T_IP.IC that exchanges population means among the populations of
+  each species, so that its effect size is near zero when the site does
+  not matter, positive under convergence and negative under divergence;
+  the null model of Taudiere & Violle (2016) is far below zero for any
+  set of distinct species. In `data-raw/pilot_tstats_identifiability.R`
+  (ABC, `h ~ U(0, 1)`, `c ~ U(0, 10)`, ten individuals per population,
+  metacommunities of the pseudo-observations left out), the T-statistics
+  alone recover `h` (R2 0.87 to 0.89 over tolerances) but hardly `c`
+  (0.56 to 0.58), while the estimates of
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  recover both (0.99, and 0.95 to 0.96; recoverable at tolerance 0.05).
+  `group_sum()`, used inside
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
+  now gives zero to empty groups, and
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  no longer fails on a trait without values.
+
 - `sample_individuals(displacement = , displacement_width = )` adds
   character displacement: the populations of each site sit at the
   equilibrium between selection toward their mean without competitors

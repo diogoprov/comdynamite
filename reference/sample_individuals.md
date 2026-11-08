@@ -125,7 +125,12 @@ competitor is largest at a distance `w` and at most `c w exp(-1/2)`,
 about `0.6 c w`. The equilibrium is found by damped fixed-point
 iteration from `m_ij`, with steps of `1 / (1 + c)`. Populations with the
 same `m_ij`, as with `local_adaptation = 1` and no `population_sd`, are
-not pushed apart, since the push is symmetric.
+not pushed apart, since the push is symmetric. With `c > 1`, however,
+the equilibrium with equal means is unstable: populations whose `m_ij`
+differ even slightly end up about `w sqrt(2 log c)` apart, and several
+equilibria can exist, of which the iteration finds the one reached from
+`m_ij`. The size of the displacement therefore grows with `c` only
+slowly once `c` exceeds 1.
 
 The traits of individuals are drawn after the simulation and do not feed
 back on the dynamics: abundances are those of the species means. The

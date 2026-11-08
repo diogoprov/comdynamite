@@ -338,6 +338,8 @@ Grids of scenarios, summaries and checks.
   : Individuals from a simulated metacommunity
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
   T-statistics of intraspecific trait variation
+- [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  : Local adaptation and character displacement from population means
 
 ## Results
 

@@ -172,7 +172,10 @@ population near <code>m_ij</code>. The push from one competitor is largest at a 
 most <code>c w exp(-1/2)</code>, about <code>0.6 c w</code>. The equilibrium is found by damped fixed-point
 iteration from <code>m_ij</code>, with steps of <code>1 / (1 + c)</code>. Populations with the same <code>m_ij</code>, as
 with <code>local_adaptation = 1</code> and no <code>population_sd</code>, are not pushed apart, since the push is
-symmetric.</p>
+symmetric. With <code>c &gt; 1</code>, however, the equilibrium with equal means is unstable: populations
+whose <code>m_ij</code> differ even slightly end up about <code>w sqrt(2 log c)</code> apart, and several
+equilibria can exist, of which the iteration finds the one reached from <code>m_ij</code>. The size of
+the displacement therefore grows with <code>c</code> only slowly once <code>c</code> exceeds 1.</p>
 <p>The traits of individuals are drawn after the simulation and do not feed back on the
 dynamics: abundances are those of the species means. The function describes the pattern
 that local adaptation would leave in samples of individuals, not its demographic

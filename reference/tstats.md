@@ -15,6 +15,7 @@ tstats(
   method = c("base", "cati"),
   nperm = 99,
   alternative = c("less", "greater", "two.sided"),
+  null_ip = c("site", "species"),
   ...
 )
 ```
@@ -50,6 +51,13 @@ tstats(
 
   Direction of the test of `method = "base"`: `"less"` (the default),
   `"greater"` or `"two.sided"`.
+
+- null_ip:
+
+  Null model of `T_IP.IC` for `method = "base"`: `"site"` (the default),
+  trait values permuted within each site as in Taudiere & Violle (2016),
+  or `"species"`, the populations of each species exchanged among its
+  sites (see the section Null models).
 
 - ...:
 
@@ -119,6 +127,28 @@ differentiation within communities for `T_IP.IC`, environmental
 filtering for the others), so `"less"` tests them. Each trait is
 randomised on its own.
 
+The null model of `T_IP.IC` asks only whether populations differ:
+permuting individuals within a site removes its populations, so null
+values are near 1, and co-occurring species with different means give a
+large negative effect size even when each population sits where its
+species would be at any site. With `null_ip = "species"`, the
+populations of each species, with their individuals, are instead
+exchanged at random among the sites where the species occurs. Each site
+keeps its species and each species its populations; only which
+population of a species sits at which site is broken. Whole populations
+are moved, rather than their means, because means of populations with
+different numbers of individuals are not exchangeable. The standardised
+effect size is near zero when the position of a population does not
+depend on the site, positive when co-occurring populations are closer
+than expected from their species (convergence, as under local adaptation
+to a shared environment), and negative when they are further apart
+(divergence, as under character displacement);
+`alternative = "two.sided"` tests both. Species found at a single site
+stay in place. Local adaptation and character displacement move this
+statistic in opposite directions and can cancel; see
+[`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+to estimate both.
+
 `method = "cati"` calls
 [`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html)
 (Taudiere & Violle 2016) instead and returns its object. Both methods
@@ -162,7 +192,8 @@ Evolution*, 27, 244–252.
 
 ## See also
 
-[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md).
+[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
+[`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md).
 
 ## Examples
 

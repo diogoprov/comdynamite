@@ -69,6 +69,7 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base"</span>, <span class="st">"cati"</span><span class="op">)</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="fl">99</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"less"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span><span class="op">)</span>,</span>
+<span>  null_ip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"species"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -103,6 +104,12 @@ values only, much faster in simulation studies with many replicates.</p></dd>
 <dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
 <dd><p>Direction of the test of <code>method = "base"</code>: <code>"less"</code> (the default),
 <code>"greater"</code> or <code>"two.sided"</code>.</p></dd>
+
+
+<dt id="arg-null-ip">null_ip<a class="anchor" aria-label="anchor" href="#arg-null-ip"></a></dt>
+<dd><p>Null model of <code>T_IP.IC</code> for <code>method = "base"</code>: <code>"site"</code> (the default), trait
+values permuted within each site as in Taudiere &amp; Violle (2016), or <code>"species"</code>, the
+populations of each species exchanged among its sites (see the section Null models).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -154,6 +161,21 @@ one (<code>alternative = "less"</code>), at or above it (<code>"greater"</code>)
 (<code>"two.sided"</code>, at most 1). Low values of the three statistics are the usual hypotheses
 (niche differentiation within communities for <code>T_IP.IC</code>, environmental filtering for the
 others), so <code>"less"</code> tests them. Each trait is randomised on its own.</p>
+<p>The null model of <code>T_IP.IC</code> asks only whether populations differ: permuting individuals
+within a site removes its populations, so null values are near 1, and co-occurring species
+with different means give a large negative effect size even when each population sits where
+its species would be at any site. With <code>null_ip = "species"</code>, the populations of each
+species, with their individuals, are instead exchanged at random among the sites where the
+species occurs. Each site keeps its species and each species its populations; only which
+population of a species sits at which site is broken. Whole populations are moved, rather
+than their means, because means of populations with different numbers of individuals are
+not exchangeable. The standardised effect size is near zero when the position of a population does not depend on
+the site, positive when co-occurring populations are closer than expected from their species
+(convergence, as under local adaptation to a shared environment), and negative when they are
+further apart (divergence, as under character displacement); <code>alternative = "two.sided"</code>
+tests both. Species found at a single site stay in place. Local adaptation and character
+displacement move this statistic in opposite directions and can cancel; see
+<code><a href="population_shifts.html">population_shifts()</a></code> to estimate both.</p>
 <p><code>method = "cati"</code> calls <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> (Taudiere &amp; Violle 2016) instead and returns its
 object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
 <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> finds the populations of a site by matching its name as a regular
@@ -188,7 +210,7 @@ community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="sample_individuals.html">sample_individuals()</a></code>.</p></div>
+    <div class="dont-index"><p><code><a href="sample_individuals.html">sample_individuals()</a></code>, <code><a href="population_shifts.html">population_shifts()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
