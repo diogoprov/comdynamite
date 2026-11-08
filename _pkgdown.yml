@@ -30,6 +30,7 @@ reference:
   - species_traits
   - trait_bm
   - traits_ou
+  - rate_matrix
   - trait_mk
   - trait_rates
   - history_rates

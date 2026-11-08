@@ -17,13 +17,16 @@ simulate_metacommunity(
   extirpation = 0,
   pool = NULL,
   initial = NULL,
-  immigration = c("poisson", "multinomial")
+  immigration = c("poisson", "multinomial"),
+  env = NULL
 )
 }
 \arguments{
 \item{landscape}{An \code{mc_landscape} object.}
 
-\item{traits}{Species traits from \code{\link[=species_traits]{species_traits()}}.}
+\item{traits}{Species traits from \code{\link[=species_traits]{species_traits()}}, or, for a niche with several
+environmental axes, a list of them, one per column of \code{env}, with the same species; see
+\code{\link[=growth_rates]{growth_rates()}}.}
 
 \item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}. Species are matched to the
 rows of \code{traits} by name, or by position if \code{alpha} has no names.}
@@ -55,12 +58,18 @@ only where \code{pool} allows.}
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
 which conserves them. Spatially implicit landscapes are always multinomial.}
+
+\item{env}{Optional environmental axes of each site, a matrix or data frame with one row per
+site and one column per element of \code{traits} (such as the \code{env} of several landscapes on
+the same grid). Needed when \code{traits} is a list; replaces the \code{env} of \code{landscape}. Not
+available with \code{env_time}.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
-used, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a tree.
+used, \code{env} when given, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a
+tree.
 }
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
@@ -133,6 +142,12 @@ sim <- simulate_metacommunity(ls, species_traits(tr),
                               competition_matrix(tr, "phylo"),
                               dispersal = 0.01, n_steps = 200)
 sim
+# a niche with two environmental axes
+ls2 <- landscape_implicit(30)
+niche2 <- species_traits(tr, rmax_range = c(1, 1))
+sim2 <- simulate_metacommunity(ls, list(species_traits(tr), niche2),
+                               competition_matrix(tr, "phylo"), n_steps = 200,
+                               env = cbind(ls$env, ls2$env))
 \dontshow{\}) # examplesIf}
 }
 \references{

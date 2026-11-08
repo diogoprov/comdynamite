@@ -1,5 +1,32 @@
 # comdynamite (development version)
 
+- Community assembly with several traits. `assemble_community(distance = )` measures trait
+  space by Euclidean distance (`"euclidean"`, the default and the earlier behaviour),
+  Euclidean distance on traits standardised by their standard deviation in the pool
+  (`"standardized"`), or Mahalanobis distance with the covariance of the pool or a given
+  `trait_cov` (`"mahalanobis"`), in both limiting similarity and filtering; filtering by
+  Mahalanobis distance is filtering by a multivariate Gaussian niche. The help explains when
+  each fits: Euclidean distances count correlated traits more than once.
+  `growth_rates()` and `simulate_metacommunity()` take a niche with several environmental
+  axes: a list of traits, one per axis, and, in `simulate_metacommunity(env = )`, a matrix
+  with one column per axis; the growth rate is the product of the responses to each axis,
+  as in `simulate_static()`.
+
+- `traits_ou()` simulates several correlated traits: `sigma2` can be an evolutionary rate
+  matrix, or a named list with one matrix (or one rate) per selective regime, as in the
+  multi-rate models of mvMORPH (Clavel et al. 2015). `regimes` can also be a mapped history
+  (class `simmap`, such as from `trait_mk()`), so that regimes, optima and rates change within
+  branches. With one number as `sigma2` the values are the same as before for the same seed.
+  `rate_matrix()` builds rate matrices with the structures that `mvMORPH::mvBM()` fits: any
+  matrix (`"default"`), independent traits (`"diagonal"`, `"equaldiagonal"`), equal rates with
+  correlations (`"equal"`), and, across regimes, proportional matrices (`"proportional"`),
+  shared eigenvectors (`"shared"`), equal variances (`"variance"`) or equal correlations
+  (`"correlation"`). `data-raw/validation_mvtraits.R` checks them against mvMORPH 1.2.3: over
+  20000 simulations with two regimes changing within branches, the covariances of the tips
+  stayed within 2.9 Monte Carlo standard errors of `sum_k kronecker(R_k, C_k)` (mvSIM: 2.8),
+  and under OU within 3.1 of the covariance of Hansen (1997); `mvBM()` with the same constraint
+  recovered the matrices (100 tips, median of 30 fits within 9% of each true element).
+
 - `sample_individuals()` draws individuals from the populations of a simulated metacommunity,
   with trait values made of the optimum of the species, a fraction of the gap to the
   environment of the site (`local_adaptation`), a deviation of the population that does not

@@ -86,7 +86,7 @@ as_mc_data.mc_data <- function(x, ...) x
 #' @rdname mc_data
 #' @export
 as_mc_data.mc_sim <- function(x, ...) {
-  env <- x$landscape$env %||% x$env
+  env <- x$env %||% x$landscape$env
   if (is.list(env) && !is.data.frame(env)) env <- as.data.frame(env)
   if (is.numeric(env) && is.null(dim(env))) env <- data.frame(env = env)
   traits <- if (is.data.frame(x$traits)) x$traits

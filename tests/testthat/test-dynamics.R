@@ -112,3 +112,44 @@ test_that("multinomial immigration conserves emigrants and follows the kernel", 
   expect_s3_class(sim, "mc_sim")
   expect_error(mc_dynamics(r, diag(0.05, 3), 0.1, immigration = "other"), "should be one of")
 })
+
+test_that("a niche with several axes multiplies the responses to each axis", {
+  set.seed(11)
+  t1 <- species_traits(4)
+  t2 <- species_traits(4, rmax_range = c(1, 1))
+  env <- cbind(e1 = c(10, 50, 90), e2 = c(30, 30, 70))
+  g <- growth_rates(env, list(t1, t2))
+  expect_equal(g, growth_rates(env[, 1], t1) * growth_rates(env[, 2], t2), ignore_attr = TRUE)
+  expect_equal(growth_rates(as.data.frame(env), list(t1, t2)), g)
+  expect_equal(growth_rates(env[, 1, drop = FALSE], t1), growth_rates(env[, 1], t1),
+               ignore_attr = TRUE)
+  expect_error(growth_rates(env, list(t1)), "2 axes")
+  expect_error(growth_rates(env, t1), "need a list of traits")
+  t3 <- t2
+  rownames(t3)[1] <- "other"
+  expect_error(growth_rates(env, list(t1, t3)), "different species")
+
+  ls <- landscape_implicit(5)
+  alpha <- competition_matrix(4)
+  set.seed(1)
+  a <- simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 20,
+                              env = cbind(ls$env, rep(50, 5)))
+  set.seed(1)
+  b <- mc_dynamics(growth_rates(cbind(ls$env, rep(50, 5)), list(t1, t2)), alpha,
+                   dispersal = 0.01, n_steps = 20)
+  expect_equal(unname(a$abundance), unname(b$abundance))
+  expect_length(a$traits, 2)
+  expect_equal(ncol(as_mc_data(a)$env), 2)
+  # one axis given as env reproduces the landscape
+  set.seed(2)
+  c1 <- simulate_metacommunity(ls, t1, alpha, n_steps = 20)
+  set.seed(2)
+  c2 <- simulate_metacommunity(ls, t1, alpha, n_steps = 20, env = matrix(ls$env))
+  expect_equal(c1$abundance, c2$abundance)
+  expect_error(simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 5), "needs `env`")
+  expect_error(simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 5,
+                                      env = cbind(1:4, 1:4)), "one row per site")
+  expect_error(simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 5,
+                                      env = cbind(ls$env, ls$env),
+                                      env_time = matrix(0, 5, 5)), "env_time")
+})

@@ -17,26 +17,30 @@ traits_ou(
 \arguments{
 \item{tree}{A rooted \code{phylo} tree with branch lengths.}
 
-\item{n_traits}{Number of independent traits.}
+\item{n_traits}{Number of traits. Taken from the rate matrices when \code{sigma2} gives them.}
 
 \item{alpha}{Strength of selection towards the optimum (0 = Brownian
 motion).}
 
-\item{sigma2}{Rate of the stochastic (drift) component.}
+\item{sigma2}{Rate of the stochastic (drift) component: one number for all traits, which
+then evolve independently; a symmetric positive semidefinite rate matrix with one row and
+column per trait, for correlated traits; or a named list or vector with a matrix or a
+number per regime (names as in \code{regimes}). See \code{\link[=rate_matrix]{rate_matrix()}}.}
 
 \item{theta}{Optimum of each regime: one value for a single optimum, or a
 named vector with one value per regime (names as in \code{regimes}).}
 
 \item{regimes}{Selective regime of each branch, in the order of the edges
 of \code{tree} reordered "cladewise" (\code{ape::reorder.phylo(tree, "cladewise")}),
-as returned by \code{\link[=paint_regimes]{paint_regimes()}}. \code{NULL} puts every branch in one
+as returned by \code{\link[=paint_regimes]{paint_regimes()}}; or a tree with the same edges as \code{tree} and a mapped
+history (class \code{simmap}), whose states are the regimes. \code{NULL} puts every branch in one
 regime.}
 
 \item{root}{Trait value at the root.}
 }
 \value{
 Matrix with one row per tip (tip labels as row names) and one
-column per trait. The attribute \code{nodes} holds the values at the internal nodes, one row
+column per trait, named as the columns of the rate matrix, if any. The attribute \code{nodes} holds the values at the internal nodes, one row
 per node named by its number in \code{tree$edge}, the root first.
 }
 \description{
@@ -52,8 +56,20 @@ x at the start has, at the end, a normal distribution with mean
 }
 \details{
 With \code{alpha = 0} the process is Brownian motion with rate \code{sigma2}, and the
-optima play no role. Each branch belongs to a single regime, so a shift in
-optimum happens at the start of the branch where the regime changes.
+optima play no role. With regimes given as a vector, each branch belongs to a single
+regime, so a shift in optimum happens at the start of the branch where the regime changes.
+With regimes given as a mapped history (class \code{simmap}, from \code{\link[=trait_mk]{trait_mk()}} or phytools),
+regimes can also change within branches, at the times of the map.
+
+Several traits evolve independently with \code{sigma2} as one number, or correlated with an
+evolutionary rate matrix, whose diagonal holds the rate of each trait
+and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
+gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
+2015); \code{\link[=rate_matrix]{rate_matrix()}} builds them with the structures that mvMORPH fits. The strength of
+selection \code{alpha} and the optimum \code{theta} are the same for all traits. Under Brownian motion
+(\code{alpha = 0}) the traits of the tips have covariance \verb{sum_k kronecker(R_k, C_k)}, where \code{R_k}
+is the rate matrix of regime k and \code{C_k} the phylogenetic covariance matrix built from the
+time spent in regime k (Clavel et al. 2015).
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -65,6 +81,10 @@ traits_ou(tr, alpha = 0)[1:3, ]
 reg <- paint_regimes(tr, nodes = 25)
 x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 round(x[, 1], 1)
+# two correlated traits
+r <- rate_matrix(c(1, 0.5), correlation = 0.8)
+y <- traits_ou(tr, sigma2 = r)
+cor(y)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -72,10 +92,15 @@ Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis: a
 modeling approach for adaptive evolution. \emph{The American Naturalist}, 164,
 683--695. \doi{10.1086/426002}
 
+Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package for fitting
+multivariate evolutionary models to morphometric data. \emph{Methods in Ecology and
+Evolution}, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
+
 Hansen, T. F. (1997). Stabilizing selection and the comparative analysis
 of adaptation. \emph{Evolution}, 51, 1341--1351.
 \doi{10.1111/j.1558-5646.1997.tb01457.x}
 }
 \seealso{
-\code{\link[=paint_regimes]{paint_regimes()}} to assign regimes to clades.
+\code{\link[=paint_regimes]{paint_regimes()}} to assign regimes to clades, \code{\link[=rate_matrix]{rate_matrix()}} for rate matrices,
+\code{\link[=trait_mk]{trait_mk()}} for a history of regimes that change within branches.
 }

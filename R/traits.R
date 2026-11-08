@@ -145,9 +145,18 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #' `sigma` equals `sqrt(2)` times the niche breadth parameter of Thompson et
 #' al. (2020).
 #'
-#' @param env Environment of each site.
+#' With several environmental axes, each species has a response to each axis and the growth
+#' rate is the product of the responses, as in [simulate_static()]: a Gaussian niche in
+#' several dimensions whose axes are independent (no correlation between the responses to
+#' different axes), with the optimum and breadth of each axis in its own set of traits. The
+#' maxima multiply too, so give the traits of all but one axis `r_max` of 1, for example with
+#' `species_traits(rmax_range = c(1, 1))`.
+#'
+#' @param env Environment of each site; for several axes, a matrix, data frame or list with
+#'   one axis per column or element, in the order of `traits`.
 #' @param traits Data frame from [species_traits()], or any data frame with
-#'   columns `optimum`, `sigma` and `r_max`.
+#'   columns `optimum`, `sigma` and `r_max`; for several axes, a list of them with the same
+#'   species.
 #' @return Numeric matrix with one row per site and one column per species:
 #'   the density-independent growth rate of each species at each site.
 #' @examples
@@ -156,6 +165,28 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #' round(g, 2)
 #' @export
 growth_rates <- function(env, traits) {
+  if (is.list(traits) && !is.data.frame(traits)) {
+    traits <- lapply(traits, as_traits)
+    axes <- if (is.matrix(env)) as.data.frame(env) else as.list(env)
+    if (length(axes) != length(traits)) {
+      stop("`env` has ", length(axes), " axes and `traits` ", length(traits), " sets of traits",
+           call. = FALSE)
+    }
+    species <- rownames(traits[[1]])
+    if (!all(vapply(traits, function(x) setequal(rownames(x), species), logical(1)))) {
+      stop("sets of traits have different species", call. = FALSE)
+    }
+    sites <- if (is.matrix(env) || is.data.frame(env)) rownames(env)
+    if (is.data.frame(env) && .row_names_info(env) < 0) sites <- NULL
+    r <- Reduce(`*`, Map(function(e, x) growth_rates(unname(e), x[species, , drop = FALSE]),
+                         unname(as.list(axes)), traits))
+    rownames(r) <- sites
+    return(r)
+  }
+  if (is.data.frame(env) || is.matrix(env)) {
+    if (ncol(env) != 1) stop("several axes in `env` need a list of traits", call. = FALSE)
+    env <- stats::setNames(if (is.data.frame(env)) env[[1]] else env[, 1], rownames(env))
+  }
   traits <- as_traits(traits)
   r <- exp(-sweep(outer(env, traits$optimum, "-")^2, 2, 2 * traits$sigma^2, "/"))
   r <- sweep(r, 2, traits$r_max, "*")

@@ -516,6 +516,8 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
+      Covariância entre traits feita em `traits_ou()` e `rate_matrix()`, conferida contra o
+      mvMORPH (item "Funções que usam traits" abaixo).
 - [x] Taxas que variam entre ramos como modelo gerador. Avaliação da literatura (2026-11-07):
       um gerador com a verdade conhecida, não um método de inferência; RRphylo, phytools,
       motmot, bifrost e corHMM são GPL e só entram em `Suggests` ou `data-raw`. O RRphylo não
@@ -617,13 +619,38 @@ pacotes de referência em vez de reimplementá-los.
       adaptação local, vários traits por indivíduo (depois da sessão de traits
       multivariados), traits de indivíduos que afetam a dinâmica (hoje são sorteados depois) e
       cruzar com dispersão e extinção de manchas (cenário 9) para a ponte Leibold–Januario.
-- [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
+- [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
       iguais (`"variance"`, `"correlation"`), matrizes proporcionais (`"proportional"`) ou
       compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
       usa vários traits: distância multivariada na similaridade limitante, nicho
       multidimensional no filtro.
+      Feito (estrutura entre traits): `traits_ou(sigma2 = )` aceita matriz de taxas ou lista
+      nomeada com uma matriz (ou taxa) por regime, e `regimes` aceita um mapa simmap (de
+      `trait_mk()`), com regimes, ótimos e taxas mudando dentro dos ramos; com `sigma2`
+      escalar os valores são os mesmos de antes com a mesma semente. `rate_matrix()` monta as
+      estruturas do `mvBM()`: `"default"`, `"diagonal"`, `"equaldiagonal"`, `"equal"` e, entre
+      regimes, `"proportional"`, `"shared"` (mesmos autovetores), `"variance"`, `"correlation"`.
+      Todas fazem sentido aqui porque o pacote já tem regimes (`paint_regimes()`, simmap). A
+      matriz de índices inteiros do mvMORPH (restrições definidas pelo usuário) só serve para
+      ajuste: na simulação o usuário passa a matriz. Validação em
+      `data-raw/validation_mvtraits.R` (mvMORPH 1.2.3): covariâncias das pontas dentro de 2,9
+      erros de Monte Carlo de `sum_k kronecker(R_k, C_k)` (mvSIM: 2,8), OU dentro de 3,1, e
+      `mvBM()` recuperou as matrizes (mediana de 30 ajustes a menos de 9% de cada elemento).
+      Ficou de fora: `alpha` matricial e `theta` por trait no OU (como `mvOU()`), e taxas por
+      ramo de `trait_rates()` vezes uma matriz (estrutura proporcional por ramo), para não
+      mexer em `R/traits_rates.R` enquanto `history_rates()` é ligada à metacomunidade.
+      Feito (uso de vários traits, pedido em 2026-11-08): `assemble_community(distance = )`
+      com `"euclidean"` (padrão, como antes), `"standardized"` e `"mahalanobis"` (covariância
+      do pool ou `trait_cov`), na similaridade limitante e no filtro; a ajuda justifica a
+      escolha (euclidiana conta duas vezes eixos correlacionados; Mahalanobis trata cada
+      direção independente como um eixo; padronizada quando cada trait é um eixo distinto).
+      Nicho com vários eixos ambientais em `growth_rates()` e `simulate_metacommunity(env = )`,
+      com uma lista de traits por eixo e o produto das respostas, como em `simulate_static()`.
+      Falta: nicho com correlação entre eixos (matriz de largura por espécie) na dinâmica;
+      competição a partir da distância entre traits (hoje `competition_matrix()` é aleatória
+      ou filogenética); paisagens que gerem vários eixos ambientais de uma vez.
 - [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
       `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra
