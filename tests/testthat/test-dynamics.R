@@ -91,3 +91,24 @@ test_that("extirpation reaches the metacommunity and is kept with the result", {
   expect_equal(with_loss$extirpation, 0.2)
   expect_lt(sum(with_loss$abundance > 0), sum(without$abundance > 0))
 })
+
+test_that("multinomial immigration conserves emigrants and follows the kernel", {
+  set.seed(9)
+  ls <- landscape_grid(side = 4)
+  em <- matrix(rpois(16 * 3, 3), 16, 3)
+  imm <- place_emigrants(em, ls$dispersal)
+  expect_equal(colSums(imm), colSums(em))
+  means <- Reduce(`+`, lapply(1:2000, function(i) place_emigrants(em, ls$dispersal))) / 2000
+  expect_equal(means, crossprod(ls$dispersal, em), tolerance = 0.05)
+  r <- matrix(3, 16, 3)
+  set.seed(10)
+  a <- mc_dynamics(r, diag(0.05, 3), 0.1, n_steps = 20, disp_matrix = ls$dispersal)
+  set.seed(10)
+  b <- mc_dynamics(r, diag(0.05, 3), 0.1, n_steps = 20, disp_matrix = ls$dispersal,
+                   immigration = "poisson")
+  expect_identical(a$abundance, b$abundance)
+  sim <- simulate_metacommunity(ls, species_traits(3), diag(0.05, 3), dispersal = 0.2,
+                                n_steps = 30, immigration = "multinomial")
+  expect_s3_class(sim, "mc_sim")
+  expect_error(mc_dynamics(r, diag(0.05, 3), 0.1, immigration = "other"), "should be one of")
+})
