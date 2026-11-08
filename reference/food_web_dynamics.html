@@ -97,7 +97,8 @@ traits and the attack coefficients take one of the three forms of <code><a href=
 <span>  omnivory <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  introductions <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dt <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  extinction <span class="op">=</span> <span class="fl">1e-06</span></span>
+<span>  extinction <span class="op">=</span> <span class="fl">1e-06</span>,</span>
+<span>  trait_floor <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -148,7 +149,14 @@ appear, after the first time. Until then they are absent whatever <code>init</co
 
 
 <dt id="arg-extinction">extinction<a class="anchor" aria-label="anchor" href="#arg-extinction"></a></dt>
-<dd><p>Abundance below which a level is set to zero.</p></dd>
+<dd><p>Abundance below which a level is set to zero; McPeek's code has no such
+threshold, so use 0 to compare with it.</p></dd>
+
+
+<dt id="arg-trait-floor">trait_floor<a class="anchor" aria-label="anchor" href="#arg-trait-floor"></a></dt>
+<dd><p>Lowest value of the mean traits: a trait that falls below it relaxes back
+at rate <code>trait_floor - z</code>. <code>NULL</code> uses 0 with <code>attack = "michaelis"</code>, where traits must be
+positive, and no floor (<code>-Inf</code>) otherwise. McPeek's MATLAB code floors every trait at 0.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -177,23 +185,39 @@ or whose abundances overshoot below zero stops with an error.</p>
 Levels can be added during the run with <code>introductions</code>, to follow the burst of evolution
 after an invasion and its deceleration towards equilibrium (figures 3.2 and 3.3 of the
 book), and to compare the trait of the resource with and without the predator (figure
-3.11). Abundances that fall below <code>extinction</code> are set to zero.</p>
+3.11). Abundances that fall below <code>extinction</code> are set to zero. <code><a href="plot.food_web.html">plot.food_web()</a></code> draws
+the trajectories and <code><a href="animate_food_web.html">animate_food_web()</a></code> turns them into a GIF, such as this one, in which
+a consumer invades the resource and a predator arrives at time 6000 (parameters of the
+Gaussian panel of figure 3.11, made by <code>data-raw/food_web_gif.R</code>):</p>
+<p><img src="figures/food_web_dynamics.gif" width="600" alt="Animated abundances, mean traits and rates of trait change of a resource, a consumer and a predator"></p>
 <p>Two details of equation 3.20 are read as follows. Its loss term of the resource to the
 predator carries the conversion efficiency <code>w</code>, which the matching selection gradient of
 the resource, the consumer's loss term and equation 3.9 do not; the implementation leaves
 <code>w</code> out of the losses of prey, as in the other equations. The attack coefficient of the
 predator on the consumer is written there with the trait of the resource; it is taken as a
-function of the traits of the consumer and the predator, as box 3.1 defines it.</p>
+function of the traits of the consumer and the predator, as box 3.1 defines it; with
+this reading the three-level panel A of figure 3.11 is reproduced closely.</p>
+<p>For the resource and the consumer, the implementation matches the MATLAB code of the
+resource-consumer models that McPeek (2017, <em>The American Naturalist</em>) published as
+supplementary material: the same fitness functions, functional responses and selection
+gradients, and trajectories of figure 2 of that article (figure 3.2 of the book) within
+1e-4 of the author's <code>ode45</code> integration in continuous time, where one "iteration" of the
+book is one unit of time. That code floors the mean traits at zero (<code>trait_floor</code>) and has
+no extinction threshold. It has no predator, so the predator level rests on the equations
+of the book alone.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>McPeek, M. A. (2017). <em>Evolutionary Community Ecology</em>. Princeton University
 Press. <a href="https://doi.org/10.23943/princeton/9780691088778.001.0001" class="external-link">doi:10.23943/princeton/9780691088778.001.0001</a></p>
+<p>McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the
+coevolution of community structure. <em>The American Naturalist</em>, 189, E91–E117.
+<a href="https://doi.org/10.1086/691101" class="external-link">doi:10.1086/691101</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="food_web_params.html">food_web_params()</a></code>; <code><a href="trait_rates.html">trait_rates()</a></code> for rates that vary among branches of a
-tree.</p></div>
+    <div class="dont-index"><p><code><a href="food_web_params.html">food_web_params()</a></code>; <code><a href="plot.food_web.html">plot.food_web()</a></code> and <code><a href="animate_food_web.html">animate_food_web()</a></code> to draw the
+results; <code><a href="trait_rates.html">trait_rates()</a></code> for rates that vary among branches of a tree.</p></div>
     </div>
 
     <div class="section level2">

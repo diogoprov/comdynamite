@@ -29,7 +29,8 @@ food_web_dynamics(
   omnivory = FALSE,
   introductions = NULL,
   dt = 0.1,
-  extinction = 1e-06
+  extinction = 1e-06,
+  trait_floor = NULL
 )
 ```
 
@@ -84,7 +85,15 @@ food_web_dynamics(
 
 - extinction:
 
-  Abundance below which a level is set to zero.
+  Abundance below which a level is set to zero; McPeek's code has no
+  such threshold, so use 0 to compare with it.
+
+- trait_floor:
+
+  Lowest value of the mean traits: a trait that falls below it relaxes
+  back at rate `trait_floor - z`. `NULL` uses 0 with
+  `attack = "michaelis"`, where traits must be positive, and no floor
+  (`-Inf`) otherwise. McPeek's MATLAB code floors every trait at 0.
 
 ## Value
 
@@ -119,6 +128,15 @@ to follow the burst of evolution after an invasion and its deceleration
 towards equilibrium (figures 3.2 and 3.3 of the book), and to compare
 the trait of the resource with and without the predator (figure 3.11).
 Abundances that fall below `extinction` are set to zero.
+[`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
+draws the trajectories and
+[`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
+turns them into a GIF, such as this one, in which a consumer invades the
+resource and a predator arrives at time 6000 (parameters of the Gaussian
+panel of figure 3.11, made by `data-raw/food_web_gif.R`):
+
+![Animated abundances, mean traits and rates of trait change of a
+resource, a consumer and a predator](figures/food_web_dynamics.gif)
 
 Two details of equation 3.20 are read as follows. Its loss term of the
 resource to the predator carries the conversion efficiency `w`, which
@@ -127,7 +145,19 @@ term and equation 3.9 do not; the implementation leaves `w` out of the
 losses of prey, as in the other equations. The attack coefficient of the
 predator on the consumer is written there with the trait of the
 resource; it is taken as a function of the traits of the consumer and
-the predator, as box 3.1 defines it.
+the predator, as box 3.1 defines it; with this reading the three-level
+panel A of figure 3.11 is reproduced closely.
+
+For the resource and the consumer, the implementation matches the MATLAB
+code of the resource-consumer models that McPeek (2017, *The American
+Naturalist*) published as supplementary material: the same fitness
+functions, functional responses and selection gradients, and
+trajectories of figure 2 of that article (figure 3.2 of the book) within
+1e-4 of the author's `ode45` integration in continuous time, where one
+"iteration" of the book is one unit of time. That code floors the mean
+traits at zero (`trait_floor`) and has no extinction threshold. It has
+no predator, so the predator level rests on the equations of the book
+alone.
 
 ## References
 
@@ -135,9 +165,18 @@ McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton
 University Press.
 [doi:10.23943/princeton/9780691088778.001.0001](https://doi.org/10.23943/princeton/9780691088778.001.0001)
 
+McPeek, M. A. (2017). The ecological dynamics of natural selection:
+traits and the coevolution of community structure. *The American
+Naturalist*, 189, E91–E117.
+[doi:10.1086/691101](https://doi.org/10.1086/691101)
+
 ## See also
 
 [`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md);
+[`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
+and
+[`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
+to draw the results;
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
 for rates that vary among branches of a tree.
 

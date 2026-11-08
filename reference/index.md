@@ -78,6 +78,10 @@ Abundances and mean traits of a resource, a consumer and a predator.
   : Coevolution of a resource, a consumer and a predator
 - [`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md)
   : Parameters of the three-trophic-level eco-evolutionary model
+- [`plot(`*`<food_web>`*`)`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
+  : Plot the dynamics of a food web
+- [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
+  : Animate the dynamics of a food web
 
 ## Competition
 
