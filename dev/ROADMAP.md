@@ -615,10 +615,21 @@ pacotes de referência em vez de reimplementá-los.
       adaptação local sobe T_IP.IC (0,02 → 1,0) e baixa T_IC.IR e T_PC.PR (0,54 e 0,89 → <0,01).
       Isso contraria a previsão do cenário 10 (T_IP.IC cair): adaptação ao ambiente do sítio
       torna as espécies co-ocorrentes parecidas; T_IP.IC só cai com divergência entre
-      co-ocorrentes (deslocamento de caráter). Falta: deslocamento de caráter como modo de
-      adaptação local, vários traits por indivíduo (depois da sessão de traits
-      multivariados), traits de indivíduos que afetam a dinâmica (hoje são sorteados depois) e
-      cruzar com dispersão e extinção de manchas (cenário 9) para a ponte Leibold–Januario.
+      co-ocorrentes (deslocamento de caráter).
+      Segunda rodada: deslocamento de caráter em `sample_individuals(displacement = ,
+      displacement_width = )`, equilíbrio entre seleção em direção à média local e repulsão
+      por um núcleo gaussiano de competição ponderado pela abundância dos competidores; nulos
+      em R base em `tstats()` (os três de Taudiere & Violle 2016, com SES e p-valor), de modo
+      que o cati só serve para conferir. O nulo de T_IP.IC do cati junta permutações de
+      sítios diferentes (a permutação i do sítio s usa indivíduos de outro sítio), então os
+      SES de T_IP.IC do cati estão errados. Demo: o deslocamento baixa T_IP.IC e sobe T_PC.PR
+      e contrabalança a adaptação local (h = 0,9: T_IP.IC 0,61 → 0,011 e T_PC.PR 0,010 → 0,59
+      com `displacement = 10`). O SES de T_IP.IC já é muito negativo sem deslocamento: o nulo
+      testa se as populações do sítio diferem, não se divergiram. Falta: vários traits por
+      indivíduo (agora que `assemble_community()` tem vários traits), traits de indivíduos que
+      afetam a dinâmica (hoje são sorteados depois), identificabilidade (combinações de
+      adaptação e deslocamento que dão as mesmas razões) e cruzar com dispersão e extinção de
+      manchas (cenário 9) para a ponte Leibold–Januario.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações

@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- `sample_individuals(displacement = , displacement_width = )` adds character displacement:
+  the populations of each site sit at the equilibrium between selection toward their mean
+  without competitors and a push away from close competitors through a Gaussian competition
+  kernel, weighted by their abundance. `tstats()` now has the three null models of Taudiere &
+  Violle (2016) in base R (`nperm`, `alternative`), with standardised effect sizes and
+  p-values, so cati is needed only for comparison. The null model for T_IP.IC in
+  `cati::Tstats()` 0.99.6 puts together permutations of different sites, so its effect sizes
+  for T_IP.IC are wrong, and its regular-expression match of site names was reported
+  upstream (adrientaudiere/cati#11). In `data-raw/demo_tstats.R`, character displacement
+  lowers T_IP.IC and raises T_PC.PR and offsets local adaptation: with
+  `local_adaptation = 0.9`, `displacement = 10` takes T_IP.IC from 0.61 to 0.011 and T_PC.PR
+  from 0.010 to 0.59.
+
 - Community assembly with several traits. `assemble_community(distance = )` measures trait
   space by Euclidean distance (`"euclidean"`, the default and the earlier behaviour),
   Euclidean distance on traits standardised by their standard deviation in the pool
