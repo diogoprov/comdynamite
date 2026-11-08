@@ -627,8 +627,9 @@ as fases, em `dev/plano-especiacao.md`.
 - [ ] Fase 4: comparação com o gen3sis (GPL, só em `data-raw`) e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;
       neutralidade regional contra taxas por ramo) e artigo.
-- [ ] Decidir: função nova (`simulate_diversification()`, provisório) ou argumento em
-      `simulate_metacommunity()`; modos da primeira versão; número da versão.
+- [x] Interface: função nova (decidido em 2026-11-08), com `as_metacommunity()` para os
+      métodos atuais; nome provisório `simulate_diversification()`.
+- [ ] Decidir: nome final, modos da primeira versão e número da versão.
 
 **Concluído quando:** as fases 1 a 4 tiverem testes, validação em `data-raw` e uma vignette.
 

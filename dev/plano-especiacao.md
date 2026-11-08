@@ -72,7 +72,7 @@ precisa ser variada nos experimentos:
 - Traits por população e médias por espécie, para os estimadores de taxa por ramo e para as
   estatísticas T (`cati::Tstats()`).
 
-### 4. Interface (decidir na rodada de UX)
+### 4. Interface (decidida em 2026-11-08: função nova)
 
 - Opção A: função nova, por exemplo `simulate_diversification(landscape, ...)`, que reaproveita
   as partes internas de `mc_dynamics()` (dispersão, imigração, competição) e devolve uma
@@ -80,8 +80,8 @@ precisa ser variada nos experimentos:
   `events` e `persistence`.
 - Opção B: argumento `speciation = ` em `simulate_metacommunity()`. Mais simples para o
   usuário, mas complica uma função que hoje assume k fixo.
-- Preferência inicial: A, com um `as_metacommunity()` que converta a saída para os métodos que
-  já existem.
+- Decisão (Diogo, 2026-11-08): opção A, função nova, com um `as_metacommunity()` que converta
+  a saída para os métodos que já existem. O nome final fica para a rodada de UX.
 
 ### 5. Implementação
 
@@ -138,8 +138,7 @@ precisa ser variada nos experimentos:
   Januario et al. (2025) atribuem o desacoplamento justamente à diferença entre décadas e
   milhões de anos; o modelo comprime essas escalas e o artigo tem de dizer isso.
 - Custo computacional com muitas espécies e sítios.
-- Decisões para o Diogo: nome e forma da interface (A ou B); quais modos entram na primeira
-  versão; número da versão (proposta: bloco próprio, número a definir, depois da v0.7.0).
+- Decisões para o Diogo: nome da função nova; quais modos entram na primeira versão; número da versão (proposta: bloco próprio, número a definir, depois da v0.7.0).
 
 ## Referências
 
