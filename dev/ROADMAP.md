@@ -610,8 +610,8 @@ pacotes de referência em vez de reimplementá-los.
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
       `food_web_dynamics()`) quanto à consistência com o resto do pacote; pensar em funções e
-      métodos de plot (taxas por ramo pintadas na árvore, trajetórias de `food_web_dynamics()`,
-      ordenação PCPS); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
+      métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
+      `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
       por ramo) e as mensagens de erro.
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
