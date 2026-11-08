@@ -102,3 +102,12 @@ test_that("audit edge cases of the neighbour metrics", {
   expect_error(mnnd(array(1:8, c(2, 2, 2))), "vector, a matrix")
   expect_error(trait_range(array(1:8, c(2, 2, 2))))
 })
+
+test_that("metrics return NA for too few or missing values", {
+  expect_true(is.na(mst_ratio(c(1, NA, 2))))
+  expect_true(is.na(mst_ratio(3)))
+  expect_true(is.na(trait_range(c(1, NA))))
+  expect_equal(trait_range(c(1, NA, 4), na.rm = TRUE), 3)
+  expect_true(is.na(mnd(c(1, NA, 4))))
+  expect_true(is.na(mnd(1)))
+})

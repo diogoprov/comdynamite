@@ -129,3 +129,25 @@ test_that("plots of all-NA statistics or untestable sites give no warnings", {
   expect_no_warning(ggplot2::ggplot_build(plot(res)))
   expect_no_warning(ggplot2::ggplot_build(plot(res, type = "ses")))
 })
+
+test_that("plot options and input checks of trait plots", {
+  skip_if_not_installed("ggplot2")
+  set.seed(5)
+  ind <- data.frame(site = rep(paste0("s", 1:3), each = 12), species = rep(c("a", "b"), 18),
+                    trait = rnorm(36), ab = 1)
+  res <- tstats(ind, nperm = 19)
+  expect_s3_class(plot(res, hatch = FALSE), "ggplot")
+  expect_equal(nrow(hatch_lines(data.frame(xmin = numeric(0), xmax = numeric(0),
+                                           ymin = numeric(0), ymax = numeric(0)), 1)), 0)
+  bad <- ind
+  bad$trait <- as.character(bad$trait)
+  expect_error(trait_densities(bad), "numeric")
+  bad <- ind
+  bad$ab[1] <- 2
+  expect_error(trait_densities(bad, abundance = "ab"), "one value")
+})
+
+test_that("community_index rejects malformed lists of indices", {
+  ind <- data.frame(site = "s1", species = c("a", "b"), trait = 1:2)
+  expect_error(community_index(ind, list(mean, var)), "distinct names")
+})

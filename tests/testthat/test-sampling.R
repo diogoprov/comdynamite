@@ -98,3 +98,16 @@ test_that("trait_rarefaction() summarises subsamples and plots them", {
   own_rule <- plot(rare, reference = c(protocol = 4))
   expect_equal(unique(ggplot2::layer_data(own_rule, 1)$xintercept), 4)
 })
+
+test_that("sampling helpers handle edge inputs", {
+  ind <- data.frame(site = rep(c("s1", "s2"), each = 6), species = rep(c("a", "b"), 6),
+                    trait = 1:12)
+  ind$ab <- ifelse(ind$site == "s1", 0, ifelse(ind$species == "a", 5, 1))
+  sub <- subsample_individuals(ind, cover = 0.8, abundance = "ab")
+  expect_true(all(sub$site == "s2"))
+  expect_error(trait_rarefaction(ind, cover = 1.5))
+  r <- trait_rarefaction(ind, n = 2:3, reps = 2)
+  attr(r, "by") <- NULL
+  skip_if_not_installed("ggplot2")
+  expect_s3_class(plot(r), "ggplot")
+})
