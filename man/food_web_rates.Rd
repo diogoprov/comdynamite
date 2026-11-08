@@ -38,7 +38,8 @@ that the rates change when a level is added (scenario 4 of the notes on branch r
 The speed of a level is the mean of its rate of trait change, \eqn{|d\bar z / dt|}, over
 the steps at which it is present. Like \code{\link[=turnover_rates]{turnover_rates()}}, the food web runs in ecological
 time and only informs the tip branches: over the last \code{window} units of time of each tip
-branch the rate is \code{sigma2 * (1 + k * speed)} of the level of the tip, and elsewhere it is
+branch the rate is \eqn{\mathrm{sigma2}\, (1 + k \cdot \mathrm{speed})}{sigma2 * (1 + k *
+speed)} of the level of the tip, and elsewhere it is
 \code{sigma2}. These speeds are directional changes of the mean trait under selection, not the
 variance per unit time of Brownian motion, so they give relative rates among levels, scaled
 by \code{k}, not an equivalence between the two.

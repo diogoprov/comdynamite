@@ -111,8 +111,8 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #' Trait evolution by Brownian motion with Pagel's lambda
 #'
 #' Draws from a multivariate normal distribution with covariance
-#' `lambda * C + (1 - lambda) * diag(C)`, where `C` is the phylogenetic
-#' covariance matrix of `tree`.
+#' \eqn{\lambda C + (1 - \lambda)\, \mathrm{diag}(C)}{lambda * C + (1 - lambda) * diag(C)},
+#' where \eqn{C} is the phylogenetic covariance matrix of `tree`.
 #'
 #' @param tree A `phylo` tree with branch lengths.
 #' @param lambda Pagel's lambda, in \[0, 1\].
@@ -139,11 +139,12 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 
 #' Growth rates of each species at each site
 #'
-#' Density-independent growth rate of species j at site i,
-#' `r_max[j] * exp(-(E[i] - optimum[j])^2 / (2 * sigma[j]^2))`: a Gaussian
-#' response whose standard deviation is the niche breadth `sigma`. This
-#' `sigma` equals `sqrt(2)` times the niche breadth parameter of Thompson et
-#' al. (2020).
+#' Density-independent growth rate of species \eqn{j} at site \eqn{i},
+#' \eqn{r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))}{r_max[j] * exp(-(E[i] - optimum[j])^2 /
+#' (2 * sigma[j]^2))}, with \eqn{r_j} = `r_max`, \eqn{\theta_j}{theta_j} = `optimum` and
+#' \eqn{\sigma_j}{sigma_j} = `sigma`: a Gaussian response whose standard deviation is the niche
+#' breadth `sigma`. This `sigma` equals \eqn{\sqrt{2}}{sqrt(2)} times the niche breadth
+#' parameter of Thompson et al. (2020).
 #'
 #' With several environmental axes, each species has a response to each axis and the growth
 #' rate is the product of the responses, as in [simulate_static()]: a Gaussian niche in

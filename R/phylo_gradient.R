@@ -189,7 +189,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #' of the component. Each fraction is tested by permutations of sites, which move the
 #' predictors of all sites together, and by permutations of the trait values among species,
 #' and `p_max` is the larger p-value, as in [phylo_vector()]. The statistic of `a` and `c` is
-#' the share of the component that the other set leaves unexplained, `a / (a + d)` within the
+#' the share of the component that the other set leaves unexplained, \eqn{a / (a + d)} within
+#' the
 #' component, which is a monotone function of the partial F statistic of the set given the
 #' other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
 #' not, and its test loses most of its power when the other set explains much: see the

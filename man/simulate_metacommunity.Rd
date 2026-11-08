@@ -74,9 +74,10 @@ tree.
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
 each time step, abundances are drawn as
-\verb{N' ~ Poisson(r N / (1 + N alpha'))}, where \code{r} holds the growth rates of
-each species at each site (\code{\link[=growth_rates]{growth_rates()}}) and \code{alpha} the competition
-coefficients (\code{\link[=competition_matrix]{competition_matrix()}}). Each individual then emigrates with
+\eqn{N' \sim \mathrm{Poisson}(r N / (1 + N \alpha'))}{N' ~ Poisson(r N / (1 + N alpha'))},
+where \eqn{r} holds the growth rates of each species at each site (\code{\link[=growth_rates]{growth_rates()}}) and
+\eqn{\alpha}{alpha} the competition coefficients (\code{\link[=competition_matrix]{competition_matrix()}}). Each individual
+then emigrates with
 probability \code{dispersal}, and emigrants are redistributed among sites:
 }
 \details{

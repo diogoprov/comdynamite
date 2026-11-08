@@ -43,7 +43,8 @@ same names and results can be bound by rows.
 }
 \details{
 \code{alpha}, \code{gamma} and \code{beta} are the mean number of species per site, the number of species
-in all sites and \code{gamma / alpha}. \code{occupancy} and \code{occupancy_sd} are the mean and the
+in all sites and \eqn{\gamma / \alpha}{gamma / alpha}. \code{occupancy} and \code{occupancy_sd} are the
+mean and the
 standard deviation of the share of sites each species occupies, over the species present.
 \code{abundance} is the mean number of individuals per site, \code{evenness} the mean Pielou
 evenness of sites with two or more species, \code{evenness_regional} the same for all sites

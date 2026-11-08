@@ -2,9 +2,10 @@
 #'
 #' Runs the process-based model of Thompson et al. (2020) on a landscape. At
 #' each time step, abundances are drawn as
-#' `N' ~ Poisson(r N / (1 + N alpha'))`, where `r` holds the growth rates of
-#' each species at each site ([growth_rates()]) and `alpha` the competition
-#' coefficients ([competition_matrix()]). Each individual then emigrates with
+#' \eqn{N' \sim \mathrm{Poisson}(r N / (1 + N \alpha'))}{N' ~ Poisson(r N / (1 + N alpha'))},
+#' where \eqn{r} holds the growth rates of each species at each site ([growth_rates()]) and
+#' \eqn{\alpha}{alpha} the competition coefficients ([competition_matrix()]). Each individual
+#' then emigrates with
 #' probability `dispersal`, and emigrants are redistributed among sites:
 #'
 #' * spatially implicit landscapes ([landscape_implicit()]): the emigrants of

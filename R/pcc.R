@@ -4,8 +4,9 @@
 #' step of the phylogenetic community composition of Peres-Neto & Kembel (2015).
 #'
 #' @param tree A `phylo` object.
-#' @param squared Use `-PD^2 / 2`, as in a classic principal coordinate analysis,
-#'   instead of `-PD / 2`, the form printed by Peres-Neto & Kembel (2015)?
+#' @param squared Use \eqn{-\mathrm{PD}^2 / 2}{-PD^2 / 2}, as in a classic principal coordinate
+#'   analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the form printed by Peres-Neto &
+#'   Kembel (2015)?
 #' @return Matrix with one row per tip and one column per positive eigenvalue.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:

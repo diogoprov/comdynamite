@@ -76,7 +76,8 @@ answers how much of all the variation each fraction holds, and \code{r2_componen
 of the component. Each fraction is tested by permutations of sites, which move the
 predictors of all sites together, and by permutations of the trait values among species,
 and \code{p_max} is the larger p-value, as in \code{\link[=phylo_vector]{phylo_vector()}}. The statistic of \code{a} and \code{c} is
-the share of the component that the other set leaves unexplained, \code{a / (a + d)} within the
+the share of the component that the other set leaves unexplained, \eqn{a / (a + d)} within
+the
 component, which is a monotone function of the partial F statistic of the set given the
 other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
 not, and its test loses most of its power when the other set explains much: see the

@@ -47,7 +47,8 @@ The metacommunity runs in ecological time among the species at the tips, so its 
 only inform the tip branches, and how ecological time relates to branch lengths is a choice
 of the user, not something the simulation gives. Here the dynamics are taken to represent
 the last \code{window} units of time of each tip branch: in that stretch the rate is
-\code{sigma2 * (1 + k * turnover)}, and elsewhere, including all internal branches, it is
+\eqn{\mathrm{sigma2}\, (1 + k \cdot \mathrm{turnover})}{sigma2 * (1 + k * turnover)}, and
+elsewhere, including all internal branches, it is
 \code{sigma2}. The rate of a tip branch is the mean over the branch, weighted by time.
 }
 \examples{

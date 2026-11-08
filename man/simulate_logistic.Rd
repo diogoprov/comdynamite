@@ -47,10 +47,11 @@ and \code{slope}, with one row per species and one column per gradient; and \cod
 }
 \description{
 The two-gradient simulation of Appendix C of Peres-Neto et al. (2012), after
-Ives & Helmus (2011). The probability that species j occurs at site t along
-gradient x is \code{plogis(a[j] + b[j] * x[t])}, where \code{a} is a normal deviate and
-the slope \code{b} evolves on the tree. With several gradients, each with its own
-\code{a} and \code{b}, the probabilities multiply. A value drawn for each site from
+Ives & Helmus (2011). The probability that species \eqn{j} occurs at site \eqn{t} along
+gradient \eqn{x} is \eqn{\mathrm{logit}^{-1}(a_j + b_j x_t)}{plogis(a[j] + b[j] * x[t])},
+where \eqn{a} is a normal deviate and the slope \eqn{b} evolves on the tree. With several
+gradients, each with its own \eqn{a} and \eqn{b}, the probabilities multiply. A value drawn
+for each site from
 \code{reduction} then reduces them, which adds noise.
 }
 \details{

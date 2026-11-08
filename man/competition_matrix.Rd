@@ -30,7 +30,7 @@ species j.
 Intraspecific coefficients are 1 and interspecific coefficients lie in
 [0, \code{inter_max}), all multiplied by \code{scale}. With the default \code{scale} of
 0.05, as in Thompson et al. (2020), a species alone at its optimum with
-\code{r_max = 5} reaches an equilibrium of \code{(5 - 1) / 0.05 = 80} individuals,
+\code{r_max = 5} reaches an equilibrium of \eqn{(5 - 1) / 0.05 = 80} individuals,
 and \code{inter_max} is the strength of interspecific relative to intraspecific
 competition. The matrix is symmetric.
 }

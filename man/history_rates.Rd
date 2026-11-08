@@ -48,12 +48,14 @@ by time. Three models link the history to the rate:
 several regimes (O'Meara et al. 2006).
 \item \code{"burst"}: each change of state, such as the colonisation of a new habitat or region,
 multiplies the rate by \code{1 + burst}, and the excess decays exponentially with time scale
-\code{decay}, also along the descending branches, until the next change. The rate at time \code{u}
-after the last change is \code{sigma2 * (1 + burst * exp(-u / decay))}; before any change it is
+\code{decay}, also along the descending branches, until the next change. The rate at time
+\eqn{u} after the last change is \eqn{\mathrm{sigma2}\, (1 + \mathrm{burst}\,
+  e^{-u / \mathrm{decay}})}{sigma2 * (1 + burst * exp(-u / decay))}; before any change it is
 \code{sigma2}. This follows the expectation of McPeek (2017) that selection, and so evolution,
 is strongest when a lineage first adapts to a new community.
 \item \code{"sympatry"}: the rate depends on the number of lineages that share the state at each
-moment, counting the lineage itself, as \code{sigma2 * exp(r * n)}; a negative \code{r} slows
+moment, counting the lineage itself, as \eqn{\mathrm{sigma2}\, e^{r n}}{sigma2 * exp(r *
+  n)}, with \eqn{n} that number; a negative \eqn{r} slows
 evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
 biogeography of Drury et al. (2016).
 }
