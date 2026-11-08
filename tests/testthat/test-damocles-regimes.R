@@ -59,8 +59,9 @@ test_that("fit_damocles with regimes recovers a difference among clades", {
   set.seed(11)
   tree <- treeshapesim::sim_tree_shape(40)
   reg <- clade_regimes(tree, list(A = crown_tips(tree)))
-  gamma <- ifelse(reg == "A", 3, 0.3)
-  comm <- simulate_damocles(tree, gamma, 1, n = 10)
+  # a strong difference and many communities, so that the test rejects whatever the draw
+  gamma <- ifelse(reg == "A", 4, 0.25)
+  comm <- simulate_damocles(tree, gamma, 1, n = 20)
   constant <- fit_damocles(comm, tree, shared = TRUE)
   by_clade <- fit_damocles(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
   expect_identical(attr(by_clade, "parameters"), c("gamma_background", "gamma_A", "mu"))
