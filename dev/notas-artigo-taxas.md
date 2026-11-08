@@ -172,6 +172,13 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
     simuladas, com traits em torno da média da espécie ou ajustados ao ambiente do sítio, e
     calcular as estatísticas T com `cati::Tstats()`. Adaptação local forte deve baixar T_IP.IC
     e mudar T_PC.PR em relação ao cenário sem adaptação.
+    Feito com `sample_individuals()` e `tstats()` (`data-raw/demo_tstats.R`). Resultado: a
+    previsão de T_IP.IC estava errada para adaptação ao ambiente do sítio. As populações
+    convergem para o ambiente, as espécies co-ocorrentes ficam parecidas e T_IP.IC sobe
+    (0,02 → 1,0), enquanto T_IC.IR e T_PC.PR caem (0,54 e 0,89 → <0,01). T_IP.IC baixo exige
+    divergência entre co-ocorrentes (deslocamento de caráter), ainda não simulado. Para a
+    ponte: o sinal da adaptação local aparece em T_PC.PR e T_IC.IR, não em T_IP.IC. A escala
+    de T_IP.IC depende de `intraspecific_sd` em relação à dispersão dos ótimos no sítio.
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas

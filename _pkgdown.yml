@@ -87,6 +87,8 @@ reference:
   - summary_stats
   - equilibrium_check
   - as.data.frame.mc_sim
+  - sample_individuals
+  - tstats
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:
