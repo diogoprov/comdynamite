@@ -21,7 +21,8 @@ mc_dynamics(
   species = NULL,
   extirpation = 0,
   pool = NULL,
-  initial = NULL
+  initial = NULL,
+  immigration = c("poisson", "multinomial")
 )
 ```
 
@@ -83,6 +84,13 @@ mc_dynamics(
 
   Optional matrix (sites x species) of abundances or 0/1 presences at
   the start, only where `pool` allows.
+
+- immigration:
+
+  How emigrants reach other sites on spatially explicit landscapes:
+  `"poisson"` (the default, as in the code of Thompson et al. 2020) or
+  `"multinomial"`, which conserves them. Spatially implicit landscapes
+  are always multinomial.
 
 ## Value
 
