@@ -59,6 +59,11 @@ Traits with phylogenetic signal and evolutionary regimes.
   : A continuous trait whose rate of evolution varies among branches
 - [`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md)
   : Rates of trait evolution from a history along the tree
+- [`partner_turnover()`](https://provetelab.org/comdynamite/reference/partner_turnover.md)
+  : Turnover of interaction partners in a simulated metacommunity
+- [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
+  : Rates of trait evolution from the turnover of partners in a
+  metacommunity
 - [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
   : Tip-based metrics of a known trait history
 - [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
