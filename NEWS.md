@@ -10,6 +10,18 @@
   1.02, 2.12 and 5.46 for true ratios 1, 2 and 5); and the RRphylo rates of tip branches
   follow the turnover of partners weakly (median rho 0.10).
 
+- `fit_damocles(shared = TRUE)` and `damocles_test(shared = TRUE)` estimate one pair of
+  DAMOCLES rates for several communities on the same tree from the sum of their
+  log-likelihoods. A single community rarely holds enough information on colonisation and
+  extinction; pooling communities narrows the estimates (`data-raw/validation_damocles.R`),
+  provided they can be treated as independent realisations of the process.
+- `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` take
+  `sympatry`, the probability that a locally present ancestor leaves both daughters present
+  at speciation (in situ speciation, or recolonisation before the daughters diverge),
+  relaxing the strictly allopatric rule of Pigot & Etienne (2015), which stays the default
+  (`sympatry = 0`). The likelihood remains exact; `fit_damocles(sympatry = NULL)` estimates it,
+  which needs several communities with shared rates (`data-raw/validation_damocles.R`).
+
 - `food_web_rates()` turns the rates of trait change of the resource, consumer and predator
   from `food_web_dynamics()` into rates per branch for `trait_rates(edge_rates = )`: each tip
   belongs to a trophic level, and over the last `window` units of time of its branch the rate

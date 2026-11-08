@@ -9,6 +9,12 @@
 #' and the other absent, chosen at random, and an absent ancestor leaves two absent daughters.
 #' The states at the tips form the community.
 #'
+#' `sympatry` relaxes the rule of strictly allopatric speciation: with that probability a
+#' present ancestor leaves both daughters present, as after speciation within the community
+#' (in situ or sympatric speciation) or when one daughter recolonises it before the two can be
+#' told apart; otherwise one daughter is present, as above. `sympatry = 0`, the default, is the
+#' model of Pigot & Etienne (2015). An absent ancestor always leaves two absent daughters.
+#'
 #' The states at the nodes are drawn from the exact transition probabilities of the two-state
 #' process over each branch, which gives the same distribution of tip states as simulating each
 #' colonisation and extinction event. The model assumes the tree holds the species of the
@@ -18,6 +24,8 @@
 #' @param tree A rooted, fully dichotomous `phylo` tree with branch lengths.
 #' @param gamma Rate of local colonisation per lineage, in the units of the branch lengths.
 #' @param mu Rate of local extinction per lineage.
+#' @param sympatry Probability, between 0 and 1, that a locally present ancestor leaves both
+#'   daughters present at speciation; 0 (the default) is strictly allopatric speciation.
 #' @param n Number of communities to simulate.
 #' @param root State of the ancestor at the root, just before the first speciation (or at the
 #'   start of the root edge): `"both"` draws absent or present with equal probabilities for each
@@ -35,10 +43,12 @@
 #' comm <- simulate_damocles(tr, gamma = 0.5, mu = 0.5, n = 5)
 #' rowSums(comm)
 #' @export
-simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent", "present")) {
+simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent", "present"),
+                              sympatry = 0) {
   root <- match.arg(root)
   check_damocles_tree(tree)
   check_damocles_rates(gamma, mu)
+  check_sympatry(sympatry)
   if (length(n) != 1 || !is.finite(n) || n < 1 || n != round(n)) {
     stop("`n` must be one whole number, 1 or more", call. = FALSE)
   }
@@ -50,12 +60,14 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
   # state at the end of the branch leading to each node, just before it speciates
   state <- matrix(0L, n, n_tip + tree$Nnode)
   state[, n_tip + 1] <- start
-  # which of the two daughters inherits the presence of its ancestor
+  # which of the two daughters inherits the presence of its ancestor (3: both of them)
   heir <- matrix(sample.int(2, n * tree$Nnode, replace = TRUE), n, tree$Nnode)
+  if (sympatry > 0) heir[stats::runif(length(heir)) < sympatry] <- 3L
   position <- stats::ave(seq_len(nrow(tree$edge)), tree$edge[, 1], FUN = seq_along)
   for (e in seq_len(nrow(tree$edge))) {  # cladewise: ancestors before descendants
     parent <- tree$edge[e, 1]
-    begin <- state[, parent] * (heir[, parent - n_tip] == position[e])
+    inherits <- heir[, parent - n_tip] == position[e] | heir[, parent - n_tip] == 3L
+    begin <- state[, parent] * inherits
     state[, tree$edge[e, 2]] <- damocles_step(begin, tree$edge.length[e], gamma, mu)
   }
   out <- state[, seq_len(n_tip), drop = FALSE]
@@ -71,8 +83,9 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' algorithm of Pigot & Etienne (2015, Box 1): from the tips to the root, the probabilities of
 #' the observed states below each branch, given its state, are carried along the branch by the
 #' analytical solution of the backward equations of the two-state process, and combined at each
-#' node by the rule of allopatric speciation. `fit_damocles()` finds the maximum-likelihood
-#' rates.
+#' node by the rule of speciation (allopatric, or with probability `sympatry` leaving both
+#' daughters present). `fit_damocles()` finds the maximum-likelihood rates, and optionally
+#' `sympatry`.
 #'
 #' At the root, `"both"` averages the likelihoods given an absent and a present ancestor, as the
 #' default of the DAMOCLES package (`pchoice = 0`); the article sums them, which only adds
@@ -85,6 +98,30 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' 60 tips gave estimates of `mu` from zero to several thousand, with the same likelihoods as
 #' `DAMOCLES::DAMOCLES_ML()`; the ratio of the two rates is better estimated than each one.
 #'
+#' With `shared = TRUE`, `fit_damocles()` estimates one pair of rates for all communities by
+#' maximising the sum of their log-likelihoods, which treats the communities as independent
+#' realisations of the same process on the same tree. Pooling communities narrows the
+#' estimates: in `data-raw/validation_damocles.R`, with `gamma = mu = 1` on trees of 60 tips and
+#' height one (30 fits each), 90% of the estimates of `gamma` fell between 0.49 and 6.0 from one
+#' community and between 0.75 and 1.27 from twenty, and those of `mu` between zero and 18.9 from
+#' one and between zero and 1.8 from twenty. `mu` stays the harder rate, and some fits still put
+#' it near zero. The
+#' assumption of independence matters: neighbouring sites that share their colonisation history,
+#' or communities nested in one another, are not independent replicates and pooling them
+#' overstates the information on the rates. Twice the difference between the summed
+#' log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
+#' on `2 * (number of communities - 1)` degrees of freedom to ask whether the rates differ among
+#' communities.
+#'
+#' With `sympatry = NULL`, `fit_damocles()` also estimates the probability that a present
+#' ancestor leaves both daughters present, on the logit scale. A single community says almost
+#' nothing about it: in `data-raw/validation_damocles.R`, with `sympatry = 0.5` and
+#' `gamma = mu = 1` on trees of 60 tips, 90% of the estimates fell between 0 and 1 from one
+#' community, between 0.26 and 0.81 from five and between 0.41 and 0.60 from twenty. Estimate it
+#' with shared rates, and compare the fit with that of `sympatry = 0` by a likelihood ratio (one
+#' degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
+#' conservative) to ask whether strictly allopatric speciation is enough.
+#'
 #' @param comm Presences of the species (columns, named as the tips of `tree`) in one or more
 #'   communities (rows): a matrix or data frame, or a named vector for one community. Values
 #'   above zero count as presences. Tips missing from `comm` count as absent, with a warning,
@@ -94,7 +131,10 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #'   `"present"`.
 #' @return `damocles_loglik()`: the log-likelihood of each community. `fit_damocles()`: a data
 #'   frame of class `mc_damocles_fit` with one row per community and the columns `gamma`, `mu`,
-#'   `loglik`, `richness` and `convergence` (0 when [stats::optim()] converged).
+#'   `sympatry` (fixed or estimated), `loglik`, `richness` and `convergence` (0 when [stats::optim()] converged). With
+#'   `shared = TRUE` every row holds the same rates and convergence code, `loglik` is the
+#'   contribution of each community at those rates, and the attribute `loglik_total` holds
+#'   their sum.
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [damocles_test()].
@@ -104,34 +144,58 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' comm <- simulate_damocles(tr, gamma = 1, mu = 2, n = 2)
 #' damocles_loglik(comm, tr, gamma = 1, mu = 2)
 #' fit_damocles(comm, tr)
+#' fit_damocles(comm, tr, shared = TRUE)
 #' @export
-damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "present")) {
+damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "present"),
+                            sympatry = 0) {
   root <- match.arg(root)
   check_damocles_tree(tree)
   check_damocles_rates(gamma, mu)
+  check_sympatry(sympatry)
   presence <- damocles_presence(comm, tree)
-  damocles_prune(presence, ape::reorder.phylo(tree, "postorder"), gamma, mu, root)
+  damocles_prune(presence, ape::reorder.phylo(tree, "postorder"), gamma, mu, root, sympatry)
 }
 
 #' @rdname damocles_loglik
 #' @param start Optional starting rates, `c(gamma = , mu = )`; by default the optimisation
 #'   starts from four combinations of 0.2 and 2 divided by the height of the tree.
+#' @param shared If `TRUE`, one pair of rates shared by all communities, estimated from the sum
+#'   of their log-likelihoods; if `FALSE` (the default), separate rates for each community.
+#' @param sympatry In `damocles_loglik()`, the probability that a present ancestor leaves both
+#'   daughters present (see [simulate_damocles()]). In `fit_damocles()`, a fixed value, or
+#'   `NULL` to estimate it with the rates (shared or not, as they are).
 #' @export
-fit_damocles <- function(comm, tree, root = c("both", "absent", "present"), start = NULL) {
+fit_damocles <- function(comm, tree, root = c("both", "absent", "present"), start = NULL,
+                         shared = FALSE, sympatry = 0) {
   root <- match.arg(root)
+  if (!isTRUE(shared) && !isFALSE(shared)) stop("`shared` must be TRUE or FALSE", call. = FALSE)
+  if (!is.null(sympatry)) check_sympatry(sympatry)
   check_damocles_tree(tree)
   presence <- damocles_presence(comm, tree)
   tree <- ape::reorder.phylo(tree, "postorder")
   starts <- damocles_starts(tree, start)
-  fits <- lapply(seq_len(nrow(presence)), function(i) {
-    damocles_optim(presence[i, , drop = FALSE], tree, root, starts)
+  groups <- if (shared) list(seq_len(nrow(presence))) else as.list(seq_len(nrow(presence)))
+  fits <- lapply(groups, function(rows) {
+    damocles_optim(presence[rows, , drop = FALSE], tree, root, starts, sympatry)
   })
-  out <- data.frame(gamma = vapply(fits, `[[`, numeric(1), "gamma"),
-                    mu = vapply(fits, `[[`, numeric(1), "mu"),
-                    loglik = vapply(fits, `[[`, numeric(1), "loglik"),
-                    richness = rowSums(presence),
-                    convergence = vapply(fits, `[[`, integer(1), "convergence"),
-                    row.names = rownames(presence))
+  if (shared) {
+    fit <- fits[[1]]
+    each <- damocles_prune(presence, tree, fit$gamma, fit$mu, root, fit$sympatry)
+    n <- nrow(presence)
+    out <- data.frame(gamma = rep(fit$gamma, n), mu = rep(fit$mu, n),
+                      sympatry = rep(fit$sympatry, n), loglik = unname(each),
+                      richness = rowSums(presence), convergence = rep(fit$convergence, n),
+                      row.names = rownames(presence))
+    attr(out, "loglik_total") <- fit$loglik
+  } else {
+    out <- data.frame(gamma = vapply(fits, `[[`, numeric(1), "gamma"),
+                      mu = vapply(fits, `[[`, numeric(1), "mu"),
+                      sympatry = vapply(fits, `[[`, numeric(1), "sympatry"),
+                      loglik = vapply(fits, `[[`, numeric(1), "loglik"),
+                      richness = rowSums(presence),
+                      convergence = vapply(fits, `[[`, integer(1), "convergence"),
+                      row.names = rownames(presence))
+  }
   class(out) <- c("mc_damocles_fit", "data.frame")
   out
 }
@@ -139,6 +203,11 @@ fit_damocles <- function(comm, tree, root = c("both", "absent", "present"), star
 #' @export
 print.mc_damocles_fit <- function(x, ...) {
   cat("DAMOCLES rates by maximum likelihood (Pigot & Etienne 2015)\n")
+  total <- attr(x, "loglik_total")
+  if (!is.null(total)) {
+    cat("Rates shared by", nrow(x), "communities; total log-likelihood",
+        format(total, digits = 6), "\n")
+  }
   print(as.data.frame(unclass(x), row.names = attr(x, "row.names")), digits = 3, ...)
   invisible(x)
 }
@@ -149,8 +218,9 @@ print.mc_damocles_fit <- function(x, ...) {
 #' distance (MNTD) among the species present in each community with two null distributions: one
 #' from communities simulated along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 #' [simulate_damocles()]), with the rates of colonisation and local extinction estimated from
-#' that community by [fit_damocles()] or given, and one from random draws of the same number of
-#' species from the tips, the static null model the dynamic one is compared with in that study.
+#' that community (or shared by all communities) by [fit_damocles()] or given, and one from
+#' random draws of the same number of species from the tips, the static null model the dynamic
+#' one is compared with in that study.
 #'
 #' Allopatric speciation alone makes present species less related than random draws expect, so
 #' communities that look overdispersed against random draws may be consistent with the dynamic
@@ -170,13 +240,17 @@ print.mc_damocles_fit <- function(x, ...) {
 #' @param n_sim Number of null communities of each model.
 #' @param gamma,mu Rates of local colonisation and extinction used to simulate the null
 #'   communities, one value for all communities or one per community; `NULL` (the default)
-#'   estimates both for each community with [fit_damocles()].
+#'   estimates both with [fit_damocles()].
+#' @param shared When the rates are estimated, `TRUE` fits one pair shared by all communities
+#'   (see [fit_damocles()]) and `FALSE` (the default) one pair per community.
+#' @param sympatry Probability that a present ancestor leaves both daughters present, used in
+#'   the simulations (see [simulate_damocles()]); `NULL` estimates it with the rates.
 #' @param root Prior on the state at the root, used both in the fit and in the simulations
 #'   (`"both"` draws the state of the root of each simulated community with equal
 #'   probabilities).
 #' @return A data frame of class `mc_damocles_test`, one row per community, with the richness,
-#'   the rates used (`gamma`, `mu`) and their log-likelihood when estimated, and, for `mpd` and
-#'   `mntd`, the observed value, the standardised effect size and p-value against the DAMOCLES
+#'   the parameters used (`gamma`, `mu`, `sympatry`) and their log-likelihood when estimated,
+#'   and, for `mpd` and `mntd`, the observed value, the standardised effect size and p-value against the DAMOCLES
 #'   null (`ses_mpd_damocles`, `p_mpd_damocles`, ...) and against random draws
 #'   (`ses_mpd_random`, `p_mpd_random`, ...), plus `n_valid`.
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
@@ -189,7 +263,8 @@ print.mc_damocles_fit <- function(x, ...) {
 #' damocles_test(comm, tr, n_sim = 99)
 #' @export
 damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
-                          root = c("both", "absent", "present")) {
+                          root = c("both", "absent", "present"), shared = FALSE,
+                          sympatry = 0) {
   root <- match.arg(root)
   check_damocles_tree(tree)
   if (length(n_sim) != 1 || !is.finite(n_sim) || n_sim < 2 || n_sim != round(n_sim)) {
@@ -201,9 +276,10 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
     stop("give both `gamma` and `mu`, or neither to estimate them", call. = FALSE)
   }
   if (is.null(gamma)) {
-    fit <- fit_damocles(presence, tree, root = root)
+    fit <- fit_damocles(presence, tree, root = root, shared = shared, sympatry = sympatry)
     gamma <- fit$gamma
     mu <- fit$mu
+    sympatry <- fit$sympatry
     loglik <- fit$loglik
   } else {
     if (!length(gamma) %in% c(1, n_comm) || !length(mu) %in% c(1, n_comm)) {
@@ -212,6 +288,11 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
     gamma <- rep_len(gamma, n_comm)
     mu <- rep_len(mu, n_comm)
     for (i in seq_len(n_comm)) check_damocles_rates(gamma[i], mu[i])
+    if (is.null(sympatry)) {
+      stop("`sympatry = NULL` (estimated) needs `gamma` and `mu` estimated too", call. = FALSE)
+    }
+    check_sympatry(sympatry)
+    sympatry <- rep_len(sympatry, n_comm)
     loglik <- NA_real_
   }
   distances <- tip_distances(tree)[colnames(presence), colnames(presence)]
@@ -219,7 +300,8 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
     site <- presence[i, , drop = FALSE]
     observed <- c(mpd = unname(mean_pairwise(site, distances)),
                   mntd = unname(mean_nearest(site, distances)))
-    dynamic <- simulate_damocles(tree, gamma[i], mu[i], n = n_sim, root = root)
+    dynamic <- simulate_damocles(tree, gamma[i], mu[i], n = n_sim, root = root,
+                                 sympatry = sympatry[i])
     dynamic <- dynamic[, colnames(presence), drop = FALSE]
     random <- t(replicate(n_sim, sample(unname(site[1, ]))))
     null_dynamic <- cbind(mpd = mean_pairwise(dynamic, distances),
@@ -238,7 +320,8 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
     out
   })
   stats <- as.data.frame(do.call(rbind, rows))
-  out <- data.frame(richness = stats$richness, gamma = gamma, mu = mu, loglik = loglik,
+  out <- data.frame(richness = stats$richness, gamma = gamma, mu = mu, sympatry = sympatry,
+                    loglik = loglik,
                     stats[, -1], row.names = rownames(presence))
   attr(out, "n_sim") <- n_sim
   class(out) <- c("mc_damocles_test", "data.frame")
@@ -251,9 +334,10 @@ print.mc_damocles_test <- function(x, ...) {
   cat(attr(x, "n_sim"), "null communities per model; SES < 0: clustering, SES > 0:",
       "overdispersion\n")
   shown <- as.data.frame(unclass(x), row.names = attr(x, "row.names"))
-  print(shown[, c("richness", "gamma", "mu", "mpd", "ses_mpd_damocles", "p_mpd_damocles",
-                  "ses_mpd_random", "p_mpd_random", "mntd", "ses_mntd_damocles",
-                  "p_mntd_damocles", "ses_mntd_random", "p_mntd_random")], digits = 3, ...)
+  columns <- c("richness", "gamma", "mu", if (any(x$sympatry > 0)) "sympatry", "mpd", "ses_mpd_damocles", "p_mpd_damocles",
+               "ses_mpd_random", "p_mpd_random", "mntd", "ses_mntd_damocles",
+               "p_mntd_damocles", "ses_mntd_random", "p_mntd_random")
+  print(shown[, columns], digits = 3, ...)
   invisible(x)
 }
 
@@ -278,6 +362,14 @@ check_damocles_rates <- function(gamma, mu) {
     if (length(rate) != 1 || !is.numeric(rate) || !is.finite(rate) || rate < 0) {
       stop("`gamma` and `mu` must each be one number, zero or more", call. = FALSE)
     }
+  }
+  invisible(TRUE)
+}
+
+check_sympatry <- function(sympatry) {
+  if (length(sympatry) != 1 || !is.numeric(sympatry) || !is.finite(sympatry) ||
+      sympatry < 0 || sympatry > 1) {
+    stop("`sympatry` must be one probability, between 0 and 1", call. = FALSE)
   }
   invisible(TRUE)
 }
@@ -327,7 +419,7 @@ damocles_step <- function(begin, t, gamma, mu) {
 }
 
 # log-likelihood of each row of `presence` (tips of `tree`, in order), `tree` in postorder
-damocles_prune <- function(presence, tree, gamma, mu, root) {
+damocles_prune <- function(presence, tree, gamma, mu, root, sympatry = 0) {
   n_tip <- ape::Ntip(tree)
   n_comm <- nrow(presence)
   # partial likelihoods given absence (column 1) and presence (column 2) at each node
@@ -353,10 +445,12 @@ damocles_prune <- function(presence, tree, gamma, mu, root) {
       first_present[, parent] <- top$present
       next
     }
-    # allopatric speciation: an absent ancestor leaves two absent daughters, a present one
-    # leaves one present daughter, either of the two
+    # an absent ancestor leaves two absent daughters; a present one leaves both present with
+    # probability `sympatry`, and otherwise one present daughter, either of the two
     a <- first_absent[, parent] * top$absent
-    p <- (first_present[, parent] * top$absent + first_absent[, parent] * top$present) / 2
+    p <- (1 - sympatry) *
+      (first_present[, parent] * top$absent + first_absent[, parent] * top$present) / 2 +
+      sympatry * first_present[, parent] * top$present
     scale <- a + p
     loglik <- loglik + log(scale)
     absent[, parent] <- a / ifelse(scale > 0, scale, 1)
@@ -385,18 +479,26 @@ damocles_starts <- function(tree, start) {
   as.matrix(expand.grid(gamma = c(0.2, 2), mu = c(0.2, 2))) / height
 }
 
-damocles_optim <- function(presence, tree, root, starts) {
-  objective <- function(log_rates) {
-    value <- damocles_prune(presence, tree, exp(log_rates[1]), exp(log_rates[2]), root)
+# rates on the log scale and, when `sympatry` is NULL, sympatry on the logit scale
+damocles_optim <- function(presence, tree, root, starts, sympatry = 0) {
+  estimate <- is.null(sympatry)
+  objective <- function(par) {
+    s <- if (estimate) stats::plogis(par[3]) else sympatry
+    value <- sum(damocles_prune(presence, tree, exp(par[1]), exp(par[2]), root, s))
     if (is.finite(value)) -value else 1e10
+  }
+  if (estimate) {
+    starts <- cbind(starts[rep(seq_len(nrow(starts)), 2), , drop = FALSE],
+                    rep(stats::qlogis(c(0.1, 0.5)), each = nrow(starts)))
   }
   best <- NULL
   for (i in seq_len(nrow(starts))) {
-    fit <- stats::optim(log(starts[i, ]), objective, control = list(reltol = 1e-10,
-                                                                     maxit = 2000))
+    start <- c(log(starts[i, 1:2]), if (estimate) starts[i, 3])
+    fit <- stats::optim(start, objective, control = list(reltol = 1e-10, maxit = 4000))
     if (is.null(best) || fit$value < best$value) best <- fit
   }
   list(gamma = exp(best$par[1]), mu = exp(best$par[2]),
+       sympatry = if (estimate) stats::plogis(best$par[3]) else sympatry,
        loglik = if (best$value >= 1e10) -Inf else -best$value,
        convergence = as.integer(best$convergence))
 }

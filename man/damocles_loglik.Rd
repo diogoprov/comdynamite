@@ -5,9 +5,23 @@
 \alias{fit_damocles}
 \title{Likelihood of local presences under the DAMOCLES model}
 \usage{
-damocles_loglik(comm, tree, gamma, mu, root = c("both", "absent", "present"))
+damocles_loglik(
+  comm,
+  tree,
+  gamma,
+  mu,
+  root = c("both", "absent", "present"),
+  sympatry = 0
+)
 
-fit_damocles(comm, tree, root = c("both", "absent", "present"), start = NULL)
+fit_damocles(
+  comm,
+  tree,
+  root = c("both", "absent", "present"),
+  start = NULL,
+  shared = FALSE,
+  sympatry = 0
+)
 }
 \arguments{
 \item{comm}{Presences of the species (columns, named as the tips of \code{tree}) in one or more
@@ -24,13 +38,23 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{root}{Prior on the state of the ancestor at the root: \code{"both"}, \code{"absent"} or
 \code{"present"}.}
 
+\item{sympatry}{In \code{damocles_loglik()}, the probability that a present ancestor leaves both
+daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{fit_damocles()}, a fixed value, or
+\code{NULL} to estimate it with the rates (shared or not, as they are).}
+
 \item{start}{Optional starting rates, \code{c(gamma = , mu = )}; by default the optimisation
 starts from four combinations of 0.2 and 2 divided by the height of the tree.}
+
+\item{shared}{If \code{TRUE}, one pair of rates shared by all communities, estimated from the sum
+of their log-likelihoods; if \code{FALSE} (the default), separate rates for each community.}
 }
 \value{
 \code{damocles_loglik()}: the log-likelihood of each community. \code{fit_damocles()}: a data
 frame of class \code{mc_damocles_fit} with one row per community and the columns \code{gamma}, \code{mu},
-\code{loglik}, \code{richness} and \code{convergence} (0 when \code{\link[stats:optim]{stats::optim()}} converged).
+\code{sympatry} (fixed or estimated), \code{loglik}, \code{richness} and \code{convergence} (0 when \code{\link[stats:optim]{stats::optim()}} converged). With
+\code{shared = TRUE} every row holds the same rates and convergence code, \code{loglik} is the
+contribution of each community at those rates, and the attribute \code{loglik_total} holds
+their sum.
 }
 \description{
 \code{damocles_loglik()} computes the exact log-likelihood of the presences and absences of the
@@ -39,8 +63,9 @@ species of a clade in a local community, given their tree and the rates of local
 algorithm of Pigot & Etienne (2015, Box 1): from the tips to the root, the probabilities of
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
-node by the rule of allopatric speciation. \code{fit_damocles()} finds the maximum-likelihood
-rates.
+node by the rule of speciation (allopatric, or with probability \code{sympatry} leaving both
+daughters present). \code{fit_damocles()} finds the maximum-likelihood rates, and optionally
+\code{sympatry}.
 }
 \details{
 At the root, \code{"both"} averages the likelihoods given an absent and a present ancestor, as the
@@ -53,6 +78,30 @@ nearly none of them, the likelihood surface is flat and the estimates are poor. 
 \code{data-raw/validation_damocles.R}, ten communities simulated with \code{gamma = mu = 1} on trees of
 60 tips gave estimates of \code{mu} from zero to several thousand, with the same likelihoods as
 \code{DAMOCLES::DAMOCLES_ML()}; the ratio of the two rates is better estimated than each one.
+
+With \code{shared = TRUE}, \code{fit_damocles()} estimates one pair of rates for all communities by
+maximising the sum of their log-likelihoods, which treats the communities as independent
+realisations of the same process on the same tree. Pooling communities narrows the
+estimates: in \code{data-raw/validation_damocles.R}, with \code{gamma = mu = 1} on trees of 60 tips and
+height one (30 fits each), 90\% of the estimates of \code{gamma} fell between 0.49 and 6.0 from one
+community and between 0.75 and 1.27 from twenty, and those of \code{mu} between zero and 18.9 from
+one and between zero and 1.8 from twenty. \code{mu} stays the harder rate, and some fits still put
+it near zero. The
+assumption of independence matters: neighbouring sites that share their colonisation history,
+or communities nested in one another, are not independent replicates and pooling them
+overstates the information on the rates. Twice the difference between the summed
+log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
+on \verb{2 * (number of communities - 1)} degrees of freedom to ask whether the rates differ among
+communities.
+
+With \code{sympatry = NULL}, \code{fit_damocles()} also estimates the probability that a present
+ancestor leaves both daughters present, on the logit scale. A single community says almost
+nothing about it: in \code{data-raw/validation_damocles.R}, with \code{sympatry = 0.5} and
+\code{gamma = mu = 1} on trees of 60 tips, 90\% of the estimates fell between 0 and 1 from one
+community, between 0.26 and 0.81 from five and between 0.41 and 0.60 from twenty. Estimate it
+with shared rates, and compare the fit with that of \code{sympatry = 0} by a likelihood ratio (one
+degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
+conservative) to ask whether strictly allopatric speciation is enough.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -61,6 +110,7 @@ tr <- treeshapesim::sim_tree_shape(60)
 comm <- simulate_damocles(tr, gamma = 1, mu = 2, n = 2)
 damocles_loglik(comm, tr, gamma = 1, mu = 2)
 fit_damocles(comm, tr)
+fit_damocles(comm, tr, shared = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \references{

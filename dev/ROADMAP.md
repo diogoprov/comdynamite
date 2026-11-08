@@ -671,7 +671,14 @@ pacotes de referência em vez de reimplementá-los.
       do tempo, gamma_td; modelos com traits binários ou ternários, `model = 1, 2`;
       colonização dependente de traits ou de parentesco das simulações do artigo); amostragem
       incompleta do pool; ligar à saída de `simulate_metacommunity()` (vários sítios como
-      comunidades locais da mesma árvore).
+      comunidades locais da mesma árvore). Ajuste com taxas compartilhadas entre comunidades
+      (`shared = TRUE`) feito em 2026-11-08; falta perfil de verossimilhança ou intervalo para
+      as taxas, e taxas que variam entre comunidades com uma covariável. Regra de especiação
+      relaxada (`sympatry`, probabilidade de as duas filhas ficarem presentes) feita em
+      2026-11-08. Próximos, em ordem de facilidade: taxas por época (constantes por intervalo)
+      e por clado definido a priori; trait discreto coevoluindo com a presença (estado
+      presença × trait); traits contínuos e colonização dependente de parentesco só por
+      simulação.
 
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
