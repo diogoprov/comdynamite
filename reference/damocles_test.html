@@ -82,7 +82,8 @@ one is compared with in that study.</p>
 <span>  gamma <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  mu <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
-<span>  shared <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  shared <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -121,12 +122,17 @@ probabilities).</p></dd>
 <dd><p>When the rates are estimated, <code>TRUE</code> fits one pair shared by all communities
 (see <code><a href="damocles_loglik.html">fit_damocles()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
 
+
+<dt id="arg-sympatry">sympatry<a class="anchor" aria-label="anchor" href="#arg-sympatry"></a></dt>
+<dd><p>Probability that a present ancestor leaves both daughters present, used in
+the simulations (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>); <code>NULL</code> estimates it with the rates.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame of class <code>mc_damocles_test</code>, one row per community, with the richness,
-the rates used (<code>gamma</code>, <code>mu</code>) and their log-likelihood when estimated, and, for <code>mpd</code> and
-<code>mntd</code>, the observed value, the standardised effect size and p-value against the DAMOCLES
+the parameters used (<code>gamma</code>, <code>mu</code>, <code>sympatry</code>) and their log-likelihood when estimated,
+and, for <code>mpd</code> and <code>mntd</code>, the observed value, the standardised effect size and p-value against the DAMOCLES
 null (<code>ses_mpd_damocles</code>, <code>p_mpd_damocles</code>, ...) and against random draws
 (<code>ses_mpd_random</code>, <code>p_mpd_random</code>, ...), plus <code>n_valid</code>.</p>
     </div>

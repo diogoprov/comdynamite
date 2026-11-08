@@ -5,15 +5,17 @@ gamma and extinction mu, under the model of simulate_damocles(). It follows the 
 algorithm of Pigot &amp;amp; Etienne (2015, Box 1): from the tips to the root, the probabilities of
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
-node by the rule of allopatric speciation. fit_damocles() finds the maximum-likelihood
-rates."><meta property="og:description" content="damocles_loglik() computes the exact log-likelihood of the presences and absences of the
+node by the rule of speciation (allopatric, or with probability sympatry leaving both
+daughters present). fit_damocles() finds the maximum-likelihood rates, and optionally
+sympatry."><meta property="og:description" content="damocles_loglik() computes the exact log-likelihood of the presences and absences of the
 species of a clade in a local community, given their tree and the rates of local colonisation
 gamma and extinction mu, under the model of simulate_damocles(). It follows the pruning
 algorithm of Pigot &amp;amp; Etienne (2015, Box 1): from the tips to the root, the probabilities of
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
-node by the rule of allopatric speciation. fit_damocles() finds the maximum-likelihood
-rates."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
+node by the rule of speciation (allopatric, or with probability sympatry leaving both
+daughters present). fit_damocles() finds the maximum-likelihood rates, and optionally
+sympatry."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -72,20 +74,29 @@ species of a clade in a local community, given their tree and the rates of local
 algorithm of Pigot &amp; Etienne (2015, Box 1): from the tips to the root, the probabilities of
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
-node by the rule of allopatric speciation. <code>fit_damocles()</code> finds the maximum-likelihood
-rates.</p>
+node by the rule of speciation (allopatric, or with probability <code>sympatry</code> leaving both
+daughters present). <code>fit_damocles()</code> finds the maximum-likelihood rates, and optionally
+<code>sympatry</code>.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">damocles_loglik</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">gamma</span>, <span class="va">mu</span>, root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">damocles_loglik</span><span class="op">(</span></span>
+<span>  <span class="va">comm</span>,</span>
+<span>  <span class="va">tree</span>,</span>
+<span>  <span class="va">gamma</span>,</span>
+<span>  <span class="va">mu</span>,</span>
+<span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
+<span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">fit_damocles</span><span class="op">(</span></span>
 <span>  <span class="va">comm</span>,</span>
 <span>  <span class="va">tree</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
 <span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  shared <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  shared <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -117,6 +128,12 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 <code>"present"</code>.</p></dd>
 
 
+<dt id="arg-sympatry">sympatry<a class="anchor" aria-label="anchor" href="#arg-sympatry"></a></dt>
+<dd><p>In <code>damocles_loglik()</code>, the probability that a present ancestor leaves both
+daughters present (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>). In <code>fit_damocles()</code>, a fixed value, or
+<code>NULL</code> to estimate it with the rates (shared or not, as they are).</p></dd>
+
+
 <dt id="arg-start">start<a class="anchor" aria-label="anchor" href="#arg-start"></a></dt>
 <dd><p>Optional starting rates, <code>c(gamma = , mu = )</code>; by default the optimisation
 starts from four combinations of 0.2 and 2 divided by the height of the tree.</p></dd>
@@ -131,7 +148,7 @@ of their log-likelihoods; if <code>FALSE</code> (the default), separate rates fo
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p><code>damocles_loglik()</code>: the log-likelihood of each community. <code>fit_damocles()</code>: a data
 frame of class <code>mc_damocles_fit</code> with one row per community and the columns <code>gamma</code>, <code>mu</code>,
-<code>loglik</code>, <code>richness</code> and <code>convergence</code> (0 when <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim()</a></code> converged). With
+<code>sympatry</code> (fixed or estimated), <code>loglik</code>, <code>richness</code> and <code>convergence</code> (0 when <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim()</a></code> converged). With
 <code>shared = TRUE</code> every row holds the same rates and convergence code, <code>loglik</code> is the
 contribution of each community at those rates, and the attribute <code>loglik_total</code> holds
 their sum.</p>
@@ -162,6 +179,14 @@ overstates the information on the rates. Twice the difference between the summed
 log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
 on <code>2 * (number of communities - 1)</code> degrees of freedom to ask whether the rates differ among
 communities.</p>
+<p>With <code>sympatry = NULL</code>, <code>fit_damocles()</code> also estimates the probability that a present
+ancestor leaves both daughters present, on the logit scale. A single community says almost
+nothing about it: in <code>data-raw/validation_damocles.R</code>, with <code>sympatry = 0.5</code> and
+<code>gamma = mu = 1</code> on trees of 60 tips, 90% of the estimates fell between 0 and 1 from one
+community, between 0.26 and 0.81 from five and between 0.41 and 0.60 from twenty. Estimate it
+with shared rates, and compare the fit with that of <code>sympatry = 0</code> by a likelihood ratio (one
+degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
+conservative) to ask whether strictly allopatric speciation is enough.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -183,15 +208,15 @@ community structure. <em>Ecology Letters</em>, 18, 153–163. <a href="https://d
 <span class="r-out co"><span class="r-pr">#&gt;</span> -28.13747 -22.54596 </span>
 <span class="r-in"><span><span class="fu">fit_damocles</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES rates by maximum likelihood (Pigot &amp; Etienne 2015)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma       mu loglik richness convergence</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sim1 1.794 4.61e+00  -27.8       11           0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sim2 0.476 1.46e-09  -21.9        8           0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma       mu sympatry loglik richness convergence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sim1 1.794 4.61e+00        0  -27.8       11           0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sim2 0.476 1.46e-09        0  -21.9        8           0</span>
 <span class="r-in"><span><span class="fu">fit_damocles</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, shared <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES rates by maximum likelihood (Pigot &amp; Etienne 2015)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rates shared by 2 communities; total log-likelihood -50.6593 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma   mu loglik richness convergence</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sim1  1.12 2.69  -28.0       11           0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> sim2  1.12 2.69  -22.6        8           0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      gamma   mu sympatry loglik richness convergence</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sim1  1.12 2.69        0  -28.0       11           0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> sim2  1.12 2.69        0  -22.6        8           0</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -9,20 +9,29 @@ It follows the pruning algorithm of Pigot & Etienne (2015, Box 1): from
 the tips to the root, the probabilities of the observed states below
 each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process,
-and combined at each node by the rule of allopatric speciation.
-`fit_damocles()` finds the maximum-likelihood rates.
+and combined at each node by the rule of speciation (allopatric, or with
+probability `sympatry` leaving both daughters present). `fit_damocles()`
+finds the maximum-likelihood rates, and optionally `sympatry`.
 
 ## Usage
 
 ``` r
-damocles_loglik(comm, tree, gamma, mu, root = c("both", "absent", "present"))
+damocles_loglik(
+  comm,
+  tree,
+  gamma,
+  mu,
+  root = c("both", "absent", "present"),
+  sympatry = 0
+)
 
 fit_damocles(
   comm,
   tree,
   root = c("both", "absent", "present"),
   start = NULL,
-  shared = FALSE
+  shared = FALSE,
+  sympatry = 0
 )
 ```
 
@@ -54,6 +63,14 @@ fit_damocles(
   Prior on the state of the ancestor at the root: `"both"`, `"absent"`
   or `"present"`.
 
+- sympatry:
+
+  In `damocles_loglik()`, the probability that a present ancestor leaves
+  both daughters present (see
+  [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)).
+  In `fit_damocles()`, a fixed value, or `NULL` to estimate it with the
+  rates (shared or not, as they are).
+
 - start:
 
   Optional starting rates, `c(gamma = , mu = )`; by default the
@@ -70,8 +87,8 @@ fit_damocles(
 
 `damocles_loglik()`: the log-likelihood of each community.
 `fit_damocles()`: a data frame of class `mc_damocles_fit` with one row
-per community and the columns `gamma`, `mu`, `loglik`, `richness` and
-`convergence` (0 when
+per community and the columns `gamma`, `mu`, `sympatry` (fixed or
+estimated), `loglik`, `richness` and `convergence` (0 when
 [`stats::optim()`](https://rdrr.io/r/stats/optim.html) converged). With
 `shared = TRUE` every row holds the same rates and convergence code,
 `loglik` is the contribution of each community at those rates, and the
@@ -112,6 +129,18 @@ the summed log-likelihoods of separate and shared fits can be compared
 with a chi-squared distribution on `2 * (number of communities - 1)`
 degrees of freedom to ask whether the rates differ among communities.
 
+With `sympatry = NULL`, `fit_damocles()` also estimates the probability
+that a present ancestor leaves both daughters present, on the logit
+scale. A single community says almost nothing about it: in
+`data-raw/validation_damocles.R`, with `sympatry = 0.5` and
+`gamma = mu = 1` on trees of 60 tips, 90% of the estimates fell between
+0 and 1 from one community, between 0.26 and 0.81 from five and between
+0.41 and 0.60 from twenty. Estimate it with shared rates, and compare
+the fit with that of `sympatry = 0` by a likelihood ratio (one degree of
+freedom, on the boundary of the parameter space, so the chi-squared
+p-value is conservative) to ask whether strictly allopatric speciation
+is enough.
+
 ## References
 
 Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for
@@ -134,13 +163,13 @@ damocles_loglik(comm, tr, gamma = 1, mu = 2)
 #> -28.13747 -22.54596 
 fit_damocles(comm, tr)
 #> DAMOCLES rates by maximum likelihood (Pigot & Etienne 2015)
-#>      gamma       mu loglik richness convergence
-#> sim1 1.794 4.61e+00  -27.8       11           0
-#> sim2 0.476 1.46e-09  -21.9        8           0
+#>      gamma       mu sympatry loglik richness convergence
+#> sim1 1.794 4.61e+00        0  -27.8       11           0
+#> sim2 0.476 1.46e-09        0  -21.9        8           0
 fit_damocles(comm, tr, shared = TRUE)
 #> DAMOCLES rates by maximum likelihood (Pigot & Etienne 2015)
 #> Rates shared by 2 communities; total log-likelihood -50.6593 
-#>      gamma   mu loglik richness convergence
-#> sim1  1.12 2.69  -28.0       11           0
-#> sim2  1.12 2.69  -22.6        8           0
+#>      gamma   mu sympatry loglik richness convergence
+#> sim1  1.12 2.69        0  -28.0       11           0
+#> sim2  1.12 2.69        0  -22.6        8           0
 ```

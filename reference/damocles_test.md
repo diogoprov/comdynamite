@@ -22,7 +22,8 @@ damocles_test(
   gamma = NULL,
   mu = NULL,
   root = c("both", "absent", "present"),
-  shared = FALSE
+  shared = FALSE,
+  sympatry = 0
 )
 ```
 
@@ -64,14 +65,21 @@ damocles_test(
   [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md))
   and `FALSE` (the default) one pair per community.
 
+- sympatry:
+
+  Probability that a present ancestor leaves both daughters present,
+  used in the simulations (see
+  [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md));
+  `NULL` estimates it with the rates.
+
 ## Value
 
 A data frame of class `mc_damocles_test`, one row per community, with
-the richness, the rates used (`gamma`, `mu`) and their log-likelihood
-when estimated, and, for `mpd` and `mntd`, the observed value, the
-standardised effect size and p-value against the DAMOCLES null
-(`ses_mpd_damocles`, `p_mpd_damocles`, ...) and against random draws
-(`ses_mpd_random`, `p_mpd_random`, ...), plus `n_valid`.
+the richness, the parameters used (`gamma`, `mu`, `sympatry`) and their
+log-likelihood when estimated, and, for `mpd` and `mntd`, the observed
+value, the standardised effect size and p-value against the DAMOCLES
+null (`ses_mpd_damocles`, `p_mpd_damocles`, ...) and against random
+draws (`ses_mpd_random`, `p_mpd_random`, ...), plus `n_valid`.
 
 ## Details
 

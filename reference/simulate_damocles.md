@@ -19,7 +19,8 @@ simulate_damocles(
   gamma,
   mu,
   n = 1,
-  root = c("both", "absent", "present")
+  root = c("both", "absent", "present"),
+  sympatry = 0
 )
 ```
 
@@ -49,6 +50,12 @@ simulate_damocles(
   with equal probabilities for each community, as in the simulations of
   Pigot & Etienne (2015); `"absent"` or `"present"` fix it.
 
+- sympatry:
+
+  Probability, between 0 and 1, that a locally present ancestor leaves
+  both daughters present at speciation; 0 (the default) is strictly
+  allopatric speciation.
+
 ## Value
 
 A matrix of zeros and ones with one row per community and one column per
@@ -56,6 +63,14 @@ tip, named by the tips, ready to be used as `comm` in the other
 functions of the package.
 
 ## Details
+
+`sympatry` relaxes the rule of strictly allopatric speciation: with that
+probability a present ancestor leaves both daughters present, as after
+speciation within the community (in situ or sympatric speciation) or
+when one daughter recolonises it before the two can be told apart;
+otherwise one daughter is present, as above. `sympatry = 0`, the
+default, is the model of Pigot & Etienne (2015). An absent ancestor
+always leaves two absent daughters.
 
 The states at the nodes are drawn from the exact transition
 probabilities of the two-state process over each branch, which gives the
