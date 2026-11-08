@@ -11,6 +11,7 @@ tstats(
   species = "species",
   method = c("base", "cati"),
   nperm = 99,
+  alternative = c("less", "greater", "two.sided"),
   ...
 )
 }
@@ -22,11 +23,14 @@ tstats(
 
 \item{site, species}{Names of the columns with the site and the species of each individual.}
 
-\item{method}{\code{"base"} (the default) for the observed values only, or \code{"cati"} for
-\code{\link[cati:Tstats]{cati::Tstats()}} with null models; it needs the package cati.}
+\item{method}{\code{"base"} (the default), computed in base R, or \code{"cati"} for \code{\link[cati:Tstats]{cati::Tstats()}};
+it needs the package cati.}
 
-\item{nperm}{Number of randomisations of the null models of \code{method = "cati"}; \code{NULL} for
-observed values only.}
+\item{nperm}{Number of randomisations of the null models; 0 or \code{NULL} for the observed
+values only, much faster in simulation studies with many replicates.}
+
+\item{alternative}{Direction of the test of \code{method = "base"}: \code{"less"} (the default),
+\code{"greater"} or \code{"two.sided"}.}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
@@ -35,8 +39,9 @@ observed values only.}
 With \code{method = "base"}, a data frame with one row per site and trait and the columns
 \code{site}, \code{trait}, \code{n_populations}, \code{T_IP.IC}, \code{T_IC.IR} and \code{T_PC.PR}; statistics that
 cannot be computed, such as \code{T_PC.PR} for a site with one species, are \code{NA}. With
-\code{method = "cati"}, the \code{Tstats} object of \code{\link[cati:Tstats]{cati::Tstats()}}, with the site names of
-\code{individuals}, for its methods \code{\link[cati:ses.Tstats]{cati::ses.Tstats()}}, \code{plot()} and \code{summary()}.
+\code{nperm > 0}, also \code{ses_} and \code{p_} columns for each statistic, and the attribute \code{null},
+an array (randomisation x row x statistic) with the null values. With \code{method = "cati"},
+the \code{Tstats} object of \code{\link[cati:Tstats]{cati::Tstats()}}, with the site names of \code{individuals}.
 }
 \description{
 Computes the three variance ratios of Violle et al. (2012) for each site (community) and
@@ -56,27 +61,51 @@ population means of the region. Low values mean filtering of populations.
 
 A population is a species at a site. Variances use \code{n - 1}, means of the variances within
 populations are not weighted, and populations of a single individual have no variance and
-are left out of \code{T_IP.IC}, as in \code{\link[cati:Tstats]{cati::Tstats()}}.
-
-\code{method = "base"} computes the observed values in base R, with no null model. It is fast and
-needs no other package, which suits simulation studies with many replicates, where the
-truth is known and each statistic is compared among scenarios rather than with a null
-model. \code{method = "cati"} calls \code{\link[cati:Tstats]{cati::Tstats()}} (Taudiere & Violle 2016), which adds null
-models: individuals permuted within each site for \code{T_IP.IC}, individuals drawn from the
-regional pool for \code{T_IC.IR}, and population means permuted for \code{T_PC.PR}. Both give the
-same observed values. \code{\link[cati:Tstats]{cati::Tstats()}} finds the populations of a site by matching its name
-as a regular expression, so a site called \code{site1} would also take the populations of
-\code{site10}; the sites are therefore passed under labels of equal width (\code{site01}, \code{site02},
-...) and given back their names in the result.
+are left out of \code{T_IP.IC}, as in \code{\link[cati:Tstats]{cati::Tstats()}}. Individuals with a missing value of a
+trait are left out for that trait.
 }
-\section{Local adaptation}{
+\section{Null models}{
+
+With \code{nperm > 0}, \code{method = "base"} compares each statistic with a null distribution, from
+the three null models of Taudiere & Violle (2016), implemented in base R from their
+description:
+\itemize{
+\item \code{T_IP.IC}: trait values are permuted among the individuals of each site, which keeps the
+variance of the site and breaks the structure of populations within it;
+\item \code{T_IC.IR}: each site receives as many individuals as it has, drawn without replacement from
+all individuals of the region;
+\item \code{T_PC.PR}: each individual takes the mean of its population, and each site then receives
+as many of these values as it has individuals, drawn without replacement from the region;
+population means are computed again from the values drawn.
+}
+
+The standardised effect size is \verb{(observed - mean of null) / sd of null}, and the p-value
+is \code{(1 + r) / (1 + nperm)}, where \code{r} is the number of null values at or below the observed
+one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice the smaller of the two
+(\code{"two.sided"}, at most 1). Low values of the three statistics are the usual hypotheses
+(niche differentiation within communities for \code{T_IP.IC}, environmental filtering for the
+others), so \code{"less"} tests them. Each trait is randomised on its own.
+
+\code{method = "cati"} calls \code{\link[cati:Tstats]{cati::Tstats()}} (Taudiere & Violle 2016) instead and returns its
+object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
+\code{\link[cati:Tstats]{cati::Tstats()}} finds the populations of a site by matching its name as a regular
+expression, so a site called \code{site1} would also take the populations of \code{site10}
+(\url{https://github.com/adrientaudiere/cati/issues/11}); the sites are therefore passed
+under labels of equal width (\code{site01}, \code{site02}, ...) and given back their names in the
+result. And its null model for \code{T_IP.IC} puts together the permutations of different sites
+in the wrong order, so that the null values of a site come from the individuals of other
+sites; its standardised effect sizes for \code{T_IP.IC} are then wrong
+(\url{https://github.com/adrientaudiere/cati/issues/12}). \code{method = "base"} is recommended.
+}
+
+\section{Local adaptation and character displacement}{
 
 With \code{local_adaptation} in \code{\link[=sample_individuals]{sample_individuals()}}, population means move toward the
 environment of their site, so co-occurring species become more alike and the region spreads
 along the environment. The variance among populations within a site falls, so \code{T_PC.PR} and
-\code{T_IC.IR} fall, and \code{T_IP.IC} rises, because the populations that remain overlap more. A
-fall in \code{T_IP.IC} with local adaptation would need populations to diverge from co-occurring
-species, as in character displacement, which \code{\link[=sample_individuals]{sample_individuals()}} does not simulate.
+\code{T_IC.IR} fall, and \code{T_IP.IC} rises, because the populations that remain overlap more. With
+\code{displacement}, co-occurring populations diverge from one another instead, which raises the
+variance among populations within sites and lowers \code{T_IP.IC}.
 }
 
 \examples{
@@ -86,15 +115,17 @@ tree <- treeshapesim::sim_tree_shape(20)
 sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
-none <- tstats(sample_individuals(sim, intraspecific_sd = 2))
-local <- tstats(sample_individuals(sim, local_adaptation = 0.8, intraspecific_sd = 2))
-colMeans(none[, c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
-colMeans(local[, c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
-\dontshow{\}) # examplesIf}
-\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("cati", quietly = TRUE)) withAutoprint(\{ # examplesIf}
-# with the null models of cati; ses.Tstats() lists T_IP.IC, T_IC.IR and T_PC.PR in order
-res <- tstats(sample_individuals(sim, intraspecific_sd = 2), method = "cati", nperm = 19)
-round(cati::ses.Tstats(res)[[1]]$ses[, 1], 1)
+ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
+none <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 0)
+local <- tstats(sample_individuals(sim, local_adaptation = 0.8, intraspecific_sd = 2),
+                nperm = 0)
+apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), nperm = 0)
+rbind(none = colMeans(none[ratios], na.rm = TRUE),
+      local = colMeans(local[ratios], na.rm = TRUE),
+      apart = colMeans(apart[ratios], na.rm = TRUE))
+# standardised effect sizes and p-values from the null models
+res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 \dontshow{\}) # examplesIf}
 }
 \references{

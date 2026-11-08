@@ -179,6 +179,14 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
     divergência entre co-ocorrentes (deslocamento de caráter), ainda não simulado. Para a
     ponte: o sinal da adaptação local aparece em T_PC.PR e T_IC.IR, não em T_IP.IC. A escala
     de T_IP.IC depende de `intraspecific_sd` em relação à dispersão dos ótimos no sítio.
+    Deslocamento de caráter (`displacement`) faz o contrário: T_IP.IC cai e T_PC.PR sobe, e os
+    dois processos se compensam (com h = 0,9, `displacement = 10` leva T_IP.IC de 0,61 a
+    0,011 e T_PC.PR de 0,010 a 0,59). Consequência para o artigo: as razões sozinhas não
+    separam "nem adaptação nem deslocamento" de "os dois fortes" (T_PC.PR 0,89 contra 0,59,
+    T_IP.IC 0,017 contra 0,011); é preciso olhar as três juntas, ou acrescentar o ambiente do
+    sítio (a adaptação local deixa as médias das populações correlacionadas com ele).
+    Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata dessa
+    compensação [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas
