@@ -436,6 +436,16 @@ turnover_rates <- function(x, tree = x$tree, sigma2 = 1, k = 1, window = NULL,
   if (!inherits(tree, "phylo")) {
     stop("`tree` must be a tree of class `phylo`; `x` has none stored", call. = FALSE)
   }
+  check_tip_window(sigma2, k, window)
+  turnover <- partner_turnover(x, partners)
+  if (!setequal(names(turnover), tree$tip.label)) {
+    stop("the species of `x` and the tips of `tree` differ", call. = FALSE)
+  }
+  rate <- tip_window_rates(tree, turnover[tree$tip.label], sigma2, k, window)
+  structure(rate, turnover = turnover)
+}
+
+check_tip_window <- function(sigma2, k, window) {
   if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
     stop("`sigma2` must be one positive number", call. = FALSE)
   }
@@ -445,15 +455,84 @@ turnover_rates <- function(x, tree = x$tree, sigma2 = 1, k = 1, window = NULL,
   if (!is.null(window) && (length(window) != 1 || !is.finite(window) || window <= 0)) {
     stop("`window` must be one positive number or `NULL`", call. = FALSE)
   }
-  turnover <- partner_turnover(x, partners)
-  if (!setequal(names(turnover), tree$tip.label)) {
-    stop("the species of `x` and the tips of `tree` differ", call. = FALSE)
-  }
+}
+
+# rate sigma2 * (1 + k * value) over the last `window` of each tip branch, sigma2 elsewhere;
+# `value` is in the order of tree$tip.label
+tip_window_rates <- function(tree, value, sigma2, k, window) {
   rate <- rep(sigma2, nrow(tree$edge))
   tip_edge <- match(seq_along(tree$tip.label), tree$edge[, 2])
   len <- tree$edge.length[tip_edge]
   w <- if (is.null(window)) len else pmin(window, len)
   share <- ifelse(len > 0, w / len, 1)
-  rate[tip_edge] <- sigma2 * (1 + k * turnover[tree$tip.label] * share)
-  structure(rate, turnover = turnover)
+  rate[tip_edge] <- sigma2 * (1 + k * unname(value) * share)
+  rate
+}
+
+#' Rates of trait evolution from the trophic level of each lineage in a food web
+#'
+#' Turns the rates of change of the mean traits of the resource, the consumer and the predator
+#' in [food_web_dynamics()] into rates of evolution of a continuous trait on the branches of a
+#' tree whose tips belong to these levels, for `trait_rates(edge_rates = )`. It implements the
+#' expectation that lineages at different trophic positions evolve at different speeds, and
+#' that the rates change when a level is added (scenario 4 of the notes on branch rates).
+#'
+#' The speed of a level is the mean of its rate of trait change, \eqn{|d\bar z / dt|}, over
+#' the steps at which it is present. Like [turnover_rates()], the food web runs in ecological
+#' time and only informs the tip branches: over the last `window` units of time of each tip
+#' branch the rate is `sigma2 * (1 + k * speed)` of the level of the tip, and elsewhere it is
+#' `sigma2`. These speeds are directional changes of the mean trait under selection, not the
+#' variance per unit time of Brownian motion, so they give relative rates among levels, scaled
+#' by `k`, not an equivalence between the two.
+#'
+#' @param x Result of [food_web_dynamics()].
+#' @param tree A tree of class `phylo`.
+#' @param levels Trophic level of each tip, `"R"`, `"N"` or `"P"`, named by tip label or in the
+#'   order of `tree$tip.label`.
+#' @param k Increase of the rate, relative to `sigma2`, per unit of speed (trait units per unit
+#'   of time of the food web).
+#' @inheritParams turnover_rates
+#' @return Numeric vector with the rate of each branch, in the order of the rows of
+#'   `tree$edge`, with the speed of each level as attribute `"speed"`.
+#' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
+#'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
+#' @seealso [food_web_dynamics()], [turnover_rates()], [trait_rates()]
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' web <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
+#'                          traits = c(R = 10, N = 4, P = 6), introductions = c(P = 2000),
+#'                          dt = 0.5)
+#' tr <- treeshapesim::sim_tree_shape(9)
+#' levels <- rep(c("R", "N", "P"), each = 3)
+#' # speeds are small (trait units per time step), so k is large
+#' rates <- food_web_rates(web, tr, levels, k = 500)
+#' attr(rates, "speed")
+#' x <- trait_rates(tr, edge_rates = rates)
+#' @export
+food_web_rates <- function(x, tree, levels, sigma2 = 1, k = 1, window = NULL) {
+  check_food_web(x)
+  if (!inherits(tree, "phylo")) stop("`tree` must be a tree of class `phylo`", call. = FALSE)
+  check_tip_window(sigma2, k, window)
+  n_tip <- length(tree$tip.label)
+  if (length(levels) != n_tip || !all(levels %in% c("R", "N", "P"))) {
+    stop("`levels` must give \"R\", \"N\" or \"P\" for each of the ", n_tip, " tips",
+         call. = FALSE)
+  }
+  if (!is.null(names(levels))) {
+    if (!setequal(names(levels), tree$tip.label)) {
+      stop("the names of `levels` and the tips of `tree` differ", call. = FALSE)
+    }
+    levels <- levels[tree$tip.label]
+  }
+  speed <- vapply(c("R", "N", "P"), function(l) {
+    present <- x[[l]] > 0
+    if (any(present)) mean(x[[paste0("rate_", l)]][present]) else NA_real_
+  }, numeric(1))
+  absent <- setdiff(unique(levels), names(speed)[!is.na(speed)])
+  if (length(absent) > 0) {
+    stop("level ", paste(absent, collapse = ", "), " is absent during the whole run",
+         call. = FALSE)
+  }
+  rate <- tip_window_rates(tree, speed[levels], sigma2, k, window)
+  structure(rate, speed = speed)
 }
