@@ -57,6 +57,68 @@ identificável (correlação entre mudança verdadeira e taxa verdadeira de 0,29
 - Interpretação nossa: eles falam de taxas de evolução relativas à colonização em escala
   ecológica, não de taxas por ramo numa filogenia.
 
+## Leibold, Urban, De Meester, Klausmeier & Vanoverbeke (2019)
+
+- Pergunta: o papel da evolução adaptativa local na coexistência, numa paisagem de manchas
+  conectadas sujeitas a distúrbio.
+- Dois modelos. Um modelo de ocupação de manchas (determinístico, sem coexistência local; o
+  residente adaptado não pode ser invadido), resolvido no Mathematica. E um modelo baseado em
+  indivíduos numa grade 10 × 10 com dois tipos de mancha distribuídos ao acaso (ótimos 0,4 e
+  0,6), trait de 10 locos dialélicos com mutação, aptidão gaussiana, extinção de manchas com
+  probabilidade Pext e dispersão com núcleo exponencial (código em Java no Zenodo,
+  10.5281/zenodo.2280982, conforme o artigo).
+- Resultado: os colonizadores precoces se adaptam à mancha antes da chegada dos pré-adaptados
+  (efeitos de prioridade mediados pela evolução). A repetição disso faz as duas espécies
+  convergirem para distribuições bimodais de trait iguais na escala regional e para ocupações
+  iguais dos dois tipos de mancha, embora cada mancha continue monopolizada por uma espécie.
+  Os autores chamam isso de neutralidade regional: nicho na escala local, equivalência na
+  regional, e deriva regional nas abundâncias relativas.
+- Mais neutralidade regional com dispersão baixa (menos de 100 indivíduos dispersando por
+  mancha por geração, Fig. 5); com extinção baixa e dispersão alta ela demora mais.
+- Partição de variância: a neutralidade regional reduz a fração ambiental da composição e
+  infla a espacial e o resíduo. Para os traits (e não a composição), o ambiente explica quase
+  toda a variação. A partição da composição, sozinha, não separa neutralidade puramente
+  ecológica de neutralidade regional evoluída.
+- Previsão: os táxons mostram pouco rastreamento ambiental, mas os valores de trait locais
+  (independentes do táxon) mostram muito. Isso exige medir traits no nível da população.
+
+## Urban et al. (2020)
+
+- Síntese de 500 estudos eco-evolutivos com 14 mecanismos pelos quais a evolução local
+  amortece, amplifica ou cria padrões ecológicos espaciais.
+- A evolução amortece os padrões em 85% dos estudos, amplifica em 13% e cria em 8% (a soma
+  passa de 100% porque um estudo pode ter mais de um padrão). A
+  adaptação local iguala a aptidão entre ambientes e alisa a heterogeneidade.
+- Montagem: colonizadores precoces podem se adaptar e alterar permanentemente riqueza e
+  composição. A evolução de neutralidade é citada como mecanismo pouco visto empiricamente.
+- Questão em aberto 5: em que condições a especiação converte diferenças entre populações em
+  diferenças ecológicas entre espécies. A questão 2 lembra que o resultado depende das taxas
+  relativas de evolução, colonização e redundância de nicho.
+
+## Ponte Leibold–Januario (interpretação nossa)
+
+- Leibold et al. (2022) dizem que falta incorporar à macroecologia como a montagem e a
+  adaptação local alteram especiação e extinção. Januario et al. (2025) testaram uma ligação
+  desse tipo (persistência metapopulacional → especiação nas pontas) e acharam desacoplamento.
+- Leibold et al. (2019) e Urban et al. (2020) oferecem mecanismos para esse desacoplamento:
+  - a neutralidade regional deixa as espécies equivalentes na escala regional, de modo que
+    propriedades da dinâmica local, como a persistência, não se traduzem em diferenças entre
+    espécies;
+  - a evolução local amortece os padrões espaciais;
+  - a divergência adaptativa fica entre populações, e só vira diferença entre espécies se
+    houver especiação (Urban et al., questão 5).
+- Para taxas de evolução de traits, a previsão análoga é: com evolução local rápida em
+  relação à colonização e dispersão baixa, a evolução entre populações é rápida, mas as médias
+  das espécies convergem. As taxas por ramo estimadas com médias de espécies ficam baixas e
+  pouco ligadas à dinâmica local; as estatísticas T (T_IP.IC, T_PC.PR) carregam o sinal.
+- O que o comdynamite pode testar com verdade conhecida: variar extinção de manchas e
+  dispersão (os eixos da Fig. 5 de Leibold et al. 2019) e medir se a história de colonização
+  (`history_rates()`) deixa assinatura nas taxas estimadas por ramo, comparando traits de
+  espécies e de populações. Nenhum dos três trabalhos usa taxas por ramo; a ligação é nossa.
+- Limite: o comdynamite ainda não simula especiação acoplada à metacomunidade, então a
+  conversão de divergência entre populações em especiação (o elo de Januario) fica fora por
+  enquanto.
+
 ## McPeek (2017), *Evolutionary Community Ecology*
 
 Leitura feita por subagente; três citações conferidas no texto extraído.
@@ -103,7 +165,9 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
 8. Mudanças de taxa por Poisson com intensidade variável no tempo, concentradas em eventos de
    reembaralhamento das comunidades e compartilhadas entre linhagens simpátricas, contra mudanças
    independentes entre linhagens.
-9. Frequência de extinção de manchas e autocorrelação espacial do ambiente (Leibold et al. 2022).
+9. Frequência de extinção de manchas e autocorrelação espacial do ambiente (Leibold et al. 2022),
+   cruzadas com a dispersão como na Fig. 5 de Leibold et al. (2019), para achar onde a
+   neutralidade regional apaga o rastro da montagem nas taxas entre espécies.
 10. Variação intraespecífica e adaptação local: gerar indivíduos a partir das abundâncias
     simuladas, com traits em torno da média da espécie ou ajustados ao ambiente do sítio, e
     calcular as estatísticas T com `cati::Tstats()`. Adaptação local forte deve baixar T_IP.IC
