@@ -585,8 +585,9 @@ pacotes de referência em vez de reimplementá-los.
       e gradientes idênticos e trajetórias da Fig. 3.2 a 1e-4 do `ode45` do autor; sem
       predador nesse código. Acrescentado `trait_floor` (piso dos traços em zero, como no
       código do autor; padrão com Michaelis-Menten).
-      Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`, várias
-      espécies por nível (cap. 5) e o cenário 4 das notas.
+      `food_web_rates()` traduz as taxas por nível em `edge_rates` para `trait_rates()`
+      (cenário 4 das notas), na janela final dos ramos terminais, como `turnover_rates()`.
+      Falta: várias espécies por nível (cap. 5).
 - [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,
       com taxa por estado (`"state"`, como O'Meara et al. 2006), explosão após cada mudança
       que decai exponencialmente (`"burst"`, cenários 1 e 2 das notas) e dependência do número

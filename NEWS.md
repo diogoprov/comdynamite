@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `food_web_rates()` turns the rates of trait change of the resource, consumer and predator
+  from `food_web_dynamics()` into rates per branch for `trait_rates(edge_rates = )`: each tip
+  belongs to a trophic level, and over the last `window` units of time of its branch the rate
+  is `sigma2 * (1 + k * speed)`, where speed is the mean rate of change of the mean trait of
+  that level while present. As in `turnover_rates()`, only tip branches are informed; the
+  speeds are directional changes under selection, so they give relative rates among levels,
+  not Brownian variances.
+
 - `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` implement
   the dynamic null model of community assembly of Pigot & Etienne (2015, DAMOCLES): each
   lineage colonises the local community at rate gamma and goes locally extinct at rate mu along

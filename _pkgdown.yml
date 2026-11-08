@@ -35,6 +35,7 @@ reference:
   - history_rates
   - partner_turnover
   - turnover_rates
+  - food_web_rates
   - tip_history_metrics
   - as_herodotools
   - region_pool
