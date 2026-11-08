@@ -542,18 +542,25 @@ pacotes de referência em vez de reimplementá-los.
       Ecology*. Notas de leitura e cenários de simulação em `dev/notas-artigo-taxas.md`.
       Incluir os resultados da validação e o limite de identificabilidade (uma realização por
       ramo).
-- [ ] Ponte direta com Leibold et al. (2022) como eixo do artigo. Os autores apontam que os
-      modelos macroecológicos não incorporam adequadamente quanto a adaptação local e a
-      montagem alteram as taxas de especiação e extinção e, por elas, as filogenias e a biota
-      regional, que por sua vez alimenta a montagem. O comdynamite pode fechar esse ciclo com
-      verdade conhecida: dinâmica da metacomunidade → história por linhagem
-      (`history_rates()`) → taxas por ramo e traits (`trait_rates()`) → montagem com esses
-      traits → estimadores de taxa por ramo. Simular os cenários que eles sugerem (frequência
-      de extinção de manchas, autocorrelação espacial do ambiente, ordem de chegada,
-      adaptações secundárias que revertem a monopolização) e as três taxas relativas da
-      Fig. 1 (colonização, regulação da comunidade, evolução) e perguntar se cada regime deixa
-      assinatura recuperável nas taxas estimadas. Interpretação nossa: eles falam de taxas em
-      escala ecológica, não de taxas por ramo; o artigo deve dizer isso.
+- [ ] Ponte Leibold–Januario como eixo do artigo (detalhes em `dev/notas-artigo-taxas.md`).
+      Leibold et al. (2022) apontam que os modelos macroecológicos não incorporam quanto a
+      adaptação local e a montagem alteram especiação e extinção e, por elas, as filogenias.
+      Januario et al. (2025) testaram uma versão disso, a persistência metapopulacional
+      contra a taxa de especiação nas pontas, e acharam desacoplamento. Leibold et al. (2019)
+      e Urban et al. (2020) dão mecanismos para esse desacoplamento: efeitos de prioridade
+      mediados pela evolução tornam as espécies equivalentes na escala regional (neutralidade
+      regional) e a evolução em geral amortece os padrões espaciais (85% dos estudos
+      revisados por Urban et al.). Hipótese de trabalho (interpretação nossa): a dinâmica
+      local deixa pouco rastro nas taxas entre espécies porque a divergência adaptativa fica
+      entre populações, não entre espécies. O comdynamite pode testar isso com verdade
+      conhecida: metacomunidade → história por linhagem (`history_rates()`) → taxas por ramo e
+      traits (`trait_rates()`) → montagem → estimadores de taxa por ramo, com traits de
+      indivíduos e populações (estatísticas T) para separar a escala intraespecífica da
+      interespecífica. Cenários: frequência de extinção de manchas e dispersão (os dois eixos
+      da Fig. 5 de Leibold et al. 2019), autocorrelação espacial do ambiente, ordem de
+      chegada, as três taxas relativas da Fig. 1 de Leibold et al. (2022). Cuidado: Leibold et
+      al. e Urban et al. falam de escala ecológica; Januario et al. de taxas de especiação, e
+      nós de taxas de evolução de traits. O artigo deve dizer isso.
 - [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
       McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
       código MATLAB do autor não tem licença declarada e não foi consultado). Abundâncias e
@@ -593,7 +600,41 @@ pacotes de referência em vez de reimplementá-los.
 - [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore.
 
+- [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
+      argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
+      `food_web_dynamics()`) quanto à consistência com o resto do pacote; pensar em funções e
+      métodos de plot (taxas por ramo pintadas na árvore, trajetórias de `food_web_dynamics()`,
+      ordenação PCPS); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
+      por ramo) e as mensagens de erro.
+
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
+
+## Especiação acoplada à metacomunidade (número a definir, depois da v0.7.0)
+
+Objetivo: fechar o limite da ponte Leibold–Januario. Hoje a árvore é dada e a especiação não
+depende da metacomunidade. Plano completo, com o modelo, os modos de especiação, a validação e
+as fases, em `dev/plano-especiacao.md`.
+
+- [ ] Fase 1: traits por população (espécie × sítio) com seleção local e fluxo gênico em
+      `mc_dynamics()`, sem especiação; reproduzir qualitativamente a neutralidade regional de
+      Leibold et al. (2019).
+- [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
+      `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
+      2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético
+      (árvore completa e reconstruída, tempos de iniciação e de conclusão) e extinção global;
+      validação no limite neutro, contra o PBD e contra Desjardins-Proulx & Gravel (2012a).
+- [ ] Fase 3: saídas (simmap da distribuição de cada linhagem, métricas de persistência de
+      Januario et al. 2025, traits por população) integradas a `history_rates()`,
+      `trait_rates()` e às estatísticas T.
+- [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
+      `data-raw`, e medida de custo.
+- [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;
+      neutralidade regional contra taxas por ramo) e artigo.
+- [x] Interface: função nova (decidido em 2026-11-08), com `as_metacommunity()` para os
+      métodos atuais; nome provisório `simulate_diversification()`.
+- [ ] Decidir: nome final, modos da primeira versão e número da versão.
+
+**Concluído quando:** as fases 1 a 4 tiverem testes, validação em `data-raw` e uma vignette.
 
 ## v0.8.0: traits, filogenia e biogeografia
 
@@ -736,6 +777,8 @@ Objetivo: API estável e pacote no CRAN.
 ## Referências citadas neste roadmap
 
 - Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). *Evolution*, 57, 2647–2652. https://doi.org/10.1111/j.0014-3820.2003.tb01508.x
+- Desjardins-Proulx, P., & Gravel, D. (2012a). *The American Naturalist*, 179, 137–144. https://doi.org/10.1086/663196
+- Desjardins-Proulx, P., & Gravel, D. (2012b). *Ecology and Evolution*, 2, 1781–1790. https://doi.org/10.1002/ece3.292
 - Drury, J., Clavel, J., Manceau, M., & Morlon, H. (2016). *Systematic Biology*, 65, 700–710. https://doi.org/10.1093/sysbio/syw020
 - Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population Biology 59. Princeton University Press. https://doi.org/10.2307/j.ctt1wf4d24
 
@@ -758,6 +801,7 @@ Conferidas no Crossref em 2026-11-05.
 - Legendre, P. (2008). *Journal of Plant Ecology*, 1, 3–8. https://doi.org/10.1093/jpe/rtm001
 - Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). *Ecology Letters*, 28, e70021. https://doi.org/10.1111/ele.70021
 - Leibold, M. A., Govaert, L., Loeuille, N., De Meester, L., & Urban, M. C. (2022). *Annual Review of Ecology, Evolution, and Systematics*, 53, 299–326. https://doi.org/10.1146/annurev-ecolsys-102220-024934
+- Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J. (2019). *Proceedings of the National Academy of Sciences*, 116, 2612–2617. https://doi.org/10.1073/pnas.1808615116
 - Leibold, M. A., et al. (2010). *Ecology Letters*, 13, 1290–1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
 - Matzke, N. J. (2014). *Systematic Biology*, 63, 951–970. https://doi.org/10.1093/sysbio/syu056
 - McPeek, M. A. (2017). *Evolutionary Community Ecology*. Monographs in Population Biology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001
@@ -776,6 +820,7 @@ Conferidas no Crossref em 2026-11-05.
 - Robert, C. P., et al. (2011). *PNAS*, 108, 15112–15117. https://doi.org/10.1073/pnas.1102900108
 - Ruffley, M., et al. (2019). *Ecology and Evolution*, 9, 13218–13230. https://doi.org/10.1002/ece3.5773
 - van der Plas, F., et al. (2015). *Ecology*, 96, 1502–1515. https://doi.org/10.1890/14-0454.1
+- Urban, M. C., Strauss, S. Y., Pelletier, F., Palkovacs, E. P., Leibold, M. A., Hendry, A. P., De Meester, L., Carlson, S. M., Angert, A. L., & Giery, S. T. (2020). *Proceedings of the National Academy of Sciences*, 117, 17482–17490. https://doi.org/10.1073/pnas.1918960117
 - Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof, C., Jung, V., & Messier, J. (2012). *Trends in Ecology & Evolution*, 27, 244–252. https://doi.org/10.1016/j.tree.2011.11.014
 - Vehtari, A., et al. (2017). *Statistics and Computing*, 27, 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
 - Wood, S. N. (2010). *Nature*, 466, 1102–1104. https://doi.org/10.1038/nature09319
