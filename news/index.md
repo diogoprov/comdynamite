@@ -2,6 +2,36 @@
 
 ## comdynamite (development version)
 
+- [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
+  simulates a continuous trait whose rate varies among branches and
+  keeps the rates, as the known truth for methods that estimate rates
+  per branch. Three models: shifts at a few branches, inherited by their
+  descendants or not (`"shift"`); a logarithm of the rate that evolves
+  by Brownian motion (`"gbm"`); and independent lognormal rates
+  (`"iid"`). It gives the trait at tips and nodes, the rate of each
+  branch and the rescaled tree.
+
+- [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md):
+  `alpha` multiplies the rates of each branch by a gamma factor with
+  mean 1, the model of
+  [`phytools::fitgammaMk()`](https://rdrr.io/pkg/phytools/man/fitMk.html),
+  or `edge_rates` gives the factors; `rate_classes` adds hidden rate
+  classes, as in corHMM, and keeps the hidden history in `$hidden`.
+  Without them the results are the same as before with the same seed.
+
+- `data-raw/validation_rates.R` compares the truth with RRphylo,
+  [`phytools::multirateBM()`](https://rdrr.io/pkg/phytools/man/multirateBM.html),
+  traitMedusa (motmot), `fitgammaMk()` and corHMM. With one change per
+  branch, rates per branch are weakly identifiable: the Spearman
+  correlation between the true change and the true rate of a branch was
+  0.29 to 0.40, and RRphylo rates followed the change (0.32 to 0.38) but
+  hardly the rate (0.07 to 0.13). multirateBM recovered the log rates at
+  nodes with r = 0.62 and slope 0.46. traitMedusa found a true eightfold
+  shift in 20 of 30 trees, with a median estimated multiplier of 8.3.
+  fitgammaMk gave a median alpha of 0.33 for a true 0.3 (500 tips), and
+  corHMM preferred two hidden classes in 10 of 12 trees with classes and
+  in none of 12 without.
+
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
@@ -11,6 +41,7 @@
   `"poisson"`, as in the code of Thompson et al. (2020). With
   extirpation 0.02 and dispersal 0.001 on a grid, mean local richness
   was 1.51 with Poisson, 1.61 with multinomial and 1.61 in mcomsimr.
+
 - purrr moved from `Imports` to `Suggests`: it only gives the progress
   bar of long loops in interactive sessions. The package now imports
   only ape and base packages.

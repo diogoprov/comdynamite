@@ -94,4 +94,13 @@ tip_history_metrics(h)
 #> t8        0        1.00000000
 #> t9        0        1.00000000
 #> t10       0        1.00000000
+# rates that vary among branches
+g <- trait_mk(tr, q = 0.5, alpha = 0.3)
+round(g$edge_rates, 2)
+#>  [1] 0.14 0.40 0.22 1.87 1.52 0.00 2.22 0.88 0.15 0.03 0.40 1.67 0.29 0.00 0.00
+#> [16] 0.46 0.50 0.03
+hr <- trait_mk(tr, q = 0.5, rate_classes = c(slow = 0.1, fast = 2), class_switch = 0.2)
+hr$classes
+#>     t1     t2     t3     t4     t5     t6     t7     t8     t9    t10 
+#> "slow" "slow" "slow" "slow" "slow" "slow" "slow" "slow" "slow" "fast" 
 ```
