@@ -3,13 +3,15 @@
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp;amp; Etienne 2015;
 simulate_damocles()), with the rates of colonisation and local extinction estimated from
-that community by fit_damocles() or given, and one from random draws of the same number of
-species from the tips, the static null model the dynamic one is compared with in that study."><meta property="og:description" content="damocles_test() compares the mean pairwise distance (MPD) and the mean nearest taxon
+that community (or shared by all communities) by fit_damocles() or given, and one from
+random draws of the same number of species from the tips, the static null model the dynamic
+one is compared with in that study."><meta property="og:description" content="damocles_test() compares the mean pairwise distance (MPD) and the mean nearest taxon
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp;amp; Etienne 2015;
 simulate_damocles()), with the rates of colonisation and local extinction estimated from
-that community by fit_damocles() or given, and one from random draws of the same number of
-species from the tips, the static null model the dynamic one is compared with in that study."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
+that community (or shared by all communities) by fit_damocles() or given, and one from
+random draws of the same number of species from the tips, the static null model the dynamic
+one is compared with in that study."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
@@ -66,8 +68,9 @@ species from the tips, the static null model the dynamic one is compared with in
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp; Etienne 2015;
 <code><a href="simulate_damocles.html">simulate_damocles()</a></code>), with the rates of colonisation and local extinction estimated from
-that community by <code><a href="damocles_loglik.html">fit_damocles()</a></code> or given, and one from random draws of the same number of
-species from the tips, the static null model the dynamic one is compared with in that study.</p>
+that community (or shared by all communities) by <code><a href="damocles_loglik.html">fit_damocles()</a></code> or given, and one from
+random draws of the same number of species from the tips, the static null model the dynamic
+one is compared with in that study.</p>
     </div>
 
     <div class="section level2">
@@ -78,7 +81,8 @@ species from the tips, the static null model the dynamic one is compared with in
 <span>  n_sim <span class="op">=</span> <span class="fl">999</span>,</span>
 <span>  gamma <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  mu <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span></span>
+<span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
+<span>  shared <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,13 +108,18 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 <dt id="arg-gamma-mu">gamma, mu<a class="anchor" aria-label="anchor" href="#arg-gamma-mu"></a></dt>
 <dd><p>Rates of local colonisation and extinction used to simulate the null
 communities, one value for all communities or one per community; <code>NULL</code> (the default)
-estimates both for each community with <code><a href="damocles_loglik.html">fit_damocles()</a></code>.</p></dd>
+estimates both with <code><a href="damocles_loglik.html">fit_damocles()</a></code>.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
 <dd><p>Prior on the state at the root, used both in the fit and in the simulations
 (<code>"both"</code> draws the state of the root of each simulated community with equal
 probabilities).</p></dd>
+
+
+<dt id="arg-shared">shared<a class="anchor" aria-label="anchor" href="#arg-shared"></a></dt>
+<dd><p>When the rates are estimated, <code>TRUE</code> fits one pair shared by all communities
+(see <code><a href="damocles_loglik.html">fit_damocles()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
 
 </dl></div>
     <div class="section level2">

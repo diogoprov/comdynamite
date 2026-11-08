@@ -6,7 +6,7 @@ community with two null distributions: one from communities simulated
 along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)),
 with the rates of colonisation and local extinction estimated from that
-community by
+community (or shared by all communities) by
 [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 or given, and one from random draws of the same number of species from
 the tips, the static null model the dynamic one is compared with in that
@@ -21,7 +21,8 @@ damocles_test(
   n_sim = 999,
   gamma = NULL,
   mu = NULL,
-  root = c("both", "absent", "present")
+  root = c("both", "absent", "present"),
+  shared = FALSE
 )
 ```
 
@@ -47,7 +48,7 @@ damocles_test(
 
   Rates of local colonisation and extinction used to simulate the null
   communities, one value for all communities or one per community;
-  `NULL` (the default) estimates both for each community with
+  `NULL` (the default) estimates both with
   [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
 
 - root:
@@ -55,6 +56,13 @@ damocles_test(
   Prior on the state at the root, used both in the fit and in the
   simulations (`"both"` draws the state of the root of each simulated
   community with equal probabilities).
+
+- shared:
+
+  When the rates are estimated, `TRUE` fits one pair shared by all
+  communities (see
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md))
+  and `FALSE` (the default) one pair per community.
 
 ## Value
 

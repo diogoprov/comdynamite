@@ -2,6 +2,14 @@
 
 ## comdynamite (development version)
 
+- `fit_damocles(shared = TRUE)` and `damocles_test(shared = TRUE)`
+  estimate one pair of DAMOCLES rates for several communities on the
+  same tree from the sum of their log-likelihoods. A single community
+  rarely holds enough information on colonisation and extinction;
+  pooling communities narrows the estimates
+  (`data-raw/validation_damocles.R`), provided they can be treated as
+  independent realisations of the process.
+
 - [`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md)
   turns the rates of trait change of the resource, consumer and predator
   from
