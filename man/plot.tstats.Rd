@@ -65,8 +65,10 @@ distribution as two nested intervals (thin: \code{level}; thick: \code{inner}), 
 tick and the observed value as a point coloured by the result of the test: below the null,
 above it, or within it. Sites that cannot be tested (such as \code{T_IP.IC} at a site with one
 species) are drawn as hollow points. With \code{type = "ses"} the standardised effect sizes are
-drawn instead, with the band of \verb{±qnorm(1 - (1 - level) / 2)}; the colours still give the
-result of the permutation test, which does not assume a normal null distribution. With
+drawn instead, with the band of
+\eqn{\pm z_{1 - (1 - \mathrm{level})/2}}{+/- qnorm(1 - (1 - level) / 2)}; sites that
+cannot be tested have no standardised effect size and are left empty. The colours still give
+the result of the permutation test, which does not assume a normal null distribution. With
 \code{hatch = TRUE} (the default) the area expected by chance (the outer null interval of each
 site, or the band of standardised effect sizes) is hatched.
 }

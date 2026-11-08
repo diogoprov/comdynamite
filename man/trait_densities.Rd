@@ -44,8 +44,11 @@ populations weighted by their relative abundances, so that both integrate to one
 All populations share one bandwidth, so that their densities can be compared and summed.
 By default it follows Silverman's rule of thumb (as \code{\link[stats:bw.nrd0]{stats::bw.nrd0()}}) applied to the
 deviations of individuals from the mean of their population, pooled over all populations
-with two or more individuals, with the mean number of individuals per population as the
-sample size. A population of one individual then gets a kernel of that width around its
+with two or more individuals (the standard deviation with \eqn{n_i - 1}{n_i - 1} degrees of
+freedom per population, and the interquartile range of the deviations rescaled by
+\eqn{\sqrt{n_i / (n_i - 1)}}{sqrt(n_i / (n_i - 1))}, so that small populations do not
+shrink the bandwidth), with the mean number of individuals per population as the sample
+size. A population of one individual then gets a kernel of that width around its
 value, instead of no density.
 }
 \examples{

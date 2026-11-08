@@ -106,3 +106,26 @@ test_that("plot_population_traits() draws populations, communities and rugs", {
   many$species <- paste0(many$species, seq_len(nrow(many)) %% 9)
   expect_s3_class(plot_population_traits(many, "size"), "ggplot")
 })
+
+test_that("the default bandwidth is not shrunk by small populations", {
+  set.seed(3)
+  bws <- replicate(200, {
+    ind <- data.frame(site = rep(paste0("s", 1:20), each = 2), species = "a",
+                      trait = rnorm(40, rep(rnorm(20, 0, 5), each = 2)))
+    attr(trait_densities(ind, n = 16), "bw")
+  })
+  # Silverman's rule for sd 1 and n = 2
+  expect_equal(mean(bws), 0.9 * 2^(-1 / 5), tolerance = 0.12)
+  ind <- data.frame(site = "s1", species = rep(c("a", "b"), each = 3), trait = rep(1:2, each = 3))
+  expect_error(trait_densities(ind), "identical values")
+})
+
+test_that("plots of all-NA statistics or untestable sites give no warnings", {
+  skip_if_not_installed("ggplot2")
+  set.seed(4)
+  ind <- data.frame(site = rep(paste0("s", 1:4), each = 10), species = rep(paste0("p", 1:4), each = 10),
+                    trait = rnorm(40))
+  res <- suppressWarnings(tstats(ind, nperm = 19))
+  expect_no_warning(ggplot2::ggplot_build(plot(res)))
+  expect_no_warning(ggplot2::ggplot_build(plot(res, type = "ses")))
+})

@@ -24,7 +24,9 @@ subsample_individuals(
 
 \item{cover}{Share (0 to 1) of the abundance of each site covered by the species kept, from
 the most abundant down (Pakeman & Quested 2007), or \code{NULL} to keep every species.
-Abundances are those of the \code{abundance} column, or the numbers of individuals in the data.}
+Abundances are those of the \code{abundance} column, or the numbers of individuals in the data.
+Species tied in abundance are taken in the order of the data, and populations with an
+abundance of zero are never kept.}
 
 \item{min_n}{Minimum number of individuals of a population after sampling.}
 

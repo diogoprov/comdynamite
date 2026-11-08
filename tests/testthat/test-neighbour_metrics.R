@@ -66,7 +66,7 @@ test_that("metrics handle missing values, small samples and bad input", {
   expect_true(is.na(mst_length(5)))
   expect_true(is.na(cvnnd(c(1, 1, 1))))
   expect_equal(nn_distances(4), NA_real_)
-  expect_true(is.na(nn_distances(c(1, NA))))
+  expect_true(all(is.na(nn_distances(c(1, NA)))))
   expect_error(trait_range(cbind(1:3, 1:3)), "single trait")
   expect_error(mnnd("a"), "numeric")
   d <- dist(c(1, 2, 4))
@@ -91,4 +91,14 @@ test_that("metrics work as indices of community_index()", {
   mv <- community_index(ind, mnnd, traits = c("a", "b"), multivariate = TRUE, nperm = 0)
   expect_equal(mv$observed[1], mnnd(as.matrix(ind[ind$site == "s1", c("a", "b")])))
   expect_equal(mv$index[1], "mnnd")
+})
+
+test_that("audit edge cases of the neighbour metrics", {
+  expect_equal(nn_distances(c(1, NA, 3)), rep(NA_real_, 3))
+  expect_equal(nn_distances(data.frame(a = c(1, NA, 3), b = 1:3)), rep(NA_real_, 3))
+  expect_error(trait_range(letters[1:5]), "numeric")
+  expect_error(trait_kurtosis(letters[1:5]), "numeric")
+  expect_equal(trait_range(matrix(c(1, 4, 2))), 3)
+  expect_error(mnnd(array(1:8, c(2, 2, 2))), "vector, a matrix")
+  expect_error(trait_range(array(1:8, c(2, 2, 2))))
 })

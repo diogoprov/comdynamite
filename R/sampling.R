@@ -20,6 +20,8 @@
 #' @param cover Share (0 to 1) of the abundance of each site covered by the species kept, from
 #'   the most abundant down (Pakeman & Quested 2007), or `NULL` to keep every species.
 #'   Abundances are those of the `abundance` column, or the numbers of individuals in the data.
+#'   Species tied in abundance are taken in the order of the data, and populations with an
+#'   abundance of zero are never kept.
 #' @param min_n Minimum number of individuals of a population after sampling.
 #' @param site,species Names of the columns with the site and the species.
 #' @param abundance Name of a column with the abundance of each population (the same value for

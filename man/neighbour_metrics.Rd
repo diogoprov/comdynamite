@@ -54,9 +54,10 @@ computation; with \code{FALSE} (the default) missing values give \code{NA}.}
 distance (several traits), as the \code{div_range} option of cati.}
 }
 \value{
-A single number, or \code{NA} when there are too few values: two for the metrics of
-distances and the range, three for the standard deviation of nearest-neighbour distances,
-four for the kurtosis. \code{nn_distances()} returns a vector with one distance per value.
+A single number, or \code{NA} when there are too few values: two for the means, minima,
+maxima, the minimum spanning tree and the range, three for the standard deviations and
+coefficients of variation, four for the kurtosis. \code{nn_distances()} returns a vector with
+one distance per value (all \code{NA} when a value is missing and \code{na.rm = FALSE}).
 }
 \description{
 Metrics of the distribution of trait values within a community used in tests of community

@@ -40,9 +40,10 @@
 #'   distance (several traits), as the `div_range` option of cati.
 #' @param na.rm Drop missing values (rows with any missing value of a matrix) before the
 #'   computation; with `FALSE` (the default) missing values give `NA`.
-#' @return A single number, or `NA` when there are too few values: two for the metrics of
-#'   distances and the range, three for the standard deviation of nearest-neighbour distances,
-#'   four for the kurtosis. `nn_distances()` returns a vector with one distance per value.
+#' @return A single number, or `NA` when there are too few values: two for the means, minima,
+#'   maxima, the minimum spanning tree and the range, three for the standard deviations and
+#'   coefficients of variation, four for the kurtosis. `nn_distances()` returns a vector with
+#'   one distance per value (all `NA` when a value is missing and `na.rm = FALSE`).
 #' @references Aiba, M., Katabuchi, M., Takafumi, H., Matsuzaki, S. S., Sasaki, T., & Hiura, T.
 #'   (2013). Robustness of trait distribution metrics for community assembly studies under the
 #'   uncertainties of assembly processes. *Ecology*, 94, 2873--2885. \doi{10.1890/13-0269.1}
@@ -75,8 +76,9 @@ NULL
 #' @rdname neighbour_metrics
 #' @export
 nn_distances <- function(x, na.rm = FALSE) {
+  original <- x
   x <- metric_input(x, na.rm)
-  if (is.null(x)) return(NA_real_)
+  if (is.null(x)) return(rep(NA_real_, n_values(original)))
   if (is.numeric(x) && is.null(dim(x)) && !inherits(x, "dist")) {
     n <- length(x)
     if (n < 2) return(rep(NA_real_, n))
@@ -188,6 +190,7 @@ metric_input <- function(x, na.rm) {
     return(x)
   }
   if (is.data.frame(x)) x <- as.matrix(x)
+  if (length(dim(x)) > 2) stop("`x` must be a vector, a matrix or a dist object", call. = FALSE)
   if (!is.numeric(x)) stop("`x` must be numeric, a numeric matrix or a dist object", call. = FALSE)
   if (is.matrix(x) && ncol(x) == 1) x <- as.vector(x)
   if (is.matrix(x)) {
@@ -206,7 +209,8 @@ metric_input <- function(x, na.rm) {
 metric_dist <- function(x) if (inherits(x, "dist")) x else stats::dist(x)
 
 n_values <- function(x) {
-  if (inherits(x, "dist")) attr(x, "Size") else if (is.matrix(x)) nrow(x) else length(x)
+  if (inherits(x, "dist")) attr(x, "Size") else if (is.matrix(x) || is.data.frame(x)) nrow(x) else
+    length(x)
 }
 
 # range of one trait, or the largest pairwise distance
@@ -251,7 +255,11 @@ single_trait <- function(x, na.rm) {
       (is.data.frame(x) && ncol(x) > 1)) {
     stop("this metric takes a single trait", call. = FALSE)
   }
-  x <- as.numeric(unlist(x))
+  x <- unlist(x, use.names = FALSE)
+  if (!is.numeric(x) || length(dim(x)) > 2) {
+    stop("`x` must be a numeric vector or a one-column matrix", call. = FALSE)
+  }
+  x <- as.vector(x)
   if (na.rm) x <- x[!is.na(x)]
   x
 }

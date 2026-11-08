@@ -69,8 +69,10 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' tick and the observed value as a point coloured by the result of the test: below the null,
 #' above it, or within it. Sites that cannot be tested (such as `T_IP.IC` at a site with one
 #' species) are drawn as hollow points. With `type = "ses"` the standardised effect sizes are
-#' drawn instead, with the band of `±qnorm(1 - (1 - level) / 2)`; the colours still give the
-#' result of the permutation test, which does not assume a normal null distribution. With
+#' drawn instead, with the band of
+#' \eqn{\pm z_{1 - (1 - \mathrm{level})/2}}{+/- qnorm(1 - (1 - level) / 2)}; sites that
+#' cannot be tested have no standardised effect size and are left empty. The colours still give
+#' the result of the permutation test, which does not assume a normal null distribution. With
 #' `hatch = TRUE` (the default) the area expected by chance (the outer null interval of each
 #' site, or the band of standardised effect sizes) is hatched.
 #'
@@ -154,10 +156,10 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
   # spacing of the hatching lines: a fixed fraction of the range of each statistic (facet column)
   span_of <- if (type == "intervals") {
     tapply(c(d$null_low, d$null_high, d$observed), rep(d$statistic, 3),
-           function(v) diff(range(v, na.rm = TRUE)))
+           function(v) if (all(is.na(v))) NA_real_ else diff(range(v, na.rm = TRUE)))
   } else {
     tapply(c(d$ses, rep(c(-band, band), length.out = nrow(d))), rep(d$statistic, 2),
-           function(v) diff(range(v, na.rm = TRUE)))
+           function(v) if (all(is.na(v))) NA_real_ else diff(range(v, na.rm = TRUE)))
   }
   span_of[!is.finite(span_of) | span_of == 0] <- 1
   if (type == "intervals") {
@@ -216,7 +218,7 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
     ggplot2::geom_point(data = d[!d$tested, , drop = FALSE],
                         ggplot2::aes(x = .data[[x_value]]), shape = 21, size = point_size,
                         colour = "grey40", fill = NA, na.rm = TRUE) +
-    ggplot2::scale_fill_manual(values = fill, drop = FALSE, name = NULL) +
+    ggplot2::scale_fill_manual(values = fill, limits = names(fill), drop = FALSE, name = NULL) +
     ggplot2::facet_grid(ggplot2::vars(.data$trait), ggplot2::vars(.data$statistic),
                         scales = scales) +
     ggplot2::theme_minimal() +
@@ -264,8 +266,11 @@ hatch_lines <- function(rects, spacing) {
 #' All populations share one bandwidth, so that their densities can be compared and summed.
 #' By default it follows Silverman's rule of thumb (as [stats::bw.nrd0()]) applied to the
 #' deviations of individuals from the mean of their population, pooled over all populations
-#' with two or more individuals, with the mean number of individuals per population as the
-#' sample size. A population of one individual then gets a kernel of that width around its
+#' with two or more individuals (the standard deviation with \eqn{n_i - 1}{n_i - 1} degrees of
+#' freedom per population, and the interquartile range of the deviations rescaled by
+#' \eqn{\sqrt{n_i / (n_i - 1)}}{sqrt(n_i / (n_i - 1))}, so that small populations do not
+#' shrink the bandwidth), with the mean number of individuals per population as the sample
+#' size. A population of one individual then gets a kernel of that width around its
 #' value, instead of no density.
 #'
 #' @param individuals Data frame with one row per individual.
@@ -332,9 +337,17 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
     if (sum(used) < 2) {
       stop("no population has two or more individuals: give `bw`", call. = FALSE)
     }
+    # deviations from the population mean underestimate the spread by sqrt((n - 1) / n):
+    # the standard deviation is pooled with n - 1 degrees of freedom per population and the
+    # interquartile range is taken on deviations rescaled by sqrt(n / (n - 1))
+    n_i <- size[match(pop, pop_levels)][used]
     d <- deviation[used]
-    spread <- min(stats::sd(d), stats::IQR(d) / 1.34)
-    if (!(spread > 0)) spread <- stats::sd(d)
+    pooled_sd <- sqrt(sum(d^2) / (length(d) - sum(size > 1)))
+    spread <- min(pooled_sd, stats::IQR(d * sqrt(n_i / (n_i - 1))) / 1.34)
+    if (!(spread > 0)) spread <- pooled_sd
+    if (!(spread > 0)) {
+      stop("the individuals of each population have identical values: give `bw`", call. = FALSE)
+    }
     bw <- 0.9 * spread * mean(size)^(-1 / 5)
   }
   stopifnot(is.numeric(bw), length(bw) == 1, bw > 0)
