@@ -5,6 +5,10 @@
 # 2. Maximum-likelihood rates against DAMOCLES::DAMOCLES_ML() on 10 simulated communities.
 # 3. Simulations against DAMOCLES::DAMOCLES_sim() (a Gillespie simulation of every event): the
 #    frequency of presence of each tip, richness, MPD and MNTD over 4000 communities each.
+# 4. Identifiability of the rates shared by several communities (fit_damocles(shared = TRUE)):
+#    estimates from 1, 5 and 20 communities simulated with gamma = mu = 1 on trees of 60 tips
+#    (height one), 30 replicates each. DAMOCLES fits one community at a time, so this part
+#    checks only our code.
 suppressMessages({
   devtools::load_all(".", quiet = TRUE)
   library(DAMOCLES)
@@ -93,4 +97,18 @@ for (s in sims) {
       "| max |freq diff|", round(s$max_freq_diff, 3), "(max |z|", round(s$max_z, 2), ")\n")
 }
 
-saveRDS(list(loglik_diffs = diffs, ml = ml, sims = sims), "data-raw/validation_damocles.rds")
+# 4. shared rates -----------------------------------------------------------------------------
+shared_one <- function(i, k) {
+  tree <- treeshapesim::sim_tree_shape(60)
+  fit <- fit_damocles(simulate_damocles(tree, 1, 1, n = k), tree, shared = TRUE)
+  c(communities = k, gamma = fit$gamma[1], mu = fit$mu[1])
+}
+shared <- as.data.frame(do.call(rbind, lapply(c(1, 5, 20), function(k) {
+  do.call(rbind, parallel::mclapply(seq_len(30), shared_one, k = k, mc.cores = cores))
+})))
+cat("4. shared rates (true gamma = mu = 1), 5%, 50% and 95% quantiles of 30 fits\n")
+print(aggregate(cbind(gamma, mu) ~ communities, shared,
+                function(x) round(stats::quantile(x, c(0.05, 0.5, 0.95)), 3)))
+
+saveRDS(list(loglik_diffs = diffs, ml = ml, sims = sims, shared = shared),
+        "data-raw/validation_damocles.rds")

@@ -10,7 +10,8 @@ damocles_test(
   n_sim = 999,
   gamma = NULL,
   mu = NULL,
-  root = c("both", "absent", "present")
+  root = c("both", "absent", "present"),
+  shared = FALSE
 )
 }
 \arguments{
@@ -25,11 +26,14 @@ and species of \code{comm} missing from the tree are dropped.}
 
 \item{gamma, mu}{Rates of local colonisation and extinction used to simulate the null
 communities, one value for all communities or one per community; \code{NULL} (the default)
-estimates both for each community with \code{\link[=fit_damocles]{fit_damocles()}}.}
+estimates both with \code{\link[=fit_damocles]{fit_damocles()}}.}
 
 \item{root}{Prior on the state at the root, used both in the fit and in the simulations
 (\code{"both"} draws the state of the root of each simulated community with equal
 probabilities).}
+
+\item{shared}{When the rates are estimated, \code{TRUE} fits one pair shared by all communities
+(see \code{\link[=fit_damocles]{fit_damocles()}}) and \code{FALSE} (the default) one pair per community.}
 }
 \value{
 A data frame of class \code{mc_damocles_test}, one row per community, with the richness,
@@ -43,8 +47,9 @@ null (\code{ses_mpd_damocles}, \code{p_mpd_damocles}, ...) and against random dr
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 \code{\link[=simulate_damocles]{simulate_damocles()}}), with the rates of colonisation and local extinction estimated from
-that community by \code{\link[=fit_damocles]{fit_damocles()}} or given, and one from random draws of the same number of
-species from the tips, the static null model the dynamic one is compared with in that study.
+that community (or shared by all communities) by \code{\link[=fit_damocles]{fit_damocles()}} or given, and one from
+random draws of the same number of species from the tips, the static null model the dynamic
+one is compared with in that study.
 }
 \details{
 Allopatric speciation alone makes present species less related than random draws expect, so

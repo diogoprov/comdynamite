@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `fit_damocles(shared = TRUE)` and `damocles_test(shared = TRUE)` estimate one pair of
+  DAMOCLES rates for several communities on the same tree from the sum of their
+  log-likelihoods. A single community rarely holds enough information on colonisation and
+  extinction; pooling communities narrows the estimates (`data-raw/validation_damocles.R`),
+  provided they can be treated as independent realisations of the process.
+
 - Community assembly with several traits. `assemble_community(distance = )` measures trait
   space by Euclidean distance (`"euclidean"`, the default and the earlier behaviour),
   Euclidean distance on traits standardised by their standard deviation in the pool
