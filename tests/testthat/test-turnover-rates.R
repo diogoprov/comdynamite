@@ -20,7 +20,7 @@ test_that("partner_turnover() counts entries and exits per site and step", {
   expect_equal(partner_turnover(fake_sim(alpha), "competitors"), c(a = 2 / 30, b = 0, c = 0))
   # without step names each interval counts as one step
   y <- x
-  dimnames(y$history)[[3]] <- NULL
+  dimnames(y$history) <- c(dimnames(y$history)[1:2], list(NULL))
   expect_equal(partner_turnover(y), c(a = 2 / 3, b = 0, c = 0))
 })
 

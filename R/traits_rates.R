@@ -371,8 +371,8 @@ partner_turnover <- function(x, partners = c("all", "competitors")) {
   presence <- x$history > 0
   n_rec <- dim(presence)[3]
   if (n_rec < 2) stop("`x` needs at least two recorded steps", call. = FALSE)
-  steps <- as.numeric(sub("^step", "", dimnames(presence)[[3]]))
-  if (anyNA(steps)) steps <- seq_len(n_rec)
+  steps <- suppressWarnings(as.numeric(sub("^step", "", dimnames(presence)[[3]])))
+  if (length(steps) != n_rec || anyNA(steps)) steps <- seq_len(n_rec)
   species <- dimnames(presence)[[2]]
   n_sp <- length(species)
   weights <- if (partners == "all") {
