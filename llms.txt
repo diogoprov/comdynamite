@@ -363,6 +363,19 @@ Community assembly without population dynamics.
 - [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md)
   : Assemble a local community from a regional pool by rules
 
+## Dynamic null model
+
+Colonisation and local extinction along the tree (DAMOCLES).
+
+- [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
+  : Local presence along a tree: the dynamic null model of DAMOCLES
+- [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  : Likelihood of local presences under the DAMOCLES model
+- [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
+  : Phylogenetic community structure against the dynamic null model of
+  DAMOCLES
+
 # Articles
 
 ### Analysing data
