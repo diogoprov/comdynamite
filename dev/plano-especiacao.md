@@ -43,20 +43,57 @@ conhecida em cada etapa.
 
 ### 2. Divergência e especiação
 
-Modos, escolhidos por argumento, porque a regra de especiação condiciona os resultados e
-precisa ser variada nos experimentos:
+Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
+especiação geográfica (limitação de dispersão e estocasticidade), especiação ecológica
+baseada em nicho (adaptação com fluxo gênico em paisagens heterogêneas) e especiação
+ecológica mediada pela comunidade (trade-offs de história de vida em paisagens homogêneas).
+Também destacam que a especiação tem duas etapas: espécies incipientes surgem continuamente
+(a taxa real) e só viram espécies boas se sobreviverem a um período de transição (a taxa
+aparente, a que se observa), ideia formalizada na especiação prolongada (Rosindell et al.
+2010; Etienne & Rosindell 2012). Os modos abaixo seguem esse quadro; a regra de especiação
+condiciona os resultados e precisa ser variada nos experimentos.
 
-- `"allopatric"` (modo principal): uma matriz de divergência entre populações coespecíficas
-  cresce a cada passo sem fluxo gênico entre elas e é zerada (ou reduzida) quando há fluxo.
-  Quando a divergência entre grupos de populações passa de um limiar, o grupo vira espécie
-  nova. É a abordagem do gen3sis (Hagen et al. 2021), reimplementada a partir da descrição
-  publicada.
-- `"ecological"`: especiação quando a diferença de trait entre grupos de populações passa de
-  um limiar, com ou sem exigência de isolamento.
-- `"protracted"`: espécies incipientes que só viram espécies boas depois de um tempo τ, como
-  em Rosindell et al. (2010) e Etienne & Rosindell (2012); permite comparar com o modelo PBD.
-- `"point"`: mutação pontual neutra (cada indivíduo novo vira espécie nova com probabilidade
-  ν), para o limite neutro de teste.
+**Modos de iniciação** (o que cria uma espécie incipiente):
+
+- `"point"`: mutação pontual; cada nascimento vira espécie nova com probabilidade ν. É o
+  modo do MESS (Overcast et al. 2021) e da teoria neutra (Hubbell 2001, como citado por
+  Hubert et al. 2015). Serve de limite neutro.
+- `"fission"`: fissão aleatória; uma espécie é dividida em duas ao acaso (Hubbell 2001, como
+  citado por Hubert et al. 2015; também opção do MESS). Aqui a divisão é de populações, não
+  de indivíduos, o que dá às filhas distribuições geográficas próprias.
+- `"geographic"` (modo principal): uma matriz de divergência entre populações coespecíficas
+  cresce sem fluxo gênico e é reduzida quando há fluxo; o grupo de populações que passa do
+  limiar se separa. É a abordagem do gen3sis (Hagen et al. 2021). Variante a considerar: a
+  acumulação de incompatibilidades por mutação e deriva de Desjardins-Proulx & Gravel (2012a,
+  b), cuja previsão (comunidades periféricas e pouco conectadas acumulam mais espécies por
+  especiação) vira um teste qualitativo.
+- `"ecological"`: separação quando a diferença de trait entre grupos de populações passa de
+  um limiar, mesmo com fluxo gênico (especiação ecológica baseada em nicho).
+- Mediada pela comunidade (trade-offs competição–colonização etc.): fica para depois, porque
+  exige traits de história de vida que o simulador ainda não tem.
+
+**Conclusão da especiação** (camada sobre qualquer modo, em vez de um modo à parte):
+
+- Cada iniciação cria uma espécie incipiente, que vira espécie boa depois de um tempo τ
+  (fixo ou exponencial com taxa λ2, como no modelo PBD) se não se extinguir nem se fundir de
+  novo com a mãe (no modo `"geographic"`, fluxo gênico que zera a divergência).
+- `completion = 0` dá especiação instantânea. No modo `"geographic"` o limiar de divergência
+  já é uma forma mecanística de especiação prolongada; τ adiciona o período de transição de
+  Hubert et al. (2015).
+- Registrar os tempos de iniciação e de conclusão. A árvore reconstruída sai com os nós nos
+  tempos de iniciação, como no PBD (Etienne & Rosindell 2012), e, opcionalmente, nos de
+  conclusão. As taxas real (iniciação) e aparente (conclusão) ficam disponíveis, o que importa
+  para o teste de Januario, que usa taxas nas pontas.
+
+**Trait das espécies novas:**
+
+- Mecanístico (padrão): as filhas herdam as populações e os traits locais que já tinham.
+- Pontuado (opção): salto gaussiano no momento da especiação, como no MESS, que usa variância
+  σ²_M/(λ + λε), a variância esperada entre mãe e filha no BM da metacomunidade (Overcast et
+  al. 2021). Útil nos modos `"point"` e `"fission"`, em que a divisão não vem de divergência.
+
+**Primeira versão (proposta):** `"point"` e `"fission"` (para validar contra a teoria neutra e
+o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
 
 ### 3. Registro filogenético e da história
 
@@ -100,12 +137,17 @@ precisa ser variada nos experimentos:
 2. Modo prolongado contra o PBD: as árvores reconstruídas devem ter a desaceleração aparente
    descrita por Etienne & Rosindell (2012). Ajustar o PBD (pacote `PBD`, conferir a licença) em
    `data-raw` e ver se recupera as taxas.
-3. gen3sis (CRAN, GPL; só em `data-raw`): mesma paisagem e parâmetros equivalentes no modo
+3. Desjardins-Proulx & Gravel (2012a): no modo `"geographic"` em grafos de sítios, as
+   comunidades periféricas e pouco conectadas devem acumular mais espécies por especiação.
+4. gen3sis (CRAN, GPL; só em `data-raw`): mesma paisagem e parâmetros equivalentes no modo
    alopátrico; comparar riqueza, tamanho de clado e forma da árvore.
-4. Leibold et al. (2019): sem especiação e com duas espécies, reproduzir a neutralidade
+5. Leibold et al. (2019): sem especiação e com duas espécies, reproduzir a neutralidade
    regional qualitativamente (convergência das distribuições de trait e das ocupações) nos
    eixos de extinção de manchas e dispersão da Fig. 5.
-5. Consistência interna: árvore ultramétrica no reconstruído, número de eventos igual ao de
+6. MESS (Overcast et al. 2021; Python, sem licença declarada no GitHub, só executado): no
+   modo `"point"` com um só sítio e imigração de um pool fixo, comparar riqueza e
+   abundâncias locais.
+7. Consistência interna: árvore ultramétrica no reconstruído, número de eventos igual ao de
    nós, simmap coerente com as ocupações, testes de que sem especiação o resultado é o de
    `mc_dynamics()` com a mesma semente.
 
@@ -117,17 +159,21 @@ precisa ser variada nos experimentos:
   quando a persistência causa a especiação no modelo?
 - Neutralidade regional e taxas de trait: taxas por ramo verdadeiras e estimadas com médias de
   espécies, contra a divergência entre populações e as estatísticas T.
+- Escalas dos dados: Overcast et al. (2021) mostram que abundâncias, diversidade genética e
+  traits/filogenia guardam informação de escalas de tempo diferentes. As saídas por população
+  e por espécie permitem perguntar em que eixo o sinal da montagem sobrevive.
 - Ligação com os cenários 1, 2, 5 e 8 das notas, agora com a árvore gerada pela própria
   metacomunidade.
 
 ## Fases
 
 1. Traits por população com seleção e fluxo gênico em `mc_dynamics()`, sem especiação;
-   validação 4.
-2. Divergência, os quatro modos de especiação e o registro filogenético; validações 1, 2 e 5.
+   validação 5.
+2. Divergência, os modos de especiação, a camada de conclusão e o registro filogenético;
+   validações 1, 2, 3 e 7.
 3. Saídas (simmap, persistência, traits por população) e integração com `history_rates()`,
    `trait_rates()` e as estatísticas T.
-4. Comparação com o gen3sis (validação 3) e medida de custo.
+4. Comparação com o gen3sis e o MESS (validações 4 e 6) e medida de custo.
 5. Experimentos e o artigo.
 
 ## Riscos e decisões em aberto
@@ -138,17 +184,23 @@ precisa ser variada nos experimentos:
   Januario et al. (2025) atribuem o desacoplamento justamente à diferença entre décadas e
   milhões de anos; o modelo comprime essas escalas e o artigo tem de dizer isso.
 - Custo computacional com muitas espécies e sítios.
-- Decisões para o Diogo: nome da função nova; quais modos entram na primeira versão; número da versão (proposta: bloco próprio, número a definir, depois da v0.7.0).
+- Decisões para o Diogo: nome da função nova; confirmar os modos da primeira versão; número da versão (proposta: bloco próprio, número a definir, depois da v0.7.0).
 
 ## Referências
 
-- Etienne, R. S., & Rosindell, J. (2012). *Systematic Biology*, 61, 204 (página final não conferida).
+- Desjardins-Proulx, P., & Gravel, D. (2012a). *The American Naturalist*, 179, 137–144.
+  https://doi.org/10.1086/663196
+- Desjardins-Proulx, P., & Gravel, D. (2012b). *Ecology and Evolution*, 2, 1781–1790.
+  https://doi.org/10.1002/ece3.292
+- Etienne, R. S., & Rosindell, J. (2012). *Systematic Biology*, 61, 204–213.
   https://doi.org/10.1093/sysbio/syr091
 - Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel, T. F., &
   Pellissier, L. (2021). *PLOS Biology*, 19, e3001340.
   https://doi.org/10.1371/journal.pbio.3001340
 - Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). *Ecology Letters*, 28, e70021.
   https://doi.org/10.1111/ele.70021
+- Hubert, N., Calcagno, V., Etienne, R. S., & Mouquet, N. (2015). *Ecology Letters*, 18,
+  864–881. https://doi.org/10.1111/ele.12458
 - Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O. (2012). *Nature*, 491,
   444–448. https://doi.org/10.1038/nature11631
 - Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J. (2019).
@@ -158,6 +210,8 @@ precisa ser variada nos experimentos:
   https://doi.org/10.1146/annurev-ecolsys-102220-024934
 - McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University Press.
   https://doi.org/10.23943/princeton/9780691088778.001.0001
+- Overcast, I., Ruffley, M., Rosindell, J., Harmon, L., et al. (2021). *Molecular Ecology
+  Resources*, 21, 2782–2800. https://doi.org/10.1111/1755-0998.13514
 - Pontarp, M., et al. (2019). *Trends in Ecology & Evolution*, 34, 211–223.
   https://doi.org/10.1016/j.tree.2018.11.009
 - Rosindell, J., Cornell, S. J., Hubbell, S. P., & Etienne, R. S. (2010). *Ecology Letters*,

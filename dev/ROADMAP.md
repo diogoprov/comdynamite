@@ -618,13 +618,16 @@ as fases, em `dev/plano-especiacao.md`.
 - [ ] Fase 1: traits por população (espécie × sítio) com seleção local e fluxo gênico em
       `mc_dynamics()`, sem especiação; reproduzir qualitativamente a neutralidade regional de
       Leibold et al. (2019).
-- [ ] Fase 2: divergência entre populações e especiação (`"allopatric"`, `"ecological"`,
-      `"protracted"`, `"point"`), com registro filogenético (árvore completa e reconstruída) e
-      extinção global; validação no limite neutro e contra o PBD.
+- [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
+      `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
+      2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético
+      (árvore completa e reconstruída, tempos de iniciação e de conclusão) e extinção global;
+      validação no limite neutro, contra o PBD e contra Desjardins-Proulx & Gravel (2012a).
 - [ ] Fase 3: saídas (simmap da distribuição de cada linhagem, métricas de persistência de
       Januario et al. 2025, traits por população) integradas a `history_rates()`,
       `trait_rates()` e às estatísticas T.
-- [ ] Fase 4: comparação com o gen3sis (GPL, só em `data-raw`) e medida de custo.
+- [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
+      `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;
       neutralidade regional contra taxas por ramo) e artigo.
 - [x] Interface: função nova (decidido em 2026-11-08), com `as_metacommunity()` para os
@@ -774,6 +777,8 @@ Objetivo: API estável e pacote no CRAN.
 ## Referências citadas neste roadmap
 
 - Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). *Evolution*, 57, 2647–2652. https://doi.org/10.1111/j.0014-3820.2003.tb01508.x
+- Desjardins-Proulx, P., & Gravel, D. (2012a). *The American Naturalist*, 179, 137–144. https://doi.org/10.1086/663196
+- Desjardins-Proulx, P., & Gravel, D. (2012b). *Ecology and Evolution*, 2, 1781–1790. https://doi.org/10.1002/ece3.292
 - Drury, J., Clavel, J., Manceau, M., & Morlon, H. (2016). *Systematic Biology*, 65, 700–710. https://doi.org/10.1093/sysbio/syw020
 - Leibold, M. A., & Chase, J. M. (2018). *Metacommunity Ecology*. Monographs in Population Biology 59. Princeton University Press. https://doi.org/10.2307/j.ctt1wf4d24
 
