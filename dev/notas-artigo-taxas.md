@@ -117,7 +117,7 @@ identificável (correlação entre mudança verdadeira e taxa verdadeira de 0,29
   espécies e de populações. Nenhum dos três trabalhos usa taxas por ramo; a ligação é nossa.
 - Limite: o comdynamite ainda não simula especiação acoplada à metacomunidade, então a
   conversão de divergência entre populações em especiação (o elo de Januario) fica fora por
-  enquanto.
+  enquanto. Plano para fechar esse limite em `dev/plano-especiacao.md`.
 
 ## McPeek (2017), *Evolutionary Community Ecology*
 

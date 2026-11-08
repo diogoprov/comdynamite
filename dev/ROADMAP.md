@@ -609,6 +609,29 @@ pacotes de referência em vez de reimplementá-los.
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
 
+## Especiação acoplada à metacomunidade (número a definir, depois da v0.7.0)
+
+Objetivo: fechar o limite da ponte Leibold–Januario. Hoje a árvore é dada e a especiação não
+depende da metacomunidade. Plano completo, com o modelo, os modos de especiação, a validação e
+as fases, em `dev/plano-especiacao.md`.
+
+- [ ] Fase 1: traits por população (espécie × sítio) com seleção local e fluxo gênico em
+      `mc_dynamics()`, sem especiação; reproduzir qualitativamente a neutralidade regional de
+      Leibold et al. (2019).
+- [ ] Fase 2: divergência entre populações e especiação (`"allopatric"`, `"ecological"`,
+      `"protracted"`, `"point"`), com registro filogenético (árvore completa e reconstruída) e
+      extinção global; validação no limite neutro e contra o PBD.
+- [ ] Fase 3: saídas (simmap da distribuição de cada linhagem, métricas de persistência de
+      Januario et al. 2025, traits por população) integradas a `history_rates()`,
+      `trait_rates()` e às estatísticas T.
+- [ ] Fase 4: comparação com o gen3sis (GPL, só em `data-raw`) e medida de custo.
+- [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;
+      neutralidade regional contra taxas por ramo) e artigo.
+- [ ] Decidir: função nova (`simulate_diversification()`, provisório) ou argumento em
+      `simulate_metacommunity()`; modos da primeira versão; número da versão.
+
+**Concluído quando:** as fases 1 a 4 tiverem testes, validação em `data-raw` e uma vignette.
+
 ## v0.8.0: traits, filogenia e biogeografia
 
 Objetivo: transformar o desenho de Benício et al. (2021) em um fluxo do pacote e testar,
