@@ -637,9 +637,18 @@ Objetivo: API estável e pacote no CRAN.
   e a redução U(0,5; 1) entra uma vez por gradiente, enquanto o Appendix C a aplica uma
   vez. `simulate_logistic()` adotou esses valores na 0.5.1, e a redução fica uma só, como
   no Appendix C. O resultado da Tabela 5 está no artigo de validação.
-- **Validar `simulate_logistic()` com PGLMM.** Ideia de 2026-11-07, sem compromisso: ajustar
-  `phyr::pglmm()` (CRAN, GPL-3), ou `pez::communityPGLMM()`, aos dados simulados e ver se recupera
-  as variâncias e o sinal filogenético. Só em `data-raw`, sem copiar código para o pacote (MIT).
+- **Validar `simulate_logistic()` com PGLMM.** Feito em 2026-11-07, em
+  `data-raw/validation_pglmm.R` (phyr 1.1.3, só no script; árvore balanceada de 32 espécies,
+  40 sítios, 100 réplicas por cenário, 900 ajustes sem falha). Modelo
+  `y ~ x + (1 | sp) + (x | sp__)`, binomial. Sem a redução por sítio, o PGLMM recupera a
+  simulação: fração filogenética da variância das inclinações 0,00, 0,48 e 1,00 para lambda
+  0, 0,5 e 1, igual à obtida das inclinações verdadeiras; teste da inclinação filogenética com
+  5-6% de rejeição em lambda 0, 71% em 0,5 e 100% em 1; variâncias 10-15% abaixo, viés
+  conhecido do ajuste binário. Com a redução padrão U(0,5; 1), que o modelo não tem, as
+  variâncias caem à metade, mas a fração e as rejeições não mudam; um intercepto aleatório de
+  sítio não corrige. `slope_sd` é o desvio amostral das inclinações (padronizadas por
+  `scale()`), não o do processo: com lambda 1 nesta árvore, a variância do processo é 1,48.
+  Isso ficou explícito na ajuda.
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
   assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver
