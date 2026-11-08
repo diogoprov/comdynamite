@@ -37,6 +37,11 @@ reference:
   - region_pool
   - arrival_ages
   - paint_regimes
+- title: Coevolution in food webs
+  desc: Abundances and mean traits of a resource, a consumer and a predator.
+  contents:
+  - food_web_dynamics
+  - food_web_params
 - title: Competition
   desc: Interspecific competition, optionally structured by relatedness.
   contents:

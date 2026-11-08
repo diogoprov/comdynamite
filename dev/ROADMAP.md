@@ -543,6 +543,20 @@ pacotes de referência em vez de reimplementá-los.
 - [ ] Função que traduz a história de uma metacomunidade simulada (colonizações, entradas e
       saídas de parceiros, mudanças de hábitat) em taxas por ramo para `trait_rates()` e
       `trait_mk()`, para os cenários 1, 2, 5 e 8 das notas.
+- [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
+      McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
+      código MATLAB do autor não tem licença declarada e não foi consultado). Abundâncias e
+      médias dos traits integradas juntas por RK4 de passo fixo em R base; gradientes de
+      seleção por diferenças centrais, o que permite as três formas de coeficiente de ataque
+      (gaussiana, logística, Michaelis-Menten) e a omnivoria sem derivadas à mão. Níveis
+      ausentes e introduções em tempos dados (`introductions`), para testar a previsão de
+      que a evolução dispara após uma invasão e desacelera até o equilíbrio e que o predador
+      enfraquece a seleção sobre o recurso; a saída guarda os gradientes e |dz/dt| por nível,
+      para virar taxa por linhagem. Validação em `data-raw/validation_food_web.R` (fig. 3.2,
+      3.3 e 3.11). Duas leituras da eq. 3.20 documentadas na ajuda: o termo de perda do
+      recurso para o predador sem `w`, e `m` como função dos traits do consumidor e do
+      predador (box 3.1).
+      Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`.
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
       das notas). Incluir os resultados da validação e o limite
