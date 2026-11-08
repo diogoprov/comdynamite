@@ -17,7 +17,8 @@ finest.}
 \value{
 A data frame with one row per factor and one for the variance within the finest
 level (\code{within}), and one column per trait with the share of variance of each level. The
-attribute \code{variance} holds the variances.
+attribute \code{variance} holds the variances. It has class \code{nested_variance}, with a
+\link[=plot.nested_variance]{plot()} method.
 }
 \description{
 Splits the variance of each trait among nested levels, such as regions, sites, species and
@@ -42,7 +43,9 @@ d <- data.frame(region = rep(c("north", "south"), each = 60),
                 species = sample(c("a", "b", "c"), 120, replace = TRUE))
 d$population <- paste(d$site, d$species)
 d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
-nested_variance(d, "trait", c("region", "site", "population"))
+res <- nested_variance(d, "trait", c("region", "site", "population"))
+res
+if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 \dontshow{\}) # examplesIf}
 }
 \references{

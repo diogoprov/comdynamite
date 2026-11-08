@@ -270,7 +270,8 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #'   finest.
 #' @return A data frame with one row per factor and one for the variance within the finest
 #'   level (`within`), and one column per trait with the share of variance of each level. The
-#'   attribute `variance` holds the variances.
+#'   attribute `variance` holds the variances. It has class `nested_variance`, with a
+#'   [plot()][plot.nested_variance] method.
 #' @references Messier, J., McGill, B. J., & Lechowicz, M. J. (2010). How do traits vary across
 #'   ecological scales? A case for trait-based ecology. *Ecology Letters*, 13, 838--848.
 #'   \doi{10.1111/j.1461-0248.2010.01476.x}
@@ -282,7 +283,9 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #'                 species = sample(c("a", "b", "c"), 120, replace = TRUE))
 #' d$population <- paste(d$site, d$species)
 #' d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
-#' nested_variance(d, "trait", c("region", "site", "population"))
+#' res <- nested_variance(d, "trait", c("region", "site", "population"))
+#' res
+#' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 #' @export
 nested_variance <- function(data, traits, factors) {
   if (!requireNamespace("nlme", quietly = TRUE)) {
@@ -333,7 +336,62 @@ nested_variance <- function(data, traits, factors) {
   out <- as.data.frame(sweep(variances, 2, colSums(variances), "/"))
   out <- data.frame(level = rownames(out), out, row.names = NULL, check.names = FALSE)
   attr(out, "variance") <- variances
+  class(out) <- c("nested_variance", class(out))
   out
+}
+
+#' Plot the shares of variance across nested levels
+#'
+#' Draws one stacked bar per trait with the share of variance of each level from
+#' [nested_variance()], the broadest level at the bottom and the variance within the finest
+#' level (`within`, in grey) at the top. Needs the package ggplot2.
+#'
+#' @param x Result of [nested_variance()].
+#' @param min_label Smallest share labelled with its percentage inside the bar; 1 or more
+#'   removes the labels.
+#' @param ... Not used.
+#' @return A ggplot object, which can be changed further with ggplot2 functions.
+#' @seealso [nested_variance()].
+#' @examplesIf requireNamespace("nlme", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' d <- data.frame(region = rep(c("north", "south"), each = 60),
+#'                 site = rep(paste0("s", 1:6), each = 20),
+#'                 species = sample(c("a", "b", "c"), 120, replace = TRUE))
+#' d$population <- paste(d$site, d$species)
+#' d$size <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
+#' d$shape <- rnorm(120, rep(c(0, 2), each = 60))
+#' plot(nested_variance(d, c("size", "shape"), c("region", "site", "population")))
+#' @export
+plot.nested_variance <- function(x, min_label = 0.05, ...) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("plot() of nested_variance() needs the package ggplot2", call. = FALSE) # nocov
+  }
+  stopifnot(is.numeric(min_label), length(min_label) == 1)
+  levels <- x$level
+  traits <- setdiff(names(x), "level")
+  long <- data.frame(level = factor(rep(levels, length(traits)), levels),
+                     trait = factor(rep(traits, each = length(levels)), traits),
+                     share = unlist(lapply(traits, function(t) x[[t]]), use.names = FALSE))
+  long$label <- ifelse(long$share >= min_label, sprintf("%.0f%%", 100 * long$share), "")
+  n_factors <- length(levels) - 1
+  fill <- stats::setNames(c(grDevices::hcl.colors(max(n_factors, 1), "Viridis")[seq_len(n_factors)],
+                            "grey80"), levels)
+  dark <- colSums(grDevices::col2rgb(fill) * c(0.299, 0.587, 0.114)) < 140
+  long$text <- ifelse(dark[as.character(long$level)], "white", "black")
+  .data <- ggplot2::.data
+  ggplot2::ggplot(long, ggplot2::aes(x = .data$trait, y = .data$share, fill = .data$level,
+                                     group = .data$level)) +
+    ggplot2::geom_col(position = ggplot2::position_stack(reverse = TRUE), width = 0.7) +
+    ggplot2::geom_text(ggplot2::aes(label = .data$label, colour = .data$text),
+                       position = ggplot2::position_stack(vjust = 0.5, reverse = TRUE),
+                       size = 3.5, show.legend = FALSE) +
+    ggplot2::scale_fill_manual(values = fill, name = "Level") +
+    ggplot2::scale_colour_identity() +
+    ggplot2::scale_y_continuous(labels = function(v) paste0(100 * v, "%"),
+                                expand = ggplot2::expansion(mult = c(0, 0.02))) +
+    ggplot2::labs(x = NULL, y = "Share of variance") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(panel.grid.major.x = ggplot2::element_blank())
 }
 
 #' Trait indices of communities against null models

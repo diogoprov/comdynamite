@@ -240,3 +240,39 @@ test_that("the functions handle untestable statistics, missing values and bad in
   res <- community_index(d, mean, nperm = 0)
   expect_true(is.na(res$observed[res$site == "s01"]))
 })
+
+test_that("plot() of nested_variance() stacks the shares from the broadest level", {
+  skip_if_not_installed("nlme")
+  skip_if_not_installed("ggplot2")
+  d <- toy_individuals(n_sites = 8, n = 240)
+  d$region <- ifelse(d$site %in% sprintf("s%02d", 1:4), "north", "south")
+  d$population <- paste(d$site, d$species)
+  res <- nested_variance(d, c("trait", "other"), c("region", "site", "population"))
+  expect_s3_class(res, "nested_variance")
+  p <- plot(res)
+  expect_s3_class(p, "ggplot")
+  bars <- ggplot2::layer_data(p, 1)
+  expect_equal(nrow(bars), 8)
+  # each bar reaches 1 and the broadest level sits at the bottom
+  expect_equal(tapply(bars$ymax, bars$x, max), c(`1` = 1, `2` = 1), ignore_attr = TRUE)
+  first <- bars[bars$ymin == 0, ]
+  expect_equal(unique(first$fill), unname(grDevices::hcl.colors(3, "Viridis")[1]))
+  labels <- ggplot2::layer_data(plot(res, min_label = 2), 2)$label
+  expect_true(all(labels == ""))
+})
+
+test_that("labels of plot.nested_variance() sit inside their own segment", {
+  skip_if_not_installed("nlme")
+  skip_if_not_installed("ggplot2")
+  set.seed(1)
+  d <- data.frame(region = rep(c("north", "south"), each = 60),
+                  site = rep(paste0("s", 1:6), each = 20),
+                  species = sample(c("a", "b", "c"), 120, replace = TRUE))
+  d$population <- paste(d$site, d$species)
+  d$shape <- rnorm(120, rep(c(0, 2), each = 60))
+  p <- plot(nested_variance(d, "shape", c("region", "site", "population")), min_label = 0)
+  bars <- ggplot2::layer_data(p, 1)
+  text <- ggplot2::layer_data(p, 2)
+  expect_equal(text$y, (bars$ymin + bars$ymax) / 2)
+  expect_equal(text$label, sprintf("%.0f%%", 100 * (bars$ymax - bars$ymin)))
+})

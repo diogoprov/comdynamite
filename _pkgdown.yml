@@ -100,6 +100,7 @@ reference:
   - community_index
   - trait_flex
   - nested_variance
+  - plot.nested_variance
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:
