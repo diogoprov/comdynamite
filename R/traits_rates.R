@@ -330,7 +330,6 @@ sympatry_integral <- function(history, r) {
   integral <- numeric(nrow(edge))
   for (i in seq_len(length(breaks) - 1)) {
     alive <- which(pieces$from <= breaks[i] & pieces$to >= breaks[i + 1])
-    if (length(alive) == 0) next
     n <- table(pieces$state[alive])[pieces$state[alive]]
     add <- exp(r * as.numeric(n)) * (breaks[i + 1] - breaks[i])
     by_edge <- rowsum(add, pieces$edge[alive])

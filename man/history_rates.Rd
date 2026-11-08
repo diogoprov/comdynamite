@@ -53,8 +53,8 @@ after the last change is \code{sigma2 * (1 + burst * exp(-u / decay))}; before a
 \code{sigma2}. This follows the expectation of McPeek (2017) that selection, and so evolution,
 is strongest when a lineage first adapts to a new community.
 \item \code{"sympatry"}: the rate depends on the number of lineages that share the state at each
-moment, counting the lineage itself, as \code{sigma2 * exp(r * n)}; \code{r < 0} slows evolution down
-as lineages accumulate in the same region, as in the diversity-dependent model with
+moment, counting the lineage itself, as \code{sigma2 * exp(r * n)}; a negative \code{r} slows
+evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
 biogeography of Drury et al. (2016).
 }
 }

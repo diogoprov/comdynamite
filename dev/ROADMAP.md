@@ -565,8 +565,11 @@ pacotes de referência em vez de reimplementá-los.
       com taxa por estado (`"state"`, como O'Meara et al. 2006), explosão após cada mudança
       que decai exponencialmente (`"burst"`, cenários 1 e 2 das notas) e dependência do número
       de linhagens no mesmo estado (`"sympatry"`, o DDexp com geografia de Drury et al.
-      2016); `trait_rates(edge_rates = )` recebe as taxas. Validar `"sympatry"` contra
-      `RPANDA::fit_t_comp()`. Falta ligar a saída de `simulate_metacommunity()` (entradas e
+      2016); `trait_rates(edge_rates = )` recebe as taxas. `"sympatry"` validado contra o
+      RPANDA em `data-raw/validation_sympatry.R`: matrizes de covariância iguais às do DDexp
+      com geografia (diferença máxima 3e-15) e r recuperado por `fit_t_comp()` (média -0,30
+      para -0,3 verdadeiro, 0,005 para 0). `CreateGeoObject()` falha em mapas sem mudança de
+      região (bug do RPANDA, objeto `old.Dist`); essas histórias são sorteadas de novo. Falta ligar a saída de `simulate_metacommunity()` (entradas e
       saídas de parceiros, cenários 5 e 8).
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
@@ -659,6 +662,10 @@ Objetivo: API estável e pacote no CRAN.
 
 ## Pendências e decisões
 
+- **Ordenação PCPS na vignette `whole-tree`.** Pedido em 2026-11-08: além de PCPS 1 contra o
+  ambiente, mostrar a ordenação das comunidades no plano PCPS 1 × PCPS 2 com o ambiente como
+  tamanho (ou cor) dos círculos, em R base ou em ggplot2 (só na vignette, via `Suggests`).
+  Ver se `pcps_test()` guarda os escores do segundo eixo e as posições das espécies (biplot).
 - **Imigração na grade.** Decidido em 2026-11-07: argumento `immigration` em
   `simulate_metacommunity()` e `mc_dynamics()`, com `"poisson"` como padrão (código original,
   sementes antigas iguais) e `"multinomial"` conservando os dispersores, como o mcomsimr. No
