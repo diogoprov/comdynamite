@@ -18,6 +18,10 @@ test_that("partner_turnover() counts entries and exits per site and step", {
   alpha <- diag(3)
   alpha[2, 1] <- 0.1
   expect_equal(partner_turnover(fake_sim(alpha), "competitors"), c(a = 2 / 30, b = 0, c = 0))
+  # without step names each interval counts as one step
+  y <- x
+  dimnames(y$history)[[3]] <- NULL
+  expect_equal(partner_turnover(y), c(a = 2 / 3, b = 0, c = 0))
 })
 
 test_that("turnover_rates() raises only the tip branches", {
