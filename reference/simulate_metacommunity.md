@@ -26,7 +26,8 @@ simulate_metacommunity(
   extirpation = 0,
   pool = NULL,
   initial = NULL,
-  immigration = c("poisson", "multinomial")
+  immigration = c("poisson", "multinomial"),
+  env = NULL
 )
 ```
 
@@ -39,7 +40,10 @@ simulate_metacommunity(
 - traits:
 
   Species traits from
-  [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md).
+  [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
+  or, for a niche with several environmental axes, a list of them, one
+  per column of `env`, with the same species; see
+  [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md).
 
 - alpha:
 
@@ -98,12 +102,21 @@ simulate_metacommunity(
   `"multinomial"`, which conserves them. Spatially implicit landscapes
   are always multinomial.
 
+- env:
+
+  Optional environmental axes of each site, a matrix or data frame with
+  one row per site and one column per element of `traits` (such as the
+  `env` of several landscapes on the same grid). Needed when `traits` is
+  a list; replaces the `env` of `landscape`. Not available with
+  `env_time`.
+
 ## Value
 
 An `mc_sim` object: a list with `abundance` (sites x species matrix at
 the last step), `history` (sites x species x recorded steps array, or
 `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`,
-`extirpation` and `pool` used, and `tree` when the traits came from
+`extirpation` and `pool` used, `env` when given, and `tree` when the
+traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
 with a tree.
 
@@ -193,4 +206,10 @@ sim
 #> <mc_sim> 30 sites x 20 species
 #> species persisting: 18 of 20 
 #> mean local richness: 7.03 
+# a niche with two environmental axes
+ls2 <- landscape_implicit(30)
+niche2 <- species_traits(tr, rmax_range = c(1, 1))
+sim2 <- simulate_metacommunity(ls, list(species_traits(tr), niche2),
+                               competition_matrix(tr, "phylo"), n_steps = 200,
+                               env = cbind(ls$env, ls2$env))
 ```

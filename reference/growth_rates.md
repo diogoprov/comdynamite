@@ -16,18 +16,31 @@ growth_rates(env, traits)
 
 - env:
 
-  Environment of each site.
+  Environment of each site; for several axes, a matrix, data frame or
+  list with one axis per column or element, in the order of `traits`.
 
 - traits:
 
   Data frame from
   [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
-  or any data frame with columns `optimum`, `sigma` and `r_max`.
+  or any data frame with columns `optimum`, `sigma` and `r_max`; for
+  several axes, a list of them with the same species.
 
 ## Value
 
 Numeric matrix with one row per site and one column per species: the
 density-independent growth rate of each species at each site.
+
+## Details
+
+With several environmental axes, each species has a response to each
+axis and the growth rate is the product of the responses, as in
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md):
+a Gaussian niche in several dimensions whose axes are independent (no
+correlation between the responses to different axes), with the optimum
+and breadth of each axis in its own set of traits. The maxima multiply
+too, so give the traits of all but one axis `r_max` of 1, for example
+with `species_traits(rmax_range = c(1, 1))`.
 
 ## Examples
 

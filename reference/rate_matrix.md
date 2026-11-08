@@ -1,0 +1,152 @@
+# Evolutionary rate matrices with restricted structures
+
+Builds the evolutionary rate matrix (the covariance of the changes of
+several traits per unit time) for multivariate trait evolution with
+[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+with the structures that mvMORPH fits
+(`mvBM(param = list(constraint = ))`, Clavel et al. 2015). Variances are
+rates of evolution of each trait, and correlations are evolutionary
+correlations between traits.
+
+## Usage
+
+``` r
+rate_matrix(
+  variance = 1,
+  correlation = 0,
+  constraint = c("default", "diagonal", "equaldiagonal", "equal", "proportional",
+    "shared", "variance", "correlation"),
+  n_traits = NULL,
+  scale = NULL,
+  eigenvalues = NULL
+)
+```
+
+## Arguments
+
+- variance:
+
+  Rate of each trait (variance per unit time), recycled to the number of
+  traits. For `"correlation"`, a named list with the rates of each
+  regime.
+
+- correlation:
+
+  Correlation between traits: one number for all pairs or a correlation
+  matrix. For `"variance"`, a named list with the correlations of each
+  regime.
+
+- constraint:
+
+  Structure of the matrix or matrices; see Details.
+
+- n_traits:
+
+  Number of traits, when neither `variance` nor `correlation` gives it.
+
+- scale:
+
+  For `"proportional"`, the multiplier of each regime, named by regime.
+
+- eigenvalues:
+
+  For `"shared"`, a named list with the eigenvalues of each regime, one
+  per trait.
+
+## Value
+
+A symmetric matrix with one row and column per trait, or, for the
+multi-regime structures, a named list of them, one per regime. The
+attribute `constraint` holds the structure. Either can be passed to
+`traits_ou(sigma2 = )`.
+
+## Details
+
+One matrix, for the whole tree:
+
+- `"default"`: any rate matrix, with the variances in `variance` and the
+  correlations in `correlation`. A matrix supplied by the user can also
+  be passed directly to `traits_ou(sigma2 = )`.
+
+- `"diagonal"`: traits evolve independently, each with its own rate.
+
+- `"equaldiagonal"`: traits evolve independently, all with the same
+  rate.
+
+- `"equal"`: all traits with the same rate, correlated (Adams 2013).
+
+One matrix per selective regime, for multi-regime models (`regimes` in
+[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)):
+
+- `"proportional"`: matrices proportional to each other, the matrix
+  built from `variance` and `correlation` multiplied by `scale`, one
+  positive number per regime.
+
+- `"shared"`: matrices with the same eigenvectors, those of the matrix
+  built from `variance` and `correlation`, and the eigenvalues of each
+  regime in `eigenvalues`, in the order of
+  [`eigen()`](https://rdrr.io/r/base/eigen.html) (decreasing eigenvalues
+  of that matrix).
+
+- `"variance"`: the same variances in all regimes, and the correlations
+  of each regime in `correlation`, a named list.
+
+- `"correlation"`: the same correlations in all regimes, and the
+  variances of each regime in `variance`, a named list.
+
+The regimes are named by the names of `scale`, `eigenvalues`, or the
+list in `correlation` or `variance`, and those names must be the regimes
+of the tree.
+
+## References
+
+Adams, D. C. (2013). Comparing evolutionary rates for different
+phenotypic traits on a phylogeny using likelihood. *Systematic Biology*,
+62, 181–192.
+[doi:10.1093/sysbio/sys083](https://doi.org/10.1093/sysbio/sys083)
+
+Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package
+for fitting multivariate evolutionary models to morphometric data.
+*Methods in Ecology and Evolution*, 6, 1311–1319.
+[doi:10.1111/2041-210X.12420](https://doi.org/10.1111/2041-210X.12420)
+
+## See also
+
+[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+which simulates traits with these matrices.
+
+## Examples
+
+``` r
+rate_matrix(c(1, 2), correlation = 0.5)
+#>           trait1    trait2
+#> trait1 1.0000000 0.7071068
+#> trait2 0.7071068 2.0000000
+#> attr(,"constraint")
+#> [1] "default"
+rate_matrix(1, correlation = 0.3, constraint = "equal", n_traits = 3)
+#>        trait1 trait2 trait3
+#> trait1    1.0    0.3    0.3
+#> trait2    0.3    1.0    0.3
+#> trait3    0.3    0.3    1.0
+#> attr(,"constraint")
+#> [1] "equal"
+# two habitats, the open one evolving four times faster in all directions
+r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
+                 scale = c(forest = 1, open = 4))
+set.seed(1)
+tr <- treeshapesim::sim_tree_shape(30)
+habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
+x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+head(x)
+#>         trait1     trait2
+#> t1  0.56212063 -0.6358557
+#> t2  0.54365812 -0.6260814
+#> t3 -0.06730175 -0.5904160
+#> t4 -0.41208589 -0.2280676
+#> t5 -0.46384701 -0.2697568
+#> t6 -3.04661063 -1.8355874
+# several correlated traits in community assembly
+assemble_community(x, size = 10, rule = "limiting_similarity")$community
+#>  [1] "t1"  "t6"  "t14" "t20" "t22" "t23" "t25" "t26" "t27" "t30"
+```

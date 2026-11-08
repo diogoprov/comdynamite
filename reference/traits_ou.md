@@ -32,7 +32,8 @@ traits_ou(
 
 - n_traits:
 
-  Number of independent traits.
+  Number of traits. Taken from the rate matrices when `sigma2` gives
+  them.
 
 - alpha:
 
@@ -40,7 +41,12 @@ traits_ou(
 
 - sigma2:
 
-  Rate of the stochastic (drift) component.
+  Rate of the stochastic (drift) component: one number for all traits,
+  which then evolve independently; a symmetric positive semidefinite
+  rate matrix with one row and column per trait, for correlated traits;
+  or a named list or vector with a matrix or a number per regime (names
+  as in `regimes`). See
+  [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md).
 
 - theta:
 
@@ -52,8 +58,10 @@ traits_ou(
   Selective regime of each branch, in the order of the edges of `tree`
   reordered "cladewise" (`ape::reorder.phylo(tree, "cladewise")`), as
   returned by
-  [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md).
-  `NULL` puts every branch in one regime.
+  [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md);
+  or a tree with the same edges as `tree` and a mapped history (class
+  `simmap`), whose states are the regimes. `NULL` puts every branch in
+  one regime.
 
 - root:
 
@@ -62,21 +70,44 @@ traits_ou(
 ## Value
 
 Matrix with one row per tip (tip labels as row names) and one column per
-trait. The attribute `nodes` holds the values at the internal nodes, one
-row per node named by its number in `tree$edge`, the root first.
+trait, named as the columns of the rate matrix, if any. The attribute
+`nodes` holds the values at the internal nodes, one row per node named
+by its number in `tree$edge`, the root first.
 
 ## Details
 
 With `alpha = 0` the process is Brownian motion with rate `sigma2`, and
-the optima play no role. Each branch belongs to a single regime, so a
-shift in optimum happens at the start of the branch where the regime
-changes.
+the optima play no role. With regimes given as a vector, each branch
+belongs to a single regime, so a shift in optimum happens at the start
+of the branch where the regime changes. With regimes given as a mapped
+history (class `simmap`, from
+[`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+or phytools), regimes can also change within branches, at the times of
+the map.
+
+Several traits evolve independently with `sigma2` as one number, or
+correlated with an evolutionary rate matrix, whose diagonal holds the
+rate of each trait and whose off-diagonal elements hold the evolutionary
+covariances. A named list of matrices gives each regime its own matrix,
+as in the multi-rate models of mvMORPH (Clavel et al. 2015);
+[`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
+builds them with the structures that mvMORPH fits. The strength of
+selection `alpha` and the optimum `theta` are the same for all traits.
+Under Brownian motion (`alpha = 0`) the traits of the tips have
+covariance `sum_k kronecker(R_k, C_k)`, where `R_k` is the rate matrix
+of regime k and `C_k` the phylogenetic covariance matrix built from the
+time spent in regime k (Clavel et al. 2015).
 
 ## References
 
 Butler, M. A., & King, A. A. (2004). Phylogenetic comparative analysis:
 a modeling approach for adaptive evolution. *The American Naturalist*,
 164, 683–695. [doi:10.1086/426002](https://doi.org/10.1086/426002)
+
+Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package
+for fitting multivariate evolutionary models to morphometric data.
+*Methods in Ecology and Evolution*, 6, 1311–1319.
+[doi:10.1111/2041-210X.12420](https://doi.org/10.1111/2041-210X.12420)
 
 Hansen, T. F. (1997). Stabilizing selection and the comparative analysis
 of adaptation. *Evolution*, 51, 1341–1351.
@@ -85,7 +116,11 @@ of adaptation. *Evolution*, 51, 1341–1351.
 ## See also
 
 [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
-to assign regimes to clades.
+to assign regimes to clades,
+[`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
+for rate matrices,
+[`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+for a history of regimes that change within branches.
 
 ## Examples
 
@@ -104,4 +139,11 @@ round(x[, 1], 1)
 #>  0.0  0.2  0.2  7.4  8.0  8.0  8.4  7.9  8.3  8.6  8.8  8.2  8.5  8.5  0.7  0.0 
 #>  t17  t18  t19  t20 
 #>  0.0 -0.3 -0.7  0.9 
+# two correlated traits
+r <- rate_matrix(c(1, 0.5), correlation = 0.8)
+y <- traits_ou(tr, sigma2 = r)
+cor(y)
+#>          trait1   trait2
+#> trait1 1.000000 0.943929
+#> trait2 0.943929 1.000000
 ```

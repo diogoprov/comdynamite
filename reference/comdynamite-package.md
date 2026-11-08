@@ -87,7 +87,9 @@ implemented from the published equations.
   [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
   [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
   and
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md).
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+  with correlated traits from
+  [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md).
 
 ## Where to start
 

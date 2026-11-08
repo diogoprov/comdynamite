@@ -53,6 +53,8 @@ Traits with phylogenetic signal and evolutionary regimes.
 - [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
   : Traits evolving by an Ornstein-Uhlenbeck process with one or several
   optima
+- [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
+  : Evolutionary rate matrices with restricted structures
 - [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
   : A discrete trait evolving along a tree, with its whole history
 - [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)

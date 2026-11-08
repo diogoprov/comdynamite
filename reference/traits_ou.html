@@ -101,7 +101,7 @@ x at the start has, at the end, a normal distribution with mean
 
 
 <dt id="arg-n-traits">n_traits<a class="anchor" aria-label="anchor" href="#arg-n-traits"></a></dt>
-<dd><p>Number of independent traits.</p></dd>
+<dd><p>Number of traits. Taken from the rate matrices when <code>sigma2</code> gives them.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
@@ -110,7 +110,10 @@ motion).</p></dd>
 
 
 <dt id="arg-sigma-">sigma2<a class="anchor" aria-label="anchor" href="#arg-sigma-"></a></dt>
-<dd><p>Rate of the stochastic (drift) component.</p></dd>
+<dd><p>Rate of the stochastic (drift) component: one number for all traits, which
+then evolve independently; a symmetric positive semidefinite rate matrix with one row and
+column per trait, for correlated traits; or a named list or vector with a matrix or a
+number per regime (names as in <code>regimes</code>). See <code><a href="rate_matrix.html">rate_matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-theta">theta<a class="anchor" aria-label="anchor" href="#arg-theta"></a></dt>
@@ -121,7 +124,8 @@ named vector with one value per regime (names as in <code>regimes</code>).</p></
 <dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>
 <dd><p>Selective regime of each branch, in the order of the edges
 of <code>tree</code> reordered "cladewise" (<code>ape::reorder.phylo(tree, "cladewise")</code>),
-as returned by <code><a href="paint_regimes.html">paint_regimes()</a></code>. <code>NULL</code> puts every branch in one
+as returned by <code><a href="paint_regimes.html">paint_regimes()</a></code>; or a tree with the same edges as <code>tree</code> and a mapped
+history (class <code>simmap</code>), whose states are the regimes. <code>NULL</code> puts every branch in one
 regime.</p></dd>
 
 
@@ -132,27 +136,42 @@ regime.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Matrix with one row per tip (tip labels as row names) and one
-column per trait. The attribute <code>nodes</code> holds the values at the internal nodes, one row
+column per trait, named as the columns of the rate matrix, if any. The attribute <code>nodes</code> holds the values at the internal nodes, one row
 per node named by its number in <code>tree$edge</code>, the root first.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>With <code>alpha = 0</code> the process is Brownian motion with rate <code>sigma2</code>, and the
-optima play no role. Each branch belongs to a single regime, so a shift in
-optimum happens at the start of the branch where the regime changes.</p>
+optima play no role. With regimes given as a vector, each branch belongs to a single
+regime, so a shift in optimum happens at the start of the branch where the regime changes.
+With regimes given as a mapped history (class <code>simmap</code>, from <code><a href="trait_mk.html">trait_mk()</a></code> or phytools),
+regimes can also change within branches, at the times of the map.</p>
+<p>Several traits evolve independently with <code>sigma2</code> as one number, or correlated with an
+evolutionary rate matrix, whose diagonal holds the rate of each trait
+and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
+gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
+2015); <code><a href="rate_matrix.html">rate_matrix()</a></code> builds them with the structures that mvMORPH fits. The strength of
+selection <code>alpha</code> and the optimum <code>theta</code> are the same for all traits. Under Brownian motion
+(<code>alpha = 0</code>) the traits of the tips have covariance <code>sum_k kronecker(R_k, C_k)</code>, where <code>R_k</code>
+is the rate matrix of regime k and <code>C_k</code> the phylogenetic covariance matrix built from the
+time spent in regime k (Clavel et al. 2015).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Butler, M. A., &amp; King, A. A. (2004). Phylogenetic comparative analysis: a
 modeling approach for adaptive evolution. <em>The American Naturalist</em>, 164,
 683–695. <a href="https://doi.org/10.1086/426002" class="external-link">doi:10.1086/426002</a></p>
+<p>Clavel, J., Escarguel, G., &amp; Merceron, G. (2015). mvMORPH: an R package for fitting
+multivariate evolutionary models to morphometric data. <em>Methods in Ecology and
+Evolution</em>, 6, 1311–1319. <a href="https://doi.org/10.1111/2041-210X.12420" class="external-link">doi:10.1111/2041-210X.12420</a></p>
 <p>Hansen, T. F. (1997). Stabilizing selection and the comparative analysis
 of adaptation. <em>Evolution</em>, 51, 1341–1351.
 <a href="https://doi.org/10.1111/j.1558-5646.1997.tb01457.x" class="external-link">doi:10.1111/j.1558-5646.1997.tb01457.x</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="paint_regimes.html">paint_regimes()</a></code> to assign regimes to clades.</p></div>
+    <div class="dont-index"><p><code><a href="paint_regimes.html">paint_regimes()</a></code> to assign regimes to clades, <code><a href="rate_matrix.html">rate_matrix()</a></code> for rate matrices,
+<code><a href="trait_mk.html">trait_mk()</a></code> for a history of regimes that change within branches.</p></div>
     </div>
 
     <div class="section level2">
@@ -171,6 +190,13 @@ of adaptation. <em>Evolution</em>, 51, 1341–1351.
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.0  0.2  0.2  7.4  8.0  8.0  8.4  7.9  8.3  8.6  8.8  8.2  8.5  8.5  0.7  0.0 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  t17  t18  t19  t20 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.0 -0.3 -0.7  0.9 </span>
+<span class="r-in"><span><span class="co"># two correlated traits</span></span></span>
+<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="rate_matrix.html">rate_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.5</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu">traits_ou</span><span class="op">(</span><span class="va">tr</span>, sigma2 <span class="op">=</span> <span class="va">r</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">y</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          trait1   trait2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait1 1.000000 0.943929</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait2 0.943929 1.000000</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
