@@ -603,9 +603,22 @@ pacotes de referência em vez de reimplementá-los.
       ramos terminais, na janela `window` do fim de cada ramo (a simulação roda em tempo
       ecológico só entre as pontas). Falta o cenário 8 (mudanças de taxa por Poisson
       concentradas em eventos de reembaralhamento e compartilhadas entre linhagens simpátricas).
-- [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
+- [x] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
-      das notas).
+      das notas). `sample_individuals()` sorteia n indivíduos por população (ou Binomial(N,
+      `fraction`)) com trait = ótimo da espécie + fração `local_adaptation` da distância ao
+      ambiente do sítio + desvio da população (`population_sd`) + ruído individual
+      (`intraspecific_sd`). `tstats()` calcula as três razões em R base (sem nulos, para
+      estudos com muitas réplicas) ou via `cati::Tstats()` (nulos); os valores observados
+      batem. O cati casa nomes de sítio por regex (`site1` pega `site10`): os sítios vão com
+      rótulos de largura fixa e voltam com o nome original. `data-raw/demo_tstats.R`: a
+      adaptação local sobe T_IP.IC (0,02 → 1,0) e baixa T_IC.IR e T_PC.PR (0,54 e 0,89 → <0,01).
+      Isso contraria a previsão do cenário 10 (T_IP.IC cair): adaptação ao ambiente do sítio
+      torna as espécies co-ocorrentes parecidas; T_IP.IC só cai com divergência entre
+      co-ocorrentes (deslocamento de caráter). Falta: deslocamento de caráter como modo de
+      adaptação local, vários traits por indivíduo (depois da sessão de traits
+      multivariados), traits de indivíduos que afetam a dinâmica (hoje são sorteados depois) e
+      cruzar com dispersão e extinção de manchas (cenário 9) para a ponte Leibold–Januario.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações

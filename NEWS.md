@@ -27,6 +27,18 @@
   and under OU within 3.1 of the covariance of Hansen (1997); `mvBM()` with the same constraint
   recovered the matrices (100 tips, median of 30 fits within 9% of each true element).
 
+- `sample_individuals()` draws individuals from the populations of a simulated metacommunity,
+  with trait values made of the optimum of the species, a fraction of the gap to the
+  environment of the site (`local_adaptation`), a deviation of the population that does not
+  track the environment (`population_sd`) and variation among individuals
+  (`intraspecific_sd`). `tstats()` computes the T-statistics of Violle et al. (2012) per site,
+  in base R for the observed values or through `cati::Tstats()` (Taudiere & Violle 2016, now
+  in Suggests) for its null models; both give the same values. Sites are passed to cati under
+  labels of equal width, because `cati::Tstats()` matches site names as regular expressions
+  and would pool `site1` with `site10`. `data-raw/demo_tstats.R` shows that local adaptation
+  raises T_IP.IC (from 0.02 to 1.0 as it goes from none to complete) and lowers T_IC.IR and
+  T_PC.PR (from 0.54 and 0.89 to below 0.01), means of 20 metacommunities.
+
 - `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` implement
   the dynamic null model of community assembly of Pigot & Etienne (2015, DAMOCLES): each
   lineage colonises the local community at rate gamma and goes locally extinct at rate mu along
