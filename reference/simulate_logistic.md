@@ -47,7 +47,12 @@ simulate_logistic(
 
   Standard deviation of the slopes `b` among the species of the tree, as
   in the code of Ives & Helmus (2011). Appendix C does not give this
-  value.
+  value. The slopes are rescaled to this sample standard deviation in
+  each simulation, so with `lambda > 0` the variance of the Brownian
+  process behind them is larger than `slope_sd^2`; a model that
+  estimates that variance, such as a phylogenetic GLMM, should be
+  compared with it and not with `slope_sd^2` (see
+  `data-raw/validation_pglmm.R`).
 
 - lambda:
 

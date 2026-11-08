@@ -106,7 +106,11 @@ not give these values, and the defaults are those of the code of Ives &amp; Helm
 
 <dt id="arg-slope-sd">slope_sd<a class="anchor" aria-label="anchor" href="#arg-slope-sd"></a></dt>
 <dd><p>Standard deviation of the slopes <code>b</code> among the species of the tree, as in
-the code of Ives &amp; Helmus (2011). Appendix C does not give this value.</p></dd>
+the code of Ives &amp; Helmus (2011). Appendix C does not give this value. The slopes are
+rescaled to this sample standard deviation in each simulation, so with <code>lambda &gt; 0</code> the
+variance of the Brownian process behind them is larger than <code>slope_sd^2</code>; a model that
+estimates that variance, such as a phylogenetic GLMM, should be compared with it and not
+with <code>slope_sd^2</code> (see <code>data-raw/validation_pglmm.R</code>).</p></dd>
 
 
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
