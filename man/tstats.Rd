@@ -12,6 +12,7 @@ tstats(
   method = c("base", "cati"),
   nperm = 99,
   alternative = c("less", "greater", "two.sided"),
+  null_ip = c("site", "species"),
   ...
 )
 }
@@ -31,6 +32,10 @@ values only, much faster in simulation studies with many replicates.}
 
 \item{alternative}{Direction of the test of \code{method = "base"}: \code{"less"} (the default),
 \code{"greater"} or \code{"two.sided"}.}
+
+\item{null_ip}{Null model of \code{T_IP.IC} for \code{method = "base"}: \code{"site"} (the default), trait
+values permuted within each site as in Taudiere & Violle (2016), or \code{"species"}, the
+populations of each species exchanged among its sites (see the section Null models).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
@@ -86,6 +91,22 @@ one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice t
 (niche differentiation within communities for \code{T_IP.IC}, environmental filtering for the
 others), so \code{"less"} tests them. Each trait is randomised on its own.
 
+The null model of \code{T_IP.IC} asks only whether populations differ: permuting individuals
+within a site removes its populations, so null values are near 1, and co-occurring species
+with different means give a large negative effect size even when each population sits where
+its species would be at any site. With \code{null_ip = "species"}, the populations of each
+species, with their individuals, are instead exchanged at random among the sites where the
+species occurs. Each site keeps its species and each species its populations; only which
+population of a species sits at which site is broken. Whole populations are moved, rather
+than their means, because means of populations with different numbers of individuals are
+not exchangeable. The standardised effect size is near zero when the position of a population does not depend on
+the site, positive when co-occurring populations are closer than expected from their species
+(convergence, as under local adaptation to a shared environment), and negative when they are
+further apart (divergence, as under character displacement); \code{alternative = "two.sided"}
+tests both. Species found at a single site stay in place. Local adaptation and character
+displacement move this statistic in opposite directions and can cancel; see
+\code{\link[=population_shifts]{population_shifts()}} to estimate both.
+
 \code{method = "cati"} calls \code{\link[cati:Tstats]{cati::Tstats()}} (Taudiere & Violle 2016) instead and returns its
 object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
 \code{\link[cati:Tstats]{cati::Tstats()}} finds the populations of a site by matching its name as a regular
@@ -139,5 +160,5 @@ community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 \doi{10.1016/j.tree.2011.11.014}
 }
 \seealso{
-\code{\link[=sample_individuals]{sample_individuals()}}.
+\code{\link[=sample_individuals]{sample_individuals()}}, \code{\link[=population_shifts]{population_shifts()}}.
 }

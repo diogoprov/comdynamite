@@ -632,9 +632,21 @@ pacotes de referência em vez de reimplementá-los.
       com `displacement = 10`). O SES de T_IP.IC já é muito negativo sem deslocamento: o nulo
       testa se as populações do sítio diferem, não se divergiram. Falta: vários traits por
       indivíduo (agora que `assemble_community()` tem vários traits), traits de indivíduos que
-      afetam a dinâmica (hoje são sorteados depois), identificabilidade (combinações de
-      adaptação e deslocamento que dão as mesmas razões) e cruzar com dispersão e extinção de
+      afetam a dinâmica (hoje são sorteados depois) e cruzar com dispersão e extinção de
       manchas (cenário 9) para a ponte Leibold–Januario.
+      Terceira rodada (identificabilidade): `tstats(null_ip = "species")` troca as médias das
+      populações entre populações da mesma espécie (SES ≈ 0 sem processo, > 0 com
+      convergência, < 0 com divergência; conservador com n desigual, nunca anticonservador;
+      trocar populações inteiras testaria a filtragem de abundâncias e deu 22% de rejeição sob
+      H0). `population_shifts()` ajusta h e c juntos (regressão dentro de espécie no ambiente
+      e no empurrão previsto pelos competidores, metades sorteadas contra o erro amostral, w
+      por perfil refinado com `optimize()`). Piloto ABC
+      (`data-raw/pilot_tstats_identifiability.R`, metacomunidades de teste fora da referência,
+      500 pseudo-observações): só as razões dão R² 0,87–0,89 para h e 0,56–0,58 para c;
+      com `population_shifts()`, 0,99 e 0,95–0,96, recuperáveis na tolerância 0,05. Auditoria
+      independente (Fable) antes da rodada final mudou o desenho do piloto e o refinamento de
+      w. Limites: modelo do piloto é o mesmo que gera os dados, sem `population_sd`, com n = 10
+      e `intraspecific_sd` = 2 fixos; `c` atenua com c alto e com `fraction`.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
