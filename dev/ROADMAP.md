@@ -592,7 +592,7 @@ pacotes de referência em vez de reimplementá-los.
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
       das notas).
-- [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
+- [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
       iguais (`"variance"`, `"correlation"`), matrizes proporcionais (`"proportional"`) ou
@@ -614,16 +614,16 @@ pacotes de referência em vez de reimplementá-los.
       Ficou de fora: `alpha` matricial e `theta` por trait no OU (como `mvOU()`), e taxas por
       ramo de `trait_rates()` vezes uma matriz (estrutura proporcional por ramo), para não
       mexer em `R/traits_rates.R` enquanto `history_rates()` é ligada à metacomunidade.
-      Falta (proposta, não implementada): (1) `assemble_community(distance = )` com
-      `"euclidean"` (atual; já aceita várias colunas), `"standardized"` (traits em desvios
-      padrão) e `"mahalanobis"` (com a covariância do pool ou uma matriz dada, como a de
-      `rate_matrix()`), porque com traits correlacionados a distância euclidiana conta duas
-      vezes os eixos correlacionados; o filtro passaria a ordenar pela distância de Mahalanobis
-      ao ótimo, que é o nicho gaussiano multidimensional com matriz de largura. (2) Na
-      dinâmica, ambiente com vários eixos (sítios x eixos), ótimos em matriz e
-      `growth_rates()` com `r_max * exp(-0.5 * d2)`, `d2` a distância de Mahalanobis entre
-      ambiente e ótimo; competição por distância multivariada nos traits. (2) muda
-      `species_traits()`, `growth_rates()` e as paisagens, e é o maior.
+      Feito (uso de vários traits, pedido em 2026-11-08): `assemble_community(distance = )`
+      com `"euclidean"` (padrão, como antes), `"standardized"` e `"mahalanobis"` (covariância
+      do pool ou `trait_cov`), na similaridade limitante e no filtro; a ajuda justifica a
+      escolha (euclidiana conta duas vezes eixos correlacionados; Mahalanobis trata cada
+      direção independente como um eixo; padronizada quando cada trait é um eixo distinto).
+      Nicho com vários eixos ambientais em `growth_rates()` e `simulate_metacommunity(env = )`,
+      com uma lista de traits por eixo e o produto das respostas, como em `simulate_static()`.
+      Falta: nicho com correlação entre eixos (matriz de largura por espécie) na dinâmica;
+      competição a partir da distância entre traits (hoje `competition_matrix()` é aleatória
+      ou filogenética); paisagens que gerem vários eixos ambientais de uma vez.
 - [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore.
 

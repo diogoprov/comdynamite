@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- Community assembly with several traits. `assemble_community(distance = )` measures trait
+  space by Euclidean distance (`"euclidean"`, the default and the earlier behaviour),
+  Euclidean distance on traits standardised by their standard deviation in the pool
+  (`"standardized"`), or Mahalanobis distance with the covariance of the pool or a given
+  `trait_cov` (`"mahalanobis"`), in both limiting similarity and filtering; filtering by
+  Mahalanobis distance is filtering by a multivariate Gaussian niche. The help explains when
+  each fits: Euclidean distances count correlated traits more than once.
+  `growth_rates()` and `simulate_metacommunity()` take a niche with several environmental
+  axes: a list of traits, one per axis, and, in `simulate_metacommunity(env = )`, a matrix
+  with one column per axis; the growth rate is the product of the responses to each axis,
+  as in `simulate_static()`.
+
 - `traits_ou()` simulates several correlated traits: `sigma2` can be an evolutionary rate
   matrix, or a named list with one matrix (or one rate) per selective regime, as in the
   multi-rate models of mvMORPH (Clavel et al. 2015). `regimes` can also be a mapped history

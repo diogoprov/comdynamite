@@ -57,7 +57,13 @@
 #' website for the complete list.
 #'
 #' @param landscape An `mc_landscape` object.
-#' @param traits Species traits from [species_traits()].
+#' @param traits Species traits from [species_traits()], or, for a niche with several
+#'   environmental axes, a list of them, one per column of `env`, with the same species; see
+#'   [growth_rates()].
+#' @param env Optional environmental axes of each site, a matrix or data frame with one row per
+#'   site and one column per element of `traits` (such as the `env` of several landscapes on
+#'   the same grid). Needed when `traits` is a list; replaces the `env` of `landscape`. Not
+#'   available with `env_time`.
 #' @param alpha Competition matrix from [competition_matrix()]. Species are matched to the
 #'   rows of `traits` by name, or by position if `alpha` has no names.
 #' @param dispersal Emigration probability, one value or one per species.
@@ -81,7 +87,8 @@
 #' @return An `mc_sim` object: a list with `abundance` (sites x species matrix
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
-#'   used, and `tree` when the traits came from [species_traits()] with a tree.
+#'   used, `env` when given, and `tree` when the traits came from [species_traits()] with a
+#'   tree.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
 #'   Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 #'   process-based metacommunity framework linking local and regional scale
@@ -95,15 +102,33 @@
 #'                               competition_matrix(tr, "phylo"),
 #'                               dispersal = 0.01, n_steps = 200)
 #' sim
+#' # a niche with two environmental axes
+#' ls2 <- landscape_implicit(30)
+#' niche2 <- species_traits(tr, rmax_range = c(1, 1))
+#' sim2 <- simulate_metacommunity(ls, list(species_traits(tr), niche2),
+#'                                competition_matrix(tr, "phylo"), n_steps = 200,
+#'                                env = cbind(ls$env, ls2$env))
 #' @export
 simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    n_steps = 1000, env_time = NULL,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0, pool = NULL,
-                                   initial = NULL, immigration = c("poisson", "multinomial")) {
+                                   initial = NULL, immigration = c("poisson", "multinomial"),
+                                   env = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
-  traits <- as_traits(traits)
+  several <- is.list(traits) && !is.data.frame(traits)
+  if (several || !is.null(env)) {
+    if (!is.null(env_time)) stop("`env_time` is not available with `env`", call. = FALSE)
+    trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
+    env <- as.data.frame(env %||% stop("a list of traits needs `env`, one column per element",
+                                       call. = FALSE))
+    if (nrow(env) != length(landscape$env) || ncol(env) != length(trait_list)) {
+      stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
+           "set of traits (", length(trait_list), ")", call. = FALSE)
+    }
+    traits <- trait_list[[1]]
+  }
   if (!identical(dim(alpha), rep(nrow(traits), 2L))) {
     stop("`alpha` needs one row and one column per species (", nrow(traits), ")", call. = FALSE)
   }
@@ -115,7 +140,10 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
     alpha <- alpha[species, species]
   }
   sites <- paste0("site", seq_along(landscape$env))
-  r <- if (is.null(env_time)) {
+  r <- if (!is.null(env)) {
+    rownames(env) <- sites
+    growth_rates(env, if (several) trait_list else traits)
+  } else if (is.null(env_time)) {
     growth_rates(stats::setNames(landscape$env, sites), traits)
   } else {
     stopifnot(nrow(env_time) == length(landscape$env), ncol(env_time) >= n_steps)
@@ -126,7 +154,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation, pool = pool, initial = initial,
                      immigration = immigration)
-  structure(c(out, list(landscape = landscape, traits = traits, alpha = alpha,
+  if (several) traits <- trait_list
+  structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
                         pool = out$pool, tree = attr(traits, "tree"))), class = "mc_sim")
 }

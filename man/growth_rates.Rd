@@ -7,10 +7,12 @@
 growth_rates(env, traits)
 }
 \arguments{
-\item{env}{Environment of each site.}
+\item{env}{Environment of each site; for several axes, a matrix, data frame or list with
+one axis per column or element, in the order of \code{traits}.}
 
 \item{traits}{Data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame with
-columns \code{optimum}, \code{sigma} and \code{r_max}.}
+columns \code{optimum}, \code{sigma} and \code{r_max}; for several axes, a list of them with the same
+species.}
 }
 \value{
 Numeric matrix with one row per site and one column per species:
@@ -22,6 +24,14 @@ Density-independent growth rate of species j at site i,
 response whose standard deviation is the niche breadth \code{sigma}. This
 \code{sigma} equals \code{sqrt(2)} times the niche breadth parameter of Thompson et
 al. (2020).
+}
+\details{
+With several environmental axes, each species has a response to each axis and the growth
+rate is the product of the responses, as in \code{\link[=simulate_static]{simulate_static()}}: a Gaussian niche in
+several dimensions whose axes are independent (no correlation between the responses to
+different axes), with the optimum and breadth of each axis in its own set of traits. The
+maxima multiply too, so give the traits of all but one axis \code{r_max} of 1, for example with
+\code{species_traits(rmax_range = c(1, 1))}.
 }
 \examples{
 set.seed(1)
