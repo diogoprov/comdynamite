@@ -217,3 +217,26 @@ test_that("nested_variance() rejects a factor with one level", {
   d$region <- "all"
   expect_error(nested_variance(d, "trait", c("region", "site")), "single level")
 })
+
+test_that("the functions handle untestable statistics, missing values and bad input", {
+  # one species per site: T_PC.PR cannot be computed anywhere
+  d <- data.frame(site = rep(c("s1", "s2", "s3"), each = 10),
+                  species = rep(c("a", "b", "c"), each = 10))
+  set.seed(4)
+  d$trait <- rnorm(30)
+  s <- suppressWarnings(tstats_summary(tstats(d, nperm = 39)))
+  pc <- s$traits[s$traits$statistic == "T_PC.PR", ]
+  expect_equal(pc$n_sites, 0)
+  expect_true(is.na(pc$percent_low) && is.na(pc$p_mean_low))
+  d <- toy_individuals()
+  env <- data.frame(site = sprintf("s%02d", 1:6), moisture = 1:6)
+  expect_error(trait_flex(d, formula = ~ depth, env = env), "no column depth")
+  d$abundance <- NA_real_
+  expect_error(trait_flex(d, abundance = "abundance"), "missing values")
+  d$label <- "x"
+  expect_error(trait_flex(d, traits = "label"), "numeric")
+  expect_error(community_index(d, mean, traits = "label"), "numeric")
+  d$trait[d$site == "s01"] <- NA
+  res <- community_index(d, mean, nperm = 0)
+  expect_true(is.na(res$observed[res$site == "s01"]))
+})

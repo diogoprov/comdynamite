@@ -286,7 +286,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #' @export
 nested_variance <- function(data, traits, factors) {
   if (!requireNamespace("nlme", quietly = TRUE)) {
-    stop("nested_variance() needs the package nlme", call. = FALSE)
+    stop("nested_variance() needs the package nlme", call. = FALSE) # nocov
   }
   stopifnot(is.data.frame(data), is.character(traits), is.character(factors),
             length(factors) >= 1)
