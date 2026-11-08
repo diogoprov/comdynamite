@@ -511,10 +511,14 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
+Estado em 2026-11-08: itens de código concluídos (PRs 30–38). Faltam a vignette de taxas por
+ramo, os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
+demonstração das estatísticas T; ver o item de indivíduos) e a rodada de UX.
+
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
 
-- [ ] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
+- [x] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
       Covariância entre traits feita em `traits_ou()` e `rate_matrix()`, conferida contra o
       mvMORPH (item "Funções que usam traits" abaixo).
@@ -664,7 +668,8 @@ pacotes de referência em vez de reimplementá-los.
 
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
-      `food_web_dynamics()`) quanto à consistência com o resto do pacote; pensar em funções e
+      `partner_turnover()`, `turnover_rates()`, `food_web_rates()`, `food_web_dynamics()`,
+      `rate_matrix()`, `sample_individuals()`, `tstats()` e as funções do DAMOCLES) quanto à consistência com o resto do pacote; pensar em funções e
       métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
       `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
       por ramo) e as mensagens de erro.
