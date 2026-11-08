@@ -206,3 +206,19 @@ test_that("subsets of the output print as data frames", {
   expect_output(print(x), "<food_web>")
   expect_output(print(utils::tail(x[, c("time", "R")], 1)), "time")
 })
+
+test_that("trait_floor keeps the mean traits at or above it", {
+  pars <- food_web_params(zc_R = -5)
+  free <- food_web_dynamics(seq(0, 400, by = 50), init = c(R = 50, N = 0, P = 0),
+                            traits = c(R = 1, N = 4, P = 1), params = pars, dt = 0.5)
+  expect_lt(min(free$z_R), 0)
+  floored <- food_web_dynamics(seq(0, 400, by = 50), init = c(R = 50, N = 0, P = 0),
+                               traits = c(R = 1, N = 4, P = 1), params = pars, dt = 0.5,
+                               trait_floor = 0)
+  expect_gt(min(floored$z_R), -1e-3)
+  expect_lt(utils::tail(floored$rate_R, 1), 1e-3)
+  expect_error(food_web_dynamics(0:2, trait_floor = NA), "one number")
+  expect_error(food_web_dynamics(0:2, trait_floor = Inf), "one number")
+  expect_error(food_web_dynamics(0:2, attack = "michaelis", trait_floor = -1), "zero or more")
+  expect_error(food_web_dynamics(0:2, traits = c(1, 4, 1), trait_floor = 2), "at or above")
+})

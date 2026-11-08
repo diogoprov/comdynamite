@@ -2,7 +2,7 @@
 # Run from the root of the package; takes a few minutes.
 # 1. Figure 3.2: a consumer invades a resource at its demographic and evolutionary
 #    equilibrium (R* = c0 / d = 50 at z_R = 10). The book shows the consumer peaking near 10
-#    at about iteration 250 while the resource falls to about 30 and recovers, then both
+#    at about iteration 200 while the resource falls to about 34 and recovers, then both
 #    traits rising at a decelerating rate to about 17.5 (resource) and 15.5 (consumer) by
 #    iteration 3000, with the attack coefficient near 0.09, c(z_R) near 0.9 and f(z_N) near
 #    0.23 at the end. One iteration of the book is one unit of time here.
@@ -10,13 +10,23 @@
 #    the resource at a minimum, both with log mean fitness zero.
 # 3. Figure 3.11 at c0 = 10, one column per attack form: the resource evolves a trait closer
 #    to its intrinsic birth optimum (zc_R) when the predator is present. Read from the figure,
-#    with and without the predator: bidirectional-dependent (panel I) about 12.5 against 16
-#    (zc_R = 12); unidirectional-dependent (panel E) about 13.5 against 15.5 (zc_R = 12);
-#    unidirectional-independent (panel A) about 11.6 against 10 (zc_R = 12: the caption says
-#    20, but the resource alone sits at 12 in the panel, so 12 is used here). Initial traits
-#    and abundances of the invaders are not given in the book; they are set here to small
-#    abundances, the consumer at 6 and the predator at 10, near the consumer at its arrival,
-#    as the predator cannot invade with a trait far from the consumer's.
+#    with and without the predator: bidirectional-dependent (panel I) about 12.4 against 15.6
+#    (zc_R = 12, delta = 0.02); unidirectional-dependent (panel E) about 12.9 against 15.4
+#    (zc_R = 12; the consumer and predator traits of this panel cannot be reproduced from the
+#    caption's parameters: at the plotted traits the consumer cannot persist for any
+#    abundance of the resource up to its carrying capacity); unidirectional-independent
+#    (panel A) about 11.5 against 10.1 (zc_R = 12: the caption says 20, but the resource alone
+#    sits at 12 at low c0 in every panel). Initial abundance of the invaders 0.01, as in the
+#    caption of figure 2 of McPeek (2017, The American Naturalist 189, E91-E117,
+#    doi:10.1086/691101); traits 6 (N) and 10 (P) are our choice, as the predator does not
+#    invade from a trait far from the consumer's. In panel E the predator trait is still
+#    moving at iteration 18000 (the gradient of its death rate is small), so its final value
+#    depends on its initial trait. The chapter's MATLAB code (enallagma.com) was offline and
+#    not archived when checked in November 2026, so these comparisons are against the book.
+#    The resource-consumer code of the supplement of McPeek (2017, The American Naturalist)
+#    integrates with ode45 in continuous time (one iteration = one unit of time); run with the
+#    parameters of figure 3.2 (outside this package, as it has no declared licence), it gives
+#    the consumer peak at t = 200 and trajectories within 1e-4 of food_web_dynamics().
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 
 # 1. Figure 3.2
@@ -55,7 +65,7 @@ print(summary_33)
 panels <- list(
   bidirectional = list(attack = "gaussian", pars = list(
     c0 = 10, d = 0.2, a0 = 1, b = 0.1, h = 0.1, m0 = 0.05, n = 0.1, l = 0.1, f0 = 0.2, g = 0,
-    x0 = 0.01, y = 0, beta = 5, phi = 5, gamma = 0.01, theta = 0.01, delta = 0.01, zc_R = 12,
+    x0 = 0.01, y = 0, beta = 5, phi = 5, gamma = 0.01, theta = 0.01, delta = 0.02, zc_R = 12,
     zf_N = 1, zx_P = 1)),
   unidirectional_dependent = list(attack = "logistic", pars = list(
     c0 = 10, d = 0.2, a0 = 0.5, b = 0.1, h = 0.2, m0 = 0.01, n = 0.1, l = 0.2, f0 = 0.2, g = 0,
