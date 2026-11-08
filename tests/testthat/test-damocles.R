@@ -134,3 +134,28 @@ test_that("an impossible community has a likelihood of zero at any rates", {
   fit <- fit_damocles(c(a = 1, b = 1, c = 0), tree)
   expect_identical(fit$loglik, -Inf)
 })
+
+test_that("fit_damocles with shared rates maximises the summed log-likelihood", {
+  set.seed(6)
+  tree <- treeshapesim::sim_tree_shape(40)
+  comm <- simulate_damocles(tree, 1, 1, n = 4)
+  separate <- fit_damocles(comm, tree)
+  pooled <- fit_damocles(comm, tree, shared = TRUE)
+  expect_s3_class(pooled, "mc_damocles_fit")
+  expect_identical(rownames(pooled), rownames(comm))
+  expect_length(unique(pooled$gamma), 1)
+  expect_length(unique(pooled$mu), 1)
+  expect_equal(pooled$loglik,
+               unname(damocles_loglik(comm, tree, pooled$gamma[1], pooled$mu[1])))
+  expect_equal(attr(pooled, "loglik_total"), sum(pooled$loglik))
+  expect_gte(attr(pooled, "loglik_total"), sum(damocles_loglik(comm, tree, 1, 1)) - 1e-6)
+  # separate rates can only fit as well or better
+  expect_true(sum(separate$loglik) >= attr(pooled, "loglik_total") - 1e-6)
+  expect_null(attr(separate, "loglik_total"))
+  expect_output(print(pooled), "shared by 4 communities")
+  one <- fit_damocles(comm[1, , drop = FALSE], tree, shared = TRUE)
+  expect_equal(one$loglik, separate$loglik[1], tolerance = 1e-4)
+  expect_error(fit_damocles(comm, tree, shared = NA), "TRUE or FALSE")
+  res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE)
+  expect_equal(res$gamma[1], res$gamma[2])
+})

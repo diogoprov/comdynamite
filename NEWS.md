@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `fit_damocles(shared = TRUE)` and `damocles_test(shared = TRUE)` estimate one pair of
+  DAMOCLES rates for several communities on the same tree from the sum of their
+  log-likelihoods. A single community rarely holds enough information on colonisation and
+  extinction; pooling communities narrows the estimates (`data-raw/validation_damocles.R`),
+  provided they can be treated as independent realisations of the process.
+
 - `food_web_rates()` turns the rates of trait change of the resource, consumer and predator
   from `food_web_dynamics()` into rates per branch for `trait_rates(edge_rates = )`: each tip
   belongs to a trophic level, and over the last `window` units of time of its branch the rate
