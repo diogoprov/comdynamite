@@ -11,7 +11,9 @@ trait_rates(
   shifts = 1,
   shift_size = 4,
   shift_edges = NULL,
+  shift_rate = NULL,
   shift_branch = FALSE,
+  relative = TRUE,
   rate_sd = 0.5,
   root_value = 0
 )
@@ -23,15 +25,22 @@ trait_rates(
 
 \item{sigma2}{Rate at the root (\code{"shift"}, \code{"gbm"}) or median rate (\code{"iid"}).}
 
-\item{shifts}{Number of shifts, for \code{"shift"} when \code{shift_edges} is not given.}
+\item{shifts}{Number of shifts, for \code{"shift"} when neither \code{shift_edges} nor \code{shift_rate} is
+given.}
 
-\item{shift_size}{Multipliers of the rate at each shift, recycled to the number of shifts.
-Values below 1 slow evolution down.}
+\item{shift_size}{Multipliers of the rate at each shift, recycled to the number of shifts, or
+a function of the number of shifts that gives them. Values below 1 slow evolution down.}
 
-\item{shift_edges}{Optional row numbers of \code{tree$edge} where the shifts happen.}
+\item{shift_edges}{Optional row numbers of \code{tree$edge} at whose start the shifts happen.}
 
-\item{shift_branch}{Should a shift change only its own branch, rather than all branches
-descending from it?}
+\item{shift_rate}{Optional rate of shifts per unit of branch length, for shifts as a Poisson
+process along the branches.}
+
+\item{shift_branch}{Should a shift last only to the end of its branch, rather than pass to
+all branches descending from it?}
+
+\item{relative}{Multiply the rate before each shift by \code{shift_size} (\code{TRUE}), or set the rate
+after it to \code{sigma2} times \code{shift_size} (\code{FALSE})?}
 
 \item{rate_sd}{Standard deviation of the logarithm of the rate: per square root of time for
 \code{"gbm"} and among branches for \code{"iid"}.}
@@ -48,7 +57,8 @@ root first;
 \item \code{node_rate}: for \code{"gbm"}, the rate at every node, tips first, named by node number;
 \code{NULL} otherwise;
 \item \code{shifts}: for \code{"shift"}, a data frame with the \code{edge} (row of \code{tree$edge}), the \code{node}
-at its end and the \code{multiplier}; \code{NULL} otherwise;
+at its end, the \code{position} of the shift as time from the start of the edge, the
+\code{multiplier} and the \code{rate} after the shift; \code{NULL} otherwise;
 \item \code{tree}: the tree given, and \code{scaled}: the tree with each branch length multiplied by its
 rate, under which the trait is ordinary Brownian motion.
 }
@@ -60,12 +70,20 @@ the rates that generated the data. Three models of how rates vary are available:
 }
 \details{
 \itemize{
-\item \code{"shift"}: the rate is \code{sigma2} at the root and is multiplied by \code{shift_size} at a few
-branches. With \code{shift_branch = FALSE} the new rate is inherited by every branch descending
-from the shifted one, as in the models of Eastman et al. (2011), traitMedusa in motmot
-(Thomas & Freckleton 2012) or bifrost; with \code{shift_branch = TRUE} only the shifted branch
-changes. The branches are drawn with probabilities proportional to their length, or given
-in \code{shift_edges}.
+\item \code{"shift"}: the rate is \code{sigma2} at the root and changes at a few points of the tree. With
+\code{shift_branch = FALSE} the new rate is inherited by every branch descending from the
+shift, as in the models of Eastman et al. (2011), traitMedusa in motmot (Thomas &
+Freckleton 2012), BAMM (Rabosky 2014) or bifrost; with \code{shift_branch = TRUE} it lasts only
+to the end of the branch. By default \code{shifts} shifts happen at the start of branches drawn
+with probabilities proportional to their length, or of the branches in \code{shift_edges}. With
+\code{shift_rate}, shifts instead happen as a Poisson process along the branches, as under the
+prior of BAMM: their number is Poisson with mean \code{shift_rate} times the total length of the
+tree, and they fall at uniform positions over it, so also within branches. At each shift
+the rate is multiplied by \code{shift_size} (\code{relative = TRUE}), or becomes \code{sigma2} times
+\code{shift_size} whatever it was before (\code{relative = FALSE}), as each new regime of BAMM or
+bifrost has a rate of its own. \code{shift_size} can be a function of the number of shifts that
+draws them, such as \code{function(n) stats::rlnorm(n, 0, 1)}. The rate of a branch is its mean
+over the branch, weighted by time.
 \item \code{"gbm"}: the logarithm of the rate evolves itself by Brownian motion with standard
 deviation \code{rate_sd} per square root of time, starting from \code{log(sigma2)} at the root, as in
 the variable-rate models of Revell (2021) and Martin et al. (2023). The rate of a branch is
@@ -84,6 +102,10 @@ tr <- treeshapesim::sim_tree_shape(20)
 x <- trait_rates(tr, "shift", shifts = 1, shift_size = 8)
 x$shifts
 head(x$tips)
+# shifts as a Poisson process, each new regime with a rate of its own, as in BAMM
+b <- trait_rates(tr, "shift", shift_rate = 0.1, relative = FALSE,
+                 shift_size = function(n) stats::rexp(n))
+b$shifts
 g <- trait_rates(tr, "gbm", rate_sd = 0.5)
 summary(g$edge_rate)
 # as the environmental optima of a metacommunity
@@ -91,6 +113,10 @@ traits <- species_traits(tr, optima = g$tips)
 \dontshow{\}) # examplesIf}
 }
 \references{
+Rabosky, D. L. (2014). Automatic detection of key innovations, rate shifts, and
+diversity-dependence on phylogenetic trees. \emph{PLoS ONE}, 9, e89543.
+\doi{10.1371/journal.pone.0089543}
+
 Eastman, J. M., Alfaro, M. E., Joyce, P., Hipp, A. L., & Harmon, L. J. (2011). A
 novel comparative method for identifying shifts in the rate of character evolution on
 trees. \emph{Evolution}, 65, 3578--3589. \doi{10.1111/j.1558-5646.2011.01401.x}

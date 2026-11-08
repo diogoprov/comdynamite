@@ -26,7 +26,8 @@ test_that("shifts are inherited by descendants unless they change one branch", {
   x <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10)
   expect_equal(x$edge_rate[c(inner, below)], rep(10, 3))
   expect_equal(x$edge_rate[-c(inner, below)], rep(1, 3))
-  expect_equal(x$shifts, data.frame(edge = inner, node = 6L, multiplier = 10))
+  expect_equal(x$shifts, data.frame(edge = inner, node = 6L, position = 0, multiplier = 10,
+                                    rate = 10))
   only <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10, shift_branch = TRUE)
   expect_equal(only$edge_rate[inner], 10)
   expect_equal(only$edge_rate[-inner], rep(1, 5))
@@ -37,7 +38,10 @@ test_that("shifts are inherited by descendants unless they change one branch", {
   drawn <- trait_rates(tree, "shift", shifts = 2)
   expect_equal(nrow(drawn$shifts), 2)
   expect_error(trait_rates(tree, "shift", shift_edges = 9), "row numbers")
-  expect_error(trait_rates(tree, "shift", shift_edges = 1, shift_size = -1), "positive")
+  expect_error(trait_rates(tree, "shift", shift_edges = 1, shift_size = -1), "positive multiplier")
+  expect_error(trait_rates(tree, "shift", shift_edges = 1, shift_size = function(n) 1:2),
+               "one positive multiplier")
+  expect_error(trait_rates(tree, "shift", shift_rate = -1), "zero or more")
   expect_error(trait_rates(tree, sigma2 = 0), "positive number")
   expect_error(trait_rates(tree, rate_sd = -1), "zero or more")
 })
@@ -114,4 +118,36 @@ test_that("hidden rate classes give an observed and a hidden history", {
   expect_error(trait_mk(tree, rate_classes = c(1, 2), class_switch = -1), "zero or more")
   skip_if_not_installed("phytools")
   expect_equal(sum(phytools::countSimmap(h)$N), sum(vapply(h$maps, length, integer(1)) - 1))
+})
+
+test_that("shifts can follow a Poisson process and start regimes of their own", {
+  tree <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
+  set.seed(9)
+  counts <- replicate(3000, nrow(trait_rates(tree, "shift", shift_rate = 0.25)$shifts))
+  # total length 6: Poisson with mean 1.5
+  expect_equal(c(mean(counts), stats::var(counts)), c(1.5, 1.5), tolerance = 0.08)
+  set.seed(10)
+  x <- trait_rates(tree, "shift", shift_rate = 1, shift_size = function(n) stats::rexp(n))
+  expect_true(all(x$shifts$position >= 0 & x$shifts$position <= 1))
+  expect_equal(x$scaled$edge.length, tree$edge.length * x$edge_rate)
+  # a shift halfway along a branch: the rate of the branch is the mean over time
+  inner <- which(tree$edge[, 2] == 6)
+  below <- which(tree$edge[, 2] %in% c(1, 2))
+  pair <- ape::read.tree(text = "(a:1,b:1);")
+  set.seed(11)
+  repeat {
+    p <- trait_rates(pair, "shift", shift_rate = 1, shift_size = 3)
+    once <- as.integer(names(which(table(p$shifts$edge) == 1)))
+    if (length(once) > 0) break
+  }
+  shift <- p$shifts[p$shifts$edge == once[1], ]
+  expect_equal(p$edge_rate[once[1]], shift$position + 3 * (1 - shift$position))
+  # relative = FALSE: nested shifts set the rate from sigma2, not from the parent regime
+  own <- trait_rates(tree, "shift", sigma2 = 2, shift_edges = c(inner, below[1]),
+                     shift_size = c(10, 0.5), relative = FALSE)
+  expect_equal(own$edge_rate[c(inner, below)], c(20, 1, 20))
+  expect_equal(own$shifts$rate, c(20, 1)[order(c(inner, below[1]))])
+  only <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10, relative = FALSE,
+                      shift_branch = TRUE)
+  expect_equal(only$edge_rate[below], c(1, 1))
 })
