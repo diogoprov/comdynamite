@@ -61,6 +61,17 @@ test_that("sample_individuals() checks its arguments", {
   expect_error(sample_individuals(sim, population_sd = 1:3), "one per species")
   expect_error(sample_individuals(sim, local_adaptation = c(sp1 = 0.5)), "no value for")
   expect_error(sample_individuals(list()), "mc_sim")
+  expect_error(sample_individuals(sim, local_adaptation = "a"), "must be numbers")
+  expect_error(sample_individuals(sim, intraspecific_sd = NA_real_), "must be numbers")
+})
+
+test_that("unnamed per-species values follow the order of the species", {
+  sim <- small_sim()
+  sp <- rownames(sim$traits)
+  ind <- sample_individuals(sim, local_adaptation = rep(c(0, 1), 4), intraspecific_sd = 0)
+  adapted <- ind$species %in% sp[c(2, 4, 6, 8)]
+  expect_equal(ind$trait[adapted], ind$env[adapted])
+  expect_equal(ind$trait[!adapted], ind$optimum[!adapted])
 })
 
 # a hand-made data set with known variances
