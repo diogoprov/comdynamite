@@ -21,8 +21,12 @@
 #    doi:10.1086/691101); traits 6 (N) and 10 (P) are our choice, as the predator does not
 #    invade from a trait far from the consumer's. In panel E the predator trait is still
 #    moving at iteration 18000 (the gradient of its death rate is small), so its final value
-#    depends on its initial trait. The author's MATLAB code (enallagma.com) was offline and
+#    depends on its initial trait. The chapter's MATLAB code (enallagma.com) was offline and
 #    not archived when checked in November 2026, so these comparisons are against the book.
+#    The resource-consumer code of the supplement of McPeek (2017, The American Naturalist)
+#    integrates with ode45 in continuous time (one iteration = one unit of time); run with the
+#    parameters of figure 3.2 (outside this package, as it has no declared licence), it gives
+#    the consumer peak at t = 200 and trajectories within 1e-4 of food_web_dynamics().
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 
 # 1. Figure 3.2

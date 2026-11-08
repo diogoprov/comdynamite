@@ -25,8 +25,12 @@
   and from 10.1 to 11.6 with Michaelis-Menten attack (10.1 to 11.5). The three-level
   Michaelis-Menten panel is reproduced closely; the consumer and predator traits of the
   logistic panel cannot be reproduced from the parameters of its caption, at which the
-  consumer cannot persist. The author's MATLAB code was offline and not archived, so the
-  comparison is against the book.
+  consumer cannot persist. Against the MATLAB code of the resource-consumer models published
+  with McPeek (2017, *The American Naturalist*), the fitness functions and gradients are the
+  same and the trajectories of figure 3.2 agree within 1e-4 of the author's `ode45`
+  integration; that code has no predator, and the chapter's own code was offline and not
+  archived. `trait_floor` keeps mean traits at or above a value, as the author's code does
+  at zero (the default with Michaelis-Menten attack).
 
 - `history_rates()` turns the history of a discrete character along the tree, such as the
   region or habitat of each lineage from `trait_mk()` or a stochastic map, into the rate of

@@ -580,7 +580,11 @@ pacotes de referência em vez de reimplementá-los.
       reproduzidos quase exatamente. Discrepâncias atribuídas ao livro: legenda da Fig. 3.11
       com z̃c_R = 20 nos painéis A–D (o recurso sozinho fica em 12) e painel E (logístico)
       irreprodutível com os parâmetros da legenda (o consumidor não persiste no traço
-      plotado). Corrigido δ = 0,02 nos painéis I–L na validação.
+      plotado). Corrigido δ = 0,02 nos painéis I–L na validação. Contra o código MATLAB dos
+      modelos recurso–consumidor do suplemento de McPeek (2017, *Am Nat*): funções de aptidão
+      e gradientes idênticos e trajetórias da Fig. 3.2 a 1e-4 do `ode45` do autor; sem
+      predador nesse código. Acrescentado `trait_floor` (piso dos traços em zero, como no
+      código do autor; padrão com Michaelis-Menten).
       Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`, várias
       espécies por nível (cap. 5) e o cenário 4 das notas.
 - [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,

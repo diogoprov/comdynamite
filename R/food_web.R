@@ -134,6 +134,15 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #' function of the traits of the consumer and the predator, as box 3.1 defines it; with
 #' this reading the three-level panel A of figure 3.11 is reproduced closely.
 #'
+#' For the resource and the consumer, the implementation matches the MATLAB code of the
+#' resource-consumer models that McPeek (2017, *The American Naturalist*) published as
+#' supplementary material: the same fitness functions, functional responses and selection
+#' gradients, and trajectories of figure 2 of that article (figure 3.2 of the book) within
+#' 1e-4 of the author's `ode45` integration in continuous time, where one "iteration" of the
+#' book is one unit of time. That code floors the mean traits at zero (`trait_floor`) and has
+#' no extinction threshold. It has no predator, so the predator level rests on the equations
+#' of the book alone.
+#'
 #' @param times Times at which to return the state, increasing; the run starts at the first.
 #' @param init Abundances at the first time, or at introduction for the levels in
 #'   `introductions`, named `R`, `N` and `P` or in that order. Zero means absent.
@@ -149,7 +158,11 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #'   appear, after the first time. Until then they are absent whatever `init` says.
 #' @param dt Step of the integration; the intervals between the times of `times` and of
 #'   `introductions` are divided into steps no longer than this.
-#' @param extinction Abundance below which a level is set to zero.
+#' @param extinction Abundance below which a level is set to zero; McPeek's code has no such
+#'   threshold, so use 0 to compare with it.
+#' @param trait_floor Lowest value of the mean traits: a trait that falls below it relaxes back
+#'   at rate `trait_floor - z`. `NULL` uses 0 with `attack = "michaelis"`, where traits must be
+#'   positive, and no floor (`-Inf`) otherwise. McPeek's MATLAB code floors every trait at 0.
 #' @return A data frame of class `food_web` with one row per time in `times` and columns
 #'   `time`; the abundances `R`, `N`, `P`; the mean traits `z_R`, `z_N`, `z_P`; the selection
 #'   gradients `grad_R`, `grad_N`, `grad_P` (\eqn{\partial \ln W / \partial z} at the mean, so
@@ -159,6 +172,10 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #'   attributes.
 #' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
 #'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
+#'
+#'   McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the
+#'   coevolution of community structure. *The American Naturalist*, 189, E91--E117.
+#'   \doi{10.1086/691101}
 #' @seealso [food_web_params()]; [plot.food_web()] and [animate_food_web()] to draw the
 #'   results; [trait_rates()] for rates that vary among branches of a tree.
 #' @examples
@@ -177,8 +194,14 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
                               traits = c(R = 10, N = 4, P = 1), params = food_web_params(),
                               attack = c("gaussian", "logistic", "michaelis"),
                               V = c(R = 0.2, N = 0.2, P = 0.2), omnivory = FALSE,
-                              introductions = NULL, dt = 0.1, extinction = 1e-6) {
+                              introductions = NULL, dt = 0.1, extinction = 1e-6,
+                              trait_floor = NULL) {
   attack <- match.arg(attack)
+  if (is.null(trait_floor)) trait_floor <- if (attack == "michaelis") 0 else -Inf
+  if (!is.numeric(trait_floor) || length(trait_floor) != 1 || is.na(trait_floor) ||
+      trait_floor == Inf) {
+    stop("`trait_floor` must be one number or -Inf", call. = FALSE)
+  }
   levels <- c("R", "N", "P")
   if (!is.numeric(times) || length(times) < 2 || anyNA(times) || any(diff(times) <= 0)) {
     stop("`times` must be at least two increasing numbers", call. = FALSE)
@@ -218,7 +241,14 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
   if (attack == "michaelis" && any(traits < 0)) {
     stop("`traits` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
   }
+  if (attack == "michaelis" && trait_floor < 0) {
+    stop("`trait_floor` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
+  }
+  if (any(traits < trait_floor)) {
+    stop("`traits` must be at or above `trait_floor`", call. = FALSE)
+  }
   p <- unclass(params)
+  p$trait_floor <- trait_floor
   if (!omnivory) p$v0 <- 0
 
   state <- c(init, traits)
@@ -360,7 +390,17 @@ fw_gradients <- function(state, p, attack, sh) {
 
 fw_deriv <- function(state, p, attack, V) {
   g <- fw_gradients(state, p, attack, fw_shapes(p, attack))
-  c(state[1:3] * g$growth, V * g$grad)
+  c(state[1:3] * g$growth, fw_trait_change(state, g$grad, p, V))
+}
+
+# change of the mean traits: V times the gradient, except that a trait below the floor relaxes
+# back to it at rate (floor - z), as McPeek's code does with a floor of zero
+fw_trait_change <- function(state, grad, p, V) {
+  dz <- V * grad
+  z <- state[4:6]
+  below <- z < p$trait_floor
+  dz[below] <- p$trait_floor - z[below]
+  dz
 }
 
 fw_rk4 <- function(state, h, p, attack, V) {
@@ -378,7 +418,7 @@ fw_rk4 <- function(state, h, p, attack, V) {
 fw_report <- function(state, p, attack, V) {
   sh <- fw_shapes(p, attack)
   g <- fw_gradients(state, p, attack, sh)
-  c(state, g$grad, abs(V * g$grad),
+  c(state, g$grad, abs(fw_trait_change(state, g$grad, p, V)),
     fw_attack(state[["z_R"]], state[["z_N"]], p$a0, sh$RN, attack),
     fw_attack(state[["z_N"]], state[["z_P"]], p$m0, sh$NP, attack),
     fw_attack(state[["z_R"]], state[["z_P"]], p$v0, sh$RP, attack))
