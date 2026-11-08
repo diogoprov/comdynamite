@@ -175,6 +175,13 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   as many of these values as it has individuals, drawn without replacement from the region;
 #'   population means are computed again from the values drawn.
 #'
+#' The null model of `T_IC.IR` leaves the regional pool as it is, so its denominator (the
+#' variance among all individuals) stays that of the observed data, and only the variance
+#' within sites is randomised. Taking the denominator from the values drawn, which repeat
+#' individuals across sites, biases the null and makes the test anti-conservative. In the null
+#' model of `T_PC.PR` the population means are themselves computed from the values drawn, so
+#' their regional variance is computed again from them, as in Taudiere & Violle (2016).
+#'
 #' The standardised effect size is `(observed - mean of null) / sd of null`, and the p-value
 #' is `(1 + r) / (1 + nperm)`, where `r` is the number of null values at or below the observed
 #' one (`alternative = "less"`), at or above it (`"greater"`), or twice the smaller of the two
@@ -251,7 +258,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   V., & Messier, J. (2012). The return of the variance: intraspecific variability in
 #'   community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
 #'   \doi{10.1016/j.tree.2011.11.014}
-#' @seealso [sample_individuals()], [population_shifts()].
+#' @seealso [tstats_summary()] to summarise the tests, [sample_individuals()],
+#'   [population_shifts()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -308,19 +316,9 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   if (nperm == 0) return(out)
   null <- do.call(abind_rows, lapply(per_trait, `[[`, "null"))
   for (stat in ratios) {
-    sims <- null[, , stat, drop = FALSE][, , 1]
-    sims <- matrix(sims, nperm)
-    obs <- out[[stat]]
-    valid <- colSums(is.finite(sims))
-    null_mean <- colMeans(sims, na.rm = TRUE)
-    null_sd <- apply(sims, 2, stats::sd, na.rm = TRUE)
-    below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-    above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
-    p <- switch(alternative, less = (1 + below) / (1 + valid),
-                greater = (1 + above) / (1 + valid),
-                two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
-    out[[paste0("ses_", stat)]] <- finite_or_na((obs - null_mean) / null_sd)
-    out[[paste0("p_", stat)]] <- ifelse(is.na(obs) | valid == 0, NA_real_, p)
+    compared <- null_compare(out[[stat]], null[, , stat], alternative)
+    out[[paste0("ses_", stat)]] <- compared$ses
+    out[[paste0("p_", stat)]] <- compared$p
   }
   attr(out, "null") <- null
   out
@@ -501,8 +499,10 @@ tstats_groups <- function(site_id, species_id, site_levels) {
        by_site = split(seq_along(site), factor(site, seq_along(site_levels))))
 }
 
-# the three ratios per site, from trait values and the groups of tstats_groups()
-t_ratios <- function(z, g) {
+# the three ratios per site, from trait values and the groups of tstats_groups(); var_r fixes
+# the denominator of T_IC.IR (variance among all individuals), which its null model does not
+# randomise
+t_ratios <- function(z, g, var_r = NULL) {
   z <- z - mean(z)
   pop_mean <- group_mean(z, g$pop, g$n_pops)
   pop_var <- group_var(z, g$pop, g$n_pops)
@@ -512,7 +512,8 @@ t_ratios <- function(z, g) {
   mean_ip <- group_sum(pop_var, g$pop_site, g$n_sites) /
     group_sum(as.numeric(has_var), g$pop_site, g$n_sites)
   var_pc <- group_var(pop_mean, g$pop_site, g$n_sites)
-  data.frame(T_IP.IC = mean_ip / var_ic, T_IC.IR = var_ic / stats::var(z),
+  if (is.null(var_r)) var_r <- stats::var(z)
+  data.frame(T_IP.IC = mean_ip / var_ic, T_IC.IR = var_ic / var_r,
              T_PC.PR = var_pc / stats::var(pop_mean))
 }
 
@@ -524,6 +525,7 @@ tstats_null <- function(z, g, nperm, null_ip = "site") {
   pop_mean <- group_mean(z, g$pop, g$n_pops)
   carried <- pop_mean[g$pop]
   deviation <- z - carried
+  var_r <- stats::var(z)
   same_species <- Filter(function(ix) length(ix) > 1, split(seq_len(g$n_pops), g$pop_species))
   out <- array(NA_real_, c(nperm, g$n_sites, 3),
                list(NULL, NULL, c("T_IP.IC", "T_IC.IR", "T_PC.PR")))
@@ -539,7 +541,7 @@ tstats_null <- function(z, g, nperm, null_ip = "site") {
     }
     regional <- numeric(n)
     regional[positions] <- unlist(lapply(sizes, function(m) z[sample.int(n, m)]))
-    out[i, , "T_IC.IR"] <- t_ratios(regional, g)$T_IC.IR
+    out[i, , "T_IC.IR"] <- t_ratios(regional, g, var_r = var_r)$T_IC.IR
     populations <- numeric(n)
     populations[positions] <- unlist(lapply(sizes, function(m) carried[sample.int(n, m)]))
     out[i, , "T_PC.PR"] <- t_ratios(populations, g)$T_PC.PR
@@ -563,6 +565,29 @@ group_var <- function(x, g, n_groups) {
   out <- group_sum((x - mean_g[g])^2, g, n_groups) / (n - 1)
   out[n < 2] <- NA_real_
   out
+}
+
+# standardised effect sizes and permutation p-values of observed values (vector of length m)
+# against null values (matrix nperm x m); NA where the observed value or every null value is
+# missing
+null_compare <- function(obs, sims, alternative = c("less", "greater", "two.sided")) {
+  alternative <- match.arg(alternative)
+  sims <- matrix(sims, ncol = length(obs))
+  sims[!is.finite(sims)] <- NA
+  nperm <- nrow(sims)
+  valid <- colSums(!is.na(sims))
+  null_mean <- colMeans(sims, na.rm = TRUE)
+  null_sd <- apply(sims, 2, function(v) if (sum(!is.na(v)) > 1) stats::sd(v, na.rm = TRUE) else NA)
+  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  p <- switch(alternative, less = (1 + below) / (1 + valid),
+              greater = (1 + above) / (1 + valid),
+              two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
+  # null values that differ only by rounding (an index the randomisation cannot change) have
+  # no spread
+  null_sd[null_sd <= 1e-10 * pmax(1, abs(null_mean))] <- NA
+  list(ses = finite_or_na((obs - null_mean) / null_sd),
+       p = ifelse(is.na(obs) | valid == 0, NA_real_, p))
 }
 
 finite_or_na <- function(v) ifelse(is.finite(v), v, NA_real_)

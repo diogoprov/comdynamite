@@ -1,5 +1,25 @@
 # comdynamite (development version)
 
+- `tstats()`: the null model of `T_IC.IR` now keeps the observed regional variance as the
+  denominator. It was computed from the values drawn, which repeat individuals across sites;
+  this biased the null upward and made the tests anti-conservative (about 6% of sites
+  rejected per tail at a nominal 4% in simulations with random traits).
+- New functions for analyses of intraspecific trait variation, written from the published
+  definitions to replace functions of cati 0.99.6 that give wrong results (an audit found
+  bugs reported as adrientaudiere/cati#13 to #21): `tstats_summary()` summarises the tests of
+  `tstats()` (shares of sites below and above the null, test of the mean over sites, the sites
+  that deviate), with sites that cannot be tested left out instead of given small p-values;
+  `trait_flex()` splits community-weighted means into species turnover, intraspecific
+  variability and covariation (Lepš et al. 2011), with environmental variables matched to sites
+  by name, and a `plot()` method (ggplot2) with explained and residual sums of squares; `nested_variance()` gives REML variance components across nested levels (nlme in
+  Suggests) and stops when the factors are not ordered from the broadest to the finest level,
+  with a `plot()` method that draws stacked bars of the shares in Okabe-Ito colours (ggplot2
+  in Suggests);
+  `community_index()` compares any trait index of communities with four null models, with all
+  traits of an individual kept together in multivariate indices. The standardised effect size
+  is now `NA` when the null values do not vary, as for an index that a randomisation cannot
+  change.
+
 - `population_shifts()` estimates local adaptation (`h`) and character displacement (`c`)
   together from the population means of individuals, by a regression within species on the
   environment of the site and on the push predicted from co-occurring competitors, with the

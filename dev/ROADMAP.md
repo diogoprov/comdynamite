@@ -654,6 +654,18 @@ pacotes de referência em vez de reimplementá-los.
       independente (Fable) antes da rodada final mudou o desenho do piloto e o refinamento de
       w. Limites: modelo do piloto é o mesmo que gera os dados, sem `population_sd`, com n = 10
       e `intraspecific_sd` = 2 fixos; `c` atenua com c alto e com `fraction`.
+      Quarta rodada (substitutos do cati): auditoria completa do cati 0.99.6 achou bugs em
+      `ComIndexMulti`, `ComIndex` (regional.pop, ordem de `sp`), `sum_Tstats`, rótulos de
+      `Tstats`, p-valores e `ses()` (cati#13 a #21). Reescritos a partir das definições:
+      `tstats_summary()`, `trait_flex()` (Lepš et al. 2011), `nested_variance()` (checa a
+      ordem do aninhamento) e `community_index()` (quatro nulos, multivariado). Conferidos
+      contra o cati onde ele está certo e na reanálise do capítulo 1 do Leandro.
+      Auditoria Fable das funções novas: corrigido o denominador do nulo de T_IC.IR em
+      `tstats()` (recalculado a partir dos valores sorteados, anticonservador; o cati faz o
+      mesmo); `trait_flex()` com NA em `env`, variável chamada `y` e fórmula sem intercepto.
+      Em aberto: o nulo de T_PC.PR (método publicado, denominador recalculado) tem tamanho
+      um pouco acima do nominal na cauda inferior (0,068 contra 0,04); pensar num nulo que
+      sorteie médias de população diretamente, com o denominador observado.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
