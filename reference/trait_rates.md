@@ -19,7 +19,8 @@ trait_rates(
   shift_branch = FALSE,
   relative = TRUE,
   rate_sd = 0.5,
-  root_value = 0
+  root_value = 0,
+  edge_rates = NULL
 )
 ```
 
@@ -75,6 +76,13 @@ trait_rates(
 - root_value:
 
   Trait value at the root.
+
+- edge_rates:
+
+  Optional rate of each branch, in the order of the rows of `tree$edge`,
+  such as those of
+  [`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md).
+  When given, `model` and its arguments are ignored.
 
 ## Value
 

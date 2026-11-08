@@ -74,7 +74,8 @@ the rates that generated the data. Three models of how rates vary are available:
 <span>  shift_branch <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  relative <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  rate_sd <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  root_value <span class="op">=</span> <span class="fl">0</span></span>
+<span>  root_value <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  edge_rates <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,6 +131,11 @@ after it to <code>sigma2</code> times <code>shift_size</code> (<code>FALSE</code
 
 <dt id="arg-root-value">root_value<a class="anchor" aria-label="anchor" href="#arg-root-value"></a></dt>
 <dd><p>Trait value at the root.</p></dd>
+
+
+<dt id="arg-edge-rates">edge_rates<a class="anchor" aria-label="anchor" href="#arg-edge-rates"></a></dt>
+<dd><p>Optional rate of each branch, in the order of the rows of <code>tree$edge</code>, such as
+those of <code><a href="history_rates.html">history_rates()</a></code>. When given, <code>model</code> and its arguments are ignored.</p></dd>
 
 </dl></div>
     <div class="section level2">
