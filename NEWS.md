@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- `history_rates()` turns the history of a discrete character along the tree, such as the
+  region or habitat of each lineage from `trait_mk()` or a stochastic map, into the rate of
+  each branch for `trait_rates(edge_rates = )`: a rate per state (`"state"`), a burst after
+  each change that decays exponentially (`"burst"`), or a rate that depends on the number of
+  lineages in the same state (`"sympatry"`, as in the diversity-dependent model with
+  biogeography of Drury et al. 2016). The rate of a branch is its mean over time.
+  `data-raw/validation_sympatry.R` checks `"sympatry"` against RPANDA: the covariance matrices
+  of the tips matched those of the diversity-dependent model with biogeography to 3e-15 in 30
+  stochastic maps, and `RPANDA::fit_t_comp()` recovered r from traits simulated with these
+  rates (60 tips, three regions; mean estimate -0.30 for a true -0.3, 80% of estimates between
+  -0.32 and -0.27, and 0.005 for a true 0; mean sigma2 0.98 and 0.91 for a true 1).
+
 - `trait_rates()`: `shift_rate` draws shifts as a Poisson process along the branches, as under
   the prior of BAMM, so they can fall within branches and the rate of a branch is its mean over
   time; `relative = FALSE` gives each new regime a rate of its own, as in BAMM and bifrost,

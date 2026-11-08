@@ -15,7 +15,8 @@ trait_rates(
   shift_branch = FALSE,
   relative = TRUE,
   rate_sd = 0.5,
-  root_value = 0
+  root_value = 0,
+  edge_rates = NULL
 )
 }
 \arguments{
@@ -46,6 +47,9 @@ after it to \code{sigma2} times \code{shift_size} (\code{FALSE})?}
 \code{"gbm"} and among branches for \code{"iid"}.}
 
 \item{root_value}{Trait value at the root.}
+
+\item{edge_rates}{Optional rate of each branch, in the order of the rows of \code{tree$edge}, such as
+those of \code{\link[=history_rates]{history_rates()}}. When given, \code{model} and its arguments are ignored.}
 }
 \value{
 A list with
