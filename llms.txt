@@ -220,6 +220,10 @@ Traits with phylogenetic signal and evolutionary regimes.
 - [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
   : Traits evolving by an Ornstein-Uhlenbeck process with one or several
   optima
+- [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  : A discrete trait evolving along a tree, with its whole history
+- [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
+  : Tip-based metrics of a known trait history
 - [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
   : Assign selective regimes to clades
 

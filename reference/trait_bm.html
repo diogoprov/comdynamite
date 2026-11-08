@@ -62,7 +62,7 @@ covariance matrix of <code>tree</code>.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">trait_bm</span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">trait_bm</span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span>, nodes <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,10 +76,19 @@ covariance matrix of <code>tree</code>.</p>
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
 <dd><p>Pagel's lambda, in [0, 1].</p></dd>
 
+
+<dt id="arg-nodes">nodes<a class="anchor" aria-label="anchor" href="#arg-nodes"></a></dt>
+<dd><p>Also draw the values at the internal nodes? They are drawn after the tips,
+given them, so the tips are the same as with <code>nodes = FALSE</code> and the same seed. Under
+lambda, the nodes are those of the tree whose internal branches are multiplied by lambda
+and whose terminal branches are lengthened to keep the tips where they were.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Named numeric vector with the simulated trait value of each tip.</p>
+    <p>Named numeric vector with the simulated trait value of each tip. With <code>nodes = TRUE</code>,
+the attribute <code>nodes</code> holds the values at the internal nodes, named by their numbers in
+<code>tree$edge</code>, the root first.</p>
     </div>
 
     <div class="section level2">

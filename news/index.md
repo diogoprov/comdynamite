@@ -8,6 +8,19 @@
   not given are drawn as before, and with the same seed they are the
   same as without the external ones. `rescale_optima = FALSE` keeps
   external optima on their own scale.
+- Trait histories along the tree, to validate reconstructions:
+  `trait_bm(nodes = TRUE)` and `species_traits(nodes = TRUE)` give the
+  values at the internal nodes, drawn after everything else so that the
+  other values stay the same with the same seed;
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+  keeps them as the attribute `nodes`.
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  simulates a discrete trait under the Mk model and keeps every change,
+  in the `simmap` format of phytools.
+  [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
+  gives the tip-based metrics of Luza et al. (2021), as computed by
+  Herodotools, from a known history, plus the number of changes and the
+  time since the last one in continuous time.
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):

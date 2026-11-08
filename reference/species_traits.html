@@ -90,7 +90,8 @@ keeps their marginal distribution.</p>
 <span>  optima <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  sigma <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  r_max <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  rescale_optima <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  rescale_optima <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  nodes <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -140,11 +141,19 @@ drawn for that trait.</p></dd>
 <dt id="arg-rescale-optima">rescale_optima<a class="anchor" aria-label="anchor" href="#arg-rescale-optima"></a></dt>
 <dd><p>Rescale external optima to <code>optima_range</code>?</p></dd>
 
+
+<dt id="arg-nodes">nodes<a class="anchor" aria-label="anchor" href="#arg-nodes"></a></dt>
+<dd><p>Also give the optima at the internal nodes of the tree, as <code><a href="trait_bm.html">trait_bm()</a></code> does?
+They are drawn after all other values, so the traits are the same as with
+<code>nodes = FALSE</code> and the same seed, and rescaled as the optima of the tips, so they may fall
+outside <code>optima_range</code>. Not available with external optima or <code>uniform_optima</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Data frame with columns <code>optimum</code>, <code>sigma</code> and <code>r_max</code>, one row per
-species, with species names as row names.</p>
+species, with species names as row names. With a tree, the attribute <code>tree</code> holds it, and
+with <code>nodes = TRUE</code> the attribute <code>nodes</code> holds the optima at its internal nodes.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

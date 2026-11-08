@@ -25,7 +25,8 @@ species_traits(
   optima = NULL,
   sigma = NULL,
   r_max = NULL,
-  rescale_optima = TRUE
+  rescale_optima = TRUE,
+  nodes = FALSE
 )
 ```
 
@@ -73,10 +74,21 @@ species_traits(
 
   Rescale external optima to `optima_range`?
 
+- nodes:
+
+  Also give the optima at the internal nodes of the tree, as
+  [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
+  does? They are drawn after all other values, so the traits are the
+  same as with `nodes = FALSE` and the same seed, and rescaled as the
+  optima of the tips, so they may fall outside `optima_range`. Not
+  available with external optima or `uniform_optima`.
+
 ## Value
 
 Data frame with columns `optimum`, `sigma` and `r_max`, one row per
-species, with species names as row names.
+species, with species names as row names. With a tree, the attribute
+`tree` holds it, and with `nodes = TRUE` the attribute `nodes` holds the
+optima at its internal nodes.
 
 ## Details
 

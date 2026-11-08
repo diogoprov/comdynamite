@@ -62,7 +62,8 @@ traits_ou(
 ## Value
 
 Matrix with one row per tip (tip labels as row names) and one column per
-trait.
+trait. The attribute `nodes` holds the values at the internal nodes, one
+row per node named by its number in `tree$edge`, the root first.
 
 ## Details
 
