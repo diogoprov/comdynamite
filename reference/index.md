@@ -57,6 +57,12 @@ Traits with phylogenetic signal and evolutionary regimes.
   : A discrete trait evolving along a tree, with its whole history
 - [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
   : Tip-based metrics of a known trait history
+- [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
+  : Simulations as input for Herodotools, with the known history
+- [`region_pool()`](https://provetelab.org/comdynamite/reference/region_pool.md)
+  : Sites where each species can occur, from its region
+- [`arrival_ages()`](https://provetelab.org/comdynamite/reference/arrival_ages.md)
+  : True ages at which lineages arrived in each region
 - [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
   : Assign selective regimes to clades
 

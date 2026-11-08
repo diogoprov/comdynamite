@@ -8,6 +8,17 @@
   not given are drawn as before, and with the same seed they are the
   same as without the external ones. `rescale_optima = FALSE` keeps
   external optima on their own scale.
+- Herodotools:
+  [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
+  gives its inputs from a simulation or an `mc_data` object, with the
+  true ancestral areas from a history of
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md);
+  [`region_pool()`](https://provetelab.org/comdynamite/reference/region_pool.md)
+  limits each species to the sites of its region;
+  [`arrival_ages()`](https://provetelab.org/comdynamite/reference/arrival_ages.md)
+  gives the true ages at which lineages arrived in each region. The
+  article “Known biogeographic histories for Herodotools” shows the
+  steps and the results of `data-raw/validation_herodotools.R`.
 - Trait histories along the tree, to validate reconstructions:
   `trait_bm(nodes = TRUE)` and `species_traits(nodes = TRUE)` give the
   values at the internal nodes, drawn after everything else so that the

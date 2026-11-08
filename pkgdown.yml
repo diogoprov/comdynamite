@@ -5,13 +5,14 @@ articles:
   articles/analysing-clades: analysing-clades.html
   comdynamite: comdynamite.html
   evaluating-methods: evaluating-methods.html
+  articles/herodotools: herodotools.html
   phylogenetic-structure: phylogenetic-structure.html
   articles/preparing-data: preparing-data.html
   articles/validation-gradient: validation-gradient.html
   articles/validation: validation.html
   articles/watching-assembly: watching-assembly.html
   articles/whole-tree: whole-tree.html
-last_built: 2026-11-08T00:09Z
+last_built: 2026-11-08T00:45Z
 urls:
   reference: https://provetelab.org/comdynamite/reference
   article: https://provetelab.org/comdynamite/articles
