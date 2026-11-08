@@ -596,8 +596,11 @@ pacotes de referência em vez de reimplementá-los.
       com geografia (diferença máxima 3e-15) e r recuperado por `fit_t_comp()` (média -0,30
       para -0,3 verdadeiro, 0,005 para 0). `CreateGeoObject()` falha em mapas sem mudança de
       região (bug do RPANDA, objeto `old.Dist`); essas histórias são sorteadas de novo.
-      Falta ligar a saída de `simulate_metacommunity()` (entradas e saídas de parceiros,
-      cenários 5 e 8).
+      Ligação com `simulate_metacommunity()` (cenário 5): `partner_turnover()` conta entradas
+      e saídas de parceiros por sítio e passo, e `turnover_rates()` as converte em taxas nos
+      ramos terminais, na janela `window` do fim de cada ramo (a simulação roda em tempo
+      ecológico só entre as pontas). Falta o cenário 8 (mudanças de taxa por Poisson
+      concentradas em eventos de reembaralhamento e compartilhadas entre linhagens simpátricas).
 - [x] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
       das notas). `sample_individuals()` sorteia n indivíduos por população (ou Binomial(N,
@@ -621,8 +624,15 @@ pacotes de referência em vez de reimplementá-los.
       compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
       usa vários traits: distância multivariada na similaridade limitante, nicho
       multidimensional no filtro.
-- [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
-      local ao longo da árvore.
+- [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
+      local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
+      `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra
+      DAMOCLES e contra sorteio aleatório); validado contra o pacote DAMOCLES em
+      `data-raw/validation_damocles.R`. Falta: as variantes do pacote (colonização dependente
+      do tempo, gamma_td; modelos com traits binários ou ternários, `model = 1, 2`;
+      colonização dependente de traits ou de parentesco das simulações do artigo); amostragem
+      incompleta do pool; ligar à saída de `simulate_metacommunity()` (vários sítios como
+      comunidades locais da mesma árvore).
 
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,

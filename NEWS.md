@@ -12,6 +12,31 @@
   raises T_IP.IC (from 0.02 to 1.0 as it goes from none to complete) and lowers T_IC.IR and
   T_PC.PR (from 0.54 and 0.89 to below 0.01), means of 20 metacommunities.
 
+- `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` implement
+  the dynamic null model of community assembly of Pigot & Etienne (2015, DAMOCLES): each
+  lineage colonises the local community at rate gamma and goes locally extinct at rate mu along
+  the tree, and at each allopatric speciation a present ancestor leaves one present daughter.
+  The likelihood follows the pruning algorithm of the article, the rates are fitted by maximum
+  likelihood with `optim()`, and `damocles_test()` compares MPD and MNTD of each community with
+  communities simulated under the fitted rates and with random draws of the same richness. All
+  is base R, from the published equations. `data-raw/validation_damocles.R` checks it against
+  the DAMOCLES package (2.3): log-likelihoods matched `DAMOCLES_loglik()` to 3e-14 in 180
+  comparisons (20 trees, three pairs of rates, three priors at the root, some trees with a root
+  edge); maximum likelihoods matched `DAMOCLES_ML()` to 5e-4 in ten communities, ours equal or
+  higher in all; and over 4000 simulated communities per setting the frequency of presence of
+  each of 40 tips, the mean richness, MPD and MNTD agreed with `DAMOCLES_sim()` (largest
+  difference in a tip frequency 0.032, |z| < 3). The rates themselves are poorly identified
+  from one community of 60 species (true gamma = mu = 1; estimated mu from zero to thousands).
+
+- `partner_turnover()` counts, for each species of a simulated metacommunity, the entries and
+  exits of other species (all of them, or only competitors) in the sites it occupies, per site
+  and time step between recorded steps. `turnover_rates()` turns this turnover into rates per
+  branch for `trait_rates(edge_rates = )`, `sigma2 * (1 + k * turnover)` over the last
+  `window` units of time of each tip branch, linking the assembly of the metacommunity to
+  rates of trait evolution (evolution speeds up as the community around a lineage changes).
+  The simulation runs among the tips in ecological time, so only tip branches are informed and
+  the match between ecological and branch time is set by `window`.
+
 - `plot.food_web()` draws the abundances, mean traits and rates of trait change from
   `food_web_dynamics()` in stacked panels, with introductions marked; with `time` it draws the
   state up to that time on the axes of the whole run. `animate_food_web()` turns these frames
