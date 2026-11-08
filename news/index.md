@@ -2,6 +2,27 @@
 
 ## comdynamite (development version)
 
+- [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  draws individuals from the populations of a simulated metacommunity,
+  with trait values made of the optimum of the species, a fraction of
+  the gap to the environment of the site (`local_adaptation`), a
+  deviation of the population that does not track the environment
+  (`population_sd`) and variation among individuals
+  (`intraspecific_sd`).
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  computes the T-statistics of Violle et al. (2012) per site, in base R
+  for the observed values or through
+  [`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html)
+  (Taudiere & Violle 2016, now in Suggests) for its null models; both
+  give the same values. Sites are passed to cati under labels of equal
+  width, because
+  [`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html)
+  matches site names as regular expressions and would pool `site1` with
+  `site10`. `data-raw/demo_tstats.R` shows that local adaptation raises
+  T_IP.IC (from 0.02 to 1.0 as it goes from none to complete) and lowers
+  T_IC.IR and T_PC.PR (from 0.54 and 0.89 to below 0.01), means of 20
+  metacommunities.
+
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
   [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
   [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)

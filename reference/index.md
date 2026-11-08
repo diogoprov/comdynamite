@@ -162,6 +162,10 @@ Grids of scenarios, summaries and checks.
   : Check whether a simulation has settled
 - [`as.data.frame(`*`<mc_sim>`*`)`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md)
   : Simulation results as a long table
+- [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  : Individuals from a simulated metacommunity
+- [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
+  T-statistics of intraspecific trait variation
 
 ## Results
 
