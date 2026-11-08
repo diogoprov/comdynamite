@@ -511,8 +511,8 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
-Estado em 2026-11-08: itens de código concluídos (PRs 30–38). Faltam a vignette de taxas por
-ramo, os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
+Estado em 2026-11-08: itens de código concluídos (PRs 30–38) e vignette tutorial de taxas por
+ramo feita. Faltam o artigo de taxas por ramo, os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
 demonstração das estatísticas T; ver o item de indivíduos) e a rodada de UX.
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
@@ -537,6 +537,13 @@ pacotes de referência em vez de reimplementá-los.
       Validação com o BAMM 2.5.0 em `data-raw/validation_bamm.R` (binário local, GPL, só
       executado): Spearman 0,51 entre taxa média posterior e verdadeira por ramo; probabilidade
       marginal de mudança 0,18 nos ramos com mudança verdadeira contra 0,02 nos demais.
+- [x] Vignette tutorial `branch-rates` (decidido em 2026-11-08 separar tutorial e artigo):
+      os três geradores (`trait_rates()`, `history_rates()`, `turnover_rates()` e
+      `food_web_rates()`) e a recuperação, pré-computada em `data-raw/vignette_rates.R`: o
+      RRphylo segue a mudança realizada (rho 0,35–0,37) mas não a taxa verdadeira (0,06–0,08;
+      teto 0,24–0,35); o BM com regimes do mvMORPH recupera a razão entre taxas (medianas 1,02,
+      2,12 e 5,46 para 1, 2 e 5); a taxa do RRphylo nas pontas acompanha pouco a troca de
+      parceiros (rho mediano 0,10).
 - [ ] Artigo (vignette) sobre taxas por ramo. Citar obrigatoriamente Hubert et al. (2015),
       modelos de especiação em metacomunidades, e Januario et al. (2025), persistência
       metapopulacional contra taxas de especiação nas pontas (sinal filogenético, mas sem
