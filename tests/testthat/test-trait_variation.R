@@ -257,7 +257,13 @@ test_that("plot() of nested_variance() stacks the shares from the broadest level
   expect_equal(tapply(bars$ymax, bars$x, max), c(`1` = 1, `2` = 1), ignore_attr = TRUE)
   first <- bars[bars$ymin == 0, ]
   expect_equal(unique(first$fill), "#0072B2")
-  expect_equal(unique(bars$fill[bars$ymax == 1]), "grey80")
+  top <- bars$ymax == stats::ave(bars$ymax, bars$x, FUN = max)
+  expect_equal(unique(bars$fill[top]), "grey80")
+  # more factors than default colours asks for colours
+  many <- structure(data.frame(level = c(letters[1:7], "within"), trait = rep(0.125, 8)),
+                    class = c("nested_variance", "data.frame"))
+  expect_error(plot(many), "one colour per level")
+  expect_s3_class(plot(many, colours = grDevices::hcl.colors(8)), "ggplot")
   # own colours, checked for number and validity
   own <- ggplot2::layer_data(plot(res, colours = c("red", "green", "blue", "white")), 1)
   expect_equal(unique(own$fill[own$ymin == 0]), "red")
