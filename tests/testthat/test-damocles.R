@@ -127,3 +127,10 @@ test_that("edge cases of inputs and of the null distributions", {
   expect_true(is.na(single$ses_mpd_damocles))
   expect_true(is.na(single$p_mntd_random))
 })
+
+test_that("an impossible community has a likelihood of zero at any rates", {
+  # sisters on branches of length zero cannot both be present after allopatric speciation
+  tree <- ape::read.tree(text = "((a:0,b:0):1,c:1);")
+  fit <- fit_damocles(c(a = 1, b = 1, c = 0), tree)
+  expect_identical(fit$loglik, -Inf)
+})

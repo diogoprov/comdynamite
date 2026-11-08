@@ -396,7 +396,8 @@ damocles_optim <- function(presence, tree, root, starts) {
                                                                      maxit = 2000))
     if (is.null(best) || fit$value < best$value) best <- fit
   }
-  list(gamma = exp(best$par[1]), mu = exp(best$par[2]), loglik = -best$value,
+  list(gamma = exp(best$par[1]), mu = exp(best$par[2]),
+       loglik = if (best$value >= 1e10) -Inf else -best$value,
        convergence = as.integer(best$convergence))
 }
 
