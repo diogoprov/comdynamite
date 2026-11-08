@@ -20,9 +20,13 @@
   280 and 47 times lower at iteration 3000 than at their maxima), figure 3.3 (the consumer at
   a maximum and the resource at a minimum of their fitness surfaces at the end) and the
   effect of the predator in figure 3.11: with the predator the resource evolves a trait
-  closer to its birth optimum of 12 under the three attack forms, from 16.8 to 11.5 with
-  Gaussian attack (book: 16 to 12.4), from 13.6 to 12.6 with logistic attack (15.5 to 12.9)
-  and from 10.1 to 11.6 with Michaelis-Menten attack (10 to 11.6).
+  closer to its birth optimum of 12 under the three attack forms, from 16.8 to 11.8 with
+  Gaussian attack (book: 15.6 to 12.4), from 13.6 to 12.6 with logistic attack (15.4 to 12.9)
+  and from 10.1 to 11.6 with Michaelis-Menten attack (10.1 to 11.5). The three-level
+  Michaelis-Menten panel is reproduced closely; the consumer and predator traits of the
+  logistic panel cannot be reproduced from the parameters of its caption, at which the
+  consumer cannot persist. The author's MATLAB code was offline and not archived, so the
+  comparison is against the book.
 
 - `history_rates()` turns the history of a discrete character along the tree, such as the
   region or habitat of each lineage from `trait_mk()` or a stochastic map, into the rate of

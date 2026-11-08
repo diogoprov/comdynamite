@@ -94,7 +94,8 @@ predator carries the conversion efficiency \code{w}, which the matching selectio
 the resource, the consumer's loss term and equation 3.9 do not; the implementation leaves
 \code{w} out of the losses of prey, as in the other equations. The attack coefficient of the
 predator on the consumer is written there with the trait of the resource; it is taken as a
-function of the traits of the consumer and the predator, as box 3.1 defines it.
+function of the traits of the consumer and the predator, as box 3.1 defines it; with
+this reading the three-level panel A of figure 3.11 is reproduced closely.
 }
 \examples{
 # a consumer invades a resource at its demographic and evolutionary equilibrium

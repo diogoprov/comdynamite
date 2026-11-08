@@ -5,7 +5,7 @@
 devtools::load_all(".", quiet = TRUE)
 pars <- food_web_params(c0 = 10, d = 0.2, a0 = 1, b = 0.1, h = 0.1, m0 = 0.05, n = 0.1,
                         l = 0.1, f0 = 0.2, g = 0, x0 = 0.01, y = 0, beta = 5, phi = 5,
-                        gamma = 0.01, theta = 0.01, delta = 0.01, zc_R = 12, zf_N = 1,
+                        gamma = 0.01, theta = 0.01, delta = 0.02, zc_R = 12, zf_N = 1,
                         zx_P = 1)
 x <- food_web_dynamics(seq(0, 12000, by = 50), init = c(R = 50, N = 0.01, P = 0.01),
                        traits = c(R = 12, N = 6, P = 10), params = pars,

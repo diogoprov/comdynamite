@@ -556,7 +556,8 @@ pacotes de referência em vez de reimplementá-los.
       escala ecológica, não de taxas por ramo; o artigo deve dizer isso.
 - [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
       McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
-      código MATLAB do autor não tem licença declarada e não foi consultado). Abundâncias e
+      código MATLAB do autor não tem licença declarada; em novembro de 2026 estava fora do ar em
+      enallagma.com e não arquivado, então a validação é contra o livro). Abundâncias e
       médias dos traits integradas juntas por RK4 de passo fixo em R base; gradientes de
       seleção por diferenças centrais, o que permite as três formas de coeficiente de ataque
       (gaussiana, logística, Michaelis-Menten) e a omnivoria sem derivadas à mão. Níveis
@@ -567,6 +568,12 @@ pacotes de referência em vez de reimplementá-los.
       3.3 e 3.11). Duas leituras da eq. 3.20 documentadas na ajuda: o termo de perda do
       recurso para o predador sem `w`, e `m` como função dos traits do consumidor e do
       predador (box 3.1).
+      Conferência equação a equação (subagente, nov. 2026): gradientes numéricos iguais aos
+      analíticos da eq. 3.20 (diferença relativa ≤ 2e-7); Fig. 3.2 e painel A da Fig. 3.11
+      reproduzidos quase exatamente. Discrepâncias atribuídas ao livro: legenda da Fig. 3.11
+      com z̃c_R = 20 nos painéis A–D (o recurso sozinho fica em 12) e painel E (logístico)
+      irreprodutível com os parâmetros da legenda (o consumidor não persiste no traço
+      plotado). Corrigido δ = 0,02 nos painéis I–L na validação.
       Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`, várias
       espécies por nível (cap. 5) e o cenário 4 das notas.
 - [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,
