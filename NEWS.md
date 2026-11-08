@@ -1,5 +1,15 @@
 # comdynamite (development version)
 
+- New vignette "Rates of trait evolution that vary among branches" (`branch-rates`): rates as a
+  model (`trait_rates()`), from a history along the tree (`history_rates()`) and from
+  ecological dynamics (`turnover_rates()`, `food_web_rates()`), and how well two estimators
+  recover them, computed in advance by `data-raw/vignette_rates.R`. RRphylo follows the change
+  that happened on each branch (mean Spearman rho 0.35 to 0.37) but hardly the true rate (0.06
+  to 0.08, against a ceiling of 0.24 to 0.35 set by one realisation per branch); Brownian
+  motion with regimes in mvMORPH recovers the ratio between the rates of two habitats (medians
+  1.02, 2.12 and 5.46 for true ratios 1, 2 and 5); and the RRphylo rates of tip branches
+  follow the turnover of partners weakly (median rho 0.10).
+
 - `food_web_rates()` turns the rates of trait change of the resource, consumer and predator
   from `food_web_dynamics()` into rates per branch for `trait_rates(edge_rates = )`: each tip
   belongs to a trophic level, and over the last `window` units of time of its branch the rate
