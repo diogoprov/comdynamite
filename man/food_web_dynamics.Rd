@@ -82,7 +82,12 @@ A level with abundance zero is absent: its trait is held and its rate of change 
 Levels can be added during the run with \code{introductions}, to follow the burst of evolution
 after an invasion and its deceleration towards equilibrium (figures 3.2 and 3.3 of the
 book), and to compare the trait of the resource with and without the predator (figure
-3.11). Abundances that fall below \code{extinction} are set to zero.
+3.11). Abundances that fall below \code{extinction} are set to zero. \code{\link[=plot.food_web]{plot.food_web()}} draws
+the trajectories and \code{\link[=animate_food_web]{animate_food_web()}} turns them into a GIF, such as this one, in which
+a consumer invades the resource and a predator arrives at time 6000 (parameters of the
+Gaussian panel of figure 3.11, made by \code{data-raw/food_web_gif.R}):
+
+\if{html}{\figure{food_web_dynamics.gif}{options: width="600" alt="Animated abundances, mean traits and rates of trait change of a resource, a consumer and a predator"}}
 
 Two details of equation 3.20 are read as follows. Its loss term of the resource to the
 predator carries the conversion efficiency \code{w}, which the matching selection gradient of
@@ -108,6 +113,6 @@ McPeek, M. A. (2017). \emph{Evolutionary Community Ecology}. Princeton Universit
 Press. \doi{10.23943/princeton/9780691088778.001.0001}
 }
 \seealso{
-\code{\link[=food_web_params]{food_web_params()}}; \code{\link[=trait_rates]{trait_rates()}} for rates that vary among branches of a
-tree.
+\code{\link[=food_web_params]{food_web_params()}}; \code{\link[=plot.food_web]{plot.food_web()}} and \code{\link[=animate_food_web]{animate_food_web()}} to draw the
+results; \code{\link[=trait_rates]{trait_rates()}} for rates that vary among branches of a tree.
 }

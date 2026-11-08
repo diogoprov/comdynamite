@@ -119,7 +119,12 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #' Levels can be added during the run with `introductions`, to follow the burst of evolution
 #' after an invasion and its deceleration towards equilibrium (figures 3.2 and 3.3 of the
 #' book), and to compare the trait of the resource with and without the predator (figure
-#' 3.11). Abundances that fall below `extinction` are set to zero.
+#' 3.11). Abundances that fall below `extinction` are set to zero. [plot.food_web()] draws
+#' the trajectories and [animate_food_web()] turns them into a GIF, such as this one, in which
+#' a consumer invades the resource and a predator arrives at time 6000 (parameters of the
+#' Gaussian panel of figure 3.11, made by `data-raw/food_web_gif.R`):
+#'
+#' \if{html}{\figure{food_web_dynamics.gif}{options: width="600" alt="Animated abundances, mean traits and rates of trait change of a resource, a consumer and a predator"}}
 #'
 #' Two details of equation 3.20 are read as follows. Its loss term of the resource to the
 #' predator carries the conversion efficiency `w`, which the matching selection gradient of
@@ -153,8 +158,8 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #'   attributes.
 #' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
 #'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
-#' @seealso [food_web_params()]; [trait_rates()] for rates that vary among branches of a
-#'   tree.
+#' @seealso [food_web_params()]; [plot.food_web()] and [animate_food_web()] to draw the
+#'   results; [trait_rates()] for rates that vary among branches of a tree.
 #' @examples
 #' # a consumer invades a resource at its demographic and evolutionary equilibrium
 #' # (figure 3.2 of McPeek 2017)

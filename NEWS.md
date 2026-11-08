@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `plot.food_web()` draws the abundances, mean traits and rates of trait change from
+  `food_web_dynamics()` in stacked panels, with introductions marked; with `time` it draws the
+  state up to that time on the axes of the whole run. `animate_food_web()` turns these frames
+  into a GIF (gifski in `Suggests`); the reference page of `food_web_dynamics()` shows one,
+  made by `data-raw/food_web_gif.R`.
+
 - `food_web_dynamics()` simulates the joint dynamics of abundances and mean traits of a
   resource, a consumer and a predator, the three-trophic-level model of chapter 3 of McPeek
   (2017, *Evolutionary Community Ecology*): quadratic intrinsic rates, Holling type II feeding,
