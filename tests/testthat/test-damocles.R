@@ -108,3 +108,22 @@ test_that("inputs are checked", {
                  "dropped")
   expect_error(fit_damocles(c(a = 1, b = 0, c = 1, d = 0), tree, start = c(1, -1)), "start")
 })
+
+test_that("edge cases of inputs and of the null distributions", {
+  tree <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
+  rooted <- tree
+  rooted$root.edge <- 1
+  set.seed(5)
+  expect_true(all(rowSums(simulate_damocles(rooted, 0, 0, n = 20, root = "present")) == 1))
+  expect_error(simulate_damocles(list(), 1, 1), "phylo")
+  twins <- tree
+  twins$tip.label <- c("a", "a", "c", "d")
+  expect_error(simulate_damocles(twins, 1, 1), "different tip labels")
+  expect_error(damocles_loglik(matrix(c(1, 0, 1, 0), 1), tree, 1, 1), "species names")
+  repeated <- matrix(c(1, 0, 1, 0), 1, dimnames = list(NULL, c("a", "a", "c", "d")))
+  expect_error(damocles_loglik(repeated, tree, 1, 1), "repeated species")
+  # one species present: no MPD nor MNTD, so no effect sizes
+  single <- damocles_test(c(a = 1, b = 0, c = 0, d = 0), tree, n_sim = 9, gamma = 1, mu = 1)
+  expect_true(is.na(single$ses_mpd_damocles))
+  expect_true(is.na(single$p_mntd_random))
+})
