@@ -597,8 +597,15 @@ pacotes de referência em vez de reimplementá-los.
       compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
       usa vários traits: distância multivariada na similaridade limitante, nicho
       multidimensional no filtro.
-- [ ] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
-      local ao longo da árvore.
+- [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
+      local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
+      `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra
+      DAMOCLES e contra sorteio aleatório); validado contra o pacote DAMOCLES em
+      `data-raw/validation_damocles.R`. Falta: as variantes do pacote (colonização dependente
+      do tempo, gamma_td; modelos com traits binários ou ternários, `model = 1, 2`;
+      colonização dependente de traits ou de parentesco das simulações do artigo); amostragem
+      incompleta do pool; ligar à saída de `simulate_metacommunity()` (vários sítios como
+      comunidades locais da mesma árvore).
 
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,

@@ -94,6 +94,12 @@ reference:
   desc: Community assembly without population dynamics.
   contents:
   - assemble_community
+- title: Dynamic null model
+  desc: Colonisation and local extinction along the tree (DAMOCLES).
+  contents:
+  - simulate_damocles
+  - damocles_loglik
+  - damocles_test
 
 articles:
 - title: Analysing data

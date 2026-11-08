@@ -1,5 +1,21 @@
 # comdynamite (development version)
 
+- `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` implement
+  the dynamic null model of community assembly of Pigot & Etienne (2015, DAMOCLES): each
+  lineage colonises the local community at rate gamma and goes locally extinct at rate mu along
+  the tree, and at each allopatric speciation a present ancestor leaves one present daughter.
+  The likelihood follows the pruning algorithm of the article, the rates are fitted by maximum
+  likelihood with `optim()`, and `damocles_test()` compares MPD and MNTD of each community with
+  communities simulated under the fitted rates and with random draws of the same richness. All
+  is base R, from the published equations. `data-raw/validation_damocles.R` checks it against
+  the DAMOCLES package (2.3): log-likelihoods matched `DAMOCLES_loglik()` to 3e-14 in 180
+  comparisons (20 trees, three pairs of rates, three priors at the root, some trees with a root
+  edge); maximum likelihoods matched `DAMOCLES_ML()` to 5e-4 in ten communities, ours equal or
+  higher in all; and over 4000 simulated communities per setting the frequency of presence of
+  each of 40 tips, the mean richness, MPD and MNTD agreed with `DAMOCLES_sim()` (largest
+  difference in a tip frequency 0.032, |z| < 3). The rates themselves are poorly identified
+  from one community of 60 species (true gamma = mu = 1; estimated mu from zero to thousands).
+
 - `food_web_dynamics()` simulates the joint dynamics of abundances and mean traits of a
   resource, a consumer and a predator, the three-trophic-level model of chapter 3 of McPeek
   (2017, *Evolutionary Community Ecology*): quadratic intrinsic rates, Holling type II feeding,
