@@ -554,13 +554,21 @@ pacotes de referência em vez de reimplementá-los.
       Fig. 1 (colonização, regulação da comunidade, evolução) e perguntar se cada regime deixa
       assinatura recuperável nas taxas estimadas. Interpretação nossa: eles falam de taxas em
       escala ecológica, não de taxas por ramo; o artigo deve dizer isso.
-- [ ] `food_web_dynamics()`: cadeia recurso–consumidor–predador com dinâmica de abundâncias e
-      de traços médios de McPeek (2017, eq. 3.8–3.21 e Box 3.1), integrada em R base
-      (Runge–Kutta), com as três formas de coeficiente de ataque e gradientes numéricos de
-      ln W. Reimplementada a partir das equações publicadas; o código MATLAB do autor (sem
-      licença declarada) só serve de comparação via Octave, sem copiar nada. Validar
-      reproduzindo as Fig. 3.2–3.3 e 3.11. Depois: várias espécies por nível (cap. 5) e
-      trajetórias dos traços como taxas por linhagem para o cenário 4 das notas.
+- [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
+      McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
+      código MATLAB do autor não tem licença declarada e não foi consultado). Abundâncias e
+      médias dos traits integradas juntas por RK4 de passo fixo em R base; gradientes de
+      seleção por diferenças centrais, o que permite as três formas de coeficiente de ataque
+      (gaussiana, logística, Michaelis-Menten) e a omnivoria sem derivadas à mão. Níveis
+      ausentes e introduções em tempos dados (`introductions`), para testar a previsão de
+      que a evolução dispara após uma invasão e desacelera até o equilíbrio e que o predador
+      enfraquece a seleção sobre o recurso; a saída guarda os gradientes e |dz/dt| por nível,
+      para virar taxa por linhagem. Validação em `data-raw/validation_food_web.R` (fig. 3.2,
+      3.3 e 3.11). Duas leituras da eq. 3.20 documentadas na ajuda: o termo de perda do
+      recurso para o predador sem `w`, e `m` como função dos traits do consumidor e do
+      predador (box 3.1).
+      Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`, várias
+      espécies por nível (cap. 5) e o cenário 4 das notas.
 - [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,
       com taxa por estado (`"state"`, como O'Meara et al. 2006), explosão após cada mudança
       que decai exponencialmente (`"burst"`, cenários 1 e 2 das notas) e dependência do número
@@ -569,8 +577,9 @@ pacotes de referência em vez de reimplementá-los.
       RPANDA em `data-raw/validation_sympatry.R`: matrizes de covariância iguais às do DDexp
       com geografia (diferença máxima 3e-15) e r recuperado por `fit_t_comp()` (média -0,30
       para -0,3 verdadeiro, 0,005 para 0). `CreateGeoObject()` falha em mapas sem mudança de
-      região (bug do RPANDA, objeto `old.Dist`); essas histórias são sorteadas de novo. Falta ligar a saída de `simulate_metacommunity()` (entradas e
-      saídas de parceiros, cenários 5 e 8).
+      região (bug do RPANDA, objeto `old.Dist`); essas histórias são sorteadas de novo.
+      Falta ligar a saída de `simulate_metacommunity()` (entradas e saídas de parceiros,
+      cenários 5 e 8).
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
       das notas).
