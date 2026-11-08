@@ -55,6 +55,15 @@ test_that("rate_matrix checks its inputs", {
                "list named by regime")
   expect_error(rate_matrix(list(a = 1, b = 2), constraint = "default", n_traits = 2),
                "only with constraint")
+  expect_error(rate_matrix(1, correlation = list(a = 0.5), n_traits = 2),
+               "only with constraint \"variance\"")
+  expect_error(rate_matrix(1, n_traits = 0), "one positive number")
+  expect_error(rate_matrix(1, correlation = 0.5, constraint = "equaldiagonal", n_traits = 2),
+               "no correlations")
+  expect_error(rate_matrix(c(1, 2), constraint = "equaldiagonal"), "one variance")
+  expect_error(rate_matrix(c(1, 2), correlation = matrix(c(1, 0.5, 0.2, 1), 2)),
+               "symmetric 2 x 2")
+  expect_error(rate_matrix(1, correlation = diag(3), n_traits = 2), "symmetric 2 x 2")
 })
 
 test_that("a rate matrix gives correlated traits with covariance R times the path length", {
