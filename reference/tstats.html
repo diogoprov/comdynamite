@@ -68,6 +68,7 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base"</span>, <span class="st">"cati"</span><span class="op">)</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="fl">99</span>,</span>
+<span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"less"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -90,13 +91,18 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>
-<dd><p><code>"base"</code> (the default) for the observed values only, or <code>"cati"</code> for
-<code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> with null models; it needs the package cati.</p></dd>
+<dd><p><code>"base"</code> (the default), computed in base R, or <code>"cati"</code> for <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>;
+it needs the package cati.</p></dd>
 
 
 <dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>
-<dd><p>Number of randomisations of the null models of <code>method = "cati"</code>; <code>NULL</code> for
-observed values only.</p></dd>
+<dd><p>Number of randomisations of the null models; 0 or <code>NULL</code> for the observed
+values only, much faster in simulation studies with many replicates.</p></dd>
+
+
+<dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
+<dd><p>Direction of the test of <code>method = "base"</code>: <code>"less"</code> (the default),
+<code>"greater"</code> or <code>"two.sided"</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -109,8 +115,9 @@ observed values only.</p></dd>
     <p>With <code>method = "base"</code>, a data frame with one row per site and trait and the columns
 <code>site</code>, <code>trait</code>, <code>n_populations</code>, <code>T_IP.IC</code>, <code>T_IC.IR</code> and <code>T_PC.PR</code>; statistics that
 cannot be computed, such as <code>T_PC.PR</code> for a site with one species, are <code>NA</code>. With
-<code>method = "cati"</code>, the <code>Tstats</code> object of <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>, with the site names of
-<code>individuals</code>, for its methods <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::ses.Tstats()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> and <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>.</p>
+<code>nperm &gt; 0</code>, also <code>ses_</code> and <code>p_</code> columns for each statistic, and the attribute <code>null</code>,
+an array (randomisation x row x statistic) with the null values. With <code>method = "cati"</code>,
+the <code>Tstats</code> object of <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>, with the site names of <code>individuals</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -125,28 +132,49 @@ the region. Low values mean that the site holds a narrow part of the regional tr
 population means of the region. Low values mean filtering of populations.</p></li>
 </ul><p>A population is a species at a site. Variances use <code>n - 1</code>, means of the variances within
 populations are not weighted, and populations of a single individual have no variance and
-are left out of <code>T_IP.IC</code>, as in <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>.</p>
-<p><code>method = "base"</code> computes the observed values in base R, with no null model. It is fast and
-needs no other package, which suits simulation studies with many replicates, where the
-truth is known and each statistic is compared among scenarios rather than with a null
-model. <code>method = "cati"</code> calls <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> (Taudiere &amp; Violle 2016), which adds null
-models: individuals permuted within each site for <code>T_IP.IC</code>, individuals drawn from the
-regional pool for <code>T_IC.IR</code>, and population means permuted for <code>T_PC.PR</code>. Both give the
-same observed values. <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> finds the populations of a site by matching its name
-as a regular expression, so a site called <code>site1</code> would also take the populations of
-<code>site10</code>; the sites are therefore passed under labels of equal width (<code>site01</code>, <code>site02</code>,
-...) and given back their names in the result.</p>
+are left out of <code>T_IP.IC</code>, as in <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>. Individuals with a missing value of a
+trait are left out for that trait.</p>
     </div>
     <div class="section level2">
-    <h2 id="local-adaptation">Local adaptation<a class="anchor" aria-label="anchor" href="#local-adaptation"></a></h2>
+    <h2 id="null-models">Null models<a class="anchor" aria-label="anchor" href="#null-models"></a></h2>
+
+
+<p>With <code>nperm &gt; 0</code>, <code>method = "base"</code> compares each statistic with a null distribution, from
+the three null models of Taudiere &amp; Violle (2016), implemented in base R from their
+description:</p><ul><li><p><code>T_IP.IC</code>: trait values are permuted among the individuals of each site, which keeps the
+variance of the site and breaks the structure of populations within it;</p></li>
+<li><p><code>T_IC.IR</code>: each site receives as many individuals as it has, drawn without replacement from
+all individuals of the region;</p></li>
+<li><p><code>T_PC.PR</code>: each individual takes the mean of its population, and each site then receives
+as many of these values as it has individuals, drawn without replacement from the region;
+population means are computed again from the values drawn.</p></li>
+</ul><p>The standardised effect size is <code>(observed - mean of null) / sd of null</code>, and the p-value
+is <code>(1 + r) / (1 + nperm)</code>, where <code>r</code> is the number of null values at or below the observed
+one (<code>alternative = "less"</code>), at or above it (<code>"greater"</code>), or twice the smaller of the two
+(<code>"two.sided"</code>, at most 1). Low values of the three statistics are the usual hypotheses
+(niche differentiation within communities for <code>T_IP.IC</code>, environmental filtering for the
+others), so <code>"less"</code> tests them. Each trait is randomised on its own.</p>
+<p><code>method = "cati"</code> calls <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> (Taudiere &amp; Violle 2016) instead and returns its
+object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
+<code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code> finds the populations of a site by matching its name as a regular
+expression, so a site called <code>site1</code> would also take the populations of <code>site10</code>
+(<a href="https://github.com/adrientaudiere/cati/issues/11" class="external-link">https://github.com/adrientaudiere/cati/issues/11</a>); the sites are therefore passed
+under labels of equal width (<code>site01</code>, <code>site02</code>, ...) and given back their names in the
+result. And its null model for <code>T_IP.IC</code> puts together the permutations of different sites
+in the wrong order, so that the null values of a site come from the individuals of other
+sites; its standardised effect sizes for <code>T_IP.IC</code> are then wrong
+(<a href="https://github.com/adrientaudiere/cati/issues/12" class="external-link">https://github.com/adrientaudiere/cati/issues/12</a>). <code>method = "base"</code> is recommended.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="local-adaptation-and-character-displacement">Local adaptation and character displacement<a class="anchor" aria-label="anchor" href="#local-adaptation-and-character-displacement"></a></h2>
 
 
 <p>With <code>local_adaptation</code> in <code><a href="sample_individuals.html">sample_individuals()</a></code>, population means move toward the
 environment of their site, so co-occurring species become more alike and the region spreads
 along the environment. The variance among populations within a site falls, so <code>T_PC.PR</code> and
-<code>T_IC.IR</code> fall, and <code>T_IP.IC</code> rises, because the populations that remain overlap more. A
-fall in <code>T_IP.IC</code> with local adaptation would need populations to diverge from co-occurring
-species, as in character displacement, which <code><a href="sample_individuals.html">sample_individuals()</a></code> does not simulate.</p>
+<code>T_IC.IR</code> fall, and <code>T_IP.IC</code> rises, because the populations that remain overlap more. With
+<code>displacement</code>, co-occurring populations diverge from one another instead, which raises the
+variance among populations within sites and lowers <code>T_IP.IC</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -170,21 +198,28 @@ community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
 <span class="r-in"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">15</span><span class="op">)</span>, <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                              <span class="fu"><a href="competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">100</span>,</span></span>
 <span class="r-in"><span>                              seed_steps <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">none</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">local</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, local_adaptation <span class="op">=</span> <span class="fl">0.8</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">none</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T_IP.IC"</span>, <span class="st">"T_IC.IR"</span>, <span class="st">"T_PC.PR"</span><span class="op">)</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    T_IP.IC    T_IC.IR    T_PC.PR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.02299744 0.89106250 1.11059919 </span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">local</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T_IP.IC"</span>, <span class="st">"T_IC.IR"</span>, <span class="st">"T_PC.PR"</span><span class="op">)</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    T_IP.IC    T_IC.IR    T_PC.PR </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.33914930 0.03219661 0.03057455 </span>
-<span class="r-in"><span><span class="co"># with the null models of cati; ses.Tstats() lists T_IP.IC, T_IC.IR and T_PC.PR in order</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"cati"</span>, nperm <span class="op">=</span> <span class="fl">19</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">cati</span><span class="fu">::</span><span class="fu"><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">ses.Tstats</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">ses</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  site1  site2  site3  site4  site5  site6  site7  site8  site9 site10 site11 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -15.6  -12.9  -16.9  -13.9   -8.7  -10.7   -8.7  -16.9   -7.1  -11.7  -14.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> site12 site13 site14 site15 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  -11.2  -15.1  -10.2  -18.5 </span>
+<span class="r-in"><span><span class="va">ratios</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T_IP.IC"</span>, <span class="st">"T_IC.IR"</span>, <span class="st">"T_PC.PR"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">none</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">local</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, local_adaptation <span class="op">=</span> <span class="fl">0.8</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">apart</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, displacement <span class="op">=</span> <span class="fl">2</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>none <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">none</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      local <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">local</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      apart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">apart</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          T_IP.IC    T_IC.IR    T_PC.PR</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> none  0.02299744 0.89106250 1.11059919</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> local 0.33914930 0.03219661 0.03057455</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> apart 0.01278061 0.91639355 1.13307743</span>
+<span class="r-in"><span><span class="co"># standardised effect sizes and p-values from the null models</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"T_IP.IC"</span>, <span class="st">"ses_T_IP.IC"</span>, <span class="st">"p_T_IP.IC"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1 0.016376543  -13.545376      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 site2 0.079715195  -22.236577      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 site3 0.012470128  -10.490671      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 site4 0.019383034  -23.070752      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 site5 0.056784711   -6.326309      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 site6 0.005298958   -9.945998      0.01</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -20,6 +20,8 @@ sample_individuals(
   local_adaptation = 0,
   population_sd = 0,
   intraspecific_sd = 1,
+  displacement = 0,
+  displacement_width = NULL,
   step = NULL,
   env = NULL
 )
@@ -60,6 +62,18 @@ sample_individuals(
   Standard deviation of trait values among the individuals of a
   population; one value or one per species.
 
+- displacement:
+
+  Strength of character displacement among the populations of a site
+  (`c` in Details), relative to the selection that keeps each population
+  near its mean without competitors; 0 (the default) for none.
+
+- displacement_width:
+
+  Width `w` of the Gaussian competition kernel of character
+  displacement, in units of the trait. The default is the mean niche
+  breadth (`sigma`) of the species.
+
 - step:
 
   Recorded step to sample, as in `record_steps`; `NULL` (the default)
@@ -77,8 +91,8 @@ Data frame with one row per individual and the columns `site`,
 `species`, `individual` (its number within the population), `abundance`
 (of the population), `env` (of the site), `optimum` (of the species),
 `population_mean` (the expected value of the population,
-`theta_j + h_j (E_i - theta_j) + d_ij`) and `trait`. Populations with no
-individual measured are absent.
+`theta_j + h_j (E_i - theta_j) + d_ij`, after character displacement)
+and `trait`. Populations with no individual measured are absent.
 
 ## Details
 
@@ -93,6 +107,25 @@ among individuals of a population. With `local_adaptation = 0` and
 `population_sd = 0` all populations of a species share its mean; with
 `local_adaptation = 1` every population sits on the environment of its
 site and species no longer differ within a site.
+
+With `displacement > 0`, the populations of each site also diverge from
+one another, as in ecological character displacement. Their means are
+the equilibrium of
+
+`mu_ij = m_ij + c sum_k p_ik (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2))`,
+
+where `m_ij` is the mean above (`theta_j + h_j (E_i - theta_j) + d_ij`),
+`c` is `displacement`, `p_ik` the share of species `k` among the
+individuals of the site and `w` (`displacement_width`) the width of a
+Gaussian competition kernel. Each population is pushed away from the
+populations close to it in trait, more so from abundant ones, and held
+near `m_ij`, so `c` sets the strength of competition relative to the
+selection that keeps the population near `m_ij`. The push from one
+competitor is largest at a distance `w` and at most `c w exp(-1/2)`,
+about `0.6 c w`. The equilibrium is found by damped fixed-point
+iteration from `m_ij`, with steps of `1 / (1 + c)`. Populations with the
+same `m_ij`, as with `local_adaptation = 1` and no `population_sd`, are
+not pushed apart, since the push is symmetric.
 
 The traits of individuals are drawn after the simulation and do not feed
 back on the dynamics: abundances are those of the species means. The
