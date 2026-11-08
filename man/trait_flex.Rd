@@ -21,14 +21,16 @@ trait_flex(
 
 \item{site, species}{Names of the columns with the site and the species.}
 
-\item{abundance}{Name of a column with the abundance of each population, or \code{NULL} to weight
-by the number of individuals measured.}
+\item{abundance}{Name of a column with the abundance of each population (the same value
+for all its individuals), or \code{NULL} to weight by the number of individuals measured.}
 
-\item{formula}{One-sided formula with variables of \code{env}; \code{~ 1} (the default) gives the
-total sums of squares only.}
+\item{formula}{One-sided formula with variables of \code{env}, with an intercept; \code{~ 1} (the
+default) gives the total sums of squares only. With several terms, \code{explained} is the sum
+of squares of the whole model and \code{p} the p-value of its F test.}
 
 \item{env}{Data frame with one row per site, a column named like \code{site} and the variables of
-\code{formula}; it is matched to the sites by name.}
+\code{formula}; it is matched to the sites by name. Sites with missing values in these
+variables are left out of all sums of squares, with a warning.}
 }
 \value{
 A list with \code{decomposition}, a data frame with one row per trait and component

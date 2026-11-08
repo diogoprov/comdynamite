@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- `tstats()`: the null model of `T_IC.IR` now keeps the observed regional variance as the
+  denominator. It was computed from the values drawn, which repeat individuals across sites;
+  this biased the null upward and made the tests anti-conservative (about 6% of sites
+  rejected per tail at a nominal 4% in simulations with random traits).
 - New functions for analyses of intraspecific trait variation, written from the published
   definitions to replace functions of cati 0.99.6 that give wrong results (an audit found
   bugs reported as adrientaudiere/cati#13 to #21): `tstats_summary()` summarises the tests of

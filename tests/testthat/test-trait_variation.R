@@ -174,3 +174,46 @@ test_that("community_index() and trait_flex() agree with cati where cati is righ
   ours <- trait_flex(d)$decomposition
   expect_equal(ours$total, unname(unlist(dc$trait$SumSq[1, ])), tolerance = 1e-8)
 })
+
+test_that("the regional nulls of tstats() keep the observed denominators", {
+  set.seed(3)
+  d <- data.frame(site = rep(sprintf("s%d", 1:4), each = 15),
+                  species = sample(c("a", "b", "c"), 60, replace = TRUE))
+  d$trait <- rnorm(60)
+  res <- tstats(d, nperm = 2000)
+  null <- attr(res, "null")
+  # each site draws without replacement from the pool, so its variance is unbiased for var(z)
+  expect_lt(abs(mean(null[, , "T_IC.IR"]) - 1), 0.02)
+})
+
+test_that("tstats_summary() warns when nperm is too small for the level", {
+  d <- toy_individuals()
+  expect_warning(tstats_summary(tstats(d, nperm = 19)), "nperm >= 40")
+  expect_no_warning(tstats_summary(tstats(d, nperm = 40)))
+})
+
+test_that("trait_flex() guards the model against missing values, names and no intercept", {
+  d <- toy_individuals()
+  env <- data.frame(site = sprintf("s%02d", 1:6), moisture = c(1, 3, 2, NA, 5, 4))
+  expect_warning(res <- trait_flex(d, formula = ~moisture, env = env), "s04")
+  dec <- res$decomposition
+  expect_equal(dec$explained + dec$residual, dec$total)
+  kept <- res$sites[res$sites$site != "s04", ]
+  expect_equal(dec$total[dec$component == "total"],
+               sum((kept$specific - mean(kept$specific))^2))
+  # an environmental variable called y does not clash with the response
+  env$y <- c(1, 3, 2, 6, 5, 4)
+  env$moisture <- env$y
+  expect_equal(suppressWarnings(trait_flex(d, formula = ~y, env = env))$decomposition,
+               suppressWarnings(trait_flex(d, formula = ~moisture, env = env))$decomposition)
+  expect_error(trait_flex(d, formula = ~ y - 1, env = env), "intercept")
+  d$abundance <- seq_len(nrow(d))
+  expect_error(trait_flex(d, abundance = "abundance"), "same for all")
+})
+
+test_that("nested_variance() rejects a factor with one level", {
+  skip_if_not_installed("nlme")
+  d <- toy_individuals()
+  d$region <- "all"
+  expect_error(nested_variance(d, "trait", c("region", "site")), "single level")
+})

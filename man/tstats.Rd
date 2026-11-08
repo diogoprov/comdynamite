@@ -85,6 +85,13 @@ as many of these values as it has individuals, drawn without replacement from th
 population means are computed again from the values drawn.
 }
 
+The null model of \code{T_IC.IR} leaves the regional pool as it is, so its denominator (the
+variance among all individuals) stays that of the observed data, and only the variance
+within sites is randomised. Taking the denominator from the values drawn, which repeat
+individuals across sites, biases the null and makes the test anti-conservative. In the null
+model of \code{T_PC.PR} the population means are themselves computed from the values drawn, so
+their regional variance is computed again from them, as in Taudiere & Violle (2016).
+
 The standardised effect size is \verb{(observed - mean of null) / sd of null}, and the p-value
 is \code{(1 + r) / (1 + nperm)}, where \code{r} is the number of null values at or below the observed
 one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice the smaller of the two

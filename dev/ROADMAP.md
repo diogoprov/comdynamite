@@ -660,6 +660,12 @@ pacotes de referência em vez de reimplementá-los.
       `tstats_summary()`, `trait_flex()` (Lepš et al. 2011), `nested_variance()` (checa a
       ordem do aninhamento) e `community_index()` (quatro nulos, multivariado). Conferidos
       contra o cati onde ele está certo e na reanálise do capítulo 1 do Leandro.
+      Auditoria Fable das funções novas: corrigido o denominador do nulo de T_IC.IR em
+      `tstats()` (recalculado a partir dos valores sorteados, anticonservador; o cati faz o
+      mesmo); `trait_flex()` com NA em `env`, variável chamada `y` e fórmula sem intercepto.
+      Em aberto: o nulo de T_PC.PR (método publicado, denominador recalculado) tem tamanho
+      um pouco acima do nominal na cauda inferior (0,068 contra 0,04); pensar num nulo que
+      sorteie médias de população diretamente, com o denominador observado.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações

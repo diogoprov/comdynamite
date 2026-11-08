@@ -59,7 +59,8 @@ use \code{species};
 without replacement from all individuals of the data;
 \item \code{"regional.pop"}: each individual takes the mean of its population, and each site receives
 as many of these values as it has individuals, drawn without replacement from all
-individuals;
+individuals. The observed index uses the values of the individuals, so the null removes
+the variation within populations as well as the species composition of the site;
 \item \code{"regional.pop.prab"}: the index is computed on the means of the populations of each site
 (one value per population, observed and null alike), and each site receives as many
 population means as it has populations, drawn without replacement from all populations.
@@ -70,7 +71,8 @@ argument named \code{species}, such as \verb{function(x, species)}, receives the
 values of the site. With \code{multivariate = TRUE} the index
 receives the matrix of all traits of the site, and randomisations move whole rows, so that
 the traits of an individual stay together. Sites and species are matched by name, so the
-order of the rows does not matter.
+order of the rows does not matter. An index that the null model cannot change (for example
+\code{stats::var} under \code{"local"}) gets \code{ses = NA}.
 }
 \examples{
 set.seed(1)

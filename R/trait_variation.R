@@ -22,7 +22,9 @@
 #' mean keeps the dependence among sites within a randomisation.
 #'
 #' @param x Data frame from [tstats()] with `nperm > 0`.
-#' @param level Size of the two-sided test of each site and of the mean.
+#' @param level Size of the two-sided test of each site and of the mean. A site can deviate
+#'   only if `1 / (1 + nperm) < level / 2`, so `nperm` must be at least `2 / level`; a warning
+#'   is given otherwise.
 #' @return A list with two data frames. `traits` has one row per trait and statistic, with the
 #'   columns `trait`, `statistic`, `n_sites` (testable sites), `percent_low`, `percent_high`,
 #'   `mean_ses`, `p_mean_low`, `p_mean_high`, `sites_low` and `sites_high` (site names separated
@@ -45,6 +47,10 @@ tstats_summary <- function(x, level = 0.05) {
   }
   stopifnot(is.numeric(level), length(level) == 1, level > 0, level < 1)
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
+  if (1 / (1 + dim(null)[1]) >= level / 2) {
+    warning("with ", dim(null)[1], " randomisations no p-value can fall below level / 2 = ",
+            level / 2, "; use nperm >= ", ceiling(2 / level), call. = FALSE)
+  }
   sites <- list()
   traits <- list()
   for (stat in ratios) {
@@ -79,7 +85,8 @@ tstats_summary <- function(x, level = 0.05) {
       dev <- deviation[rows]
       traits[[paste(stat, tr)]] <- data.frame(
         trait = tr, statistic = stat, n_sites = length(rows),
-        percent_low = 100 * mean(dev == "low"), percent_high = 100 * mean(dev == "high"),
+        percent_low = if (length(rows)) 100 * mean(dev == "low") else NA_real_,
+        percent_high = if (length(rows)) 100 * mean(dev == "high") else NA_real_,
         mean_ses = if (length(rows)) mean(ses[rows]) else NA_real_,
         p_mean_low = mean_low, p_mean_high = mean_high,
         sites_low = paste(x$site[rows][dev == "low"], collapse = " "),
@@ -120,12 +127,14 @@ tstats_summary <- function(x, level = 0.05) {
 #' @param individuals Data frame with one row per individual.
 #' @param traits Names of the columns with trait values.
 #' @param site,species Names of the columns with the site and the species.
-#' @param abundance Name of a column with the abundance of each population, or `NULL` to weight
-#'   by the number of individuals measured.
-#' @param formula One-sided formula with variables of `env`; `~ 1` (the default) gives the
-#'   total sums of squares only.
+#' @param abundance Name of a column with the abundance of each population (the same value
+#'   for all its individuals), or `NULL` to weight by the number of individuals measured.
+#' @param formula One-sided formula with variables of `env`, with an intercept; `~ 1` (the
+#'   default) gives the total sums of squares only. With several terms, `explained` is the sum
+#'   of squares of the whole model and `p` the p-value of its F test.
 #' @param env Data frame with one row per site, a column named like `site` and the variables of
-#'   `formula`; it is matched to the sites by name.
+#'   `formula`; it is matched to the sites by name. Sites with missing values in these
+#'   variables are left out of all sums of squares, with a warning.
 #' @return A list with `decomposition`, a data frame with one row per trait and component
 #'   (`turnover`, `intraspecific`, `covariation`, `total`) and the columns `explained`,
 #'   `residual`, `total` (sums of squares) and `p` (of the regression, `NA` for the
@@ -153,6 +162,10 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
   stopifnot(inherits(formula, "formula"), length(formula) == 2)
+  if (attr(stats::terms(formula), "intercept") == 0) {
+    stop("`formula` must keep the intercept: the sums of squares are taken around the mean",
+         call. = FALSE)
+  }
   site_id <- as.character(individuals[[site]])
   species_id <- as.character(individuals[[species]])
   site_levels <- unique(site_id)
@@ -168,8 +181,23 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     rows <- match(site_levels, as.character(env[[site]]))
     if (anyNA(rows)) stop("`env` lacks some sites of `individuals`", call. = FALSE)
     env_sites <- env[rows, model_vars, drop = FALSE]
+    env_ok <- stats::complete.cases(env_sites)
+    if (!all(env_ok)) {
+      warning("sites with missing values in `env` are left out of the decomposition: ",
+              paste(site_levels[!env_ok], collapse = ", "), call. = FALSE)
+    }
+    model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
   } else {
     env_sites <- data.frame(row.names = seq_along(site_levels))
+    env_ok <- rep(TRUE, length(site_levels))
+  }
+  if (!is.null(abundance)) {
+    a <- individuals[[abundance]]
+    pops <- paste(site_id, species_id, sep = "\r")
+    if (anyNA(a)) stop("`abundance` has missing values", call. = FALSE)
+    if (any(tapply(a, pops, function(v) length(unique(v))) > 1)) {
+      stop("`abundance` must be the same for all individuals of a population", call. = FALSE)
+    }
   }
   decomposition <- list()
   site_means <- list()
@@ -198,11 +226,11 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     fixed <- weighted(as.vector(species_mean))
     values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
     ss <- lapply(values, function(y) {
-      ok <- !is.na(y)
+      ok <- !is.na(y) & env_ok
       total <- sum((y[ok] - mean(y[ok]))^2)
       if (length(model_vars) == 0) return(c(explained = 0, residual = total, total = total,
                                              p = NA_real_))
-      fit <- stats::lm(stats::update(formula, y ~ .), data = cbind(y = y, env_sites)[ok, ])
+      fit <- stats::lm(model_formula, data = cbind(.y = y, env_sites)[ok, , drop = FALSE])
       residual <- sum(stats::residuals(fit)^2)
       f <- summary(fit)$fstatistic
       p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
@@ -266,6 +294,12 @@ nested_variance <- function(data, traits, factors) {
   if (length(missing_columns) > 0) {
     stop("`data` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
+  single <- factors[vapply(factors, function(f) length(unique(stats::na.omit(data[[f]]))) < 2,
+                           logical(1))]
+  if (length(single) > 0) {
+    stop("factor ", paste0("`", single, "`", collapse = ", "), " has a single level",
+         call. = FALSE)
+  }
   groups <- lapply(seq_along(factors), function(k) {
     do.call(paste, c(lapply(factors[seq_len(k)], function(f) as.character(data[[f]])),
                      sep = "\r"))
@@ -278,10 +312,11 @@ nested_variance <- function(data, traits, factors) {
     parents <- tapply(groups[[k - 1]], as.character(data[[factors[k]]]),
                       function(v) length(unique(v)))
     if (any(parents > 1)) {
-      warning("levels of `", factors[k], "` occur in several levels of `",
-              paste(factors[seq_len(k - 1)], collapse = "/"), "`: the factors are crossed, ",
-              "and the nested model treats each combination as a separate group",
-              call. = FALSE)
+      warning("labels of `", factors[k], "` recur under several levels of `",
+              paste(factors[seq_len(k - 1)], collapse = "/"), "`. If they are the same units, ",
+              "the factors are crossed and the nested model treats each combination as a ",
+              "separate group; if the labels are only reused (site 1, 2, ... in each region), ",
+              "the results are right and this warning can be ignored", call. = FALSE)
     }
   }
   model_data <- data.frame(lapply(data[factors], function(f) factor(as.character(f))))
@@ -316,7 +351,8 @@ nested_variance <- function(data, traits, factors) {
 #'   without replacement from all individuals of the data;
 #' * `"regional.pop"`: each individual takes the mean of its population, and each site receives
 #'   as many of these values as it has individuals, drawn without replacement from all
-#'   individuals;
+#'   individuals. The observed index uses the values of the individuals, so the null removes
+#'   the variation within populations as well as the species composition of the site;
 #' * `"regional.pop.prab"`: the index is computed on the means of the populations of each site
 #'   (one value per population, observed and null alike), and each site receives as many
 #'   population means as it has populations, drawn without replacement from all populations.
@@ -326,7 +362,8 @@ nested_variance <- function(data, traits, factors) {
 #' values of the site. With `multivariate = TRUE` the index
 #' receives the matrix of all traits of the site, and randomisations move whole rows, so that
 #' the traits of an individual stay together. Sites and species are matched by name, so the
-#' order of the rows does not matter.
+#' order of the rows does not matter. An index that the null model cannot change (for example
+#' `stats::var` under `"local"`) gets `ses = NA`.
 #'
 #' @param individuals Data frame with one row per individual.
 #' @param index Function of the trait values of a site (its first argument: a vector, or a
@@ -378,7 +415,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
   uses_species <- "species" %in% names(formals(index))
   apply_index <- function(x, sp) {
-    value <- if (uses_species) index(x, sp) else index(x)
+    value <- if (uses_species) index(x, species = sp) else index(x)
     if (!is.numeric(value) || length(value) != 1) {
       stop("`index` must return a single number", call. = FALSE)
     }

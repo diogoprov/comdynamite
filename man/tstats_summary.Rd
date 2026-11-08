@@ -9,7 +9,9 @@ tstats_summary(x, level = 0.05)
 \arguments{
 \item{x}{Data frame from \code{\link[=tstats]{tstats()}} with \code{nperm > 0}.}
 
-\item{level}{Size of the two-sided test of each site and of the mean.}
+\item{level}{Size of the two-sided test of each site and of the mean. A site can deviate
+only if \code{1 / (1 + nperm) < level / 2}, so \code{nperm} must be at least \code{2 / level}; a warning
+is given otherwise.}
 }
 \value{
 A list with two data frames. \code{traits} has one row per trait and statistic, with the
