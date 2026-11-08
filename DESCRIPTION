@@ -33,6 +33,7 @@ Suggests:
     adespatial,
     future,
     future.apply,
+    gifski,
     knitr,
     phytools,
     picante,

@@ -563,7 +563,8 @@ pacotes de referência em vez de reimplementá-los.
       nós de taxas de evolução de traits. O artigo deve dizer isso.
 - [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
       McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
-      código MATLAB do autor não tem licença declarada e não foi consultado). Abundâncias e
+      código MATLAB do autor não tem licença declarada; em novembro de 2026 estava fora do ar em
+      enallagma.com e não arquivado, então a validação é contra o livro). Abundâncias e
       médias dos traits integradas juntas por RK4 de passo fixo em R base; gradientes de
       seleção por diferenças centrais, o que permite as três formas de coeficiente de ataque
       (gaussiana, logística, Michaelis-Menten) e a omnivoria sem derivadas à mão. Níveis
@@ -574,6 +575,16 @@ pacotes de referência em vez de reimplementá-los.
       3.3 e 3.11). Duas leituras da eq. 3.20 documentadas na ajuda: o termo de perda do
       recurso para o predador sem `w`, e `m` como função dos traits do consumidor e do
       predador (box 3.1).
+      Conferência equação a equação (subagente, nov. 2026): gradientes numéricos iguais aos
+      analíticos da eq. 3.20 (diferença relativa ≤ 2e-7); Fig. 3.2 e painel A da Fig. 3.11
+      reproduzidos quase exatamente. Discrepâncias atribuídas ao livro: legenda da Fig. 3.11
+      com z̃c_R = 20 nos painéis A–D (o recurso sozinho fica em 12) e painel E (logístico)
+      irreprodutível com os parâmetros da legenda (o consumidor não persiste no traço
+      plotado). Corrigido δ = 0,02 nos painéis I–L na validação. Contra o código MATLAB dos
+      modelos recurso–consumidor do suplemento de McPeek (2017, *Am Nat*): funções de aptidão
+      e gradientes idênticos e trajetórias da Fig. 3.2 a 1e-4 do `ode45` do autor; sem
+      predador nesse código. Acrescentado `trait_floor` (piso dos traços em zero, como no
+      código do autor; padrão com Michaelis-Menten).
       Falta: traduzir as taxas por nível em `edge_rates` para `trait_rates()`, várias
       espécies por nível (cap. 5) e o cenário 4 das notas.
 - [x] Função que traduz a história ao longo da árvore em taxas por ramo: `history_rates()`,
@@ -610,8 +621,8 @@ pacotes de referência em vez de reimplementá-los.
 - [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
       argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
       `food_web_dynamics()`) quanto à consistência com o resto do pacote; pensar em funções e
-      métodos de plot (taxas por ramo pintadas na árvore, trajetórias de `food_web_dynamics()`,
-      ordenação PCPS); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
+      métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
+      `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
       por ramo) e as mensagens de erro.
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.

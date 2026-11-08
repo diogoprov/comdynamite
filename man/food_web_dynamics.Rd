@@ -14,7 +14,8 @@ food_web_dynamics(
   omnivory = FALSE,
   introductions = NULL,
   dt = 0.1,
-  extinction = 1e-06
+  extinction = 1e-06,
+  trait_floor = NULL
 )
 }
 \arguments{
@@ -42,7 +43,12 @@ appear, after the first time. Until then they are absent whatever \code{init} sa
 \item{dt}{Step of the integration; the intervals between the times of \code{times} and of
 \code{introductions} are divided into steps no longer than this.}
 
-\item{extinction}{Abundance below which a level is set to zero.}
+\item{extinction}{Abundance below which a level is set to zero; McPeek's code has no such
+threshold, so use 0 to compare with it.}
+
+\item{trait_floor}{Lowest value of the mean traits: a trait that falls below it relaxes back
+at rate \code{trait_floor - z}. \code{NULL} uses 0 with \code{attack = "michaelis"}, where traits must be
+positive, and no floor (\code{-Inf}) otherwise. McPeek's MATLAB code floors every trait at 0.}
 }
 \value{
 A data frame of class \code{food_web} with one row per time in \code{times} and columns
@@ -82,14 +88,29 @@ A level with abundance zero is absent: its trait is held and its rate of change 
 Levels can be added during the run with \code{introductions}, to follow the burst of evolution
 after an invasion and its deceleration towards equilibrium (figures 3.2 and 3.3 of the
 book), and to compare the trait of the resource with and without the predator (figure
-3.11). Abundances that fall below \code{extinction} are set to zero.
+3.11). Abundances that fall below \code{extinction} are set to zero. \code{\link[=plot.food_web]{plot.food_web()}} draws
+the trajectories and \code{\link[=animate_food_web]{animate_food_web()}} turns them into a GIF, such as this one, in which
+a consumer invades the resource and a predator arrives at time 6000 (parameters of the
+Gaussian panel of figure 3.11, made by \code{data-raw/food_web_gif.R}):
+
+\if{html}{\figure{food_web_dynamics.gif}{options: width="600" alt="Animated abundances, mean traits and rates of trait change of a resource, a consumer and a predator"}}
 
 Two details of equation 3.20 are read as follows. Its loss term of the resource to the
 predator carries the conversion efficiency \code{w}, which the matching selection gradient of
 the resource, the consumer's loss term and equation 3.9 do not; the implementation leaves
 \code{w} out of the losses of prey, as in the other equations. The attack coefficient of the
 predator on the consumer is written there with the trait of the resource; it is taken as a
-function of the traits of the consumer and the predator, as box 3.1 defines it.
+function of the traits of the consumer and the predator, as box 3.1 defines it; with
+this reading the three-level panel A of figure 3.11 is reproduced closely.
+
+For the resource and the consumer, the implementation matches the MATLAB code of the
+resource-consumer models that McPeek (2017, \emph{The American Naturalist}) published as
+supplementary material: the same fitness functions, functional responses and selection
+gradients, and trajectories of figure 2 of that article (figure 3.2 of the book) within
+1e-4 of the author's \code{ode45} integration in continuous time, where one "iteration" of the
+book is one unit of time. That code floors the mean traits at zero (\code{trait_floor}) and has
+no extinction threshold. It has no predator, so the predator level rests on the equations
+of the book alone.
 }
 \examples{
 # a consumer invades a resource at its demographic and evolutionary equilibrium
@@ -106,8 +127,12 @@ tail(y, 1)[, c("R", "N", "P", "z_R", "z_N", "z_P")]
 \references{
 McPeek, M. A. (2017). \emph{Evolutionary Community Ecology}. Princeton University
 Press. \doi{10.23943/princeton/9780691088778.001.0001}
+
+McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the
+coevolution of community structure. \emph{The American Naturalist}, 189, E91--E117.
+\doi{10.1086/691101}
 }
 \seealso{
-\code{\link[=food_web_params]{food_web_params()}}; \code{\link[=trait_rates]{trait_rates()}} for rates that vary among branches of a
-tree.
+\code{\link[=food_web_params]{food_web_params()}}; \code{\link[=plot.food_web]{plot.food_web()}} and \code{\link[=animate_food_web]{animate_food_web()}} to draw the
+results; \code{\link[=trait_rates]{trait_rates()}} for rates that vary among branches of a tree.
 }
