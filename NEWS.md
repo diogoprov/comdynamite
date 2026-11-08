@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `food_web_rates()` turns the rates of trait change of the resource, consumer and predator
+  from `food_web_dynamics()` into rates per branch for `trait_rates(edge_rates = )`: each tip
+  belongs to a trophic level, and over the last `window` units of time of its branch the rate
+  is `sigma2 * (1 + k * speed)`, where speed is the mean rate of change of the mean trait of
+  that level while present. As in `turnover_rates()`, only tip branches are informed; the
+  speeds are directional changes under selection, so they give relative rates among levels,
+  not Brownian variances.
+
 - Community assembly with several traits. `assemble_community(distance = )` measures trait
   space by Euclidean distance (`"euclidean"`, the default and the earlier behaviour),
   Euclidean distance on traits standardised by their standard deviation in the pool
