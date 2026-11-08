@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- `sample_individuals()` draws individuals from the populations of a simulated metacommunity,
+  with trait values made of the optimum of the species, a fraction of the gap to the
+  environment of the site (`local_adaptation`), a deviation of the population that does not
+  track the environment (`population_sd`) and variation among individuals
+  (`intraspecific_sd`). `tstats()` computes the T-statistics of Violle et al. (2012) per site,
+  in base R for the observed values or through `cati::Tstats()` (Taudiere & Violle 2016, now
+  in Suggests) for its null models; both give the same values. Sites are passed to cati under
+  labels of equal width, because `cati::Tstats()` matches site names as regular expressions
+  and would pool `site1` with `site10`. `data-raw/demo_tstats.R` shows that local adaptation
+  raises T_IP.IC (from 0.02 to 1.0 as it goes from none to complete) and lowers T_IC.IR and
+  T_PC.PR (from 0.54 and 0.89 to below 0.01), means of 20 metacommunities.
+
 - `plot.food_web()` draws the abundances, mean traits and rates of trait change from
   `food_web_dynamics()` in stacked panels, with introductions marked; with `time` it draws the
   state up to that time on the axes of the whole run. `animate_food_web()` turns these frames
