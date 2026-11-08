@@ -27,8 +27,8 @@ Imports:
     graphics,
     grDevices,
     parallel,
-    purrr,
-    stats
+    stats,
+    utils
 Suggests:
     adespatial,
     future,
@@ -36,6 +36,7 @@ Suggests:
     knitr,
     phytools,
     picante,
+    purrr,
     rmarkdown,
     testthat (>= 3.0.0),
     tibble,

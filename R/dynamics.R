@@ -18,7 +18,11 @@
 #'   dispersing individuals exactly, but has the right expectation. The code of
 #'   Thompson et al. (2020) does the same. Few emigrants may then produce no
 #'   immigrant, so with `extirpation` and low dispersal, recolonisation is rarer
-#'   than in mcomsimr, which conserves dispersers.
+#'   than in mcomsimr, which conserves dispersers. With `immigration = "multinomial"`,
+#'   the emigrants of each species at each site are instead distributed among the other
+#'   sites multinomially, with the probabilities of the kernel, which conserves them. It
+#'   costs about as much as the Poisson draw at low dispersal and up to 20 times more at high
+#'   dispersal, where the two give nearly the same results.
 #'
 #' After dispersal, each population is lost with probability `extirpation`,
 #' independently of its size. Thompson et al. (2020) used 0.002 in their
@@ -67,6 +71,9 @@
 #' @param seed_mean Mean number of individuals of each species added to each
 #'   site at each seeding step (and at the start).
 #' @param record_steps Optional steps at which abundances are recorded.
+#' @param immigration How emigrants reach other sites on spatially explicit landscapes:
+#'   `"poisson"` (the default, as in the code of Thompson et al. 2020) or `"multinomial"`,
+#'   which conserves them. Spatially implicit landscapes are always multinomial.
 #' @param pool Optional matrix (sites x species), logical or 0/1, with the sites where each
 #'   species can occur.
 #' @param initial Optional matrix (sites x species) of abundances or 0/1 presences at the start,
@@ -93,8 +100,9 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    n_steps = 1000, env_time = NULL,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0, pool = NULL,
-                                   initial = NULL) {
+                                   initial = NULL, immigration = c("poisson", "multinomial")) {
   stopifnot(inherits(landscape, "mc_landscape"))
+  immigration <- match.arg(immigration)
   traits <- as_traits(traits)
   if (!identical(dim(alpha), rep(nrow(traits), 2L))) {
     stop("`alpha` needs one row and one column per species (", nrow(traits), ")", call. = FALSE)
@@ -116,7 +124,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   out <- mc_dynamics(r, alpha, dispersal, n_steps = n_steps, seed_steps = seed_steps,
                      seed_mean = seed_mean, disp_matrix = landscape$dispersal,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
-                     extirpation = extirpation, pool = pool, initial = initial)
+                     extirpation = extirpation, pool = pool, initial = initial,
+                     immigration = immigration)
   structure(c(out, list(landscape = landscape, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
                         pool = out$pool, tree = attr(traits, "tree"))), class = "mc_sim")
@@ -145,7 +154,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                         disp_matrix = NULL, record_steps = NULL,
                         sites = NULL, species = NULL, extirpation = 0, pool = NULL,
-                        initial = NULL) {
+                        initial = NULL, immigration = c("poisson", "multinomial")) {
+  immigration <- match.arg(immigration)
   r_fun <- if (is.function(r)) r else function(step) r
   r1 <- r_fun(1)
   m <- nrow(r1)
@@ -211,7 +221,9 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
       em <- matrix(stats::rbinom(m * k, n, p_em), m, k)
       tot <- colSums(em)
       if (any(tot > 0)) {
-        if (!is.null(disp_matrix)) {
+        if (!is.null(disp_matrix) && immigration == "multinomial") {
+          n <- n - em + place_emigrants(em, disp_matrix)
+        } else if (!is.null(disp_matrix)) {
           n <- n - em + matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
         } else {
           w <- sweep(-em, 2, tot, "+")
@@ -230,6 +242,20 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
   abundance[, alive] <- n
   list(abundance = abundance, history = history, pool = pool)
+}
+
+# immigrants when the emigrants of each species at each site go to the other sites
+# multinomially, with the probabilities of the rows of `disp_matrix`
+place_emigrants <- function(em, disp_matrix) {
+  m <- nrow(em)
+  immigrants <- matrix(0L, m, ncol(em))
+  for (cell in which(em > 0)) {
+    from <- (cell - 1L) %% m + 1L
+    species <- (cell - 1L) %/% m + 1L
+    immigrants[, species] <- immigrants[, species] +
+      drop(stats::rmultinom(1, em[cell], disp_matrix[from, ]))
+  }
+  immigrants
 }
 
 # a sites x species matrix in the order of `sites` and `species`: rows by name when they have

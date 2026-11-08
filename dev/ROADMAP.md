@@ -610,14 +610,18 @@ Objetivo: API estável e pacote no CRAN.
 
 ## Pendências e decisões
 
-- **Imigração na grade.** Decidir se `mc_dynamics()` passa a conservar dispersores, como o
-  mcomsimr, ou mantém a Poisson do código original. Mudar altera os resultados de
-  sementes antigas e exige refazer as vignettes.
+- **Imigração na grade.** Decidido em 2026-11-07: argumento `immigration` em
+  `simulate_metacommunity()` e `mc_dynamics()`, com `"poisson"` como padrão (código original,
+  sementes antigas iguais) e `"multinomial"` conservando os dispersores, como o mcomsimr. No
+  cenário da diferença (grade, dispersão 0,001, extirpação 0,02, alfa contando sítios vazios):
+  1,51 com Poisson, 1,61 com multinomial e 1,61 no mcomsimr. O multinomial custa o mesmo em
+  dispersão baixa e até 20 vezes mais em dispersão alta (10 x 10 sítios, 50 espécies).
 - **Erros no artigo de Thompson et al. (2020).** Tabela 1 (beta), faixa de dispersão,
   conversão do ambiente em postos e metade dos imigrantes no cenário de
   competição-colonização não batem com o código. Vale citar isso no artigo do pacote.
-- **Dependências do hub.** Hoje o pacote só importa `ape`, `purrr` e pacotes base (`graphics`, `grDevices`, `parallel`, `stats`). Tidyverse, Futureverse
-  e pacotes de biogeografia pesam em `Imports`; preferir `Suggests` sempre que der.
+- **Dependências do hub.** Decidido em 2026-11-07: `Imports` só com `ape` e pacotes base
+  (`graphics`, `grDevices`, `parallel`, `stats`, `utils`); todo o resto em `Suggests`, chamado
+  com `requireNamespace()`. O `purrr`, que só dava a barra de progresso, foi para `Suggests`.
 - **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
   equações e citar; se for copiar a estrutura do código, falar com os autores.
 - **Protocolo estático.** O texto de Peres-Neto et al. (2012) dá `h` entre 0,5 e 1 e usa
@@ -649,10 +653,11 @@ Objetivo: API estável e pacote no CRAN.
 - **Resultados pré-calculados.** Os `.rds` em `vignettes/` vêm de
   `data-raw/vignette_ecology.R` e `data-raw/vignette_method.R`. Se o modelo mudar,
   é preciso rodar os scripts de novo e revisar os números citados no texto.
-- **Páginas órfãs do site.** O deploy do pkgdown usa `clean: false`, então a página de uma
-  função removida fica no `gh-pages` e precisa ser apagada à mão.
-- **`data-raw/hex_dynamite.R`.** Sobrescreve o `logo.png` oficial se for rodado. Remover
-  ou mudar o arquivo de saída.
+- **Páginas órfãs do site.** Resolvido em 2026-11-07: o deploy passou a `clean: true` (com
+  `clean-exclude: .nojekyll`), que apaga do `gh-pages` o que o site não gera mais. Na
+  comparação com um site construído localmente, sobravam só 5 figuras antigas de artigos.
+- **`data-raw/hex_dynamite.R`.** Removido em 2026-11-07; o logo atual (opção F1) vem de
+  `data-raw/hex_sticker.R`.
 
 ## Referências citadas neste roadmap
 

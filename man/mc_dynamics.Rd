@@ -17,7 +17,8 @@ mc_dynamics(
   species = NULL,
   extirpation = 0,
   pool = NULL,
-  initial = NULL
+  initial = NULL,
+  immigration = c("poisson", "multinomial")
 )
 }
 \arguments{
@@ -51,6 +52,10 @@ species can occur.}
 
 \item{initial}{Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 only where \code{pool} allows.}
+
+\item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
+\code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
+which conserves them. Spatially implicit landscapes are always multinomial.}
 }
 \value{
 List with \code{abundance} and \code{history}, as in

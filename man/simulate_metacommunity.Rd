@@ -16,7 +16,8 @@ simulate_metacommunity(
   record_steps = NULL,
   extirpation = 0,
   pool = NULL,
-  initial = NULL
+  initial = NULL,
+  immigration = c("poisson", "multinomial")
 )
 }
 \arguments{
@@ -50,6 +51,10 @@ species can occur.}
 
 \item{initial}{Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 only where \code{pool} allows.}
+
+\item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
+\code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
+which conserves them. Spatially implicit landscapes are always multinomial.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
@@ -78,7 +83,11 @@ dispersal kernel. This approximation does not conserve the number of
 dispersing individuals exactly, but has the right expectation. The code of
 Thompson et al. (2020) does the same. Few emigrants may then produce no
 immigrant, so with \code{extirpation} and low dispersal, recolonisation is rarer
-than in mcomsimr, which conserves dispersers.
+than in mcomsimr, which conserves dispersers. With \code{immigration = "multinomial"},
+the emigrants of each species at each site are instead distributed among the other
+sites multinomially, with the probabilities of the kernel, which conserves them. It
+costs about as much as the Poisson draw at low dispersal and up to 20 times more at high
+dispersal, where the two give nearly the same results.
 }
 
 After dispersal, each population is lost with probability \code{extirpation},

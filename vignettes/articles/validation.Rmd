@@ -32,7 +32,10 @@ dispersal of 0.001. The cause is the immigration step. comdynamite draws immigra
 from a Poisson distribution, as does the authors' Julia code, so that a few
 emigrants may produce no immigrant. mcomsimr conserves dispersers. In that scenario,
 alpha was 1.75 with Poisson immigrants, 1.85 with multinomial immigrants and 1.85
-in mcomsimr (600 runs each, standard error 0.015).
+in mcomsimr (600 runs each, standard error 0.015). Since version 0.6.3.9000,
+`immigration = "multinomial"` conserves dispersers in comdynamite too; in the same scenario,
+counting empty sites in alpha, it gave 1.61 against 1.61 in mcomsimr and 1.51 with the
+default Poisson draw.
 
 ## Article and archived code
 

@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `simulate_metacommunity()` and `mc_dynamics()`: `immigration = "multinomial"` distributes
+  the emigrants of each site among the others by the dispersal kernel and conserves them, as
+  mcomsimr does, on spatially explicit landscapes. The default stays `"poisson"`, as in the
+  code of Thompson et al. (2020). With extirpation 0.02 and dispersal 0.001 on a grid, mean
+  local richness was 1.51 with Poisson, 1.61 with multinomial and 1.61 in mcomsimr.
+- purrr moved from `Imports` to `Suggests`: it only gives the progress bar of long loops in
+  interactive sessions. The package now imports only ape and base packages.
+
 # comdynamite 0.6.3
 
 - `species_traits()`: `optima`, `sigma` and `r_max` take values from elsewhere, such as mvMORPH,
