@@ -85,6 +85,13 @@ as many of these values as it has individuals, drawn without replacement from th
 population means are computed again from the values drawn.
 }
 
+The null model of \code{T_IC.IR} leaves the regional pool as it is, so its denominator (the
+variance among all individuals) stays that of the observed data, and only the variance
+within sites is randomised. Taking the denominator from the values drawn, which repeat
+individuals across sites, biases the null and makes the test anti-conservative. In the null
+model of \code{T_PC.PR} the population means are themselves computed from the values drawn, so
+their regional variance is computed again from them, as in Taudiere & Violle (2016).
+
 The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
 mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
 with \eqn{n} = \code{nperm}, where \eqn{r} is the number of null values at or below the observed
@@ -166,5 +173,6 @@ community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 \doi{10.1016/j.tree.2011.11.014}
 }
 \seealso{
-\code{\link[=sample_individuals]{sample_individuals()}}, \code{\link[=population_shifts]{population_shifts()}}.
+\code{\link[=tstats_summary]{tstats_summary()}} to summarise the tests, \code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=population_shifts]{population_shifts()}}.
 }
