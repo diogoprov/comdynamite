@@ -6,10 +6,11 @@ the dynamic null model of community assembly of Pigot & Etienne (2015),
 DAMOCLES. Along each branch the lineage is either locally absent (state
 0) or present (state 1); an absent lineage colonises the community at
 rate `gamma` and a present one goes locally extinct at rate `mu`, the
-same for every lineage. At each speciation, which is allopatric, a
-locally present ancestor leaves one daughter present and the other
-absent, chosen at random, and an absent ancestor leaves two absent
-daughters. The states at the tips form the community.
+same for every lineage unless rates are given for each edge. At each
+speciation, which is allopatric, a locally present ancestor leaves one
+daughter present and the other absent, chosen at random, and an absent
+ancestor leaves two absent daughters. The states at the tips form the
+community.
 
 ## Usage
 
@@ -33,11 +34,14 @@ simulate_damocles(
 - gamma:
 
   Rate of local colonisation per lineage, in the units of the branch
-  lengths.
+  lengths: one rate, or one per edge of `tree` in the order of
+  `tree$edge`.
 
 - mu:
 
-  Rate of local extinction per lineage.
+  Rate of local extinction per lineage, one or one per edge. With rates
+  per edge and a root edge, the two edges leaving the root must have the
+  same rates, which the root edge takes.
 
 - n:
 

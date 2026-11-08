@@ -84,7 +84,10 @@ one is compared with in that study.</p>
 <span>  mu <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
 <span>  shared <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
+<span>  sympatry <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  regimes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  edge_covariate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"gamma"</span>, <span class="st">"mu"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,8 +112,10 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 
 <dt id="arg-gamma-mu">gamma, mu<a class="anchor" aria-label="anchor" href="#arg-gamma-mu"></a></dt>
 <dd><p>Rates of local colonisation and extinction used to simulate the null
-communities, one value for all communities or one per community; <code>NULL</code> (the default)
-estimates both with <code><a href="damocles_loglik.html">fit_damocles()</a></code>.</p></dd>
+communities, one value for all communities or one per community, or lists with one rate,
+or one rate per edge of <code>tree</code>, per community; <code>NULL</code> (the default) estimates both with
+<code><a href="damocles_loglik.html">fit_damocles()</a></code>, with <code>shared</code>, <code>sympatry</code>, <code>regimes</code>, <code>edge_covariate</code> and <code>vary</code> passed
+on to it.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
@@ -128,11 +133,30 @@ probabilities).</p></dd>
 <dd><p>Probability that a present ancestor leaves both daughters present, used in
 the simulations (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>); <code>NULL</code> estimates it with the rates.</p></dd>
 
+
+<dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>
+<dd><p>Optional regime of each edge of <code>tree</code>, in the order of <code>tree$edge</code> (a factor
+or character vector), such as from <code><a href="clade_regimes.html">clade_regimes()</a></code> or from a configuration of rate shifts
+estimated by another method: the rates in <code>vary</code> are estimated separately for each regime.</p></dd>
+
+
+<dt id="arg-edge-covariate">edge_covariate<a class="anchor" aria-label="anchor" href="#arg-edge-covariate"></a></dt>
+<dd><p>Optional positive number for each edge of <code>tree</code>, in the order of
+<code>tree$edge</code>, such as branch-specific rates of speciation estimated by another method: the
+rates in <code>vary</code> change with it as <code>rate * (x / geometric mean of x)^beta</code>, with <code>rate</code> and
+<code>beta</code> estimated. Give <code>regimes</code> or <code>edge_covariate</code>, not both.</p></dd>
+
+
+<dt id="arg-vary">vary<a class="anchor" aria-label="anchor" href="#arg-vary"></a></dt>
+<dd><p>Which rates change among <code>regimes</code> or with <code>edge_covariate</code>: <code>"both"</code>, <code>"gamma"</code>
+or <code>"mu"</code>; the other one is a single rate for the whole tree.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame of class <code>mc_damocles_test</code>, one row per community, with the richness,
-the parameters used (<code>gamma</code>, <code>mu</code>, <code>sympatry</code>) and their log-likelihood when estimated,
+the parameters used (<code>gamma</code>, <code>mu</code>, or the columns of the fit with <code>regimes</code> or
+<code>edge_covariate</code>, and <code>sympatry</code>; <code>NA</code> for rates given per edge) and their log-likelihood when estimated,
 and, for <code>mpd</code> and <code>mntd</code>, the observed value, the standardised effect size and p-value against the DAMOCLES
 null (<code>ses_mpd_damocles</code>, <code>p_mpd_damocles</code>, ...) and against random draws
 (<code>ses_mpd_random</code>, <code>p_mpd_random</code>, ...), plus <code>n_valid</code>.</p>

@@ -97,7 +97,10 @@ daughters present). <code>fit_damocles()</code> finds the maximum-likelihood rat
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
 <span>  start <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  shared <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
+<span>  sympatry <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  regimes <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  edge_covariate <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"gamma"</span>, <span class="st">"mu"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -117,11 +120,14 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 
 
 <dt id="arg-gamma">gamma<a class="anchor" aria-label="anchor" href="#arg-gamma"></a></dt>
-<dd><p>Rate of local colonisation per lineage, in the units of the branch lengths.</p></dd>
+<dd><p>Rate of local colonisation per lineage, in the units of the branch lengths: one
+rate, or one per edge of <code>tree</code> in the order of <code>tree$edge</code>.</p></dd>
 
 
 <dt id="arg-mu">mu<a class="anchor" aria-label="anchor" href="#arg-mu"></a></dt>
-<dd><p>Rate of local extinction per lineage.</p></dd>
+<dd><p>Rate of local extinction per lineage, one or one per edge. With rates per edge and
+a root edge, the two edges leaving the root must have the same rates, which the root edge
+takes.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
@@ -141,8 +147,27 @@ starts from four combinations of 0.2 and 2 divided by the height of the tree.</p
 
 
 <dt id="arg-shared">shared<a class="anchor" aria-label="anchor" href="#arg-shared"></a></dt>
-<dd><p>If <code>TRUE</code>, one pair of rates shared by all communities, estimated from the sum
-of their log-likelihoods; if <code>FALSE</code> (the default), separate rates for each community.</p></dd>
+<dd><p>If <code>TRUE</code>, one set of parameters shared by all communities, estimated from the
+sum of their log-likelihoods; if <code>FALSE</code> (the default), separate parameters for each
+community.</p></dd>
+
+
+<dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>
+<dd><p>Optional regime of each edge of <code>tree</code>, in the order of <code>tree$edge</code> (a factor
+or character vector), such as from <code><a href="clade_regimes.html">clade_regimes()</a></code> or from a configuration of rate shifts
+estimated by another method: the rates in <code>vary</code> are estimated separately for each regime.</p></dd>
+
+
+<dt id="arg-edge-covariate">edge_covariate<a class="anchor" aria-label="anchor" href="#arg-edge-covariate"></a></dt>
+<dd><p>Optional positive number for each edge of <code>tree</code>, in the order of
+<code>tree$edge</code>, such as branch-specific rates of speciation estimated by another method: the
+rates in <code>vary</code> change with it as <code>rate * (x / geometric mean of x)^beta</code>, with <code>rate</code> and
+<code>beta</code> estimated. Give <code>regimes</code> or <code>edge_covariate</code>, not both.</p></dd>
+
+
+<dt id="arg-vary">vary<a class="anchor" aria-label="anchor" href="#arg-vary"></a></dt>
+<dd><p>Which rates change among <code>regimes</code> or with <code>edge_covariate</code>: <code>"both"</code>, <code>"gamma"</code>
+or <code>"mu"</code>; the other one is a single rate for the whole tree.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -188,6 +213,23 @@ community, between 0.26 and 0.81 from five and between 0.41 and 0.60 from twenty
 with shared rates, and compare the fit with that of <code>sympatry = 0</code> by a likelihood ratio (one
 degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
 conservative) to ask whether strictly allopatric speciation is enough.</p>
+<p>Rates can change across the tree. <code>damocles_loglik()</code> and <code><a href="simulate_damocles.html">simulate_damocles()</a></code> take one rate
+per edge, and <code>fit_damocles()</code> estimates rates that differ among <code>regimes</code> of the edges (a
+partition defined a priori with <code><a href="clade_regimes.html">clade_regimes()</a></code>, or the configuration of rate shifts of a
+method such as BAMM) or that change with an <code>edge_covariate</code> (such as branch-specific rates
+of speciation from a method such as ClaDS), for colonisation, extinction or both (<code>vary</code>).
+Either input is a plain vector in the order of <code>tree$edge</code>, so any method can supply it.
+Rates of diversification describe speciation and extinction of the whole lineage, not local
+colonisation and extinction: the regimes or the covariate are a hypothesis about the local
+dynamics, tested by comparing the fit with the constant model by <code><a href="damocles_lrt.html">damocles_lrt()</a></code> (a single
+regime, or <code>beta = 0</code>, gives the constant model) and by intervals from
+<code><a href="confint.mc_damocles_fit.html">confint.mc_damocles_fit()</a></code>. Each regime adds parameters to a likelihood that is already
+flat, so these fits need several communities with <code>shared = TRUE</code>; the type I error and
+power of that comparison are in <code>data-raw/validation_damocles.R</code>: with rates shared by 5 or
+20 communities on trees of 60 tips, the test rejected constant rates in 4–7% of 100
+replicates without an effect and in 86–99% with a threefold difference between clades or a
+slope of one on an autocorrelated covariate. Those communities were simulated
+independently; real communities that share their history will reject more often.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -214,7 +256,7 @@ community structure. <em>Ecology Letters</em>, 18, 153–163. <a href="https://d
 <span class="r-out co"><span class="r-pr">#&gt;</span> sim2 0.476 1.46e-09        0  -21.9        8           0</span>
 <span class="r-in"><span><span class="fu">fit_damocles</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, shared <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES rates by maximum likelihood (Pigot &amp; Etienne 2015)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Rates shared by 2 communities; total log-likelihood -50.6593 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Parameters shared by 2 communities; total log-likelihood -50.6593 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      gamma   mu sympatry loglik richness convergence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sim1  1.12 2.69        0  -28.0       11           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sim2  1.12 2.69        0  -22.6        8           0</span>

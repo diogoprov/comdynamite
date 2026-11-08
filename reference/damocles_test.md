@@ -23,7 +23,10 @@ damocles_test(
   mu = NULL,
   root = c("both", "absent", "present"),
   shared = FALSE,
-  sympatry = 0
+  sympatry = 0,
+  regimes = NULL,
+  edge_covariate = NULL,
+  vary = c("both", "gamma", "mu")
 )
 ```
 
@@ -48,9 +51,12 @@ damocles_test(
 - gamma, mu:
 
   Rates of local colonisation and extinction used to simulate the null
-  communities, one value for all communities or one per community;
+  communities, one value for all communities or one per community, or
+  lists with one rate, or one rate per edge of `tree`, per community;
   `NULL` (the default) estimates both with
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+  with `shared`, `sympatry`, `regimes`, `edge_covariate` and `vary`
+  passed on to it.
 
 - root:
 
@@ -72,14 +78,38 @@ damocles_test(
   [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md));
   `NULL` estimates it with the rates.
 
+- regimes:
+
+  Optional regime of each edge of `tree`, in the order of `tree$edge` (a
+  factor or character vector), such as from
+  [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md)
+  or from a configuration of rate shifts estimated by another method:
+  the rates in `vary` are estimated separately for each regime.
+
+- edge_covariate:
+
+  Optional positive number for each edge of `tree`, in the order of
+  `tree$edge`, such as branch-specific rates of speciation estimated by
+  another method: the rates in `vary` change with it as
+  `rate * (x / geometric mean of x)^beta`, with `rate` and `beta`
+  estimated. Give `regimes` or `edge_covariate`, not both.
+
+- vary:
+
+  Which rates change among `regimes` or with `edge_covariate`: `"both"`,
+  `"gamma"` or `"mu"`; the other one is a single rate for the whole
+  tree.
+
 ## Value
 
 A data frame of class `mc_damocles_test`, one row per community, with
-the richness, the parameters used (`gamma`, `mu`, `sympatry`) and their
-log-likelihood when estimated, and, for `mpd` and `mntd`, the observed
-value, the standardised effect size and p-value against the DAMOCLES
-null (`ses_mpd_damocles`, `p_mpd_damocles`, ...) and against random
-draws (`ses_mpd_random`, `p_mpd_random`, ...), plus `n_valid`.
+the richness, the parameters used (`gamma`, `mu`, or the columns of the
+fit with `regimes` or `edge_covariate`, and `sympatry`; `NA` for rates
+given per edge) and their log-likelihood when estimated, and, for `mpd`
+and `mntd`, the observed value, the standardised effect size and p-value
+against the DAMOCLES null (`ses_mpd_damocles`, `p_mpd_damocles`, ...)
+and against random draws (`ses_mpd_random`, `p_mpd_random`, ...), plus
+`n_valid`.
 
 ## Details
 

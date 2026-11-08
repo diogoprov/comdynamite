@@ -219,3 +219,9 @@ Colonisation and local extinction along the tree (DAMOCLES).
 - [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   : Phylogenetic community structure against the dynamic null model of
   DAMOCLES
+- [`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md)
+  : Likelihood-ratio test between nested DAMOCLES fits
+- [`confint(`*`<mc_damocles_fit>`*`)`](https://provetelab.org/comdynamite/reference/confint.mc_damocles_fit.md)
+  : Profile-likelihood intervals of DAMOCLES parameters
+- [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md)
+  : Regimes of the edges of a tree from a list of clades

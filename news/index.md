@@ -69,6 +69,27 @@
   (`data-raw/validation_damocles.R`), provided they can be treated as
   independent realisations of the process.
 
+- DAMOCLES rates can change across the tree.
+  [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
+  and
+  [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  take one rate per edge;
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  and
+  [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
+  estimate rates that differ among `regimes` of the edges or change with
+  an `edge_covariate`, for colonisation, extinction or both (`vary`).
+  Regimes can be clades defined a priori
+  ([`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md))
+  or rate shifts from methods of diversification (BAMM, ClaDS and
+  similar), given as plain vectors so that no such package is needed.
+  [`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md)
+  compares nested fits (constant against varying rates, shared against
+  separate, allopatric against estimated `sympatry`) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html) gives
+  profile-likelihood intervals. Type I error and power of the comparison
+  with constant rates are in `data-raw/validation_damocles.R`.
+
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
   [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
   [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
