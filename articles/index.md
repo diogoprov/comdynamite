@@ -17,6 +17,8 @@
   structure](https://provetelab.org/comdynamite/articles/phylogenetic-structure.md):
 - [Evaluating a method with simulated
   metacommunities](https://provetelab.org/comdynamite/articles/evaluating-methods.md):
+- [Rates of trait evolution that vary among
+  branches](https://provetelab.org/comdynamite/articles/branch-rates.md):
 - [Watching a metacommunity
   assemble](https://provetelab.org/comdynamite/articles/watching-assembly.md):
 

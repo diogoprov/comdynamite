@@ -3,6 +3,7 @@ pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   articles/analysing-clades: analysing-clades.html
+  branch-rates: branch-rates.html
   comdynamite: comdynamite.html
   evaluating-methods: evaluating-methods.html
   articles/herodotools: herodotools.html
@@ -12,7 +13,7 @@ articles:
   articles/validation: validation.html
   articles/watching-assembly: watching-assembly.html
   articles/whole-tree: whole-tree.html
-last_built: 2026-11-08T17:09Z
+last_built: 2026-11-08T18:47Z
 urls:
   reference: https://provetelab.org/comdynamite/reference
   article: https://provetelab.org/comdynamite/articles
