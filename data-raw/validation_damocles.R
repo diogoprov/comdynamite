@@ -12,6 +12,14 @@
 # 5. Speciation with probability `sympatry` of both daughters present (not in DAMOCLES): rates
 #    and sympatry estimated together, shared, from 1, 5 and 20 communities simulated with
 #    gamma = mu = 1 and sympatry = 0.5 on trees of 60 tips, 30 replicates each.
+# 6. Rates that change among regimes or with a covariate of the edges: type I error and power
+#    of damocles_lrt() against constant rates, 100 replicates per setting, rates shared by 5
+#    or 20 communities on trees of 60 tips. The covariate is autocorrelated along the tree,
+#    like branch-specific rates of speciation (its log follows Brownian motion with variance
+#    0.5 per unit of time); colonisation is gamma = exp(beta * centred log covariate), with
+#    beta = 0 (type I error) or 1 (power), and mu = 1. The regimes are the crown clade of one
+#    of the two daughters of the root against the rest, with gamma 1 in both (type I error)
+#    or 3 in the clade and 0.5 elsewhere (power).
 suppressMessages({
   devtools::load_all(".", quiet = TRUE)
   library(DAMOCLES)
@@ -128,5 +136,44 @@ cat("5. sympatry estimated with shared rates (true gamma = mu = 1, sympatry = 0.
 print(aggregate(cbind(gamma, mu, sympatry) ~ communities, sympatry,
                 function(x) round(stats::quantile(x, c(0.05, 0.5, 0.95)), 3)))
 
-saveRDS(list(loglik_diffs = diffs, ml = ml, sims = sims, shared = shared, sympatry = sympatry),
+# 6. regimes and covariates ---------------------------------------------------------------------
+bm_covariate <- function(tree, variance = 0.5) {
+  value <- numeric(ape::Ntip(tree) + tree$Nnode)
+  out <- numeric(nrow(tree$edge))
+  for (e in ape::reorder.phylo(tree, "cladewise", index.only = TRUE)) {
+    value[tree$edge[e, 2]] <- value[tree$edge[e, 1]] +
+      stats::rnorm(1, 0, sqrt(variance * tree$edge.length[e]))
+    out[e] <- exp((value[tree$edge[e, 1]] + value[tree$edge[e, 2]]) / 2)
+  }
+  out
+}
+lrt_one <- function(i, setting) {
+  tree <- treeshapesim::sim_tree_shape(60)
+  if (setting$model == "covariate") {
+    x <- bm_covariate(tree)
+    z <- log(x) - mean(log(x))
+    comm <- simulate_damocles(tree, exp(setting$effect * z), 1, n = setting$communities)
+    alternative <- fit_damocles(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
+  } else {
+    clade <- ape::extract.clade(tree, ape::Ntip(tree) + 2)$tip.label
+    reg <- clade_regimes(tree, list(A = clade))
+    gamma <- if (setting$effect == 0) 1 else ifelse(reg == "A", 3, 0.5)
+    comm <- simulate_damocles(tree, gamma, 1, n = setting$communities)
+    alternative <- fit_damocles(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
+  }
+  damocles_lrt(fit_damocles(comm, tree, shared = TRUE), alternative)$p_value[2]
+}
+lrt_settings <- expand.grid(model = c("covariate", "regimes"), effect = c(0, 1),
+                            communities = c(5, 20), stringsAsFactors = FALSE)
+lrt_settings$rejected <- vapply(seq_len(nrow(lrt_settings)), function(s) {
+  p <- unlist(parallel::mclapply(seq_len(100), lrt_one, setting = lrt_settings[s, ],
+                                 mc.cores = cores))
+  mean(p < 0.05)
+}, numeric(1))
+cat("6. likelihood-ratio tests against constant rates, proportion of 100 with p < 0.05",
+    "(effect 0: type I error; 1: power)\n")
+print(lrt_settings)
+
+saveRDS(list(loglik_diffs = diffs, ml = ml, sims = sims, shared = shared, sympatry = sympatry,
+             lrt = lrt_settings),
         "data-raw/validation_damocles.rds")

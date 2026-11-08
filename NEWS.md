@@ -80,6 +80,15 @@
   log-likelihoods. A single community rarely holds enough information on colonisation and
   extinction; pooling communities narrows the estimates (`data-raw/validation_damocles.R`),
   provided they can be treated as independent realisations of the process.
+- DAMOCLES rates can change across the tree. `simulate_damocles()` and `damocles_loglik()`
+  take one rate per edge; `fit_damocles()` and `damocles_test()` estimate rates that differ
+  among `regimes` of the edges or change with an `edge_covariate`, for colonisation,
+  extinction or both (`vary`). Regimes can be clades defined a priori (`clade_regimes()`) or
+  rate shifts from methods of diversification (BAMM, ClaDS and similar), given as plain
+  vectors so that no such package is needed. `damocles_lrt()` compares nested fits (constant
+  against varying rates, shared against separate, allopatric against estimated `sympatry`)
+  and `confint()` gives profile-likelihood intervals. Type I error and power of the
+  comparison with constant rates are in `data-raw/validation_damocles.R`.
 - `simulate_damocles()`, `damocles_loglik()`, `fit_damocles()` and `damocles_test()` take
   `sympatry`, the probability that a locally present ancestor leaves both daughters present
   at speciation (in situ speciation, or recolonisation before the daughters diverge),
