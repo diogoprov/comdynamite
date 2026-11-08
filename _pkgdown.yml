@@ -33,6 +33,8 @@ reference:
   - trait_mk
   - trait_rates
   - history_rates
+  - partner_turnover
+  - turnover_rates
   - tip_history_metrics
   - as_herodotools
   - region_pool

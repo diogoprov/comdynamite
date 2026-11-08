@@ -596,8 +596,11 @@ pacotes de referência em vez de reimplementá-los.
       com geografia (diferença máxima 3e-15) e r recuperado por `fit_t_comp()` (média -0,30
       para -0,3 verdadeiro, 0,005 para 0). `CreateGeoObject()` falha em mapas sem mudança de
       região (bug do RPANDA, objeto `old.Dist`); essas histórias são sorteadas de novo.
-      Falta ligar a saída de `simulate_metacommunity()` (entradas e saídas de parceiros,
-      cenários 5 e 8).
+      Ligação com `simulate_metacommunity()` (cenário 5): `partner_turnover()` conta entradas
+      e saídas de parceiros por sítio e passo, e `turnover_rates()` as converte em taxas nos
+      ramos terminais, na janela `window` do fim de cada ramo (a simulação roda em tempo
+      ecológico só entre as pontas). Falta o cenário 8 (mudanças de taxa por Poisson
+      concentradas em eventos de reembaralhamento e compartilhadas entre linhagens simpátricas).
 - [ ] Indivíduos a partir das simulações (variação intraespecífica e adaptação local por sítio)
       e estatísticas T de Violle et al. (2012) via `cati::Tstats()` em `Suggests` (cenário 10
       das notas).

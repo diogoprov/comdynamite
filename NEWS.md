@@ -1,5 +1,14 @@
 # comdynamite (development version)
 
+- `partner_turnover()` counts, for each species of a simulated metacommunity, the entries and
+  exits of other species (all of them, or only competitors) in the sites it occupies, per site
+  and time step between recorded steps. `turnover_rates()` turns this turnover into rates per
+  branch for `trait_rates(edge_rates = )`, `sigma2 * (1 + k * turnover)` over the last
+  `window` units of time of each tip branch, linking the assembly of the metacommunity to
+  rates of trait evolution (evolution speeds up as the community around a lineage changes).
+  The simulation runs among the tips in ecological time, so only tip branches are informed and
+  the match between ecological and branch time is set by `window`.
+
 - `plot.food_web()` draws the abundances, mean traits and rates of trait change from
   `food_web_dynamics()` in stacked panels, with introductions marked; with `time` it draws the
   state up to that time on the axes of the whole run. `animate_food_web()` turns these frames

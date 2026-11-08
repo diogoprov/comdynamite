@@ -338,3 +338,122 @@ sympatry_integral <- function(history, r) {
   }
   integral
 }
+
+#' Turnover of interaction partners in a simulated metacommunity
+#'
+#' Counts, for each species, how often the composition around it changes: the number of other
+#' species that enter or leave the sites where the species is present, between successive
+#' recorded steps of [simulate_metacommunity()]. The count is divided by the number of sites
+#' and time steps over which the species was present at both ends of an interval, so it is a
+#' rate of change of partners per site and per time step. It measures the entries and exits of
+#' partners of scenario 5 of the notes on branch rates, and feeds [turnover_rates()].
+#'
+#' @param x An `mc_sim` object with `history`, that is, run with `record_steps`.
+#' @param partners `"all"` counts every other species as a partner; `"competitors"` counts only
+#'   the species with a non-zero competition coefficient with the focal species in `x$alpha`
+#'   (in either direction).
+#' @return Named numeric vector, one value per species. Species never present at two successive
+#'   recorded steps get zero.
+#' @seealso [turnover_rates()], [history_rates()]
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tr <- treeshapesim::sim_tree_shape(10)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tr),
+#'                               competition_matrix(tr, "none"), n_steps = 300,
+#'                               record_steps = seq(100, 300, 20), extirpation = 0.02)
+#' partner_turnover(sim)
+#' @export
+partner_turnover <- function(x, partners = c("all", "competitors")) {
+  if (!inherits(x, "mc_sim") || is.null(x$history)) {
+    stop("`x` must be an `mc_sim` object run with `record_steps`", call. = FALSE)
+  }
+  partners <- match.arg(partners)
+  presence <- x$history > 0
+  n_rec <- dim(presence)[3]
+  if (n_rec < 2) stop("`x` needs at least two recorded steps", call. = FALSE)
+  steps <- as.numeric(sub("^step", "", dimnames(presence)[[3]]))
+  if (anyNA(steps)) steps <- seq_len(n_rec)
+  species <- dimnames(presence)[[2]]
+  n_sp <- length(species)
+  weights <- if (partners == "all") {
+    matrix(1, n_sp, n_sp)
+  } else {
+    (x$alpha != 0 | t(x$alpha != 0)) * 1
+  }
+  diag(weights) <- 0
+  changes <- exposure <- numeric(n_sp)
+  for (t in seq_len(n_rec - 1)) {
+    a <- matrix(presence[, , t], ncol = n_sp)
+    b <- matrix(presence[, , t + 1], ncol = n_sp)
+    both <- a & b
+    changes <- changes + colSums(both * ((a != b) %*% weights))
+    exposure <- exposure + colSums(both) * (steps[t + 1] - steps[t])
+  }
+  out <- ifelse(exposure > 0, changes / exposure, 0)
+  stats::setNames(out, species)
+}
+
+#' Rates of trait evolution from the turnover of partners in a metacommunity
+#'
+#' Turns the turnover of interaction partners of each species in a simulated metacommunity,
+#' from [partner_turnover()], into rates of evolution of a continuous trait on the branches of
+#' its tree, for `trait_rates(edge_rates = )`. It implements the expectation that evolution
+#' speeds up with each change in the community around a lineage and stays slow while the
+#' community is stable (McPeek 2017; scenario 5 of the notes on branch rates).
+#'
+#' The metacommunity runs in ecological time among the species at the tips, so its dynamics
+#' only inform the tip branches, and how ecological time relates to branch lengths is a choice
+#' of the user, not something the simulation gives. Here the dynamics are taken to represent
+#' the last `window` units of time of each tip branch: in that stretch the rate is
+#' `sigma2 * (1 + k * turnover)`, and elsewhere, including all internal branches, it is
+#' `sigma2`. The rate of a tip branch is the mean over the branch, weighted by time.
+#'
+#' @param x An `mc_sim` object with `history`, that is, run with `record_steps`.
+#' @param tree The tree of the species in `x`; by default the one stored in `x`.
+#' @param sigma2 Rate outside the stretch informed by the metacommunity.
+#' @param k Increase of the rate, relative to `sigma2`, per unit of turnover (partners gained
+#'   or lost per site and time step).
+#' @param window Length of the end of each tip branch represented by the metacommunity, in the
+#'   units of the branch lengths; `NULL` uses the whole tip branch. A window longer than a tip
+#'   branch is cut to its length.
+#' @inheritParams partner_turnover
+#' @return Numeric vector with the rate of each branch, in the order of the rows of
+#'   `tree$edge`, with the turnover of each species as attribute `"turnover"`.
+#' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
+#'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
+#' @seealso [partner_turnover()], [history_rates()], [trait_rates()]
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tr <- treeshapesim::sim_tree_shape(10)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tr),
+#'                               competition_matrix(tr, "none"), n_steps = 300,
+#'                               record_steps = seq(100, 300, 20), extirpation = 0.02)
+#' rates <- turnover_rates(sim, k = 20, window = 0.1)
+#' x <- trait_rates(tr, edge_rates = rates)
+#' @export
+turnover_rates <- function(x, tree = x$tree, sigma2 = 1, k = 1, window = NULL,
+                           partners = c("all", "competitors")) {
+  if (!inherits(tree, "phylo")) {
+    stop("`tree` must be a tree of class `phylo`; `x` has none stored", call. = FALSE)
+  }
+  if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
+    stop("`sigma2` must be one positive number", call. = FALSE)
+  }
+  if (length(k) != 1 || !is.finite(k) || k < 0) {
+    stop("`k` must be one number, zero or more", call. = FALSE)
+  }
+  if (!is.null(window) && (length(window) != 1 || !is.finite(window) || window <= 0)) {
+    stop("`window` must be one positive number or `NULL`", call. = FALSE)
+  }
+  turnover <- partner_turnover(x, partners)
+  if (!setequal(names(turnover), tree$tip.label)) {
+    stop("the species of `x` and the tips of `tree` differ", call. = FALSE)
+  }
+  rate <- rep(sigma2, nrow(tree$edge))
+  tip_edge <- match(seq_along(tree$tip.label), tree$edge[, 2])
+  len <- tree$edge.length[tip_edge]
+  w <- if (is.null(window)) len else pmin(window, len)
+  share <- ifelse(len > 0, w / len, 1)
+  rate[tip_edge] <- sigma2 * (1 + k * turnover[tree$tip.label] * share)
+  structure(rate, turnover = turnover)
+}
