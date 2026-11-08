@@ -539,7 +539,10 @@ pacotes de referência em vez de reimplementá-los.
       deixa rastro nas taxas estimadas por ramo. Para o papel da montagem de metacomunidades
       na evolução de traits, citar também Leibold et al. (2022), evolução e montagem de
       comunidades através de escalas espaciais, e McPeek (2017), *Evolutionary Community
-      Ecology* (ainda não lidos aqui). Incluir os resultados da validação e o limite
+      Ecology*. Notas de leitura e cenários de simulação em `dev/notas-artigo-taxas.md`.
+- [ ] Função que traduz a história de uma metacomunidade simulada (colonizações, entradas e
+      saídas de parceiros, mudanças de hábitat) em taxas por ramo para `trait_rates()` e
+      `trait_mk()`, para os cenários 1, 2, 5 e 8 das notas. Incluir os resultados da validação e o limite
       de identificabilidade (uma realização por ramo).
 - [ ] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
