@@ -9,7 +9,8 @@ simulate_damocles(
   gamma,
   mu,
   n = 1,
-  root = c("both", "absent", "present")
+  root = c("both", "absent", "present"),
+  sympatry = 0
 )
 }
 \arguments{
@@ -25,6 +26,9 @@ simulate_damocles(
 start of the root edge): \code{"both"} draws absent or present with equal probabilities for each
 community, as in the simulations of Pigot & Etienne (2015); \code{"absent"} or \code{"present"} fix
 it.}
+
+\item{sympatry}{Probability, between 0 and 1, that a locally present ancestor leaves both
+daughters present at speciation; 0 (the default) is strictly allopatric speciation.}
 }
 \value{
 A matrix of zeros and ones with one row per community and one column per tip, named
@@ -41,6 +45,12 @@ and the other absent, chosen at random, and an absent ancestor leaves two absent
 The states at the tips form the community.
 }
 \details{
+\code{sympatry} relaxes the rule of strictly allopatric speciation: with that probability a
+present ancestor leaves both daughters present, as after speciation within the community
+(in situ or sympatric speciation) or when one daughter recolonises it before the two can be
+told apart; otherwise one daughter is present, as above. \code{sympatry = 0}, the default, is the
+model of Pigot & Etienne (2015). An absent ancestor always leaves two absent daughters.
+
 The states at the nodes are drawn from the exact transition probabilities of the two-state
 process over each branch, which gives the same distribution of tip states as simulating each
 colonisation and extinction event. The model assumes the tree holds the species of the
