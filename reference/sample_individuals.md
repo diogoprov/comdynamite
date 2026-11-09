@@ -18,7 +18,9 @@ sample_individuals(
   displacement = 0,
   displacement_width = NULL,
   step = NULL,
-  env = NULL
+  env = NULL,
+  cover = NULL,
+  min_n = 1
 )
 ```
 
@@ -79,6 +81,20 @@ sample_individuals(
   Optional environment of each site at the sampled step. The default is
   the environment of the landscape; give it for simulations with
   `env_time`.
+
+- cover:
+
+  Optional share (0 to 1) of the abundance of each site covered by the
+  species measured: species are taken from the most abundant down until
+  they reach `cover`, and the rest are not measured, as in field
+  protocols that measure the species making up 80% of the abundance
+  (Pakeman & Quested 2007). `NULL` (the default) measures every species.
+
+- min_n:
+
+  Populations with fewer individuals measured than `min_n` are left out,
+  as when populations with a single individual are removed before
+  computing T-statistics.
 
 ## Value
 
@@ -149,10 +165,19 @@ intraspecific variability in community ecology. *Trends in Ecology &
 Evolution*, 27, 244–252.
 [doi:10.1016/j.tree.2011.11.014](https://doi.org/10.1016/j.tree.2011.11.014)
 
+Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional
+traits: what proportion of the species need to be measured? *Applied
+Vegetation Science*, 10, 91–96.
+[doi:10.1111/j.1654-109x.2007.tb00507.x](https://doi.org/10.1111/j.1654-109x.2007.tb00507.x)
+
 ## See also
 
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) for
-the T-statistics.
+the T-statistics;
+[`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md)
+and
+[`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+for the same sampling schemes on real data.
 
 ## Examples
 

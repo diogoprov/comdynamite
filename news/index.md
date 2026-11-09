@@ -2,6 +2,58 @@
 
 ## comdynamite (development version)
 
+- Plots of null-model tests:
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  and
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  draws, site by site, the null interval (hatched by default) with the
+  observed value coloured by the test, or the standardised effect sizes;
+  [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md)
+  returns the table behind it.
+
+- [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md)
+  gives trait probability densities of populations and communities
+  (Carmona et al. 2016, 2019) with one bandwidth for all populations,
+  and
+  [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md)
+  draws them with adjustable transparency.
+
+- Classic metrics of trait spacing and spread, for use with
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md):
+  [`mnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`sdnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`cvnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`min_nnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`max_nnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`mnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`sdnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`cvnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`mst_length()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`mst_ratio()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`trait_range()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`trait_kurtosis()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  and
+  [`nn_distances()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md).
+  Zero distances count (cati discards them), and one-trait metrics use
+  sorted values instead of distance matrices.
+
+- [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  accepts a named list of indices, computed on the same randomised
+  communities, and returns them in one table with an `index` column.
+
+- Sampling effort:
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  gains `cover` (measure only the most abundant species of each site, as
+  in Pakeman & Quested 2007) and `min_n`;
+  [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md)
+  applies the same schemes to real data, and
+  [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+  follows any statistic over the number of individuals per population or
+  over `cover`, with a
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
+  marks the 80% rule of Pakeman & Quested (2007) with a dashed line.
+
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md):
   the null model of `T_IC.IR` now keeps the observed regional variance
   as the denominator. It was computed from the values drawn, which

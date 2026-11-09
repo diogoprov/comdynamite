@@ -88,8 +88,10 @@ communities.</p>
 <dt id="arg-index">index<a class="anchor" aria-label="anchor" href="#arg-index"></a></dt>
 <dd><p>Function of the trait values of a site (its first argument: a vector, or a
 matrix with <code>multivariate = TRUE</code>) and optionally of their species (an argument named
-<code>species</code>), returning a single number, such as <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::var</a></code> or
-<code>function(x, species) stats::var(tapply(x, species, mean))</code>.</p></dd>
+<code>species</code>), returning a single number, such as <code><a href="https://rdrr.io/r/stats/cor.html" class="external-link">stats::var</a></code>, <code><a href="neighbour_metrics.html">mnnd()</a></code> or
+<code>function(x, species) stats::var(tapply(x, species, mean))</code>; or a named list of such
+functions, all computed on the same observed and randomised communities, such as
+<code>list(variance = stats::var, MNND = mnnd, range = trait_range)</code>.</p></dd>
 
 
 <dt id="arg-traits">traits<a class="anchor" aria-label="anchor" href="#arg-traits"></a></dt>
@@ -119,10 +121,11 @@ matrix with <code>multivariate = TRUE</code>) and optionally of their species (a
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with one row per site and trait (or per site with
-<code>multivariate = TRUE</code>, trait <code>"multivariate"</code>) and the columns <code>site</code>, <code>trait</code>,
-<code>observed</code>, and with <code>nperm &gt; 0</code> also <code>ses</code> and <code>p</code>; the attribute <code>null</code> holds the null
-values (randomisation x row). Individuals with a missing value are left out for that trait
+    <p>A data frame of class <code>community_index</code> with one row per site, trait (or
+<code>"multivariate"</code> with <code>multivariate = TRUE</code>) and index, and the columns <code>site</code>, <code>trait</code>,
+<code>index</code> (the name in the list, or the name of the function), <code>observed</code>, and with
+<code>nperm &gt; 0</code> also <code>ses</code> and <code>p</code>; the attribute <code>null</code> holds the null values
+(randomisation x row), and <a href="plot.tstats.html">plot()</a> draws the tests. Individuals with a missing value are left out for that trait
 (for any trait with <code>multivariate = TRUE</code>).</p>
     </div>
     <div class="section level2">
@@ -166,21 +169,40 @@ to detect and quantify multi-level community assembly processes. <em>Ecography</
 <span class="r-in"><span><span class="va">ind</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span>, c <span class="op">=</span> <span class="fl">3</span>, d <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">[</span><span class="va">ind</span><span class="op">$</span><span class="va">species</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># range of trait values within sites, against draws from the whole region</span></span></span>
 <span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, null <span class="op">=</span> <span class="st">"regional.ind"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   site trait observed         ses    p</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait 3.155201 -1.79804612 0.12</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait 3.695020  0.53805219 0.68</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait 3.843434  1.13858880 0.40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait 3.297534 -0.97698903 0.42</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait 3.579527 -0.02346576 0.94</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   site trait index observed         ses    p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait index 3.155201 -1.79804612 0.12</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait index 3.695020  0.53805219 0.68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait index 3.843434  1.13858880 0.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait index 3.297534 -0.97698903 0.42</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait index 3.579527 -0.02346576 0.94</span>
 <span class="r-in"><span><span class="co"># variance among the population means of a site</span></span></span>
 <span class="r-in"><span><span class="va">pop_var</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">species</span><span class="op">)</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">species</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="va">pop_var</span>, null <span class="op">=</span> <span class="st">"local"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   site trait observed      ses    p</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait 1.476106 4.219795 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait 1.577807 7.631109 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait 2.090731 7.206326 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait 1.661834 8.237044 0.02</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait 1.713591 4.415371 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   site trait   index observed      ses    p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait pop_var 1.476106 4.219795 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait pop_var 1.577807 7.631109 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait pop_var 2.090731 7.206326 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait pop_var 1.661834 8.237044 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait pop_var 1.713591 4.415371 0.02</span>
+<span class="r-in"><span><span class="co"># several indices at once, on the same randomised communities</span></span></span>
+<span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span>, MNND <span class="op">=</span> <span class="va">mnnd</span>, kurtosis <span class="op">=</span> <span class="va">trait_kurtosis</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                null <span class="op">=</span> <span class="st">"regional.ind"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    site trait    index    observed          ses    p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    s1 trait variance  0.96184073 -1.204549411 0.24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2    s2 trait variance  1.01906139 -1.315648430 0.24</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3    s3 trait variance  1.55696893  0.955877885 0.34</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4    s4 trait variance  0.88096775 -1.394588992 0.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    s5 trait variance  1.72488384  2.015358652 0.06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6    s1 trait     MNND  0.08888870 -0.721103852 0.50</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7    s2 trait     MNND  0.11849284  0.847592936 0.46</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8    s3 trait     MNND  0.12324692  1.028942015 0.38</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9    s4 trait     MNND  0.04634544 -2.976977563 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10   s5 trait     MNND  0.09741112 -0.370322230 0.72</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11   s1 trait kurtosis -1.05229048 -0.007918248 0.90</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12   s2 trait kurtosis -0.10003062  3.187360206 0.06</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 13   s3 trait kurtosis -1.23233713 -0.420626901 0.76</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14   s4 trait kurtosis -0.68087734  0.906284555 0.36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15   s5 trait kurtosis -1.55901734 -1.373313414 0.02</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -31,8 +31,12 @@ community_index(
   Function of the trait values of a site (its first argument: a vector,
   or a matrix with `multivariate = TRUE`) and optionally of their
   species (an argument named `species`), returning a single number, such
-  as [`stats::var`](https://rdrr.io/r/stats/cor.html) or
-  `function(x, species) stats::var(tapply(x, species, mean))`.
+  as [`stats::var`](https://rdrr.io/r/stats/cor.html),
+  [`mnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  or `function(x, species) stats::var(tapply(x, species, mean))`; or a
+  named list of such functions, all computed on the same observed and
+  randomised communities, such as
+  `list(variance = stats::var, MNND = mnnd, range = trait_range)`.
 
 - traits:
 
@@ -61,12 +65,14 @@ community_index(
 
 ## Value
 
-A data frame with one row per site and trait (or per site with
-`multivariate = TRUE`, trait `"multivariate"`) and the columns `site`,
-`trait`, `observed`, and with `nperm > 0` also `ses` and `p`; the
-attribute `null` holds the null values (randomisation x row).
-Individuals with a missing value are left out for that trait (for any
-trait with `multivariate = TRUE`).
+A data frame of class `community_index` with one row per site, trait (or
+`"multivariate"` with `multivariate = TRUE`) and index, and the columns
+`site`, `trait`, `index` (the name in the list, or the name of the
+function), `observed`, and with `nperm > 0` also `ses` and `p`; the
+attribute `null` holds the null values (randomisation x row), and
+[plot()](https://provetelab.org/comdynamite/reference/plot.tstats.md)
+draws the tests. Individuals with a missing value are left out for that
+trait (for any trait with `multivariate = TRUE`).
 
 ## Details
 
@@ -122,19 +128,38 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 20),
 ind$trait <- c(a = 1, b = 2, c = 3, d = 4)[ind$species] + rnorm(100, sd = 0.3)
 # range of trait values within sites, against draws from the whole region
 community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 99)
-#>   site trait observed         ses    p
-#> 1   s1 trait 3.155201 -1.79804612 0.12
-#> 2   s2 trait 3.695020  0.53805219 0.68
-#> 3   s3 trait 3.843434  1.13858880 0.40
-#> 4   s4 trait 3.297534 -0.97698903 0.42
-#> 5   s5 trait 3.579527 -0.02346576 0.94
+#>   site trait index observed         ses    p
+#> 1   s1 trait index 3.155201 -1.79804612 0.12
+#> 2   s2 trait index 3.695020  0.53805219 0.68
+#> 3   s3 trait index 3.843434  1.13858880 0.40
+#> 4   s4 trait index 3.297534 -0.97698903 0.42
+#> 5   s5 trait index 3.579527 -0.02346576 0.94
 # variance among the population means of a site
 pop_var <- function(x, species) stats::var(tapply(x, species, mean))
 community_index(ind, pop_var, null = "local", nperm = 99)
-#>   site trait observed      ses    p
-#> 1   s1 trait 1.476106 4.219795 0.02
-#> 2   s2 trait 1.577807 7.631109 0.02
-#> 3   s3 trait 2.090731 7.206326 0.02
-#> 4   s4 trait 1.661834 8.237044 0.02
-#> 5   s5 trait 1.713591 4.415371 0.02
+#>   site trait   index observed      ses    p
+#> 1   s1 trait pop_var 1.476106 4.219795 0.02
+#> 2   s2 trait pop_var 1.577807 7.631109 0.02
+#> 3   s3 trait pop_var 2.090731 7.206326 0.02
+#> 4   s4 trait pop_var 1.661834 8.237044 0.02
+#> 5   s5 trait pop_var 1.713591 4.415371 0.02
+# several indices at once, on the same randomised communities
+community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
+                null = "regional.ind", nperm = 99)
+#>    site trait    index    observed          ses    p
+#> 1    s1 trait variance  0.96184073 -1.204549411 0.24
+#> 2    s2 trait variance  1.01906139 -1.315648430 0.24
+#> 3    s3 trait variance  1.55696893  0.955877885 0.34
+#> 4    s4 trait variance  0.88096775 -1.394588992 0.16
+#> 5    s5 trait variance  1.72488384  2.015358652 0.06
+#> 6    s1 trait     MNND  0.08888870 -0.721103852 0.50
+#> 7    s2 trait     MNND  0.11849284  0.847592936 0.46
+#> 8    s3 trait     MNND  0.12324692  1.028942015 0.38
+#> 9    s4 trait     MNND  0.04634544 -2.976977563 0.02
+#> 10   s5 trait     MNND  0.09741112 -0.370322230 0.72
+#> 11   s1 trait kurtosis -1.05229048 -0.007918248 0.90
+#> 12   s2 trait kurtosis -0.10003062  3.187360206 0.06
+#> 13   s3 trait kurtosis -1.23233713 -0.420626901 0.76
+#> 14   s4 trait kurtosis -0.68087734  0.906284555 0.36
+#> 15   s5 trait kurtosis -1.55901734 -1.373313414 0.02
 ```

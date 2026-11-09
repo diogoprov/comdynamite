@@ -359,6 +359,35 @@ indices and decompositions of trait variation.
   : Variance components of traits across nested levels
 - [`plot(`*`<nested_variance>`*`)`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md)
   : Plot the shares of variance across nested levels
+- [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md)
+  : Null intervals of the tests of each site
+- [`plot(`*`<tstats>`*`)`](https://provetelab.org/comdynamite/reference/plot.tstats.md)
+  [`plot(`*`<community_index>`*`)`](https://provetelab.org/comdynamite/reference/plot.tstats.md)
+  : Plot the null-model tests of each site
+- [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md)
+  : Trait probability densities of populations and communities
+- [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md)
+  : Plot the trait distributions of populations within communities
+- [`nn_distances()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`mnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`sdnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`cvnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`min_nnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`max_nnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`mnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`sdnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`cvnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`mst_length()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`mst_ratio()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`trait_range()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  [`trait_kurtosis()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md)
+  : Classic metrics of trait spacing and spread
+- [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md)
+  : Subsamples of individuals
+- [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+  : Rarefaction of a statistic over sampling effort
+- [`plot(`*`<trait_rarefaction>`*`)`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md)
+  : Plot a rarefaction of a statistic
 
 ## Results
 
