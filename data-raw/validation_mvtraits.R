@@ -1,4 +1,4 @@
-# Multivariate traits from traits_ou() with rate matrices from rate_matrix(), against mvMORPH
+# Multivariate traits from trait_ou() with rate matrices from rate_matrix(), against mvMORPH
 # (GPL-2 | GPL-3, only called here; Clavel et al. 2015, doi:10.1111/2041-210X.12420).
 # 1. Covariance of the traits at the tips over many simulations, under Brownian motion with one
 #    rate matrix per regime and regimes changing within branches (a map from trait_mk()), against
@@ -28,7 +28,7 @@ tips <- rownames(split[[1]])
 expected <- Reduce(`+`, Map(kronecker, rates_bmm[colnames(hist$mapped.edge)], split))
 n_sim <- 20000
 ours <- do.call(rbind, parallel::mclapply(seq_len(n_sim), function(i) {
-  as.vector(traits_ou(hist, sigma2 = rates_bmm, regimes = hist)[tips, ])
+  as.vector(trait_ou(hist, sigma2 = rates_bmm, regimes = hist)[tips, ])
 }, mc.cores = cores))
 theirs <- mvSIM(hist, nsim = n_sim, model = "BMM",
                 param = list(sigma = unname(rates_bmm[colnames(hist$mapped.edge)]),
@@ -37,7 +37,7 @@ theirs <- do.call(rbind, lapply(theirs, function(x) as.vector(x[tips, ])))
 # Monte Carlo standard error of each covariance: sqrt((s_ii s_jj + s_ij^2) / n)
 mc_se <- sqrt((outer(diag(expected), diag(expected)) + expected^2) / n_sim)
 cov_check <- data.frame(
-  source = c("traits_ou", "mvSIM"),
+  source = c("trait_ou", "mvSIM"),
   max_abs_diff = c(max(abs(stats::cov(ours) - expected)), max(abs(stats::cov(theirs) - expected))),
   max_z = c(max(abs(stats::cov(ours) - expected) / mc_se),
             max(abs(stats::cov(theirs) - expected) / mc_se)),
@@ -53,7 +53,7 @@ dsum <- outer(depth, depth, `+`)
 c_ou <- (exp(-alpha * (dsum - 2 * shared)) - exp(-alpha * dsum)) / (2 * alpha)
 expected_ou <- kronecker(rates_ou, c_ou)
 ou <- do.call(rbind, parallel::mclapply(seq_len(n_sim), function(i) {
-  as.vector(traits_ou(tree, alpha = alpha, sigma2 = rates_ou)[tree$tip.label, ])
+  as.vector(trait_ou(tree, alpha = alpha, sigma2 = rates_ou)[tree$tip.label, ])
 }, mc.cores = cores))
 mc_se_ou <- sqrt((outer(diag(expected_ou), diag(expected_ou)) + expected_ou^2) / n_sim)
 ou_check <- c(max_abs_diff = max(abs(stats::cov(ou) - expected_ou)),
@@ -85,7 +85,7 @@ n_rep <- 30
 fit_one <- function(constraint, i) {
   truth <- truths[[constraint]]
   multi <- is.list(truth)
-  x <- traits_ou(if (multi) big_hist else big, sigma2 = truth,
+  x <- trait_ou(if (multi) big_hist else big, sigma2 = truth,
                  regimes = if (multi) big_hist)
   constraint_mv <- if (constraint == "default") FALSE else constraint
   fit <- if (multi) {
@@ -137,8 +137,8 @@ saveRDS(list(cov_check = cov_check, ou_check = ou_check, recovery = recovery, fi
 
 # Results (mvMORPH 1.2.3, seed 7, 20000 simulations, 30 fits per constraint on 100 tips):
 # 1. BM, two regimes changing within branches (12 tips, 300 covariances of 24 tip-trait values):
-#    largest difference from the expected covariance 0.037 for traits_ou() and 0.035 for mvSIM();
-#    in Monte Carlo standard errors, at most 2.86 (mean 0.79) for traits_ou() and 2.76 (mean
+#    largest difference from the expected covariance 0.037 for trait_ou() and 0.035 for mvSIM();
+#    in Monte Carlo standard errors, at most 2.86 (mean 0.79) for trait_ou() and 2.76 (mean
 #    0.92) for mvSIM(). Both are within simulation error of sum_k kronecker(R_k, C_k).
 # 2. OU, alpha = 0.8: largest difference 0.011, at most 3.06 standard errors (mean 0.91).
 # 3. Median of 30 estimates by mvBM() with the constraint of the simulation (truth in brackets):

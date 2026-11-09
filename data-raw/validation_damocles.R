@@ -1,11 +1,11 @@
-# simulate_damocles(), damocles_loglik() and fit_damocles() against the DAMOCLES package of
+# simulate_damocles(), damocles_loglik() and damocles_fit() against the DAMOCLES package of
 # Pigot & Etienne (2015) (GPL, only called here; install.packages("DAMOCLES"), version 2.3).
 # 1. Log-likelihoods against DAMOCLES::DAMOCLES_loglik() on 20 trees, three pairs of rates and
 #    the three priors at the root (pchoice 0, 1, 2), plus trees with a root edge.
 # 2. Maximum-likelihood rates against DAMOCLES::DAMOCLES_ML() on 10 simulated communities.
 # 3. Simulations against DAMOCLES::DAMOCLES_sim() (a Gillespie simulation of every event): the
 #    frequency of presence of each tip, richness, MPD and MNTD over 4000 communities each.
-# 4. Identifiability of the rates shared by several communities (fit_damocles(shared = TRUE)):
+# 4. Identifiability of the rates shared by several communities (damocles_fit(shared = TRUE)):
 #    estimates from 1, 5 and 20 communities simulated with gamma = mu = 1 on trees of 60 tips
 #    (height one), 30 replicates each. DAMOCLES fits one community at a time, so this part
 #    checks only our code.
@@ -63,7 +63,7 @@ cat("1. |loglik difference|: max", format(max(diffs), digits = 3), "over", lengt
 ml_one <- function(i) {
   tree <- treeshapesim::sim_tree_shape(60)
   presence <- simulate_damocles(tree, 1, 1)[1, ]
-  ours <- fit_damocles(presence, tree)
+  ours <- damocles_fit(presence, tree)
   theirs <- suppressMessages(utils::capture.output(
     fit <- DAMOCLES_ML(tree, pa_table(tree, presence), initparsopt = c(0.5, 0.5))
   ))
@@ -118,7 +118,7 @@ for (s in sims) {
 # 4. shared rates -----------------------------------------------------------------------------
 shared_one <- function(i, k) {
   tree <- treeshapesim::sim_tree_shape(60)
-  fit <- fit_damocles(simulate_damocles(tree, 1, 1, n = k), tree, shared = TRUE)
+  fit <- damocles_fit(simulate_damocles(tree, 1, 1, n = k), tree, shared = TRUE)
   c(communities = k, gamma = fit$gamma[1], mu = fit$mu[1])
 }
 shared <- as.data.frame(do.call(rbind, lapply(c(1, 5, 20), function(k) {
@@ -132,7 +132,7 @@ print(aggregate(cbind(gamma, mu) ~ communities, shared,
 sympatry_one <- function(i, k) {
   tree <- treeshapesim::sim_tree_shape(60)
   comm <- simulate_damocles(tree, 1, 1, n = k, sympatry = 0.5)
-  fit <- fit_damocles(comm, tree, shared = TRUE, sympatry = NULL)
+  fit <- damocles_fit(comm, tree, shared = TRUE, sympatry = NULL)
   c(communities = k, gamma = fit$gamma[1], mu = fit$mu[1], sympatry = fit$sympatry[1])
 }
 sympatry <- as.data.frame(do.call(rbind, lapply(c(1, 5, 20), function(k) {
@@ -160,15 +160,15 @@ lrt_one <- function(i, setting) {
     x <- bm_covariate(tree)
     z <- log(x) - mean(log(x))
     comm <- simulate_damocles(tree, exp(setting$effect * z), 1, n = setting$communities)
-    alternative <- fit_damocles(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
+    alternative <- damocles_fit(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
   } else {
     clade <- ape::extract.clade(tree, ape::Ntip(tree) + 2)$tip.label
     reg <- clade_regimes(tree, list(A = clade))
     gamma <- if (setting$effect == 0) 1 else ifelse(reg == "A", 3, 0.5)
     comm <- simulate_damocles(tree, gamma, 1, n = setting$communities)
-    alternative <- fit_damocles(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
+    alternative <- damocles_fit(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
   }
-  damocles_lrt(fit_damocles(comm, tree, shared = TRUE), alternative)$p_value[2]
+  damocles_lrt(damocles_fit(comm, tree, shared = TRUE), alternative)$p_value[2]
 }
 lrt_settings <- expand.grid(model = c("covariate", "regimes"), effect = c(0, 1),
                             communities = c(5, 20), stringsAsFactors = FALSE)

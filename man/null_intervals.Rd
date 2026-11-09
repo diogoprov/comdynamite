@@ -7,7 +7,7 @@
 null_intervals(x, level = 0.95, inner = 0.5)
 }
 \arguments{
-\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{nperm > 0}.}
+\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{n_perm > 0}.}
 
 \item{level}{Coverage of the outer null interval, and \code{1 - level} the size of the two-sided
 test that defines \code{deviation}.}
@@ -32,7 +32,7 @@ set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
                   species = sample(c("a", "b", "c"), 120, replace = TRUE))
 ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(120)
-head(null_intervals(tstats(ind, nperm = 99)))
+head(null_intervals(tstats(ind, n_perm = 99)))
 }
 \seealso{
 \code{\link[=plot.tstats]{plot.tstats()}}, \code{\link[=tstats_summary]{tstats_summary()}}.

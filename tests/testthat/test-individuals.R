@@ -80,7 +80,7 @@ toy <- data.frame(site = rep(c("a", "b"), each = 6),
                   trait = c(1, 2, 3, 7, 8, 9, 2, 3, 4, 2, 3, 4))
 
 test_that("tstats() gives the variance ratios of Violle et al. (2012)", {
-  res <- tstats(toy, nperm = 0)
+  res <- tstats(toy, n_perm = 0)
   expect_named(res, c("site", "trait", "n_populations", "T_IP.IC", "T_IC.IR", "T_PC.PR"))
   expect_equal(res$site, c("a", "b"))
   expect_equal(res$n_populations, c(2, 2))
@@ -94,7 +94,7 @@ test_that("tstats() gives the variance ratios of Violle et al. (2012)", {
 test_that("tstats() gives NA where a ratio is undefined and handles several traits", {
   one_species <- rbind(toy, data.frame(site = "c", species = "x", trait = c(5, 6)))
   one_species$other <- one_species$trait * 2
-  res <- tstats(one_species, traits = c("trait", "other"), nperm = 0)
+  res <- tstats(one_species, traits = c("trait", "other"), n_perm = 0)
   expect_equal(nrow(res), 6)
   expect_true(is.na(res$T_PC.PR[res$site == "c"][1]))
   expect_equal(res$T_IP.IC[res$trait == "trait"], res$T_IP.IC[res$trait == "other"])
@@ -108,14 +108,14 @@ test_that("tstats() matches cati::Tstats(), also with site names that are prefix
   set.seed(2)
   ind <- sample_individuals(sim, local_adaptation = 0.5, population_sd = 2,
                             intraspecific_sd = 3)
-  base <- tstats(ind, nperm = 0)
-  res <- tstats(ind, method = "cati", nperm = NULL)
+  base <- tstats(ind, n_perm = 0)
+  res <- tstats(ind, method = "cati", n_perm = NULL)
   expect_s3_class(res, "Tstats")
   expect_true(any(base$site == "site1") && any(base$site == "site10"))
   for (stat in c("T_IP.IC", "T_IC.IR", "T_PC.PR")) {
     expect_equal(unname(res$Tstats[[stat]][base$site, 1]), base[[stat]])
   }
-  with_null <- tstats(ind, method = "cati", nperm = 9)
+  with_null <- tstats(ind, method = "cati", n_perm = 9)
   expect_equal(dim(with_null$Tstats$T_IP.IC_nm)[3], length(unique(ind$site)))
 })
 
@@ -129,7 +129,7 @@ test_that("local adaptation raises T_IP.IC and lowers T_PC.PR", {
   set.seed(3)
   ratios <- function(h) {
     res <- tstats(sample_individuals(sim, local_adaptation = h, intraspecific_sd = 2),
-                  nperm = 0)
+                  n_perm = 0)
     colMeans(res[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
   }
   none <- ratios(0)
@@ -143,14 +143,14 @@ test_that("tstats() leaves out missing values trait by trait", {
   with_na <- toy
   with_na$other <- with_na$trait
   with_na$other[1] <- NA
-  res <- tstats(with_na, traits = c("trait", "other"), nperm = 0)
+  res <- tstats(with_na, traits = c("trait", "other"), n_perm = 0)
   expect_equal(res$T_IP.IC[res$trait == "other"],
-               tstats(toy[-1, ], nperm = 0)$T_IP.IC)
+               tstats(toy[-1, ], n_perm = 0)$T_IP.IC)
 })
 
 test_that("tstats() adds effect sizes and p-values from the null models", {
   set.seed(1)
-  res <- tstats(toy, nperm = 49)
+  res <- tstats(toy, n_perm = 49)
   expect_named(res, c("site", "trait", "n_populations", "T_IP.IC", "T_IC.IR", "T_PC.PR",
                       "ses_T_IP.IC", "p_T_IP.IC", "ses_T_IC.IR", "p_T_IC.IR",
                       "ses_T_PC.PR", "p_T_PC.PR"))
@@ -162,12 +162,12 @@ test_that("tstats() adds effect sizes and p-values from the null models", {
   expect_equal(res$p_T_IP.IC[1], (1 + sum(null[, 1, "T_IP.IC"] <= res$T_IP.IC[1])) / 50)
   expect_equal(res$ses_T_IP.IC[1],
                (res$T_IP.IC[1] - mean(null[, 1, "T_IP.IC"])) / sd(null[, 1, "T_IP.IC"]))
-  greater <- tstats(toy, nperm = 49, alternative = "greater")
+  greater <- tstats(toy, n_perm = 49, alternative = "greater")
   expect_true(all(greater$p_T_IP.IC > 0 & greater$p_T_IP.IC <= 1))
-  two <- tstats(toy, nperm = 49, alternative = "two.sided")
+  two <- tstats(toy, n_perm = 49, alternative = "two.sided")
   expect_true(all(two$p_T_IP.IC <= 1))
-  expect_identical(names(tstats(toy, nperm = NULL)), names(tstats(toy, nperm = 0)))
-  expect_error(tstats(toy, nperm = -1))
+  expect_identical(names(tstats(toy, n_perm = NULL)), names(tstats(toy, n_perm = 0)))
+  expect_error(tstats(toy, n_perm = -1))
 })
 
 test_that("null models of tstats() keep what they should", {
@@ -183,7 +183,7 @@ test_that("null models of tstats() keep what they should", {
   expect_gt(mean(null[, , "T_PC.PR"], na.rm = TRUE), 0.5)
   # random data: no structure, effect sizes small on average
   d$trait <- rnorm(60)
-  res <- tstats(d, nperm = 99)
+  res <- tstats(d, n_perm = 99)
   expect_lt(abs(mean(res$ses_T_IP.IC)), 1.5)
   expect_lt(abs(mean(res$ses_T_IC.IR)), 1.5)
 })
@@ -223,16 +223,16 @@ test_that("sample_individuals() applies character displacement within sites", {
   expect_error(sample_individuals(sim, displacement = -1))
   expect_error(sample_individuals(sim, displacement = 1, displacement_width = 0))
   set.seed(5)
-  t_none <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 0)
+  t_none <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 0)
   set.seed(5)
-  t_apart <- tstats(sample_individuals(sim, intraspecific_sd = 2, displacement = 5), nperm = 0)
+  t_apart <- tstats(sample_individuals(sim, intraspecific_sd = 2, displacement = 5), n_perm = 0)
   expect_lt(mean(t_apart$T_IP.IC, na.rm = TRUE), mean(t_none$T_IP.IC, na.rm = TRUE))
 })
 
 test_that("tstats() stacks the null values of several traits", {
   two <- transform(toy, other = trait^2)
   set.seed(6)
-  res <- tstats(two, traits = c("trait", "other"), nperm = 19)
+  res <- tstats(two, traits = c("trait", "other"), n_perm = 19)
   expect_equal(nrow(res), 4)
   expect_equal(dim(attr(res, "null")), c(19, 4, 3))
   expect_false(anyNA(res$p_T_IP.IC))
@@ -254,13 +254,13 @@ test_that("the species null of T_IP.IC moves populations only within species", {
   sim <- small_sim()
   set.seed(2)
   ind <- sample_individuals(sim, n = 6, intraspecific_sd = 1)
-  res <- tstats(ind, nperm = 20, null_ip = "species", alternative = "two.sided")
-  base <- tstats(ind, nperm = 0)
+  res <- tstats(ind, n_perm = 20, null_ip = "species", alternative = "two.sided")
+  base <- tstats(ind, n_perm = 0)
   expect_equal(res[names(base)], base)
   # when every species occurs at one site, nothing can move and the null equals the observation
   single <- ind
   single$species <- paste(single$site, single$species)
-  kept <- tstats(single, nperm = 5, null_ip = "species")
+  kept <- tstats(single, n_perm = 5, null_ip = "species")
   expect_equal(attr(kept, "null")[, , "T_IP.IC"],
                matrix(kept$T_IP.IC, 5, nrow(kept), byrow = TRUE))
   expect_true(all(is.finite(res$ses_T_IP.IC) | is.na(res$ses_T_IP.IC)))
@@ -275,7 +275,7 @@ test_that("the species null of T_IP.IC tells convergence from divergence", {
                                 seed_steps = 1:5)
   ses <- function(...) {
     ind <- sample_individuals(sim, n = 10, intraspecific_sd = 1, ...)
-    mean(tstats(ind, nperm = 39, null_ip = "species")$ses_T_IP.IC, na.rm = TRUE)
+    mean(tstats(ind, n_perm = 39, null_ip = "species")$ses_T_IP.IC, na.rm = TRUE)
   }
   expect_gt(ses(local_adaptation = 0.9), 2)
   expect_lt(ses(displacement = 10), 0)
@@ -332,7 +332,7 @@ test_that("tstats() returns NA for a trait without values", {
   sim <- small_sim()
   ind <- sample_individuals(sim, n = 4)
   ind$empty <- NA_real_
-  res <- tstats(ind, traits = c("trait", "empty"), nperm = 0)
+  res <- tstats(ind, traits = c("trait", "empty"), n_perm = 0)
   expect_true(all(is.na(res$T_IP.IC[res$trait == "empty"])))
   expect_false(all(is.na(res$T_IP.IC[res$trait == "trait"])))
 })

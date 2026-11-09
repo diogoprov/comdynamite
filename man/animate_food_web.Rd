@@ -26,7 +26,7 @@ number of rows.}
 
 \item{width, height}{Size of the GIF in pixels.}
 
-\item{...}{Other arguments of \code{\link[=plot.food_web]{plot.food_web()}}, such as \code{panels} or \code{col}.}
+\item{...}{Other arguments of \code{\link[=plot.food_web]{plot.food_web()}}, such as \code{panels} or \code{colours}.}
 }
 \value{
 The path of the GIF, invisibly.

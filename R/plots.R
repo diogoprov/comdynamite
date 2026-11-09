@@ -22,12 +22,14 @@
 #'   names of the variables along the radii so that they stay clear of the species.
 #' @param level Significance level.
 #' @param alpha Deprecated, use `level`.
-#' @param col Colours of predictors and biogeographic events.
-#' @param cex Size of the text.
-#' @param legend Add a legend?
-#' @param ... Other arguments of [ape::plot.phylo()].
-#' @return Invisibly, a data frame with one row per symbol, with `node`, `set`, `variable`,
-#'   `p`, `p_adjusted` and `corrected`, which is `TRUE` for solid symbols.
+#' @param colours Colours of predictors and biogeographic events.
+#' @param text_size Size of the text, in mm (as in [ggplot2::geom_text()]).
+#' @param legend Draw the legend?
+#' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size` (in mm,
+#'   about 3.5 times the old value); arguments of [ape::plot.phylo()] are no longer used.
+#' @return A ggplot object, with the table of symbols in the attribute `marks`: one row per
+#'   symbol, with `node`, `set`, `variable`, `p`, `p_adjusted` and `corrected`, which is `TRUE`
+#'   for solid symbols.
 #' @references
 #' Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: a
 #' practical and powerful approach to multiple testing. *Journal of the Royal Statistical
@@ -38,7 +40,7 @@
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
 #' @family clades and biogeography
-#' @examples
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
@@ -53,38 +55,109 @@
 #' @export
 plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
                            type = c("phylogram", "fan"), level = 0.05,
-                           col = c("#0072B2", "#D55E00"), cex = 0.8, legend = TRUE, ..., alpha = NULL) {
+                           colours = c("#0072B2", "#D55E00"), text_size = 2.8, legend = TRUE,
+                           ..., alpha = NULL, col = NULL, cex = NULL) {
+  need_ggplot("plot_node_test()")
   level <- deprecated_level(level, alpha)
+  colours <- renamed_arg(colours, col, "colours", "col")
+  if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  legend <- legend_flag(legend)
   if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
   check_tree(tree, branch_lengths = FALSE)
-  stopifnot(length(col) == 2)
+  check_colours(colours, 2)
   test <- match.arg(test)
   type <- match.arg(type)
   check_node_tree(x, tree)
   marks <- node_marks(x, test, level)
-  # names of species and of variables can go beyond the plot region
-  old <- graphics::par(xpd = NA)
-  on.exit(graphics::par(old))
-  ape::plot.phylo(tree, type = type, cex = cex, ...)
-  last <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
-  for (node in unique(marks$node)) {
-    here <- marks[marks$node == node, ]
-    # one symbol per set and level, with solid ones next to the node
-    groups <- split(here, list(here$set == "biogeography", !here$corrected), drop = TRUE)
-    side <- vapply(groups, function(g) if (g$set[1] == "biogeography") -1 else 1, numeric(1))
-    at <- as.integer(node)
-    angle <- if (type == "fan") atan2(last$yy[at], last$xx[at]) else 0
-    steps <- symbol_steps(side, graphics::strheight("M", cex = cex))
-    x <- last$xx[at] - steps * sin(angle)
-    y <- last$yy[at] + steps * cos(angle)
-    room <- if (type == "fan") sqrt(x^2 + y^2) else x - graphics::par("usr")[1]
-    for (i in seq_along(groups)) draw_symbol(x[i], y[i], groups[[i]], col, cex, angle, room[i])
+  if (is.null(tree$edge.length)) tree$edge.length <- rep(1, nrow(tree$edge))
+  layout <- tree_layout(tree)
+  n_tip <- length(tree$tip.label)
+  depth <- max(layout$x)
+  edges <- tree_segments(tree, layout)
+  tips <- data.frame(x = layout$x[seq_len(n_tip)], y = layout$y[seq_len(n_tip)],
+                     label = tree$tip.label)
+  fan <- type == "fan"
+  # text along the radius of a fan, turned on its left half so that it is not upside down
+  turn <- function(y) {
+    angle <- 90 - 360 * (y - 0.5) / n_tip
+    flip <- angle < -90
+    list(angle = ifelse(flip, angle + 180, angle), flip = flip)
   }
-  if (legend) {
-    graphics::legend("bottomleft", c("Predictor", "Biogeography", "After correction", "Uncorrected"),
-                     pch = c(19, 17, 19, 21), col = c(col, "black", "black"), bty = "n", cex = cex)
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_segment(data = edges, ggplot2::aes(x = .data$x, xend = .data$xend,
+                                                     y = .data$y, yend = .data$yend),
+                          linewidth = 0.4)
+  if (fan) {
+    t <- turn(tips$y)
+    tips$angle <- t$angle
+    tips$hjust <- ifelse(t$flip, 1, 0)
+    p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label,
+                                                          angle = .data$angle,
+                                                          hjust = .data$hjust),
+                                size = text_size, nudge_x = 0.02 * depth)
+  } else {
+    p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label),
+                                size = text_size, hjust = 0, nudge_x = 0.02 * depth)
   }
-  invisible(marks)
+  if (!is.null(marks) && nrow(marks) > 0) {
+    groups <- split(marks, list(marks$node, marks$set == "biogeography", !marks$corrected),
+                    drop = TRUE)
+    symbols <- do.call(rbind, lapply(groups, function(g) {
+      data.frame(node = as.integer(g$node[1]), set = g$set[1], corrected = g$corrected[1],
+                 label = paste(g$variable, collapse = ", "))
+    }))
+    # one symbol per set and level at each node: predictors above, events below, solid ones
+    # next to the node
+    symbols <- symbols[order(symbols$node, symbols$set, !symbols$corrected), ]
+    side <- ifelse(symbols$set == "biogeography", -1, 1)
+    rank <- stats::ave(side, symbols$node, side, FUN = seq_along)
+    symbols$x <- layout$x[symbols$node]
+    symbols$y <- layout$y[symbols$node] + side * (rank - 0.4) * 0.45
+    symbols$key <- factor(paste(ifelse(symbols$set == "biogeography", "Biogeography",
+                                       "Predictor"),
+                                ifelse(symbols$corrected, "after correction", "uncorrected"),
+                                sep = ", "),
+                          c("Predictor, after correction", "Predictor, uncorrected",
+                            "Biogeography, after correction", "Biogeography, uncorrected"))
+    symbols$colour <- colours[1 + (symbols$set == "biogeography")]
+    key_colour <- stats::setNames(rep(colours, each = 2), levels(symbols$key))
+    key_fill <- stats::setNames(c(colours[1], "white", colours[2], "white"), levels(symbols$key))
+    key_shape <- stats::setNames(c(21, 21, 24, 24), levels(symbols$key))
+    if (fan) {
+      t <- turn(symbols$y)
+      symbols$angle <- t$angle
+      symbols$hjust <- ifelse(t$flip, 0, 1)
+    } else {
+      symbols$angle <- 0
+      symbols$hjust <- 1
+    }
+    p <- p +
+      ggplot2::geom_label(data = symbols,
+                          ggplot2::aes(.data$x, .data$y, label = .data$label,
+                                       angle = .data$angle, hjust = .data$hjust),
+                          colour = symbols$colour, fill = "white", linewidth = 0,
+                          size = text_size * 0.9, nudge_x = -0.015 * depth,
+                          label.padding = ggplot2::unit(0.05, "lines")) +
+      ggplot2::geom_point(data = symbols, ggplot2::aes(.data$x, .data$y, colour = .data$key,
+                                                       fill = .data$key, shape = .data$key),
+                          size = 2.2, stroke = 0.9) +
+      ggplot2::scale_colour_manual(values = key_colour, name = NULL, drop = TRUE) +
+      ggplot2::scale_fill_manual(values = key_fill, name = NULL, drop = TRUE) +
+      ggplot2::scale_shape_manual(values = key_shape, name = NULL, drop = TRUE)
+  }
+  p <- p + ggplot2::theme_void() +
+    ggplot2::theme(legend.position = if (legend) "bottom" else "none")
+  p <- if (fan) {
+    p + ggplot2::coord_polar(theta = "y", clip = "off") +
+      ggplot2::scale_y_continuous(limits = c(0.5, n_tip + 0.5), expand = c(0, 0)) +
+      ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.2, 0.35)))
+  } else {
+    p + ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.25, 0.3))) +
+      ggplot2::coord_cartesian(clip = "off")
+  }
+  attr(p, "marks") <- marks
+  p
 }
 
 #' Plot the semipartial correlations of a node test
@@ -94,21 +167,22 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #' after the false discovery rate, as in [plot_node_test()]; other bold values are
 #' significant only as isolated tests. Blank cells could not be calculated.
 #'
-#' Rows are the node numbers of the tree. To find them, call `ape::nodelabels()` after
-#' [plot_node_test()].
+#' Rows are the node numbers of the tree, as in `tree$edge`; `ape::nodelabels()` on a plot of
+#' [ape::plot.phylo()] shows where they are.
 #'
 #' @inheritParams plot_node_test
-#' @param col Colours of negative and positive values.
-#' @param ... Other arguments of [graphics::image()].
-#' @return Invisibly, the matrix of semipartial correlations, with predictors followed by
-#'   biogeographic events.
+#' @param colours Colours of negative and positive values.
+#' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments of
+#'   [graphics::image()] are no longer used.
+#' @return A ggplot object, with the matrix of semipartial correlations (predictors followed
+#'   by biogeographic events) in the attribute `values`.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
 #' @family clades and biogeography
-#' @examples
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
@@ -116,33 +190,45 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #' plot_node_heatmap(out, test = "site")
 #' @export
 plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
-                              col = c("#0072B2", "#D55E00"), cex = 0.8, ..., alpha = NULL) {
+                              colours = c("#0072B2", "#D55E00"), text_size = 2.5, ...,
+                              alpha = NULL, col = NULL, cex = NULL) {
+  need_ggplot("plot_node_heatmap()")
   level <- deprecated_level(level, alpha)
-  stopifnot(inherits(x, "mc_node_test"), length(col) == 2)
+  colours <- renamed_arg(colours, col, "colours", "col")
+  if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
+  check_colours(colours, 2)
   test <- match.arg(test)
   values <- cbind(x$semipartial, x$biogeography$semipartial)
   if (all(is.na(values))) stop("no node was tested, so there is nothing to show", call. = FALSE)
   marks <- node_marks(x, test, level)
-  n_nodes <- nrow(values)
-  n_variables <- ncol(values)
-  rows <- rev(seq_len(n_nodes))
-  limit <- max(abs(values), na.rm = TRUE)
-  ramp <- grDevices::colorRampPalette(c(col[1], "white", col[2]))(101)
-  old <- graphics::par(mar = c(6, 4, 1, 1))
-  on.exit(graphics::par(old))
-  graphics::image(seq_len(n_variables), seq_len(n_nodes), t(values[rows, , drop = FALSE]),
-                  zlim = c(-limit, limit), col = ramp, axes = FALSE, xlab = "", ylab = "Node", ...)
-  graphics::axis(1, seq_len(n_variables), colnames(values), las = 2, tick = FALSE, cex.axis = cex)
-  graphics::axis(2, seq_len(n_nodes), rownames(values)[rows], las = 1, tick = FALSE, cex.axis = cex)
-  graphics::box()
-  significant <- matrix(0, n_nodes, n_variables)
+  significant <- matrix(0, nrow(values), ncol(values))
   significant[cbind(match(marks$node, rownames(values)), marks$column)] <- 1 + marks$corrected
-  cells <- which(!is.na(values), arr.ind = TRUE)
-  strength <- significant[cells]
-  graphics::text(cells[, 2], n_nodes + 1 - cells[, 1],
-                 paste0(format(round(values[cells], 2), nsmall = 2), c("", "", "*")[strength + 1]),
-                 font = ifelse(strength > 0, 2, 1), cex = cex * 0.85)
-  invisible(values)
+  cells <- data.frame(node = factor(rep(rownames(values), ncol(values)), rev(rownames(values))),
+                      # by position: a predictor and an event may share a name
+                      variable = rep(seq_len(ncol(values)), each = nrow(values)),
+                      value = as.vector(values), strength = as.vector(significant))
+  cells$label <- ifelse(is.na(cells$value), "",
+                        paste0(format(round(cells$value, 2), nsmall = 2),
+                               c("", "", "*")[cells$strength + 1]))
+  limit <- max(abs(values), na.rm = TRUE)
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot(cells, ggplot2::aes(.data$variable, .data$node)) +
+    ggplot2::geom_tile(ggplot2::aes(fill = .data$value), colour = "white") +
+    ggplot2::geom_text(ggplot2::aes(label = .data$label,
+                                    fontface = ifelse(.data$strength > 0, "bold", "plain")),
+                       size = text_size) +
+    ggplot2::scale_fill_gradient2(low = colours[1], mid = "white", high = colours[2],
+                                  limits = c(-limit, limit), na.value = "white",
+                                  name = "Semipartial\ncorrelation") +
+    ggplot2::scale_x_continuous(breaks = seq_len(ncol(values)), labels = colnames(values),
+                                expand = c(0, 0)) +
+    ggplot2::labs(x = NULL, y = "Node") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5),
+                   panel.grid = ggplot2::element_blank())
+  attr(p, "values") <- values
+  p
 }
 
 # the tree must be able to hold the species of each node
@@ -173,39 +259,6 @@ node_marks <- function(x, test, alpha) {
   marks
 }
 
-# symbols in a column at the node, predictors above and events below
-symbol_steps <- function(side, height) {
-  side * (stats::ave(side, side, FUN = seq_along) - 0.4) * height * 1.3
-}
-
-# labels go towards the root, over a white box, along the radius of a fan
-draw_symbol <- function(x, y, group, col, cex, angle, room) {
-  colour <- col[1 + (group$set[1] == "biogeography")]
-  label <- paste(group$variable, collapse = ", ")
-  size <- cex * 0.85
-  width <- graphics::strwidth(label, cex = size)
-  height <- graphics::strheight(label, cex = size)
-  gap <- graphics::strwidth("n", cex = size)
-  place <- label_place(x, y, width, gap, angle, room)
-  along <- c(cos(angle), sin(angle)) * width / 2
-  across <- c(-sin(angle), cos(angle)) * height / 2
-  graphics::polygon(place$x + c(-1, 1, 1, -1) * along[1] + c(-1, -1, 1, 1) * across[1],
-                    place$y + c(-1, 1, 1, -1) * along[2] + c(-1, -1, 1, 1) * across[2],
-                    col = "white", border = NA)
-  graphics::text(place$x, place$y, label, srt = place$srt, col = colour, cex = size)
-  shape <- if (group$set[1] == "biogeography") c(17, 24) else c(19, 21)
-  graphics::points(x, y, pch = shape[2 - group$corrected[1]], col = colour, bg = "white")
-}
-
-# centre and rotation of a label; it goes away from the root only if there is no room,
-# and turns on the left of a fan so that it is not upside down
-label_place <- function(x, y, width, gap, angle, room) {
-  direction <- if (room > gap + width) -1 else 1
-  shift <- direction * (gap + width / 2)
-  list(x = x + shift * cos(angle), y = y + shift * sin(angle),
-       srt = angle * 180 / pi + if (cos(angle) < 0) 180 else 0)
-}
-
 #' Plot the fractions of a trait partition
 #'
 #' Draws the total variation as a line divided into the fractions of [trait_partition()],
@@ -225,12 +278,13 @@ label_place <- function(x, y, width, gap, angle, room) {
 #'   `"site"` or `"species"`.
 #' @param level Significance level.
 #' @param alpha Deprecated, use `level`.
-#' @param col Colour of significant segments.
+#' @param colours Colour of significant segments.
 #' @param labels Names of the two sets of predictors.
-#' @param cex Size of the text.
-#' @param ... Other arguments of [graphics::plot.window()].
-#' @return Invisibly, the rows of `x$fractions` for `a`, `b`, `c` and `d`, with `shown`, the
-#'   values drawn.
+#' @param text_size Size of the text, in mm.
+#' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments of
+#'   [graphics::plot.window()] are no longer used.
+#' @return A ggplot object, with the rows of `x$fractions` for `a`, `b`, `c` and `d` in the
+#'   attribute `fractions`, with `shown`, the values drawn.
 #' @references
 #' Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). Quantifying
 #' phylogenetically structured environmental variation. *Evolution*, 57, 2647--2652.
@@ -240,7 +294,7 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' multiple regression and canonical analysis. *Journal of Plant Ecology*, 1, 3--8.
 #' \doi{10.1093/jpe/rtm001}
 #' @family environment and space
-#' @examples
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
 #' env <- runif(40, 0, 100)
@@ -252,10 +306,17 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' @export
 plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
                                  test = c("max", "site", "species"), level = 0.05,
-                                 col = "#0072B2", labels = c("Environment", "Space"),
-                                 cex = 0.9, ..., alpha = NULL) {
+                                 colours = "#0072B2", labels = c("Environment", "Space"),
+                                 text_size = 3.2, ..., alpha = NULL, col = NULL, cex = NULL) {
+  need_ggplot("plot_trait_partition()")
   level <- deprecated_level(level, alpha)
-  stopifnot(inherits(x, "mc_trait_partition"), length(labels) == 2)
+  colours <- renamed_arg(colours, col, "colours", "col")
+  if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  if (!inherits(x, "mc_trait_partition")) {
+    stop("`x` must come from trait_partition()", call. = FALSE)
+  }
+  if (length(labels) != 2) stop("`labels` must give two names", call. = FALSE)
+  check_colours(colours, 1)
   value <- match.arg(value)
   if (identical(test, "taxa")) {
     warning("`test = \"taxa\"` is deprecated, use `\"species\"`", call. = FALSE)
@@ -265,40 +326,51 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   table <- x$fractions
   shown <- table[match(c("a", "b", "c", "d"), table$fraction), ]
   shown$shown <- pmax(shown[[value]], 0)
-  p <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
-  fill <- function(fraction) {
-    if (is.na(p[[fraction]])) return("grey70")
-    if (p[[fraction]] <= level) col else grDevices::adjustcolor(col, 0.3)
+  p_of <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
+  status <- function(fraction) {
+    if (is.na(p_of[[fraction]])) "Not tested"
+    else if (p_of[[fraction]] <= level) "Significant" else "Not significant"
   }
   edges <- c(0, cumsum(shown$shown))
-  old <- graphics::par(mar = c(3, 1, 3, 1), xpd = NA)
-  on.exit(graphics::par(old))
-  graphics::plot.new()
-  graphics::plot.window(xlim = c(0, edges[5]), ylim = c(0, 3), ...)
-  segment <- function(i, y, colour) {
-    graphics::rect(edges[i], y, edges[i + 1], y + 0.7, col = colour, border = "white")
-  }
-  segment(1, 2, fill("a"))
-  segment(2, 2, fill("b"))
-  segment(2, 1.1, fill("b"))
-  segment(3, 1.1, fill("c"))
-  graphics::text(edges[1], 2.85, labels[1], adj = c(0, 0), cex = cex)
-  # beside its bar, on the side with more room
+  total <- edges[5]
+  bars <- data.frame(xmin = edges[c(1, 2, 2, 3)], xmax = edges[c(2, 3, 3, 4)],
+                     ymin = c(2, 2, 1.1, 1.1),
+                     status = vapply(c("a", "b", "b", "c"), status, character(1)))
+  bars$ymax <- bars$ymin + 0.7
+  bars$status <- factor(bars$status, c("Significant", "Not significant", "Not tested"))
+  fills <- c(Significant = colours, `Not significant` = grDevices::adjustcolor(colours, 0.3),
+             `Not tested` = "grey70")
+  # beside the bar of space, on the side with more room
   on_right <- edges[5] - edges[4] >= edges[2]
-  gap <- graphics::strwidth("n", cex = cex)
-  graphics::text(if (on_right) edges[4] + gap else edges[2] - gap, 1.45, labels[2],
-                 adj = c(1 - on_right, 0.5), cex = cex)
-  graphics::text(mean(edges[4:5]), 2.35, "Unexplained", cex = cex)
-  graphics::segments(edges[1], 0.9, edges[5], 0.9, lwd = 4)
-  graphics::segments(edges, 0.75, edges, 1.05)
-  graphics::text(fraction_positions(edges, graphics::strwidth("[a] 0.00", cex = cex)), 0.45,
-                 paste0("[", shown$fraction, "] ", format(round(shown$shown, 2), nsmall = 2)),
-                 cex = cex)
-  graphics::title(main = paste(x$component, "component"))
-  graphics::legend("bottom", c("Significant", "Not significant", "Not tested"), bty = "n",
-                   fill = c(col, grDevices::adjustcolor(col, 0.3), "grey70"), border = NA,
-                   horiz = TRUE, cex = cex * 0.9, inset = c(0, -0.08))
-  invisible(shown)
+  gap <- 0.01 * total
+  texts <- data.frame(x = c(edges[1], if (on_right) edges[4] + gap else edges[2] - gap,
+                            mean(edges[4:5])),
+                      y = c(2.85, 1.45, 2.35), label = c(labels, "Unexplained"),
+                      hjust = c(0, 1 - on_right, 0.5))
+  fractions <- data.frame(x = fraction_positions(edges, 0.12 * total), y = 0.45,
+                          label = paste0("[", shown$fraction, "] ",
+                                         format(round(shown$shown, 2), nsmall = 2)))
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_rect(data = bars, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax,
+                                                 ymin = .data$ymin, ymax = .data$ymax,
+                                                 fill = .data$status), colour = "white") +
+    ggplot2::geom_text(data = texts, ggplot2::aes(.data$x, .data$y, label = .data$label,
+                                                  hjust = .data$hjust), size = text_size,
+                       vjust = 0) +
+    ggplot2::annotate("segment", x = 0, xend = total, y = 0.9, yend = 0.9, linewidth = 1.5) +
+    ggplot2::annotate("segment", x = edges, xend = edges, y = 0.75, yend = 1.05) +
+    ggplot2::geom_text(data = fractions, ggplot2::aes(.data$x, .data$y, label = .data$label),
+                       size = text_size) +
+    ggplot2::scale_fill_manual(values = fills, name = NULL, drop = FALSE) +
+    ggplot2::labs(title = paste(x$component, "component")) +
+    ggplot2::coord_cartesian(clip = "off") +
+    ggplot2::theme_void() +
+    ggplot2::theme(legend.position = "bottom",
+                   plot.title = ggplot2::element_text(hjust = 0.5),
+                   plot.margin = ggplot2::margin(10, 20, 10, 20))
+  attr(p, "fractions") <- shown
+  p
 }
 
 # centres of the fractions, moved apart so that their labels do not overlap
@@ -326,17 +398,18 @@ fraction_positions <- function(edges, width) {
 #' @param comm The community matrix given to [phylo_beta_test()].
 #' @param tree The `phylo` object given to [phylo_beta_test()].
 #' @param axis Axis of `x$scores` that orders the sites.
-#' @param col Colour of the largest value, with white for absences.
-#' @param cex Size of the text.
-#' @param ... Passed to [graphics::image()].
-#' @return The ordered matrix, invisibly.
+#' @param colours Colour of the largest value, with white for absences.
+#' @param text_size Size of the names of species, in mm.
+#' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments of
+#'   [graphics::image()] are no longer used.
+#' @return A ggplot object, with the ordered matrix in the attribute `ordered`.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
 #' @family the whole tree
-#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
 #' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
@@ -347,9 +420,14 @@ fraction_positions <- function(edges, width) {
 #' out <- phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 9)
 #' plot_phylo_beta(out, comm[keep, ], tree)
 #' @export
-plot_phylo_beta <- function(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...) {
+plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_size = 2.5,
+                            ..., col = NULL, cex = NULL) {
+  need_ggplot("plot_phylo_beta()")
+  colours <- renamed_arg(colours, col, "colours", "col")
+  if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
   if (!inherits(x, "mc_phylo_beta")) stop("`x` must come from phylo_beta_test()", call. = FALSE)
   check_tree(tree, branch_lengths = FALSE)
+  check_colours(colours, 1)
   matched <- present_species(check_phylo_comm(comm, tree, allow_empty = TRUE))
   comm <- matched$comm[rowSums(matched$comm) > 0, , drop = FALSE]
   scores <- as.matrix(x$scores)
@@ -361,22 +439,36 @@ plot_phylo_beta <- function(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7,
     stop("`axis` must be between 1 and ", ncol(scores), call. = FALSE)
   }
   tree <- ape::ladderize(matched$tree)
-  tips <- tree$edge[tree$edge[, 2] <= length(tree$tip.label), 2]
-  ordered <- comm[order(scores[, axis]), tree$tip.label[tips], drop = FALSE]
-  n_species <- ncol(ordered)
+  if (is.null(tree$edge.length)) tree$edge.length <- rep(1, nrow(tree$edge))
+  layout <- tree_layout(tree)
+  n_species <- length(tree$tip.label)
+  # columns follow the tips in the order of the tree
+  ordered <- comm[order(scores[, axis]), tree$tip.label[order(layout$y[seq_len(n_species)])],
+                  drop = FALSE]
   n_sites <- nrow(ordered)
-  old <- graphics::par(no.readonly = TRUE)
-  on.exit(graphics::par(old))
-  graphics::layout(matrix(1:2), heights = c(1, 3))
-  # without the extra 4% of the axis, tips line up with the columns of the image
-  graphics::par(mar = c(0, 4, 1, 1), xaxs = "i")
-  ape::plot.phylo(tree, direction = "downwards", show.tip.label = FALSE,
-                  x.lim = c(0.5, n_species + 0.5), no.margin = FALSE)
-  graphics::par(mar = c(7, 4, 0, 1))
-  ramp <- grDevices::colorRampPalette(c("white", col))(max(2, min(max(ordered) + 1, 50)))
-  graphics::image(seq_len(n_species), seq_len(n_sites), t(ordered), col = ramp, axes = FALSE,
-                  xlab = "", ylab = paste("Sites, ordered by axis", axis), ...)
-  graphics::axis(1, seq_len(n_species), colnames(ordered), las = 2, tick = FALSE, cex.axis = cex)
-  graphics::box()
-  invisible(ordered)
+  cells <- data.frame(species = rep(seq_len(n_species), each = n_sites),
+                      site = rep(seq_len(n_sites), n_species), value = as.vector(ordered))
+  # the tree hangs over the columns, root at the top, over a third of the height
+  height <- max(3, n_sites / 3)
+  depth <- max(layout$x)
+  to_y <- function(d) n_sites + 0.5 + height * (1 - d / depth)
+  edges <- tree_segments(tree, layout)
+  branches <- data.frame(x = edges$y, xend = edges$yend, y = to_y(edges$x), yend = to_y(edges$xend))
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot() +
+    ggplot2::geom_tile(data = cells, ggplot2::aes(.data$species, .data$site, fill = .data$value)) +
+    ggplot2::geom_segment(data = branches, ggplot2::aes(x = .data$x, xend = .data$xend,
+                                                        y = .data$y, yend = .data$yend),
+                          linewidth = 0.4) +
+    ggplot2::scale_fill_gradient(low = "white", high = colours, name = "Abundance") +
+    ggplot2::scale_x_continuous(breaks = seq_len(n_species), labels = colnames(ordered),
+                                expand = c(0, 0)) +
+    ggplot2::scale_y_continuous(breaks = NULL, expand = ggplot2::expansion(mult = c(0, 0.02))) +
+    ggplot2::labs(x = NULL, y = paste("Sites, ordered by axis", axis)) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90, hjust = 1, vjust = 0.5,
+                                                       size = text_size * ggplot2::.pt),
+                   panel.grid = ggplot2::element_blank())
+  attr(p, "ordered") <- ordered
+  p
 }

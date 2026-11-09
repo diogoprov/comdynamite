@@ -58,8 +58,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

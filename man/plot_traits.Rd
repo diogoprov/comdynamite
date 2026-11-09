@@ -10,35 +10,42 @@ plot_traits(
   traits = c(1, 2),
   regimes = NULL,
   colours = NULL,
-  labels = FALSE,
-  legend = "topleft",
-  ...
+  tip_labels = FALSE,
+  legend = TRUE,
+  point_size = 1.8,
+  linewidth = 0.7,
+  ...,
+  labels = NULL
 )
 }
 \arguments{
-\item{x}{Traits of the tips from \code{\link[=traits_ou]{traits_ou()}}: a matrix with one row per tip, named by tip
+\item{x}{Traits of the tips from \code{\link[=trait_ou]{trait_ou()}}: a matrix with one row per tip, named by tip
 label.}
 
 \item{tree}{The tree of \code{x}, a \code{phylo} object; or \code{NULL} to draw only the tips.}
 
 \item{traits}{The two columns of \code{x} to draw (names or numbers), or one for a traitgram.}
 
-\item{regimes}{Regimes of the branches, as in \code{\link[=traits_ou]{traits_ou()}}: a vector in the cladewise order
+\item{regimes}{Regimes of the branches, as in \code{\link[=trait_ou]{trait_ou()}}: a vector in the cladewise order
 of the edges (from \code{\link[=paint_regimes]{paint_regimes()}}) or a tree with a mapped history (class \code{simmap}, from
 \code{\link[=trait_mk]{trait_mk()}}). \code{NULL} draws every branch in one colour.}
 
 \item{colours}{Colours of the regimes, named by regime or in the order of the sorted
 regimes; one colour when there are no regimes.}
 
-\item{labels}{Should the tips be labelled?}
+\item{tip_labels}{Should the tips be labelled?}
 
-\item{legend}{Where to put the legend of the regimes (a keyword of
-\code{\link[graphics:legend]{graphics::legend()}}), or \code{NULL} for none.}
+\item{legend}{Draw the legend of the regimes?}
 
-\item{...}{Further arguments to \code{\link[graphics:plot]{graphics::plot()}}, such as \code{main}, \code{xlim} or \code{asp}.}
+\item{point_size}{Size of the tips.}
+
+\item{linewidth}{Width of the branches.}
+
+\item{labels, ...}{Deprecated: \code{labels} is now \code{tip_labels}; graphical arguments of base
+graphics are no longer used (modify the ggplot object instead).}
 }
 \value{
-\code{NULL}, invisibly; called for the plot.
+A ggplot object.
 }
 \description{
 Draws simulated traits with the tree that generated them. With two traits, a
@@ -48,25 +55,25 @@ Branches are coloured by selective regime, with the change of colour at the poin
 shift in a mapped history.
 }
 \details{
-The values of the internal nodes are those kept by \code{\link[=traits_ou]{traits_ou()}} in the attribute \code{nodes},
+The values of the internal nodes are those kept by \code{\link[=trait_ou]{trait_ou()}} in the attribute \code{nodes},
 so the branches show the simulated path between nodes, not a reconstruction. Without that
 attribute, only the tips are drawn.
 }
 \examples{
-\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(2)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 r <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
                  constraint = "variance")
-x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 plot_traits(x, habitat, regimes = habitat)
 # traitgram of the first trait
 plot_traits(x, habitat, traits = 1, regimes = habitat)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=traits_ou]{traits_ou()}}, \code{\link[=rate_matrix]{rate_matrix()}} and \code{\link[=plot.rate_matrix]{plot.rate_matrix()}}.
+\code{\link[=trait_ou]{trait_ou()}}, \code{\link[=rate_matrix]{rate_matrix()}} and \code{\link[=plot.rate_matrix]{plot.rate_matrix()}}.
 
 Other species traits:
 \code{\link[=arrival_ages]{arrival_ages()}},
@@ -83,8 +90,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}
