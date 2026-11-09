@@ -2,6 +2,29 @@
 
 ## comdynamite (development version)
 
+- All plots now use ggplot2 (in Suggests, version 3.5.0 or later) and
+  return a ggplot object, which can be changed further with ggplot2:
+  [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
+  (both layouts),
+  [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md),
+  [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md),
+  [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md),
+  [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md),
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
+  [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md),
+  [`plot_assembly()`](https://provetelab.org/comdynamite/reference/plot_assembly.md),
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
+  [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
+  and the frames of
+  [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md).
+  Tables these functions used to return invisibly are kept as attributes
+  (`marks`, `values`, `fractions`, `ordered`). Colours are `colours` and
+  text sizes `text_size` everywhere; `col`, `cex`, `lwd` and logical
+  `labels` (now `tip_labels` or `species_labels`) still work, with a
+  warning, until 1.0.0. `legend` is `TRUE` or `FALSE`; a position
+  keyword is still accepted. Arguments of base graphics passed in `...`
+  are no longer used.
+
 - Renamed for consistency; the old names still work, with a warning,
   until 1.0.0:
   [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)

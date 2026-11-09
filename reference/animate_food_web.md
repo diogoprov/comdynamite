@@ -49,7 +49,7 @@ animate_food_web(
 
   Other arguments of
   [`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md),
-  such as `panels` or `col`.
+  such as `panels` or `colours`.
 
 ## Value
 
@@ -73,6 +73,12 @@ if (requireNamespace("gifski", quietly = TRUE)) {
   gif <- animate_food_web(x, tempfile(fileext = ".gif"), frames = 30)
   file.exists(gif)
 }
+#> `geom_line()`: Each group consists of only one observation.
+#> ℹ Do you need to adjust the group aesthetic?
+#> `geom_line()`: Each group consists of only one observation.
+#> ℹ Do you need to adjust the group aesthetic?
+#> `geom_line()`: Each group consists of only one observation.
+#> ℹ Do you need to adjust the group aesthetic?
 #> [1] TRUE
 # }
 ```

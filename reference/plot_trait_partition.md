@@ -17,11 +17,13 @@ plot_trait_partition(
   value = c("r2_adjusted", "r2", "r2_component"),
   test = c("max", "site", "species"),
   level = 0.05,
-  col = "#0072B2",
+  colours = "#0072B2",
   labels = c("Environment", "Space"),
-  cex = 0.9,
+  text_size = 3.2,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 ```
 
@@ -46,7 +48,7 @@ plot_trait_partition(
 
   Significance level.
 
-- col:
+- colours:
 
   Colour of significant segments.
 
@@ -54,23 +56,25 @@ plot_trait_partition(
 
   Names of the two sets of predictors.
 
-- cex:
+- text_size:
 
-  Size of the text.
-
-- ...:
-
-  Other arguments of
-  [`graphics::plot.window()`](https://rdrr.io/r/graphics/plot.window.html).
+  Size of the text, in mm.
 
 - alpha:
 
   Deprecated, use `level`.
 
+- col, cex, ...:
+
+  Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments
+  of
+  [`graphics::plot.window()`](https://rdrr.io/r/graphics/plot.window.html)
+  are no longer used.
+
 ## Value
 
-Invisibly, the rows of `x$fractions` for `a`, `b`, `c` and `d`, with
-`shown`, the values drawn.
+A ggplot object, with the rows of `x$fractions` for `a`, `b`, `c` and
+`d` in the attribute `fractions`, with `shown`, the values drawn.
 
 ## Details
 

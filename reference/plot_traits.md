@@ -16,9 +16,12 @@ plot_traits(
   traits = c(1, 2),
   regimes = NULL,
   colours = NULL,
-  labels = FALSE,
-  legend = "topleft",
-  ...
+  tip_labels = FALSE,
+  legend = TRUE,
+  point_size = 1.8,
+  linewidth = 0.7,
+  ...,
+  labels = NULL
 )
 ```
 
@@ -54,25 +57,30 @@ plot_traits(
   Colours of the regimes, named by regime or in the order of the sorted
   regimes; one colour when there are no regimes.
 
-- labels:
+- tip_labels:
 
   Should the tips be labelled?
 
 - legend:
 
-  Where to put the legend of the regimes (a keyword of
-  [`graphics::legend()`](https://rdrr.io/r/graphics/legend.html)), or
-  `NULL` for none.
+  Draw the legend of the regimes?
 
-- ...:
+- point_size:
 
-  Further arguments to
-  [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html),
-  such as `main`, `xlim` or `asp`.
+  Size of the tips.
+
+- linewidth:
+
+  Width of the branches.
+
+- labels, ...:
+
+  Deprecated: `labels` is now `tip_labels`; graphical arguments of base
+  graphics are no longer used (modify the ggplot object instead).
 
 ## Value
 
-`NULL`, invisibly; called for the plot.
+A ggplot object.
 
 ## Details
 

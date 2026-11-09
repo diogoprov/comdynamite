@@ -11,7 +11,15 @@ ellipses inscribed in the same box.
 
 ``` r
 # S3 method for class 'rate_matrix'
-plot(x, traits = c(1, 2), level = 1, colours = NULL, legend = "topleft", ...)
+plot(
+  x,
+  traits = c(1, 2),
+  level = 1,
+  colours = NULL,
+  legend = TRUE,
+  linewidth = 0.9,
+  ...
+)
 ```
 
 ## Arguments
@@ -36,16 +44,19 @@ plot(x, traits = c(1, 2), level = 1, colours = NULL, legend = "topleft", ...)
 
 - legend:
 
-  Where to put the legend of the regimes, or `NULL` for none.
+  Draw the legend of the regimes?
+
+- linewidth:
+
+  Width of the ellipses.
 
 - ...:
 
-  Further arguments to
-  [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html).
+  Not used.
 
 ## Value
 
-`NULL`, invisibly; called for the plot.
+A ggplot object.
 
 ## See also
 

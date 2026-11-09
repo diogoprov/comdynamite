@@ -16,11 +16,13 @@ plot_node_test(
   test = c("max", "site", "joint"),
   type = c("phylogram", "fan"),
   level = 0.05,
-  col = c("#0072B2", "#D55E00"),
-  cex = 0.8,
+  colours = c("#0072B2", "#D55E00"),
+  text_size = 2.8,
   legend = TRUE,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 ```
 
@@ -54,32 +56,35 @@ plot_node_test(
 
   Significance level.
 
-- col:
+- colours:
 
   Colours of predictors and biogeographic events.
 
-- cex:
+- text_size:
 
-  Size of the text.
+  Size of the text, in mm (as in
+  [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)).
 
 - legend:
 
-  Add a legend?
-
-- ...:
-
-  Other arguments of
-  [`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html).
+  Draw the legend?
 
 - alpha:
 
   Deprecated, use `level`.
 
+- col, cex, ...:
+
+  Deprecated: `col` is now `colours` and `cex` is `text_size` (in mm,
+  about 3.5 times the old value); arguments of
+  [`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html) are
+  no longer used.
+
 ## Value
 
-Invisibly, a data frame with one row per symbol, with `node`, `set`,
-`variable`, `p`, `p_adjusted` and `corrected`, which is `TRUE` for solid
-symbols.
+A ggplot object, with the table of symbols in the attribute `marks`: one
+row per symbol, with `node`, `set`, `variable`, `p`, `p_adjusted` and
+`corrected`, which is `TRUE` for solid symbols.
 
 ## Details
 

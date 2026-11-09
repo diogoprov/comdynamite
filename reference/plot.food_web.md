@@ -15,11 +15,13 @@ plot(
   x,
   panels = c("abundance", "trait", "rate"),
   time = NULL,
-  col = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
+  colours = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
   log_abundance = FALSE,
   legend = TRUE,
-  lwd = 2,
-  ...
+  linewidth = 0.8,
+  ...,
+  col = NULL,
+  lwd = NULL
 )
 ```
 
@@ -39,30 +41,30 @@ plot(
 
   Optional time at which to stop the curves; `NULL` draws the whole run.
 
-- col:
+- colours:
 
   Colours of the resource, the consumer and the predator.
 
 - log_abundance:
 
-  Draw abundances on a logarithmic axis (zeros are left out)?
+  Draw abundances as their base-10 logarithm (zeros are left out)?
 
 - legend:
 
-  Add a legend to the first panel?
+  Draw the legend of the levels?
 
-- lwd:
+- linewidth:
 
   Width of the lines.
 
-- ...:
+- col, lwd, ...:
 
-  Other graphical parameters passed to
-  [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html).
+  Deprecated: `col` is now `colours` and `lwd` is `linewidth`; graphical
+  arguments of base graphics are no longer used.
 
 ## Value
 
-`x`, invisibly.
+A ggplot object.
 
 ## Details
 

@@ -46,21 +46,21 @@ time.
 
 ``` r
 
-op <- par(mfrow = c(1, 2))
 prop <- rate_matrix(c(1, 2), correlation = 0.6, constraint = "proportional",
                     scale = c(forest = 1, open = 3))
-plot(prop, main = "proportional")
-flip <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
-                    constraint = "variance")
-plot(flip, main = "equal variances")
+plot(prop) + ggplot2::ggtitle("proportional")
 ```
 
 ![](correlated-traits_files/figure-html/unnamed-chunk-4-1.png)
 
 ``` r
 
-par(op)
+flip <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
+                    constraint = "variance")
+plot(flip) + ggplot2::ggtitle("equal variances")
 ```
+
+![](correlated-traits_files/figure-html/unnamed-chunk-4-2.png)
 
 ## Traits on a history of habitats
 
@@ -78,17 +78,17 @@ habitat, or, for one trait, as a traitgram.
 
 habitat <- trait_mk(tree, q = 0.4, states = c("forest", "open"))
 x <- trait_ou(habitat, sigma2 = flip, regimes = habitat)
-op <- par(mfrow = c(1, 2))
 plot_traits(x, habitat, regimes = habitat)
-plot_traits(x, habitat, traits = 1, regimes = habitat)
 ```
 
 ![](correlated-traits_files/figure-html/unnamed-chunk-5-1.png)
 
 ``` r
 
-par(op)
+plot_traits(x, habitat, traits = 1, regimes = habitat)
 ```
+
+![](correlated-traits_files/figure-html/unnamed-chunk-5-2.png)
 
 Optima can also differ between traits. With a matrix `theta`, one row
 per regime and one column per trait, the open habitat below moves the
@@ -121,36 +121,38 @@ boundary of the filter around the optimum.
 ``` r
 
 z <- trait_ou(tree, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-op <- par(mfrow = c(1, 2))
-plot_assembly(assemble_community(z, 20, rule = "filtering", optimum = c(0, 0)),
-              main = "Euclidean")
-plot_assembly(assemble_community(z, 20, rule = "filtering", optimum = c(0, 0),
-                                 distance = "mahalanobis"), main = "Mahalanobis")
+plot_assembly(assemble_community(z, 20, rule = "filtering", optimum = c(0, 0))) +
+  ggplot2::ggtitle("Euclidean")
 ```
 
 ![](correlated-traits_files/figure-html/unnamed-chunk-7-1.png)
 
 ``` r
 
-par(op)
+plot_assembly(assemble_community(z, 20, rule = "filtering", optimum = c(0, 0),
+                                 distance = "mahalanobis")) +
+  ggplot2::ggtitle("Mahalanobis")
 ```
+
+![](correlated-traits_files/figure-html/unnamed-chunk-7-2.png)
 
 Under limiting similarity, the contours have half the smallest distance
 between the species kept, so that they touch but do not overlap.
 
 ``` r
 
-op <- par(mfrow = c(1, 2))
-plot_assembly(assemble_community(z, 20), main = "Euclidean")
-plot_assembly(assemble_community(z, 20, distance = "mahalanobis"), main = "Mahalanobis")
+plot_assembly(assemble_community(z, 20)) + ggplot2::ggtitle("Euclidean")
 ```
 
 ![](correlated-traits_files/figure-html/unnamed-chunk-8-1.png)
 
 ``` r
 
-par(op)
+plot_assembly(assemble_community(z, 20, distance = "mahalanobis")) +
+  ggplot2::ggtitle("Mahalanobis")
 ```
+
+![](correlated-traits_files/figure-html/unnamed-chunk-8-2.png)
 
 ## A niche with several environmental axes
 

@@ -12,8 +12,10 @@ plot_assembly(
   x,
   traits = c(1, 2),
   colours = c("#0072B2", "grey60", "#D55E00"),
-  labels = FALSE,
-  ...
+  species_labels = FALSE,
+  point_size = 2,
+  ...,
+  labels = NULL
 )
 ```
 
@@ -32,20 +34,23 @@ plot_assembly(
 
   Colours of the species kept and removed, and of the contours.
 
-- labels:
+- species_labels:
 
   Should the species be labelled?
 
-- ...:
+- point_size:
 
-  Further arguments to
-  [`graphics::plot()`](https://rdrr.io/r/graphics/plot.default.html).
-  The aspect ratio is 1 by default (`asp = 1`), so that the contours of
-  Euclidean distances are circles.
+  Size of the species.
+
+- labels, ...:
+
+  Deprecated: `labels` is now `species_labels`; graphical arguments of
+  base graphics are no longer used. The aspect ratio is always 1, so
+  that the contours of Euclidean distances are circles.
 
 ## Value
 
-`NULL`, invisibly; called for the plot.
+A ggplot object.
 
 ## Details
 
@@ -77,11 +82,10 @@ Other rule-based assembly:
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(40)
 y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-op <- par(mfrow = c(1, 2))
-plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0)),
-              main = "Euclidean")
-plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0),
-                                 distance = "mahalanobis"), main = "Mahalanobis")
+plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0))) +
+  ggplot2::ggtitle("Euclidean")
 
-par(op)
+plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0),
+                                 distance = "mahalanobis")) +
+  ggplot2::ggtitle("Mahalanobis")
 ```

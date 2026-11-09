@@ -9,7 +9,17 @@ phylogeny appears as clades that replace each other along the sites.
 ## Usage
 
 ``` r
-plot_phylo_beta(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...)
+plot_phylo_beta(
+  x,
+  comm,
+  tree,
+  axis = 1,
+  colours = "#0072B2",
+  text_size = 2.5,
+  ...,
+  col = NULL,
+  cex = NULL
+)
 ```
 
 ## Arguments
@@ -33,22 +43,23 @@ plot_phylo_beta(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...)
 
   Axis of `x$scores` that orders the sites.
 
-- col:
+- colours:
 
   Colour of the largest value, with white for absences.
 
-- cex:
+- text_size:
 
-  Size of the text.
+  Size of the names of species, in mm.
 
-- ...:
+- col, cex, ...:
 
-  Passed to
-  [`graphics::image()`](https://rdrr.io/r/graphics/image.html).
+  Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments
+  of [`graphics::image()`](https://rdrr.io/r/graphics/image.html) are no
+  longer used.
 
 ## Value
 
-The ordered matrix, invisibly.
+A ggplot object, with the ordered matrix in the attribute `ordered`.
 
 ## References
 

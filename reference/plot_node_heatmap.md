@@ -15,10 +15,12 @@ plot_node_heatmap(
   x,
   test = c("max", "site", "joint"),
   level = 0.05,
-  col = c("#0072B2", "#D55E00"),
-  cex = 0.8,
+  colours = c("#0072B2", "#D55E00"),
+  text_size = 2.5,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 ```
 
@@ -41,33 +43,37 @@ plot_node_heatmap(
 
   Significance level.
 
-- col:
+- colours:
 
   Colours of negative and positive values.
 
-- cex:
+- text_size:
 
-  Size of the text.
-
-- ...:
-
-  Other arguments of
-  [`graphics::image()`](https://rdrr.io/r/graphics/image.html).
+  Size of the text, in mm (as in
+  [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)).
 
 - alpha:
 
   Deprecated, use `level`.
 
+- col, cex, ...:
+
+  Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments
+  of [`graphics::image()`](https://rdrr.io/r/graphics/image.html) are no
+  longer used.
+
 ## Value
 
-Invisibly, the matrix of semipartial correlations, with predictors
-followed by biogeographic events.
+A ggplot object, with the matrix of semipartial correlations (predictors
+followed by biogeographic events) in the attribute `values`.
 
 ## Details
 
-Rows are the node numbers of the tree. To find them, call
-[`ape::nodelabels()`](https://rdrr.io/pkg/ape/man/nodelabels.html) after
-[`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md).
+Rows are the node numbers of the tree, as in `tree$edge`;
+[`ape::nodelabels()`](https://rdrr.io/pkg/ape/man/nodelabels.html) on a
+plot of
+[`ape::plot.phylo()`](https://rdrr.io/pkg/ape/man/plot.phylo.html) shows
+where they are.
 
 ## References
 

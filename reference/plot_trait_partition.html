@@ -79,11 +79,13 @@ significant, and <code>b</code> is grey when it was not tested (see <code>shared
 <span>  value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"r2_adjusted"</span>, <span class="st">"r2"</span>, <span class="st">"r2_component"</span><span class="op">)</span>,</span>
 <span>  test <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"max"</span>, <span class="st">"site"</span>, <span class="st">"species"</span><span class="op">)</span>,</span>
 <span>  level <span class="op">=</span> <span class="fl">0.05</span>,</span>
-<span>  col <span class="op">=</span> <span class="st">"#0072B2"</span>,</span>
+<span>  colours <span class="op">=</span> <span class="st">"#0072B2"</span>,</span>
 <span>  labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Environment"</span>, <span class="st">"Space"</span><span class="op">)</span>,</span>
-<span>  cex <span class="op">=</span> <span class="fl">0.9</span>,</span>
+<span>  text_size <span class="op">=</span> <span class="fl">3.2</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  alpha <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  col <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cex <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,7 +111,7 @@ significant, and <code>b</code> is grey when it was not tested (see <code>shared
 <dd><p>Significance level.</p></dd>
 
 
-<dt id="arg-col">col<a class="anchor" aria-label="anchor" href="#arg-col"></a></dt>
+<dt id="arg-colours">colours<a class="anchor" aria-label="anchor" href="#arg-colours"></a></dt>
 <dd><p>Colour of significant segments.</p></dd>
 
 
@@ -117,22 +119,23 @@ significant, and <code>b</code> is grey when it was not tested (see <code>shared
 <dd><p>Names of the two sets of predictors.</p></dd>
 
 
-<dt id="arg-cex">cex<a class="anchor" aria-label="anchor" href="#arg-cex"></a></dt>
-<dd><p>Size of the text.</p></dd>
-
-
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Other arguments of <code><a href="https://rdrr.io/r/graphics/plot.window.html" class="external-link">graphics::plot.window()</a></code>.</p></dd>
+<dt id="arg-text-size">text_size<a class="anchor" aria-label="anchor" href="#arg-text-size"></a></dt>
+<dd><p>Size of the text, in mm.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
 <dd><p>Deprecated, use <code>level</code>.</p></dd>
 
+
+<dt id="arg-col-cex-">col, cex, ...<a class="anchor" aria-label="anchor" href="#arg-col-cex-"></a></dt>
+<dd><p>Deprecated: <code>col</code> is now <code>colours</code> and <code>cex</code> is <code>text_size</code>; arguments of
+<code><a href="https://rdrr.io/r/graphics/plot.window.html" class="external-link">graphics::plot.window()</a></code> are no longer used.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Invisibly, the rows of <code>x$fractions</code> for <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code>, with <code>shown</code>, the
-values drawn.</p>
+    <p>A ggplot object, with the rows of <code>x$fractions</code> for <code>a</code>, <code>b</code>, <code>c</code> and <code>d</code> in the
+attribute <code>fractions</code>, with <code>shown</code>, the values drawn.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
