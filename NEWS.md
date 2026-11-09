@@ -5,7 +5,10 @@
   the standardised effect sizes; `null_intervals()` returns the table behind it.
 - `trait_densities()` gives trait probability densities of populations and communities
   (Carmona et al. 2016, 2019) with one bandwidth for all populations, and
-  `plot_population_traits()` draws them with adjustable transparency.
+  `plot_population_traits()` draws them with adjustable transparency. `trait_densities()` warns
+  when the spread within populations rises with their mean (one bandwidth then fits badly; the
+  logarithm of the trait usually helps), and `plot_population_traits(highlight = )` draws a few
+  species in colour and the rest in grey, for sites with many species.
 - Classic metrics of trait spacing and spread, for use with `community_index()`: `mnnd()`,
   `sdnnd()`, `cvnnd()`, `min_nnd()`, `max_nnd()`, `mnd()`, `sdnd()`, `cvnd()`, `mst_length()`,
   `mst_ratio()`, `trait_range()`, `trait_kurtosis()` and `nn_distances()`. Zero distances count
@@ -16,7 +19,8 @@
   of each site, as in Pakeman & Quested 2007) and `min_n`; `subsample_individuals()` applies
   the same schemes to real data, and `trait_rarefaction()` follows any statistic over the
   number of individuals per population or over `cover`, with a `plot()` method that marks the
-  80% rule of Pakeman & Quested (2007) with a dashed line.
+  80% rule of Pakeman & Quested (2007) with a dashed line. Its default statistic computes the
+  T-statistics without permutations.
 - `tstats()`: the null model of `T_IC.IR` now keeps the observed regional variance as the
   denominator. It was computed from the values drawn, which repeat individuals across sites;
   this biased the null upward and made the tests anti-conservative (about 6% of sites
