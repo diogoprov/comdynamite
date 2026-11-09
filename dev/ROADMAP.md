@@ -511,13 +511,14 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
-Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–50, sem PR aberto), com a
+Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–55), com a
 vignette tutorial de taxas por ramo (PR 42), os substitutos do cati e as ferramentas de traits
-de indivíduos (PRs 45, 47 e 49), as equações em LaTeX no site (PRs 46 e 48) e a auditoria dos
-traits multivariados (PR 50). Em andamento numa sessão: o PR B do DAMOCLES (validação rodando).
-Faltam o artigo de taxas por ramo, os experimentos da ponte Leibold–Januario (a previsão do
-cenário 10 foi contrariada pela demonstração das estatísticas T; ver o item de indivíduos;
-decisão pendente) e o restante da rodada de UX.
+de indivíduos (PRs 45, 47 e 49), as equações em LaTeX no site (PRs 46 e 48), a auditoria dos
+traits multivariados (PR 50) e a rodada de UX (PRs 52, 54 e 55). Abertos: o PR B do DAMOCLES
+(PR 56) e as opções novas de `population_shifts()` (PR 53). Faltam o artigo de taxas por ramo
+e os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
+demonstração das estatísticas T; ver o item de indivíduos; o desenho vai ao usuário antes de
+rodar).
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
@@ -740,21 +741,15 @@ pacotes de referência em vez de reimplementá-los.
       presença × trait); traits contínuos e colonização dependente de parentesco só por
       simulação.
 
-- [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
-      argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
-      `partner_turnover()`, `turnover_rates()`, `food_web_rates()`, `food_web_dynamics()`,
-      `rate_matrix()`, `sample_individuals()`, `tstats()` e as funções do DAMOCLES) quanto à consistência com o resto do pacote; pensar em funções e
-      métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
-      `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
-      por ramo) e as mensagens de erro.
-      Feito até 2026-11-09: equações da ajuda em LaTeX renderizadas pelo KaTeX no site (PRs 46
-      e 48); `plot_traits()`, `plot.rate_matrix()`, `plot_assembly()` (PR 50); plots dos nulos
-      e das densidades de traits (PRs 47 e 49); vignette tutorial `branch-rates` (PR 42).
-      Falta: revisão de nomes e argumentos; plot das taxas por ramo na árvore (hoje só um
-      auxiliar dentro da vignette) e da ordenação PCPS; mensagens de erro; decidir o estilo
-      gráfico, porque agora há dois: R base (plots de `node_test`, `phylo_beta`,
-      `trait_partition`, food web, traits multivariados) e ggplot2 em `Suggests` (plots de
-      traits de indivíduos e nulos).
+- [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
+      equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).
+      PR 52: `plot_rates()` (taxas por ramo pintadas na árvore) e `plot()` do PCPS; mensagens de
+      erro que nomeiam o argumento (`check_tree()`, `check_count()`); `@family` em 79 funções.
+      PR 54: renomeações com aviso via `.Deprecated()` até a 1.0.0 (`traits_ou()` →
+      `trait_ou()`, `fit_damocles()` → `damocles_fit()`, `nperm` → `n_perm`, `root_value` →
+      `root`, `trait_mk(root)` → `root_state`, `$edge_rate` → `$edge_rates`, `colour` →
+      `colours`; `tstats_summary(level)` passa a ser a cobertura). PR 55: todos os plots em
+      ggplot2 (`Suggests`), retornando objetos ggplot com as tabelas em atributos.
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
 
