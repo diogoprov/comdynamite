@@ -1,5 +1,24 @@
 # comdynamite (development version)
 
+- `trait_gradient()` runs the trait-gradient analysis of Ackerly & Cornwell (2007): each
+  species' trait splits into its position along the gradient of community trait means
+  (beta) and its difference from co-occurring species (alpha), with niche breadth and the
+  slope within species. Changes from the original:
+  - Site means leave out the focal species by default, which removes the circularity that
+    inflates the correlation of beta with the species mean and with alpha;
+    `leave_one_out = FALSE` reproduces the original script.
+  - The weights of site means and of species means are chosen separately;
+    `trait_gradient_weights()` compares the four combinations.
+  - `trait_gradient_test()` exchanges the trait means of species among species by default,
+    keeping the communities as observed; a curveball null (richness of sites and frequency of
+    species fixed) and the original permutation are options. In simulations, the variance
+    tests under the curveball and the original permutation reject far too often when species
+    turn over along the gradient, so they are for the correlation of beta and alpha only.
+  - `trait_gradient_phylo()` fits a model without phylogeny, Brownian motion and an OU process
+    to beta, alpha and the species mean by REML, with the bootstrap standard errors of each
+    value added to the covariance, and compares them by AIC.
+  - `plot()` draws the gradient, beta against alpha, or the null distributions.
+
 - `population_shifts()`:
   - The grid of kernel widths no longer goes below the pooled standard deviation within
     populations, and a warning is given when the best width is at an end of the grid or the
