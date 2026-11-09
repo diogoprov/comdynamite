@@ -22,7 +22,10 @@ test_that("each shifted regime enters the tree through one edge", {
   sim <- sim_shift_tree(80, n_shifts = 3, ratio = 2)
   tree <- sim$tree
   parent_edge <- match(tree$edge[, 1], tree$edge[, 2])
-  entries <- !is.na(parent_edge) & sim$regimes != sim$regimes[parent_edge]
+  # An edge enters a regime when its parent edge is in another regime, or when it leaves the
+  # root in a shifted regime (the shift happened on a lineage that became a root edge).
+  above <- ifelse(is.na(parent_edge), "0", as.character(sim$regimes[parent_edge]))
+  entries <- as.character(sim$regimes) != above
   expect_equal(sort(as.character(sim$regimes[entries])), c("1", "2", "3"))
 })
 

@@ -5,10 +5,11 @@
 #    pure-birth rate; its ratio between the shifted regime and the background should be close
 #    to the true ratio, and 1 when the ratio is 1. With extinction (epsilon = 0.5) the
 #    reconstructed rate is not lambda, but it scales with lambda, so the ratio holds.
-# 2. Conditioning: share of the tree length in terminal edges with the general sampling
-#    approach (gsa_factor = 2) against cutting within the first interval with n lineages only
-#    (gsa_factor just above 1, close to stopping when the n-th lineage appears), 200 trees of
-#    112 tips without shifts each.
+# 2. Conditioning by the general sampling approach (Hartmann, Wong & Stadler 2010): the share of
+#    the tree length in terminal edges and the depth of the root before rescaling, against the
+#    simple approach that stops when the n-th lineage first appears (gsa_factor just above 1
+#    and every run accepted, gsa_scale = 1e-9), 200 trees of 112 tips without shifts each; and
+#    how often the weight of a run was truncated (attribute "capped").
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 RNGkind("L'Ecuyer-CMRG")
 set.seed(2010)
@@ -35,11 +36,14 @@ terminal_share <- function(tree) {
   terminal <- tree$edge[, 2] <= ape::Ntip(tree)
   sum(tree$edge.length[terminal]) / sum(tree$edge.length)
 }
-conditioning <- do.call(rbind, lapply(c(1.0001, 2), function(g) {
-  share <- unlist(parallel::mclapply(1:200, function(i) {
-    terminal_share(sim_shift_tree(112, n_shifts = 0, gsa_factor = g)$tree)
-  }, mc.cores = cores))
-  data.frame(gsa_factor = g, terminal_share = mean(share), sd = stats::sd(share))
+conditioning <- do.call(rbind, lapply(list(gsa = c(2, 15), simple = c(1.0001, 1e-9)), function(g) {
+  sims <- parallel::mclapply(1:200, function(i) {
+    sim <- sim_shift_tree(112, n_shifts = 0, gsa_factor = g[1], gsa_scale = g[2])
+    c(share = terminal_share(sim$tree), capped = isTRUE(attr(sim, "capped")))
+  }, mc.cores = cores)
+  sims <- do.call(rbind, sims)
+  data.frame(gsa_factor = g[1], gsa_scale = g[2], terminal_share = mean(sims[, "share"]),
+             sd = stats::sd(sims[, "share"]), capped = mean(sims[, "capped"]))
 }))
 cat("2. share of the tree length in terminal edges, no shifts, 112 tips\n")
 print(conditioning, row.names = FALSE, digits = 3)
