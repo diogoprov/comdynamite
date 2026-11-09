@@ -152,6 +152,20 @@ test_that("nested_variance() warns on singular fits and falls back to lme4", {
   expect_equal(res$level, c("site", "species", "within"))
 })
 
+test_that("nested_variance() falls back to lme4 when nlme::lme() errors", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("nlme")
+  set.seed(5)
+  d <- expand.grid(individual = 1:4, species = paste0("sp", 1:6), site = paste0("s", 1:8),
+                   stringsAsFactors = FALSE)
+  d$population <- paste(d$site, d$species)
+  d$trait <- as.numeric(factor(d$species)) + rnorm(nrow(d))
+  local_mocked_bindings(lme = function(...) stop("singular convergence"), .package = "nlme")
+  expect_message(res <- suppressWarnings(nested_variance(d, "trait", c("site", "population"))),
+                 "failed to converge")
+  expect_equal(unname(attr(res, "engine")), "lme4")
+})
+
 test_that("nested_variance() agrees with cati::partvar()", {
   skip_if_not_installed("nlme")
   skip_if_not_installed("cati")
