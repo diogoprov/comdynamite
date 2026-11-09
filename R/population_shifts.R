@@ -386,9 +386,9 @@ shifts_fit <- function(prep, width, species_slopes, slope_names) {
     rss_change <- (max(rss) - min(rss)) / min(rss)
     flat <- isTRUE(rss_change < 0.05)
     bounds <- log(grid[c(max(at - 1, 1), min(at + 1, length(grid)))])
-    if (bounds[1] < bounds[2]) {
-      refined <- exp(stats::optimize(function(lw) fit_width(exp(lw))$rss, bounds)$minimum)
-    } else refined <- grid[at]
+    # the grid has 21 distinct points (its floor is below four times the spread), so the
+    # neighbours of the best point always bracket an interval
+    refined <- exp(stats::optimize(function(lw) fit_width(exp(lw))$rss, bounds)$minimum)
     # still at the end when the refinement did not move away from the end of the grid
     step <- diff(log(grid[1:2]))
     ends <- log(grid[c(1, length(grid))])
