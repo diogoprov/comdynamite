@@ -59,6 +59,7 @@
 #'   morphological dispersion, and the coexistence of plant species. *Oikos*, 81, 309--322.
 #'   \doi{10.2307/3547051}
 #' @seealso [community_index()].
+#' @family trait variation among individuals
 #' @examples
 #' x <- c(1, 2, 2, 5, 9)
 #' nn_distances(x)

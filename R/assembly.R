@@ -81,6 +81,7 @@
 #'   Mahalanobis, P. C. (2018). Reprint of: Mahalanobis, P. C. (1936) "On the generalised
 #'   distance in statistics". *Sankhya A*, 80(Suppl. 1), 1--7.
 #'   \doi{10.1007/s13171-019-00164-5}
+#' @family rule-based assembly
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(32)
@@ -110,7 +111,9 @@ assemble_community <- function(traits, size,
   }
   sp <- rownames(x)
   n <- nrow(x)
-  stopifnot(size >= 1, size <= n)
+  if (!is.numeric(size) || length(size) != 1 || is.na(size) || size < 1 || size > n) {
+    stop("`size` must be one number between 1 and the ", n, " species of `traits`", call. = FALSE)
+  }
   w <- trait_whitening(x, distance, trait_cov)  # Euclidean distances on x %*% w
   opt <- NULL
   removed <- switch(rule,

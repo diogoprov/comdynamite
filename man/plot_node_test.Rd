@@ -83,3 +83,11 @@ phylogenetics: separating the roles of environmental filters and historical
 biogeography. \emph{Ecology Letters}, 13, 1290--1299.
 \doi{10.1111/j.1461-0248.2010.01523.x}
 }
+\seealso{
+Other clades and biogeography:
+\code{\link[=biogeography_matrix]{biogeography_matrix()}},
+\code{\link[=node_contrasts]{node_contrasts()}},
+\code{\link[=node_test]{node_test()}},
+\code{\link[=plot_node_heatmap]{plot_node_heatmap()}}
+}
+\concept{clades and biogeography}

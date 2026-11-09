@@ -79,4 +79,9 @@ matrix(event[permutations$barrier[1, ]], 10)
 \seealso{
 \code{\link[=rigid_permutations]{rigid_permutations()}} keeps the shape of the sides and the distances between
 them, and \code{\link[=torus_permutations]{torus_permutations()}} gives a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
+
+Other restricted null models:
+\code{\link[=rigid_permutations]{rigid_permutations()}},
+\code{\link[=torus_permutations]{torus_permutations()}}
 }
+\concept{restricted null models}

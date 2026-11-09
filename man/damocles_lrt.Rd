@@ -44,4 +44,12 @@ damocles_lrt(constant, by_clade)
 }
 \seealso{
 \code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=clade_regimes]{clade_regimes()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

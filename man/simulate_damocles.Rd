@@ -75,4 +75,12 @@ community structure. \emph{Ecology Letters}, 18, 153--163. \doi{10.1111/ele.1239
 \seealso{
 \code{\link[=damocles_loglik]{damocles_loglik()}} and \code{\link[=fit_damocles]{fit_damocles()}} for the likelihood, \code{\link[=damocles_test]{damocles_test()}} for
 the null model of phylogenetic community structure.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}}
 }
+\concept{dynamic null model}

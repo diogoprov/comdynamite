@@ -47,4 +47,10 @@ image(matrix(ls$env, 8, 8), asp = 1)
 \seealso{
 \code{\link[=torus_permutations]{torus_permutations()}} for site permutations that keep the spatial
 structure of a torus.
+
+Other landscapes:
+\code{\link[=dispersal_kernel]{dispersal_kernel()}},
+\code{\link[=env_over_time]{env_over_time()}},
+\code{\link[=landscape_implicit]{landscape_implicit()}}
 }
+\concept{landscapes}

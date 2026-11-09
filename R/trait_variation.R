@@ -33,6 +33,7 @@
 #'   by spaces). `sites` has one row per site, trait and statistic, with `observed`, `ses`,
 #'   `p_low`, `p_high` and `deviation` (`"low"`, `"high"`, `"none"` or `NA`).
 #' @seealso [tstats()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -145,6 +146,7 @@ tstats_summary <- function(x, level = 0.05) {
 #'   response to environment: disentangling species turnover vs intraspecific trait
 #'   variability effects. *Ecography*, 34, 856--863. \doi{10.1111/j.1600-0587.2010.06904.x}
 #' @seealso [tstats()], [nested_variance()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
@@ -269,6 +271,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #' @param ... Not used.
 #' @return A ggplot object, which can be changed further with ggplot2 functions.
 #' @seealso [trait_flex()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:8), each = 20),
@@ -344,6 +347,7 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #'   ecological scales? A case for trait-based ecology. *Ecology Letters*, 13, 838--848.
 #'   \doi{10.1111/j.1461-0248.2010.01476.x}
 #' @seealso [trait_flex()], [tstats()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("nlme", quietly = TRUE)
 #' set.seed(1)
 #' d <- data.frame(region = rep(c("north", "south"), each = 60),
@@ -432,6 +436,7 @@ nested_variance <- function(data, traits, factors) {
 #' @references Okabe, M., & Ito, K. (2008). *Color Universal Design (CUD): Colorblind Barrier
 #'   Free*. \url{https://jfly.uni-koeln.de/color/}
 #' @seealso [nested_variance()], [plot.trait_flex()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("nlme", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' d <- data.frame(region = rep(c("north", "south"), each = 60),
@@ -535,6 +540,7 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #'   to detect and quantify multi-level community assembly processes. *Ecography*, 39,
 #'   699--708. \doi{10.1111/ecog.01433}
 #' @seealso [tstats()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 20),
@@ -574,7 +580,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
     stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
   nperm <- if (is.null(nperm)) 0 else nperm
-  stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
+  check_count(nperm, "nperm", min = 0)
   index_names <- names(index)
   n_index <- length(index)
   uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))

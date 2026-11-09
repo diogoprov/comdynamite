@@ -78,6 +78,7 @@
 #'   *Methods in Ecology and Evolution*, 3, 145--151. \doi{10.1111/j.2041-210X.2011.00132.x}
 #' @seealso [trait_bm()] for a single rate, [trait_mk()] for discrete traits with rates that
 #'   vary among branches.
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -97,7 +98,7 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
                         shift_size = 4, shift_edges = NULL, shift_rate = NULL,
                         shift_branch = FALSE, relative = TRUE, rate_sd = 0.5, root_value = 0,
                         edge_rates = NULL) {
-  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length))
+  check_tree(tree)
   model <- if (is.null(edge_rates)) match.arg(model) else "given"
   if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
     stop("`sigma2` must be one positive number", call. = FALSE)
@@ -238,6 +239,7 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #'   rates of continuous trait evolution using likelihood. *Evolution*, 60, 922--933.
 #'   \doi{10.1111/j.0014-3820.2006.tb01171.x}
 #' @seealso [trait_rates()], [trait_mk()], [as_herodotools()]
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -357,6 +359,7 @@ sympatry_integral <- function(history, r) {
 #' @return Named numeric vector, one value per species. Species never present at two successive
 #'   recorded steps get zero.
 #' @seealso [turnover_rates()], [history_rates()]
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -425,6 +428,7 @@ partner_turnover <- function(x, partners = c("all", "competitors")) {
 #' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
 #'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
 #' @seealso [partner_turnover()], [history_rates()], [trait_rates()]
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -501,6 +505,7 @@ tip_window_rates <- function(tree, value, sigma2, k, window) {
 #' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
 #'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
 #' @seealso [food_web_dynamics()], [turnover_rates()], [trait_rates()]
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' web <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),

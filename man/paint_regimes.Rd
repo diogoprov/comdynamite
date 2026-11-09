@@ -28,6 +28,28 @@ node in \code{nodes} take a new regime (\code{"1"}, \code{"2"}, ...). Nodes are 
 order, so a later node nested in an earlier one overrides it.
 }
 \examples{
-tr <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
-paint_regimes(tr, nodes = 6)
+set.seed(1)
+tr <- treeshapesim::sim_tree_shape(8)
+table(paint_regimes(tr, nodes = 10))
 }
+\seealso{
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
+}
+\concept{species traits}

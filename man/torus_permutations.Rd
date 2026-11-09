@@ -39,3 +39,9 @@ Harms, K. E., Condit, R., Hubbell, S. P., & Foster, R. B. (2001). Habitat
 associations of trees and shrubs in a 50-ha neotropical forest plot. \emph{Journal of
 Ecology}, 89, 947--959.
 }
+\seealso{
+Other restricted null models:
+\code{\link[=patch_permutations]{patch_permutations()}},
+\code{\link[=rigid_permutations]{rigid_permutations()}}
+}
+\concept{restricted null models}

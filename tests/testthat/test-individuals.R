@@ -60,7 +60,7 @@ test_that("sample_individuals() checks its arguments", {
   expect_error(sample_individuals(sim, intraspecific_sd = -1), "negative")
   expect_error(sample_individuals(sim, population_sd = 1:3), "one per species")
   expect_error(sample_individuals(sim, local_adaptation = c(sp1 = 0.5)), "no value for")
-  expect_error(sample_individuals(list()), "mc_sim")
+  expect_error(sample_individuals(list()), "simulate_metacommunity")
   expect_error(sample_individuals(sim, local_adaptation = "a"), "must be numbers")
   expect_error(sample_individuals(sim, intraspecific_sd = NA_real_), "must be numbers")
 })

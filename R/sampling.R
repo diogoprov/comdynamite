@@ -31,6 +31,7 @@
 #'   proportion of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [trait_rarefaction()], [sample_individuals()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(c("s1", "s2"), each = 50),
@@ -119,6 +120,7 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
 #'   value), with a [plot()][plot.trait_rarefaction] method. The values of all subsamples are
 #'   in the attribute `values`.
 #' @seealso [subsample_individuals()], [tstats()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 40),
@@ -147,7 +149,9 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
       size <- table(paste(individuals[[site]], individuals[[species]], sep = "\r"))
       n <- seq(2, max(2, stats::median(size)))
     }
-    stopifnot(is.numeric(n), all(n >= 1), all(n == round(n)))
+    if (!is.numeric(n) || any(is.na(n)) || any(n < 1) || any(n != round(n))) {
+      stop("`n` must be whole numbers, 1 or more", call. = FALSE)
+    }
     effort <- sort(unique(n))
   } else {
     stopifnot(is.numeric(cover), all(cover > 0 & cover <= 1))
@@ -212,6 +216,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #'   proportion of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [trait_rarefaction()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 40),

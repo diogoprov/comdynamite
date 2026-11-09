@@ -31,3 +31,10 @@ set.seed(1)
 e <- env_over_time(c(20, 50, 80), n_steps = 100, rho = 0.95, sd = 5)
 matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
 }
+\seealso{
+Other landscapes:
+\code{\link[=dispersal_kernel]{dispersal_kernel()}},
+\code{\link[=landscape_grid]{landscape_grid()}},
+\code{\link[=landscape_implicit]{landscape_implicit()}}
+}
+\concept{landscapes}
