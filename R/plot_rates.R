@@ -103,3 +103,14 @@ tree_layout <- function(tree) {
   }
   list(x = x, y = y)
 }
+
+# horizontal (along the branch) and vertical (connector at the parent) pieces of each branch
+# of a rectangular phylogram, in the coordinates of tree_layout()
+tree_segments <- function(tree, layout) {
+  parent <- tree$edge[, 1]
+  child <- tree$edge[, 2]
+  rbind(data.frame(x = layout$x[parent], xend = layout$x[parent], y = layout$y[parent],
+                   yend = layout$y[child]),
+        data.frame(x = layout$x[parent], xend = layout$x[child], y = layout$y[child],
+                   yend = layout$y[child]))
+}

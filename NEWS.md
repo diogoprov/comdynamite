@@ -1,5 +1,16 @@
 # comdynamite (development version)
 
+- All plots now use ggplot2 (in Suggests, version 3.5.0 or later) and return a ggplot object,
+  which can be changed further with ggplot2: `plot_node_test()` (both layouts),
+  `plot_node_heatmap()`, `plot_trait_partition()`, `plot_phylo_beta()`, `plot_traits()`,
+  `plot()` of `rate_matrix()`, `plot_assembly()`, `plot()` of `food_web_dynamics()` and the
+  frames of `animate_food_web()`. Tables these functions used to return invisibly are kept as
+  attributes (`marks`, `values`, `fractions`, `ordered`). Colours are `colours` and text sizes
+  `text_size` everywhere; `col`, `cex`, `lwd` and logical `labels` (now `tip_labels` or
+  `species_labels`) still work, with a warning, until 1.0.0. `legend` is `TRUE` or `FALSE`;
+  a position keyword is still accepted. Arguments of base graphics passed in `...` are no
+  longer used.
+
 - Renamed for consistency; the old names still work, with a warning, until 1.0.0:
   `traits_ou()` is now `trait_ou()` (like `trait_bm()`, `trait_mk()` and `trait_rates()`);
   `fit_damocles()` is now `damocles_fit()`; the `nperm` argument of `tstats()` and

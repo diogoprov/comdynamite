@@ -4,7 +4,15 @@
 \alias{plot.rate_matrix}
 \title{Plot evolutionary rate matrices as ellipses}
 \usage{
-\method{plot}{rate_matrix}(x, traits = c(1, 2), level = 1, colours = NULL, legend = "topleft", ...)
+\method{plot}{rate_matrix}(
+  x,
+  traits = c(1, 2),
+  level = 1,
+  colours = NULL,
+  legend = TRUE,
+  linewidth = 0.9,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{rate_matrix} object from \code{\link[=rate_matrix]{rate_matrix()}}.}
@@ -16,12 +24,14 @@ that of the marginal covariance of the two.}
 
 \item{colours}{Colours of the regimes, in the order of the regimes.}
 
-\item{legend}{Where to put the legend of the regimes, or \code{NULL} for none.}
+\item{legend}{Draw the legend of the regimes?}
 
-\item{...}{Further arguments to \code{\link[graphics:plot]{graphics::plot()}}.}
+\item{linewidth}{Width of the ellipses.}
+
+\item{...}{Not used.}
 }
 \value{
-\code{NULL}, invisibly; called for the plot.
+A ggplot object.
 }
 \description{
 Draws each rate matrix as the ellipse of the changes of two traits per unit time (one
@@ -31,9 +41,11 @@ shape, shared eigenvectors give ellipses with the same axes, equal variances giv
 inscribed in the same box.
 }
 \examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 r <- rate_matrix(c(1, 2), correlation = 0.6, constraint = "shared",
                  eigenvalues = list(slow = c(1, 0.2), fast = c(1, 2)))
 plot(r)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=rate_matrix]{rate_matrix()}}, \code{\link[=plot_traits]{plot_traits()}}.

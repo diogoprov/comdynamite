@@ -4,7 +4,17 @@
 \alias{plot_phylo_beta}
 \title{Community matrix ordered by phylogenetic beta diversity}
 \usage{
-plot_phylo_beta(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...)
+plot_phylo_beta(
+  x,
+  comm,
+  tree,
+  axis = 1,
+  colours = "#0072B2",
+  text_size = 2.5,
+  ...,
+  col = NULL,
+  cex = NULL
+)
 }
 \arguments{
 \item{x}{Result of \code{\link[=phylo_beta_test]{phylo_beta_test()}}.}
@@ -15,14 +25,15 @@ plot_phylo_beta(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...)
 
 \item{axis}{Axis of \code{x$scores} that orders the sites.}
 
-\item{col}{Colour of the largest value, with white for absences.}
+\item{colours}{Colour of the largest value, with white for absences.}
 
-\item{cex}{Size of the text.}
+\item{text_size}{Size of the names of species, in mm.}
 
-\item{...}{Passed to \code{\link[graphics:image]{graphics::image()}}.}
+\item{col, cex, ...}{Deprecated: \code{col} is now \code{colours} and \code{cex} is \code{text_size}; arguments of
+\code{\link[graphics:image]{graphics::image()}} are no longer used.}
 }
 \value{
-The ordered matrix, invisibly.
+A ggplot object, with the ordered matrix in the attribute \code{ordered}.
 }
 \description{
 The heatmap that Peres-Neto & Kembel (2015) suggest for \code{\link[=phylo_beta_test]{phylo_beta_test()}}: sites follow
@@ -31,7 +42,7 @@ link between environment and phylogeny appears as clades that replace each other
 sites.
 }
 \examples{
-\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 tree <- treeshapesim::sim_tree_shape(20)
 traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
