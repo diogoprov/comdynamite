@@ -100,7 +100,8 @@ dispersal_kernel <- function(dist, scale) {
 #' @param n_perm Number of permutations to keep, drawn without replacement. The default keeps
 #'   all of them.
 #' @return Integer matrix with one permutation of the site indices per row, excluding the
-#'   identity (`8 * side^2 - 1` rows on a square grid with `side > 2`).
+#'   identity (\eqn{8\, \mathrm{side}^2 - 1}{8 * side^2 - 1} rows on a square grid with
+#'   `side > 2`).
 #' @references Harms, K. E., Condit, R., Hubbell, S. P., & Foster, R. B. (2001). Habitat
 #'   associations of trees and shrubs in a 50-ha neotropical forest plot. *Journal of
 #'   Ecology*, 89, 947--959.

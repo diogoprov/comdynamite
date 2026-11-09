@@ -23,8 +23,8 @@ the attribute \code{nodes} holds the values at the internal nodes, named by thei
 }
 \description{
 Draws from a multivariate normal distribution with covariance
-\code{lambda * C + (1 - lambda) * diag(C)}, where \code{C} is the phylogenetic
-covariance matrix of \code{tree}.
+\eqn{\lambda C + (1 - \lambda)\, \mathrm{diag}(C)}{lambda * C + (1 - lambda) * diag(C)},
+where \eqn{C} is the phylogenetic covariance matrix of \code{tree}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

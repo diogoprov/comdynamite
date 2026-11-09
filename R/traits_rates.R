@@ -204,12 +204,14 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #'   several regimes (O'Meara et al. 2006).
 #' * `"burst"`: each change of state, such as the colonisation of a new habitat or region,
 #'   multiplies the rate by `1 + burst`, and the excess decays exponentially with time scale
-#'   `decay`, also along the descending branches, until the next change. The rate at time `u`
-#'   after the last change is `sigma2 * (1 + burst * exp(-u / decay))`; before any change it is
+#'   `decay`, also along the descending branches, until the next change. The rate at time
+#'   \eqn{u} after the last change is \eqn{\mathrm{sigma2}\, (1 + \mathrm{burst}\,
+#'   e^{-u / \mathrm{decay}})}{sigma2 * (1 + burst * exp(-u / decay))}; before any change it is
 #'   `sigma2`. This follows the expectation of McPeek (2017) that selection, and so evolution,
 #'   is strongest when a lineage first adapts to a new community.
 #' * `"sympatry"`: the rate depends on the number of lineages that share the state at each
-#'   moment, counting the lineage itself, as `sigma2 * exp(r * n)`; a negative `r` slows
+#'   moment, counting the lineage itself, as \eqn{\mathrm{sigma2}\, e^{r n}}{sigma2 * exp(r *
+#'   n)}, with \eqn{n} that number; a negative \eqn{r} slows
 #'   evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
 #'   biogeography of Drury et al. (2016).
 #'
@@ -405,7 +407,8 @@ partner_turnover <- function(x, partners = c("all", "competitors")) {
 #' only inform the tip branches, and how ecological time relates to branch lengths is a choice
 #' of the user, not something the simulation gives. Here the dynamics are taken to represent
 #' the last `window` units of time of each tip branch: in that stretch the rate is
-#' `sigma2 * (1 + k * turnover)`, and elsewhere, including all internal branches, it is
+#' \eqn{\mathrm{sigma2}\, (1 + k \cdot \mathrm{turnover})}{sigma2 * (1 + k * turnover)}, and
+#' elsewhere, including all internal branches, it is
 #' `sigma2`. The rate of a tip branch is the mean over the branch, weighted by time.
 #'
 #' @param x An `mc_sim` object with `history`, that is, run with `record_steps`.
@@ -480,7 +483,8 @@ tip_window_rates <- function(tree, value, sigma2, k, window) {
 #' The speed of a level is the mean of its rate of trait change, \eqn{|d\bar z / dt|}, over
 #' the steps at which it is present. Like [turnover_rates()], the food web runs in ecological
 #' time and only informs the tip branches: over the last `window` units of time of each tip
-#' branch the rate is `sigma2 * (1 + k * speed)` of the level of the tip, and elsewhere it is
+#' branch the rate is \eqn{\mathrm{sigma2}\, (1 + k \cdot \mathrm{speed})}{sigma2 * (1 + k *
+#' speed)} of the level of the tip, and elsewhere it is
 #' `sigma2`. These speeds are directional changes of the mean trait under selection, not the
 #' variance per unit time of Brownian motion, so they give relative rates among levels, scaled
 #' by `k`, not an equivalence between the two.

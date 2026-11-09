@@ -17,7 +17,8 @@ all of them.}
 }
 \value{
 Integer matrix with one permutation of the site indices per row, excluding the
-identity (\code{8 * side^2 - 1} rows on a square grid with \code{side > 2}).
+identity (\eqn{8\, \mathrm{side}^2 - 1}{8 * side^2 - 1} rows on a square grid with
+\code{side > 2}).
 }
 \description{
 The translations of a torus combined with the symmetries of the grid keep all distances

@@ -115,9 +115,12 @@ damocles_lrt <- function(null, alternative) {
 #'
 #' Confidence intervals for the parameters of [fit_damocles()] from the profile likelihood: the
 #' interval holds the values at which the log-likelihood, maximised over the other parameters,
-#' is within `qchisq(level, 1) / 2` of its maximum. With shared parameters there is one interval
+#' is within \eqn{\chi^2_1(\mathrm{level}) / 2}{qchisq(level, 1) / 2} of its maximum, half the
+#' `level` quantile of a chi-squared distribution with one degree of freedom. With shared
+#' parameters there is one interval
 #' per parameter; otherwise one per community. A bound the profile does not reach within a
-#' factor of `exp(10)` of the estimate (rates), 10 units (slopes `beta`) or 10 units on the logit
+#' factor of \eqn{e^{10}}{exp(10)} of the estimate (rates), 10 units (slopes `beta`) or 10 units
+#' on the logit
 #' scale (`sympatry`) is reported as the edge of the parameter space (0 or `Inf` for rates,
 #' `-Inf` or `Inf` for slopes, 0 or 1 for `sympatry`): the data do not bound it.
 #'
