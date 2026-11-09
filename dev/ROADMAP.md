@@ -511,9 +511,14 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
-Estado em 2026-11-08: itens de código concluídos (PRs 30–38) e vignette tutorial de taxas por
-ramo feita. Faltam o artigo de taxas por ramo, os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
-demonstração das estatísticas T; ver o item de indivíduos) e a rodada de UX.
+Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–55), com a
+vignette tutorial de taxas por ramo (PR 42), os substitutos do cati e as ferramentas de traits
+de indivíduos (PRs 45, 47 e 49), as equações em LaTeX no site (PRs 46 e 48), a auditoria dos
+traits multivariados (PR 50) e a rodada de UX (PRs 52, 54 e 55). Abertos: o PR B do DAMOCLES
+(PR 56) e as opções novas de `population_shifts()` (PR 53). Faltam o artigo de taxas por ramo
+e os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
+demonstração das estatísticas T; ver o item de indivíduos; o desenho vai ao usuário antes de
+rodar).
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
@@ -666,6 +671,16 @@ pacotes de referência em vez de reimplementá-los.
       Em aberto: o nulo de T_PC.PR (método publicado, denominador recalculado) tem tamanho
       um pouco acima do nominal na cauda inferior (0,068 contra 0,04); pensar num nulo que
       sorteie médias de população diretamente, com o denominador observado.
+      Quinta rodada (PRs 47 e 49, ferramentas para dados de indivíduos): métodos `plot()` em
+      ggplot2 para `tstats()`, `community_index()`, `trait_flex()` e `nested_variance()`
+      (intervalos nulos aninhados ou SES; `null_intervals()` devolve a tabela);
+      `trait_densities()` e `plot_population_traits()` (densidades por população e comunidade,
+      ideia do TPD de Carmona et al. 2016, 2019; aviso quando a largura de banda única ajusta
+      mal, com `highlight`); métricas clássicas de vizinhança (`mnnd`, `sdnnd`, `mst_length`,
+      `trait_range` etc.); esforço amostral com `sample_individuals(cover, min_n)`,
+      `subsample_individuals()` e `trait_rarefaction()`. Testadas com os dados reais do
+      Leandro (983 anuros); `population_shifts()` se aplica a esses dados (espécies com ≥ 2
+      populações de ≥ 2 indivíduos).
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -726,13 +741,15 @@ pacotes de referência em vez de reimplementá-los.
       presença × trait); traits contínuos e colonização dependente de parentesco só por
       simulação.
 
-- [ ] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08): revisar nomes e
-      argumentos das funções novas (`trait_rates()`, `trait_mk()`, `history_rates()`,
-      `partner_turnover()`, `turnover_rates()`, `food_web_rates()`, `food_web_dynamics()`,
-      `rate_matrix()`, `sample_individuals()`, `tstats()` e as funções do DAMOCLES) quanto à consistência com o resto do pacote; pensar em funções e
-      métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
-      `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
-      por ramo) e as mensagens de erro.
+- [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
+      equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).
+      PR 52: `plot_rates()` (taxas por ramo pintadas na árvore) e `plot()` do PCPS; mensagens de
+      erro que nomeiam o argumento (`check_tree()`, `check_count()`); `@family` em 79 funções.
+      PR 54: renomeações com aviso via `.Deprecated()` até a 1.0.0 (`traits_ou()` →
+      `trait_ou()`, `fit_damocles()` → `damocles_fit()`, `nperm` → `n_perm`, `root_value` →
+      `root`, `trait_mk(root)` → `root_state`, `$edge_rate` → `$edge_rates`, `colour` →
+      `colours`; `tstats_summary(level)` passa a ser a cobertura). PR 55: todos os plots em
+      ggplot2 (`Suggests`), retornando objetos ggplot com as tabelas em atributos.
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
 
