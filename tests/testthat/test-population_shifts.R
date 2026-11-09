@@ -238,3 +238,60 @@ test_that("the bootstrap centres the p-value and corrects from the generating va
   q <- stats::quantile(c_fitted, c(0.975, 0.025), names = FALSE)
   expect_equal(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
 })
+
+test_that("the variance of populations weighs means of few individuals little", {
+  set.seed(8)
+  sampling <- rep(c(12.5, 1.25), c(5000, 5000))
+  r2 <- stats::rnorm(10000, 0, sqrt(1 + sampling))^2
+  v <- population_variance(r2, sampling)
+  expect_equal(v, 1, tolerance = 0.1)
+  w <- 1 / (v + sampling)^2
+  expect_lt(abs(sum(w * (r2 - sampling - v)) / sum(w)), 1e-6)
+  # all sampling error and nothing left for populations
+  expect_equal(population_variance(c(0.5, 0.5), c(1, 1)), 0)
+})
+
+test_that("the fit without displacement gives the slopes alone", {
+  ind <- make_shifts(c = 0, n_ind = 4, seed = 21)
+  prep <- shifts_prepare(transform(ind, .env1 = env)[c("trait", "site", "species", ".env1",
+                                                       "abundance")], ".env1", NULL)
+  null <- shifts_fit(prep, 1, FALSE, "local_adaptation", displacement = FALSE)
+  expect_true(is.na(null$table$displacement))
+  use <- prep$use
+  sp <- rep(prep$pops$species[use], 2)
+  y <- c(prep$halves[use, 1], prep$halves[use, 2])
+  e <- rep(prep$pops$.env1[use], 2)
+  slope <- stats::coef(stats::lm(y ~ e + sp))[["e"]]
+  expect_equal(null$table$local_adaptation, slope)
+})
+
+test_that("with c below zero the slopes are simulated from the fit without displacement", {
+  ind <- make_shifts(c = 0, seed = 30)
+  d <- transform(ind, .env1 = env)[c("trait", "site", "species", ".env1", "abundance")]
+  set.seed(5)
+  prep <- shifts_prepare(d, ".env1", NULL)
+  null <- shifts_fit(prep, 0.5, FALSE, "local_adaptation", displacement = FALSE)
+  set.seed(5)
+  fit <- population_shifts(ind, width = 0.5, nboot = 19)
+  skip_if(fit$displacement >= 0, "this realisation has c >= 0")
+  boot <- attr(fit, "bootstrap")
+  slopes <- boot$local_adaptation[boot$set == "fitted"]
+  q <- stats::quantile(slopes, c(0.975, 0.025), names = FALSE)
+  expect_equal(c(fit$local_adaptation_low, fit$local_adaptation_high),
+               fit$local_adaptation - (q - null$table$local_adaptation))
+  expect_false(isTRUE(all.equal(null$table$local_adaptation, fit$local_adaptation)))
+})
+
+test_that("the fitted set keeps the deviations of populations with a wide kernel", {
+  ind <- make_shifts(n_sites = 100, n_species = 8, n_ind = 20, h = 0.5, c = 0, within_sd = 5,
+                     seed = 123)
+  pid <- paste(ind$site, ind$species)
+  set.seed(1)
+  ind$trait <- ind$trait + stats::rnorm(length(unique(pid)))[match(pid, unique(pid))]
+  set.seed(2)
+  fit <- suppressWarnings(population_shifts(ind, nboot = 3))
+  sds <- attr(attr(fit, "bootstrap"), "population_sd")
+  skip_if(fit$displacement <= 0, "this realisation has c <= 0")
+  expect_gt(sds[["fitted"]], 0.4)
+  expect_equal(sds[["null"]], 1, tolerance = 0.25)
+})
