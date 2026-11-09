@@ -60,6 +60,7 @@ Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=null_intervals]{null_intervals()}},
+\code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_flex]{plot.trait_flex()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
@@ -70,6 +71,10 @@ Other trait variation among individuals:
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},
 \code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_gradient]{trait_gradient()}},
+\code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}},
+\code{\link[=trait_gradient_test]{trait_gradient_test()}},
+\code{\link[=trait_gradient_weights]{trait_gradient_weights()}},
 \code{\link[=trait_rarefaction]{trait_rarefaction()}},
 \code{\link[=tstats]{tstats()}},
 \code{\link[=tstats_summary]{tstats_summary()}}
