@@ -40,7 +40,7 @@ test_that("turnover_rates() raises only the tip branches", {
                turnover_rates(x, tree, k = 3)[tip_edge])
   # the rates go to trait_rates()
   out <- trait_rates(tree, edge_rates = r)
-  expect_equal(as.numeric(out$edge_rate), as.numeric(r))
+  expect_equal(as.numeric(out$edge_rates), as.numeric(r))
 })
 
 test_that("turnover_rates() works on a simulation", {

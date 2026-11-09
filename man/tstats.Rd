@@ -10,10 +10,11 @@ tstats(
   site = "site",
   species = "species",
   method = c("base", "cati"),
-  nperm = 99,
+  n_perm = 99,
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
-  ...
+  ...,
+  nperm = NULL
 )
 }
 \arguments{
@@ -27,7 +28,7 @@ tstats(
 \item{method}{\code{"base"} (the default), computed in base R, or \code{"cati"} for \code{\link[cati:Tstats]{cati::Tstats()}};
 it needs the package cati.}
 
-\item{nperm}{Number of randomisations of the null models; 0 or \code{NULL} for the observed
+\item{n_perm}{Number of randomisations of the null models; 0 or \code{NULL} for the observed
 values only, much faster in simulation studies with many replicates.}
 
 \item{alternative}{Direction of the test of \code{method = "base"}: \code{"less"} (the default),
@@ -40,12 +41,14 @@ Null models).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
+
+\item{nperm}{Deprecated; use \code{n_perm}.}
 }
 \value{
 With \code{method = "base"}, a data frame with one row per site and trait and the columns
 \code{site}, \code{trait}, \code{n_populations}, \code{T_IP.IC}, \code{T_IC.IR} and \code{T_PC.PR}; statistics that
 cannot be computed, such as \code{T_PC.PR} for a site with one species, are \code{NA}. With
-\code{nperm > 0}, also \code{ses_} and \code{p_} columns for each statistic, and the attribute \code{null},
+\code{n_perm > 0}, also \code{ses_} and \code{p_} columns for each statistic, and the attribute \code{null},
 an array (randomisation x row x statistic) with the null values. With \code{method = "cati"},
 the \code{Tstats} object of \code{\link[cati:Tstats]{cati::Tstats()}}, with the site names of \code{individuals}.
 }
@@ -72,7 +75,7 @@ trait are left out for that trait.
 }
 \section{Null models}{
 
-With \code{nperm > 0}, \code{method = "base"} compares each statistic with a null distribution, from
+With \code{n_perm > 0}, \code{method = "base"} compares each statistic with a null distribution, from
 the three null models of Taudiere & Violle (2016), implemented in base R from their
 description:
 \itemize{
@@ -94,7 +97,7 @@ their regional variance is computed again from them, as in Taudiere & Violle (20
 
 The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
 mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
-with \eqn{n} = \code{nperm}, where \eqn{r} is the number of null values at or below the observed
+with \eqn{n} = \code{n_perm}, where \eqn{r} is the number of null values at or below the observed
 one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice the smaller of the two
 (\code{"two.sided"}, at most 1). Low values of the three statistics are the usual hypotheses
 (niche differentiation within communities for \code{T_IP.IC}, environmental filtering for the
@@ -150,15 +153,15 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
 ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
-none <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 0)
+none <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 0)
 local <- tstats(sample_individuals(sim, local_adaptation = 0.8, intraspecific_sd = 2),
-                nperm = 0)
-apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), nperm = 0)
+                n_perm = 0)
+apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), n_perm = 0)
 rbind(none = colMeans(none[ratios], na.rm = TRUE),
       local = colMeans(local[ratios], na.rm = TRUE),
       apart = colMeans(apart[ratios], na.rm = TRUE))
 # standardised effect sizes and p-values from the null models
-res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 \dontshow{\}) # examplesIf}
 }

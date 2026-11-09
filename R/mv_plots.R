@@ -6,15 +6,15 @@
 #' Branches are coloured by selective regime, with the change of colour at the point of each
 #' shift in a mapped history.
 #'
-#' The values of the internal nodes are those kept by [traits_ou()] in the attribute `nodes`,
+#' The values of the internal nodes are those kept by [trait_ou()] in the attribute `nodes`,
 #' so the branches show the simulated path between nodes, not a reconstruction. Without that
 #' attribute, only the tips are drawn.
 #'
-#' @param x Traits of the tips from [traits_ou()]: a matrix with one row per tip, named by tip
+#' @param x Traits of the tips from [trait_ou()]: a matrix with one row per tip, named by tip
 #'   label.
 #' @param tree The tree of `x`, a `phylo` object; or `NULL` to draw only the tips.
 #' @param traits The two columns of `x` to draw (names or numbers), or one for a traitgram.
-#' @param regimes Regimes of the branches, as in [traits_ou()]: a vector in the cladewise order
+#' @param regimes Regimes of the branches, as in [trait_ou()]: a vector in the cladewise order
 #'   of the edges (from [paint_regimes()]) or a tree with a mapped history (class `simmap`, from
 #'   [trait_mk()]). `NULL` draws every branch in one colour.
 #' @param colours Colours of the regimes, named by regime or in the order of the sorted
@@ -24,7 +24,7 @@
 #'   [graphics::legend()]), or `NULL` for none.
 #' @param ... Further arguments to [graphics::plot()], such as `main`, `xlim` or `asp`.
 #' @return `NULL`, invisibly; called for the plot.
-#' @seealso [traits_ou()], [rate_matrix()] and [plot.rate_matrix()].
+#' @seealso [trait_ou()], [rate_matrix()] and [plot.rate_matrix()].
 #' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(2)
@@ -32,7 +32,7 @@
 #' habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 #' r <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
 #'                  constraint = "variance")
-#' x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+#' x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 #' plot_traits(x, habitat, regimes = habitat)
 #' # traitgram of the first trait
 #' plot_traits(x, habitat, traits = 1, regimes = habitat)
@@ -65,7 +65,7 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
   check_tree(tree, branch_lengths = FALSE)
   n_tip <- ape::Ntip(tree)
   if (!all(tree$tip.label %in% rownames(x)) || nrow(nodes) != tree$Nnode) {
-    stop("`x` does not match `tree`: give the tree that `traits_ou()` simulated on",
+    stop("`x` does not match `tree`: give the tree that `trait_ou()` simulated on",
          call. = FALSE)
   }
   values <- rbind(x[tree$tip.label, , drop = FALSE], nodes[as.character(n_tip +
@@ -191,7 +191,7 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL,
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(40)
-#' y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+#' y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 #' op <- par(mfrow = c(1, 2))
 #' plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0)),
 #'               main = "Euclidean")

@@ -31,7 +31,7 @@
 #'   covariance `S` centred on the optimum (Mahalanobis 1936, reprinted 2018).
 #'
 #' The choice is a statement about niche axes. With correlated traits, such as those of
-#' [traits_ou()] with a rate matrix from [rate_matrix()], Euclidean distances, standardised or
+#' [trait_ou()] with a rate matrix from [rate_matrix()], Euclidean distances, standardised or
 #' not, count the shared direction of variation more than once: two traits that measure one
 #' niche axis double the weight of that axis. `"mahalanobis"` treats each independent
 #' direction of variation as one axis, and is the better choice when the traits are
@@ -44,11 +44,11 @@
 #'
 #' @param traits Numeric vector (one trait) or matrix (one column per trait),
 #'   with species names as names or row names. For example, the output of
-#'   [traits_ou()].
+#'   [trait_ou()].
 #' @param size Number of species in the local community.
 #' @param rule Assembly rule.
 #' @param optimum For `rule = "filtering"`: the niche optimum, either
-#'   `"ancestral"` (the root state, 0 by default in [traits_ou()]),
+#'   `"ancestral"` (the root state, 0 by default in [trait_ou()]),
 #'   `"derived"` (the maximum of each trait in the pool, one extreme corner of
 #'   trait space), or a numeric vector with one value per
 #'   trait.
@@ -85,11 +85,11 @@
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(32)
-#' x <- traits_ou(tr, n_traits = 2)
+#' x <- trait_ou(tr, n_traits = 2)
 #' assemble_community(x, size = 16, rule = "limiting_similarity")$community
 #' assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 #' # correlated traits: distances that discount the correlation
-#' y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+#' y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 #' a <- assemble_community(y, size = 16, distance = "mahalanobis")
 #' a
 #' plot_assembly(a)

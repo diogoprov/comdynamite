@@ -8,7 +8,7 @@
 #' [tstats_summary()]. This is the table drawn by the `plot()` methods of these objects, and
 #' can be used to build other figures.
 #'
-#' @param x Result of [tstats()] or [community_index()] with `nperm > 0`.
+#' @param x Result of [tstats()] or [community_index()] with `n_perm > 0`.
 #' @param level Coverage of the outer null interval, and `1 - level` the size of the two-sided
 #'   test that defines `deviation`.
 #' @param inner Coverage of the inner null interval.
@@ -23,12 +23,12 @@
 #' ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
 #'                   species = sample(c("a", "b", "c"), 120, replace = TRUE))
 #' ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(120)
-#' head(null_intervals(tstats(ind, nperm = 99)))
+#' head(null_intervals(tstats(ind, n_perm = 99)))
 #' @export
 null_intervals <- function(x, level = 0.95, inner = 0.5) {
   null <- attr(x, "null")
   if (!is.data.frame(x) || is.null(null)) {
-    stop("`x` must come from tstats() or community_index() with nperm > 0", call. = FALSE)
+    stop("`x` must come from tstats() or community_index() with n_perm > 0", call. = FALSE)
   }
   stopifnot(is.numeric(level), length(level) == 1, level > 0, level < 1,
             is.numeric(inner), length(inner) == 1, inner > 0, inner < level)
@@ -81,7 +81,7 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' ggplot2: for instance, `+ ggplot2::facet_wrap(~ statistic)`, `+ ggplot2::theme_bw()` or
 #' `+ ggplot2::scale_x_log10()`.
 #'
-#' @param x Result of [tstats()] or [community_index()] with `nperm > 0`.
+#' @param x Result of [tstats()] or [community_index()] with `n_perm > 0`.
 #' @param type `"intervals"` or `"ses"`.
 #' @param level,inner Coverage of the outer and inner null intervals; `1 - level` is also the
 #'   size of the two-sided test (as in [tstats_summary()]).
@@ -107,11 +107,11 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' ind <- data.frame(site = rep(paste0("s", 1:8), each = 20),
 #'                   species = sample(c("a", "b", "c"), 160, replace = TRUE))
 #' ind$size <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(160, sd = 3)
-#' res <- tstats(ind, traits = "size", nperm = 199)
+#' res <- tstats(ind, traits = "size", n_perm = 199)
 #' plot(res)
 #' plot(res, type = "ses", order = "ses")
 #' # an index of communities
-#' plot(community_index(ind, stats::var, traits = "size", null = "regional.ind", nperm = 199))
+#' plot(community_index(ind, stats::var, traits = "size", null = "regional.ind", n_perm = 199))
 #' @export
 plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0.5,
                         statistics = NULL, traits = NULL, sites = NULL,

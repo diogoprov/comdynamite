@@ -41,11 +41,11 @@ trait.}
 An object of class \code{rate_matrix}: a symmetric matrix with one row and column per
 trait, or, for the multi-regime structures, a named list of them, one per regime. The
 attribute \code{constraint} holds the structure. Either can be passed to
-\code{traits_ou(sigma2 = )}; \link[=plot.rate_matrix]{plot()} draws them as ellipses.
+\code{trait_ou(sigma2 = )}; \link[=plot.rate_matrix]{plot()} draws them as ellipses.
 }
 \description{
 Builds the evolutionary rate matrix (the covariance of the changes of several traits per
-unit time) for multivariate trait evolution with \code{\link[=traits_ou]{traits_ou()}}, with the structures that
+unit time) for multivariate trait evolution with \code{\link[=trait_ou]{trait_ou()}}, with the structures that
 mvMORPH fits (\code{mvBM(param = list(constraint = ))}, Clavel et al. 2015). Variances are rates
 of evolution of each trait, and correlations are evolutionary correlations between traits.
 }
@@ -54,13 +54,13 @@ One matrix, for the whole tree:
 \itemize{
 \item \code{"default"}: any rate matrix, with the variances in \code{variance} and the correlations in
 \code{correlation}. A matrix supplied by the user can also be passed directly to
-\code{traits_ou(sigma2 = )}.
+\code{trait_ou(sigma2 = )}.
 \item \code{"diagonal"}: traits evolve independently, each with its own rate.
 \item \code{"equaldiagonal"}: traits evolve independently, all with the same rate.
 \item \code{"equal"}: all traits with the same rate, correlated (Adams 2013).
 }
 
-One matrix per selective regime, for multi-regime models (\code{regimes} in \code{\link[=traits_ou]{traits_ou()}}):
+One matrix per selective regime, for multi-regime models (\code{regimes} in \code{\link[=trait_ou]{trait_ou()}}):
 \itemize{
 \item \code{"proportional"}: matrices proportional to each other, the matrix built from \code{variance}
 and \code{correlation} multiplied by \code{scale}, one positive number per regime.
@@ -88,7 +88,7 @@ plot(r)
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
-x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 plot_traits(x, habitat, regimes = habitat)
 # several correlated traits in community assembly
 assemble_community(x, size = 10, rule = "limiting_similarity")$community
@@ -104,7 +104,7 @@ multivariate evolutionary models to morphometric data. \emph{Methods in Ecology 
 Evolution}, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
 }
 \seealso{
-\code{\link[=traits_ou]{traits_ou()}}, which simulates traits with these matrices, and \code{\link[=plot_traits]{plot_traits()}}.
+\code{\link[=trait_ou]{trait_ou()}}, which simulates traits with these matrices, and \code{\link[=plot_traits]{plot_traits()}}.
 
 Other species traits:
 \code{\link[=arrival_ages]{arrival_ages()}},
@@ -121,8 +121,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

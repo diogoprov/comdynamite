@@ -20,7 +20,7 @@ test_that("plot_rates() draws one L-shaped segment per branch and checks its inp
   expect_equal(nrow(p$data), 2 * nrow(tree$edge))
   expect_equal(p$data$rate, rep(rates, 2))
   x <- trait_rates(tree, "iid", rate_sd = 0.5)
-  expect_equal(plot_rates(tree, x)$data$rate, rep(x$edge_rate, 2))
+  expect_equal(plot_rates(tree, x)$data$rate, rep(x$edge_rates, 2))
   expect_s3_class(plot_rates(tree, rates - 1, log = FALSE), "ggplot")
   expect_error(plot_rates(tree, rates - 1), "positive")
   expect_error(plot_rates(tree, rates[-1]), "one value per branch")
@@ -55,7 +55,7 @@ test_that("plot_rates() takes a result of trait_rates() alone", {
   skip_if_not_installed("ggplot2")
   set.seed(4)
   x <- trait_rates(ape::rtree(8), "gbm", rate_sd = 0.5)
-  expect_equal(plot_rates(x)$data$rate, rep(x$edge_rate, 2))
+  expect_equal(plot_rates(x)$data$rate, rep(x$edge_rates, 2))
   expect_error(plot_rates(x$tree), "`rates` is missing")
 })
 

@@ -11,9 +11,10 @@ community_index(
   site = "site",
   species = "species",
   null = c("local", "regional.ind", "regional.pop", "regional.pop.prab"),
-  nperm = 99,
+  n_perm = 99,
   alternative = c("two.sided", "less", "greater"),
-  multivariate = FALSE
+  multivariate = FALSE,
+  nperm = NULL
 )
 }
 \arguments{
@@ -32,18 +33,20 @@ functions, all computed on the same observed and randomised communities, such as
 
 \item{null}{Null model (see Details).}
 
-\item{nperm}{Number of randomisations; 0 for the observed values only.}
+\item{n_perm}{Number of randomisations; 0 for the observed values only.}
 
 \item{alternative}{Direction of the test: \code{"two.sided"} (the default), \code{"less"} or
 \code{"greater"}.}
 
 \item{multivariate}{If \code{TRUE}, the index receives all traits at once.}
+
+\item{nperm}{Deprecated; use \code{n_perm}.}
 }
 \value{
 A data frame of class \code{community_index} with one row per site, trait (or
 \code{"multivariate"} with \code{multivariate = TRUE}) and index, and the columns \code{site}, \code{trait},
 \code{index} (the name in the list, or the name of the function), \code{observed}, and with
-\code{nperm > 0} also \code{ses} and \code{p}; the attribute \code{null} holds the null values
+\code{n_perm > 0} also \code{ses} and \code{p}; the attribute \code{null} holds the null values
 (randomisation x row), and \link[=plot.community_index]{plot()} draws the tests. Individuals with a missing value are left out for that trait
 (for any trait with \code{multivariate = TRUE}).
 }
@@ -83,13 +86,13 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 20),
                   species = sample(letters[1:4], 100, replace = TRUE))
 ind$trait <- c(a = 1, b = 2, c = 3, d = 4)[ind$species] + rnorm(100, sd = 0.3)
 # range of trait values within sites, against draws from the whole region
-community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 99)
+community_index(ind, function(x) diff(range(x)), null = "regional.ind", n_perm = 99)
 # variance among the population means of a site
 pop_var <- function(x, species) stats::var(tapply(x, species, mean))
-community_index(ind, pop_var, null = "local", nperm = 99)
+community_index(ind, pop_var, null = "local", n_perm = 99)
 # several indices at once, on the same randomised communities
 community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
-                null = "regional.ind", nperm = 99)
+                null = "regional.ind", n_perm = 99)
 }
 \references{
 Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits

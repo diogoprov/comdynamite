@@ -60,18 +60,18 @@ test_that("limits of the rates give the expected communities", {
   expect_identical(unname(damocles_loglik(one, tree, 0, 1, root = "absent")), -Inf)
 })
 
-test_that("fit_damocles reaches at least the likelihood of the true rates", {
+test_that("damocles_fit reaches at least the likelihood of the true rates", {
   set.seed(3)
   tree <- treeshapesim::sim_tree_shape(80)
   comm <- simulate_damocles(tree, 1, 0.5, n = 2)
-  fit <- fit_damocles(comm, tree)
+  fit <- damocles_fit(comm, tree)
   expect_s3_class(fit, "mc_damocles_fit")
   expect_identical(rownames(fit), rownames(comm))
   expect_equal(fit$richness, unname(rowSums(comm)))
   expect_true(all(fit$loglik >= damocles_loglik(comm, tree, 1, 0.5) - 1e-6))
   expect_true(all(fit$convergence == 0))
   expect_output(print(fit), "maximum likelihood")
-  one <- fit_damocles(comm, tree, start = c(1, 1))
+  one <- damocles_fit(comm, tree, start = c(1, 1))
   expect_equal(one$loglik, fit$loglik, tolerance = 1e-4)
 })
 
@@ -106,7 +106,7 @@ test_that("inputs are checked", {
   expect_equal(ll, damocles_loglik(c(a = 1, b = 0, c = 1, d = 0), tree, 1, 1))
   expect_warning(damocles_loglik(c(a = 1, b = 0, c = 1, d = 0, z = 1), tree, 1, 1),
                  "dropped")
-  expect_error(fit_damocles(c(a = 1, b = 0, c = 1, d = 0), tree, start = c(1, -1)), "start")
+  expect_error(damocles_fit(c(a = 1, b = 0, c = 1, d = 0), tree, start = c(1, -1)), "start")
 })
 
 test_that("edge cases of inputs and of the null distributions", {
@@ -131,16 +131,16 @@ test_that("edge cases of inputs and of the null distributions", {
 test_that("an impossible community has a likelihood of zero at any rates", {
   # sisters on branches of length zero cannot both be present after allopatric speciation
   tree <- ape::read.tree(text = "((a:0,b:0):1,c:1);")
-  fit <- fit_damocles(c(a = 1, b = 1, c = 0), tree)
+  fit <- damocles_fit(c(a = 1, b = 1, c = 0), tree)
   expect_identical(fit$loglik, -Inf)
 })
 
-test_that("fit_damocles with shared rates maximises the summed log-likelihood", {
+test_that("damocles_fit with shared rates maximises the summed log-likelihood", {
   set.seed(6)
   tree <- treeshapesim::sim_tree_shape(40)
   comm <- simulate_damocles(tree, 1, 1, n = 4)
-  separate <- fit_damocles(comm, tree)
-  pooled <- fit_damocles(comm, tree, shared = TRUE)
+  separate <- damocles_fit(comm, tree)
+  pooled <- damocles_fit(comm, tree, shared = TRUE)
   expect_s3_class(pooled, "mc_damocles_fit")
   expect_identical(rownames(pooled), rownames(comm))
   expect_length(unique(pooled$gamma), 1)
@@ -153,9 +153,9 @@ test_that("fit_damocles with shared rates maximises the summed log-likelihood", 
   expect_true(sum(separate$loglik) >= attr(pooled, "loglik_total") - 1e-6)
   expect_null(attr(separate, "loglik_total"))
   expect_output(print(pooled), "shared by 4 communities")
-  one <- fit_damocles(comm[1, , drop = FALSE], tree, shared = TRUE)
+  one <- damocles_fit(comm[1, , drop = FALSE], tree, shared = TRUE)
   expect_equal(one$loglik, separate$loglik[1], tolerance = 1e-4)
-  expect_error(fit_damocles(comm, tree, shared = NA), "TRUE or FALSE")
+  expect_error(damocles_fit(comm, tree, shared = NA), "TRUE or FALSE")
   res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE)
   expect_equal(res$gamma[1], res$gamma[2])
 })
@@ -199,20 +199,20 @@ test_that("simulations with sympatry have the probabilities of the likelihood", 
   expect_lt(max(abs(as.vector(observed) - expected)), 0.012)
 })
 
-test_that("fit_damocles estimates sympatry when asked", {
+test_that("damocles_fit estimates sympatry when asked", {
   set.seed(9)
   tree <- treeshapesim::sim_tree_shape(40)
   comm <- simulate_damocles(tree, 1, 1, n = 5, sympatry = 0.5)
-  fixed <- fit_damocles(comm, tree, shared = TRUE)
-  free <- fit_damocles(comm, tree, shared = TRUE, sympatry = NULL)
+  fixed <- damocles_fit(comm, tree, shared = TRUE)
+  free <- damocles_fit(comm, tree, shared = TRUE, sympatry = NULL)
   expect_true(all(fixed$sympatry == 0))
   expect_true(all(free$sympatry > 0 & free$sympatry < 1))
   expect_gte(attr(free, "loglik_total"), attr(fixed, "loglik_total") - 1e-6)
   expect_gte(attr(free, "loglik_total"),
              sum(damocles_loglik(comm, tree, 1, 1, sympatry = 0.5)) - 1e-6)
-  each <- fit_damocles(comm[1:2, ], tree, sympatry = NULL)
+  each <- damocles_fit(comm[1:2, ], tree, sympatry = NULL)
   expect_length(unique(each$sympatry), 2)
-  expect_error(fit_damocles(comm, tree, sympatry = -1), "between 0 and 1")
+  expect_error(damocles_fit(comm, tree, sympatry = -1), "between 0 and 1")
   res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE, sympatry = NULL)
   expect_equal(res$sympatry[1], res$sympatry[2])
   expect_output(print(res), "sympatry")

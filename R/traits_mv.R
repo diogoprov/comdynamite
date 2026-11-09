@@ -1,7 +1,7 @@
 #' Evolutionary rate matrices with restricted structures
 #'
 #' Builds the evolutionary rate matrix (the covariance of the changes of several traits per
-#' unit time) for multivariate trait evolution with [traits_ou()], with the structures that
+#' unit time) for multivariate trait evolution with [trait_ou()], with the structures that
 #' mvMORPH fits (`mvBM(param = list(constraint = ))`, Clavel et al. 2015). Variances are rates
 #' of evolution of each trait, and correlations are evolutionary correlations between traits.
 #'
@@ -9,12 +9,12 @@
 #'
 #' * `"default"`: any rate matrix, with the variances in `variance` and the correlations in
 #'   `correlation`. A matrix supplied by the user can also be passed directly to
-#'   `traits_ou(sigma2 = )`.
+#'   `trait_ou(sigma2 = )`.
 #' * `"diagonal"`: traits evolve independently, each with its own rate.
 #' * `"equaldiagonal"`: traits evolve independently, all with the same rate.
 #' * `"equal"`: all traits with the same rate, correlated (Adams 2013).
 #'
-#' One matrix per selective regime, for multi-regime models (`regimes` in [traits_ou()]):
+#' One matrix per selective regime, for multi-regime models (`regimes` in [trait_ou()]):
 #'
 #' * `"proportional"`: matrices proportional to each other, the matrix built from `variance`
 #'   and `correlation` multiplied by `scale`, one positive number per regime.
@@ -41,7 +41,7 @@
 #' @return An object of class `rate_matrix`: a symmetric matrix with one row and column per
 #'   trait, or, for the multi-regime structures, a named list of them, one per regime. The
 #'   attribute `constraint` holds the structure. Either can be passed to
-#'   `traits_ou(sigma2 = )`; [plot()][plot.rate_matrix] draws them as ellipses.
+#'   `trait_ou(sigma2 = )`; [plot()][plot.rate_matrix] draws them as ellipses.
 #' @references
 #'   Adams, D. C. (2013). Comparing evolutionary rates for different phenotypic traits on a
 #'   phylogeny using likelihood. *Systematic Biology*, 62, 181--192.
@@ -50,7 +50,7 @@
 #'   Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package for fitting
 #'   multivariate evolutionary models to morphometric data. *Methods in Ecology and
 #'   Evolution*, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
-#' @seealso [traits_ou()], which simulates traits with these matrices, and [plot_traits()].
+#' @seealso [trait_ou()], which simulates traits with these matrices, and [plot_traits()].
 #' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' rate_matrix(c(1, 2), correlation = 0.5)
@@ -63,7 +63,7 @@
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
 #' habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
-#' x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+#' x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 #' plot_traits(x, habitat, regimes = habitat)
 #' # several correlated traits in community assembly
 #' assemble_community(x, size = 10, rule = "limiting_similarity")$community

@@ -73,7 +73,7 @@ Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 community structure. \emph{Ecology Letters}, 18, 153--163. \doi{10.1111/ele.12395}
 }
 \seealso{
-\code{\link[=damocles_loglik]{damocles_loglik()}} and \code{\link[=fit_damocles]{fit_damocles()}} for the likelihood, \code{\link[=damocles_test]{damocles_test()}} for
+\code{\link[=damocles_loglik]{damocles_loglik()}} and \code{\link[=damocles_fit]{damocles_fit()}} for the likelihood, \code{\link[=damocles_test]{damocles_test()}} for
 the null model of phylogenetic community structure.
 
 Other dynamic null model:

@@ -44,14 +44,16 @@
 #'   after it to `sigma2` times `shift_size` (`FALSE`)?
 #' @param rate_sd Standard deviation of the logarithm of the rate: per square root of time for
 #'   `"gbm"` and among branches for `"iid"`.
-#' @param root_value Trait value at the root.
+#' @param root Trait value at the root.
+#' @param root_value Deprecated; use `root`.
 #' @param edge_rates Optional rate of each branch, in the order of the rows of `tree$edge`, such as
 #'   those of [history_rates()]. When given, `model` and its arguments are ignored.
 #' @return A list with
 #'   * `tips`: the trait at the tips, named by species;
 #'   * `nodes`: the trait at the internal nodes, named by their numbers in `tree$edge`, the
 #'     root first;
-#'   * `edge_rate`: the rate of each branch, in the order of the rows of `tree$edge`;
+#'   * `edge_rates`: the rate of each branch, in the order of the rows of `tree$edge`, as in
+#'     [trait_mk()] (also as `edge_rate`, its name before 0.7.0, until 1.0.0);
 #'   * `node_rate`: for `"gbm"`, the rate at every node, tips first, named by node number;
 #'     `NULL` otherwise;
 #'   * `shifts`: for `"shift"`, a data frame with the `edge` (row of `tree$edge`), the `node`
@@ -90,14 +92,15 @@
 #'                  shift_size = function(n) stats::rexp(n))
 #' b$shifts
 #' g <- trait_rates(tr, "gbm", rate_sd = 0.5)
-#' summary(g$edge_rate)
+#' summary(g$edge_rates)
 #' # as the environmental optima of a metacommunity
 #' traits <- species_traits(tr, optima = g$tips)
 #' @export
 trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shifts = 1,
                         shift_size = 4, shift_edges = NULL, shift_rate = NULL,
-                        shift_branch = FALSE, relative = TRUE, rate_sd = 0.5, root_value = 0,
-                        edge_rates = NULL) {
+                        shift_branch = FALSE, relative = TRUE, rate_sd = 0.5, root = 0,
+                        edge_rates = NULL, root_value = NULL) {
+  root_value <- renamed_arg(root, root_value, "root", "root_value")
   check_tree(tree)
   model <- if (is.null(edge_rates)) match.arg(model) else "given"
   if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
@@ -189,7 +192,8 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
   tips <- trait_bm(scaled, 1, nodes = TRUE)
   nodes <- attr(tips, "nodes") + root_value
   attr(tips, "nodes") <- NULL
-  list(tips = tips + root_value, nodes = nodes, edge_rate = edge_rate, node_rate = node_rate,
+  list(tips = tips + root_value, nodes = nodes, edge_rates = edge_rate, edge_rate = edge_rate,
+       node_rate = node_rate,
        shifts = shift_table, tree = tree, scaled = scaled)
 }
 

@@ -16,14 +16,14 @@ plot_traits(
 )
 }
 \arguments{
-\item{x}{Traits of the tips from \code{\link[=traits_ou]{traits_ou()}}: a matrix with one row per tip, named by tip
+\item{x}{Traits of the tips from \code{\link[=trait_ou]{trait_ou()}}: a matrix with one row per tip, named by tip
 label.}
 
 \item{tree}{The tree of \code{x}, a \code{phylo} object; or \code{NULL} to draw only the tips.}
 
 \item{traits}{The two columns of \code{x} to draw (names or numbers), or one for a traitgram.}
 
-\item{regimes}{Regimes of the branches, as in \code{\link[=traits_ou]{traits_ou()}}: a vector in the cladewise order
+\item{regimes}{Regimes of the branches, as in \code{\link[=trait_ou]{trait_ou()}}: a vector in the cladewise order
 of the edges (from \code{\link[=paint_regimes]{paint_regimes()}}) or a tree with a mapped history (class \code{simmap}, from
 \code{\link[=trait_mk]{trait_mk()}}). \code{NULL} draws every branch in one colour.}
 
@@ -48,7 +48,7 @@ Branches are coloured by selective regime, with the change of colour at the poin
 shift in a mapped history.
 }
 \details{
-The values of the internal nodes are those kept by \code{\link[=traits_ou]{traits_ou()}} in the attribute \code{nodes},
+The values of the internal nodes are those kept by \code{\link[=trait_ou]{trait_ou()}} in the attribute \code{nodes},
 so the branches show the simulated path between nodes, not a reconstruction. Without that
 attribute, only the tips are drawn.
 }
@@ -59,14 +59,14 @@ tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 r <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
                  constraint = "variance")
-x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 plot_traits(x, habitat, regimes = habitat)
 # traitgram of the first trait
 plot_traits(x, habitat, traits = 1, regimes = habitat)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=traits_ou]{traits_ou()}}, \code{\link[=rate_matrix]{rate_matrix()}} and \code{\link[=plot.rate_matrix]{plot.rate_matrix()}}.
+\code{\link[=trait_ou]{trait_ou()}}, \code{\link[=rate_matrix]{rate_matrix()}} and \code{\link[=plot.rate_matrix]{plot.rate_matrix()}}.
 
 Other species traits:
 \code{\link[=arrival_ages]{arrival_ages()}},
@@ -83,8 +83,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

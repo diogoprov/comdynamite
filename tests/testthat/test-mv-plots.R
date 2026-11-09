@@ -13,7 +13,7 @@ draw <- function(expr) {
 test_that("plot_traits() draws phylomorphospaces and traitgrams", {
   set.seed(1)
   reg <- paint_regimes(tr4, nodes = 7)
-  x <- traits_ou(tr4, sigma2 = rate_matrix(c(1, 2), correlation = 0.5))
+  x <- trait_ou(tr4, sigma2 = rate_matrix(c(1, 2), correlation = 0.5))
   expect_null(draw(plot_traits(x, tr4, regimes = reg, labels = TRUE)))
   expect_null(draw(plot_traits(x, tr4, traits = "trait2", labels = TRUE)))
   expect_null(draw(plot_traits(x, labels = TRUE)))
