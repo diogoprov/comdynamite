@@ -100,6 +100,58 @@ test_that("nested_variance() checks the nesting and sums to one", {
   expect_error(nested_variance(d, "trait", c("region", "nope")), "no column")
 })
 
+test_that("nested_variance() separates species from populations with crossed factors", {
+  skip_if_not_installed("lme4")
+  set.seed(3)
+  species <- paste0("sp", 1:10)
+  sites <- paste0("s", 1:20)
+  d <- expand.grid(individual = 1:5, species = species, site = sites, stringsAsFactors = FALSE)
+  d$region <- ifelse(d$site %in% sites[1:10], "A", "B")
+  d$genus <- ifelse(d$species %in% species[1:5], "g1", "g2")
+  population <- paste(d$site, d$species)
+  d$trait <- stats::setNames(rnorm(10, 0, 3), species)[d$species] +
+    stats::setNames(rnorm(200), unique(population))[population] + rnorm(nrow(d))
+  # nested: species within site is the population and takes both components
+  nested <- suppressWarnings(nested_variance(d, "trait", c("region", "site", "species")))
+  expect_gt(nested$trait[nested$level == "species"], 0.85)
+  expect_warning(nested_variance(d, "trait", c("region", "site", "species")), "crossed")
+  crossed <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
+                                              crossed = "species"))
+  expect_equal(crossed$level, c("region", "site", "species", "site:species", "within"))
+  expect_equal(sum(crossed$trait), 1)
+  expect_gt(crossed$trait[crossed$level == "site:species"], 0.05)
+  expect_gt(crossed$trait[crossed$level == "species"], 0.6)
+  expect_equal(unname(attr(crossed, "engine")), "lme4")
+  no_pop <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
+                                             crossed = "species", interaction = FALSE))
+  expect_false("site:species" %in% no_pop$level)
+  expect_gt(no_pop$trait[no_pop$level == "within"], crossed$trait[crossed$level == "within"])
+  # two genera: genus and species nested in the taxonomic hierarchy
+  with_genus <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
+                                                 crossed = c("genus", "species")))
+  expect_equal(with_genus$level,
+               c("region", "site", "genus", "species", "site:species", "within"))
+  expect_error(nested_variance(d, "trait", c("region", "site"), crossed = c("species", "genus")),
+               "does not split")
+  expect_error(nested_variance(d, "trait", c("region", "site"), crossed = "site"), "share")
+})
+
+test_that("nested_variance() warns on singular fits and falls back to lme4", {
+  skip_if_not_installed("lme4")
+  skip_if_not_installed("nlme")
+  set.seed(4)
+  d <- expand.grid(individual = 1:4, species = paste0("sp", 1:6), site = paste0("s", 1:8),
+                   stringsAsFactors = FALSE)
+  d$trait <- as.numeric(factor(d$species)) + rnorm(nrow(d))  # no site variance
+  expect_warning(res <- nested_variance(d, "trait", "site", crossed = "species"), "singular")
+  expect_true(attr(res, "singular")[["trait"]])
+  local_mocked_bindings(nested_variance_nlme = function(...) NULL)
+  expect_message(res <- suppressWarnings(nested_variance(d, "trait", c("site", "species"))),
+                 "lme4")
+  expect_equal(unname(attr(res, "engine")), "lme4")
+  expect_equal(res$level, c("site", "species", "within"))
+})
+
 test_that("nested_variance() agrees with cati::partvar()", {
   skip_if_not_installed("nlme")
   skip_if_not_installed("cati")

@@ -2,9 +2,9 @@
 % Please edit documentation in R/trait_variation.R
 \name{nested_variance}
 \alias{nested_variance}
-\title{Variance components of traits across nested levels}
+\title{Variance components of traits across nested or crossed levels}
 \usage{
-nested_variance(data, traits, factors)
+nested_variance(data, traits, factors, crossed = NULL, interaction = TRUE)
 }
 \arguments{
 \item{data}{Data frame with the traits and the factors.}
@@ -13,27 +13,60 @@ nested_variance(data, traits, factors)
 
 \item{factors}{Names of the columns with the nested factors, from the broadest level to the
 finest.}
+
+\item{crossed}{Names of the columns of a second hierarchy of nested factors, from the
+broadest level to the finest, crossed with \code{factors} (for instance
+\code{c("genus", "species")} when \code{factors} are spatial), or \code{NULL} (the default) for a single
+nested hierarchy.}
+
+\item{interaction}{With \code{crossed}, whether to add a level for the combination of the finest
+level of \code{factors} and the finest level of \code{crossed} (for instance the population, species
+by site). Without it, differences among populations of a species go to \code{within}.}
 }
 \value{
-A data frame with one row per factor and one for the variance within the finest
-level (\code{within}), and one column per trait with the share of variance of each level. The
-attribute \code{variance} holds the variances. It has class \code{nested_variance}, with a
+A data frame with one row per level and one for the variance within the finest level
+(\code{within}), and one column per trait with the share of variance of each level. The
+attribute \code{variance} holds the variances, \code{singular} whether each fit was singular and
+\code{engine} the package used. It has class \code{nested_variance}, with a
 \link[=plot.nested_variance]{plot()} method.
 }
 \description{
-Splits the variance of each trait among nested levels, such as regions, sites, species and
-populations, with a linear mixed model of random intercepts nested from the broadest level
-to the finest, fitted by restricted maximum likelihood (Messier et al. 2010).
+Splits the variance of each trait among levels, such as regions, sites, genera, species and
+populations, with a linear mixed model of random intercepts fitted by restricted maximum
+likelihood (Messier et al. 2010). The levels can form one nested hierarchy (\code{factors}) or
+two hierarchies crossed with each other (\code{factors} and \code{crossed}), such as a spatial one
+(region > site) and a taxonomic one (genus > species).
 }
 \details{
-The levels must be nested: each level of a factor must lie within a single level of the
-factor before it. Two checks guard against the common mistakes. A factor that does not split
-any group of the factors before it (for instance species after populations, since each
-population holds a single species) adds no level of variation, and the function stops,
-because the order of the factors is then most likely reversed. A factor whose levels occur
-under several groups of the factors before it (for instance genera, found at several sites,
-after sites) is crossed with them rather than nested; the model then treats each combination
-as a separate group, which is rarely what is meant, and the function warns.
+\strong{Nested or crossed.} In a nested design each level of a factor lies within a single level
+of the factor before it, as sites within regions or individuals' populations within sites.
+Species are rarely nested within sites: the same species occurs at several sites. Put after
+\code{site} in \code{factors}, \code{species} then stands for each species at each site, that is, the
+population, and its share mixes two things: how much species differ from one another and
+how much populations of a species differ among sites. When species occur at several sites,
+give the spatial levels in \code{factors} and the taxonomic ones in \code{crossed}. The model then has
+a term for each level of both hierarchies and, by default, one for their interaction (the
+finest spatial level by the finest taxonomic level, for instance \code{site:species}, the
+population), which separates differences among species from differences among populations
+of the same species. The variance left (\code{within}) is among individuals of a population.
+A rule of thumb: if a column of \code{factors} has labels that recur under several levels of the
+factors before it and these labels are the same units (the same species), the design is
+crossed; if they are only reused names (site 1, 2, ... in each region), it is nested.
+
+\strong{Checks.} Within each hierarchy, a factor that does not split any group of the factors
+before it (for instance species after populations, since each population holds a single
+species) adds no level of variation, and the function stops, because the order of the
+factors is then most likely reversed. A factor of \code{factors} whose labels recur under several
+groups of the factors before it gets a warning that points to \code{crossed}.
+
+\strong{Fitting.} Nested models are fitted with \code{nlme::lme()}. Crossed models, and nested models
+for which \code{nlme::lme()} fails to converge, are fitted with \code{lme4::lmer()}, which needs the
+package lme4. When a level cannot be told apart from the others (for instance genera that
+hold a single species at most sites), \code{lme4::lmer()} sets its variance to zero (a singular
+fit) instead of failing; the function then warns, and the attribute \code{singular} says which
+traits were affected. A zero share in a singular fit means that the data do not separate
+that level, not that it does not vary. With few levels of a factor (two regions, say), the
+variance of that factor is estimated with very few degrees of freedom and is very uncertain.
 }
 \examples{
 \dontshow{if (requireNamespace("nlme", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -46,6 +79,16 @@ d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
 res <- nested_variance(d, "trait", c("region", "site", "population"))
 res
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
+\dontshow{\}) # examplesIf}
+\dontshow{if (requireNamespace("lme4", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+# the same species at every site: species crossed with sites, and populations differ
+d <- expand.grid(individual = 1:5, species = paste0("sp", 1:8), site = paste0("s", 1:12))
+d$region <- ifelse(d$site \%in\% paste0("s", 1:6), "north", "south")
+species_effect <- rnorm(8, 0, 3)
+population_effect <- rnorm(8 * 12)
+d$trait <- species_effect[d$species] +
+  population_effect[interaction(d$species, d$site)] + rnorm(nrow(d))
+nested_variance(d, "trait", c("region", "site"), crossed = "species")
 \dontshow{\}) # examplesIf}
 }
 \references{
