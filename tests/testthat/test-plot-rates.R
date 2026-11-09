@@ -58,3 +58,12 @@ test_that("plot_rates() takes a result of trait_rates() alone", {
   expect_equal(plot_rates(x)$data$rate, rep(x$edge_rates, 2))
   expect_error(plot_rates(x$tree), "`rates` is missing")
 })
+
+test_that("plot() of pcps_test() names an unnamed predictor", {
+  skip_if_not_installed("ggplot2")
+  set.seed(6)
+  tree <- ape::rtree(10)
+  comm <- matrix(rpois(200, 2), 20, dimnames = list(NULL, tree$tip.label))
+  p <- plot(pcps_test(comm, tree, seq_len(20), n_perm = 9))
+  expect_equal(p$scales$get_scales("colour")$name, "env1")
+})
