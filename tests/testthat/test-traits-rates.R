@@ -2,21 +2,21 @@ test_that("trait_rates multiplies branch lengths by the rates and keeps them", {
   set.seed(1)
   tree <- ape::rcoal(10)
   for (model in c("shift", "gbm", "iid")) {
-    x <- trait_rates(tree, model, root_value = 5)
-    expect_named(x, c("tips", "nodes", "edge_rate", "node_rate", "shifts", "tree", "scaled"))
+    x <- trait_rates(tree, model, root = 5)
+    expect_named(x, c("tips", "nodes", "edge_rates", "edge_rate", "node_rate", "shifts", "tree", "scaled"))
     expect_named(x$tips, tree$tip.label)
     expect_named(x$nodes, as.character(11:19))
-    expect_length(x$edge_rate, nrow(tree$edge))
-    expect_true(all(x$edge_rate > 0))
-    expect_equal(x$scaled$edge.length, tree$edge.length * x$edge_rate)
+    expect_length(x$edge_rates, nrow(tree$edge))
+    expect_true(all(x$edge_rates > 0))
+    expect_equal(x$scaled$edge.length, tree$edge.length * x$edge_rates)
     expect_null(attr(x$tips, "nodes"))
   }
   expect_null(trait_rates(tree, "iid")$shifts)
   expect_null(trait_rates(tree, "shift")$node_rate)
   # without variation among branches, every rate is sigma2
-  expect_equal(trait_rates(tree, "gbm", sigma2 = 2, rate_sd = 0)$edge_rate, rep(2, 18))
-  expect_equal(trait_rates(tree, "iid", sigma2 = 2, rate_sd = 0)$edge_rate, rep(2, 18))
-  expect_equal(trait_rates(tree, "shift", sigma2 = 2, shifts = 0)$edge_rate, rep(2, 18))
+  expect_equal(trait_rates(tree, "gbm", sigma2 = 2, rate_sd = 0)$edge_rates, rep(2, 18))
+  expect_equal(trait_rates(tree, "iid", sigma2 = 2, rate_sd = 0)$edge_rates, rep(2, 18))
+  expect_equal(trait_rates(tree, "shift", sigma2 = 2, shifts = 0)$edge_rates, rep(2, 18))
 })
 
 test_that("shifts are inherited by descendants unless they change one branch", {
@@ -24,16 +24,16 @@ test_that("shifts are inherited by descendants unless they change one branch", {
   inner <- which(tree$edge[, 2] == 6)  # the branch leading to (a, b)
   below <- which(tree$edge[, 2] %in% c(1, 2))
   x <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10)
-  expect_equal(x$edge_rate[c(inner, below)], rep(10, 3))
-  expect_equal(x$edge_rate[-c(inner, below)], rep(1, 3))
+  expect_equal(x$edge_rates[c(inner, below)], rep(10, 3))
+  expect_equal(x$edge_rates[-c(inner, below)], rep(1, 3))
   expect_equal(x$shifts, data.frame(edge = inner, node = 6L, position = 0, multiplier = 10,
                                     rate = 10))
   only <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10, shift_branch = TRUE)
-  expect_equal(only$edge_rate[inner], 10)
-  expect_equal(only$edge_rate[-inner], rep(1, 5))
+  expect_equal(only$edge_rates[inner], 10)
+  expect_equal(only$edge_rates[-inner], rep(1, 5))
   # nested shifts multiply
   nested <- trait_rates(tree, "shift", shift_edges = c(inner, below[1]), shift_size = c(10, 0.5))
-  expect_equal(nested$edge_rate[below], c(5, 10))
+  expect_equal(nested$edge_rates[below], c(5, 10))
   set.seed(2)
   drawn <- trait_rates(tree, "shift", shifts = 2)
   expect_equal(nrow(drawn$shifts), 2)
@@ -54,7 +54,7 @@ test_that("the log rate of gbm is Brownian motion and tips follow the rates", {
   expect_equal(stats::var(logs), 0.5^2 * 2, tolerance = 0.08)
   g <- trait_rates(tree, "gbm")
   ends <- log(g$node_rate[tree$edge])
-  expect_equal(log(g$edge_rate), rowMeans(matrix(ends, ncol = 2)))
+  expect_equal(log(g$edge_rates), rowMeans(matrix(ends, ncol = 2)))
   inner <- which(tree$edge[, 2] == 6)
   tips <- replicate(4000, trait_rates(tree, "shift", shift_edges = inner, shift_size = 9)$tips)
   # variance of a tip is the sum of rate times length along its path: 9 + 9 for a, 2 for c
@@ -65,9 +65,9 @@ test_that("trait_mk varies rates among branches", {
   set.seed(4)
   tree <- ape::rcoal(15)
   set.seed(5)
-  doubled <- trait_mk(tree, q = 1, root = "0", edge_rates = rep(2, 28))
+  doubled <- trait_mk(tree, q = 1, root_state = "0", edge_rates = rep(2, 28))
   set.seed(5)
-  faster <- trait_mk(tree, q = 2, root = "0")
+  faster <- trait_mk(tree, q = 2, root_state = "0")
   expect_equal(doubled$maps, faster$maps)
   expect_equal(doubled$edge_rates, rep(2, 28))
   expect_equal(doubled$Q, faster$Q / 2)
@@ -79,7 +79,7 @@ test_that("trait_mk varies rates among branches", {
   rates <- seq_len(28)
   m <- trait_mk(shuffled, edge_rates = rates)
   expect_equal(m$edge_rates, rates[match(m$edge[, 2], shuffled$edge[, 2])])
-  stopped <- trait_mk(tree, q = 5, root = "1", edge_rates = rep(0, 28))
+  stopped <- trait_mk(tree, q = 5, root_state = "1", edge_rates = rep(0, 28))
   expect_true(all(stopped$states == "1"))
   expect_error(trait_mk(tree, alpha = 1, edge_rates = rates), "not both")
   expect_error(trait_mk(tree, alpha = 0), "positive number")
@@ -87,7 +87,7 @@ test_that("trait_mk varies rates among branches", {
   # mean of the gamma multipliers is 1
   pair <- ape::read.tree(text = "(a:1,b:1);")
   set.seed(1)
-  changes <- replicate(8000, length(trait_mk(pair, q = 0.7, root = "0", alpha = 0.5)$maps[[1]]) - 1)
+  changes <- replicate(8000, length(trait_mk(pair, q = 0.7, root_state = "0", alpha = 0.5)$maps[[1]]) - 1)
   # Poisson with a gamma(0.5, 0.5) multiplier: mean 0.7, variance 0.7 + 0.7^2 / 0.5
   expect_equal(c(mean(changes), stats::var(changes)), c(0.7, 1.68), tolerance = 0.08)
 })
@@ -129,7 +129,7 @@ test_that("shifts can follow a Poisson process and start regimes of their own", 
   set.seed(10)
   x <- trait_rates(tree, "shift", shift_rate = 1, shift_size = function(n) stats::rexp(n))
   expect_true(all(x$shifts$position >= 0 & x$shifts$position <= 1))
-  expect_equal(x$scaled$edge.length, tree$edge.length * x$edge_rate)
+  expect_equal(x$scaled$edge.length, tree$edge.length * x$edge_rates)
   # a shift halfway along a branch: the rate of the branch is the mean over time
   inner <- which(tree$edge[, 2] == 6)
   below <- which(tree$edge[, 2] %in% c(1, 2))
@@ -141,13 +141,13 @@ test_that("shifts can follow a Poisson process and start regimes of their own", 
     if (length(once) > 0) break
   }
   shift <- p$shifts[p$shifts$edge == once[1], ]
-  expect_equal(p$edge_rate[once[1]], shift$position + 3 * (1 - shift$position))
+  expect_equal(p$edge_rates[once[1]], shift$position + 3 * (1 - shift$position))
   # relative = FALSE: nested shifts set the rate from sigma2, not from the parent regime
   own <- trait_rates(tree, "shift", sigma2 = 2, shift_edges = c(inner, below[1]),
                      shift_size = c(10, 0.5), relative = FALSE)
-  expect_equal(own$edge_rate[c(inner, below)], c(20, 1, 20))
+  expect_equal(own$edge_rates[c(inner, below)], c(20, 1, 20))
   expect_equal(own$shifts$rate, c(20, 1)[order(c(inner, below[1]))])
   only <- trait_rates(tree, "shift", shift_edges = inner, shift_size = 10, relative = FALSE,
                       shift_branch = TRUE)
-  expect_equal(only$edge_rate[below], c(1, 1))
+  expect_equal(only$edge_rates[below], c(1, 1))
 })

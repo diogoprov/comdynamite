@@ -74,21 +74,21 @@
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
 #' # Brownian motion
-#' traits_ou(tr, alpha = 0)[1:3, ]
+#' trait_ou(tr, alpha = 0)[1:3, ]
 #' # two optima: the clade of node 25 evolves towards 10, the rest towards 0
 #' reg <- paint_regimes(tr, nodes = 25)
-#' x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
+#' x <- trait_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 #' round(x[, 1], 1)
 #' # two correlated traits
 #' r <- rate_matrix(c(1, 0.5), correlation = 0.8)
-#' y <- traits_ou(tr, sigma2 = r)
+#' y <- trait_ou(tr, sigma2 = r)
 #' cor(y)
 #' # the shift to regime 1 moves the optimum of trait 1 but not of trait 2
 #' th <- rbind(`0` = c(0, 0), `1` = c(10, 0))
-#' z <- traits_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
+#' z <- trait_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
 #' plot_traits(z, tr, regimes = reg)
 #' @export
-traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
+trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       regimes = NULL, root = 0) {
   check_tree(tree)
   check_count(n_traits, "n_traits")
@@ -231,7 +231,7 @@ matrix_root <- function(m) {
 
 #' Assign selective regimes to clades
 #'
-#' Paints the branches of a tree with selective regimes for [traits_ou()]:
+#' Paints the branches of a tree with selective regimes for [trait_ou()]:
 #' every branch starts in regime `"0"`, and the branches descending from each
 #' node in `nodes` take a new regime (`"1"`, `"2"`, ...). Nodes are painted in
 #' order, so a later node nested in an earlier one overrides it.
@@ -243,7 +243,7 @@ matrix_root <- function(m) {
 #'   regime (the shift happens at the start of the stem rather than at the
 #'   node)?
 #' @return Character vector with the regime of each branch, in the order of
-#'   `tree$edge` after reordering it "cladewise" (the order [traits_ou()]
+#'   `tree$edge` after reordering it "cladewise" (the order [trait_ou()]
 #'   uses).
 #' @family species traits
 #' @examples

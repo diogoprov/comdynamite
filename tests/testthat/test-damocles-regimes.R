@@ -55,15 +55,15 @@ test_that("clade_regimes assigns edges to clades", {
   expect_error(clade_regimes(list(), list(x = "a")), "phylo")
 })
 
-test_that("fit_damocles with regimes recovers a difference among clades", {
+test_that("damocles_fit with regimes recovers a difference among clades", {
   set.seed(11)
   tree <- treeshapesim::sim_tree_shape(40)
   reg <- clade_regimes(tree, list(A = crown_tips(tree)))
   # a strong difference and many communities, so that the test rejects whatever the draw
   gamma <- ifelse(reg == "A", 4, 0.25)
   comm <- simulate_damocles(tree, gamma, 1, n = 20)
-  constant <- fit_damocles(comm, tree, shared = TRUE)
-  by_clade <- fit_damocles(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
+  constant <- damocles_fit(comm, tree, shared = TRUE)
+  by_clade <- damocles_fit(comm, tree, shared = TRUE, regimes = reg, vary = "gamma")
   expect_identical(attr(by_clade, "parameters"), c("gamma_background", "gamma_A", "mu"))
   expect_gt(by_clade$gamma_A[1], by_clade$gamma_background[1])
   expect_gte(attr(by_clade, "loglik_total"),
@@ -72,26 +72,26 @@ test_that("fit_damocles with regimes recovers a difference among clades", {
   expect_identical(lrt$df[2], 1)
   expect_lt(lrt$p_value[2], 0.05)
   expect_equal(lrt$n_par, c(2, 3))
-  both <- fit_damocles(comm[1:2, ], tree, regimes = reg)
+  both <- damocles_fit(comm[1:2, ], tree, regimes = reg)
   expect_identical(attr(both, "parameters"),
                    c("gamma_background", "gamma_A", "mu_background", "mu_A"))
   expect_identical(attr(both, "n_par"), 4L)
-  expect_identical(damocles_lrt(fit_damocles(comm[1:2, ], tree), both)$df[2], 4)
+  expect_identical(damocles_lrt(damocles_fit(comm[1:2, ], tree), both)$df[2], 4)
   # one regime is the constant model
-  single <- fit_damocles(comm[1:2, ], tree, regimes = rep("x", nrow(tree$edge)))
+  single <- damocles_fit(comm[1:2, ], tree, regimes = rep("x", nrow(tree$edge)))
   expect_identical(attr(single, "parameters"), c("gamma", "mu"))
-  expect_error(fit_damocles(comm, tree, regimes = reg[-1]), "one regime for each edge")
-  expect_error(fit_damocles(comm, tree, regimes = reg, edge_covariate = rep(1, length(reg))),
+  expect_error(damocles_fit(comm, tree, regimes = reg[-1]), "one regime for each edge")
+  expect_error(damocles_fit(comm, tree, regimes = reg, edge_covariate = rep(1, length(reg))),
                "not both")
 })
 
-test_that("fit_damocles with an edge covariate estimates its slope", {
+test_that("damocles_fit with an edge covariate estimates its slope", {
   set.seed(12)
   tree <- treeshapesim::sim_tree_shape(40)
   x <- exp(stats::rnorm(nrow(tree$edge)))
   z <- log(x) - mean(log(x))
   comm <- simulate_damocles(tree, 1 * exp(1.5 * z), 1, n = 10)
-  fit <- fit_damocles(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
+  fit <- damocles_fit(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
   expect_identical(attr(fit, "parameters"), c("gamma", "mu", "beta_gamma"))
   expect_gt(fit$beta_gamma[1], 0)
   rates <- attr(fit, "edge_rates")[[1]]
@@ -100,31 +100,31 @@ test_that("fit_damocles with an edge covariate estimates its slope", {
   ci <- confint(fit, "beta_gamma")
   expect_identical(ci$community, "shared")
   expect_true(ci$lower < fit$beta_gamma[1] && fit$beta_gamma[1] < ci$upper)
-  both <- fit_damocles(comm[1, , drop = FALSE], tree, edge_covariate = x, sympatry = NULL)
+  both <- damocles_fit(comm[1, , drop = FALSE], tree, edge_covariate = x, sympatry = NULL)
   expect_identical(attr(both, "parameters"), c("gamma", "mu", "beta_gamma", "beta_mu"))
-  expect_error(fit_damocles(comm, tree, edge_covariate = -x), "positive")
+  expect_error(damocles_fit(comm, tree, edge_covariate = -x), "positive")
   rooted <- tree
   rooted$root.edge <- 0.2
-  expect_error(fit_damocles(comm, rooted, edge_covariate = x), "root edge")
+  expect_error(damocles_fit(comm, rooted, edge_covariate = x), "root edge")
   rooted_reg <- clade_regimes(rooted, list(A = crown_tips(rooted)), stem = TRUE)
-  expect_error(fit_damocles(comm, rooted, regimes = rooted_reg), "root edge")
+  expect_error(damocles_fit(comm, rooted, regimes = rooted_reg), "root edge")
 })
 
 test_that("profile intervals cover the estimate and flag unbounded rates", {
   set.seed(13)
   tree <- treeshapesim::sim_tree_shape(30)
   comm <- simulate_damocles(tree, 1, 1, n = 2)
-  fit <- fit_damocles(comm, tree)
+  fit <- damocles_fit(comm, tree)
   ci <- confint(fit, "gamma")
   expect_identical(ci$community, rownames(comm))
   expect_true(all(ci$lower <= ci$estimate & ci$estimate <= ci$upper))
   expect_true(all(ci$lower >= 0))
-  wide <- confint(fit_damocles(comm, tree, shared = TRUE, sympatry = NULL), "sympatry",
+  wide <- confint(damocles_fit(comm, tree, shared = TRUE, sympatry = NULL), "sympatry",
                   level = 0.99)
   expect_true(wide$lower >= 0 && wide$upper <= 1)
   expect_error(confint(fit, "beta_gamma"), "not free parameters")
   expect_error(confint(fit, level = 2), "between 0 and 1")
-  flat <- confint(fit_damocles(c(stats::setNames(rep(1, 30), tree$tip.label)), tree), "mu")
+  flat <- confint(damocles_fit(c(stats::setNames(rep(1, 30), tree$tip.label)), tree), "mu")
   expect_true(flat$lower == 0 || is.infinite(flat$upper))
 })
 
@@ -132,11 +132,11 @@ test_that("damocles_lrt checks its inputs", {
   set.seed(14)
   tree <- treeshapesim::sim_tree_shape(20)
   comm <- simulate_damocles(tree, 1, 1, n = 3)
-  separate <- fit_damocles(comm, tree)
-  shared <- fit_damocles(comm, tree, shared = TRUE)
+  separate <- damocles_fit(comm, tree)
+  shared <- damocles_fit(comm, tree, shared = TRUE)
   expect_identical(damocles_lrt(shared, separate)$df[2], 4)
   expect_error(damocles_lrt(separate, shared), "more free parameters")
-  expect_error(damocles_lrt(shared, fit_damocles(comm[1:2, ], tree)), "same communities")
+  expect_error(damocles_lrt(shared, damocles_fit(comm[1:2, ], tree)), "same communities")
   expect_error(damocles_lrt(shared, data.frame()), "fits of")
 })
 

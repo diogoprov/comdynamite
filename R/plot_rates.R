@@ -10,7 +10,7 @@
 #' @param tree A `phylo` object with branch lengths, or a result of [trait_rates()], which
 #'   carries its tree and rates.
 #' @param rates Rate of each branch, in the order of the rows of `tree$edge`, or a result of
-#'   [trait_rates()], whose `edge_rate` is used. Left out when `tree` is a result of
+#'   [trait_rates()], whose `edge_rates` are used. Left out when `tree` is a result of
 #'   [trait_rates()].
 #' @param log Colour by the logarithm of the rate (the default), since rates are multiplicative.
 #'   Needs positive rates; use `FALSE` for estimates that can be negative.
@@ -35,13 +35,13 @@ plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_
     stop("plot_rates() needs the package ggplot2", call. = FALSE) # nocov
   }
   if (!inherits(tree, "phylo") && is.list(tree) && inherits(tree$tree, "phylo") &&
-      !is.null(tree$edge_rate)) {
-    if (is.null(rates)) rates <- tree$edge_rate
+      !is.null(tree$edge_rates)) {
+    if (is.null(rates)) rates <- tree$edge_rates
     tree <- tree$tree
   }
   check_tree(tree)
   if (is.null(rates)) stop("`rates` is missing", call. = FALSE)
-  if (is.list(rates) && !is.null(rates$edge_rate)) rates <- rates$edge_rate
+  if (is.list(rates) && !is.null(rates$edge_rates)) rates <- rates$edge_rates
   if (!is.numeric(rates) || length(rates) != nrow(tree$edge)) {
     stop("`rates` must have one value per branch (", nrow(tree$edge), "), in the order of ",
          "the rows of `tree$edge`", call. = FALSE)

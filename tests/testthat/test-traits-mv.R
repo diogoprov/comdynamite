@@ -69,18 +69,18 @@ test_that("rate_matrix checks its inputs", {
 test_that("a rate matrix gives correlated traits with covariance R times the path length", {
   set.seed(1)
   r <- rate_matrix(c(1, 0.5), correlation = 0.8)
-  v <- tip_cov(20000, function() traits_ou(tr4, sigma2 = r))
+  v <- tip_cov(20000, function() trait_ou(tr4, sigma2 = r))
   expect_equal(unname(v), unname(r) * 2, tolerance = 0.05, ignore_attr = TRUE)
-  x <- traits_ou(tr4, sigma2 = r)
+  x <- trait_ou(tr4, sigma2 = r)
   expect_equal(colnames(x), c("trait1", "trait2"))
   expect_equal(dim(attr(x, "nodes")), c(3, 2))
 })
 
 test_that("a diagonal rate matrix with equal rates reproduces scalar sigma2", {
   set.seed(5)
-  a <- traits_ou(tr4, n_traits = 3, alpha = 0.5, sigma2 = 2)
+  a <- trait_ou(tr4, n_traits = 3, alpha = 0.5, sigma2 = 2)
   set.seed(5)
-  b <- traits_ou(tr4, alpha = 0.5, sigma2 = rate_matrix(2, constraint = "equaldiagonal",
+  b <- trait_ou(tr4, alpha = 0.5, sigma2 = rate_matrix(2, constraint = "equaldiagonal",
                                                          n_traits = 3))
   expect_equal(a, b)
 })
@@ -89,7 +89,7 @@ test_that("a rate matrix under OU has the stationary-type covariance of Hansen (
   set.seed(2)
   r <- rate_matrix(c(1, 2), correlation = -0.5)
   a <- 1.5
-  v <- tip_cov(20000, function() traits_ou(tr4, alpha = a, sigma2 = r))
+  v <- tip_cov(20000, function() trait_ou(tr4, alpha = a, sigma2 = r))
   expect_equal(unname(v), unname(r) * (1 - exp(-2 * a * 2)) / (2 * a), tolerance = 0.05,
                ignore_attr = TRUE)
 })
@@ -98,12 +98,12 @@ test_that("one rate matrix per regime, with regimes by branch", {
   set.seed(3)
   reg <- paint_regimes(tr4, nodes = 7)  # clade (c, d), from node 7 down
   r <- rate_matrix(c(1, 1), correlation = list(`0` = 0.9, `1` = -0.9), constraint = "variance")
-  sim <- function() traits_ou(tr4, sigma2 = r, regimes = reg)
+  sim <- function() trait_ou(tr4, sigma2 = r, regimes = reg)
   # tip c spent one unit of time in each regime, tip a two units in regime 0
   expect_equal(unname(tip_cov(20000, sim, "a")), unname(2 * r$`0`), tolerance = 0.05)
   expect_equal(unname(tip_cov(20000, sim, "c")), unname(r$`0` + r$`1`), tolerance = 0.1)
   # scalar rates per regime
-  v <- stats::var(traits_ou(tr4, n_traits = 20000, sigma2 = c(`0` = 1, `1` = 3),
+  v <- stats::var(trait_ou(tr4, n_traits = 20000, sigma2 = c(`0` = 1, `1` = 3),
                             regimes = reg)["c", ])
   expect_equal(v, 4, tolerance = 0.05)
 })
@@ -116,65 +116,65 @@ test_that("a mapped history gives regimes that change within branches", {
                                                   b = sum(m[names(m) == "b"])), numeric(2)))
   class(h) <- c("simmap", "phylo")
   set.seed(4)
-  x <- traits_ou(h, n_traits = 20000, sigma2 = c(a = 1, b = 5), regimes = h)
+  x <- trait_ou(h, n_traits = 20000, sigma2 = c(a = 1, b = 5), regimes = h)
   expect_equal(stats::var(x["c", ]), 1.25 + 0.75 * 5, tolerance = 0.05)
   expect_equal(stats::var(x["d", ]), 2, tolerance = 0.05)
   # optima per state also change within the branch
-  y <- traits_ou(h, n_traits = 5000, alpha = 4, sigma2 = 0.01, theta = c(a = 0, b = 10),
+  y <- trait_ou(h, n_traits = 5000, alpha = 4, sigma2 = 0.01, theta = c(a = 0, b = 10),
                  regimes = h)
   expect_equal(mean(y["c", ]), 10 * (1 - exp(-4 * 0.75)), tolerance = 0.02)
   expect_equal(mean(y["d", ]), 0, tolerance = 0.05)
 })
 
-test_that("traits_ou checks rate matrices and mapped regimes", {
+test_that("trait_ou checks rate matrices and mapped regimes", {
   reg <- paint_regimes(tr4, nodes = 7)
-  expect_error(traits_ou(tr4, sigma2 = matrix(c(1, 2, 0, 1), 2)), "symmetric")
-  expect_error(traits_ou(tr4, sigma2 = matrix(c(1, 2, 2, 1), 2)), "semidefinite")
-  expect_error(traits_ou(tr4, n_traits = 3, sigma2 = diag(2)), "n_traits")
-  expect_error(traits_ou(tr4, sigma2 = list(`0` = diag(2), `1` = 1), regimes = reg), "not both")
-  expect_error(traits_ou(tr4, sigma2 = list(`0` = diag(2), `1` = diag(3)), regimes = reg),
+  expect_error(trait_ou(tr4, sigma2 = matrix(c(1, 2, 0, 1), 2)), "symmetric")
+  expect_error(trait_ou(tr4, sigma2 = matrix(c(1, 2, 2, 1), 2)), "semidefinite")
+  expect_error(trait_ou(tr4, n_traits = 3, sigma2 = diag(2)), "n_traits")
+  expect_error(trait_ou(tr4, sigma2 = list(`0` = diag(2), `1` = 1), regimes = reg), "not both")
+  expect_error(trait_ou(tr4, sigma2 = list(`0` = diag(2), `1` = diag(3)), regimes = reg),
                "same size")
-  expect_error(traits_ou(tr4, sigma2 = list(`0` = diag(2)), regimes = reg), "every regime")
-  expect_error(traits_ou(tr4, regimes = tr4), "simmap")
-  expect_error(traits_ou(tr4, sigma2 = -1), "zero or more")
+  expect_error(trait_ou(tr4, sigma2 = list(`0` = diag(2)), regimes = reg), "every regime")
+  expect_error(trait_ou(tr4, regimes = tr4), "simmap")
+  expect_error(trait_ou(tr4, sigma2 = -1), "zero or more")
   # a singular matrix (perfectly correlated traits) is allowed
   set.seed(6)
-  x <- traits_ou(tr4, sigma2 = matrix(1, 2, 2))
+  x <- trait_ou(tr4, sigma2 = matrix(1, 2, 2))
   expect_equal(x[, 1], x[, 2])
 })
 
 test_that("a named theta or sigma2 must name every regime", {
   reg <- paint_regimes(tr4, nodes = 7)
-  expect_error(traits_ou(tr4, alpha = 1, theta = c(`0` = 0), regimes = reg), "every regime")
-  expect_error(traits_ou(tr4, sigma2 = c(`1` = 2), regimes = reg), "every regime")
+  expect_error(trait_ou(tr4, alpha = 1, theta = c(`0` = 0), regimes = reg), "every regime")
+  expect_error(trait_ou(tr4, sigma2 = c(`1` = 2), regimes = reg), "every regime")
   # one named value is fine when the tree has that single regime
   set.seed(1)
-  a <- traits_ou(tr4, alpha = 1, theta = c(`0` = 3))
+  a <- trait_ou(tr4, alpha = 1, theta = c(`0` = 3))
   set.seed(1)
-  expect_equal(a, traits_ou(tr4, alpha = 1, theta = 3))
+  expect_equal(a, trait_ou(tr4, alpha = 1, theta = 3))
 })
 
 test_that("theta can differ between traits", {
   reg <- paint_regimes(tr4, nodes = 7)
   th <- rbind(`0` = c(0, 0), `1` = c(10, -10))
-  x <- traits_ou(tr4, alpha = 50, sigma2 = rate_matrix(c(1e-6, 1e-6)), theta = th,
+  x <- trait_ou(tr4, alpha = 50, sigma2 = rate_matrix(c(1e-6, 1e-6)), theta = th,
                  regimes = reg)
   expect_equal(unname(x["c", ]), c(10, -10), tolerance = 1e-3)
   expect_equal(unname(x["a", ]), c(0, 0), tolerance = 1e-3)
   # the number of traits comes from theta when sigma2 is a number
-  y <- traits_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = th, regimes = reg)
+  y <- trait_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = th, regimes = reg)
   expect_equal(dim(y), c(4, 2))
   # one unnamed row for a single optimum
-  z <- traits_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = matrix(c(1, 2), 1))
+  z <- trait_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = matrix(c(1, 2), 1))
   expect_equal(unname(z["d", ]), c(1, 2), tolerance = 1e-3)
-  expect_error(traits_ou(tr4, sigma2 = diag(3), theta = th, regimes = reg), "2 columns")
-  expect_error(traits_ou(tr4, theta = th), "several optima")
+  expect_error(trait_ou(tr4, sigma2 = diag(3), theta = th, regimes = reg), "2 columns")
+  expect_error(trait_ou(tr4, theta = th), "several optima")
 })
 
 test_that("root can be one value per trait and is checked", {
-  x <- traits_ou(tr4, n_traits = 2, sigma2 = 0, root = c(1, 5))
+  x <- trait_ou(tr4, n_traits = 2, sigma2 = 0, root = c(1, 5))
   expect_equal(unname(x[1, ]), c(1, 5))
-  expect_error(traits_ou(tr4, n_traits = 2, root = 1:3), "1 or 2 numbers")
+  expect_error(trait_ou(tr4, n_traits = 2, root = 1:3), "1 or 2 numbers")
 })
 
 test_that("a mapped history in another order of edges is accepted", {
@@ -184,17 +184,17 @@ test_that("a mapped history in another order of edges is accepted", {
   class(h) <- c("simmap", "phylo")
   post <- ape::reorder.phylo(tr4, "postorder")
   set.seed(4)
-  x <- traits_ou(post, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h)
+  x <- trait_ou(post, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h)
   set.seed(4)
-  expect_equal(x, traits_ou(tr4, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h))
+  expect_equal(x, trait_ou(tr4, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h))
   other <- ape::read.tree(text = "((a:1,c:1):1,(b:1,d:1):1);")
   other$edge <- other$edge[, 2:1]
   other$maps <- h$maps
   class(other) <- c("simmap", "phylo")
-  expect_error(traits_ou(tr4, regimes = other), "same edges")
+  expect_error(trait_ou(tr4, regimes = other), "same edges")
 })
 
-test_that("rate_matrix() has a class that prints, and traits_ou() takes it", {
+test_that("rate_matrix() has a class that prints, and trait_ou() takes it", {
   r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
                    scale = c(`0` = 1, `1` = 2))
   expect_s3_class(r, "rate_matrix")
@@ -202,8 +202,8 @@ test_that("rate_matrix() has a class that prints, and traits_ou() takes it", {
   expect_output(print(rate_matrix(c(1, 2))), "default structure, 2 traits")
   reg <- paint_regimes(tr4, nodes = 7)
   set.seed(1)
-  a <- traits_ou(tr4, sigma2 = r, regimes = reg)
+  a <- trait_ou(tr4, sigma2 = r, regimes = reg)
   set.seed(1)
-  b <- traits_ou(tr4, sigma2 = lapply(unclass(r), unclass), regimes = reg)
+  b <- trait_ou(tr4, sigma2 = lapply(unclass(r), unclass), regimes = reg)
   expect_equal(a, b)
 })

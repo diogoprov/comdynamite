@@ -26,7 +26,7 @@
 \method{plot}{community_index}(x, ...)
 }
 \arguments{
-\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{nperm > 0}.}
+\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{n_perm > 0}.}
 
 \item{type}{\code{"intervals"} or \code{"ses"}.}
 
@@ -83,11 +83,11 @@ set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:8), each = 20),
                   species = sample(c("a", "b", "c"), 160, replace = TRUE))
 ind$size <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(160, sd = 3)
-res <- tstats(ind, traits = "size", nperm = 199)
+res <- tstats(ind, traits = "size", n_perm = 199)
 plot(res)
 plot(res, type = "ses", order = "ses")
 # an index of communities
-plot(community_index(ind, stats::var, traits = "size", null = "regional.ind", nperm = 199))
+plot(community_index(ind, stats::var, traits = "size", null = "regional.ind", n_perm = 199))
 \dontshow{\}) # examplesIf}
 }
 \seealso{

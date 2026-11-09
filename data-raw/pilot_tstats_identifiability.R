@@ -58,7 +58,7 @@ one_draw <- function(i) {
   ind <- sample_individuals(metacommunities[[p$metacommunity]], n = n_ind,
                             intraspecific_sd = 2, local_adaptation = p$local_adaptation,
                             displacement = p$displacement)
-  t_site <- tstats(ind, nperm = 49, null_ip = "species")
+  t_site <- tstats(ind, n_perm = 49, null_ip = "species")
   shifts <- population_shifts(ind)
   c(colMeans(t_site[ratios], na.rm = TRUE),
     ses_species = mean(t_site$ses_T_IP.IC, na.rm = TRUE),

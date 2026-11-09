@@ -22,11 +22,13 @@
 #' the mean over the same sites of each randomisation, so that the null distribution of the
 #' mean keeps the dependence among sites within a randomisation.
 #'
-#' @param x Data frame from [tstats()] with `nperm > 0`.
-#' @param level Size of the two-sided test of each site and of the mean. A site can deviate
-#'   only if \eqn{1 / (1 + \mathrm{nperm}) < \mathrm{level} / 2}{1 / (1 + nperm) < level / 2},
-#'   so `nperm` must be at least \eqn{2 / \mathrm{level}}{2 / level}; a warning
-#'   is given otherwise.
+#' @param x Data frame from [tstats()] with `n_perm > 0`.
+#' @param level Coverage of the null distribution, as in [null_intervals()] and
+#'   [plot.tstats()]: each site and the mean are tested two-sided at size
+#'   \eqn{\alpha = 1 - \mathrm{level}}{alpha = 1 - level}. A site can deviate only if
+#'   \eqn{1 / (1 + \mathrm{n_perm}) < \alpha / 2}{1 / (1 + n_perm) < alpha / 2}, so `n_perm`
+#'   must be at least \eqn{2 / \alpha}{2 / alpha}; a warning is given otherwise. Before 0.7.0
+#'   `level` was the size (0.05); values below 0.5 are still read that way, with a warning.
 #' @return A list with two data frames. `traits` has one row per trait and statistic, with the
 #'   columns `trait`, `statistic`, `n_sites` (testable sites), `percent_low`, `percent_high`,
 #'   `mean_ses`, `p_mean_low`, `p_mean_high`, `sites_low` and `sites_high` (site names separated
@@ -40,19 +42,27 @@
 #' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
 #'                               competition_matrix(tree, "none"), n_steps = 100,
 #'                               seed_steps = 1:5)
-#' res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+#' res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 #' tstats_summary(res)$traits
 #' @export
-tstats_summary <- function(x, level = 0.05) {
+tstats_summary <- function(x, level = 0.95) {
   null <- attr(x, "null")
   if (!is.data.frame(x) || is.null(null)) {
-    stop("`x` must come from tstats() with nperm > 0", call. = FALSE)
+    stop("`x` must come from tstats() with n_perm > 0", call. = FALSE)
   }
-  stopifnot(is.numeric(level), length(level) == 1, level > 0, level < 1)
+  if (!is.numeric(level) || length(level) != 1 || is.na(level) || level <= 0 || level >= 1) {
+    stop("`level` must be one number between 0 and 1", call. = FALSE)
+  }
+  if (level < 0.5) {
+    warning("`level` is now the coverage, as in null_intervals() and plot(); ", level,
+            " was read as the size of the test, level = ", 1 - level, call. = FALSE)
+    level <- 1 - level
+  }
+  level <- 1 - level  # size of the two-sided test from here on
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
   if (1 / (1 + dim(null)[1]) >= level / 2) {
-    warning("with ", dim(null)[1], " randomisations no p-value can fall below level / 2 = ",
-            level / 2, "; use nperm >= ", ceiling(2 / level), call. = FALSE)
+    warning("with ", dim(null)[1], " randomisations no p-value can fall below (1 - level) / 2 = ",
+            level / 2, "; use n_perm >= ", ceiling(2 / level), call. = FALSE)
   }
   sites <- list()
   traits <- list()
@@ -526,14 +536,15 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' @param traits Names of the columns with trait values.
 #' @param site,species Names of the columns with the site and the species.
 #' @param null Null model (see Details).
-#' @param nperm Number of randomisations; 0 for the observed values only.
+#' @param n_perm Number of randomisations; 0 for the observed values only.
+#' @param nperm Deprecated; use `n_perm`.
 #' @param alternative Direction of the test: `"two.sided"` (the default), `"less"` or
 #'   `"greater"`.
 #' @param multivariate If `TRUE`, the index receives all traits at once.
 #' @return A data frame of class `community_index` with one row per site, trait (or
 #'   `"multivariate"` with `multivariate = TRUE`) and index, and the columns `site`, `trait`,
 #'   `index` (the name in the list, or the name of the function), `observed`, and with
-#'   `nperm > 0` also `ses` and `p`; the attribute `null` holds the null values
+#'   `n_perm > 0` also `ses` and `p`; the attribute `null` holds the null values
 #'   (randomisation x row), and [plot()][plot.community_index] draws the tests. Individuals with a missing value are left out for that trait
 #'   (for any trait with `multivariate = TRUE`).
 #' @references Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits
@@ -547,20 +558,21 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #'                   species = sample(letters[1:4], 100, replace = TRUE))
 #' ind$trait <- c(a = 1, b = 2, c = 3, d = 4)[ind$species] + rnorm(100, sd = 0.3)
 #' # range of trait values within sites, against draws from the whole region
-#' community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 99)
+#' community_index(ind, function(x) diff(range(x)), null = "regional.ind", n_perm = 99)
 #' # variance among the population means of a site
 #' pop_var <- function(x, species) stats::var(tapply(x, species, mean))
-#' community_index(ind, pop_var, null = "local", nperm = 99)
+#' community_index(ind, pop_var, null = "local", n_perm = 99)
 #' # several indices at once, on the same randomised communities
 #' community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
-#'                 null = "regional.ind", nperm = 99)
+#'                 null = "regional.ind", n_perm = 99)
 #' @export
 community_index <- function(individuals, index, traits = "trait", site = "site",
                             species = "species",
                             null = c("local", "regional.ind", "regional.pop",
                                      "regional.pop.prab"),
-                            nperm = 99, alternative = c("two.sided", "less", "greater"),
-                            multivariate = FALSE) {
+                            n_perm = 99, alternative = c("two.sided", "less", "greater"),
+                            multivariate = FALSE, nperm = NULL) {
+  n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   null <- match.arg(null)
   alternative <- match.arg(alternative)
   if (is.function(index)) {
@@ -579,8 +591,8 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   if (length(missing_columns) > 0) {
     stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
-  nperm <- if (is.null(nperm)) 0 else nperm
-  check_count(nperm, "nperm", min = 0)
+  n_perm <- if (is.null(n_perm)) 0 else n_perm
+  check_count(n_perm, "n_perm", min = 0)
   index_names <- names(index)
   n_index <- length(index)
   uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))
@@ -627,9 +639,9 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
       }, numeric(n_index)), n_index)))
     }
     observed <- site_index(values)
-    sims <- matrix(NA_real_, nperm, length(site_levels) * n_index)
+    sims <- matrix(NA_real_, n_perm, length(site_levels) * n_index)
     n <- nrow(values)
-    for (r in seq_len(nperm)) {
+    for (r in seq_len(n_perm)) {
       shuffled <- values
       if (null == "local") {
         for (i in rows_of) shuffled[i, ] <- values[i[sample.int(length(i))], , drop = FALSE]
@@ -649,7 +661,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   out <- do.call(rbind, lapply(per_set, `[[`, "table"))
   rownames(out) <- NULL
   class(out) <- c("community_index", class(out))
-  if (nperm == 0) return(out)
+  if (n_perm == 0) return(out)
   sims <- do.call(cbind, lapply(per_set, `[[`, "null"))
   compared <- null_compare(out$observed, sims, alternative)
   out$ses <- compared$ses
@@ -671,12 +683,12 @@ check_colours <- function(colours, n) {
 # tied with the observed one cannot be tested and get NA
 site_tests <- function(obs, sims, level) {
   sims[!is.finite(sims)] <- NA
-  nperm <- nrow(sims)
+  n_perm <- nrow(sims)
   valid <- colSums(!is.na(sims))
-  ties <- colSums(sims == rep(obs, each = nperm), na.rm = TRUE)
+  ties <- colSums(sims == rep(obs, each = n_perm), na.rm = TRUE)
   testable <- !is.na(obs) & valid > 0 & ties < valid
-  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  below <- colSums(sims <= rep(obs, each = n_perm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = n_perm), na.rm = TRUE)
   p_low <- ifelse(testable, (1 + below) / (1 + valid), NA_real_)
   p_high <- ifelse(testable, (1 + above) / (1 + valid), NA_real_)
   deviation <- ifelse(p_low < level / 2, "low", ifelse(p_high < level / 2, "high", "none"))

@@ -41,7 +41,7 @@ draw <- function(sim, i) {
 one_replicate <- function(rep) {
   sim <- simulate_one(rep)
   rows <- lapply(seq_len(nrow(scenarios)), function(i) {
-    t_site <- tstats(draw(sim, i), nperm = 0)
+    t_site <- tstats(draw(sim, i), n_perm = 0)
     cbind(rep = rep, scenarios[i, ], as.data.frame(t(colMeans(t_site[ratios], na.rm = TRUE))))
   })
   do.call(rbind, rows)
@@ -59,7 +59,7 @@ sim <- simulate_one(1)
 set.seed(1)
 null_scenarios <- c(1, 5, 11, 15)
 ses <- do.call(rbind, lapply(null_scenarios, function(i) {
-  res <- tstats(draw(sim, i), nperm = 199)
+  res <- tstats(draw(sim, i), n_perm = 199)
   cbind(scenarios[i, ],
         as.data.frame(t(colMeans(res[paste0("ses_", ratios)], na.rm = TRUE))),
         as.data.frame(t(colMeans(res[paste0("p_", ratios)] < 0.05, na.rm = TRUE))))

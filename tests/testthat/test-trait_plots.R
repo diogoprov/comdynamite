@@ -8,7 +8,7 @@ toy_plots <- function() {
 
 test_that("null_intervals() summarises the nulls of tstats() and community_index()", {
   ind <- toy_plots()
-  res <- tstats(ind, traits = "size", nperm = 99)
+  res <- tstats(ind, traits = "size", n_perm = 99)
   d <- null_intervals(res, level = 0.9, inner = 0.5)
   expect_equal(nrow(d), 3 * 7)
   null <- attr(res, "null")
@@ -18,22 +18,22 @@ test_that("null_intervals() summarises the nulls of tstats() and community_index
   expect_equal(row$inner_high, unname(stats::quantile(v, 0.75)))
   expect_equal(row$null_median, stats::median(v))
   # deviation agrees with tstats_summary() at the same size
-  s <- tstats_summary(res, level = 0.1)$sites
+  s <- tstats_summary(res, level = 0.9)$sites
   expect_equal(d$deviation, s$deviation[match(paste(d$site, d$statistic),
                                               paste(s$site, s$statistic))])
   expect_true(is.na(d$deviation[d$site == "solo" & d$statistic == "T_IP.IC"]))
   ci <- community_index(ind, list(variance = stats::var, MNND = mnnd), traits = "size",
-                        null = "regional.ind", nperm = 19)
+                        null = "regional.ind", n_perm = 19)
   dc <- null_intervals(ci)
   expect_equal(unique(dc$statistic), c("variance", "MNND"))
-  expect_error(null_intervals(tstats(ind, traits = "size", nperm = 0)), "nperm > 0")
+  expect_error(null_intervals(tstats(ind, traits = "size", n_perm = 0)), "n_perm > 0")
   expect_error(null_intervals(res, level = 0.5, inner = 0.6))
 })
 
 test_that("plot() of null tests draws intervals, effect sizes and hatching", {
   skip_if_not_installed("ggplot2")
   ind <- toy_plots()
-  res <- tstats(ind, traits = "size", nperm = 99)
+  res <- tstats(ind, traits = "size", n_perm = 99)
   p <- plot(res)
   expect_s3_class(p, "ggplot")
   built <- ggplot2::ggplot_build(p)
@@ -57,7 +57,7 @@ test_that("plot() of null tests draws intervals, effect sizes and hatching", {
   expect_equal(by_observed, names(sort(key)))
   expect_error(plot(res, sites = "nowhere"), "not in `x`")
   expect_error(plot(res, colours = "red"), "3 valid colours")
-  ci <- community_index(ind, stats::var, traits = "size", null = "regional.ind", nperm = 19)
+  ci <- community_index(ind, stats::var, traits = "size", null = "regional.ind", n_perm = 19)
   expect_s3_class(plot(ci, type = "ses"), "ggplot")
   expect_equal(levels(plot(ci)$data$statistic), "stats::var")
 })
@@ -125,7 +125,7 @@ test_that("plots of all-NA statistics or untestable sites give no warnings", {
   set.seed(4)
   ind <- data.frame(site = rep(paste0("s", 1:4), each = 10), species = rep(paste0("p", 1:4), each = 10),
                     trait = rnorm(40))
-  res <- suppressWarnings(tstats(ind, nperm = 19))
+  res <- suppressWarnings(tstats(ind, n_perm = 19))
   expect_no_warning(ggplot2::ggplot_build(plot(res)))
   expect_no_warning(ggplot2::ggplot_build(plot(res, type = "ses")))
 })
@@ -135,7 +135,7 @@ test_that("plot options and input checks of trait plots", {
   set.seed(5)
   ind <- data.frame(site = rep(paste0("s", 1:3), each = 12), species = rep(c("a", "b"), 18),
                     trait = rnorm(36), ab = 1)
-  res <- tstats(ind, nperm = 19)
+  res <- tstats(ind, n_perm = 19)
   expect_s3_class(plot(res, hatch = FALSE), "ggplot")
   expect_equal(nrow(hatch_lines(data.frame(xmin = numeric(0), xmax = numeric(0),
                                            ymin = numeric(0), ymax = numeric(0)), 1)), 0)

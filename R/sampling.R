@@ -138,7 +138,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
             is.numeric(level), length(level) == 1, level > 0, level < 1)
   if (is.null(statistic)) {
     statistic <- function(d) {
-      t <- tstats(d, site = site, species = species, nperm = 0)
+      t <- tstats(d, site = site, species = species, n_perm = 0)
       colMeans(t[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
     }
   }
@@ -207,7 +207,8 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #' @param reference Levels of effort marked by dashed lines; named values are written next to
 #'   the lines. `NULL` (the default) marks the 80% rule for `cover` and nothing for `n`;
 #'   `FALSE` draws no line.
-#' @param colour Colour of the line and band; the default is the blue of the Okabe-Ito palette.
+#' @param colours Colour of the line and band; the default is the blue of the Okabe-Ito palette.
+#' @param colour Deprecated; use `colours`, as in the other plots.
 #' @param alpha Transparency of the band.
 #' @param scales Passed to [ggplot2::facet_wrap()].
 #' @param ... Not used.
@@ -227,8 +228,9 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #' # a rule of the study, for the number of individuals
 #' plot(trait_rarefaction(ind, n = 2:10, reps = 10), reference = c("protocol" = 5))
 #' @export
-plot.trait_rarefaction <- function(x, reference = NULL, colour = "#0072B2", alpha = 0.25,
-                                   scales = "free_y", ...) {
+plot.trait_rarefaction <- function(x, reference = NULL, colours = "#0072B2", alpha = 0.25,
+                                   scales = "free_y", ..., colour = NULL) {
+  colour <- renamed_arg(colours, colour, "colours", "colour")
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of trait_rarefaction() needs the package ggplot2", call. = FALSE) # nocov
   }

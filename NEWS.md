@@ -1,5 +1,16 @@
 # comdynamite (development version)
 
+- Renamed for consistency; the old names still work, with a warning, until 1.0.0:
+  `traits_ou()` is now `trait_ou()` (like `trait_bm()`, `trait_mk()` and `trait_rates()`);
+  `fit_damocles()` is now `damocles_fit()`; the `nperm` argument of `tstats()` and
+  `community_index()` is now `n_perm`, as in the rest of the package; `trait_rates(root_value)`
+  is now `root`, as in `trait_ou()`; `trait_mk(root)` is now `root_state`, since it is a state;
+  `plot()` of `trait_rarefaction()` takes `colours`, as the other plots. `trait_rates()` returns
+  the rates as `edge_rates`, as `trait_mk()` does (`edge_rate` is kept until 1.0.0).
+- `tstats_summary(level = )` is now the coverage of the null distribution (default 0.95), as in
+  `null_intervals()` and `plot()` of `tstats()`; values below 0.5 are read as the size of the
+  test, as before, with a warning.
+
 - `plot_rates()` draws any rate per branch on the tree, from `trait_rates()`,
   `history_rates()`, `turnover_rates()`, `food_web_rates()` or an estimator, with ggplot2.
   `plot()` for `pcps_test()` draws the sites on two principal coordinates, coloured by a

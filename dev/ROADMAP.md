@@ -27,7 +27,7 @@ e um prefixo a definir para analisar). O título e o `Description` mudaram na 0.
 |---|---|
 | Modelo | Thompson et al. (2020) com traits e competição filogenéticos; paisagens implícitas e em grade; permutações do toro; ambiente variável no tempo |
 | Montagem por regras | `assemble_community()`: similaridade limitante, filtragem e neutra |
-| Traits | `traits_ou()` (um ou vários ótimos) e `paint_regimes()`, no lugar de `traits_bm()` |
+| Traits | `trait_ou()` (um ou vários ótimos) e `paint_regimes()`, no lugar de `traits_bm()` |
 | Identidade | hex sticker (opção F1) e `data-raw/hex_sticker.R` |
 | Site | pkgdown em https://provetelab.org/comdynamite/, com build automático no `main` |
 | Simulador estático | `simulate_static()`, na versão de desenvolvimento |
@@ -184,7 +184,7 @@ com outros pacotes. As versões seguintes dependem desta.
       exemplo do mvMORPH; os demais traits saem iguais aos sorteados sem eles.
 - [x] Registrar a história dos traits ao longo dos ramos: valores nos nós em `trait_bm()`,
       `species_traits()` (`nodes = TRUE`, sem mudar os outros valores com a mesma semente) e
-      `traits_ou()`; `trait_mk()` para trait discreto (Mk), no formato simmap do phytools
+      `trait_ou()`; `trait_mk()` para trait discreto (Mk), no formato simmap do phytools
       (conferido contra `phytools::sim.history()`); `tip_history_metrics()` com as métricas
       de Luza et al. (2021) como o código de `calc_tip_based_trait_evo()` as calcula (nós,
       não mudanças dentro dos ramos), mais `changes` e `time_since_change` em tempo contínuo.
@@ -520,7 +520,7 @@ pacotes de referência em vez de reimplementá-los.
 
 - [x] Mais opções de evolução de traits, multivariadas e com covariância entre traits,
       pelo mvMORPH (Clavel et al. 2015).
-      Covariância entre traits feita em `traits_ou()` e `rate_matrix()`, conferida contra o
+      Covariância entre traits feita em `trait_ou()` e `rate_matrix()`, conferida contra o
       mvMORPH (item "Funções que usam traits" abaixo).
 - [x] Taxas que variam entre ramos como modelo gerador. Avaliação da literatura (2026-11-07):
       um gerador com a verdade conhecida, não um método de inferência; RRphylo, phytools,
@@ -673,7 +673,7 @@ pacotes de referência em vez de reimplementá-los.
       compartilhadas (`"shared"`), e matriz definida pelo usuário. Definir como cada processo
       usa vários traits: distância multivariada na similaridade limitante, nicho
       multidimensional no filtro.
-      Feito (estrutura entre traits): `traits_ou(sigma2 = )` aceita matriz de taxas ou lista
+      Feito (estrutura entre traits): `trait_ou(sigma2 = )` aceita matriz de taxas ou lista
       nomeada com uma matriz (ou taxa) por regime, e `regimes` aceita um mapa simmap (de
       `trait_mk()`), com regimes, ótimos e taxas mudando dentro dos ramos; com `sigma2`
       escalar os valores são os mesmos de antes com a mesma semente. `rate_matrix()` monta as
@@ -706,7 +706,7 @@ pacotes de referência em vez de reimplementá-los.
       space". Falta ainda: `alpha` matricial no OU (como `mvOU()`).
 - [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
-      `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra
+      `damocles_loglik()`, `damocles_fit()` (ML em base R) e `damocles_test()` (MPD/MNTD contra
       DAMOCLES e contra sorteio aleatório); validado contra o pacote DAMOCLES em
       `data-raw/validation_damocles.R`. Falta: as variantes do pacote (colonização dependente
       do tempo, gamma_td; modelos com traits binários ou ternários, `model = 1, 2`;

@@ -30,7 +30,7 @@ reference:
   contents:
   - species_traits
   - trait_bm
-  - traits_ou
+  - trait_ou
   - rate_matrix
   - plot.rate_matrix
   - plot_traits
