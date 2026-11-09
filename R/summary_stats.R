@@ -45,8 +45,11 @@
 #'   parts: the trait is the column `optimum`, or the only numeric column of `traits`, and
 #'   `env` the only numeric column of `env`.
 #' @param tree Optional `phylo` object, matched to species by name.
-#' @param trait Optional numeric vector with one value per species, named by species.
-#' @param env Optional numeric vector with one value per site.
+#' @param trait Optional numeric vector with one value per species, named by species. For a
+#'   simulation, the optimum of each species by default; with a niche of several axes, the
+#'   optimum on the first axis.
+#' @param env Optional numeric vector with one value per site. For a simulation, the
+#'   environment that set growth by default; with a niche of several axes, the first axis.
 #' @param coords Optional matrix or data frame with one row per site and the coordinates in
 #'   columns.
 #' @param n_null Number of shuffles of species for `ses_mpd` and `ses_mntd`.
@@ -82,10 +85,11 @@ summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NUL
   if (inherits(x, "mc_sim")) {
     comm <- x$abundance
     series <- x$history
-    env <- env %||% x$landscape$env %||% x$env
+    niche <- sim_niche(x)  # the first axis of a niche with several
+    env <- env %||% niche$env
     coords <- coords %||% x$landscape$coords
-    if (is.null(trait) && !is.null(x$traits)) {
-      trait <- stats::setNames(x$traits$optimum, rownames(x$traits))
+    if (is.null(trait) && !is.null(niche$traits)) {
+      trait <- stats::setNames(niche$traits$optimum, rownames(niche$traits))
     }
   } else if (length(dim(x)) == 3) {
     series <- x

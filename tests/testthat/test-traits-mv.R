@@ -142,3 +142,68 @@ test_that("traits_ou checks rate matrices and mapped regimes", {
   x <- traits_ou(tr4, sigma2 = matrix(1, 2, 2))
   expect_equal(x[, 1], x[, 2])
 })
+
+test_that("a named theta or sigma2 must name every regime", {
+  reg <- paint_regimes(tr4, nodes = 7)
+  expect_error(traits_ou(tr4, alpha = 1, theta = c(`0` = 0), regimes = reg), "every regime")
+  expect_error(traits_ou(tr4, sigma2 = c(`1` = 2), regimes = reg), "every regime")
+  # one named value is fine when the tree has that single regime
+  set.seed(1)
+  a <- traits_ou(tr4, alpha = 1, theta = c(`0` = 3))
+  set.seed(1)
+  expect_equal(a, traits_ou(tr4, alpha = 1, theta = 3))
+})
+
+test_that("theta can differ between traits", {
+  reg <- paint_regimes(tr4, nodes = 7)
+  th <- rbind(`0` = c(0, 0), `1` = c(10, -10))
+  x <- traits_ou(tr4, alpha = 50, sigma2 = rate_matrix(c(1e-6, 1e-6)), theta = th,
+                 regimes = reg)
+  expect_equal(unname(x["c", ]), c(10, -10), tolerance = 1e-3)
+  expect_equal(unname(x["a", ]), c(0, 0), tolerance = 1e-3)
+  # the number of traits comes from theta when sigma2 is a number
+  y <- traits_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = th, regimes = reg)
+  expect_equal(dim(y), c(4, 2))
+  # one unnamed row for a single optimum
+  z <- traits_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = matrix(c(1, 2), 1))
+  expect_equal(unname(z["d", ]), c(1, 2), tolerance = 1e-3)
+  expect_error(traits_ou(tr4, sigma2 = diag(3), theta = th, regimes = reg), "2 columns")
+  expect_error(traits_ou(tr4, theta = th), "several optima")
+})
+
+test_that("root can be one value per trait and is checked", {
+  x <- traits_ou(tr4, n_traits = 2, sigma2 = 0, root = c(1, 5))
+  expect_equal(unname(x[1, ]), c(1, 5))
+  expect_error(traits_ou(tr4, n_traits = 2, root = 1:3), "1 or 2 numbers")
+})
+
+test_that("a mapped history in another order of edges is accepted", {
+  h <- tr4
+  h$maps <- lapply(h$edge.length, function(len) c(a = len))
+  h$maps[[which(h$edge[, 2] == 3)]] <- c(a = 0.25, b = 0.75)
+  class(h) <- c("simmap", "phylo")
+  post <- ape::reorder.phylo(tr4, "postorder")
+  set.seed(4)
+  x <- traits_ou(post, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h)
+  set.seed(4)
+  expect_equal(x, traits_ou(tr4, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h))
+  other <- ape::read.tree(text = "((a:1,c:1):1,(b:1,d:1):1);")
+  other$edge <- other$edge[, 2:1]
+  other$maps <- h$maps
+  class(other) <- c("simmap", "phylo")
+  expect_error(traits_ou(tr4, regimes = other), "same edges")
+})
+
+test_that("rate_matrix() has a class that prints, and traits_ou() takes it", {
+  r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
+                   scale = c(`0` = 1, `1` = 2))
+  expect_s3_class(r, "rate_matrix")
+  expect_output(print(r), "proportional structure, 2 traits, 2 regimes")
+  expect_output(print(rate_matrix(c(1, 2))), "default structure, 2 traits")
+  reg <- paint_regimes(tr4, nodes = 7)
+  set.seed(1)
+  a <- traits_ou(tr4, sigma2 = r, regimes = reg)
+  set.seed(1)
+  b <- traits_ou(tr4, sigma2 = lapply(unclass(r), unclass), regimes = reg)
+  expect_equal(a, b)
+})

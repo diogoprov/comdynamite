@@ -32,6 +32,8 @@ reference:
   - trait_bm
   - traits_ou
   - rate_matrix
+  - plot.rate_matrix
+  - plot_traits
   - trait_mk
   - trait_rates
   - history_rates
@@ -122,6 +124,7 @@ reference:
   desc: Community assembly without population dynamics.
   contents:
   - assemble_community
+  - plot_assembly
 - title: Dynamic null model
   desc: Colonisation and local extinction along the tree (DAMOCLES).
   contents:
@@ -146,6 +149,7 @@ articles:
   - phylogenetic-structure
   - evaluating-methods
   - branch-rates
+  - articles/correlated-traits
   - articles/watching-assembly
 - title: Validation
   navbar: Validation

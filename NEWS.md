@@ -1,5 +1,31 @@
 # comdynamite (development version)
 
+- Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`
+  with their tree, as a phylomorphospace (two traits) or a traitgram (one trait), with branches
+  coloured by regime and the colour changing where a mapped history changes;
+  `plot()` for `rate_matrix()` draws each regime's rate matrix as an ellipse; `plot_assembly()`
+  draws a community from `assemble_community()` in trait space, with the boundary of the filter
+  or the contours of limiting similarity in the metric of the assembly. New article,
+  "Correlated traits and assembly in trait space".
+- `traits_ou()`: `theta` can be a matrix with one column per trait, so that a regime shifts
+  each trait's optimum by its own amount; `root` can have one value per trait and is checked;
+  a mapped history is matched to the tree by its edges, so it may come in another order of
+  edges. A named `theta` or `sigma2` of length one is no longer recycled to every regime: it
+  must name every regime, as before rate matrices were added.
+- `rate_matrix()` returns an object of class `rate_matrix`, with `print()` and `plot()`
+  methods. `assemble_community()` returns an object of class `mc_assembly`, which keeps the
+  rule, distance, optimum, traits and the matrix of the metric, with a `print()` method; it
+  stops on missing or non-numeric traits instead of keeping such species or failing later.
+- The limiting-similarity rule of `assemble_community()` keeps the nearest neighbour of each
+  species up to date instead of scanning the whole distance matrix at each removal: 23 times
+  faster for a pool of 2000 species reduced to 100 (from 10.6 to 0.46 s), with the same species
+  removed and the same random draws.
+- Simulations with a niche of several axes keep their tree. `as_mc_data()` keeps one column of
+  optima per axis, `summary_stats()` uses the first axis, and `sample_individuals()` stops with
+  a clear message; both use the `env` that set growth when `simulate_metacommunity(env = )` was
+  given one. Axes of `env` without names take the names of the list of traits, or `axis1`,
+  `axis2`, ...
+
 - Plots of null-model tests: `plot()` for `tstats()` and `community_index()` draws, site by
   site, the null interval (hatched by default) with the observed value coloured by the test, or
   the standardised effect sizes; `null_intervals()` returns the table behind it.

@@ -113,7 +113,12 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   sites <- rownames(abundance)
   species <- colnames(abundance)
   k <- length(species)
-  if (is.null(env)) env <- x$landscape$env
+  niche <- sim_niche(x)
+  if (niche$n_axes > 1) {
+    stop("sample_individuals() needs a simulation with one environmental axis, not ",
+         niche$n_axes, call. = FALSE)
+  }
+  if (is.null(env)) env <- niche$env
   if (!is.numeric(env) || length(env) != length(sites) || anyNA(env)) {
     stop("`env` needs one number per site (", length(sites), ")", call. = FALSE)
   }
@@ -138,13 +143,13 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   }
   stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
   measured[measured < min_n] <- 0
-  theta <- x$traits[species, "optimum"]
+  theta <- niche$traits[species, "optimum"]
   pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) +
     sweep(outer(env, theta, "-"), 2, h, "*") +
     sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, pop_sd, "*")
   stopifnot(is.numeric(displacement), length(displacement) == 1, displacement >= 0)
   if (displacement > 0) {
-    width <- displacement_width %||% mean(x$traits$sigma)
+    width <- displacement_width %||% mean(niche$traits$sigma)
     stopifnot(is.numeric(width), length(width) == 1, width > 0)
     for (i in seq_along(sites)) {
       present <- which(abundance[i, ] > 0)

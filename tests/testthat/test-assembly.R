@@ -65,7 +65,7 @@ test_that("distance changes trait space as documented", {
   a <- assemble_community(x, 10, distance = "standardized")
   set.seed(1)
   b <- assemble_community(z, 10)
-  expect_identical(a, b)
+  expect_identical(a[c("community", "removed")], b[c("community", "removed")])
   # mahalanobis: the same as Euclidean on whitened traits
   w <- x %*% solve(chol(stats::cov(x)))
   set.seed(2)
@@ -73,14 +73,14 @@ test_that("distance changes trait space as documented", {
                           distance = "mahalanobis")
   set.seed(2)
   b <- assemble_community(w, 10, rule = "filtering", optimum = c(0, 0))
-  expect_identical(a, b)
+  expect_identical(a[c("community", "removed")], b[c("community", "removed")])
   # a given covariance replaces the one of the pool
   set.seed(3)
   a <- assemble_community(x, 10, distance = "mahalanobis",
                           trait_cov = diag(apply(x, 2, stats::var)))
   set.seed(3)
   b <- assemble_community(x, 10, distance = "standardized")
-  expect_equal(a, b)
+  expect_equal(a[c("community", "removed", "metric")], b[c("community", "removed", "metric")])
 })
 
 test_that("Mahalanobis filtering keeps species inside the niche ellipse", {
@@ -107,4 +107,62 @@ test_that("distance checks its inputs", {
   expect_error(assemble_community(x, 2, distance = "mahalanobis", trait_cov = matrix(1, 2, 2)),
                "singular")
   expect_error(assemble_community(cbind(x, 1), 2, distance = "standardized"), "vary")
+})
+
+test_that("missing or non-numeric traits are rejected", {
+  x <- matrix(rnorm(20), 10, dimnames = list(paste0("s", 1:10), NULL))
+  x[1, 2] <- NA
+  for (rule in c("filtering", "limiting_similarity", "neutral")) {
+    expect_error(assemble_community(x, 5, rule), "missing values")
+  }
+  y <- data.frame(species = letters[1:4], t = 1:4)
+  expect_error(assemble_community(y, 2), "must be numeric")
+  expect_error(assemble_community(matrix(1:6, 3, dimnames = list(letters[1:3], NULL)), 2,
+                                  "filtering", optimum = 1), "one value per trait")
+})
+
+test_that("assemble_community() returns an mc_assembly with the metric", {
+  set.seed(2)
+  x <- matrix(rnorm(60), 30, dimnames = list(paste0("s", 1:30), NULL))
+  a <- assemble_community(x, 10, distance = "mahalanobis")
+  expect_s3_class(a, "mc_assembly")
+  expect_equal(a$metric, stats::cov(x))
+  expect_equal(assemble_community(x, 10)$metric, diag(2))
+  f <- assemble_community(x, 10, "filtering", optimum = c(1, 1), distance = "standardized")
+  expect_equal(f$optimum, c(1, 1))
+  expect_equal(unname(diag(f$metric)), unname(apply(x, 2, var)))
+  expect_output(print(a), "limiting_similarity with mahalanobis distances: 10 of 30")
+})
+
+test_that("the GAUSE removal matches a scan of the whole matrix, ties included", {
+  scan <- function(x, size, min_distance = NULL) {
+    d <- as.matrix(stats::dist(x))
+    diag(d) <- Inf
+    keep <- rep(TRUE, nrow(d))
+    removed <- character(0)
+    while (sum(keep) > size) {
+      sub <- d[keep, keep, drop = FALSE]
+      dmin <- min(sub)
+      if (!is.null(min_distance) && dmin >= min_distance) break
+      idx <- which(keep)
+      pairs <- which(sub == dmin, arr.ind = TRUE)
+      pair <- idx[pairs[sample.int(nrow(pairs), 1), ]]
+      tot <- vapply(pair, function(i) sum(d[i, keep & seq_along(keep) != i]), 0)
+      victim <- if (tot[1] == tot[2]) pair[sample.int(2, 1)] else pair[which.min(tot)]
+      keep[victim] <- FALSE
+      removed <- c(removed, rownames(d)[victim])
+    }
+    removed
+  }
+  for (s in 1:12) {
+    set.seed(s)
+    n <- sample(5:40, 1)
+    x <- if (s %% 2) matrix(sample(0:3, 2 * n, TRUE), n) else matrix(rnorm(2 * n), n)
+    rownames(x) <- paste0("s", seq_len(n))
+    md <- if (s %% 3 == 0) 0.8 else NULL
+    set.seed(50 + s)
+    a <- scan(x, 2, md)
+    set.seed(50 + s)
+    expect_identical(gause_removal(x, 2, md), a)
+  }
 })
