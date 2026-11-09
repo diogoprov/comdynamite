@@ -1,7 +1,8 @@
 # Plano: artigo sobre montagem local e regimes de diversificação (DAMOCLES)
 
-Escrito em 2026-11-09. Documento interno de trabalho; nada aqui foi rodado ainda. Cada
-bloco de simulação e de análise empírica só começa depois de aprovado. Não confundir com
+Escrito em 2026-11-09; atualizado no mesmo dia com as decisões do Diogo e a etapa E1
+(seção 4). Documento interno de trabalho. Cada bloco de simulação e de análise empírica só
+começa depois de aprovado. Não confundir com
 `dev/notas-artigo-taxas.md`, que trata de taxas de evolução de traits.
 
 ## 1. Pergunta e enquadramento
@@ -33,15 +34,13 @@ precedente para essa integração.
 - a novidade está em regimes e covariáveis vindos de BAMM e ClaDS, na propagação do
   posterior, no teste de partições e na diluição por regressão.
 
-**Formato proposto (a decidir).**
-
-- *Artigo 1, de métodos (MEE ou Syst Biol):* o modelo, as simulações da seção 3 e
-  Benício et al. (2021) como exemplo trabalhado.
-- *Artigo 2, biológico (AmNat; Ecol Lett como alternativa):* a pergunta na escala da Mata
-  Atlântica, com o ATLANTIC AMPHIBIANS e vários clados.
-
-Opção alternativa: um artigo único para a AmNat. O risco é ter revisores de métodos e de
-ecologia cobrando coisas diferentes.
+**Formato (decidido em 2026-11-09): artigo único para a AmNat.** Os métodos (seção 3)
+entram como suporte, com as simulações em apêndice, e a pergunta biológica conduz o texto.
+Consequência: Benício et al. (2021) sozinho, com n = 14, não sustenta a inferência de um
+artigo da AmNat. A escala da Mata Atlântica (E6, com o ATLANTIC AMPHIBIANS) passa a fazer
+parte do artigo, e Benício vira o caso com amostragem padronizada e contraste costa contra
+interior. O risco de revisores de métodos e de ecologia cobrarem coisas diferentes continua;
+a mitigação é um apêndice de simulações completo e um texto principal centrado na pergunta.
 
 ## 2. Dados
 
@@ -53,39 +52,45 @@ Tudo em `data-raw/` no checkout principal, sem commit. A pasta `data-raw` está 
 | Benício et al. (2021) | `data-raw/benicio2021/` (Dryad, doi:10.5061/dryad.sf7m0cg65) | presença e ausência de anuros em 14 áreas protegidas (7 no interior, 7 na costa), coordenadas, `geo_frogs.txt`, modos reprodutivos, scripts (GeoSSE, BioGeoBEARS) | baixado |
 | Árvores de Benício | mesma pasta | `tree_pyron_112_species` e `tree_feng_112_species` (casam 112/112 com a matriz); `tree_pyron_248_species` e `tree_feng_248_species` (NEXUS, 97 árvores), com 95–96/112 por sinônimos (*Hypsiboas* → *Boana*, *Scinax*) | baixado |
 | Portik et al. (2023) | `data-raw/portik2023/` (OSF 3cbsh) | árvore datada por TreePL, 5.326 pontas, binária e ultramétrica, mais 100 bootstraps datados | baixado; o OSF só diz "copyright Daniel Portik, 2023", sem licença aberta: **não redistribuir** |
-| Vasquez-Restrepo (2024, preprint) | Figshare doi:10.6084/m9.figshare.24894363 (CC BY 4.0) | BAMM em 100 árvores totalmente amostradas de anfíbios; DR; presença e ausência da IUCN | não baixado (`1. Diversification.zip`, 6,7 GB) |
+| Vasquez-Restrepo (2024, preprint) | Figshare doi:10.6084/m9.figshare.24894363 (CC BY 4.0) | BAMM em 100 árvores totalmente amostradas de anfíbios; DR; presença e ausência da IUCN | só a parte de anfíbios, extraída do zip de 6,7 GB por intervalos de bytes, em `data-raw/vasquez2024/` (cerca de 1,2 GB): event data, `mcmc_out` e árvore de cada uma das 100 corridas, `Amphibians_SAMPLED TREES.nex`, taxas por espécie (BAMM, ES, FP) e comprimentos de ramo |
 | ATLANTIC AMPHIBIANS (Vancine et al. 2018) | `af-frogs-climate-rarity/data/raw/atlantic_amphibians/`; também no `atlanticr` | 1.163 sítios, 17.626 registros | disponível; esforço amostral heterogêneo |
 
 ### 2.1 Casamento de nomes com a árvore do Portik (feito em 2026-11-09)
 
-- Normalizando aspas e `_` final e trocando *Hypsiboas* por *Boana*:
-  - 91/112 espécies da matriz estão na árvore do Portik;
-  - 214/248 do pool amplo estão na árvore do Portik.
-- As faltas são de quatro tipos:
-  1. **concordância de gênero em *Boana*:** *albomarginata*, *bischoffi*, *pulchella*,
-     *semilineata* etc. Resolve por tabela;
-  2. **erros de grafia:** *Bokermanohyla*, *Aparasphenedon*, *Lysapus*, *Crossodactylus
-     schmdti*. Resolve por tabela;
-  3. **espécies não descritas ou "aff.":** *Adenomera* sp. J, *Aplastodiscus* sp. 5,
-     *Fritziana* aff. *fissilis*, *Megaelosia* aff. *boticariana*, *Scinax* aff. *hayii*,
-     *Dendrophryniscus* sp. Precisam ser enxertadas junto à congênere mais próxima, com a
-     árvore de Benício como guia;
-  4. **linhagens de *Ischnocnema guentheri* (C1, C3, C4) e *I. henseli*:** o Portik não
-     separa essas linhagens. Decidir entre colapsar em *I. guentheri* e enxertar.
-- Entregável: `data-raw/benicio2021_taxonomy.csv` (nome original → nome na árvore → ação)
-  e um script que constrói a árvore do pool a partir do Portik e dos 100 bootstraps.
-
+- Feito por `data-raw/benicio2021_trees.R`, que escreve `data-raw/benicio2021_taxonomy.csv`
+  (nome na árvore de 248, nome na matriz, nome canônico, nome no Portik, ação, nota). O nome
+  canônico é o da matriz, para os dados casarem sem conversão.
+- Das 248: 202 casam direto, 34 por renomeação (gênero gramatical em *Boana*, grafias,
+  *Hylomantis granulosa*, *Phantasmarana boticariana*, *Scinax perereca*) e 12 são
+  enxertadas, 10 delas nas comunidades: *Adenomera* sp. J, *Aplastodiscus* sp. 5,
+  *Bokermannohyla izecksoni*, *Dendrophryniscus* sp., *Fritziana* aff. *fissilis*, as três
+  linhagens de *Ischnocnema guentheri*, *Megaelosia* aff. *boticariana*, *Paratelmatobius*
+  aff. *cardosoi*, *Phrynomedusa dryade*, *Rhinella fernandezae*.
+- Enxerto: no ramo-tronco do ancestral comum (no Portik) das espécies do pool que formam o
+  clado-irmão na árvore de Benício, na mesma altura relativa entre esse ancestral e o pai.
+  Sempre sobre o pool de 248, que contém os clados-irmãos de todas, e depois podado.
+- *Ischnocnema guentheri* C1, C3 e C4: enxertadas como linhagens distintas (o Portik só tem
+  *I. guentheri* e *I. henselii*). Separam-se de *I. henselii* a cerca de 20–23 Ma na árvore
+  resultante, o que vem da datação do Portik. **Falta conferir** a taxonomia atual do
+  complexo; se alguma linhagem corresponder a *I. guentheri* sensu stricto, ela passa a casar
+  direto.
 ### 2.2 Definição do pool regional (decisão central)
 
 - Com a árvore de 112 espécies, o pool é a união das 14 comunidades: nenhuma espécie está
   ausente de todos os sítios. Isso condiciona o DAMOCLES a linhagens que colonizaram algum
   lugar e tende a superestimar γ.
-- As árvores de 248 espécies sugerem um pool mais amplo, com 136 espécies ausentes das 14
-  áreas. **Falta confirmar o que elas representam** (README do Dryad, ou perguntar ao
-  Fernando ou ao Ronildo).
+- **O pool de 248 não é um pool regional.** O README do Dryad descreve o alinhamento como
+  as sequências das 248 espécies usadas no RAxML, e o Diogo suspeita que as 136 espécies a
+  mais entraram por terem sequências no GenBank, para apoiar a inferência. A lista confirma:
+  inclui espécies do Nordeste, como *Adelophryne baturitensis*, e da Amazônia. Serve como
+  análise de sensibilidade, não como pool principal.
+- Com a árvore do Portik (5.326 espécies), o pool pode ser qualquer lista. Pool principal
+  proposto: as espécies da Mata Atlântica de São Paulo (ou da Serra do Mar e do interior
+  paulista) no ATLANTIC AMPHIBIANS, que também alimenta E6. A lista precisa da mesma
+  harmonização de nomes, e as espécies sem posição no Portik são enxertadas ou excluídas.
 - Plano:
-  - pool de 248, harmonizado e podado do Portik, como análise principal;
-  - pool de 112 como sensibilidade;
+  - pool regional do ATLANTIC AMPHIBIANS como análise principal;
+  - pools de 112 e de 248 como sensibilidade;
   - a simulação S6 quantifica o viés esperado.
 - Costa e interior: o DAMOCLES assume um único pool. Duas formas, a comparar:
   - (a) pool combinado com região como regime de γ e μ nos ramos terminais, o que exige
@@ -204,11 +209,20 @@ num PR próprio.
 
 ## 4. Caso de estudo: ordem das análises
 
-- **E1. Taxonomia e árvore do pool:** a tabela de 2.1, a poda do Portik até 248 (e até
-  112), o enxerto das espécies faltantes e os 100 bootstraps podados.
+- **E1. Taxonomia e árvore do pool (feito em 2026-11-09, exceto o pool regional):**
+  `data-raw/benicio2021_trees.R` constrói a tabela de 2.1 e poda a melhor árvore do Portik
+  e os 100 bootstraps até 248 e 112 espécies, com os enxertos. Idades da raiz: 166 Ma para
+  248 (bootstraps de 160 a 195) e 115 Ma para 112 (106 a 154). A distância RF normalizada à
+  árvore de Benício é 0,20 para 248 e 0,19 para 112. Falta o pool regional (2.2).
+  - **Piloto de tempo** (melhor árvore, 14 comunidades, um núcleo): `damocles_fit(shared =
+    TRUE)` leva 0,8 s com 112 espécies e 1,6 s com 248; com DR como covariável de γ, 2,4 s e
+    3,3 s; um ajuste por comunidade, 10 s e 14 s. Com 6 núcleos, 1.000 réplicas de S1 com
+    três modelos cada levam algo como 15–30 min por cenário, e os 100 bootstraps, poucos
+    minutos. O custo não limita o plano com estes tamanhos; pools de milhares de espécies
+    (E6) ainda precisam de piloto próprio.
 - **E2. Regimes e taxas:**
-  - BAMM do Vasquez-Restrepo, se o zip de 6,7 GB tiver os dados de eventos. Confirmar
-    listando o zip sem baixar tudo, e baixar só o que for de anfíbios;
+  - BAMM do Vasquez-Restrepo: o zip tem o event data de cada uma das 100 corridas de
+    anfíbios (conferido em 2026-11-09; baixado só o que é de anfíbios);
   - ClaDS próprio sobre o Portik podado (RPANDA, em `data-raw/`);
   - DR com `dr_rates()`;
   - GeoSSE de Benício et al. (2021) como referência da diferença costa contra interior.
@@ -224,7 +238,7 @@ num PR próprio.
   - 100 árvores do Portik e 97 da Feng (S7);
   - pool de 112 contra 248;
   - com e sem as espécies enxertadas.
-- **E6. Escala (artigo 2):** o ATLANTIC AMPHIBIANS filtrado por esforço e por qualidade
+- **E6. Escala da Mata Atlântica (parte do artigo único):** o ATLANTIC AMPHIBIANS filtrado por esforço e por qualidade
   da coordenada, com ajustes por clado (famílias ou gêneros com pelo menos cerca de 20
   espécies) e regimes dentro de cada clado. Comparar com os modelos "global" e "por clado"
   de Reijenga et al. (2026).
@@ -237,27 +251,34 @@ num PR próprio.
 | S1, S2, S4, S6 (em paralelo, em background) | 3–5 semanas |
 | S3 + código da verossimilhança integrada + S5 e bootstrap em blocos | 2–3 semanas |
 | E2–E5 (caso de estudo) | 2–3 semanas |
-| Redação do artigo 1 | 4–6 semanas |
-| E6 (artigo 2) | a planejar depois do artigo 1 |
+| E6 (escala da Mata Atlântica, com piloto de tempo para pools grandes) | 3–5 semanas |
+| Redação do artigo único | 6–8 semanas |
 
-## 6. Decisões pendentes (do Diogo)
+## 6. Decisões
 
-1. Artigo 1 de métodos e artigo 2 biológico, ou artigo único para a AmNat.
-2. O que é o pool de 248 espécies de Benício.
-3. Linhagens de *Ischnocnema guentheri*: colapsar ou enxertar.
-4. Se baixamos as partes de anfíbios do Figshare do Vasquez-Restrepo (até 6,7 GB).
-5. Autoria e contato com Etienne e Pigot (Reijenga et al. 2026 é do mesmo grupo).
+Tomadas em 2026-11-09:
+
+1. Artigo único para a AmNat.
+2. O pool de 248 é amostragem filogenética (sequências no GenBank), não pool regional.
+3. Baixar a parte de anfíbios do Figshare, depois de conferir o conteúdo.
+4. Contatar Etienne e Pigot só quando houver resultado concreto.
+
+Pendentes:
+
+1. *Ischnocnema guentheri* C1, C3 e C4: conferir a taxonomia atual do complexo (2.1).
+2. Recorte geográfico do pool regional no ATLANTIC AMPHIBIANS (2.2).
 
 ## 7. Riscos
 
-- **Poder com n = 14 pode ser baixo** (S2). Nesse caso, Benício vira ilustração e a
-  inferência pesa no ATLANTIC AMPHIBIANS.
+- **Poder com n = 14 pode ser baixo** (S2). Com o artigo único, a inferência já se apoia
+  também no ATLANTIC AMPHIBIANS (E6), e Benício entra como o caso de amostragem padronizada.
 - **Super-árvores com espécies imputadas** (Vasquez-Restrepo) distorcem taxas perto das
   pontas. Mitigação: comparar com o Portik, que é molecular.
 - **Confusão entre barreira biogeográfica e dinâmica local** quando costa e interior
   compartilham o pool (2.2).
 - **Esforço heterogêneo no ATLANTIC AMPHIBIANS:** ausências falsas inflam μ. Pode exigir
-  um modelo de detecção, o que está fora do escopo do artigo 1.
+  um modelo de detecção. Com E6 dentro do artigo único, esse risco fica central: filtrar
+  sítios por esforço e simular o efeito de detecção imperfeita sobre γ e μ (variante de S6).
 
 ## Referências (verificadas no Crossref, OpenAlex ou servidor de preprints em 2026-11-09)
 
