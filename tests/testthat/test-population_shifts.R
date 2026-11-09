@@ -295,3 +295,24 @@ test_that("the fitted set keeps the deviations of populations with a wide kernel
   expect_gt(sds[["fitted"]], 0.4)
   expect_equal(sds[["null"]], 1, tolerance = 0.25)
 })
+
+test_that("the slope of the push matches its numerical derivative, with unmeasured competitors", {
+  full <- make_shifts(c = 2, seed = 41)
+  gone <- full$species == "sp3" & as.integer(sub("s", "", full$site)) %% 2 == 0
+  d <- transform(full[!gone, ], .env1 = env)[c("trait", "site", "species", ".env1")]
+  set.seed(1)
+  prep <- shifts_prepare(d, ".env1", attr(full, "community"))
+  expect_true(any(vapply(prep$members, function(m) length(m$ext_mean) > 0, logical(1))))
+  slope <- shifts_push_slope(prep, 0.5)
+  eps <- 1e-6
+  numeric_slope <- vapply(seq_len(prep$n_pops), function(j) {
+    up <- prep$pops$mean
+    up[j] <- up[j] + eps
+    (shifts_push(prep, up, 0.5)[j] - shifts_push(prep, prep$pops$mean, 0.5)[j]) / eps
+  }, numeric(1))
+  expect_equal(slope, numeric_slope, tolerance = 1e-4)
+})
+
+test_that("the variance of populations is zero without residuals or sampling error", {
+  expect_equal(population_variance(c(0, 0), 0), 0)
+})
