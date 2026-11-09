@@ -186,3 +186,10 @@ test_that("plot_population_traits highlights species", {
                "no colour")
   expect_error(plot_population_traits(ind, highlight = letters[1:8]), "seven")
 })
+
+test_that("the scale check skips populations with identical spreads", {
+  ind <- data.frame(site = "s1", species = rep(paste0("sp", 1:10), each = 3))
+  ind$trait <- rep(seq(10, 100, by = 10), each = 3) + rep(c(-1, 0, 1), 10)
+  expect_no_warning(trait_densities(ind, n = 16))
+  expect_null(check_spread_scale(ind$trait, ind$species))
+})
