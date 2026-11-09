@@ -576,7 +576,7 @@ gls_known_error <- function(y, v, covs, model) {
   reml <- function(log_sigma2, a = NULL) {
     vmat <- exp(log_sigma2) * cov_of(a) + diag(v, n)
     ch <- tryCatch(chol(vmat), error = function(e) NULL)
-    if (is.null(ch)) return(-Inf) # nocov: a singular covariance (tips at distance 0)
+    if (is.null(ch)) return(-1e10) # nocov: a singular covariance (tips at distance 0)
     vi_1 <- backsolve(ch, forwardsolve(t(ch), ones))
     vi_y <- backsolve(ch, forwardsolve(t(ch), y))
     xvx <- sum(ones * vi_1)
