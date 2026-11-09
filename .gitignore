@@ -7,3 +7,9 @@ docs
 inst/doc
 Rplots.pdf
 tests/testthat/_problems/
+
+# Data sets without open licences or too large for the repository (data-raw/benicio2021_trees.R)
+data-raw/benicio2021/
+data-raw/portik2023/
+data-raw/vasquez2024/
+data-raw/benicio2021_trees.rds
