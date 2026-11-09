@@ -31,6 +31,16 @@
   - `nboot` runs a parametric bootstrap of the design. It gives a p-value for displacement that
     accounts for the choice of the width and is centred on the mean of the simulations without
     displacement, a first-order bias correction of `c`, and intervals for `c` and the slopes.
+    The simulations without displacement come from the fit without displacement, the species
+    constants from the populations that enter the fit, and the variance of populations from a
+    moment equation weighted by precision. Taking the slopes of the full fit inflated that
+    variance and the bias of `c` under the null, so the test rejected too often in large
+    designs (up to 29% at the 5% level in the experiments of `data-raw/bridge_experiments.R`).
+    The test is now somewhat conservative (about 2--3% at the 5% level in simulations without
+    displacement), because the centre of the null simulations follows the estimate.
+  - The documentation now gives the sign of the bias that deviations of whole populations
+    cause in `c`: upward when most competitors are closer than `w` in trait, downward when most
+    are farther.
   - `plot()` draws the profile of R², `c` and `h` along the width.
 - All plots now use ggplot2 (in Suggests, version 3.5.0 or later) and return a ggplot object,
   which can be changed further with ggplot2: `plot_node_test()` (both layouts),

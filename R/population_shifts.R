@@ -66,9 +66,14 @@
 #'
 #' Deviations of whole populations from the model (from genetic drift or unmeasured
 #' environmental variables) are not removed by the split: they enter the own mean in the push
-#' and the response alike, and bias `c` downward, below zero when there is no displacement. The
-#' bootstrap reproduces this bias, so `p_displacement` and `displacement_corrected` account for
-#' it, but the raw `displacement` does not.
+#' and the response alike, so `c` is biased even when there is no displacement. A deviation
+#' \eqn{\delta}{delta} of a population changes its push from a competitor at distance \eqn{g}
+#' by about \eqn{\delta \exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)}{delta exp(-g^2 / (2 w^2))
+#' (1 - g^2 / w^2)}: the bias is upward when most competitors are closer than `w` in trait (a
+#' wide kernel) and downward when most are farther (a narrow one). It grows with the variance of
+#' the deviations and does not shrink with more individuals per population. The bootstrap
+#' reproduces this bias, so `p_displacement` and `displacement_corrected` account for it, but
+#' the raw `displacement` does not.
 #'
 #' @section Width of the kernel:
 #' Without displacement the width is not identified: the residual sum of squares changes little
@@ -86,17 +91,27 @@
 #' @section Bootstrap:
 #' With `nboot > 0`, new data are simulated with the design of the data (the same sites,
 #' species, environment, abundances and numbers of individuals per population), with the
-#' within-population standard deviation of the data, a population-level standard deviation
-#' estimated from the residuals of the fit without displacement, and the fitted species
-#' constants and slopes, and refitted as the data were (with the same `width`, estimated or
-#' fixed). Two sets are simulated:
-#' * without displacement (`c = 0`), which gives `p_displacement`, the two-sided p-value of
+#' within-population standard deviation of the data, and refitted as the data were (with the
+#' same `width`, estimated or fixed). The species constants, slopes and population-level
+#' standard deviation of the simulations come from a fit: the constants are the means within
+#' species of the populations that enter as responses, and the variance of populations is the
+#' root of a moment equation in which each squared residual is net of the sampling variance of
+#' its mean and weighted by the inverse square of its expected value, so that means of few
+#' individuals weigh little (in the fitted set, the sampling variance is scaled by
+#' \eqn{(1 - c_0 D_j)^2}{(1 - c_0 D_j)^2}, with \eqn{D_j}{D_j} the derivative of the push on a
+#' population with respect to its own mean, since the sampling error of the mean also enters
+#' the push removed from it). Two sets are simulated:
+#' * without displacement (`c = 0`), from the fit without displacement (the slopes of the full
+#'   fit carry its error into the residuals, inflate the variance of populations and with it
+#'   the bias of `c` under the null), which gives `p_displacement`, the two-sided p-value of
 #'   `c` with the width chosen anew in each simulation, so that the choice of the width is
 #'   accounted for. The p-value is the share of simulations at least as far from the mean of
 #'   the simulations as the estimate, since that mean is not zero when sampling error or
 #'   deviations of populations bias `c`;
-#' * with the fitted values, \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of
-#'   [sample_individuals()] has no attraction), which give a first-order bias correction of
+#' * from the full fit, with its push removed from the means before they are displaced again,
+#'   at \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of [sample_individuals()]
+#'   has no attraction; with \eqn{\hat c \le 0}{c_hat <= 0} this set is the null set and its
+#'   slopes those of the fit without displacement), which give a first-order bias correction of
 #'   `c`, `displacement_corrected` (\eqn{\hat c - (\bar c^* - c_0)}{c_hat - (mean(c*) - c_0)}),
 #'   and basic bootstrap intervals for `c` and for the slopes (\eqn{\hat\theta -
 #'   (q^*_{1 - \alpha/2} - \theta_0)}{theta_hat - (q*(1 - alpha/2) - theta_0)} to
@@ -107,8 +122,13 @@
 #' estimate; it does change with strong displacement and with deviations of whole populations,
 #' so the intervals of `c` cover the true value less often than `level`. The correction removes
 #' most of the attenuation of `c` by sampling error when `w` is well identified; when it is not,
-#' the intervals are wide and the p-value is the better guide. Results change with the seed of
-#' the random number generator. The simulated values are in the attribute `bootstrap`.
+#' the intervals are wide and the p-value is the better guide. The test is somewhat
+#' conservative: the null simulations take the variance of populations, which sets the bias of
+#' `c`, from the same data as the estimate, so their centre follows it, and in simulations with
+#' no displacement the test rejected at the 5% level in about 2--3% of data sets. Results change
+#' with the seed of
+#' the random number generator. The simulated values are in the attribute `bootstrap`, whose
+#' own attribute `population_sd` gives the population-level standard deviation of each set.
 #'
 #' @param individuals Data frame with one row per individual, such as from
 #'   [sample_individuals()].
@@ -319,6 +339,26 @@ shifts_push <- function(prep, own, w) {
   out
 }
 
+# derivative of the push of each population with respect to its own mean (with all means at
+# their observed values): sum_k p_k exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)
+shifts_push_slope <- function(prep, w) {
+  out <- numeric(prep$n_pops)
+  means <- prep$pops$mean
+  slope <- function(gap) exp(-gap^2 / (2 * w^2)) * (1 - gap^2 / w^2)
+  for (m in prep$members) {
+    ix <- m$ix
+    if (length(ix) + length(m$ext_mean) < 2) next
+    d <- slope(outer(means[ix], means[ix], "-"))
+    diag(d) <- 0
+    value <- as.vector(d %*% m$share)
+    if (length(m$ext_mean) > 0) {
+      value <- value + as.vector(slope(outer(means[ix], m$ext_mean, "-")) %*% m$ext_share)
+    }
+    out[ix] <- value
+  }
+  out
+}
+
 # moves the means of unmeasured competitors along the gradient with the fitted slopes
 shifts_follow <- function(prep, slopes) {
   for (k in seq_along(prep$members)) {
@@ -345,7 +385,7 @@ shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
 }
 
 # fits the model over the grid of widths
-shifts_fit <- function(prep, width, species_slopes, slope_names) {
+shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = TRUE) {
   use <- prep$use
   pops <- prep$pops
   sp <- rep(pops$species[use], 2)
@@ -364,8 +404,11 @@ shifts_fit <- function(prep, width, species_slopes, slope_names) {
     }))
   }
   fit_width <- function(w) {
-    push <- centre(c(shifts_push(prep, prep$halves[, 2], w)[use],
-                     shifts_push(prep, prep$halves[, 1], w)[use]))
+    # without displacement, a column of zeros leaves `c` at NA and the slopes alone
+    push <- if (displacement) {
+      centre(c(shifts_push(prep, prep$halves[, 2], w)[use],
+               shifts_push(prep, prep$halves[, 1], w)[use]))
+    } else numeric(length(y))
     x <- cbind(e, displacement = push)
     keep <- colSums(x^2) > 0
     coef <- stats::setNames(rep(NA_real_, ncol(x)), colnames(x))
@@ -426,32 +469,69 @@ shifts_fit <- function(prep, width, species_slopes, slope_names) {
        rss_change = rss_change, species_slopes = species_table, slope_species = slope_species)
 }
 
+# variance of populations about the model from squared residuals (already scaled for the
+# parameters fitted) and the sampling variance of each mean: the moment equation
+# sum w (r^2 - v - s) = 0 with weights w = 1 / (v + s)^2, so that means of few individuals,
+# whose squared residuals are mostly sampling error, weigh little
+population_variance <- function(r2, sampling, iter = 50) {
+  sampling <- rep_len(sampling, length(r2))
+  v <- max(0, mean(r2) - mean(sampling))
+  for (k in seq_len(iter)) {
+    w <- 1 / (v + sampling)^2
+    if (!all(is.finite(w))) break
+    new <- max(0, sum(w * (r2 - sampling)) / sum(w))
+    if (abs(new - v) <= 1e-8 * max(v, 1e-12)) break
+    v <- new
+  }
+  v
+}
+
 # parametric bootstrap with the design of the data
 shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, species_slopes,
                              slope_names, nboot, level) {
   pops <- prep$pops
   env <- as.matrix(pops[env_cols])
-  # slopes of each population's species (the mean slope for species without their own)
-  slope_matrix <- matrix(unlist(out[slope_names]), nrow(pops), length(slope_names),
-                         byrow = TRUE)
-  if (species_slopes) {
-    for (v in seq_along(slope_names)) {
-      s <- fit$coef[paste(slope_names[v], pops$species, sep = "\r")]
-      slope_matrix[!is.na(s), v] <- s[!is.na(s)]
-    }
-  }
-  along <- rowSums(env * slope_matrix)
-  constant <- stats::ave(pops$mean - along, pops$species)
-  residual <- (pops$mean - along - constant)[prep$use]
   n_used <- pops$n[prep$use]
   sampling <- if (is.finite(prep$within_sd)) prep$within_sd^2 / n_used else 0
-  df <- max(sum(prep$use) - length(fit$slope_species) - length(slope_names), 1)
-  pop_sd <- sqrt(max(0, sum(residual^2) / df - mean(sampling)))
   within_sd <- if (is.finite(prep$within_sd)) prep$within_sd else 0
   c_hat <- out$displacement
   w_hat <- out$width
-  simulate <- function(strength) {
-    target <- constant + along + stats::rnorm(nrow(pops), 0, pop_sd)
+  # the model that generates the simulations: the species constants and slopes of a fit, the
+  # means before displacement (the observed means minus the push of the fit) and the standard
+  # deviation of populations about them, net of sampling error
+  generator <- function(model, strength) {
+    slopes <- unlist(model$table[slope_names])
+    # slopes of each population's species (the mean slope for species without their own)
+    slope_matrix <- matrix(slopes, nrow(pops), length(slope_names), byrow = TRUE)
+    if (species_slopes) {
+      for (v in seq_along(slope_names)) {
+        s <- model$coef[paste(slope_names[v], pops$species, sep = "\r")]
+        slope_matrix[!is.na(s), v] <- s[!is.na(s)]
+      }
+    }
+    along <- rowSums(env * slope_matrix)
+    pushed <- if (strength > 0) strength * shifts_push(prep, pops$mean, w_hat) else 0
+    base <- pops$mean - along - pushed
+    # constants from the populations that entered the fit, as in its centring within species;
+    # populations of a single individual would add their sampling error to the constants and
+    # through them to the residuals (species without such populations take all of theirs)
+    constant <- stats::ave(base, pops$species)
+    used_constant <- stats::ave(ifelse(prep$use, base, 0), pops$species, FUN = sum) /
+      stats::ave(as.numeric(prep$use), pops$species, FUN = sum)
+    constant[is.finite(used_constant)] <- used_constant[is.finite(used_constant)]
+    residual <- (base - constant)[prep$use]
+    df <- max(sum(prep$use) - length(fit$slope_species) - sum(!is.na(model$coef)), 1)
+    # the sampling error of a mean enters the push removed from it, with slope strength * D,
+    # so only (1 - strength * D)^2 of its sampling variance is left in the residual
+    left <- if (strength > 0) {
+      sampling * (1 - strength * shifts_push_slope(prep, w_hat)[prep$use])^2
+    } else sampling
+    list(mean = constant + along, slopes = slopes, strength = strength,
+         pop_sd = sqrt(population_variance(residual^2 * length(residual) / df, left)))
+  }
+  simulate <- function(g) {
+    strength <- g$strength
+    target <- g$mean + stats::rnorm(nrow(pops), 0, g$pop_sd)
     m <- target
     if (strength > 0) {
       for (mb in prep$members) {
@@ -475,12 +555,19 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
     unlist(shifts_fit_full(sim_prep, width, species_slopes,
                            slope_names)$table[c(slope_names, "displacement")])
   }
-  draws <- function(strength) {
-    t(vapply(seq_len(nboot), function(b) simulate(strength), numeric(length(slope_names) + 1)))
+  draws <- function(g) {
+    t(vapply(seq_len(nboot), function(b) simulate(g), numeric(length(slope_names) + 1)))
   }
-  null <- draws(0)
+  # the null simulations come from the fit without displacement, as a test under the null
+  # should; slopes fitted with the push would carry its error into the deviations of
+  # populations and exaggerate the bias of `c` that they cause
+  null_model <- generator(shifts_fit(prep, 1, species_slopes, slope_names,
+                                     displacement = FALSE), 0)
+  null <- draws(null_model)
   fitted_strength <- if (is.na(c_hat)) 0 else max(c_hat, 0)
-  fitted <- if (fitted_strength > 0) draws(fitted_strength) else null
+  # with c_hat <= 0 the fit restricted to c >= 0 is the fit without displacement
+  fitted_model <- if (fitted_strength > 0) generator(fit, fitted_strength) else null_model
+  fitted <- if (fitted_strength > 0) draws(fitted_model) else null
   alpha <- 1 - level
   # basic interval: the estimate minus the error of the simulations about the value that
   # generated them
@@ -504,12 +591,15 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
                                    na.rm = TRUE)) / (1 + sum(!is.na(c_null)))
   }
   for (v in slope_names) {
-    interval <- basic(out[[v]], fitted[, v])
+    interval <- basic(out[[v]], fitted[, v], fitted_model$slopes[[v]])
     out[[paste0(v, "_low")]] <- interval[1]
     out[[paste0(v, "_high")]] <- interval[2]
   }
-  attr(out, "draws") <- rbind(data.frame(set = "null", null, check.names = FALSE),
-                              data.frame(set = "fitted", fitted, check.names = FALSE))
+  draws_table <- rbind(data.frame(set = "null", null, check.names = FALSE),
+                       data.frame(set = "fitted", fitted, check.names = FALSE))
+  attr(draws_table, "population_sd") <- c(null = null_model$pop_sd,
+                                          fitted = fitted_model$pop_sd)
+  attr(out, "draws") <- draws_table
   out
 }
 

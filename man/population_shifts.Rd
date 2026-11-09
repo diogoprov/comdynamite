@@ -121,9 +121,14 @@ push is small but its sampling error is not.
 
 Deviations of whole populations from the model (from genetic drift or unmeasured
 environmental variables) are not removed by the split: they enter the own mean in the push
-and the response alike, and bias \code{c} downward, below zero when there is no displacement. The
-bootstrap reproduces this bias, so \code{p_displacement} and \code{displacement_corrected} account for
-it, but the raw \code{displacement} does not.
+and the response alike, so \code{c} is biased even when there is no displacement. A deviation
+\eqn{\delta}{delta} of a population changes its push from a competitor at distance \eqn{g}
+by about \eqn{\delta \exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)}{delta exp(-g^2 / (2 w^2))
+(1 - g^2 / w^2)}: the bias is upward when most competitors are closer than \code{w} in trait (a
+wide kernel) and downward when most are farther (a narrow one). It grows with the variance of
+the deviations and does not shrink with more individuals per population. The bootstrap
+reproduces this bias, so \code{p_displacement} and \code{displacement_corrected} account for it, but
+the raw \code{displacement} does not.
 }
 
 \section{Width of the kernel}{
@@ -145,18 +150,28 @@ niche widths when it is not identified.
 
 With \code{nboot > 0}, new data are simulated with the design of the data (the same sites,
 species, environment, abundances and numbers of individuals per population), with the
-within-population standard deviation of the data, a population-level standard deviation
-estimated from the residuals of the fit without displacement, and the fitted species
-constants and slopes, and refitted as the data were (with the same \code{width}, estimated or
-fixed). Two sets are simulated:
+within-population standard deviation of the data, and refitted as the data were (with the
+same \code{width}, estimated or fixed). The species constants, slopes and population-level
+standard deviation of the simulations come from a fit: the constants are the means within
+species of the populations that enter as responses, and the variance of populations is the
+root of a moment equation in which each squared residual is net of the sampling variance of
+its mean and weighted by the inverse square of its expected value, so that means of few
+individuals weigh little (in the fitted set, the sampling variance is scaled by
+\eqn{(1 - c_0 D_j)^2}{(1 - c_0 D_j)^2}, with \eqn{D_j}{D_j} the derivative of the push on a
+population with respect to its own mean, since the sampling error of the mean also enters
+the push removed from it). Two sets are simulated:
 \itemize{
-\item without displacement (\code{c = 0}), which gives \code{p_displacement}, the two-sided p-value of
+\item without displacement (\code{c = 0}), from the fit without displacement (the slopes of the full
+fit carry its error into the residuals, inflate the variance of populations and with it
+the bias of \code{c} under the null), which gives \code{p_displacement}, the two-sided p-value of
 \code{c} with the width chosen anew in each simulation, so that the choice of the width is
 accounted for. The p-value is the share of simulations at least as far from the mean of
 the simulations as the estimate, since that mean is not zero when sampling error or
 deviations of populations bias \code{c};
-\item with the fitted values, \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of
-\code{\link[=sample_individuals]{sample_individuals()}} has no attraction), which give a first-order bias correction of
+\item from the full fit, with its push removed from the means before they are displaced again,
+at \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of \code{\link[=sample_individuals]{sample_individuals()}}
+has no attraction; with \eqn{\hat c \le 0}{c_hat <= 0} this set is the null set and its
+slopes those of the fit without displacement), which give a first-order bias correction of
 \code{c}, \code{displacement_corrected} (\eqn{\hat c - (\bar c^* - c_0)}{c_hat - (mean(c*) - c_0)}),
 and basic bootstrap intervals for \code{c} and for the slopes (\eqn{\hat\theta -
   (q^*_{1 - \alpha/2} - \theta_0)}{theta_hat - (q*(1 - alpha/2) - theta_0)} to
@@ -168,8 +183,13 @@ The correction and the intervals assume that the bias does not change with \code
 estimate; it does change with strong displacement and with deviations of whole populations,
 so the intervals of \code{c} cover the true value less often than \code{level}. The correction removes
 most of the attenuation of \code{c} by sampling error when \code{w} is well identified; when it is not,
-the intervals are wide and the p-value is the better guide. Results change with the seed of
-the random number generator. The simulated values are in the attribute \code{bootstrap}.
+the intervals are wide and the p-value is the better guide. The test is somewhat
+conservative: the null simulations take the variance of populations, which sets the bias of
+\code{c}, from the same data as the estimate, so their centre follows it, and in simulations with
+no displacement the test rejected at the 5\% level in about 2--3\% of data sets. Results change
+with the seed of
+the random number generator. The simulated values are in the attribute \code{bootstrap}, whose
+own attribute \code{population_sd} gives the population-level standard deviation of each set.
 }
 
 \examples{
