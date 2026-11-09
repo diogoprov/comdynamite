@@ -119,6 +119,119 @@ identificável (correlação entre mudança verdadeira e taxa verdadeira de 0,29
   conversão de divergência entre populações em especiação (o elo de Januario) fica fora por
   enquanto. Plano para fechar esse limite em `dev/plano-especiacao.md`.
 
+### Experimento da ponte (resultados, `data-raw/bridge_experiments.R`)
+
+Árvore de 30 espécies, grade 10 × 10, 600 passos; dispersão {0,001; 0,01; 0,1} × extinção de
+manchas {0; 0,01; 0,05} × autocorrelação do ambiente (`env_bandwidth` {0,5; 3}), 20 réplicas
+(360 simulações); h {0; 0,5} × c {0; 1; 3}; desenhos de 20 ou 100 sítios × 5 ou 20 indivíduos
+por população; `intraspecific_sd = 5`, `population_sd = 1`. Bootstrap (nboot = 99) num
+subconjunto. 48 min em 6 núcleos.
+
+- Dispersão 0,001 com extinção 0,05 colapsa a metacomunidade (sem indivíduos amostrados): 40
+  simulações sem dados na camada de indivíduos. É o limite em que a extinção vence a
+  recolonização.
+- Taxas por ramo: a correlação de Spearman entre a taxa RRphylo das pontas e o turnover de
+  parceiros fica entre −0,01 e 0,20 (média por célula), maior com dispersão intermediária ou
+  alta. O rastro da montagem nas taxas por ramo, mesmo plantado por `turnover_rates()`, é
+  fraco, como na vignette. (A correlação em todos os ramos não é interpretável:
+  `turnover_rates(window = 0.1)` só muda as pontas e os ramos internos ficam todos com taxa 1.)
+- h é recuperado em todos os desenhos (RMSE 0,01–0,04).
+- c é identificável nestes desenhos, ao contrário de SJC: poder para c = 1 (contra o nulo c = 0
+  da mesma célula) de 0,78 com 20 sítios × 5 indivíduos e w livre, e ≥ 0,94 nos outros
+  desenhos; com w fixo, ≥ 0,997. Os desenhos com 20 sítios × 5 indivíduos perdem poder em
+  metacomunidades com dispersão muito baixa ou extinção (0,53–0,68 em várias células). O erro
+  de ĉ cai sobretudo com mais indivíduos por população (5 → 20) e com mais espécies por sítio;
+  a beta diversidade da composição não importa.
+- Com w livre, c forte é atenuado (c = 3: mediana 1,85–2,43); com w fixo quase não (2,81–2,97).
+- O aviso de w mal identificado aparece em 95–99% das réplicas sem deslocamento e quase nunca
+  com c ≥ 1: funciona como diagnóstico de ausência de deslocamento.
+- Estatísticas T (nulo por espécie, 100 sítios × 20 indivíduos): SES de T_IP.IC 0,08 sem
+  processo, 4,15 só com adaptação local, −0,8 a −1,0 só com deslocamento e 0,25 com h = 0,5 e
+  c = 3: a compensação entre os dois processos aparece também com o nulo por espécie.
+- Bootstrap de `population_shifts()` (versão do PR #57): tamanho 0,025 com 20 sítios × 5
+  indivíduos, mas 0,29 com 100 sítios × 20 indivíduos; cobertura dos intervalos de c = 3 de
+  0,04–0,13.
+- **Causa e correção (PR #58).** O gerador nulo usava os slopes do ajuste com deslocamento; o
+  erro deles (ĥ 0,548 contra 0,5) ia para os resíduos e inflava o dp de população (1,57 contra
+  1). Desvios de população viesam ĉ para cima quando o kernel é largo (a derivada do push em
+  relação à própria média é exp(−g²/2w²)(1 − g²/w²), positiva para g < w), então o nulo
+  exagerava o viés (média das réplicas nulas 0,21–0,30 contra 0,13–0,14 na distribuição
+  verdadeira de ĉ numa mesma metacomunidade). Correção: nulo a partir do ajuste sem
+  deslocamento, constantes das populações que entram no ajuste, variância de população por
+  momentos ponderados pela precisão e, no conjunto ajustado, variância de amostragem escalada por
+  (1 − c D)², já que o erro da média entra no push removido (achado da auditoria). A
+  documentação dizia que o viés por desvios de população era para baixo; o sinal depende de w.
+- Nova rodada do subconjunto (`data-raw/bridge_bootstrap.R`, novas simulações, 81 por
+  desenho, 28 min):
+
+  | c | desenho | rejeição a 5% (antes) | cobertura de c (antes) | cobertura de h (antes) | ĉ corrigido mediano (antes) |
+  |---|---|---|---|---|---|
+  | 0 | 20 × 5 | 0,06 (0,03) | 0,90 (0,91) | 0,87 (0,89) | −0,02 (−0,04) |
+  | 0 | 100 × 20 | 0,00 (0,29) | 0,68 (0,80) | 0,64 (0,87) | 0,06 (−0,01) |
+  | 3 | 20 × 5 | 0,93 (0,99) | 0,41 (0,13) | 0,88 (0,04) | 2,34 (3,02) |
+  | 3 | 100 × 20 | 0,99 (1,00) | 0,49 (0,04) | 0,78 (0,02) | 2,72 (3,36) |
+
+  O teste deixou de rejeitar demais; em 100 × 20 pareceu conservador (0 de 81 rejeições,
+  mediana do p 0,58). Diagnóstico à parte (100 × 20, extinção 0,01, 6 metacomunidades): a forma
+  do nulo está certa (150 redraws verdadeiros contra o nulo de um conjunto de dados: rejeição
+  0,03–0,11, média 0,055), mas cada conjunto de dados contra o próprio nulo rejeita 3,3% (180
+  conjuntos; somando a rodada acima, 6 de 261 ≈ 2,3%). O centro do nulo acompanha a estimativa
+  (correlação entre ĉ e a média das réplicas nulas 0,2–0,33), sobretudo pelo dp de população,
+  estimado dos mesmos resíduos que movem ĉ. Decisão: documentar o leve conservadorismo (PR
+  #58) em vez de calibrar por bootstrap duplo (custo nboot²). Os intervalos de c = 3 cobrem mais, mas ainda bem abaixo de 95%, e a correção
+  agora fica curta em vez de passar do ponto: o viés de ĉ muda com c, como a documentação
+  avisa. Sob c = 0 em 100 × 20, ĥ tem viés +0,03 com intervalo de largura 0,05, e a cobertura
+  de c e h cai porque o conjunto ajustado é gerado com c0 = ĉ > 0. Recomendação: usar
+  `p_displacement` como guia; tratar intervalos e correção de c como aproximados.
+
+#### Por que c é identificável na ponte e não em SJC (`data-raw/bridge_narrow.R`)
+
+- Mesmo número de sítios (20), mas o desvio-padrão de ĉ sob o nulo é 1,38 na calibração de SJC
+  e 0,32 no desenho 20 × 5 da ponte.
+- O que governa a identificabilidade é a largura do kernel em relação ao espaçamento das espécies
+  no trait dentro dos sítios (`spread`, mediana do desvio-padrão das médias de população por
+  sítio), não o ruído de medida nem o tamanho da amostra. Descritores adimensionais (uma réplica
+  da ponte com h = 0,5 e c = 0; em SJC, w são os valores da calibração, não estimativas):
+
+  | desenho | pops usadas | espécies/sítio | ruído de meia média / spread | w / spread | dp do push líquido do ambiente / spread (por unidade de c) | EP aproximado de ĉ (w fixo) |
+  |---|---|---|---|---|---|---|
+  | SJC, w = 0,1 | 88 | 6,1 | 0,11 | 0,20 | 0,014 | 0,58 |
+  | SJC, w = 0,25 | 88 | 6,1 | 0,11 | 0,50 | 0,056 | 0,15 |
+  | ponte 20 × 5 | 181 | 10,7 | 0,35 | 1,83 | 0,227 | 0,08 |
+  | ponte 100 × 20 | 923 | 10,9 | 0,16 | 1,81 | 0,192 | 0,02 |
+
+  O ruído relativo é até menor em SJC. A diferença está no push: com kernel estreito em relação ao
+  espaçamento, poucos pares de populações ficam a menos de w, o push quase não varia entre as
+  populações de uma espécie e c e w se compensam.
+- Teste causal: o mesmo desenho 20 × 5 da ponte, com o kernel encolhido. Poder (contra o
+  quantil 95% do nulo da mesma razão; 60 réplicas):
+
+  | w / spread | c = 1, w livre | c = 1, w fixo | c = 3, w livre | c = 3, w fixo |
+  |---|---|---|---|---|
+  | 0,2 | 0,10 | 0,08 | 0,18 | 0,17 |
+  | 0,5 | 0,33 | 0,53 | 0,75 | 0,98 |
+  | 1,8 | 0,98 | 1,00 | 1,00 | 1,00 |
+
+- A ponte planta w = média de `sigma` (a largura de nicho), larga em relação ao espaçamento dos
+  ótimos dentro dos sítios: um deslocamento forte e fácil de ver. Isso é escolha do simulador,
+  não propriedade do método.
+- Em SJC o melhor w fica no piso da grade (0,10 ≈ 0,2 × spread) e o perfil é plano. Os dados são
+  compatíveis com ausência de deslocamento ou com deslocamento por um kernel estreito, e o desenho
+  não separa as duas coisas. Na ponte, sob c = 0, o aviso de w mal identificado também dispara em
+  95–99% das réplicas: w não identificado é o sintoma esperado de c ≈ 0, não uma falha específica
+  de SJC.
+- Interpretação nossa: em anuros adultos o CRC difere entre espécies co-ocorrentes muito
+  mais do que a largura plausível de um kernel de competição por tamanho, então w / spread
+  pequeno é o caso provável em dados reais desse tipo. Para identificar c, ajuda (i) fixar w por
+  conhecimento independente, (ii) usar traits em que as espécies co-ocorrentes se sobrepõem, ou
+  (iii) desenhos com mais espécies próximas no trait por sítio.
+
+- Ressalva de escala: h e c entram na amostragem, não evoluem na dinâmica; as taxas por ramo
+  vêm de `turnover_rates()`; as duas camadas não compartilham o trait. O experimento testa a
+  recuperação de sinais plantados sob estruturas de montagem realistas, não se a montagem causa
+  evolução, e o desacoplamento de Januario et al. (2025) fica fora (proposta de teste de poder
+  em separado).
+
 ## McPeek (2017), *Evolutionary Community Ecology*
 
 Leitura feita por subagente; três citações conferidas no texto extraído.
@@ -168,36 +281,51 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
 9. Frequência de extinção de manchas e autocorrelação espacial do ambiente (Leibold et al. 2022),
    cruzadas com a dispersão como na Fig. 5 de Leibold et al. (2019), para achar onde a
    neutralidade regional apaga o rastro da montagem nas taxas entre espécies.
-10. Variação intraespecífica e adaptação local: gerar indivíduos a partir das abundâncias
-    simuladas, com traits em torno da média da espécie ou ajustados ao ambiente do sítio, e
-    calcular as estatísticas T com `cati::Tstats()`. Adaptação local forte deve baixar T_IP.IC
-    e mudar T_PC.PR em relação ao cenário sem adaptação.
-    Feito com `sample_individuals()` e `tstats()` (`data-raw/demo_tstats.R`). Resultado: a
-    previsão de T_IP.IC estava errada para adaptação ao ambiente do sítio. As populações
-    convergem para o ambiente, as espécies co-ocorrentes ficam parecidas e T_IP.IC sobe
-    (0,02 → 1,0), enquanto T_IC.IR e T_PC.PR caem (0,54 e 0,89 → <0,01). T_IP.IC baixo exige
-    divergência entre co-ocorrentes (deslocamento de caráter), ainda não simulado. Para a
-    ponte: o sinal da adaptação local aparece em T_PC.PR e T_IC.IR, não em T_IP.IC. A escala
-    de T_IP.IC depende de `intraspecific_sd` em relação à dispersão dos ótimos no sítio.
-    Deslocamento de caráter (`displacement`) faz o contrário: T_IP.IC cai e T_PC.PR sobe, e os
-    dois processos se compensam (com h = 0,9, `displacement = 10` leva T_IP.IC de 0,61 a
-    0,011 e T_PC.PR de 0,010 a 0,59). Consequência para o artigo: as razões sozinhas não
-    separam "nem adaptação nem deslocamento" de "os dois fortes" (T_PC.PR 0,89 contra 0,59,
-    T_IP.IC 0,017 contra 0,011); é preciso olhar as três juntas, ou acrescentar o ambiente do
-    sítio (a adaptação local deixa as médias das populações correlacionadas com ele).
-    Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata dessa
-    compensação [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
-    Identificabilidade resolvida em simulação: no piloto ABC
-    (`data-raw/pilot_tstats_identifiability.R`), as três razões recuperam h (R² 0,87–0,89) mas mal
-    c (0,56–0,58); acrescentar o ambiente do sítio e a abundância dos competidores numa regressão
-    conjunta dentro de espécie (`population_shifts()`) recupera os dois (0,99 e 0,95–0,96). A
-    abordagem segue Goldberg & Lande (2006, Evolution 60:1344–1357, doi:10.1554/05-696.1) e
-    Adams & Collyer (2007, Evolution 61:510–515, doi:10.1111/j.1558-5646.2007.00063.x), que
-    pedem avaliar divergência entre simpátricas depois de descontar o gradiente ambiental
-    (verificadas no Crossref). Buscas no Consensus, Scholar Gateway e OpenAlex não acharam
-    nulo restrito por espécie para T_IP.IC; não é prova de que não exista. Para o artigo: a
-    mensagem é que as estatísticas T precisam do ambiente e da composição local para separar
-    os processos; o piloto usa o mesmo modelo que gera os dados, então é um limite superior.
+10. Variação intraespecífica, adaptação local e deslocamento de caráter. Indivíduos gerados a
+    partir das abundâncias simuladas com `sample_individuals()`, com traits ajustados ao ambiente
+    do sítio (`local_adaptation`, h) e afastados dos co-ocorrentes (`displacement`, c), e
+    estatísticas T com `tstats()` (`data-raw/demo_tstats.R`).
+    - Previsão corrigida. A adaptação local *sobe* T_IP.IC: as populações convergem para o
+      ambiente do sítio, as espécies co-ocorrentes ficam parecidas e a variância dentro da
+      comunidade encolhe (0,02 → 1,0), enquanto T_IC.IR e T_PC.PR caem (0,54 e 0,89 → < 0,01).
+      Só o deslocamento de caráter *baixa* T_IP.IC (e sobe T_PC.PR). A previsão original
+      ("adaptação local forte deve baixar T_IP.IC") estava errada.
+    - Os dois processos se compensam: com h = 0,9, `displacement = 10` leva T_IP.IC de 0,61 a
+      0,011 e T_PC.PR de 0,010 a 0,59, e "nem adaptação nem deslocamento" fica parecido com "os
+      dois fortes" (T_PC.PR 0,89 contra 0,59; T_IP.IC 0,017 contra 0,011). As razões sozinhas não
+      separam os processos.
+    - T_IP.IC só deve ser reportado com `null_ip = "species"`, que troca as médias das
+      populações entre populações da mesma espécie e mantém composição, abundâncias e variâncias
+      dentro das populações. O nulo por sítio (permutar indivíduos dentro do sítio, Taudiere &
+      Violle 2016) só pergunta se as populações diferem: dá efeito negativo grande sempre que
+      co-ocorrentes têm médias diferentes, mesmo sem nenhuma resposta ao sítio. Com o nulo por
+      espécie, o efeito padronizado é positivo sob convergência (adaptação local a um ambiente
+      comum) e negativo sob divergência (deslocamento). Buscas no Consensus, Scholar Gateway e OpenAlex não acharam
+      esse nulo na literatura das estatísticas T; não é prova de que não exista
+      [CITAR: nulo restrito por espécie para T_IP.IC, se houver].
+    - A inferência sobre os processos vem de `population_shifts()`, que ajusta h e c juntos às
+      médias das populações, dentro de espécie, com o ambiente do sítio e a abundância dos
+      competidores. No piloto ABC (`data-raw/pilot_tstats_identifiability.R`), as três razões
+      recuperam h (R² 0,87–0,89) mas mal c (0,56–0,58), e a regressão conjunta recupera os dois
+      (0,99 e 0,95–0,96); o piloto usa o mesmo modelo que gera os dados, então é um limite
+      superior. A abordagem segue Goldberg & Lande (2006, Evolution 60:1344–1357,
+      doi:10.1554/05-696.1) e Adams & Collyer (2007, Evolution 61:510–515,
+      doi:10.1111/j.1558-5646.2007.00063.x), que pedem avaliar a divergência entre simpátricas
+      depois de descontar o gradiente ambiental (verificadas no Crossref).
+    - Limite em dados reais: no desenho de São José dos Campos (20 poças, 15 espécies, ≤ 5
+      indivíduos por população; calibração por simulação do próprio desenho), h é recuperado sem
+      viés (±0,01 por desvio-padrão do gradiente), mas c não é identificável com a largura do
+      kernel livre: sem deslocamento, ĉ varia de −1,9 a 2,7 (90% central), e o poder para c = 4
+      fica em 30–36%. Com a largura fixa no valor verdadeiro, c é bem estimado; o problema é
+      identificar w. Desvios de populações inteiras também enviesam ĉ para baixo, o que o
+      bootstrap de `population_shifts()` incorpora no p-valor centrado.
+    - Para o artigo: as estatísticas T precisam do ambiente e da composição local para separar
+      os processos, e o experimento da ponte (abaixo) deve mapear em que desenhos amostrais e em
+      que metacomunidades (dispersão, extinção de manchas, autocorrelação do ambiente) c passa a
+      ser estimável.
+    Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata da
+    compensação entre adaptação local e deslocamento
+    [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas
