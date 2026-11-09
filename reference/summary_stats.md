@@ -62,7 +62,7 @@ Named numeric vector.
 ## Details
 
 `alpha`, `gamma` and `beta` are the mean number of species per site, the
-number of species in all sites and `gamma / alpha`. `occupancy` and
+number of species in all sites and \\\gamma / \alpha\\. `occupancy` and
 `occupancy_sd` are the mean and the standard deviation of the share of
 sites each species occupies, over the species present. `abundance` is
 the mean number of individuals per site, `evenness` the mean Pielou

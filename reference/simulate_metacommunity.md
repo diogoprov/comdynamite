@@ -1,11 +1,11 @@
 # Simulate a metacommunity
 
 Runs the process-based model of Thompson et al. (2020) on a landscape.
-At each time step, abundances are drawn as
-`N' ~ Poisson(r N / (1 + N alpha'))`, where `r` holds the growth rates
-of each species at each site
+At each time step, abundances are drawn as \\N' \sim \mathrm{Poisson}(r
+N / (1 + N \alpha'))\\, where \\r\\ holds the growth rates of each
+species at each site
 ([`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md))
-and `alpha` the competition coefficients
+and \\\alpha\\ the competition coefficients
 ([`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md)).
 Each individual then emigrates with probability `dispersal`, and
 emigrants are redistributed among sites:

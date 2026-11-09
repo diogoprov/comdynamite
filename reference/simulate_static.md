@@ -2,17 +2,18 @@
 
 Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
-dispersal. The expected abundance of species j at site i is
-`r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the
-Gaussian response of Dray & Legendre (2008), also used by Peres-Neto et
-al. (2012). By default, observed abundances are Poisson counts with that
-mean, as in Peres-Neto & Kembel (2015) and Duarte et al. (2016), where
-`r_max` lies between 0 and 30. In the two earlier studies `r_max` lies
-between 0.5 and 1, abundances are the expected values
-(`sampling = "expected"`), and Dray & Legendre (2008) draw presences
-from a binomial distribution with the expected value as the probability
-(`sampling = "binomial"`). Because nothing but the gradient structures
-the data, this is a baseline for
+dispersal. The expected abundance of species \\j\\ at site \\i\\ is
+\\r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))\\, with \\r_j\\ =
+`r_max`, \\\theta_j\\ = `optimum`, \\\sigma_j\\ = `sigma` and \\E_i\\
+the environment, the Gaussian response of Dray & Legendre (2008), also
+used by Peres-Neto et al. (2012). By default, observed abundances are
+Poisson counts with that mean, as in Peres-Neto & Kembel (2015) and
+Duarte et al. (2016), where `r_max` lies between 0 and 30. In the two
+earlier studies `r_max` lies between 0.5 and 1, abundances are the
+expected values (`sampling = "expected"`), and Dray & Legendre (2008)
+draw presences from a binomial distribution with the expected value as
+the probability (`sampling = "binomial"`). Because nothing but the
+gradient structures the data, this is a baseline for
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
 and a fast generator for evaluating methods.
 

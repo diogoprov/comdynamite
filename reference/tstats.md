@@ -126,15 +126,14 @@ model of `T_PC.PR` the population means are themselves computed from the
 values drawn, so their regional variance is computed again from them, as
 in Taudiere & Violle (2016).
 
-The standardised effect size is
-`(observed - mean of null) / sd of null`, and the p-value is
-`(1 + r) / (1 + nperm)`, where `r` is the number of null values at or
-below the observed one (`alternative = "less"`), at or above it
-(`"greater"`), or twice the smaller of the two (`"two.sided"`, at most
-1). Low values of the three statistics are the usual hypotheses (niche
-differentiation within communities for `T_IP.IC`, environmental
-filtering for the others), so `"less"` tests them. Each trait is
-randomised on its own.
+The standardised effect size is \\(T\_{obs} - \bar T\_{null}) /
+s\_{null}\\, and the p-value is \\(1 + r) / (1 + n)\\, with \\n\\ =
+`nperm`, where \\r\\ is the number of null values at or below the
+observed one (`alternative = "less"`), at or above it (`"greater"`), or
+twice the smaller of the two (`"two.sided"`, at most 1). Low values of
+the three statistics are the usual hypotheses (niche differentiation
+within communities for `T_IP.IC`, environmental filtering for the
+others), so `"less"` tests them. Each trait is randomised on its own.
 
 The null model of `T_IP.IC` asks only whether populations differ:
 permuting individuals within a site removes its populations, so null

@@ -58,11 +58,11 @@ z / dt\|\\, over the steps at which it is present. Like
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md),
 the food web runs in ecological time and only informs the tip branches:
 over the last `window` units of time of each tip branch the rate is
-`sigma2 * (1 + k * speed)` of the level of the tip, and elsewhere it is
-`sigma2`. These speeds are directional changes of the mean trait under
-selection, not the variance per unit time of Brownian motion, so they
-give relative rates among levels, scaled by `k`, not an equivalence
-between the two.
+\\\mathrm{sigma2}\\ (1 + k \cdot \mathrm{speed})\\ of the level of the
+tip, and elsewhere it is `sigma2`. These speeds are directional changes
+of the mean trait under selection, not the variance per unit time of
+Brownian motion, so they give relative rates among levels, scaled by
+`k`, not an equivalence between the two.
 
 ## References
 

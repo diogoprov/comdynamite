@@ -101,8 +101,9 @@ fit_damocles(
 
   Optional positive number for each edge of `tree`, in the order of
   `tree$edge`, such as branch-specific rates of speciation estimated by
-  another method: the rates in `vary` change with it as
-  `rate * (x / geometric mean of x)^beta`, with `rate` and `beta`
+  another method: the rates in `vary` change with it as \\\mathrm{rate}
+  \cdot (x / \bar{x}\_g)^\beta\\, where \\x\\ is the covariate and
+  \\\bar{x}\_g\\ its geometric mean, with `rate` and \\\beta\\
   estimated. Give `regimes` or `edge_covariate`, not both.
 
 - vary:
@@ -154,8 +155,9 @@ neighbouring sites that share their colonisation history, or communities
 nested in one another, are not independent replicates and pooling them
 overstates the information on the rates. Twice the difference between
 the summed log-likelihoods of separate and shared fits can be compared
-with a chi-squared distribution on `2 * (number of communities - 1)`
-degrees of freedom to ask whether the rates differ among communities.
+with a chi-squared distribution on \\2 (m - 1)\\ degrees of freedom,
+with \\m\\ communities, to ask whether the rates differ among
+communities.
 
 With `sympatry = NULL`, `fit_damocles()` also estimates the probability
 that a present ancestor leaves both daughters present, on the logit

@@ -18,8 +18,9 @@ phylo_eigenvectors(tree, squared = FALSE)
 
 - squared:
 
-  Use `-PD^2 / 2`, as in a classic principal coordinate analysis,
-  instead of `-PD / 2`, the form printed by Peres-Neto & Kembel (2015)?
+  Use \\-\mathrm{PD}^2 / 2\\, as in a classic principal coordinate
+  analysis, instead of \\-\mathrm{PD} / 2\\, the form printed by
+  Peres-Neto & Kembel (2015)?
 
 ## Value
 

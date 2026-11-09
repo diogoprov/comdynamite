@@ -94,12 +94,12 @@ optimum, is chosen by `distance`:
   its units.
 
 - `"mahalanobis"`: Euclidean distance after removing the correlations
-  between traits, `sqrt((x - y)' S^-1 (x - y))`, with `S` the covariance
-  matrix of the traits in the pool, or `trait_cov`. In the filter,
-  removing species by decreasing Mahalanobis distance to the optimum is
-  removing them by increasing value of a multivariate Gaussian niche
-  with covariance `S` centred on the optimum (Mahalanobis 1936,
-  reprinted 2018).
+  between traits, \\\sqrt{(x - y)^\top S^{-1} (x - y)}\\, with \\S\\ the
+  covariance matrix of the traits in the pool, or `trait_cov`. In the
+  filter, removing species by decreasing Mahalanobis distance to the
+  optimum is removing them by increasing value of a multivariate
+  Gaussian niche with covariance `S` centred on the optimum (Mahalanobis
+  1936, reprinted 2018).
 
 The choice is a statement about niche axes. With correlated traits, such
 as those of

@@ -42,8 +42,8 @@ torus_permutations(side, symmetries = TRUE, n_perm = NULL)
 ## Value
 
 Integer matrix with one permutation of the site indices per row,
-excluding the identity (`8 * side^2 - 1` rows on a square grid with
-`side > 2`).
+excluding the identity (\\8\\ \mathrm{side}^2 - 1\\ rows on a square
+grid with `side > 2`).
 
 ## References
 

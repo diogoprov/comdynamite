@@ -60,11 +60,11 @@ matrix; and `permutations`.
 The equations printed in the article omit the 1 in the adjusted R2, the
 transpose in the hat matrix and the centring of the matrix that is
 regressed. Here the predictors and the matrix are centred, and the
-residual degrees of freedom are `n - p - 1`, with `n - 1` for the total,
-instead of the printed `n - p` and `n`. The pseudo-F and R2 therefore
-equal those of a distance-based redundancy analysis in vegan. The
-printed degrees of freedom would multiply the pseudo-F by a constant,
-which does not change the permutation tests.
+residual degrees of freedom are \\n - p - 1\\, with \\n - 1\\ for the
+total, instead of the printed \\n - p\\ and \\n\\. The pseudo-F and R2
+therefore equal those of a distance-based redundancy analysis in vegan.
+The printed degrees of freedom would multiply the pseudo-F by a
+constant, which does not change the permutation tests.
 
 The authors used presences and absences. Abundances are accepted, as
 weights in

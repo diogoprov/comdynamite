@@ -1,12 +1,12 @@
 # Simulate presences and absences from logistic responses
 
 The two-gradient simulation of Appendix C of Peres-Neto et al. (2012),
-after Ives & Helmus (2011). The probability that species j occurs at
-site t along gradient x is `plogis(a[j] + b[j] * x[t])`, where `a` is a
-normal deviate and the slope `b` evolves on the tree. With several
-gradients, each with its own `a` and `b`, the probabilities multiply. A
-value drawn for each site from `reduction` then reduces them, which adds
-noise.
+after Ives & Helmus (2011). The probability that species \\j\\ occurs at
+site \\t\\ along gradient \\x\\ is \\\mathrm{logit}^{-1}(a_j + b_j
+x_t)\\, where \\a\\ is a normal deviate and the slope \\b\\ evolves on
+the tree. With several gradients, each with its own \\a\\ and \\b\\, the
+probabilities multiply. A value drawn for each site from `reduction`
+then reduces them, which adds noise.
 
 ## Usage
 

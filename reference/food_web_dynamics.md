@@ -118,7 +118,7 @@ differences of this fitness with respect to `z` at the mean, so the
 three attack forms share one implementation. Abundances and means are
 integrated together by a fourth-order Runge-Kutta method with a fixed
 step `dt`, which must be short against the fastest rate of the system
-(about a tenth of `1 / c0` or less): halving `dt` should leave the
+(about a tenth of \\1 / c_0\\ or less): halving `dt` should leave the
 result unchanged, and a run whose state stops being finite or whose
 abundances overshoot below zero stops with an error.
 

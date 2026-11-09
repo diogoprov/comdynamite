@@ -66,9 +66,9 @@ so its dynamics only inform the tip branches, and how ecological time
 relates to branch lengths is a choice of the user, not something the
 simulation gives. Here the dynamics are taken to represent the last
 `window` units of time of each tip branch: in that stretch the rate is
-`sigma2 * (1 + k * turnover)`, and elsewhere, including all internal
-branches, it is `sigma2`. The rate of a tip branch is the mean over the
-branch, weighted by time.
+\\\mathrm{sigma2}\\ (1 + k \cdot \mathrm{turnover})\\, and elsewhere,
+including all internal branches, it is `sigma2`. The rate of a tip
+branch is the mean over the branch, weighted by time.
 
 ## References
 

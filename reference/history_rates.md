@@ -68,17 +68,19 @@ Numeric vector with the rate of each branch, in the order of the rows of
 - `"burst"`: each change of state, such as the colonisation of a new
   habitat or region, multiplies the rate by `1 + burst`, and the excess
   decays exponentially with time scale `decay`, also along the
-  descending branches, until the next change. The rate at time `u` after
-  the last change is `sigma2 * (1 + burst * exp(-u / decay))`; before
-  any change it is `sigma2`. This follows the expectation of
-  McPeek (2017) that selection, and so evolution, is strongest when a
-  lineage first adapts to a new community.
+  descending branches, until the next change. The rate at time \\u\\
+  after the last change is \\\mathrm{sigma2}\\ (1 + \mathrm{burst}\\
+  e^{-u / \mathrm{decay}})\\; before any change it is `sigma2`. This
+  follows the expectation of McPeek (2017) that selection, and so
+  evolution, is strongest when a lineage first adapts to a new
+  community.
 
 - `"sympatry"`: the rate depends on the number of lineages that share
   the state at each moment, counting the lineage itself, as
-  `sigma2 * exp(r * n)`; a negative `r` slows evolution down as lineages
-  accumulate in the same region, as in the diversity-dependent model
-  with biogeography of Drury et al. (2016).
+  \\\mathrm{sigma2}\\ e^{r n}\\, with \\n\\ that number; a negative
+  \\r\\ slows evolution down as lineages accumulate in the same region,
+  as in the diversity-dependent model with biogeography of Drury et al.
+  (2016).
 
 ## References
 

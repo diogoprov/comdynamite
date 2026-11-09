@@ -90,8 +90,9 @@ damocles_test(
 
   Optional positive number for each edge of `tree`, in the order of
   `tree$edge`, such as branch-specific rates of speciation estimated by
-  another method: the rates in `vary` change with it as
-  `rate * (x / geometric mean of x)^beta`, with `rate` and `beta`
+  another method: the rates in `vary` change with it as \\\mathrm{rate}
+  \cdot (x / \bar{x}\_g)^\beta\\, where \\x\\ is the covariate and
+  \\\bar{x}\_g\\ its geometric mean, with `rate` and \\\beta\\
   estimated. Give `regimes` or `edge_covariate`, not both.
 
 - vary:
@@ -122,15 +123,16 @@ or MNTD and are left out of the null distribution, and `n_valid` counts
 the ones kept. Distances are the cophenetic distances of `tree`, which
 should hold every species of the regional pool.
 
-Standardised effect sizes are
-`(observed - mean of the null) / sd of the null`, as in
+Standardised effect sizes are \\(x\_{obs} - \bar{x}\_{null}) /
+s\_{null}\\, as in
 [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md):
 negative values mean the species present are more closely related than
 expected (clustering) and positive values that they are less related
 (overdispersion). Note that `DAMOCLES::DAMOCLES_bootstrap()` reports the
-opposite sign. The p-values are lower-tail ranks,
-`(number of null values <= observed + 1) / (n_valid + 1)`; values near
-one point to overdispersion.
+opposite sign. The p-values are lower-tail ranks, \\(r + 1) / (n + 1)\\,
+with \\r\\ the number of null values at or below the observed one and
+\\n\\ the number of valid null values; values near one point to
+overdispersion.
 
 ## References
 

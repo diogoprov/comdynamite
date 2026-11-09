@@ -1,10 +1,11 @@
 # Growth rates of each species at each site
 
-Density-independent growth rate of species j at site i,
-`r_max[j] * exp(-(E[i] - optimum[j])^2 / (2 * sigma[j]^2))`: a Gaussian
-response whose standard deviation is the niche breadth `sigma`. This
-`sigma` equals `sqrt(2)` times the niche breadth parameter of Thompson
-et al. (2020).
+Density-independent growth rate of species \\j\\ at site \\i\\, \\r_j
+\exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))\\, with \\r_j\\ = `r_max`,
+\\\theta_j\\ = `optimum` and \\\sigma_j\\ = `sigma`: a Gaussian response
+whose standard deviation is the niche breadth `sigma`. This `sigma`
+equals \\\sqrt{2}\\ times the niche breadth parameter of Thompson et al.
+(2020).
 
 ## Usage
 

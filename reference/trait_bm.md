@@ -1,7 +1,7 @@
 # Trait evolution by Brownian motion with Pagel's lambda
 
-Draws from a multivariate normal distribution with covariance
-`lambda * C + (1 - lambda) * diag(C)`, where `C` is the phylogenetic
+Draws from a multivariate normal distribution with covariance \\\lambda
+C + (1 - \lambda)\\ \mathrm{diag}(C)\\, where \\C\\ is the phylogenetic
 covariance matrix of `tree`.
 
 ## Usage

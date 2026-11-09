@@ -4,11 +4,6 @@ Draws individuals from the populations of a simulated metacommunity and
 gives each one a trait value, so that intraspecific variation and local
 adaptation can be studied with the T-statistics of Violle et al. (2012)
 ([`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)).
-The trait is the environmental optimum of
-[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
-the one that sets growth in
-[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
-The value of individual `k` of species `j` at site `i` is
 
 ## Usage
 
@@ -90,47 +85,56 @@ sample_individuals(
 Data frame with one row per individual and the columns `site`,
 `species`, `individual` (its number within the population), `abundance`
 (of the population), `env` (of the site), `optimum` (of the species),
-`population_mean` (the expected value of the population,
-`theta_j + h_j (E_i - theta_j) + d_ij`, after character displacement)
-and `trait`. Populations with no individual measured are absent.
+`population_mean` (the expected value of the population, \\m\_{ij}\\
+above, after character displacement) and `trait`. Populations with no
+individual measured are absent.
 
 ## Details
 
-`z_ijk = theta_j + h_j (E_i - theta_j) + d_ij + e_ijk`,
+The trait is the environmental optimum of
+[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
+the one that sets growth in
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
+The value of individual \\k\\ of species \\j\\ at site \\i\\ is
 
-where `theta_j` is the optimum of the species, `E_i` the environment of
-the site, `h_j` (`local_adaptation`) the fraction of the gap between
-them that the population closes, `d_ij ~ N(0, population_sd^2)` a
-deviation of the population that does not track the environment (drift,
-founder effects), and `e_ijk ~ N(0, intraspecific_sd^2)` the variation
-among individuals of a population. With `local_adaptation = 0` and
-`population_sd = 0` all populations of a species share its mean; with
-`local_adaptation = 1` every population sits on the environment of its
-site and species no longer differ within a site.
+\$\$z\_{ijk} = \theta_j + h_j (E_i - \theta_j) + d\_{ij} + e\_{ijk},\$\$
+
+where \\\theta_j\\ is the optimum of the species, \\E_i\\ the
+environment of the site, \\h_j\\ (`local_adaptation`) the fraction of
+the gap between them that the population closes, \\d\_{ij} \sim N(0,
+s_p^2)\\ (with \\s_p\\ = `population_sd`) a deviation of the population
+that does not track the environment (drift, founder effects), and
+\\e\_{ijk} \sim N(0, s_e^2)\\ (with \\s_e\\ = `intraspecific_sd`) the
+variation among individuals of a population. With `local_adaptation = 0`
+and `population_sd = 0` all populations of a species share its mean;
+with `local_adaptation = 1` every population sits on the environment of
+its site and species no longer differ within a site.
 
 With `displacement > 0`, the populations of each site also diverge from
 one another, as in ecological character displacement. Their means are
 the equilibrium of
 
-`mu_ij = m_ij + c sum_k p_ik (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2))`,
+\$\$\mu\_{ij} = m\_{ij} + c \sum_k p\_{ik} (\mu\_{ij} - \mu\_{ik})
+\exp\left(-\frac{(\mu\_{ij} - \mu\_{ik})^2}{2 w^2}\right),\$\$
 
-where `m_ij` is the mean above (`theta_j + h_j (E_i - theta_j) + d_ij`),
-`c` is `displacement`, `p_ik` the share of species `k` among the
-individuals of the site and `w` (`displacement_width`) the width of a
-Gaussian competition kernel. Each population is pushed away from the
-populations close to it in trait, more so from abundant ones, and held
-near `m_ij`, so `c` sets the strength of competition relative to the
-selection that keeps the population near `m_ij`. The push from one
-competitor is largest at a distance `w` and at most `c w exp(-1/2)`,
-about `0.6 c w`. The equilibrium is found by damped fixed-point
-iteration from `m_ij`, with steps of `1 / (1 + c)`. Populations with the
-same `m_ij`, as with `local_adaptation = 1` and no `population_sd`, are
-not pushed apart, since the push is symmetric. With `c > 1`, however,
-the equilibrium with equal means is unstable: populations whose `m_ij`
-differ even slightly end up about `w sqrt(2 log c)` apart, and several
+where \\m\_{ij} = \theta_j + h_j (E_i - \theta_j) + d\_{ij}\\ is the
+mean above, \\c\\ is `displacement`, \\p\_{ik}\\ the share of species
+\\k\\ among the individuals of the site and \\w\\ (`displacement_width`)
+the width of a Gaussian competition kernel. Each population is pushed
+away from the populations close to it in trait, more so from abundant
+ones, and held near \\m\_{ij}\\, so \\c\\ sets the strength of
+competition relative to the selection that keeps the population near
+\\m\_{ij}\\. The push from one competitor is largest at a distance \\w\\
+and at most \\c w e^{-1/2}\\, about \\0.6 c w\\. The equilibrium is
+found by damped fixed-point iteration from \\m\_{ij}\\, with steps of
+\\1 / (1 + c)\\. Populations with the same \\m\_{ij}\\, as with
+`local_adaptation = 1` and no `population_sd`, are not pushed apart,
+since the push is symmetric. With \\c \> 1\\, however, the equilibrium
+with equal means is unstable: populations whose \\m\_{ij}\\ differ even
+slightly end up about \\w \sqrt{2 \log c}\\ apart, and several
 equilibria can exist, of which the iteration finds the one reached from
-`m_ij`. The size of the displacement therefore grows with `c` only
-slowly once `c` exceeds 1.
+\\m\_{ij}\\. The size of the displacement therefore grows with \\c\\
+only slowly once \\c\\ exceeds 1.
 
 The traits of individuals are drawn after the simulation and do not feed
 back on the dynamics: abundances are those of the species means. The
