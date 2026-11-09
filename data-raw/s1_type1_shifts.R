@@ -19,16 +19,19 @@
 #    the true regimes (vary = "both", 49 random partitions).
 # Settings: n_tips 112 or 250, n_shifts 1 or 3, ratio 2 or 4, n_comm 14 or 40, plus a control
 # with ratio 1 (shifts with no change in rate). REPS replicates per setting (default 500),
-# PARTITION replicates with the partition test (default 50), CORES workers (default 6).
-# Results in data-raw/s1_type1_shifts.rds; the summary gives the rejection rate at 5% with a
-# 95% binomial interval (Clopper-Pearson).
-suppressMessages(devtools::load_all(".", quiet = TRUE))
-cores <- as.integer(Sys.getenv("CORES", "6"))
+# PARTITION replicates with the partition test (default 50), WORKERS processes (default 6).
+# Each replicate is saved in JOBS (default data-raw/s1_jobs, ignored by git) with its own seed,
+# and skipped on a rerun, so a run cut short (a spot instance on AWS; data-raw/aws/) resumes.
+# When every replicate is done, the results go to OUT (default data-raw/s1_type1_shifts.rds);
+# the summary gives the rejection rate at 5% with a 95% binomial interval (Clopper-Pearson).
+suppressMessages(pkgload::load_all(".", quiet = TRUE, export_all = TRUE))
+workers <- as.integer(Sys.getenv("WORKERS", Sys.getenv("CORES", "6")))
 reps <- as.integer(Sys.getenv("REPS", "500"))
 n_partition <- as.integer(Sys.getenv("PARTITION", "50"))
+jobs_dir <- Sys.getenv("JOBS", "data-raw/s1_jobs")
 out <- Sys.getenv("OUT", "data-raw/s1_type1_shifts.rds")
 RNGkind("L'Ecuyer-CMRG")
-set.seed(101)
+dir.create(jobs_dir, showWarnings = FALSE, recursive = TRUE)
 
 # 2-3. One replicate ---------------------------------------------------------------------------
 p_value <- function(null, alternative) damocles_lrt(null, alternative)$p_value[2]
@@ -61,18 +64,29 @@ settings <- expand.grid(n_tips = c(112, 250), n_shifts = c(1, 3), ratio = c(2, 4
                         n_comm = c(14, 40))
 settings <- rbind(settings, data.frame(n_tips = c(112, 250), n_shifts = 1, ratio = 1, n_comm = 14))
 jobs <- expand.grid(setting = seq_len(nrow(settings)), rep = seq_len(reps))
+jobs$file <- file.path(jobs_dir, sprintf("s%02d_r%04d.rds", jobs$setting, jobs$rep))
+# The slowest first: partition tests, then large trees and many communities.
+cost <- (jobs$rep <= n_partition) * 50 + settings$n_tips[jobs$setting] / 112 *
+  settings$n_comm[jobs$setting] / 14 * (1 + settings$n_shifts[jobs$setting])
+todo <- which(!file.exists(jobs$file))
+todo <- todo[order(-cost[todo])]
 started <- Sys.time()
-results <- parallel::mclapply(seq_len(nrow(jobs)), function(j) {
+cat("S1:", length(todo), "of", nrow(jobs), "replicates to run on", workers, "workers\n")
+invisible(parallel::mclapply(todo, function(j) {
   s <- settings[jobs$setting[j], ]
+  set.seed(101 + 10000 * jobs$setting[j] + jobs$rep[j])
   r <- tryCatch(one(s, jobs$rep[j] <= n_partition), error = function(e) {
     data.frame(p_both = NA, p_gamma = NA, p_dr = NA, p_partition = NA, shifted_tips = NA,
                shifted_edges = NA, convergence = NA, error = conditionMessage(e))
   })
   if (is.null(r$error)) r$error <- NA_character_
-  cbind(s, rep = jobs$rep[j], r)
-}, mc.cores = cores, mc.preschedule = FALSE)
-results <- do.call(rbind, results)
+  saveRDS(cbind(s, rep = jobs$rep[j], r), jobs$file[j])
+  NULL
+}, mc.cores = workers, mc.preschedule = FALSE))
 elapsed <- as.numeric(difftime(Sys.time(), started, units = "mins"))
+done <- file.exists(jobs$file)
+if (!all(done)) stop(sum(!done), " replicates missing in ", jobs_dir, call. = FALSE)
+results <- do.call(rbind, lapply(jobs$file, readRDS))
 
 rate <- function(p) {
   p <- p[!is.na(p)]
