@@ -191,3 +191,12 @@ test_that("diagnostics include the phylogenetic shares", {
   bad <- tg_diagnostics_from(posterior::as_draws_array(arr), np)
   expect_gt(bad$max_rhat, 1.01)
 })
+
+test_that("a constant trait and an unknown response are refused", {
+  skip_if_not_installed("brms")
+  d <- tgb_sim()
+  flat <- d$tg
+  flat$populations$trait <- 3
+  expect_error(tg_brms_data(flat, d$tree), "does not vary")
+  expect_error(pp_check.mc_trait_gradient_brms(list(), resp = "x"))
+})
