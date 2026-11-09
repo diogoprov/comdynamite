@@ -11,8 +11,9 @@
   effects estimated from every site, and returns the phylogenetic share of beta, alpha and the
   mean with credible intervals, the phylogenetic correlations, species values and convergence
   diagnostics. Priors are explicit and documented; `ou_alpha` gives an OU structure with a
-  given strength; `pp_check()` works on the result. It needs about 40 species or more, and
-  in simulations without phylogenetic signal its chains mixed slowly (see Limits).
+  given strength; `pp_check()` works on the result. In simulations with about 40 species it
+  told strong phylogenetic signal from none but pulled intermediate signal (Pagel's lambda
+  0.5) toward 0, often with divergent transitions; see Limits before using it.
 
 - `trait_gradient()` runs the trait-gradient analysis of Ackerly & Cornwell (2007): each
   species' trait splits into its position along the gradient of community trait means

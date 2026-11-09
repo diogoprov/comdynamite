@@ -768,8 +768,12 @@ pacotes de referência em vez de reimplementá-los.
       em todos os diagnósticos); λ = 0 recuperado em 8/10, mas nenhuma passa (ESS 180–400);
       4 réplicas com cadeias divididas. Auditoria Fable corrigida (nomes com espaço, Kish,
       diagnósticos de λ, loo por resposta, β NA para espécies sempre sozinhas).
-- [ ] TGA bayesiana: validar λ intermediário (~0,5), cuja recuperação a auditoria pediu antes de
-      afirmá-la, e testar se cadeias mais longas resolvem o caso λ = 0.
+      Validação 2 (4000 iterações, pesos de ocorrência, ~43 espécies): R-hat ≤ 1,03, mas
+      divergências na maioria; λ = 0 de novo perto de 0 (10/10 com divergências); λ de Pagel
+      0,5 NÃO é recuperado: medianas 0,007–0,81 (mediana 0,04), intervalo contém 0,5 em 12/20 e
+      exclui 0 em 3/20; só 4/20 passam. Documentado em Limits.
+- [ ] TGA bayesiana: reparametrizar para tirar o viés para 0 (prior direto em λ, p. ex. beta,
+      com sd total; exige Stan próprio ou `stanvars`) e atacar as divergências perto de λ = 0.
 
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).

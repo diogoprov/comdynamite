@@ -84,8 +84,16 @@
 #' without phylogenetic signal gave \eqn{\lambda_\beta} near 0 (median 0.001--0.005) in 8 of 10
 #' trials, but none passed every diagnostic (bulk ESS 180--400, and up to 4 divergent
 #' transitions). In the remaining 4 trials the chains split between the two ends
-#' (R-hat 1.39--1.75). Intermediate values of \eqn{\lambda} were not tested. Run longer
-#' chains when the effective sample sizes are low, and do not read a fit that fails
+#' (R-hat 1.39--1.75). With 4000 iterations and occurrence weights for species, the chains
+#' mixed (R-hat at most 1.03) but most fits had divergent transitions: all 10 without
+#' phylogenetic signal (2--298 of 8000 draws), where \eqn{\lambda_\beta} was again near 0
+#' (median 0.008--0.04). **Intermediate signal is not recovered.** In 20 trials where the
+#' niches followed Pagel's \eqn{\lambda = 0.5}, the posterior median of \eqn{\lambda_\beta}
+#' ranged from 0.007 to 0.81 (median across trials 0.04): the 95% interval contained 0.5 in 12
+#' and excluded 0 in only 3, and only 4 fits passed every diagnostic. With about 40 species
+#' the model tells strong signal from none, but it pulls intermediate signal toward 0, and a
+#' \eqn{\lambda_\beta} near 0 is no evidence that \eqn{\beta} lacks phylogenetic structure.
+#' Use [trait_gradient_phylo()] to test the signal, and do not read a fit that fails
 #' `diagnostics`.
 #'
 #' @param x Result of [trait_gradient()].
