@@ -148,19 +148,83 @@ subconjunto. 48 min em 6 núcleos.
 - Estatísticas T (nulo por espécie, 100 sítios × 20 indivíduos): SES de T_IP.IC 0,08 sem
   processo, 4,15 só com adaptação local, −0,8 a −1,0 só com deslocamento e 0,25 com h = 0,5 e
   c = 3: a compensação entre os dois processos aparece também com o nulo por espécie.
-- Bootstrap de `population_shifts()`: tamanho 0,025 com 20 sítios × 5 indivíduos, mas **0,29
-  com 100 sítios × 20 indivíduos** (sem deslocamento, ĉ fica entre 0,03 e 0,24 com h = 0,5, e
-  o gerador do bootstrap não reproduz esse viés positivo). Cobertura dos intervalos de c = 3
-  de 0,04–0,13 e correção mediana 3,02–3,36. O bootstrap não é confiável em desenhos grandes;
-  a causa precisa ser investigada antes de recomendá-lo.
-- Por que c é identificável aqui e não em SJC: não resolvido. Os desenhos têm números de
-  populações parecidos; a diferença provável está na razão entre a largura do kernel e o
-  espaçamento das médias das espécies e na razão sinal/ruído, que precisa ser medida nos dois
-  casos (interpretação nossa).
+- Bootstrap de `population_shifts()` (versão do PR #57): tamanho 0,025 com 20 sítios × 5
+  indivíduos, mas 0,29 com 100 sítios × 20 indivíduos; cobertura dos intervalos de c = 3 de
+  0,04–0,13.
+- **Causa e correção (PR #58).** O gerador nulo usava os slopes do ajuste com deslocamento; o
+  erro deles (ĥ 0,548 contra 0,5) ia para os resíduos e inflava o dp de população (1,57 contra
+  1). Desvios de população viesam ĉ para cima quando o kernel é largo (a derivada do push em
+  relação à própria média é exp(−g²/2w²)(1 − g²/w²), positiva para g < w), então o nulo
+  exagerava o viés (média das réplicas nulas 0,21–0,30 contra 0,13–0,14 na distribuição
+  verdadeira de ĉ numa mesma metacomunidade). Correção: nulo a partir do ajuste sem
+  deslocamento, constantes das populações que entram no ajuste, variância de população por
+  momentos ponderados pela precisão e, no conjunto ajustado, variância de amostragem escalada por
+  (1 − c D)², já que o erro da média entra no push removido (achado da auditoria). A
+  documentação dizia que o viés por desvios de população era para baixo; o sinal depende de w.
+- Nova rodada do subconjunto (`data-raw/bridge_bootstrap.R`, novas simulações, 81 por
+  desenho, 28 min):
+
+  | c | desenho | rejeição a 5% (antes) | cobertura de c (antes) | cobertura de h (antes) | ĉ corrigido mediano (antes) |
+  |---|---|---|---|---|---|
+  | 0 | 20 × 5 | 0,06 (0,03) | 0,90 (0,91) | 0,87 (0,89) | −0,02 (−0,04) |
+  | 0 | 100 × 20 | 0,00 (0,29) | 0,68 (0,80) | 0,64 (0,87) | 0,06 (−0,01) |
+  | 3 | 20 × 5 | 0,93 (0,99) | 0,41 (0,13) | 0,88 (0,04) | 2,34 (3,02) |
+  | 3 | 100 × 20 | 0,99 (1,00) | 0,49 (0,04) | 0,78 (0,02) | 2,72 (3,36) |
+
+  O teste deixou de rejeitar demais; em 100 × 20 ficou conservador (mediana do p 0,58, só 2,5%
+  abaixo de 0,1). Os intervalos de c = 3 cobrem mais, mas ainda bem abaixo de 95%, e a correção
+  agora fica curta em vez de passar do ponto: o viés de ĉ muda com c, como a documentação
+  avisa. Sob c = 0 em 100 × 20, ĥ tem viés +0,03 com intervalo de largura 0,05, e a cobertura
+  de c e h cai porque o conjunto ajustado é gerado com c0 = ĉ > 0. Recomendação: usar
+  `p_displacement` como guia; tratar intervalos e correção de c como aproximados.
+
+#### Por que c é identificável na ponte e não em SJC (`data-raw/bridge_narrow.R`)
+
+- Mesmo número de sítios (20), mas o desvio-padrão de ĉ sob o nulo é 1,38 na calibração de SJC
+  e 0,32 no desenho 20 × 5 da ponte.
+- O que governa a identificabilidade é a largura do kernel em relação ao espaçamento das espécies
+  no trait dentro dos sítios (`spread`, mediana do desvio-padrão das médias de população por
+  sítio), não o ruído de medida nem o tamanho da amostra. Descritores adimensionais (uma réplica
+  da ponte com h = 0,5 e c = 0; em SJC, w são os valores da calibração, não estimativas):
+
+  | desenho | pops usadas | espécies/sítio | ruído de meia média / spread | w / spread | dp do push líquido do ambiente / spread (por unidade de c) | EP aproximado de ĉ (w fixo) |
+  |---|---|---|---|---|---|---|
+  | SJC, w = 0,1 | 88 | 6,1 | 0,11 | 0,20 | 0,014 | 0,58 |
+  | SJC, w = 0,25 | 88 | 6,1 | 0,11 | 0,50 | 0,056 | 0,15 |
+  | ponte 20 × 5 | 181 | 10,7 | 0,35 | 1,83 | 0,227 | 0,08 |
+  | ponte 100 × 20 | 923 | 10,9 | 0,16 | 1,81 | 0,192 | 0,02 |
+
+  O ruído relativo é até menor em SJC. A diferença está no push: com kernel estreito em relação ao
+  espaçamento, poucos pares de populações ficam a menos de w, o push quase não varia entre as
+  populações de uma espécie e c e w se compensam.
+- Teste causal: o mesmo desenho 20 × 5 da ponte, com o kernel encolhido. Poder (contra o
+  quantil 95% do nulo da mesma razão; 60 réplicas):
+
+  | w / spread | c = 1, w livre | c = 1, w fixo | c = 3, w livre | c = 3, w fixo |
+  |---|---|---|---|---|
+  | 0,2 | 0,10 | 0,08 | 0,18 | 0,17 |
+  | 0,5 | 0,33 | 0,53 | 0,75 | 0,98 |
+  | 1,8 | 0,98 | 1,00 | 1,00 | 1,00 |
+
+- A ponte planta w = média de `sigma` (a largura de nicho), larga em relação ao espaçamento dos
+  ótimos dentro dos sítios: um deslocamento forte e fácil de ver. Isso é escolha do simulador,
+  não propriedade do método.
+- Em SJC o melhor w fica no piso da grade (0,10 ≈ 0,2 × spread) e o perfil é plano. Os dados são
+  compatíveis com ausência de deslocamento ou com deslocamento por um kernel estreito, e o desenho
+  não separa as duas coisas. Na ponte, sob c = 0, o aviso de w mal identificado também dispara em
+  95–99% das réplicas: w não identificado é o sintoma esperado de c ≈ 0, não uma falha específica
+  de SJC.
+- Interpretação nossa: em anuros adultos o CRC difere entre espécies co-ocorrentes muito
+  mais do que a largura plausível de um kernel de competição por tamanho, então w / spread
+  pequeno é o caso provável em dados reais desse tipo. Para identificar c, ajuda (i) fixar w por
+  conhecimento independente, (ii) usar traits em que as espécies co-ocorrentes se sobrepõem, ou
+  (iii) desenhos com mais espécies próximas no trait por sítio.
+
 - Ressalva de escala: h e c entram na amostragem, não evoluem na dinâmica; as taxas por ramo
   vêm de `turnover_rates()`; as duas camadas não compartilham o trait. O experimento testa a
   recuperação de sinais plantados sob estruturas de montagem realistas, não se a montagem causa
-  evolução, e o desacoplamento de Januario et al. (2025) fica fora.
+  evolução, e o desacoplamento de Januario et al. (2025) fica fora (proposta de teste de poder
+  em separado).
 
 ## McPeek (2017), *Evolutionary Community Ecology*
 
