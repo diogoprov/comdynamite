@@ -41,9 +41,13 @@
 #' weighted by `abundance`. Species that occur at a site but were not measured are then left
 #' out of the push and bias `c`. With `community`, a matrix of abundances (sites in rows,
 #' species in columns, with names as in `individuals`), every species present at a site pushes,
-#' with its share of the abundance of the site; a species not measured at a site enters with
-#' the mean of its populations measured elsewhere. Species never measured have no trait value
-#' and are left out, with a warning. Populations measured at a site where `community` gives
+#' with its share of the abundance of the site. A species not measured at a site enters with
+#' the mean of its populations measured elsewhere, moved along the gradient by the fitted slopes
+#' times the difference between the environment of the site and the mean environment of the
+#' sites where the species was measured (the model is fitted once with the plain means, then
+#' again with the moved ones). Species never measured have no trait value and are left out,
+#' with a warning, of both the push and the total abundance of the site that sets the shares.
+#' Populations measured at a site where `community` gives
 #' them a smaller abundance than the number of individuals measured (such as zero, when the
 #' census and the measurements come from different visits) take that number as abundance.
 #'
@@ -60,15 +64,22 @@
 #' strongly displaced populations sit in the tail of the kernel of their competitors, where the
 #' push is small but its sampling error is not.
 #'
+#' Deviations of whole populations from the model (from genetic drift or unmeasured
+#' environmental variables) are not removed by the split: they enter the own mean in the push
+#' and the response alike, and bias `c` downward, below zero when there is no displacement. The
+#' bootstrap reproduces this bias, so `p_displacement` and `displacement_corrected` account for
+#' it, but the raw `displacement` does not.
+#'
 #' @section Width of the kernel:
 #' Without displacement the width is not identified: the residual sum of squares changes little
 #' along the grid, and a narrow kernel, which acts on few pairs of populations, can give a value
 #' of `c` far from zero, of either sign. The grid runs from the larger of one eighth of the
 #' median standard deviation of population means within sites and the pooled standard
 #' deviation within populations (a kernel narrower than the spread of individuals mostly fits
-#' sampling noise) to four times that median, and is refined by [stats::optimize()] around its
-#' best value. A warning is given when the best width of the grid is at one of its ends or when
-#' the residual sum of squares changes by less than 5% along it; `plot()` shows the profile of
+#' sampling noise), but no higher than that median, to four times the median, and is refined by
+#' [stats::optimize()] around its best value. A warning is given when the best width stays at
+#' one of the ends of the grid after the refinement or when the residual sum of squares changes
+#' by less than 5% along the grid; `plot()` shows the profile of
 #' the fit and of the estimates along the width. Fix `width` from independent knowledge of the
 #' niche widths when it is not identified.
 #'
@@ -81,17 +92,23 @@
 #' fixed). Two sets are simulated:
 #' * without displacement (`c = 0`), which gives `p_displacement`, the two-sided p-value of
 #'   `c` with the width chosen anew in each simulation, so that the choice of the width is
-#'   accounted for;
-#' * with the fitted values (`c` set to zero when negative, since the model of
+#'   accounted for. The p-value is the share of simulations at least as far from the mean of
+#'   the simulations as the estimate, since that mean is not zero when sampling error or
+#'   deviations of populations bias `c`;
+#' * with the fitted values, \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of
 #'   [sample_individuals()] has no attraction), which give a first-order bias correction of
-#'   `c`, `displacement_corrected` (\eqn{2 \hat c - \bar c^*}{2 c_hat - mean(c*)}), and basic
-#'   bootstrap intervals for `c` and for the slopes (\eqn{2 \hat\theta -
-#'   q^*_{1 - \alpha/2}}{2 theta_hat - q*(1 - alpha/2)} to \eqn{2 \hat\theta -
-#'   q^*_{\alpha/2}}{2 theta_hat - q*(alpha/2)}).
+#'   `c`, `displacement_corrected` (\eqn{\hat c - (\bar c^* - c_0)}{c_hat - (mean(c*) - c_0)}),
+#'   and basic bootstrap intervals for `c` and for the slopes (\eqn{\hat\theta -
+#'   (q^*_{1 - \alpha/2} - \theta_0)}{theta_hat - (q*(1 - alpha/2) - theta_0)} to
+#'   \eqn{\hat\theta - (q^*_{\alpha/2} - \theta_0)}{theta_hat - (q*(alpha/2) - theta_0)}, with
+#'   \eqn{\theta_0}{theta_0} the value that generated the simulations).
 #'
-#' The correction removes most of the attenuation of `c` by sampling error when `w` is well
-#' identified; when it is not, the intervals are wide and the p-value is the better guide. The
-#' simulated values are in the attribute `bootstrap`.
+#' The correction and the intervals assume that the bias does not change with `c` near the
+#' estimate; it does change with strong displacement and with deviations of whole populations,
+#' so the intervals of `c` cover the true value less often than `level`. The correction removes
+#' most of the attenuation of `c` by sampling error when `w` is well identified; when it is not,
+#' the intervals are wide and the p-value is the better guide. Results change with the seed of
+#' the random number generator. The simulated values are in the attribute `bootstrap`.
 #'
 #' @param individuals Data frame with one row per individual, such as from
 #'   [sample_individuals()].
@@ -165,7 +182,8 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   slope_names <- if (length(env) == 1) "local_adaptation" else
     paste0("local_adaptation_", env)
   prep <- shifts_prepare(d, env_cols, community, warn = TRUE)
-  fit <- shifts_fit(prep, width, species_slopes, slope_names)
+  fit <- shifts_fit_full(prep, width, species_slopes, slope_names)
+  prep <- fit$prep
   if (is.null(width) && !is.na(fit$table$displacement) && (fit$boundary || fit$flat)) {
     why <- c(if (fit$boundary) "the best width is at an end of the grid",
              if (fit$flat) sprintf("the residual sum of squares changes by %.1f%% along the grid",
@@ -227,18 +245,30 @@ shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
     sqrt(sum(deviation[pooled]^2) / (sum(pooled) - sum(pops$n > 1)))
   } else NA_real_
   species_mean <- tapply(pops$mean, pops$species, mean)
+  # mean environment of the sites where each species was measured
+  species_env <- matrix(vapply(env_cols, function(v) {
+    as.vector(tapply(pops[[v]], pops$species, mean)[names(species_mean)])
+  }, numeric(length(species_mean))), length(species_mean),
+  dimnames = list(names(species_mean), env_cols))
   sites <- unique(pops$site)
   members <- lapply(sites, function(s) {
     ix <- which(pops$site == s)
     if (is.null(community)) {
       return(list(ix = ix, share = d$abundance[first][ix], ext_mean = numeric(0),
+                  ext_base = numeric(0), ext_gap = matrix(0, 0, length(env_cols)),
                   ext_share = numeric(0)))
     }
-    row <- community[s, ]
+    row <- community[s, , drop = FALSE][1, ]
     measured <- pmax(row[pops$species[ix]], pops$n[ix])
     others <- setdiff(names(row)[row > 0], pops$species[ix])
     others <- others[others %in% names(species_mean)]
+    # environment of the site minus the mean environment of the species elsewhere, so that
+    # the mean of an unmeasured competitor can follow the gradient (see shifts_follow())
+    site_env <- unlist(pops[ix[1], env_cols])
+    gap <- matrix(rep(site_env, each = length(others)), length(others), length(env_cols)) -
+      species_env[others, , drop = FALSE]
     list(ix = ix, share = unname(measured), ext_mean = unname(species_mean[others]),
+         ext_base = unname(species_mean[others]), ext_gap = unname(gap),
          ext_share = unname(row[others]), ext_species = others)
   })
   dropped <- character(0)
@@ -288,6 +318,31 @@ shifts_push <- function(prep, own, w) {
   out
 }
 
+# moves the means of unmeasured competitors along the gradient with the fitted slopes
+shifts_follow <- function(prep, slopes) {
+  for (k in seq_along(prep$members)) {
+    m <- prep$members[[k]]
+    if (length(m$ext_base) > 0) {
+      prep$members[[k]]$ext_mean <- m$ext_base + as.vector(m$ext_gap %*% slopes)
+    }
+  }
+  prep
+}
+
+# fits the model; with unmeasured competitors, fits again after moving their means along the
+# gradient with the slopes of the first fit
+shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
+  fit <- shifts_fit(prep, width, species_slopes, slope_names)
+  external <- any(vapply(prep$members, function(m) length(m$ext_base) > 0, logical(1)))
+  slopes <- unlist(fit$table[slope_names])
+  if (external && all(is.finite(slopes))) {
+    prep <- shifts_follow(prep, slopes)
+    fit <- shifts_fit(prep, width, species_slopes, slope_names)
+  }
+  fit$prep <- prep
+  fit
+}
+
 # fits the model over the grid of widths
 shifts_fit <- function(prep, width, species_slopes, slope_names) {
   use <- prep$use
@@ -334,6 +389,10 @@ shifts_fit <- function(prep, width, species_slopes, slope_names) {
     if (bounds[1] < bounds[2]) {
       refined <- exp(stats::optimize(function(lw) fit_width(exp(lw))$rss, bounds)$minimum)
     } else refined <- grid[at]
+    # still at the end when the refinement did not move away from the end of the grid
+    step <- diff(log(grid[1:2]))
+    ends <- log(grid[c(1, length(grid))])
+    boundary <- boundary && min(abs(log(refined) - ends)) < step / 10
     grid <- c(grid, refined)
     fits <- c(fits, list(fit_width(refined)))
     rss <- c(rss, fits[[length(fits)]]$rss)
@@ -412,8 +471,8 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
       sim$abundance <- d$abundance[!duplicated(paste(d$site, d$species, sep = "\r"))][rows]
     }
     sim_prep <- shifts_prepare(sim, env_cols, community)
-    unlist(shifts_fit(sim_prep, width, species_slopes, slope_names)$table[c(slope_names,
-                                                                            "displacement")])
+    unlist(shifts_fit_full(sim_prep, width, species_slopes,
+                           slope_names)$table[c(slope_names, "displacement")])
   }
   draws <- function(strength) {
     t(vapply(seq_len(nboot), function(b) simulate(strength), numeric(length(slope_names) + 1)))
@@ -422,21 +481,26 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
   fitted_strength <- if (is.na(c_hat)) 0 else max(c_hat, 0)
   fitted <- if (fitted_strength > 0) draws(fitted_strength) else null
   alpha <- 1 - level
-  basic <- function(estimate, values) {
+  # basic interval: the estimate minus the error of the simulations about the value that
+  # generated them
+  basic <- function(estimate, values, truth = estimate) {
     q <- stats::quantile(values, c(1 - alpha / 2, alpha / 2), na.rm = TRUE, names = FALSE)
-    2 * estimate - q
+    estimate - (q - truth)
   }
   if (is.na(c_hat)) {
     out$displacement_corrected <- out$displacement_low <- out$displacement_high <- NA_real_
     out$p_displacement <- NA_real_
   } else {
     c_null <- null[, "displacement"]
-    out$displacement_corrected <- 2 * c_hat - mean(fitted[, "displacement"], na.rm = TRUE)
-    interval <- basic(c_hat, fitted[, "displacement"])
+    c_fitted <- fitted[, "displacement"]
+    out$displacement_corrected <- c_hat - (mean(c_fitted, na.rm = TRUE) - fitted_strength)
+    interval <- basic(c_hat, c_fitted, fitted_strength)
     out$displacement_low <- interval[1]
     out$displacement_high <- interval[2]
-    out$p_displacement <- (1 + sum(abs(c_null) >= abs(c_hat), na.rm = TRUE)) /
-      (1 + sum(!is.na(c_null)))
+    # centred on the mean of the null draws, which need not be zero
+    centre <- mean(c_null, na.rm = TRUE)
+    out$p_displacement <- (1 + sum(abs(c_null - centre) >= abs(c_hat - centre),
+                                   na.rm = TRUE)) / (1 + sum(!is.na(c_null)))
   }
   for (v in slope_names) {
     interval <- basic(out[[v]], fitted[, v])

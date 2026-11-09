@@ -184,3 +184,57 @@ test_that("plot() draws the profile of a fit", {
                            any(abs(l$xintercept - log10(fit$width)) < 1e-8), logical(1))))
   expect_error(plot(population_shifts(ind, width = 0.5)), "fixed")
 })
+
+test_that("unmeasured competitors follow the gradient with the fitted slopes", {
+  ind <- make_shifts(h = 1, c = 2, n_ind = 8, seed = 11)
+  community <- attr(ind, "community")
+  gone <- ind$species == "sp4" & as.integer(sub("s", "", ind$site)) %% 2 == 0
+  kept <- ind[!gone, ]
+  set.seed(1)
+  fit <- population_shifts(kept, width = 0.5, community = community, abundance = NULL)
+  set.seed(1)
+  d <- data.frame(trait = kept$trait, site = kept$site, species = kept$species,
+                  .env1 = kept$env)
+  prep <- shifts_prepare(d, ".env1", community)
+  first <- shifts_fit(prep, 0.5, FALSE, "local_adaptation")$table$local_adaptation
+  full <- shifts_fit_full(prep, 0.5, FALSE, "local_adaptation")
+  expect_equal(full$table$displacement, fit$displacement)
+  pops <- unique(d[c("site", "species", ".env1")])
+  sp4 <- pops[pops$species == "sp4", ]
+  members <- full$prep$members
+  site_names <- unique(pops$site)
+  for (k in seq_along(members)) {
+    m <- members[[k]]
+    if ("sp4" %in% m$ext_species) {
+      e <- pops$.env1[pops$site == site_names[k]][1]
+      j <- match("sp4", m$ext_species)
+      expect_equal(m$ext_mean[j] - m$ext_base[j],
+                   first * (e - mean(sp4$.env1)))
+    }
+  }
+  expect_true(any(vapply(members, function(m) "sp4" %in% m$ext_species, logical(1))))
+})
+
+test_that("a community with one species keeps its names", {
+  ind <- make_shifts(n_species = 1, n_sites = 20, seed = 12)
+  community <- attr(ind, "community")
+  expect_equal(ncol(community), 1)
+  fit <- population_shifts(ind, width = 0.5, community = community, abundance = NULL)
+  expect_true(is.na(fit$displacement))
+})
+
+test_that("the bootstrap centres the p-value and corrects from the generating value", {
+  null <- make_shifts(c = 0, seed = 13)
+  set.seed(4)
+  fit <- population_shifts(null, width = 0.5, nboot = 19)
+  boot <- attr(fit, "bootstrap")
+  c_null <- boot$displacement[boot$set == "null"]
+  c_fitted <- boot$displacement[boot$set == "fitted"]
+  centre <- mean(c_null)
+  expect_equal(fit$p_displacement,
+               (1 + sum(abs(c_null - centre) >= abs(fit$displacement - centre))) / 20)
+  c0 <- max(fit$displacement, 0)
+  expect_equal(fit$displacement_corrected, fit$displacement - (mean(c_fitted) - c0))
+  q <- stats::quantile(c_fitted, c(0.975, 0.025), names = FALSE)
+  expect_equal(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
+})

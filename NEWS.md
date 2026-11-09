@@ -7,10 +7,11 @@
   - `env` takes several environmental variables, and `species_slopes = TRUE` gives each
     species its own slope.
   - `community` (a site x species matrix of abundances) lets species that were present but not
-    measured push the populations measured at their sites.
+    measured push the populations measured at their sites, with the mean of their populations
+    elsewhere moved along the gradient by the fitted slopes.
   - `nboot` runs a parametric bootstrap of the design. It gives a p-value for displacement that
-    accounts for the choice of the width, a first-order bias correction of `c`, and intervals
-    for `c` and the slopes.
+    accounts for the choice of the width and is centred on the mean of the simulations without
+    displacement, a first-order bias correction of `c`, and intervals for `c` and the slopes.
   - `plot()` draws the profile of R², `c` and `h` along the width.
 
 - Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`

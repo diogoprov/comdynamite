@@ -94,9 +94,13 @@ By default the competitors of a population are the other populations measured at
 weighted by \code{abundance}. Species that occur at a site but were not measured are then left
 out of the push and bias \code{c}. With \code{community}, a matrix of abundances (sites in rows,
 species in columns, with names as in \code{individuals}), every species present at a site pushes,
-with its share of the abundance of the site; a species not measured at a site enters with
-the mean of its populations measured elsewhere. Species never measured have no trait value
-and are left out, with a warning. Populations measured at a site where \code{community} gives
+with its share of the abundance of the site. A species not measured at a site enters with
+the mean of its populations measured elsewhere, moved along the gradient by the fitted slopes
+times the difference between the environment of the site and the mean environment of the
+sites where the species was measured (the model is fitted once with the plain means, then
+again with the moved ones). Species never measured have no trait value and are left out,
+with a warning, of both the push and the total abundance of the site that sets the shares.
+Populations measured at a site where \code{community} gives
 them a smaller abundance than the number of individuals measured (such as zero, when the
 census and the measurements come from different visits) take that number as abundance.
 }
@@ -114,6 +118,12 @@ all populations enter as competitors. Sampling error left in the push still bias
 toward zero, more so with few individuals per population and with strong displacement:
 strongly displaced populations sit in the tail of the kernel of their competitors, where the
 push is small but its sampling error is not.
+
+Deviations of whole populations from the model (from genetic drift or unmeasured
+environmental variables) are not removed by the split: they enter the own mean in the push
+and the response alike, and bias \code{c} downward, below zero when there is no displacement. The
+bootstrap reproduces this bias, so \code{p_displacement} and \code{displacement_corrected} account for
+it, but the raw \code{displacement} does not.
 }
 
 \section{Width of the kernel}{
@@ -123,9 +133,10 @@ along the grid, and a narrow kernel, which acts on few pairs of populations, can
 of \code{c} far from zero, of either sign. The grid runs from the larger of one eighth of the
 median standard deviation of population means within sites and the pooled standard
 deviation within populations (a kernel narrower than the spread of individuals mostly fits
-sampling noise) to four times that median, and is refined by \code{\link[stats:optimize]{stats::optimize()}} around its
-best value. A warning is given when the best width of the grid is at one of its ends or when
-the residual sum of squares changes by less than 5\% along it; \code{plot()} shows the profile of
+sampling noise), but no higher than that median, to four times the median, and is refined by
+\code{\link[stats:optimize]{stats::optimize()}} around its best value. A warning is given when the best width stays at
+one of the ends of the grid after the refinement or when the residual sum of squares changes
+by less than 5\% along the grid; \code{plot()} shows the profile of
 the fit and of the estimates along the width. Fix \code{width} from independent knowledge of the
 niche widths when it is not identified.
 }
@@ -141,18 +152,24 @@ fixed). Two sets are simulated:
 \itemize{
 \item without displacement (\code{c = 0}), which gives \code{p_displacement}, the two-sided p-value of
 \code{c} with the width chosen anew in each simulation, so that the choice of the width is
-accounted for;
-\item with the fitted values (\code{c} set to zero when negative, since the model of
+accounted for. The p-value is the share of simulations at least as far from the mean of
+the simulations as the estimate, since that mean is not zero when sampling error or
+deviations of populations bias \code{c};
+\item with the fitted values, \eqn{c_0 = \max(\hat c, 0)}{c_0 = max(c_hat, 0)} (the model of
 \code{\link[=sample_individuals]{sample_individuals()}} has no attraction), which give a first-order bias correction of
-\code{c}, \code{displacement_corrected} (\eqn{2 \hat c - \bar c^*}{2 c_hat - mean(c*)}), and basic
-bootstrap intervals for \code{c} and for the slopes (\eqn{2 \hat\theta -
-  q^*_{1 - \alpha/2}}{2 theta_hat - q*(1 - alpha/2)} to \eqn{2 \hat\theta -
-  q^*_{\alpha/2}}{2 theta_hat - q*(alpha/2)}).
+\code{c}, \code{displacement_corrected} (\eqn{\hat c - (\bar c^* - c_0)}{c_hat - (mean(c*) - c_0)}),
+and basic bootstrap intervals for \code{c} and for the slopes (\eqn{\hat\theta -
+  (q^*_{1 - \alpha/2} - \theta_0)}{theta_hat - (q*(1 - alpha/2) - theta_0)} to
+\eqn{\hat\theta - (q^*_{\alpha/2} - \theta_0)}{theta_hat - (q*(alpha/2) - theta_0)}, with
+\eqn{\theta_0}{theta_0} the value that generated the simulations).
 }
 
-The correction removes most of the attenuation of \code{c} by sampling error when \code{w} is well
-identified; when it is not, the intervals are wide and the p-value is the better guide. The
-simulated values are in the attribute \code{bootstrap}.
+The correction and the intervals assume that the bias does not change with \code{c} near the
+estimate; it does change with strong displacement and with deviations of whole populations,
+so the intervals of \code{c} cover the true value less often than \code{level}. The correction removes
+most of the attenuation of \code{c} by sampling error when \code{w} is well identified; when it is not,
+the intervals are wide and the p-value is the better guide. Results change with the seed of
+the random number generator. The simulated values are in the attribute \code{bootstrap}.
 }
 
 \examples{
