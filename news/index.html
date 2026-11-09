@@ -74,7 +74,8 @@
 <li>
 <code>community</code> (a site x species matrix of abundances) lets species that were present but not measured push the populations measured at their sites, with the mean of their populations elsewhere moved along the gradient by the fitted slopes.</li>
 <li>
-<code>nboot</code> runs a parametric bootstrap of the design. It gives a p-value for displacement that accounts for the choice of the width and is centred on the mean of the simulations without displacement, a first-order bias correction of <code>c</code>, and intervals for <code>c</code> and the slopes.</li>
+<code>nboot</code> runs a parametric bootstrap of the design. It gives a p-value for displacement that accounts for the choice of the width and is centred on the mean of the simulations without displacement, a first-order bias correction of <code>c</code>, and intervals for <code>c</code> and the slopes. The simulations without displacement come from the fit without displacement, the species constants from the populations that enter the fit, and the variance of populations from a moment equation weighted by precision. Taking the slopes of the full fit inflated that variance and the bias of <code>c</code> under the null, so the test rejected too often in large designs (up to 29% at the 5% level in the experiments of <code>data-raw/bridge_experiments.R</code>). The test is now somewhat conservative (about 2–3% at the 5% level in simulations without displacement), because the centre of the null simulations follows the estimate.</li>
+<li>The documentation now gives the sign of the bias that deviations of whole populations cause in <code>c</code>: upward when most competitors are closer than <code>w</code> in trait, downward when most are farther.</li>
 <li>
 <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the profile of R², <code>c</code> and <code>h</code> along the width.</li>
 </ul></li>

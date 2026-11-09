@@ -200,9 +200,13 @@ strongly displaced populations sit in the tail of the kernel of their competitor
 push is small but its sampling error is not.</p>
 <p>Deviations of whole populations from the model (from genetic drift or unmeasured
 environmental variables) are not removed by the split: they enter the own mean in the push
-and the response alike, and bias <code>c</code> downward, below zero when there is no displacement. The
-bootstrap reproduces this bias, so <code>p_displacement</code> and <code>displacement_corrected</code> account for
-it, but the raw <code>displacement</code> does not.</p>
+and the response alike, so <code>c</code> is biased even when there is no displacement. A deviation
+\(\delta\) of a population changes its push from a competitor at distance \(g\)
+by about \(\delta \exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)\): the bias is upward when most competitors are closer than <code>w</code> in trait (a
+wide kernel) and downward when most are farther (a narrow one). It grows with the variance of
+the deviations and does not shrink with more individuals per population. The bootstrap
+reproduces this bias, so <code>p_displacement</code> and <code>displacement_corrected</code> account for it, but
+the raw <code>displacement</code> does not.</p>
     </div>
     <div class="section level2">
     <h2 id="width-of-the-kernel">Width of the kernel<a class="anchor" aria-label="anchor" href="#width-of-the-kernel"></a></h2>
@@ -226,16 +230,26 @@ niche widths when it is not identified.</p>
 
 <p>With <code>nboot &gt; 0</code>, new data are simulated with the design of the data (the same sites,
 species, environment, abundances and numbers of individuals per population), with the
-within-population standard deviation of the data, a population-level standard deviation
-estimated from the residuals of the fit without displacement, and the fitted species
-constants and slopes, and refitted as the data were (with the same <code>width</code>, estimated or
-fixed). Two sets are simulated:</p><ul><li><p>without displacement (<code>c = 0</code>), which gives <code>p_displacement</code>, the two-sided p-value of
+within-population standard deviation of the data, and refitted as the data were (with the
+same <code>width</code>, estimated or fixed). The species constants, slopes and population-level
+standard deviation of the simulations come from a fit: the constants are the means within
+species of the populations that enter as responses, and the variance of populations is the
+root of a moment equation in which each squared residual is net of the sampling variance of
+its mean and weighted by the inverse square of its expected value, so that means of few
+individuals weigh little (in the fitted set, the sampling variance is scaled by
+\((1 - c_0 D_j)^2\), with \(D_j\) the derivative of the push on a
+population with respect to its own mean, since the sampling error of the mean also enters
+the push removed from it). Two sets are simulated:</p><ul><li><p>without displacement (<code>c = 0</code>), from the fit without displacement (the slopes of the full
+fit carry its error into the residuals, inflate the variance of populations and with it
+the bias of <code>c</code> under the null), which gives <code>p_displacement</code>, the two-sided p-value of
 <code>c</code> with the width chosen anew in each simulation, so that the choice of the width is
 accounted for. The p-value is the share of simulations at least as far from the mean of
 the simulations as the estimate, since that mean is not zero when sampling error or
 deviations of populations bias <code>c</code>;</p></li>
-<li><p>with the fitted values, \(c_0 = \max(\hat c, 0)\) (the model of
-<code><a href="sample_individuals.html">sample_individuals()</a></code> has no attraction), which give a first-order bias correction of
+<li><p>from the full fit, with its push removed from the means before they are displaced again,
+at \(c_0 = \max(\hat c, 0)\) (the model of <code><a href="sample_individuals.html">sample_individuals()</a></code>
+has no attraction; with \(\hat c \le 0\) this set is the null set and its
+slopes those of the fit without displacement), which give a first-order bias correction of
 <code>c</code>, <code>displacement_corrected</code> (\(\hat c - (\bar c^* - c_0)\)),
 and basic bootstrap intervals for <code>c</code> and for the slopes (\(\hat\theta -
   (q^*_{1 - \alpha/2} - \theta_0)\) to
@@ -245,8 +259,13 @@ and basic bootstrap intervals for <code>c</code> and for the slopes (\(\hat\thet
 estimate; it does change with strong displacement and with deviations of whole populations,
 so the intervals of <code>c</code> cover the true value less often than <code>level</code>. The correction removes
 most of the attenuation of <code>c</code> by sampling error when <code>w</code> is well identified; when it is not,
-the intervals are wide and the p-value is the better guide. Results change with the seed of
-the random number generator. The simulated values are in the attribute <code>bootstrap</code>.</p>
+the intervals are wide and the p-value is the better guide. The test is somewhat
+conservative: the null simulations take the variance of populations, which sets the bias of
+<code>c</code>, from the same data as the estimate, so their centre follows it, and in simulations with
+no displacement the test rejected at the 5% level in about 2–3% of data sets. Results change
+with the seed of
+the random number generator. The simulated values are in the attribute <code>bootstrap</code>, whose
+own attribute <code>population_sd</code> gives the population-level standard deviation of each set.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -296,9 +315,9 @@ an environmental gradient. <em>Evolution</em>, 60, 1344–1357. <a href="https:/
 <span class="r-out co"><span class="r-pr">#&gt;</span>   local_adaptation displacement    width r_squared n_populations n_species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        0.4914459     1.990583 12.13176 0.9960785            91        14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   displacement_corrected displacement_low displacement_high p_displacement</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1               2.970074         2.911755          3.054845           0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               2.019634         1.851009          2.113893           0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   local_adaptation_low local_adaptation_high</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1           0.09551249              0.205185</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1            0.4829497              0.503197</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="population_shifts-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>

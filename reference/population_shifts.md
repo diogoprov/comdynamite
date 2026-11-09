@@ -155,10 +155,16 @@ error is not.
 
 Deviations of whole populations from the model (from genetic drift or
 unmeasured environmental variables) are not removed by the split: they
-enter the own mean in the push and the response alike, and bias `c`
-downward, below zero when there is no displacement. The bootstrap
-reproduces this bias, so `p_displacement` and `displacement_corrected`
-account for it, but the raw `displacement` does not.
+enter the own mean in the push and the response alike, so `c` is biased
+even when there is no displacement. A deviation \\\delta\\ of a
+population changes its push from a competitor at distance \\g\\ by about
+\\\delta \exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)\\: the bias is upward when
+most competitors are closer than `w` in trait (a wide kernel) and
+downward when most are farther (a narrow one). It grows with the
+variance of the deviations and does not shrink with more individuals per
+population. The bootstrap reproduces this bias, so `p_displacement` and
+`displacement_corrected` account for it, but the raw `displacement` does
+not.
 
 ## Width of the kernel
 
@@ -184,26 +190,38 @@ identified.
 With `nboot > 0`, new data are simulated with the design of the data
 (the same sites, species, environment, abundances and numbers of
 individuals per population), with the within-population standard
-deviation of the data, a population-level standard deviation estimated
-from the residuals of the fit without displacement, and the fitted
-species constants and slopes, and refitted as the data were (with the
-same `width`, estimated or fixed). Two sets are simulated:
+deviation of the data, and refitted as the data were (with the same
+`width`, estimated or fixed). The species constants, slopes and
+population-level standard deviation of the simulations come from a fit:
+the constants are the means within species of the populations that enter
+as responses, and the variance of populations is the root of a moment
+equation in which each squared residual is net of the sampling variance
+of its mean and weighted by the inverse square of its expected value, so
+that means of few individuals weigh little (in the fitted set, the
+sampling variance is scaled by \\(1 - c_0 D_j)^2\\, with \\D_j\\ the
+derivative of the push on a population with respect to its own mean,
+since the sampling error of the mean also enters the push removed from
+it). Two sets are simulated:
 
-- without displacement (`c = 0`), which gives `p_displacement`, the
-  two-sided p-value of `c` with the width chosen anew in each
-  simulation, so that the choice of the width is accounted for. The
-  p-value is the share of simulations at least as far from the mean of
-  the simulations as the estimate, since that mean is not zero when
-  sampling error or deviations of populations bias `c`;
+- without displacement (`c = 0`), from the fit without displacement (the
+  slopes of the full fit carry its error into the residuals, inflate the
+  variance of populations and with it the bias of `c` under the null),
+  which gives `p_displacement`, the two-sided p-value of `c` with the
+  width chosen anew in each simulation, so that the choice of the width
+  is accounted for. The p-value is the share of simulations at least as
+  far from the mean of the simulations as the estimate, since that mean
+  is not zero when sampling error or deviations of populations bias `c`;
 
-- with the fitted values, \\c_0 = \max(\hat c, 0)\\ (the model of
+- from the full fit, with its push removed from the means before they
+  are displaced again, at \\c_0 = \max(\hat c, 0)\\ (the model of
   [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
-  has no attraction), which give a first-order bias correction of `c`,
-  `displacement_corrected` (\\\hat c - (\bar c^\* - c_0)\\), and basic
-  bootstrap intervals for `c` and for the slopes (\\\hat\theta -
-  (q^\*\_{1 - \alpha/2} - \theta_0)\\ to \\\hat\theta -
-  (q^\*\_{\alpha/2} - \theta_0)\\, with \\\theta_0\\ the value that
-  generated the simulations).
+  has no attraction; with \\\hat c \le 0\\ this set is the null set and
+  its slopes those of the fit without displacement), which give a
+  first-order bias correction of `c`, `displacement_corrected` (\\\hat
+  c - (\bar c^\* - c_0)\\), and basic bootstrap intervals for `c` and
+  for the slopes (\\\hat\theta - (q^\*\_{1 - \alpha/2} - \theta_0)\\ to
+  \\\hat\theta - (q^\*\_{\alpha/2} - \theta_0)\\, with \\\theta_0\\ the
+  value that generated the simulations).
 
 The correction and the intervals assume that the bias does not change
 with `c` near the estimate; it does change with strong displacement and
@@ -211,8 +229,14 @@ with deviations of whole populations, so the intervals of `c` cover the
 true value less often than `level`. The correction removes most of the
 attenuation of `c` by sampling error when `w` is well identified; when
 it is not, the intervals are wide and the p-value is the better guide.
-Results change with the seed of the random number generator. The
-simulated values are in the attribute `bootstrap`.
+The test is somewhat conservative: the null simulations take the
+variance of populations, which sets the bias of `c`, from the same data
+as the estimate, so their centre follows it, and in simulations with no
+displacement the test rejected at the 5% level in about 2–3% of data
+sets. Results change with the seed of the random number generator. The
+simulated values are in the attribute `bootstrap`, whose own attribute
+`population_sd` gives the population-level standard deviation of each
+set.
 
 ## References
 
@@ -268,8 +292,8 @@ fit
 #>   local_adaptation displacement    width r_squared n_populations n_species
 #> 1        0.4914459     1.990583 12.13176 0.9960785            91        14
 #>   displacement_corrected displacement_low displacement_high p_displacement
-#> 1               2.970074         2.911755          3.054845           0.02
+#> 1               2.019634         1.851009          2.113893           0.02
 #>   local_adaptation_low local_adaptation_high
-#> 1           0.09551249              0.205185
+#> 1            0.4829497              0.503197
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(fit)
 ```
