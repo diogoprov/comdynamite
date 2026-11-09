@@ -103,6 +103,14 @@ reference:
   - plot.trait_flex
   - nested_variance
   - plot.nested_variance
+  - null_intervals
+  - plot.tstats
+  - trait_densities
+  - plot_population_traits
+  - neighbour_metrics
+  - subsample_individuals
+  - trait_rarefaction
+  - plot.trait_rarefaction
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:

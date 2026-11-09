@@ -56,6 +56,12 @@
 #' @param fraction Optional probability that each individual is measured, so that the number
 #'   measured in a population is Binomial(abundance, `fraction`), proportional to abundance on
 #'   average.
+#' @param cover Optional share (0 to 1) of the abundance of each site covered by the species
+#'   measured: species are taken from the most abundant down until they reach `cover`, and the
+#'   rest are not measured, as in field protocols that measure the species making up 80% of the
+#'   abundance (Pakeman & Quested 2007). `NULL` (the default) measures every species.
+#' @param min_n Populations with fewer individuals measured than `min_n` are left out, as when
+#'   populations with a single individual are removed before computing T-statistics.
 #' @param local_adaptation Fraction (0 to 1) of the gap between the optimum of the species and
 #'   the environment of the site that each population closes; one value or one per species
 #'   (named by species, or in their order). The same holds for the two standard deviations.
@@ -83,7 +89,12 @@
 #'   C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability
 #'   in community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
 #'   \doi{10.1016/j.tree.2011.11.014}
-#' @seealso [tstats()] for the T-statistics.
+#'
+#'   Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what proportion
+#'   of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
+#'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
+#' @seealso [tstats()] for the T-statistics; [subsample_individuals()] and
+#'   [trait_rarefaction()] for the same sampling schemes on real data.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -95,7 +106,8 @@
 #' @export
 sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
-                               displacement_width = NULL, step = NULL, env = NULL) {
+                               displacement_width = NULL, step = NULL, env = NULL,
+                               cover = NULL, min_n = 1) {
   stopifnot(inherits(x, "mc_sim"))
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
@@ -120,6 +132,12 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
                        nrow(abundance), dimnames = dimnames(abundance))
   }
+  if (!is.null(cover)) {
+    dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), k), cover)
+    measured[!dominant] <- 0
+  }
+  stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
+  measured[measured < min_n] <- 0
   theta <- x$traits[species, "optimum"]
   pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) +
     sweep(outer(env, theta, "-"), 2, h, "*") +
@@ -324,6 +342,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   out <- do.call(rbind, lapply(per_trait, `[[`, "table"))
   rownames(out) <- NULL
   out[ratios] <- lapply(out[ratios], finite_or_na)
+  class(out) <- c("tstats", class(out))
   if (nperm == 0) return(out)
   null <- do.call(abind_rows, lapply(per_trait, `[[`, "null"))
   for (stat in ratios) {

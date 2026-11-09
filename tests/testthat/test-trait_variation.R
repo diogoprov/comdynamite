@@ -131,7 +131,7 @@ test_that("community_index() computes observed values and keeps the null models 
   # the order of the rows does not matter for observed values
   shuffled <- community_index(d[sample(nrow(d)), ], pop_var, null = "local", nperm = 0)
   expect_equal(shuffled$observed[match(sp$site, shuffled$site)], sp$observed)
-  expect_named(shuffled, c("site", "trait", "observed"))
+  expect_named(shuffled, c("site", "trait", "index", "observed"))
 })
 
 test_that("community_index() handles populations, several traits and checks the index", {

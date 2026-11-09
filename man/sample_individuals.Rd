@@ -14,7 +14,9 @@ sample_individuals(
   displacement = 0,
   displacement_width = NULL,
   step = NULL,
-  env = NULL
+  env = NULL,
+  cover = NULL,
+  min_n = 1
 )
 }
 \arguments{
@@ -50,6 +52,14 @@ abundances at the last step.}
 
 \item{env}{Optional environment of each site at the sampled step. The default is the
 environment of the landscape; give it for simulations with \code{env_time}.}
+
+\item{cover}{Optional share (0 to 1) of the abundance of each site covered by the species
+measured: species are taken from the most abundant down until they reach \code{cover}, and the
+rest are not measured, as in field protocols that measure the species making up 80\% of the
+abundance (Pakeman & Quested 2007). \code{NULL} (the default) measures every species.}
+
+\item{min_n}{Populations with fewer individuals measured than \code{min_n} are left out, as when
+populations with a single individual are removed before computing T-statistics.}
 }
 \value{
 Data frame with one row per individual and the columns \code{site}, \code{species},
@@ -127,7 +137,12 @@ Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof,
 C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability
 in community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 \doi{10.1016/j.tree.2011.11.014}
+
+Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what proportion
+of the species need to be measured? \emph{Applied Vegetation Science}, 10, 91--96.
+\doi{10.1111/j.1654-109x.2007.tb00507.x}
 }
 \seealso{
-\code{\link[=tstats]{tstats()}} for the T-statistics.
+\code{\link[=tstats]{tstats()}} for the T-statistics; \code{\link[=subsample_individuals]{subsample_individuals()}} and
+\code{\link[=trait_rarefaction]{trait_rarefaction()}} for the same sampling schemes on real data.
 }
