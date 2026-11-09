@@ -454,6 +454,15 @@ Colonisation and local extinction along the tree (DAMOCLES).
   : Profile-likelihood intervals of DAMOCLES parameters
 - [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md)
   : Regimes of the edges of a tree from a list of clades
+- [`damocles_samples()`](https://provetelab.org/comdynamite/reference/damocles_samples.md)
+  [`summary(`*`<mc_damocles_samples>`*`)`](https://provetelab.org/comdynamite/reference/damocles_samples.md)
+  : DAMOCLES fits over many configurations of regimes or covariates
+- [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
+  : Test a partition of the tree against random partitions
+- [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md)
+  : Random partitions of a tree like a given one
+- [`dr_rates()`](https://provetelab.org/comdynamite/reference/dr_rates.md)
+  : Tip diversification rates (DR) of Jetz et al. (2012)
 
 # Articles
 

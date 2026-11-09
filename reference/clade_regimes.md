@@ -23,7 +23,8 @@ clade_regimes(tree, clades, background = "background", stem = FALSE)
 
 - clades:
 
-  A named list of character vectors, the tips of each clade.
+  A named list with, for each clade, a character vector of its tips or
+  one node number (of `tree`, as in `tree$edge`) at its base.
 
 - background:
 

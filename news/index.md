@@ -332,6 +332,32 @@
   (`data-raw/validation_damocles.R`), provided they can be treated as
   independent realisations of the process.
 
+- [`damocles_samples()`](https://provetelab.org/comdynamite/reference/damocles_samples.md)
+  fits DAMOCLES rates over a list of configurations of regimes or edge
+  covariates, such as posterior samples of rate shifts or of
+  branch-specific rates of speciation, and summarises how often they
+  beat constant rates, the parameters that mean the same in every fit,
+  and the rate of each edge.
+  [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
+  tests a partition against random partitions of the same complexity
+  placed elsewhere on the tree, drawn by
+  [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md)
+  (`max_overlap` excludes placements that nearly coincide with the one
+  tested), which asks whether the partition is better placed than
+  arbitrary ones rather than only whether rates vary; with the effect in
+  another clade, the chi-squared test rejected constant rates in 29 of
+  40 replicates and this test in none.
+  [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md)
+  also takes node numbers.
+  [`dr_rates()`](https://provetelab.org/comdynamite/reference/dr_rates.md)
+  computes the tip diversification rate DR of Jetz et al. (2012), per
+  tip or per edge, to use as an edge covariate.
+  `data-raw/damocles_bamm.R` and `data-raw/damocles_clads.R` show the
+  path from BAMM (BAMMtools) and ClaDS (RPANDA) output to these
+  functions; with continuous rates, single posterior samples attenuate
+  the slope, so the help recommends fitting the posterior summary of
+  each rate.
+
 - DAMOCLES rates can change across the tree.
   [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
   and
