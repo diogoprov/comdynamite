@@ -102,6 +102,7 @@ reference:
   - tstats
   - tstats_summary
   - population_shifts
+  - plot.population_shifts
   - community_index
   - trait_flex
   - plot.trait_flex
