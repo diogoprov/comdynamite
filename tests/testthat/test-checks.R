@@ -61,6 +61,8 @@ test_that("plot() of trait_rarefaction() takes `colours` and warns on `colour`",
   r <- trait_rarefaction(ind, n = 2:5, reps = 3)
   expect_s3_class(plot(r, colours = "red"), "ggplot")
   expect_warning(plot(r, colour = "red"), "`colour` is deprecated")
+})
+
 test_that("plots and rarefaction name the bad argument", {
   tree <- ape::rtree(5)
   expect_error(plot_node_test(list(), tree), "`x` must come from node_test()")
