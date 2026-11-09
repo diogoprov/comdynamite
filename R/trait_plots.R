@@ -273,6 +273,14 @@ hatch_lines <- function(rects, spacing) {
 #' size. A population of one individual then gets a kernel of that width around its
 #' value, instead of no density.
 #'
+#' One bandwidth suits populations whose spread is about the same. For traits whose spread
+#' grows with their mean, such as body size across species of very different sizes, the
+#' bandwidth follows the many small populations and the densities of large ones break into one
+#' peak per individual; the logarithm of the trait usually evens out the spread. With the
+#' default bandwidth, a warning is given when the trait is positive and the standard deviation
+#' of populations of three or more individuals rises with their mean (Spearman correlation
+#' above 0.7 over at least ten populations).
+#'
 #' @param individuals Data frame with one row per individual.
 #' @param trait Name of the column with the trait.
 #' @param site,species Names of the columns with the site and the species.
@@ -349,6 +357,7 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
       stop("the individuals of each population have identical values: give `bw`", call. = FALSE)
     }
     bw <- 0.9 * spread * mean(size)^(-1 / 5)
+    check_spread_scale(z, pop)
   }
   stopifnot(is.numeric(bw), length(bw) == 1, bw > 0)
   grid <- seq(min(z) - 3 * bw, max(z) + 3 * bw, length.out = n)
@@ -374,6 +383,26 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
   out
 }
 
+# warns when the spread within populations rises with their mean, so that one bandwidth fits
+# small and large populations badly
+check_spread_scale <- function(z, pop) {
+  if (any(z <= 0)) return(invisible(NULL))
+  size <- tapply(z, pop, length)
+  keep <- names(size)[size >= 3]
+  if (length(keep) < 10) return(invisible(NULL))
+  centre <- tapply(z, pop, mean)[keep]
+  spread <- tapply(z, pop, stats::sd)[keep]
+  if (stats::sd(spread) == 0) return(invisible(NULL))
+  r <- stats::cor(centre, spread, method = "spearman")
+  if (r > 0.7) {
+    warning("the spread within populations rises with their mean (Spearman r = ",
+            format(round(r, 2), nsmall = 2), "), so one bandwidth fits small and large ",
+            "populations badly; consider the logarithm of the trait, or give `bw`",
+            call. = FALSE)
+  }
+  invisible(r)
+}
+
 #' Plot the trait distributions of populations within communities
 #'
 #' Draws, in one panel per site, the trait probability density of each population from
@@ -382,6 +411,10 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
 #' `weighted = TRUE` (the default) each population is scaled by its relative abundance, so that
 #' the populations of a site add up to the community line; with `weighted = FALSE` every
 #' population integrates to one, which shows the shape of rare populations.
+#'
+#' With many species, `highlight` draws a few of them in colour and the rest in grey. For traits
+#' whose spread grows with their mean, such as body size, see the note on the bandwidth in
+#' [trait_densities()].
 #'
 #' The ggplot object can be changed further, for instance with `+ ggplot2::facet_wrap(~ site,
 #' ncol = 2)`, `+ ggplot2::scale_fill_viridis_d()` or `+ ggplot2::theme_classic()`.
@@ -394,7 +427,11 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
 #' @param alpha Transparency of the population densities (0, transparent, to 1, opaque).
 #' @param colours Colours of the species: unnamed, in the order of first appearance in
 #'   `individuals`, or named by species. `NULL` (the default) uses the Okabe-Ito palette for
-#'   up to seven species and [grDevices::hcl.colors()] (`"Dark 3"`) for more.
+#'   up to seven species and [grDevices::hcl.colors()] (`"Dark 3"`) for more. With
+#'   `highlight`, the colours of the highlighted species only.
+#' @param highlight Species to draw in colour, on top of the others, which are drawn in grey
+#'   and left out of the legend. Useful when a site holds many species, whose colours cannot
+#'   all be told apart.
 #' @param ncol,scales Passed to [ggplot2::facet_wrap()].
 #' @return A ggplot object.
 #' @seealso [trait_densities()], [tstats()].
@@ -409,8 +446,8 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
 plot_population_traits <- function(individuals, trait = "trait", site = "site",
                                    species = "species", abundance = NULL, sites = NULL,
                                    weighted = TRUE, community = TRUE, rug = TRUE,
-                                   alpha = 0.35, colours = NULL, bw = NULL, n = 512,
-                                   ncol = NULL, scales = "free_y") {
+                                   alpha = 0.35, colours = NULL, highlight = NULL,
+                                   bw = NULL, n = 512, ncol = NULL, scales = "free_y") {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot_population_traits() needs the package ggplot2", call. = FALSE) # nocov
   }
@@ -430,6 +467,31 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
     site_levels <- site_levels[site_levels %in% sites]
   }
   species_levels <- unique(points$species)
+  if (!is.null(highlight)) {
+    stopifnot(is.character(highlight), length(highlight) >= 1, !anyDuplicated(highlight))
+    unknown <- setdiff(highlight, species_levels)
+    if (length(unknown) > 0) {
+      stop("`highlight` has species not in the data: ", paste(unknown, collapse = ", "),
+           call. = FALSE)
+    }
+    if (is.null(colours)) {
+      colours <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9",
+                   "#F0E442")
+      if (length(highlight) > length(colours)) {
+        stop("give `colours` to highlight more than seven species", call. = FALSE)
+      }
+      colours <- colours[seq_along(highlight)]
+    }
+    if (is.null(names(colours))) {
+      check_colours(colours, length(highlight))
+      names(colours) <- highlight
+    }
+    if (anyNA(colours[highlight])) {
+      stop("`colours` has no colour for some highlighted species", call. = FALSE)
+    }
+    others <- setdiff(species_levels, highlight)
+    colours <- c(colours[highlight], stats::setNames(rep("grey75", length(others)), others))
+  }
   if (is.null(colours)) {
     okabe_ito <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9", "#F0E442")
     colours <- if (length(species_levels) <= length(okabe_ito)) {
@@ -457,7 +519,12 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   pops <- d[d$level == "population", , drop = FALSE]
   if (weighted) pops$density <- pops$density * pops$weight
   pops$species <- factor(pops$species, species_levels)
-  pops$group <- paste(pops$site, pops$species)
+  # highlighted species are drawn last, on top of the others
+  draw_order <- if (is.null(highlight)) species_levels else
+    c(setdiff(species_levels, highlight), highlight)
+  pops$group <- factor(paste(pops$site, pops$species),
+                       unique(paste(rep(site_levels, each = length(draw_order)),
+                                    rep(draw_order, length(site_levels)))))
   points$species <- factor(points$species, species_levels)
   .data <- ggplot2::.data
   p <- ggplot2::ggplot(pops, ggplot2::aes(x = .data$trait, y = .data$density)) +
@@ -474,9 +541,10 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
                                inherit.aes = FALSE, sides = "b", alpha = 0.8,
                                length = ggplot2::unit(0.04, "npc"))
   }
+  breaks <- if (is.null(highlight)) ggplot2::waiver() else highlight
   p +
-    ggplot2::scale_fill_manual(values = colours, name = "Species") +
-    ggplot2::scale_colour_manual(values = colours, name = "Species") +
+    ggplot2::scale_fill_manual(values = colours, breaks = breaks, name = "Species") +
+    ggplot2::scale_colour_manual(values = colours, breaks = breaks, name = "Species") +
     ggplot2::facet_wrap(ggplot2::vars(.data$site), ncol = ncol, scales = scales) +
     ggplot2::labs(x = trait, y = if (weighted) "Density (weighted by abundance)" else
       "Density") +

@@ -136,7 +136,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
             is.numeric(level), length(level) == 1, level > 0, level < 1)
   if (is.null(statistic)) {
     statistic <- function(d) {
-      t <- tstats(d, site = site, species = species)
+      t <- tstats(d, site = site, species = species, nperm = 0)
       colMeans(t[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
     }
   }

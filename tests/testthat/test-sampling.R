@@ -123,3 +123,20 @@ test_that("trait_rarefaction over cover with a fixed n keeps the replicates", {
   expect_equal(r$reps, c(3, 3))
   expect_error(trait_rarefaction(ind, cover = 0.5, n = 1.5), "round")
 })
+
+test_that("the default statistic of trait_rarefaction runs no permutations", {
+  set.seed(9)
+  ind <- data.frame(site = rep(c("s1", "s2"), each = 20),
+                    species = sample(c("a", "b", "c"), 40, replace = TRUE), trait = rnorm(40))
+  calls <- 0
+  trace_fun <- function(...) calls <<- calls + 1
+  local_mocked_bindings(
+    tstats = function(..., nperm) {
+      expect_equal(nperm, 0)
+      calls <<- calls + 1
+      data.frame(T_IP.IC = 1, T_IC.IR = 1, T_PC.PR = 1)
+    }
+  )
+  trait_rarefaction(ind, n = 2, reps = 2)
+  expect_equal(calls, 2)
+})

@@ -151,3 +151,45 @@ test_that("community_index rejects malformed lists of indices", {
   ind <- data.frame(site = "s1", species = c("a", "b"), trait = 1:2)
   expect_error(community_index(ind, list(mean, var)), "distinct names")
 })
+
+test_that("trait_densities warns when the spread rises with the mean", {
+  set.seed(7)
+  sizes <- exp(seq(log(15), log(200), length.out = 12))
+  ind <- data.frame(site = rep(c("s1", "s2"), each = 60), species = rep(paste0("sp", 1:12), 10))
+  ind$crc <- sizes[as.integer(sub("sp", "", ind$species))] * exp(rnorm(120, 0, 0.1))
+  expect_warning(trait_densities(ind, "crc", n = 16), "logarithm")
+  ind$log_crc <- log(ind$crc)
+  expect_no_warning(trait_densities(ind, "log_crc", n = 16))
+  expect_no_warning(trait_densities(ind, "crc", bw = 1, n = 16))
+  # equal spread on a positive scale does not warn
+  ind$even <- 100 + sizes[as.integer(sub("sp", "", ind$species))] + rnorm(120)
+  expect_no_warning(trait_densities(ind, "even", n = 16))
+})
+
+test_that("plot_population_traits highlights species", {
+  skip_if_not_installed("ggplot2")
+  set.seed(8)
+  ind <- data.frame(site = rep(c("s1", "s2"), each = 40), species = rep(letters[1:8], 10),
+                    trait = rnorm(80, rep(1:8, 10)))
+  p <- plot_population_traits(ind, highlight = c("c", "f"), n = 32)
+  b <- ggplot2::ggplot_build(p)
+  fills <- unique(b$data[[1]][c("group", "fill")])
+  expect_setequal(unique(fills$fill), c("#0072B2", "#E69F00", "grey75"))
+  expect_equal(as.vector(b$plot$scales$get_scales("fill")$get_breaks()), c("c", "f"))
+  # highlighted populations are drawn after the grey ones in each panel
+  d1 <- b$data[[1]]
+  expect_equal(tail(unique(d1$fill[d1$PANEL == 1]), 2), c("#0072B2", "#E69F00"))
+  p2 <- plot_population_traits(ind, highlight = "a", colours = c(a = "red"), n = 32)
+  expect_true("red" %in% ggplot2::ggplot_build(p2)$data[[1]]$fill)
+  expect_error(plot_population_traits(ind, highlight = "z"), "not in the data")
+  expect_error(plot_population_traits(ind, highlight = "a", colours = c(b = "red")),
+               "no colour")
+  expect_error(plot_population_traits(ind, highlight = letters[1:8]), "seven")
+})
+
+test_that("the scale check skips populations with identical spreads", {
+  ind <- data.frame(site = "s1", species = rep(paste0("sp", 1:10), each = 3))
+  ind$trait <- rep(seq(10, 100, by = 10), each = 3) + rep(c(-1, 0, 1), 10)
+  expect_no_warning(trait_densities(ind, n = 16))
+  expect_null(check_spread_scale(ind$trait, ind$species))
+})

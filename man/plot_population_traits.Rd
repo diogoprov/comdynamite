@@ -16,6 +16,7 @@ plot_population_traits(
   rug = TRUE,
   alpha = 0.35,
   colours = NULL,
+  highlight = NULL,
   bw = NULL,
   n = 512,
   ncol = NULL,
@@ -45,7 +46,12 @@ measured.}
 
 \item{colours}{Colours of the species: unnamed, in the order of first appearance in
 \code{individuals}, or named by species. \code{NULL} (the default) uses the Okabe-Ito palette for
-up to seven species and \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}} (\code{"Dark 3"}) for more.}
+up to seven species and \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}} (\code{"Dark 3"}) for more. With
+\code{highlight}, the colours of the highlighted species only.}
+
+\item{highlight}{Species to draw in colour, on top of the others, which are drawn in grey
+and left out of the legend. Useful when a site holds many species, whose colours cannot
+all be told apart.}
 
 \item{bw}{Bandwidth of the kernel, or \code{NULL} for the rule above.}
 
@@ -65,6 +71,10 @@ the populations of a site add up to the community line; with \code{weighted = FA
 population integrates to one, which shows the shape of rare populations.
 }
 \details{
+With many species, \code{highlight} draws a few of them in colour and the rest in grey. For traits
+whose spread grows with their mean, such as body size, see the note on the bandwidth in
+\code{\link[=trait_densities]{trait_densities()}}.
+
 The ggplot object can be changed further, for instance with \code{+ ggplot2::facet_wrap(~ site, ncol = 2)}, \code{+ ggplot2::scale_fill_viridis_d()} or \code{+ ggplot2::theme_classic()}.
 }
 \examples{
