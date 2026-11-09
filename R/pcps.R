@@ -44,9 +44,12 @@
 #' @return List of class `mc_pcps` with `tests`, a data frame with one row for all the
 #'   dissimilarity (`whole`) and one for each axis, and the columns `share`, the share of the
 #'   positive eigenvalues; `r2`; `statistic`, the F statistic; `p_site`, `p_species` and
-#'   `p_max`; `scores`, the sites on all the axes with positive eigenvalues; and
+#'   `p_max`; `scores`, the sites on all the axes with positive eigenvalues; `share`, the
+#'   share of each of those axes; `species`, the
+#'   correlation of each species' column of the matrix P with those axes (its position in the
+#'   biplot of the package PCPS); `env`, the predictors of the occupied sites; and
 #'   `permutations`, the numbers of permutations and whether those of sites were free or
-#'   restricted.
+#'   restricted. [plot.mc_pcps()] draws the ordination.
 #' @references
 #' Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring
 #' phylogenetic eigenvectors across metacommunities. *Frontiers of Biogeography*, 6.
@@ -67,7 +70,9 @@
 #' traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(0, 30))
 #' env <- seq(0, 100, length.out = 36)
 #' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-#' pcps_test(comm, tree, env, n_perm = 49)
+#' res <- pcps_test(comm, tree, env, n_perm = 49)
+#' res
+#' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 #' @export
 pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL) {
   if (inherits(comm, "mc_data")) {
@@ -121,7 +126,12 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
                       share = c(1, ordination$share[axes]), r2 = observed$r2,
                       statistic = observed$statistic, p_site = p_site, p_species = p_species,
                       p_max = pmax(p_site, p_species))
-  structure(list(tests = tests, scores = ordination$scores,
+  composition <- weights %*% belonging
+  species <- suppressWarnings(stats::cor(composition, ordination$scores))
+  rownames(species) <- colnames(comm)
+  rownames(ordination$scores) <- rownames(comm)
+  structure(list(tests = tests, scores = ordination$scores, share = ordination$share,
+                 species = species, env = env,
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_pcps")
 }
@@ -172,4 +182,93 @@ pcps_fit <- function(gower, scores, env) {
   total <- c(sum(diag(gower)), colSums(scores^2))
   list(r2 = explained / total,
        statistic = (explained / fit$rank) / ((total - explained) / (n - fit$rank - 1)))
+}
+
+#' Plot the principal coordinates of phylogenetic structure
+#'
+#' Draws the sites on two principal coordinates of [pcps_test()], coloured by a predictor, with
+#' the species as arrows from the correlation of their column of the matrix P with the axes,
+#' as in the biplot of the package PCPS (Debastiani & Duarte 2014).
+#'
+#' @param x Result of [pcps_test()].
+#' @param axes The two principal coordinates to draw.
+#' @param env Predictor that colours the sites: a column number or name of the predictors given
+#'   to [pcps_test()], or `NULL` for no colour.
+#' @param species Draw the species as arrows.
+#' @param species_labels Write the names of the species at the arrows.
+#' @param palette Name of a palette of [grDevices::hcl.colors()] for the predictor.
+#' @param point_size Size of the site points.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [pcps_test()].
+#' @references
+#' Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring
+#' phylogenetic eigenvectors across metacommunities. *Frontiers of Biogeography*, 6.
+#' \doi{10.21425/F5FBG22943}
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(12)
+#' traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(0, 30))
+#' env <- seq(0, 100, length.out = 36)
+#' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+#' plot(pcps_test(comm, tree, env, n_perm = 19))
+#' @export
+plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_labels = TRUE,
+                         palette = "viridis", point_size = 2.5, ...) {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("plot() of pcps_test() needs the package ggplot2", call. = FALSE) # nocov
+  }
+  if (is.null(x$species)) {
+    stop("`x` comes from an older version of pcps_test(); run it again", call. = FALSE)
+  }
+  n_axes <- ncol(x$scores)
+  if (!is.numeric(axes) || length(axes) != 2 || any(axes < 1) || any(axes > n_axes) ||
+      any(axes != round(axes)) || axes[1] == axes[2]) {
+    stop("`axes` must be two different axes between 1 and ", n_axes, call. = FALSE)
+  }
+  stopifnot(is.logical(species), length(species) == 1, !is.na(species),
+            is.logical(species_labels), length(species_labels) == 1, !is.na(species_labels))
+  axis_label <- function(a) sprintf("PCPS %d (%.1f%%)", a, 100 * x$share[a])
+  sites <- data.frame(a1 = x$scores[, axes[1]], a2 = x$scores[, axes[2]])
+  colour_name <- NULL
+  if (!is.null(env)) {
+    predictors <- as.data.frame(x$env)
+    if (is.null(colnames(x$env))) names(predictors) <- paste0("env", seq_along(predictors))
+    if (length(env) != 1 || !(env %in% names(predictors) ||
+                              (is.numeric(env) && env >= 1 && env <= ncol(predictors)))) {
+      stop("`env` must be one column of the predictors given to pcps_test(), or NULL",
+           call. = FALSE)
+    }
+    colour_name <- if (is.numeric(env)) names(predictors)[env] else env
+    sites$env <- predictors[[env]]
+  }
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot(sites, ggplot2::aes(x = .data$a1, y = .data$a2)) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey85") +
+    ggplot2::geom_vline(xintercept = 0, colour = "grey85")
+  if (species) {
+    # arrows scaled to the spread of the sites, as in a biplot
+    scale <- 0.9 * max(abs(as.matrix(sites[c("a1", "a2")]))) /
+      max(abs(x$species[, axes]), na.rm = TRUE)
+    sp <- data.frame(a1 = x$species[, axes[1]] * scale, a2 = x$species[, axes[2]] * scale,
+                     label = rownames(x$species))
+    sp <- sp[stats::complete.cases(sp), , drop = FALSE]
+    p <- p + ggplot2::geom_segment(data = sp, ggplot2::aes(x = 0, y = 0, xend = .data$a1,
+                                                           yend = .data$a2),
+                                   colour = "grey50", linewidth = 0.4,
+                                   arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "cm")))
+    if (species_labels) {
+      p <- p + ggplot2::geom_text(data = sp, ggplot2::aes(label = .data$label),
+                                  colour = "grey30", size = 3, vjust = -0.4)
+    }
+  }
+  if (is.null(colour_name)) {
+    p <- p + ggplot2::geom_point(size = point_size)
+  } else {
+    p <- p + ggplot2::geom_point(ggplot2::aes(colour = .data$env), size = point_size) +
+      ggplot2::scale_colour_gradientn(colours = grDevices::hcl.colors(30, palette),
+                                      name = colour_name)
+  }
+  p + ggplot2::labs(x = axis_label(axes[1]), y = axis_label(axes[2])) +
+    ggplot2::coord_equal() + ggplot2::theme_minimal()
 }
