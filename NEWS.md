@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- `population_shifts()`:
+  - The grid of kernel widths no longer goes below the pooled standard deviation within
+    populations, and a warning is given when the best width is at an end of the grid or the
+    fit barely changes along it.
+  - `env` takes several environmental variables, and `species_slopes = TRUE` gives each
+    species its own slope.
+  - `community` (a site x species matrix of abundances) lets species that were present but not
+    measured push the populations measured at their sites.
+  - `nboot` runs a parametric bootstrap of the design. It gives a p-value for displacement that
+    accounts for the choice of the width, a first-order bias correction of `c`, and intervals
+    for `c` and the slopes.
+  - `plot()` draws the profile of R², `c` and `h` along the width.
+
 - Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`
   with their tree, as a phylomorphospace (two traits) or a traitgram (one trait), with branches
   coloured by regime and the colour changing where a mapped history changes;
