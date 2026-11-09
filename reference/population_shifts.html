@@ -53,7 +53,7 @@ sample_individuals() at once to the means of the populations:"><meta property="o
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Local adaptation and character displacement from population means</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/individuals.R" class="external-link"><code>R/individuals.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/population_shifts.R" class="external-link"><code>R/population_shifts.R</code></a></small>
       <div class="d-none name"><code>population_shifts.Rd</code></div>
     </div>
 
@@ -72,7 +72,11 @@ how far co-occurring species push them apart, by fitting both terms of the model
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  env <span class="op">=</span> <span class="st">"env"</span>,</span>
 <span>  abundance <span class="op">=</span> <span class="st">"abundance"</span>,</span>
-<span>  width <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  width <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  species_slopes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  community <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  nboot <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  level <span class="op">=</span> <span class="fl">0.95</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -85,24 +89,53 @@ how far co-occurring species push them apart, by fitting both terms of the model
 <code><a href="sample_individuals.html">sample_individuals()</a></code>.</p></dd>
 
 
-<dt id="arg-trait-site-species-env-abundance">trait, site, species, env, abundance<a class="anchor" aria-label="anchor" href="#arg-trait-site-species-env-abundance"></a></dt>
-<dd><p>Names of the columns with the trait value, the
-site, the species, the environment of the site and the abundance of the population.</p></dd>
+<dt id="arg-trait-site-species">trait, site, species<a class="anchor" aria-label="anchor" href="#arg-trait-site-species"></a></dt>
+<dd><p>Names of the columns with the trait value, the site and the
+species.</p></dd>
+
+
+<dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
+<dd><p>Names of one or more columns with the environment of the site.</p></dd>
+
+
+<dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
+<dd><p>Name of the column with the abundance of the population; not used with
+<code>community</code>.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>Width <code>w</code> of the competition kernel; <code>NULL</code> (the default) chooses it from a
-grid of multiples (1/8 to 4) of the median standard deviation of population means within
-sites, refined by <code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code> between the neighbours of the best value of the
-grid. <code>c</code> is estimated at that width, and the two trade off when data are few.</p></dd>
+<dd><p>Width <code>w</code> of the competition kernel; <code>NULL</code> (the default) chooses it from the
+grid described in the section on the width. <code>c</code> is estimated at that width, and the two
+trade off when data are few.</p></dd>
+
+
+<dt id="arg-species-slopes">species_slopes<a class="anchor" aria-label="anchor" href="#arg-species-slopes"></a></dt>
+<dd><p>Give each species its own slope on each environmental variable.</p></dd>
+
+
+<dt id="arg-community">community<a class="anchor" aria-label="anchor" href="#arg-community"></a></dt>
+<dd><p>Optional matrix or data frame of abundances, sites in rows and species in
+columns, so that species present but not measured also push (see the section on
+competitors).</p></dd>
+
+
+<dt id="arg-nboot">nboot<a class="anchor" aria-label="anchor" href="#arg-nboot"></a></dt>
+<dd><p>Number of parametric bootstrap simulations (0, the default, for none).</p></dd>
+
+
+<dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
+<dd><p>Confidence level of the bootstrap intervals.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with one row and the columns <code>local_adaptation</code> (<code>h</code>),
+    <p>An object of class <code>population_shifts</code>: a data frame with one row and the columns
+<code>local_adaptation</code> (<code>h</code>; with several variables, <code>local_adaptation_&lt;variable&gt;</code>),
 <code>displacement</code> (<code>c</code>), <code>width</code> (<code>w</code>), <code>r_squared</code> (of the fit within species),
-<code>n_populations</code> and <code>n_species</code> (that entered as responses). The attribute <code>profile</code> holds
-the residual sum of squares for each width tried.</p>
+<code>n_populations</code> and <code>n_species</code> (that entered as responses). With <code>nboot &gt; 0</code> it also has
+<code>displacement_corrected</code>, <code>displacement_low</code>, <code>displacement_high</code>, <code>p_displacement</code> and,
+for each slope, <code>_low</code> and <code>_high</code> columns. The attribute <code>profile</code> holds, for each width
+tried, the residual sum of squares, \(R^2\) and the estimates.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -110,12 +143,12 @@ the residual sum of squares for each width tried.</p>
   \exp\left(-\frac{(m_{ij} - m_{ik})^2}{2 w^2}\right),$$</p>
 <p>where \(m_{ij}\) is the mean of species \(j\) at site \(i\), \(a_j\) a
 constant of the species, \(E_i\) the environment of the site and
-\(p_{ik}\) the relative abundance of species \(k\) among the species measured at
-the site. In <code><a href="sample_individuals.html">sample_individuals()</a></code>, \(a_j = (1 - h) \theta_j\),
-<code>h</code> is <code>local_adaptation</code>, <code>c</code> is <code>displacement</code> and <code>w</code> is <code>displacement_width</code>. The
-constants of the species are removed by centring each variable within species, and <code>h</code> and
-<code>c</code> are the coefficients of a regression through the origin; <code>w</code>, when not given, is the
-value of a grid that leaves the smallest residual sum of squares.</p>
+\(p_{ik}\) the relative abundance of species \(k\) at the site. In
+<code><a href="sample_individuals.html">sample_individuals()</a></code>, \(a_j = (1 - h) \theta_j\), <code>h</code> is
+<code>local_adaptation</code>, <code>c</code> is <code>displacement</code> and <code>w</code> is <code>displacement_width</code>. The constants of
+the species are removed by centring each variable within species, and <code>h</code> and <code>c</code> are the
+coefficients of a regression through the origin; <code>w</code>, when not given, is the value of a
+grid that leaves the smallest residual sum of squares.</p>
 <p>Local adaptation alone moves the populations of a species along the environment, and
 displacement alone moves them away from the species they meet. The two leave different
 signatures, but each term alone picks up part of the other: the slope of population means on
@@ -126,6 +159,28 @@ environments and different competitors. The approach follows the advice of Goldb
 (2006) and Adams &amp; Collyer (2007) to judge divergence among sympatric species after the
 variation of the trait along the environment is accounted for, here with the strength of
 competition at each site in place of a contrast between sympatry and allopatry.</p>
+<p>With several columns in <code>env</code>, each environmental variable gets its own coefficient
+(\(h E_i\) becomes \(\sum_v h_v E_{iv}\)). With <code>species_slopes = TRUE</code>
+each species gets its own slope on each variable; the table then gives their unweighted mean
+and the attribute <code>species_slopes</code> the slope of each species.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="competitors-that-were-not-measured">Competitors that were not measured<a class="anchor" aria-label="anchor" href="#competitors-that-were-not-measured"></a></h2>
+
+
+<p>By default the competitors of a population are the other populations measured at its site,
+weighted by <code>abundance</code>. Species that occur at a site but were not measured are then left
+out of the push and bias <code>c</code>. With <code>community</code>, a matrix of abundances (sites in rows,
+species in columns, with names as in <code>individuals</code>), every species present at a site pushes,
+with its share of the abundance of the site. A species not measured at a site enters with
+the mean of its populations measured elsewhere, moved along the gradient by the fitted slopes
+times the difference between the environment of the site and the mean environment of the
+sites where the species was measured (the model is fitted once with the plain means, then
+again with the moved ones). Species never measured have no trait value and are left out,
+with a warning, of both the push and the total abundance of the site that sets the shares.
+Populations measured at a site where <code>community</code> gives
+them a smaller abundance than the number of individuals measured (such as zero, when the
+census and the measurements come from different visits) take that number as abundance.</p>
     </div>
     <div class="section level2">
     <h2 id="sampling-error">Sampling error<a class="anchor" aria-label="anchor" href="#sampling-error"></a></h2>
@@ -141,15 +196,56 @@ least two individuals, of species with at least two such populations, enter as r
 all populations enter as competitors. Sampling error left in the push still biases <code>c</code>
 toward zero, more so with few individuals per population and with strong displacement:
 strongly displaced populations sit in the tail of the kernel of their competitors, where the
-push is small but its sampling error is not. Competitors are the populations present in
-<code>individuals</code>, so species that occur at a site but were not measured (as with <code>fraction</code>
-in <code><a href="sample_individuals.html">sample_individuals()</a></code>) are missing from the push and bias <code>c</code> as well. The estimates are best read as
-summary statistics, with their uncertainty and bias found by simulating the design, as in
-approximate Bayesian computation.</p>
+push is small but its sampling error is not.</p>
+<p>Deviations of whole populations from the model (from genetic drift or unmeasured
+environmental variables) are not removed by the split: they enter the own mean in the push
+and the response alike, and bias <code>c</code> downward, below zero when there is no displacement. The
+bootstrap reproduces this bias, so <code>p_displacement</code> and <code>displacement_corrected</code> account for
+it, but the raw <code>displacement</code> does not.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="width-of-the-kernel">Width of the kernel<a class="anchor" aria-label="anchor" href="#width-of-the-kernel"></a></h2>
+
+
 <p>Without displacement the width is not identified: the residual sum of squares changes little
 along the grid, and a narrow kernel, which acts on few pairs of populations, can give a value
-of <code>c</code> far from zero, of either sign. Look at the attribute <code>profile</code>, or fix <code>width</code> from
-independent knowledge of the niche widths, before reading <code>c</code> as evidence of displacement.</p>
+of <code>c</code> far from zero, of either sign. The grid runs from the larger of one eighth of the
+median standard deviation of population means within sites and the pooled standard
+deviation within populations (a kernel narrower than the spread of individuals mostly fits
+sampling noise), but no higher than that median, to four times the median, and is refined by
+<code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code> around its best value. A warning is given when the best width stays at
+one of the ends of the grid after the refinement or when the residual sum of squares changes
+by less than 5% along the grid; <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> shows the profile of
+the fit and of the estimates along the width. Fix <code>width</code> from independent knowledge of the
+niche widths when it is not identified.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="bootstrap">Bootstrap<a class="anchor" aria-label="anchor" href="#bootstrap"></a></h2>
+
+
+<p>With <code>nboot &gt; 0</code>, new data are simulated with the design of the data (the same sites,
+species, environment, abundances and numbers of individuals per population), with the
+within-population standard deviation of the data, a population-level standard deviation
+estimated from the residuals of the fit without displacement, and the fitted species
+constants and slopes, and refitted as the data were (with the same <code>width</code>, estimated or
+fixed). Two sets are simulated:</p><ul><li><p>without displacement (<code>c = 0</code>), which gives <code>p_displacement</code>, the two-sided p-value of
+<code>c</code> with the width chosen anew in each simulation, so that the choice of the width is
+accounted for. The p-value is the share of simulations at least as far from the mean of
+the simulations as the estimate, since that mean is not zero when sampling error or
+deviations of populations bias <code>c</code>;</p></li>
+<li><p>with the fitted values, \(c_0 = \max(\hat c, 0)\) (the model of
+<code><a href="sample_individuals.html">sample_individuals()</a></code> has no attraction), which give a first-order bias correction of
+<code>c</code>, <code>displacement_corrected</code> (\(\hat c - (\bar c^* - c_0)\)),
+and basic bootstrap intervals for <code>c</code> and for the slopes (\(\hat\theta -
+  (q^*_{1 - \alpha/2} - \theta_0)\) to
+\(\hat\theta - (q^*_{\alpha/2} - \theta_0)\), with
+\(\theta_0\) the value that generated the simulations).</p></li>
+</ul><p>The correction and the intervals assume that the bias does not change with <code>c</code> near the
+estimate; it does change with strong displacement and with deviations of whole populations,
+so the intervals of <code>c</code> cover the true value less often than <code>level</code>. The correction removes
+most of the attenuation of <code>c</code> by sampling error when <code>w</code> is well identified; when it is not,
+the intervals are wide and the p-value is the better guide. Results change with the seed of
+the random number generator. The simulated values are in the attribute <code>bootstrap</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -189,9 +285,16 @@ an environmental gradient. <em>Evolution</em>, 60, 1344–1357. <a href="https:/
 <span class="r-in"><span>                              <span class="fu"><a href="competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">100</span>,</span></span>
 <span class="r-in"><span>                              seed_steps <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, n <span class="op">=</span> <span class="fl">20</span>, local_adaptation <span class="op">=</span> <span class="fl">0.5</span>, displacement <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">population_shifts</span><span class="op">(</span><span class="va">ind</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu">population_shifts</span><span class="op">(</span><span class="va">ind</span>, nboot <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fit</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   local_adaptation displacement    width r_squared n_populations n_species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        0.4914459     1.990583 12.13176 0.9960785            91        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   displacement_corrected displacement_low displacement_high p_displacement</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1               2.970074         2.911755          3.054845           0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   local_adaptation_low local_adaptation_high</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           0.09551249              0.205185</span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="population_shifts-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

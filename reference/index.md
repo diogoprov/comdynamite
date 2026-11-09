@@ -190,6 +190,8 @@ indices and decompositions of trait variation.
   : Summary of the null-model tests of T-statistics
 - [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
   : Local adaptation and character displacement from population means
+- [`plot(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/plot.population_shifts.md)
+  : Plot the profile of a fit of population shifts
 - [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
   : Trait indices of communities against null models
 - [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)

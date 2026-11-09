@@ -16,7 +16,11 @@ population_shifts(
   species = "species",
   env = "env",
   abundance = "abundance",
-  width = NULL
+  width = NULL,
+  species_slopes = FALSE,
+  community = NULL,
+  nboot = 0,
+  level = 0.95
 )
 ```
 
@@ -27,27 +31,54 @@ population_shifts(
   Data frame with one row per individual, such as from
   [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md).
 
-- trait, site, species, env, abundance:
+- trait, site, species:
 
-  Names of the columns with the trait value, the site, the species, the
-  environment of the site and the abundance of the population.
+  Names of the columns with the trait value, the site and the species.
+
+- env:
+
+  Names of one or more columns with the environment of the site.
+
+- abundance:
+
+  Name of the column with the abundance of the population; not used with
+  `community`.
 
 - width:
 
   Width `w` of the competition kernel; `NULL` (the default) chooses it
-  from a grid of multiples (1/8 to 4) of the median standard deviation
-  of population means within sites, refined by
-  [`stats::optimize()`](https://rdrr.io/r/stats/optimize.html) between
-  the neighbours of the best value of the grid. `c` is estimated at that
-  width, and the two trade off when data are few.
+  from the grid described in the section on the width. `c` is estimated
+  at that width, and the two trade off when data are few.
+
+- species_slopes:
+
+  Give each species its own slope on each environmental variable.
+
+- community:
+
+  Optional matrix or data frame of abundances, sites in rows and species
+  in columns, so that species present but not measured also push (see
+  the section on competitors).
+
+- nboot:
+
+  Number of parametric bootstrap simulations (0, the default, for none).
+
+- level:
+
+  Confidence level of the bootstrap intervals.
 
 ## Value
 
-A data frame with one row and the columns `local_adaptation` (`h`),
-`displacement` (`c`), `width` (`w`), `r_squared` (of the fit within
-species), `n_populations` and `n_species` (that entered as responses).
-The attribute `profile` holds the residual sum of squares for each width
-tried.
+An object of class `population_shifts`: a data frame with one row and
+the columns `local_adaptation` (`h`; with several variables,
+`local_adaptation_<variable>`), `displacement` (`c`), `width` (`w`),
+`r_squared` (of the fit within species), `n_populations` and `n_species`
+(that entered as responses). With `nboot > 0` it also has
+`displacement_corrected`, `displacement_low`, `displacement_high`,
+`p_displacement` and, for each slope, `_low` and `_high` columns. The
+attribute `profile` holds, for each width tried, the residual sum of
+squares, \\R^2\\ and the estimates.
 
 ## Details
 
@@ -56,8 +87,7 @@ tried.
 
 where \\m\_{ij}\\ is the mean of species \\j\\ at site \\i\\, \\a_j\\ a
 constant of the species, \\E_i\\ the environment of the site and
-\\p\_{ik}\\ the relative abundance of species \\k\\ among the species
-measured at the site. In
+\\p\_{ik}\\ the relative abundance of species \\k\\ at the site. In
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 \\a_j = (1 - h) \theta_j\\, `h` is `local_adaptation`, `c` is
 `displacement` and `w` is `displacement_width`. The constants of the
@@ -80,6 +110,32 @@ after the variation of the trait along the environment is accounted for,
 here with the strength of competition at each site in place of a
 contrast between sympatry and allopatry.
 
+With several columns in `env`, each environmental variable gets its own
+coefficient (\\h E_i\\ becomes \\\sum_v h_v E\_{iv}\\). With
+`species_slopes = TRUE` each species gets its own slope on each
+variable; the table then gives their unweighted mean and the attribute
+`species_slopes` the slope of each species.
+
+## Competitors that were not measured
+
+By default the competitors of a population are the other populations
+measured at its site, weighted by `abundance`. Species that occur at a
+site but were not measured are then left out of the push and bias `c`.
+With `community`, a matrix of abundances (sites in rows, species in
+columns, with names as in `individuals`), every species present at a
+site pushes, with its share of the abundance of the site. A species not
+measured at a site enters with the mean of its populations measured
+elsewhere, moved along the gradient by the fitted slopes times the
+difference between the environment of the site and the mean environment
+of the sites where the species was measured (the model is fitted once
+with the plain means, then again with the moved ones). Species never
+measured have no trait value and are left out, with a warning, of both
+the push and the total abundance of the site that sets the shares.
+Populations measured at a site where `community` gives them a smaller
+abundance than the number of individuals measured (such as zero, when
+the census and the measurements come from different visits) take that
+number as abundance.
+
 ## Sampling error
 
 The mean of a population enters both sides of the equation, so its
@@ -95,20 +151,68 @@ competitors. Sampling error left in the push still biases `c` toward
 zero, more so with few individuals per population and with strong
 displacement: strongly displaced populations sit in the tail of the
 kernel of their competitors, where the push is small but its sampling
-error is not. Competitors are the populations present in `individuals`,
-so species that occur at a site but were not measured (as with
-`fraction` in
-[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md))
-are missing from the push and bias `c` as well. The estimates are best
-read as summary statistics, with their uncertainty and bias found by
-simulating the design, as in approximate Bayesian computation.
+error is not.
+
+Deviations of whole populations from the model (from genetic drift or
+unmeasured environmental variables) are not removed by the split: they
+enter the own mean in the push and the response alike, and bias `c`
+downward, below zero when there is no displacement. The bootstrap
+reproduces this bias, so `p_displacement` and `displacement_corrected`
+account for it, but the raw `displacement` does not.
+
+## Width of the kernel
 
 Without displacement the width is not identified: the residual sum of
 squares changes little along the grid, and a narrow kernel, which acts
 on few pairs of populations, can give a value of `c` far from zero, of
-either sign. Look at the attribute `profile`, or fix `width` from
-independent knowledge of the niche widths, before reading `c` as
-evidence of displacement.
+either sign. The grid runs from the larger of one eighth of the median
+standard deviation of population means within sites and the pooled
+standard deviation within populations (a kernel narrower than the spread
+of individuals mostly fits sampling noise), but no higher than that
+median, to four times the median, and is refined by
+[`stats::optimize()`](https://rdrr.io/r/stats/optimize.html) around its
+best value. A warning is given when the best width stays at one of the
+ends of the grid after the refinement or when the residual sum of
+squares changes by less than 5% along the grid;
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows the
+profile of the fit and of the estimates along the width. Fix `width`
+from independent knowledge of the niche widths when it is not
+identified.
+
+## Bootstrap
+
+With `nboot > 0`, new data are simulated with the design of the data
+(the same sites, species, environment, abundances and numbers of
+individuals per population), with the within-population standard
+deviation of the data, a population-level standard deviation estimated
+from the residuals of the fit without displacement, and the fitted
+species constants and slopes, and refitted as the data were (with the
+same `width`, estimated or fixed). Two sets are simulated:
+
+- without displacement (`c = 0`), which gives `p_displacement`, the
+  two-sided p-value of `c` with the width chosen anew in each
+  simulation, so that the choice of the width is accounted for. The
+  p-value is the share of simulations at least as far from the mean of
+  the simulations as the estimate, since that mean is not zero when
+  sampling error or deviations of populations bias `c`;
+
+- with the fitted values, \\c_0 = \max(\hat c, 0)\\ (the model of
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  has no attraction), which give a first-order bias correction of `c`,
+  `displacement_corrected` (\\\hat c - (\bar c^\* - c_0)\\), and basic
+  bootstrap intervals for `c` and for the slopes (\\\hat\theta -
+  (q^\*\_{1 - \alpha/2} - \theta_0)\\ to \\\hat\theta -
+  (q^\*\_{\alpha/2} - \theta_0)\\, with \\\theta_0\\ the value that
+  generated the simulations).
+
+The correction and the intervals assume that the bias does not change
+with `c` near the estimate; it does change with strong displacement and
+with deviations of whole populations, so the intervals of `c` cover the
+true value less often than `level`. The correction removes most of the
+attenuation of `c` by sampling error when `w` is well identified; when
+it is not, the intervals are wide and the p-value is the better guide.
+Results change with the seed of the random number generator. The
+simulated values are in the attribute `bootstrap`.
 
 ## References
 
@@ -154,7 +258,13 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
-population_shifts(ind)
+fit <- population_shifts(ind, nboot = 49)
+fit
 #>   local_adaptation displacement    width r_squared n_populations n_species
 #> 1        0.4914459     1.990583 12.13176 0.9960785            91        14
+#>   displacement_corrected displacement_low displacement_high p_displacement
+#> 1               2.970074         2.911755          3.054845           0.02
+#>   local_adaptation_low local_adaptation_high
+#> 1           0.09551249              0.205185
+if (requireNamespace("ggplot2", quietly = TRUE)) plot(fit)
 ```

@@ -2,6 +2,25 @@
 
 ## comdynamite (development version)
 
+- [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md):
+
+  - The grid of kernel widths no longer goes below the pooled standard
+    deviation within populations, and a warning is given when the best
+    width is at an end of the grid or the fit barely changes along it.
+  - `env` takes several environmental variables, and
+    `species_slopes = TRUE` gives each species its own slope.
+  - `community` (a site x species matrix of abundances) lets species
+    that were present but not measured push the populations measured at
+    their sites, with the mean of their populations elsewhere moved
+    along the gradient by the fitted slopes.
+  - `nboot` runs a parametric bootstrap of the design. It gives a
+    p-value for displacement that accounts for the choice of the width
+    and is centred on the mean of the simulations without displacement,
+    a first-order bias correction of `c`, and intervals for `c` and the
+    slopes.
+  - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the
+    profile of R², `c` and `h` along the width.
+
 - All plots now use ggplot2 (in Suggests, version 3.5.0 or later) and
   return a ggplot object, which can be changed further with ggplot2:
   [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
