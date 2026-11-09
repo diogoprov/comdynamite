@@ -772,8 +772,13 @@ pacotes de referência em vez de reimplementá-los.
       divergências na maioria; λ = 0 de novo perto de 0 (10/10 com divergências); λ de Pagel
       0,5 NÃO é recuperado: medianas 0,007–0,81 (mediana 0,04), intervalo contém 0,5 em 12/20 e
       exclui 0 em 3/20; só 4/20 passam. Documentado em Limits.
-- [ ] TGA bayesiana: reparametrizar para tirar o viés para 0 (prior direto em λ, p. ex. beta,
-      com sd total; exige Stan próprio ou `stanvars`) e atacar as divergências perto de λ = 0.
+- [x] TGA bayesiana reparametrizada em Stan próprio (pedido em 2026-11-09):
+      `trait_gradient_bayes()` substitui `trait_gradient_brms()` (nunca na main); τ total e
+      λ ~ beta(1, 1) por resposta, efeitos não centrados, cmdstanr (BSD) em Suggests, modelo
+      em `inst/stan/` compilado no cache do usuário. Validação (60 réplicas, ~43 espécies):
+      9–30 s por ajuste, 1 divergência em 60; λ = 0 → mediana 0,07; λ = 0,5 → 0,24, intervalo
+      contém 0,5 em 17/20 (brms: 12/20, mediana 0,04); λ = 1 → 0,94. Falhas de diagnóstico
+      só por ESS < 400.
 
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).

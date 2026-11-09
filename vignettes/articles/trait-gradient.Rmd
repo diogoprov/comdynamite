@@ -120,25 +120,27 @@ Brownian motion.
 ## A Bayesian model with latent beta
 
 `trait_gradient_phylo()` first computes \(\beta\) and then models it with a standard error.
-`trait_gradient_brms()` instead fits one bivariate model in which \(\beta\) and the species
-mean are latent species effects, with a phylogenetic and a non-phylogenetic part, estimated
-from every site of every species. The phylogenetic share \(\lambda\) of \(\beta\),
-\(\alpha\) and the mean comes with a credible interval. It needs brms, and many species:
-with about 20 species the chains do not separate the two parts, and even with 40 they mix
-poorly when \(\beta\) has no phylogenetic signal. Abundance weights make the posterior too
-narrow, so the model below uses occurrence weights for species.
+`trait_gradient_bayes()` instead fits in Stan one bivariate model in which \(\beta\) and the
+species mean are latent species effects, with a phylogenetic and a non-phylogenetic part,
+estimated from every site of every species. The phylogenetic share \(\lambda\) of
+\(\beta\), \(\alpha\) and the mean has its own prior and comes with a credible interval.
+It needs cmdstanr and many species (see the Limits section of its help page). Abundance
+weights make the posterior too narrow, so the model below uses occurrence weights for species.
+
+In simulations with about 40 species, \(\lambda\) of \(\beta\) near 0 and near 1 was recovered,
+while intermediate signal came out low with wide intervals; the help page gives the numbers.
 
 ```{r, eval = FALSE}
 tg_occ <- trait_gradient(ind, abundance = "abundance", species_weights = "occurrence")
-bayes <- trait_gradient_brms(tg_occ, tree, chains = 4, cores = 4)
+bayes <- trait_gradient_bayes(tg_occ, tree, parallel_chains = 4)
 bayes$diagnostics   # R-hat, effective sample sizes, divergent transitions
 bayes$signal
 bayesplot::pp_check(bayes, resp = "sitemean")
 # an OU structure with the strength fitted to beta by trait_gradient_phylo()
 a <- ph$models$a[ph$models$response == "beta" & ph$models$model == "OU"]
-ou <- trait_gradient_brms(tg_occ, tree, ou_alpha = a, chains = 4, cores = 4)
-# cross-validation one response at a time, since the two are fitted to different rows
-brms::loo_compare(brms::loo(bayes$fit, resp = "sitemean"), brms::loo(ou$fit, resp = "sitemean"))
+ou <- trait_gradient_bayes(tg_occ, tree, ou_alpha = a, parallel_chains = 4)
+# cross-validation one response at a time, since the two are fitted to different populations
+loo::loo_compare(bayes$fit$loo(variables = "log_lik_p"), ou$fit$loo(variables = "log_lik_p"))
 ```
 
 ## References
