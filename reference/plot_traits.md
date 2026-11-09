@@ -89,6 +89,25 @@ tips are drawn.
 and
 [`plot.rate_matrix()`](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md).
 
+Other species traits:
+[`arrival_ages()`](https://provetelab.org/comdynamite/reference/arrival_ages.md),
+[`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md),
+[`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md),
+[`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md),
+[`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md),
+[`partner_turnover()`](https://provetelab.org/comdynamite/reference/partner_turnover.md),
+[`plot.rate_matrix()`](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md),
+[`plot_rates()`](https://provetelab.org/comdynamite/reference/plot_rates.md),
+[`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md),
+[`region_pool()`](https://provetelab.org/comdynamite/reference/region_pool.md),
+[`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
+[`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
+[`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
+[`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
+[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
+
 ## Examples
 
 ``` r

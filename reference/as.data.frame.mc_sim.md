@@ -35,6 +35,13 @@ recorded.
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)
 turns it into a tibble.
 
+## See also
+
+Other simulation studies:
+[`equilibrium_check()`](https://provetelab.org/comdynamite/reference/equilibrium_check.md),
+[`run_scenarios()`](https://provetelab.org/comdynamite/reference/run_scenarios.md),
+[`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+
 ## Examples
 
 ``` r

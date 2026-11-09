@@ -94,6 +94,14 @@ shows the result.
 [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
 is the other framework of the same article.
 
+Other the whole tree:
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+[`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
+[`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md),
+[`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md),
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+
 ## Examples
 
 ``` r

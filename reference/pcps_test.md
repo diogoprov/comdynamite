@@ -57,8 +57,13 @@ List of class `mc_pcps` with `tests`, a data frame with one row for all
 the dissimilarity (`whole`) and one for each axis, and the columns
 `share`, the share of the positive eigenvalues; `r2`; `statistic`, the F
 statistic; `p_site`, `p_species` and `p_max`; `scores`, the sites on all
-the axes with positive eigenvalues; and `permutations`, the numbers of
+the axes with positive eigenvalues; `share`, the share of each of those
+axes; `species`, the correlation of each species' column of the matrix P
+with those axes (its position in the biplot of the package PCPS); `env`,
+the predictors of the occupied sites; and `permutations`, the numbers of
 permutations and whether those of sites were free or restricted.
+[`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md)
+draws the ordination.
 
 ## Details
 
@@ -116,6 +121,14 @@ for other tests over the whole tree, and
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md),
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md).
 
+Other the whole tree:
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
+[`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
+[`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md),
+[`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md),
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+
 ## Examples
 
 ``` r
@@ -124,11 +137,13 @@ tree <- treeshapesim::sim_tree_shape(12)
 traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(0, 30))
 env <- seq(0, 100, length.out = 36)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-pcps_test(comm, tree, env, n_perm = 49)
+res <- pcps_test(comm, tree, env, n_perm = 49)
+res
 #> <mc_pcps> principal coordinates of phylogenetic structure
 #> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02
 #>   test share      r2 statistic p_site p_species p_max
 #>  whole 1.000 0.18435    7.6845   0.02      0.74  0.74
 #>  pcps1 0.285 0.00286    0.0976   0.74      1.00  1.00
 #>  pcps2 0.215 0.82350  158.6358   0.02      0.02  0.02
+if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 ```

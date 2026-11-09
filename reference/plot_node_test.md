@@ -105,6 +105,14 @@ phylogenetics: separating the roles of environmental filters and
 historical biogeography. *Ecology Letters*, 13, 1290–1299.
 [doi:10.1111/j.1461-0248.2010.01523.x](https://doi.org/10.1111/j.1461-0248.2010.01523.x)
 
+## See also
+
+Other clades and biogeography:
+[`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md),
+[`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md),
+[`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
+[`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
+
 ## Examples
 
 ``` r

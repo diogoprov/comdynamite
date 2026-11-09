@@ -201,6 +201,15 @@ process-based metacommunity framework linking local and regional scale
 community ecology. *Ecology Letters*, 23, 1314–1329.
 [doi:10.1111/ele.13568](https://doi.org/10.1111/ele.13568)
 
+## See also
+
+Other simulate metacommunities:
+[`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
+[`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+
 ## Examples
 
 ``` r

@@ -96,10 +96,14 @@ Unlike the method of
 [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
 which works on eigenvectors of the tree, this one takes eigenvectors of
 the sites, so `scores` can be plotted against the environment.
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html) draws the sites
+on the first two axes, coloured by the environment, with each species as
+an arrow from the correlation of its column of the matrix P with the
+axes.
 
 ``` r
 
-plot(env, pcps$scores[, 1], xlab = "Environment", ylab = "PCPS 1")
+plot(pcps)
 ```
 
 ![](whole-tree_files/figure-html/unnamed-chunk-7-1.png)

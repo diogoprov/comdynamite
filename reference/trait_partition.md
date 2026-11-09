@@ -333,6 +333,10 @@ methods. *Methods in Ecology and Evolution*, 6, 1169–1178.
 
 [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
 
+Other environment and space:
+[`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+[`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
+
 ## Examples
 
 ``` r

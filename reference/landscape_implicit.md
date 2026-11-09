@@ -31,6 +31,11 @@ An `mc_landscape` object: a list with `env` (one value per site), and
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
 for a spatially explicit landscape.
 
+Other landscapes:
+[`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md),
+[`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md),
+[`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
+
 ## Examples
 
 ``` r

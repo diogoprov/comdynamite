@@ -98,6 +98,15 @@ List with `abundance` and `history`, as in
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 and `pool` as a logical matrix, or `NULL` without it.
 
+## See also
+
+Other simulate metacommunities:
+[`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
+[`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+
 ## Examples
 
 ``` r

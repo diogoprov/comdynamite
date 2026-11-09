@@ -95,6 +95,15 @@ effects of spatial contingency and environmental filtering on
 metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 [doi:10.1890/11-0494.1](https://doi.org/10.1890/11-0494.1)
 
+## See also
+
+Other simulate metacommunities:
+[`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
+[`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+
 ## Examples
 
 ``` r

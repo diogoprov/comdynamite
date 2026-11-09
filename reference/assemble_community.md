@@ -153,6 +153,11 @@ Mahalanobis, P. C. (2018). Reprint of: Mahalanobis, P. C. (1936) "On the
 generalised distance in statistics". *Sankhya A*, 80(Suppl. 1), 1–7.
 [doi:10.1007/s13171-019-00164-5](https://doi.org/10.1007/s13171-019-00164-5)
 
+## See also
+
+Other rule-based assembly:
+[`plot_assembly()`](https://provetelab.org/comdynamite/reference/plot_assembly.md)
+
 ## Examples
 
 ``` r

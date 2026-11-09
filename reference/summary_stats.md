@@ -122,6 +122,13 @@ Accounting for temporal change in multiple biodiversity patterns
 improves the inference of metacommunity processes. *Ecology*, 103,
 e3683. [doi:10.1002/ecy.3683](https://doi.org/10.1002/ecy.3683)
 
+## See also
+
+Other simulation studies:
+[`as.data.frame.mc_sim()`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md),
+[`equilibrium_check()`](https://provetelab.org/comdynamite/reference/equilibrium_check.md),
+[`run_scenarios()`](https://provetelab.org/comdynamite/reference/run_scenarios.md)
+
 ## Examples
 
 ``` r

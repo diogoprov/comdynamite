@@ -43,6 +43,15 @@ and breadth of each axis in its own set of traits. The maxima multiply
 too, so give the traits of all but one axis `r_max` of 1, for example
 with `species_traits(rmax_range = c(1, 1))`.
 
+## See also
+
+Other simulate metacommunities:
+[`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+
 ## Examples
 
 ``` r

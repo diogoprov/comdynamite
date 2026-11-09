@@ -241,6 +241,8 @@ Traits with phylogenetic signal and evolutionary regimes.
 - [`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md)
   : Rates of trait evolution from the trophic level of each lineage in a
   food web
+- [`plot_rates()`](https://provetelab.org/comdynamite/reference/plot_rates.md)
+  : Plot rates that vary among branches
 - [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md)
   : Tip-based metrics of a known trait history
 - [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
@@ -295,6 +297,8 @@ Does phylogenetic composition follow the environment?
   : Test phylogenetic community composition against the environment
 - [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
   : Principal coordinates of phylogenetic structure
+- [`plot(`*`<mc_pcps>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md)
+  : Plot the principal coordinates of phylogenetic structure
 - [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md)
   : Phylogenetic eigenvectors
 - [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)

@@ -68,6 +68,9 @@ a contour may lie outside it in the other traits.
 
 [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md).
 
+Other rule-based assembly:
+[`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md)
+
 ## Examples
 
 ``` r

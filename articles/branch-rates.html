@@ -111,15 +111,9 @@ which needs RRphylo and mvMORPH; the rest runs here.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://provetelab.org/comdynamite/">comdynamite</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">7</span><span class="op">)</span></span>
-<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># colour of each branch by the logarithm of its rate, from slow (dark) to fast (light)</span></span>
-<span><span class="va">plot_rates</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">tree</span>, <span class="va">rates</span>, <span class="va">main</span> <span class="op">=</span> <span class="st">""</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">pal</span> <span class="op">&lt;-</span> <span class="fu">grDevices</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">hcl.colors</a></span><span class="op">(</span><span class="fl">30</span>, <span class="st">"viridis"</span><span class="op">)</span></span>
-<span>  <span class="va">col</span> <span class="op">&lt;-</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">rates</span><span class="op">)</span><span class="op">)</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="va">pal</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/cut.html" class="external-link">cut</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">rates</span><span class="op">)</span>, <span class="fl">30</span>, labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">]</span> <span class="kw">else</span> <span class="va">pal</span><span class="op">[</span><span class="fl">15</span><span class="op">]</span></span>
-<span>  <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/plot.phylo.html" class="external-link">plot.phylo</a></span><span class="op">(</span><span class="va">tree</span>, edge.color <span class="op">=</span> <span class="va">col</span>, edge.width <span class="op">=</span> <span class="fl">2.5</span>, show.tip.label <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>                  main <span class="op">=</span> <span class="va">main</span><span class="op">)</span></span>
-<span><span class="op">}</span></span></code></pre></div>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">40</span><span class="op">)</span></span></code></pre></div>
+<p><code><a href="../reference/plot_rates.html">plot_rates()</a></code> colours each branch by its rate, on a
+logarithmic scale, from slow (dark) to fast (light).</p>
 <div class="section level2">
 <h2 id="rates-as-a-model">Rates as a model<a class="anchor" aria-label="anchor" href="#rates-as-a-model"></a>
 </h2>
@@ -133,13 +127,14 @@ evolves by Brownian motion with that rate on each branch.</p>
 <code class="sourceCode R"><span><span class="va">shift</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_rates.html">trait_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"shift"</span>, shifts <span class="op">=</span> <span class="fl">2</span>, shift_size <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8</span>, <span class="fl">1</span> <span class="op">/</span> <span class="fl">8</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">gbm</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_rates.html">trait_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"gbm"</span>, rate_sd <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
 <span><span class="va">iid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_rates.html">trait_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"iid"</span>, rate_sd <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span></span>
-<span><span class="va">op</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">shift</span><span class="op">$</span><span class="va">edge_rate</span>, <span class="st">"shift"</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">gbm</span><span class="op">$</span><span class="va">edge_rate</span>, <span class="st">"gbm"</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">iid</span><span class="op">$</span><span class="va">edge_rate</span>, <span class="st">"iid"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">shift</span>, title <span class="op">=</span> <span class="st">"shift"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="branch-rates_files/figure-html/models-1.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">gbm</span>, title <span class="op">=</span> <span class="st">"gbm"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="branch-rates_files/figure-html/models-2.png" class="r-plt" alt="" width="576"></p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">iid</span>, title <span class="op">=</span> <span class="st">"iid"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="branch-rates_files/figure-html/models-3.png" class="r-plt" alt="" width="576"></p>
 <p>Each result keeps the rates (<code>edge_rate</code>), the trait
 values at the tips (<code>tips</code>) and nodes (<code>nodes</code>),
 and the shifts, so the truth is available for any comparison.</p>
@@ -154,7 +149,7 @@ same region. <code><a href="../reference/trait_mk.html">trait_mk()</a></code> si
 character along the tree, and <code><a href="../reference/history_rates.html">history_rates()</a></code> turns it into
 the rate of each branch, the mean over the branch of a rate that depends
 on the history at each moment.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">habitat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_mk.html">trait_mk</a></span><span class="op">(</span><span class="va">tree</span>, q <span class="op">=</span> <span class="fl">0.5</span>, states <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"forest"</span>, <span class="st">"open"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">state</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/history_rates.html">history_rates</a></span><span class="op">(</span><span class="va">habitat</span>, <span class="st">"state"</span>, state_rates <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>forest <span class="op">=</span> <span class="fl">1</span>, open <span class="op">=</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">burst</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/history_rates.html">history_rates</a></span><span class="op">(</span><span class="va">habitat</span>, <span class="st">"burst"</span>, burst <span class="op">=</span> <span class="fl">9</span>, decay <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span></span>
@@ -177,15 +172,17 @@ first adapts to a new community (McPeek 2017). With
 state, the diversity-dependent model with biogeography of Drury et
 al. (2016); <code>data-raw/validation_sympatry.R</code> checks it
 against RPANDA.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">op</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">2</span>, <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">state</span>, <span class="st">"state"</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">burst</span>, <span class="st">"burst"</span><span class="op">)</span></span>
-<span><span class="fu">plot_rates</span><span class="op">(</span><span class="va">tree</span>, <span class="va">sympatry</span>, <span class="st">"sympatry"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="branch-rates_files/figure-html/history-plot-1.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span><span class="va">op</span><span class="op">)</span></span>
-<span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_rates.html">trait_rates</a></span><span class="op">(</span><span class="va">habitat</span>, edge_rates <span class="op">=</span> <span class="va">state</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="va">state</span>, title <span class="op">=</span> <span class="st">"state"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="branch-rates_files/figure-html/history-plot-1.png" class="r-plt" alt="" width="576"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="va">burst</span>, title <span class="op">=</span> <span class="st">"burst"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="branch-rates_files/figure-html/history-plot-2.png" class="r-plt" alt="" width="576"></p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_rates.html">plot_rates</a></span><span class="op">(</span><span class="va">tree</span>, <span class="va">sympatry</span>, title <span class="op">=</span> <span class="st">"sympatry"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="branch-rates_files/figure-html/history-plot-3.png" class="r-plt" alt="" width="576"></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_rates.html">trait_rates</a></span><span class="op">(</span><span class="va">habitat</span>, edge_rates <span class="op">=</span> <span class="va">state</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">tips</span><span class="op">)</span></span>
 <span><span class="co">#&gt;         t1         t2         t3         t4         t5         t6 </span></span>
 <span><span class="co">#&gt; -0.9494369 -0.3051386 -0.5780631 -0.6126907  0.4633037  0.9653968</span></span></code></pre></div>
@@ -202,7 +199,7 @@ enter or leave the sites where each species lives, and over the last
 <code>sigma2 * (1 + k * turnover)</code>. How much branch time the
 ecological dynamics represent is a choice, set by <code>window</code>;
 by default it is the whole tip branch.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="../reference/landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="../reference/species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>,</span>
 <span>                              <span class="fu"><a href="../reference/competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">400</span>,</span>
 <span>                              record_steps <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">200</span>, <span class="fl">400</span>, <span class="fl">10</span><span class="op">)</span>, extirpation <span class="op">=</span> <span class="fl">0.02</span><span class="op">)</span></span>
@@ -217,7 +214,7 @@ and its tip branch evolves faster the faster the mean trait of its level
 changed. These speeds are directional changes under selection, not
 Brownian variances, so they set relative rates among levels, scaled by
 <code>k</code>.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">web</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/food_web_dynamics.html">food_web_dynamics</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">4000</span>, by <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, init <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>R <span class="op">=</span> <span class="fl">50</span>, N <span class="op">=</span> <span class="fl">0.1</span>, P <span class="op">=</span> <span class="fl">0.1</span><span class="op">)</span>,</span>
 <span>                         traits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>R <span class="op">=</span> <span class="fl">10</span>, N <span class="op">=</span> <span class="fl">4</span>, P <span class="op">=</span> <span class="fl">6</span><span class="op">)</span>, introductions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>P <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span>,</span>
 <span>                         dt <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
@@ -230,13 +227,13 @@ Brownian variances, so they set relative rates among levels, scaled by
 <div class="section level2">
 <h2 id="recovering-the-rates">Recovering the rates<a class="anchor" aria-label="anchor" href="#recovering-the-rates"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"branch-rates.rds"</span><span class="op">)</span></span></code></pre></div>
 <p><strong>RRphylo under the three models.</strong> RRphylo (Castiglione
 et al. 2018) estimates a rate per branch by phylogenetic ridge
 regression. Over 30 trees of 60 species per model, the mean Spearman
 correlations were:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">with_change</span>, <span class="va">estimated</span>, <span class="va">ceiling</span><span class="op">)</span> <span class="op">~</span> <span class="va">model</span>, <span class="va">res</span><span class="op">$</span><span class="va">models</span>,</span>
 <span>          <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   model with_change estimated ceiling</span></span>
@@ -257,7 +254,7 @@ state can be estimated by Brownian motion with several regimes (O’Meara
 et al. 2006), here with <code>mvMORPH::mvBM(model = "BMM")</code>
 (Clavel et al. 2015) on the true history, over 30 trees of 60 species
 per true ratio:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">estimated</span> <span class="op">~</span> <span class="va">ratio</span>, <span class="va">res</span><span class="op">$</span><span class="va">regimes</span>, <span class="kw">function</span><span class="op">(</span><span class="va">v</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">v</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   ratio estimated</span></span>
 <span><span class="co">#&gt; 1     1      1.02</span></span>
@@ -275,7 +272,7 @@ crosses), with a wide spread among trees.</p>
 absolute rate RRphylo estimates on each tip branch and the turnover of
 partners of the species, over 30 metacommunities on trees of 40
 species:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">turnover</span><span class="op">$</span><span class="va">rho</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span></span>
 <span><span class="co">#&gt;   -0.27    0.06    0.10    0.13    0.24    0.56</span></span></code></pre></div>

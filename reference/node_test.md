@@ -218,6 +218,12 @@ and
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
 test the whole tree at once.
 
+Other clades and biogeography:
+[`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md),
+[`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md),
+[`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md),
+[`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
+
 ## Examples
 
 ``` r

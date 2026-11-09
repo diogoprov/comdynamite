@@ -181,6 +181,12 @@ species traits–environment relationships in the fourth-corner problem.
 *Ecology*, 93, 1525–1526.
 [doi:10.1890/12-0126.1](https://doi.org/10.1890/12-0126.1)
 
+## See also
+
+Other environment and space:
+[`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md),
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+
 ## Examples
 
 ``` r

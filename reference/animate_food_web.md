@@ -59,6 +59,11 @@ The path of the GIF, invisibly.
 
 [`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
 
+Other coevolution in food webs:
+[`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md),
+[`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md),
+[`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
+
 ## Examples
 
 ``` r

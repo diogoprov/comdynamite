@@ -48,6 +48,13 @@ parameter, its estimate and the lower and upper bounds.
 
 [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
 
+Other dynamic null model:
+[`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),
+[`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+[`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md),
+[`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md),
+[`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
+
 ## Examples
 
 ``` r

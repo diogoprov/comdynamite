@@ -33,6 +33,13 @@ site, with their means in the two halves (`early`, `late`), the relative
 `change` and whether it is `settled`, invisibly. It gives a warning if
 any statistic has not settled.
 
+## See also
+
+Other simulation studies:
+[`as.data.frame.mc_sim()`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md),
+[`run_scenarios()`](https://provetelab.org/comdynamite/reference/run_scenarios.md),
+[`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+
 ## Examples
 
 ``` r

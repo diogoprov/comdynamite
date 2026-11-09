@@ -44,6 +44,13 @@ between those rates and the local dynamics, not evidence of a mechanism.
 [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
 [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md).
 
+Other dynamic null model:
+[`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),
+[`confint.mc_damocles_fit()`](https://provetelab.org/comdynamite/reference/confint.mc_damocles_fit.md),
+[`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+[`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md),
+[`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
+
 ## Examples
 
 ``` r

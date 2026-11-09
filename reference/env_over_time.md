@@ -36,6 +36,13 @@ Matrix with one row per site and one column per time step, for the
 `env_time` argument of
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
 
+## See also
+
+Other landscapes:
+[`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md),
+[`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
+[`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
+
 ## Examples
 
 ``` r

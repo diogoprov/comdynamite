@@ -145,6 +145,13 @@ phylogenetic community structure. *Ecology Letters*, 18, 153–163.
 [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
 [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
 
+Other dynamic null model:
+[`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),
+[`confint.mc_damocles_fit()`](https://provetelab.org/comdynamite/reference/confint.mc_damocles_fit.md),
+[`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+[`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md),
+[`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
+
 ## Examples
 
 ``` r

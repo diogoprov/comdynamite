@@ -96,14 +96,36 @@ node)?</p></dd>
 <code>tree$edge</code> after reordering it "cladewise" (the order <code><a href="traits_ou.html">traits_ou()</a></code>
 uses).</p>
     </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p>Other species traits:
+<code><a href="arrival_ages.html">arrival_ages()</a></code>,
+<code><a href="as_herodotools.html">as_herodotools()</a></code>,
+<code><a href="food_web_rates.html">food_web_rates()</a></code>,
+<code><a href="history_rates.html">history_rates()</a></code>,
+<code><a href="partner_turnover.html">partner_turnover()</a></code>,
+<code><a href="plot.rate_matrix.html">plot.rate_matrix()</a></code>,
+<code><a href="plot_rates.html">plot_rates()</a></code>,
+<code><a href="plot_traits.html">plot_traits()</a></code>,
+<code><a href="rate_matrix.html">rate_matrix()</a></code>,
+<code><a href="region_pool.html">region_pool()</a></code>,
+<code><a href="species_traits.html">species_traits()</a></code>,
+<code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>,
+<code><a href="trait_bm.html">trait_bm()</a></code>,
+<code><a href="trait_mk.html">trait_mk()</a></code>,
+<code><a href="trait_rates.html">trait_rates()</a></code>,
+<code><a href="traits_ou.html">traits_ou()</a></code>,
+<code><a href="turnover_rates.html">turnover_rates()</a></code></p></div>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">ape</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/ape/man/read.tree.html" class="external-link">read.tree</a></span><span class="op">(</span>text <span class="op">=</span> <span class="st">"((a:1,b:1):1,(c:1,d:1):1);"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">paint_regimes</span><span class="op">(</span><span class="va">tr</span>, nodes <span class="op">=</span> <span class="fl">6</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "0" "1" "1" "0" "0" "0"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"order")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "cladewise"</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">8</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="fu">paint_regimes</span><span class="op">(</span><span class="va">tr</span>, nodes <span class="op">=</span> <span class="fl">10</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0 1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 8 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

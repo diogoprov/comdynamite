@@ -197,6 +197,10 @@ gives a torus.
 [`biogeography_matrix()`](https://provetelab.org/comdynamite/reference/biogeography_matrix.md)
 codes the events.
 
+Other restricted null models:
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
+[`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
+
 ## Examples
 
 ``` r

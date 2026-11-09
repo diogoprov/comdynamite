@@ -94,6 +94,24 @@ based on TPD with R. *Ecology*, 100, e02876.
 
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md).
 
+Other trait variation among individuals:
+[`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+[`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+[`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
+[`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
+[`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
+[`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
+[`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
+[`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
+[`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
+[`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
+[`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
+[`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+[`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md),
+[`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
+[`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
+
 ## Examples
 
 ``` r

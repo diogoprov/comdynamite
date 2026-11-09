@@ -2,6 +2,42 @@
 
 ## comdynamite (development version)
 
+- [`plot_rates()`](https://provetelab.org/comdynamite/reference/plot_rates.md)
+  draws any rate per branch on the tree, from
+  [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
+  [`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md),
+  [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md),
+  [`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md)
+  or an estimator, with ggplot2.
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+  draws the sites on two principal coordinates, coloured by a predictor,
+  with the species as arrows;
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+  now also returns `share`, `species` and `env` for it. The vignette
+  “Rates of trait evolution that vary among branches” and the article on
+  the whole tree use them.
+
+- Clearer errors: functions that take a tree say so when given something
+  else, instead of repeating a failed condition, and
+  [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
+  [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md),
+  [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md),
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  and
+  [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+  name the argument at fault.
+  [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  and the functions that call it stop when no species of `comm` is a tip
+  of the tree.
+
+- Help pages link to the other functions of their group (`@family`),
+  following the groups of the reference index. The example of
+  [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)
+  uses a tree from treeshapesim.
+
 - Plots for several traits, in base graphics:
   [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
   draws traits from

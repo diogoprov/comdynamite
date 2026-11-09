@@ -77,6 +77,11 @@ uses this to write a GIF.
 [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md),
 [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
 
+Other coevolution in food webs:
+[`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md),
+[`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md),
+[`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md)
+
 ## Examples
 
 ``` r

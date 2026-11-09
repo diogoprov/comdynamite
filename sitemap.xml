@@ -62,6 +62,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_eigenvectors.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_vector.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.food_web.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_pcps.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.nested_variance.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.rate_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.trait_flex.html</loc></url>
@@ -72,6 +73,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/plot_node_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_phylo_beta.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_population_traits.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot_rates.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_trait_partition.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/population_shifts.html</loc></url>

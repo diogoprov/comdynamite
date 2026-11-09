@@ -91,6 +91,12 @@ partitioning by multiple regression and canonical analysis. *Journal of
 Plant Ecology*, 1, 3–8.
 [doi:10.1093/jpe/rtm001](https://doi.org/10.1093/jpe/rtm001)
 
+## See also
+
+Other environment and space:
+[`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+
 ## Examples
 
 ``` r

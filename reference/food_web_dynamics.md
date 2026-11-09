@@ -180,6 +180,11 @@ to draw the results;
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
 for rates that vary among branches of a tree.
 
+Other coevolution in food webs:
+[`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md),
+[`food_web_params()`](https://provetelab.org/comdynamite/reference/food_web_params.md),
+[`plot.food_web()`](https://provetelab.org/comdynamite/reference/plot.food_web.md)
+
 ## Examples
 
 ``` r

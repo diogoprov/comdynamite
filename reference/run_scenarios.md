@@ -57,6 +57,13 @@ run_scenarios(
 Data frame with the columns of `scenarios`, `replicate` and the
 statistics.
 
+## See also
+
+Other simulation studies:
+[`as.data.frame.mc_sim()`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md),
+[`equilibrium_check()`](https://provetelab.org/comdynamite/reference/equilibrium_check.md),
+[`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+
 ## Examples
 
 ``` r

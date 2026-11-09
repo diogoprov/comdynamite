@@ -162,9 +162,12 @@ variation.</p>
 <span><span class="co">#&gt;  pcps2 0.137 0.0133     0.648  0.445     0.735 0.735</span></span></code></pre></div>
 <p>Unlike the method of <code><a href="../reference/pcc_test.html">pcc_test()</a></code>, which works on
 eigenvectors of the tree, this one takes eigenvectors of the sites, so
-<code>scores</code> can be plotted against the environment.</p>
+<code>scores</code> can be plotted against the environment.
+<code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> draws the sites on the first two axes, coloured by
+the environment, with each species as an arrow from the correlation of
+its column of the matrix P with the axes.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">env</span>, <span class="va">pcps</span><span class="op">$</span><span class="va">scores</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span>, xlab <span class="op">=</span> <span class="st">"Environment"</span>, ylab <span class="op">=</span> <span class="st">"PCPS 1"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pcps</span><span class="op">)</span></span></code></pre></div>
 <p><img src="whole-tree_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
 <p>When sites are neighbours and the environment and the communities are
 both autocorrelated, free permutations of sites reject far too often.

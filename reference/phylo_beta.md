@@ -52,6 +52,16 @@ analysis: environmental drivers of phylogenetic variation across
 ecological communities. *Plant Ecology*, 216, 709–724.
 [doi:10.1007/s11258-014-0405-0](https://doi.org/10.1007/s11258-014-0405-0)
 
+## See also
+
+Other the whole tree:
+[`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+[`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
+[`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md),
+[`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md),
+[`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
+
 ## Examples
 
 ``` r

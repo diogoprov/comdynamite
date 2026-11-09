@@ -32,15 +32,11 @@ which needs RRphylo and mvMORPH; the rest runs here.
 library(comdynamite)
 set.seed(7)
 tree <- treeshapesim::sim_tree_shape(40)
-
-# colour of each branch by the logarithm of its rate, from slow (dark) to fast (light)
-plot_rates <- function(tree, rates, main = "") {
-  pal <- grDevices::hcl.colors(30, "viridis")
-  col <- if (diff(range(rates)) > 0) pal[cut(log(rates), 30, labels = FALSE)] else pal[15]
-  ape::plot.phylo(tree, edge.color = col, edge.width = 2.5, show.tip.label = FALSE,
-                  main = main)
-}
 ```
+
+[`plot_rates()`](https://provetelab.org/comdynamite/reference/plot_rates.md)
+colours each branch by its rate, on a logarithmic scale, from slow
+(dark) to fast (light).
 
 ## Rates as a model
 
@@ -56,18 +52,24 @@ evolves by Brownian motion with that rate on each branch.
 shift <- trait_rates(tree, "shift", shifts = 2, shift_size = c(8, 1 / 8))
 gbm <- trait_rates(tree, "gbm", rate_sd = 0.8)
 iid <- trait_rates(tree, "iid", rate_sd = 0.8)
-op <- par(mfrow = c(1, 3), mar = c(0.5, 0.5, 2, 0.5))
-plot_rates(tree, shift$edge_rate, "shift")
-plot_rates(tree, gbm$edge_rate, "gbm")
-plot_rates(tree, iid$edge_rate, "iid")
+plot_rates(shift, title = "shift")
 ```
 
 ![](branch-rates_files/figure-html/models-1.png)
 
 ``` r
 
-par(op)
+plot_rates(gbm, title = "gbm")
 ```
+
+![](branch-rates_files/figure-html/models-2.png)
+
+``` r
+
+plot_rates(iid, title = "iid")
+```
+
+![](branch-rates_files/figure-html/models-3.png)
 
 Each result keeps the rates (`edge_rate`), the trait values at the tips
 (`tips`) and nodes (`nodes`), and the shifts, so the truth is available
@@ -112,17 +114,27 @@ the diversity-dependent model with biogeography of Drury et al. (2016);
 
 ``` r
 
-op <- par(mfrow = c(1, 3), mar = c(0.5, 0.5, 2, 0.5))
-plot_rates(tree, state, "state")
-plot_rates(tree, burst, "burst")
-plot_rates(tree, sympatry, "sympatry")
+plot_rates(tree, state, title = "state")
 ```
 
 ![](branch-rates_files/figure-html/history-plot-1.png)
 
 ``` r
 
-par(op)
+plot_rates(tree, burst, title = "burst")
+```
+
+![](branch-rates_files/figure-html/history-plot-2.png)
+
+``` r
+
+plot_rates(tree, sympatry, title = "sympatry")
+```
+
+![](branch-rates_files/figure-html/history-plot-3.png)
+
+``` r
+
 x <- trait_rates(habitat, edge_rates = state)
 head(x$tips)
 #>         t1         t2         t3         t4         t5         t6 

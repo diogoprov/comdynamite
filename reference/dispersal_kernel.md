@@ -25,6 +25,13 @@ dispersal_kernel(dist, scale)
 Row-stochastic matrix with a zero diagonal: row s gives the
 probabilities that an emigrant from site s reaches each site.
 
+## See also
+
+Other landscapes:
+[`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md),
+[`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
+[`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
+
 ## Examples
 
 ``` r

@@ -118,9 +118,12 @@ sites.</p></dd>
     <p>List of class <code>mc_pcps</code> with <code>tests</code>, a data frame with one row for all the
 dissimilarity (<code>whole</code>) and one for each axis, and the columns <code>share</code>, the share of the
 positive eigenvalues; <code>r2</code>; <code>statistic</code>, the F statistic; <code>p_site</code>, <code>p_species</code> and
-<code>p_max</code>; <code>scores</code>, the sites on all the axes with positive eigenvalues; and
+<code>p_max</code>; <code>scores</code>, the sites on all the axes with positive eigenvalues; <code>share</code>, the
+share of each of those axes; <code>species</code>, the
+correlation of each species' column of the matrix P with those axes (its position in the
+biplot of the package PCPS); <code>env</code>, the predictors of the occupied sites; and
 <code>permutations</code>, the numbers of permutations and whether those of sites were free or
-restricted.</p>
+restricted. <code><a href="plot.mc_pcps.html">plot.mc_pcps()</a></code> draws the ordination.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -159,7 +162,14 @@ phylogenetic structure. <em>Ecology Letters</em>, 13, 587–596.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="pcc_test.html">pcc_test()</a></code> and <code><a href="phylo_beta_test.html">phylo_beta_test()</a></code> for other tests over the whole tree, and
-<code><a href="torus_permutations.html">torus_permutations()</a></code>, <code><a href="rigid_permutations.html">rigid_permutations()</a></code>.</p></div>
+<code><a href="torus_permutations.html">torus_permutations()</a></code>, <code><a href="rigid_permutations.html">rigid_permutations()</a></code>.</p>
+<p>Other the whole tree:
+<code><a href="pcc_test.html">pcc_test()</a></code>,
+<code><a href="phylo_beta.html">phylo_beta()</a></code>,
+<code><a href="phylo_beta_test.html">phylo_beta_test()</a></code>,
+<code><a href="phylo_eigenvectors.html">phylo_eigenvectors()</a></code>,
+<code><a href="plot.mc_pcps.html">plot.mc_pcps()</a></code>,
+<code><a href="plot_phylo_beta.html">plot_phylo_beta()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -169,13 +179,16 @@ phylogenetic structure. <em>Ecology Letters</em>, 13, 587–596.
 <span class="r-in"><span><span class="va">traits</span> <span class="op">&lt;-</span> <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span>, optima_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>, rmax_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">30</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span>, length.out <span class="op">=</span> <span class="fl">36</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_static.html">simulate_static</a></span><span class="op">(</span><span class="va">traits</span>, <span class="va">env</span>, incidence <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">$</span><span class="va">abundance</span></span></span>
-<span class="r-in"><span><span class="fu">pcps_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">pcps_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_pcps&gt; principal coordinates of phylogenetic structure</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 49 free of sites, 49 of species; smallest possible p: 0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   test share      r2 statistic p_site p_species p_max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  whole 1.000 0.18435    7.6845   0.02      0.74  0.74</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  pcps1 0.285 0.00286    0.0976   0.74      1.00  1.00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  pcps2 0.215 0.82350  158.6358   0.02      0.02  0.02</span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="pcps_test-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
