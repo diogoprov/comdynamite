@@ -199,6 +199,18 @@ in simulations.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span>, null <span class="op">=</span> <span class="st">"curveball"</span><span class="op">)</span><span class="op">$</span><span class="va">statistics</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;        statistic observed  null_mean   null_sd      ses    p</span></span>
 <span><span class="co">#&gt; 1 cor_beta_alpha 0.833901 -0.2733103 0.2338977 4.733741 0.01</span></span></code></pre></div>
+<p>When niches are conserved, a trait that merely carries the same
+phylogenetic structure looks sorted along the gradient under the
+exchange of means among all species. The phylogenetic permutations of
+Lapointe &amp; Garland (2001) exchange means preferably among relatives;
+<code>phylo_k</code> closer to 1 keeps exchanges closer in the tree.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span>, null <span class="op">=</span> <span class="st">"phylo"</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Null model of the trait-gradient analysis: 199 communities, phylo </span></span>
+<span><span class="co">#&gt;       statistic observed null_mean null_sd   ses    p</span></span>
+<span><span class="co">#&gt;  cor_beta_alpha    0.834    -0.358   0.173  6.90 0.01</span></span>
+<span><span class="co">#&gt;        var_beta  258.000    70.000  44.300  4.23 0.01</span></span>
+<span><span class="co">#&gt;       var_alpha   40.900   528.000  67.700 -7.19 0.01</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="phylogeny">Phylogeny<a class="anchor" aria-label="anchor" href="#phylogeny"></a>
@@ -207,30 +219,30 @@ in simulations.</p>
 Each value has a bootstrap standard error, added to the covariance of
 the model, so a species seen in few sites does not pass for fast
 evolution.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo</a></span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, n_boot <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">ph</span></span>
 <span><span class="co">#&gt; Phylogenetic models of the trait-gradient analysis: 26 species</span></span>
-<span><span class="co">#&gt;  response model    mu sigma2     a half_life at_bound loglik n_par aic</span></span>
-<span><span class="co">#&gt;      beta white 60.10  215.0    NA        NA       NA -105.0     2 214</span></span>
-<span><span class="co">#&gt;      beta    BM 60.80  398.0    NA        NA       NA  -97.7     2 199</span></span>
-<span><span class="co">#&gt;      beta    OU 60.70  481.0 0.517      1.34    FALSE  -97.6     3 201</span></span>
-<span><span class="co">#&gt;     alpha white -0.77   36.8    NA        NA       NA  -83.7     2 171</span></span>
-<span><span class="co">#&gt;     alpha    BM -0.39   70.0    NA        NA       NA  -75.9     2 156</span></span>
-<span><span class="co">#&gt;     alpha    OU -0.39   70.1 0.001        NA     TRUE  -75.9     3 158</span></span>
-<span><span class="co">#&gt;      mean white 59.80  453.0    NA        NA       NA -114.0     2 232</span></span>
-<span><span class="co">#&gt;      mean    BM 60.70  863.0    NA        NA       NA -105.0     2 215</span></span>
-<span><span class="co">#&gt;      mean    OU 60.70  934.0 0.232      2.98    FALSE -105.0     3 217</span></span>
+<span><span class="co">#&gt;  response model     mu sigma2     a half_life at_bound loglik n_par aic</span></span>
+<span><span class="co">#&gt;      beta white 59.800  203.0    NA        NA       NA -105.0     2 214</span></span>
+<span><span class="co">#&gt;      beta    BM 60.400  379.0    NA        NA       NA  -97.4     2 199</span></span>
+<span><span class="co">#&gt;      beta    OU 60.400  458.0 0.506      1.37    FALSE  -97.3     3 201</span></span>
+<span><span class="co">#&gt;     alpha white -0.809   34.7    NA        NA       NA  -83.5     2 171</span></span>
+<span><span class="co">#&gt;     alpha    BM -0.404   66.6    NA        NA       NA  -75.8     2 156</span></span>
+<span><span class="co">#&gt;     alpha    OU -0.404   66.7 0.001        NA     TRUE  -75.8     3 158</span></span>
+<span><span class="co">#&gt;      mean white 59.700  446.0    NA        NA       NA -114.0     2 231</span></span>
+<span><span class="co">#&gt;      mean    BM 60.600  844.0    NA        NA       NA -105.0     2 215</span></span>
+<span><span class="co">#&gt;      mean    OU 60.500  908.0 0.213      3.25    FALSE -105.0     3 217</span></span>
 <span><span class="co">#&gt;  delta_aic</span></span>
-<span><span class="co">#&gt;      15.04</span></span>
+<span><span class="co">#&gt;      14.88</span></span>
 <span><span class="co">#&gt;       0.00</span></span>
-<span><span class="co">#&gt;       1.75</span></span>
-<span><span class="co">#&gt;      15.59</span></span>
+<span><span class="co">#&gt;       1.77</span></span>
+<span><span class="co">#&gt;      15.26</span></span>
 <span><span class="co">#&gt;       0.00</span></span>
 <span><span class="co">#&gt;       2.00</span></span>
-<span><span class="co">#&gt;      16.70</span></span>
+<span><span class="co">#&gt;      16.76</span></span>
 <span><span class="co">#&gt;       0.00</span></span>
-<span><span class="co">#&gt;       1.95</span></span></code></pre></div>
+<span><span class="co">#&gt;       1.96</span></span></code></pre></div>
 <p>In this simulation the optima evolve by Brownian motion
 (<code>lambda = 1</code>), so <span class="math inline">\beta</span>,
 which follows the optima, should prefer Brownian motion over the model
@@ -239,12 +251,41 @@ is marked in <code>at_bound</code>: at the lower bound it is Brownian
 motion.</p>
 </div>
 <div class="section level2">
+<h2 id="a-bayesian-model-with-latent-beta">A Bayesian model with latent beta<a class="anchor" aria-label="anchor" href="#a-bayesian-model-with-latent-beta"></a>
+</h2>
+<p><code><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo()</a></code> first computes <span class="math inline">\beta</span> and then models it with a standard
+error. <code><a href="../reference/trait_gradient_brms.html">trait_gradient_brms()</a></code> instead fits one bivariate
+model in which <span class="math inline">\beta</span> and the species
+mean are latent species effects, with a phylogenetic and a
+non-phylogenetic part, estimated from every site of every species. The
+phylogenetic share <span class="math inline">\lambda</span> of <span class="math inline">\beta</span>, <span class="math inline">\alpha</span> and the mean comes with a credible
+interval. It needs brms, and many species: with about 20 species the
+chains do not separate the two parts, and even with 40 they mix poorly
+when <span class="math inline">\beta</span> has no phylogenetic signal.
+Abundance weights make the posterior too narrow, so the model below uses
+occurrence weights for species.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">tg_occ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span>, species_weights <span class="op">=</span> <span class="st">"occurrence"</span><span class="op">)</span></span>
+<span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_brms.html">trait_gradient_brms</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">bayes</span><span class="op">$</span><span class="va">diagnostics</span>   <span class="co"># R-hat, effective sample sizes, divergent transitions</span></span>
+<span><span class="va">bayes</span><span class="op">$</span><span class="va">signal</span></span>
+<span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">bayes</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span></span>
+<span><span class="co"># an OU structure with the strength fitted to beta by trait_gradient_phylo()</span></span>
+<span><span class="va">a</span> <span class="op">&lt;-</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">a</span><span class="op">[</span><span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">response</span> <span class="op">==</span> <span class="st">"beta"</span> <span class="op">&amp;</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">model</span> <span class="op">==</span> <span class="st">"OU"</span><span class="op">]</span></span>
+<span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_brms.html">trait_gradient_brms</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, ou_alpha <span class="op">=</span> <span class="va">a</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co"># cross-validation one response at a time, since the two are fitted to different rows</span></span>
+<span><span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo_compare.html" class="external-link">loo_compare</a></span><span class="op">(</span><span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo</a></span><span class="op">(</span><span class="va">bayes</span><span class="op">$</span><span class="va">fit</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span>, <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo</a></span><span class="op">(</span><span class="va">ou</span><span class="op">$</span><span class="va">fit</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach
 to community assembly: partitioning of species trait values into within-
 and among-community components. <em>Ecology Letters</em>, 10, 135–145.
 <a href="https://doi.org/10.1111/j.1461-0248.2006.01006.x" class="external-link uri">https://doi.org/10.1111/j.1461-0248.2006.01006.x</a></p>
+<p>Lapointe, F.-J., &amp; Garland, T., Jr. (2001). A generalized
+permutation model for the analysis of cross-species data. <em>Journal of
+Classification</em>, 18, 109–127. <a href="https://doi.org/10.1007/s00357-001-0007-0" class="external-link uri">https://doi.org/10.1007/s00357-001-0007-0</a></p>
 <p>Strona, G., Nappo, D., Boccacci, F., Fattorini, S., &amp;
 San-Miguel-Ayanz, J. (2014). A fast and unbiased procedure to randomize
 ecological binary matrices with fixed row and column totals. <em>Nature

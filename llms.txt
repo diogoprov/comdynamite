@@ -367,6 +367,10 @@ analysis, community trait indices and decompositions of trait variation.
   : Null models of the trait-gradient analysis
 - [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
   : Phylogenetic models of beta and alpha, with their sampling error
+- [`trait_gradient_brms()`](https://provetelab.org/comdynamite/reference/trait_gradient_brms.md)
+  : Bayesian phylogenetic model of the trait gradient, with latent beta
+- [`pp_check(`*`<mc_trait_gradient_brms>`*`)`](https://provetelab.org/comdynamite/reference/pp_check.mc_trait_gradient_brms.md)
+  : Posterior predictive check of the trait-gradient model
 - [`plot(`*`<mc_trait_gradient>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
   [`plot(`*`<mc_trait_gradient_test>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
   : Plot a trait-gradient analysis

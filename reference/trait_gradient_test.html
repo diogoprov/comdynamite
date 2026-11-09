@@ -78,9 +78,11 @@ asks whether the observed co-occurrences matter given the traits.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">trait_gradient_test</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  n_null <span class="op">=</span> <span class="fl">999</span>,</span>
-<span>  null <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"curveball"</span>, <span class="st">"permute"</span><span class="op">)</span>,</span>
+<span>  null <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"species"</span>, <span class="st">"phylo"</span>, <span class="st">"bm"</span>, <span class="st">"curveball"</span>, <span class="st">"permute"</span><span class="op">)</span>,</span>
 <span>  burn_in <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  thin <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  thin <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  tree <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  phylo_k <span class="op">=</span> <span class="fl">1.1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -97,7 +99,7 @@ asks whether the observed co-occurrences matter given the traits.</p>
 
 
 <dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
-<dd><p><code>"species"</code> (the default), <code>"curveball"</code> or <code>"permute"</code>.</p></dd>
+<dd><p><code>"species"</code> (the default), <code>"phylo"</code>, <code>"bm"</code>, <code>"curveball"</code> or <code>"permute"</code>.</p></dd>
 
 
 <dt id="arg-burn-in-thin">burn_in, thin<a class="anchor" aria-label="anchor" href="#arg-burn-in-thin"></a></dt>
@@ -105,13 +107,23 @@ asks whether the observed co-occurrences matter given the traits.</p>
 between null communities; by default 50 and 5 times the number of sites, so that each site
 takes part in about 10 trades between null communities.</p></dd>
 
+
+<dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
+<dd><p>Phylogeny (<code>phylo</code>) with branch lengths, for <code>null = "phylo"</code> and <code>"bm"</code>; every
+species of <code>x</code> must be a tip.</p></dd>
+
+
+<dt id="arg-phylo-k">phylo_k<a class="anchor" aria-label="anchor" href="#arg-phylo-k"></a></dt>
+<dd><p>The constant \(k \ge 1\) of the phylogenetic permutations of
+<code>null = "phylo"</code>: closer to 1, more exchanges among relatives only.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>mc_trait_gradient_test</code>, a list with <code>statistics</code> (one row per
 statistic: <code>observed</code>, <code>null_mean</code>, <code>null_sd</code>, <code>ses</code> and <code>p</code>), <code>species</code> (one row per
-species: observed \(\beta\) with <code>ses_beta</code> and <code>p_beta</code>, and with <code>null = "species"</code>
-also \(\alpha\) with <code>ses_alpha</code> and <code>p_alpha</code>), <code>null</code> (a matrix with one row per null
+species: observed \(\beta\) with <code>ses_beta</code> and <code>p_beta</code>, and with <code>null = "species"</code>,
+<code>"phylo"</code> or <code>"bm"</code> also \(\alpha\) with <code>ses_alpha</code> and <code>p_alpha</code>), <code>null</code> (a matrix with one row per null
 community and one column per statistic) and the settings.</p>
     </div>
     <div class="section level2">
@@ -131,6 +143,32 @@ the turnover of species along the gradient, the variances of \(\beta\) and \(\al
 differ from the null whenever composition changes among sites, even when traits are
 unrelated to it: species that share sites share their site means. Use the curveball for the
 correlation only.</p>
+<p><strong><code>null = "permute"</code></strong>, the null of Ackerly &amp; Cornwell (2007), permutes the site of each
+population. It keeps the number of populations of each site but can place a species twice in
+one site, and it breaks the turnover of species as the curveball does.</p>
+<p><strong><code>null = "phylo"</code>.</strong> The phylogenetic permutations of Lapointe &amp; Garland (2001): as
+<code>"species"</code>, but the mean of a species moves preferably to a close relative. Patristic
+distances are scaled by the largest, \(d^*_{ij} = d_{ij} / d_{max}\), turned into
+similarities \(s_{ij} = k - d^*_{ij}\) with \(k\) = <code>phylo_k</code> \(\ge 1\), and each row is
+divided by its sum to give the probability \(p_{ij}\) that the mean of species \(i\)
+moves to species \(j\) (staying is the most likely move). Species are taken in random
+order, and each mean moves to a species not yet occupied, with the probabilities of the
+remaining species rescaled to sum to one; the last mean takes the last free species. Large
+\(k\) approaches <code>"species"</code> (equally likely permutations); on an ultrametric tree
+\(k = 1\) gives no exchange across the root. Lapointe &amp; Garland (2001) illustrate \(k\)
+from 1.0 to 2. A species with no close relative keeps its own mean in many nulls (about half
+of them in our trials with \(k = 1.1\)), so the test has little power for such species.</p>
+<p><strong><code>null = "bm"</code>.</strong> The species means are replaced by values simulated by Brownian motion on
+<code>tree</code>, with the mean and rate estimated from the observed means by restricted maximum
+likelihood; each species keeps its own variation among sites. The null is a trait that
+evolves along the tree and has nothing to do with assembly.</p>
+<p>Use <code>"phylo"</code> when the niches of species are conserved: under <code>"species"</code>, a trait that
+merely shares the phylogenetic structure of the niches looks sorted along the gradient.
+<code>"bm"</code> is exact only when the trait does evolve by Brownian motion: a trait with less
+phylogenetic structure than Brownian motion makes its variance tests reject (see
+Validation).</p>
+<p>The \(\alpha\) of a species is not tested under <code>"curveball"</code> and <code>"permute"</code>: the species
+mean does not change, so its test would mirror that of \(\beta\).</p>
     </div>
     <div class="section level2">
     <h2 id="validation">Validation<a class="anchor" aria-label="anchor" href="#validation"></a></h2>
@@ -144,11 +182,10 @@ null rejected in 4.7% (variance of \(\beta\)), 5.3% (variance of \(\alpha\)) and
 rejected in 98–100%. When the trait and the niches both evolve along the tree, the species
 null rejected in 10–17% although the trait plays no part in assembly: related species share
 both sites and trait values, and the test detects that association, not its cause.</p>
-<p><strong><code>null = "permute"</code></strong>, the null of Ackerly &amp; Cornwell (2007), permutes the site of each
-population. It keeps the number of populations of each site but can place a species twice in
-one site, and it breaks the turnover of species as the curveball does.</p>
-<p>The \(\alpha\) of a species is not tested under <code>"curveball"</code> and <code>"permute"</code>: the species
-mean does not change, so its test would mirror that of \(\beta\).</p>
+<p>In the same design (150 replicates per scenario), for the three statistics:</p><table class="table table"><tr><td>null</td><td>trait independent of niches</td><td>trait and niches on the tree</td><td>sorting</td></tr><tr><td><code>"species"</code></td><td>4.0–4.7%</td><td>14–23%</td><td>99–100%</td></tr><tr><td><code>"phylo"</code>, \(k = 1.1\)</td><td>2.7–4.0%</td><td>4.0–11%</td><td>95–100%</td></tr><tr><td><code>"phylo"</code>, \(k = 1.01\)</td><td>1.3–4.7%</td><td>2.0–10%</td><td>91–100%</td></tr><tr><td><code>"bm"</code></td><td>10–85%</td><td>2.7–4.7%</td><td>43–100%</td></tr></table><p>The phylogenetic permutations bring the error back near the nominal level in both null
+scenarios, with some excess left for the correlation and the variance of \(\alpha\) when
+trait and niches share the tree; <code>"bm"</code> is exact in that scenario but fails when the trait
+has no phylogenetic structure, and loses power for the variance of \(\beta\).</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -158,6 +195,9 @@ components. <em>Ecology Letters</em>, 10, 135–145. <a href="https://doi.org/10
 <p>Strona, G., Nappo, D., Boccacci, F., Fattorini, S., &amp; San-Miguel-Ayanz, J. (2014). A fast
 and unbiased procedure to randomize ecological binary matrices with fixed row and column
 totals. <em>Nature Communications</em>, 5, 4114. <a href="https://doi.org/10.1038/ncomms5114" class="external-link">doi:10.1038/ncomms5114</a></p>
+<p>Lapointe, F.-J., &amp; Garland, T., Jr. (2001). A generalized permutation model for the
+analysis of cross-species data. <em>Journal of Classification</em>, 18, 109–127.
+<a href="https://doi.org/10.1007/s00357-001-0007-0" class="external-link">doi:10.1007/s00357-001-0007-0</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -179,6 +219,7 @@ totals. <em>Nature Communications</em>, 5, 4114. <a href="https://doi.org/10.103
 <code><a href="trait_densities.html">trait_densities()</a></code>,
 <code><a href="trait_flex.html">trait_flex()</a></code>,
 <code><a href="trait_gradient.html">trait_gradient()</a></code>,
+<code><a href="trait_gradient_brms.html">trait_gradient_brms()</a></code>,
 <code><a href="trait_gradient_phylo.html">trait_gradient_phylo()</a></code>,
 <code><a href="trait_gradient_weights.html">trait_gradient_weights()</a></code>,
 <code><a href="trait_rarefaction.html">trait_rarefaction()</a></code>,
@@ -205,6 +246,19 @@ totals. <em>Nature Communications</em>, 5, 4114. <a href="https://doi.org/10.103
 <span class="r-in"><span><span class="fu">trait_gradient_test</span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">99</span>, null <span class="op">=</span> <span class="st">"curveball"</span><span class="op">)</span><span class="op">$</span><span class="va">statistics</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        statistic  observed null_mean   null_sd      ses    p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 cor_beta_alpha 0.6969889 -0.500578 0.2130449 5.621195 0.02</span>
+<span class="r-in"><span><span class="co"># means exchanged among relatives, or simulated along the tree</span></span></span>
+<span class="r-in"><span><span class="fu">trait_gradient_test</span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">99</span>, null <span class="op">=</span> <span class="st">"phylo"</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Null model of the trait-gradient analysis: 99 communities, phylo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       statistic observed null_mean null_sd    ses    p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cor_beta_alpha    0.697    -0.401   0.319  3.440 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        var_beta   68.200    41.200  41.500  0.651 0.30</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       var_alpha  200.000   505.000  99.200 -3.080 0.02</span>
+<span class="r-in"><span><span class="fu">trait_gradient_test</span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">99</span>, null <span class="op">=</span> <span class="st">"bm"</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Null model of the trait-gradient analysis: 99 communities, bm </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       statistic observed null_mean null_sd      ses    p</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  cor_beta_alpha    0.697    -0.472   0.196  5.97000 0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        var_beta   68.200    67.800  56.600  0.00652 0.68</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       var_alpha  200.000   878.000 452.000 -1.50000 0.02</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

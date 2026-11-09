@@ -132,6 +132,22 @@ trait_gradient_test(tg, n_null = 199, null = "curveball")$statistics[1, ]
 #> 1 cor_beta_alpha 0.833901 -0.2733103 0.2338977 4.733741 0.01
 ```
 
+When niches are conserved, a trait that merely carries the same
+phylogenetic structure looks sorted along the gradient under the
+exchange of means among all species. The phylogenetic permutations of
+Lapointe & Garland (2001) exchange means preferably among relatives;
+`phylo_k` closer to 1 keeps exchanges closer in the tree.
+
+``` r
+
+trait_gradient_test(tg, n_null = 199, null = "phylo", tree = tree)
+#> Null model of the trait-gradient analysis: 199 communities, phylo 
+#>       statistic observed null_mean null_sd   ses    p
+#>  cor_beta_alpha    0.834    -0.358   0.173  6.90 0.01
+#>        var_beta  258.000    70.000  44.300  4.23 0.01
+#>       var_alpha   40.900   528.000  67.700 -7.19 0.01
+```
+
 ## Phylogeny
 
 [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
@@ -144,26 +160,26 @@ model, so a species seen in few sites does not pass for fast evolution.
 ph <- trait_gradient_phylo(tg, tree, n_boot = 199)
 ph
 #> Phylogenetic models of the trait-gradient analysis: 26 species
-#>  response model    mu sigma2     a half_life at_bound loglik n_par aic
-#>      beta white 60.10  215.0    NA        NA       NA -105.0     2 214
-#>      beta    BM 60.80  398.0    NA        NA       NA  -97.7     2 199
-#>      beta    OU 60.70  481.0 0.517      1.34    FALSE  -97.6     3 201
-#>     alpha white -0.77   36.8    NA        NA       NA  -83.7     2 171
-#>     alpha    BM -0.39   70.0    NA        NA       NA  -75.9     2 156
-#>     alpha    OU -0.39   70.1 0.001        NA     TRUE  -75.9     3 158
-#>      mean white 59.80  453.0    NA        NA       NA -114.0     2 232
-#>      mean    BM 60.70  863.0    NA        NA       NA -105.0     2 215
-#>      mean    OU 60.70  934.0 0.232      2.98    FALSE -105.0     3 217
+#>  response model     mu sigma2     a half_life at_bound loglik n_par aic
+#>      beta white 59.800  203.0    NA        NA       NA -105.0     2 214
+#>      beta    BM 60.400  379.0    NA        NA       NA  -97.4     2 199
+#>      beta    OU 60.400  458.0 0.506      1.37    FALSE  -97.3     3 201
+#>     alpha white -0.809   34.7    NA        NA       NA  -83.5     2 171
+#>     alpha    BM -0.404   66.6    NA        NA       NA  -75.8     2 156
+#>     alpha    OU -0.404   66.7 0.001        NA     TRUE  -75.8     3 158
+#>      mean white 59.700  446.0    NA        NA       NA -114.0     2 231
+#>      mean    BM 60.600  844.0    NA        NA       NA -105.0     2 215
+#>      mean    OU 60.500  908.0 0.213      3.25    FALSE -105.0     3 217
 #>  delta_aic
-#>      15.04
+#>      14.88
 #>       0.00
-#>       1.75
-#>      15.59
+#>       1.77
+#>      15.26
 #>       0.00
 #>       2.00
-#>      16.70
+#>      16.76
 #>       0.00
-#>       1.95
+#>       1.96
 ```
 
 In this simulation the optima evolve by Brownian motion (`lambda = 1`),
@@ -172,12 +188,45 @@ the model without phylogeny. A fit of the OU process with its strength
 at a bound is marked in `at_bound`: at the lower bound it is Brownian
 motion.
 
+## A Bayesian model with latent beta
+
+[`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
+first computes \beta and then models it with a standard error.
+[`trait_gradient_brms()`](https://provetelab.org/comdynamite/reference/trait_gradient_brms.md)
+instead fits one bivariate model in which \beta and the species mean are
+latent species effects, with a phylogenetic and a non-phylogenetic part,
+estimated from every site of every species. The phylogenetic share
+\lambda of \beta, \alpha and the mean comes with a credible interval. It
+needs brms, and many species: with about 20 species the chains do not
+separate the two parts, and even with 40 they mix poorly when \beta has
+no phylogenetic signal. Abundance weights make the posterior too narrow,
+so the model below uses occurrence weights for species.
+
+``` r
+
+tg_occ <- trait_gradient(ind, abundance = "abundance", species_weights = "occurrence")
+bayes <- trait_gradient_brms(tg_occ, tree, chains = 4, cores = 4)
+bayes$diagnostics   # R-hat, effective sample sizes, divergent transitions
+bayes$signal
+bayesplot::pp_check(bayes, resp = "sitemean")
+# an OU structure with the strength fitted to beta by trait_gradient_phylo()
+a <- ph$models$a[ph$models$response == "beta" & ph$models$model == "OU"]
+ou <- trait_gradient_brms(tg_occ, tree, ou_alpha = a, chains = 4, cores = 4)
+# cross-validation one response at a time, since the two are fitted to different rows
+brms::loo_compare(brms::loo(bayes$fit, resp = "sitemean"), brms::loo(ou$fit, resp = "sitemean"))
+```
+
 ## References
 
 Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to
 community assembly: partitioning of species trait values into within-
 and among-community components. *Ecology Letters*, 10, 135–145.
 <https://doi.org/10.1111/j.1461-0248.2006.01006.x>
+
+Lapointe, F.-J., & Garland, T., Jr. (2001). A generalized permutation
+model for the analysis of cross-species data. *Journal of
+Classification*, 18, 109–127.
+<https://doi.org/10.1007/s00357-001-0007-0>
 
 Strona, G., Nappo, D., Boccacci, F., Fattorini, S., & San-Miguel-Ayanz,
 J. (2014). A fast and unbiased procedure to randomize ecological binary

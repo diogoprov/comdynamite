@@ -16,9 +16,11 @@ observed co-occurrences matter given the traits.
 trait_gradient_test(
   x,
   n_null = 999,
-  null = c("species", "curveball", "permute"),
+  null = c("species", "phylo", "bm", "curveball", "permute"),
   burn_in = NULL,
-  thin = NULL
+  thin = NULL,
+  tree = NULL,
+  phylo_k = 1.1
 )
 ```
 
@@ -35,7 +37,8 @@ trait_gradient_test(
 
 - null:
 
-  `"species"` (the default), `"curveball"` or `"permute"`.
+  `"species"` (the default), `"phylo"`, `"bm"`, `"curveball"` or
+  `"permute"`.
 
 - burn_in, thin:
 
@@ -44,14 +47,24 @@ trait_gradient_test(
   sites, so that each site takes part in about 10 trades between null
   communities.
 
+- tree:
+
+  Phylogeny (`phylo`) with branch lengths, for `null = "phylo"` and
+  `"bm"`; every species of `x` must be a tip.
+
+- phylo_k:
+
+  The constant \\k \ge 1\\ of the phylogenetic permutations of
+  `null = "phylo"`: closer to 1, more exchanges among relatives only.
+
 ## Value
 
 An object of class `mc_trait_gradient_test`, a list with `statistics`
 (one row per statistic: `observed`, `null_mean`, `null_sd`, `ses` and
 `p`), `species` (one row per species: observed \\\beta\\ with `ses_beta`
-and `p_beta`, and with `null = "species"` also \\\alpha\\ with
-`ses_alpha` and `p_alpha`), `null` (a matrix with one row per null
-community and one column per statistic) and the settings.
+and `p_beta`, and with `null = "species"`, `"phylo"` or `"bm"` also
+\\\alpha\\ with `ses_alpha` and `p_alpha`), `null` (a matrix with one
+row per null community and one column per statistic) and the settings.
 
 ## Details
 
@@ -76,6 +89,45 @@ from the null whenever composition changes among sites, even when traits
 are unrelated to it: species that share sites share their site means.
 Use the curveball for the correlation only.
 
+**`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes
+the site of each population. It keeps the number of populations of each
+site but can place a species twice in one site, and it breaks the
+turnover of species as the curveball does.
+
+**`null = "phylo"`.** The phylogenetic permutations of Lapointe &
+Garland (2001): as `"species"`, but the mean of a species moves
+preferably to a close relative. Patristic distances are scaled by the
+largest, \\d^\*\_{ij} = d\_{ij} / d\_{max}\\, turned into similarities
+\\s\_{ij} = k - d^\*\_{ij}\\ with \\k\\ = `phylo_k` \\\ge 1\\, and each
+row is divided by its sum to give the probability \\p\_{ij}\\ that the
+mean of species \\i\\ moves to species \\j\\ (staying is the most likely
+move). Species are taken in random order, and each mean moves to a
+species not yet occupied, with the probabilities of the remaining
+species rescaled to sum to one; the last mean takes the last free
+species. Large \\k\\ approaches `"species"` (equally likely
+permutations); on an ultrametric tree \\k = 1\\ gives no exchange across
+the root. Lapointe & Garland (2001) illustrate \\k\\ from 1.0 to 2. A
+species with no close relative keeps its own mean in many nulls (about
+half of them in our trials with \\k = 1.1\\), so the test has little
+power for such species.
+
+**`null = "bm"`.** The species means are replaced by values simulated by
+Brownian motion on `tree`, with the mean and rate estimated from the
+observed means by restricted maximum likelihood; each species keeps its
+own variation among sites. The null is a trait that evolves along the
+tree and has nothing to do with assembly.
+
+Use `"phylo"` when the niches of species are conserved: under
+`"species"`, a trait that merely shares the phylogenetic structure of
+the niches looks sorted along the gradient. `"bm"` is exact only when
+the trait does evolve by Brownian motion: a trait with less phylogenetic
+structure than Brownian motion makes its variance tests reject (see
+Validation).
+
+The \\\alpha\\ of a species is not tested under `"curveball"` and
+`"permute"`: the species mean does not change, so its test would mirror
+that of \\\beta\\.
+
 ## Validation
 
 In simulated metacommunities (25 species, 20 sites, 150 replicates per
@@ -89,14 +141,22 @@ both evolve along the tree, the species null rejected in 10–17% although
 the trait plays no part in assembly: related species share both sites
 and trait values, and the test detects that association, not its cause.
 
-**`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes
-the site of each population. It keeps the number of populations of each
-site but can place a species twice in one site, and it breaks the
-turnover of species as the curveball does.
+In the same design (150 replicates per scenario), for the three
+statistics:
 
-The \\\alpha\\ of a species is not tested under `"curveball"` and
-`"permute"`: the species mean does not change, so its test would mirror
-that of \\\beta\\.
+|  |  |  |  |
+|----|----|----|----|
+| null | trait independent of niches | trait and niches on the tree | sorting |
+| `"species"` | 4.0–4.7% | 14–23% | 99–100% |
+| `"phylo"`, \\k = 1.1\\ | 2.7–4.0% | 4.0–11% | 95–100% |
+| `"phylo"`, \\k = 1.01\\ | 1.3–4.7% | 2.0–10% | 91–100% |
+| `"bm"` | 10–85% | 2.7–4.7% | 43–100% |
+
+The phylogenetic permutations bring the error back near the nominal
+level in both null scenarios, with some excess left for the correlation
+and the variance of \\\alpha\\ when trait and niches share the tree;
+`"bm"` is exact in that scenario but fails when the trait has no
+phylogenetic structure, and loses power for the variance of \\\beta\\.
 
 ## References
 
@@ -109,6 +169,11 @@ Strona, G., Nappo, D., Boccacci, F., Fattorini, S., & San-Miguel-Ayanz,
 J. (2014). A fast and unbiased procedure to randomize ecological binary
 matrices with fixed row and column totals. *Nature Communications*, 5,
 4114. [doi:10.1038/ncomms5114](https://doi.org/10.1038/ncomms5114)
+
+Lapointe, F.-J., & Garland, T., Jr. (2001). A generalized permutation
+model for the analysis of cross-species data. *Journal of
+Classification*, 18, 109–127.
+[doi:10.1007/s00357-001-0007-0](https://doi.org/10.1007/s00357-001-0007-0)
 
 ## See also
 
@@ -131,6 +196,7 @@ Other trait variation among individuals:
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
 [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
+[`trait_gradient_brms()`](https://provetelab.org/comdynamite/reference/trait_gradient_brms.md),
 [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md),
 [`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md),
 [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md),
@@ -157,4 +223,17 @@ trait_gradient_test(tg, n_null = 99)
 trait_gradient_test(tg, n_null = 99, null = "curveball")$statistics[1, ]
 #>        statistic  observed null_mean   null_sd      ses    p
 #> 1 cor_beta_alpha 0.6969889 -0.500578 0.2130449 5.621195 0.02
+# means exchanged among relatives, or simulated along the tree
+trait_gradient_test(tg, n_null = 99, null = "phylo", tree = tree)
+#> Null model of the trait-gradient analysis: 99 communities, phylo 
+#>       statistic observed null_mean null_sd    ses    p
+#>  cor_beta_alpha    0.697    -0.401   0.319  3.440 0.02
+#>        var_beta   68.200    41.200  41.500  0.651 0.30
+#>       var_alpha  200.000   505.000  99.200 -3.080 0.02
+trait_gradient_test(tg, n_null = 99, null = "bm", tree = tree)
+#> Null model of the trait-gradient analysis: 99 communities, bm 
+#>       statistic observed null_mean null_sd      ses    p
+#>  cor_beta_alpha    0.697    -0.472   0.196  5.97000 0.02
+#>        var_beta   68.200    67.800  56.600  0.00652 0.68
+#>       var_alpha  200.000   878.000 452.000 -1.50000 0.02
 ```
