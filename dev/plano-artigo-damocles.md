@@ -100,11 +100,18 @@ Tudo em `data-raw/` no checkout principal, sem commit. A pasta `data-raw` está 
     32 Ma). A mais frequente é *Scinax hiemalis* (41 sítios); as demais têm de 1 a 6 sítios.
   - Limite: os registros sem nome válido (526 em SP) ficam de fora; "sp." e "aff." de estudos
     diferentes não são comparáveis.
-  - Falsas ausências: segundo o Diogo, o ATLANTIC AMPHIBIANS só incluiu estudos que passaram
-    por critérios de seleção (duração, métodos de amostragem etc.) para reduzir falsas
-    ausências. Não verifiquei os critérios: o PDF de metadados (ecy2392-sup-0002-MetadataS1)
-    retorna 403 na Wiley. Os campos `effort_months`, `active_methods` e `passive_methods`
-    dos sítios permitem uma análise de sensibilidade com filtros mais estritos.
+  - Falsas ausências: o Diogo lembrou que o ATLANTIC AMPHIBIANS seleciona estudos para
+    reduzir falsas ausências. O que os metadados (Vancine et al. 2018, MetadataS1, seção
+    "Research methods") descrevem como critério de inclusão:
+    - entram só estudos que amostraram comunidades de anfíbios;
+    - ficam fora descrições de espécies e trabalhos de distribuição de um único táxon;
+    - ficam fora estudos sem composição de espécies detalhada ou sem coordenadas.
+
+    Não encontrei nos metadados limiar de duração nem de método. O esforço é registrado
+    como a duração total do estudo em meses: média de 14,3 meses, desvio de 14,1, de menos
+    de 1 a 191. Os autores dizem que essa medida superestima o esforço real, e a relação
+    entre riqueza e esforço é fraca (R² = 0,12). Os campos `effort_months`, `active_methods`
+    e `passive_methods` permitem uma análise de sensibilidade com filtros mais estritos.
 - Plano:
   - pool regional como análise principal;
   - pools de 112 e de 248 como sensibilidade;
@@ -295,7 +302,8 @@ Pendentes: nenhuma no momento.
 - **Confusão entre barreira biogeográfica e dinâmica local** quando costa e interior
   compartilham o pool (2.2).
 - **Esforço heterogêneo no ATLANTIC AMPHIBIANS:** ausências falsas inflam μ. A seleção de
-  estudos do próprio conjunto reduz o problema (2.2), mas não o elimina. Pode exigir
+  estudos do próprio conjunto (só inventários de comunidades, com composição e coordenadas)
+  reduz o problema (2.2), mas não fixa esforço mínimo. Pode exigir
   um modelo de detecção. Com E6 dentro do artigo único, esse risco fica central: filtrar
   sítios por esforço e simular o efeito de detecção imperfeita sobre γ e μ (variante de S6).
 
