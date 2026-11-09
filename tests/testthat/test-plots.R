@@ -1,3 +1,5 @@
+skip_if_not_installed("ggplot2")
+
 daphniid_result <- function(biogeography = daphniids$biogeography) {
   set.seed(1)
   node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env, biogeography, n_perm = 9)
@@ -22,28 +24,19 @@ test_that("the three tests read their own p-values", {
 })
 
 test_that("nodes are drawn in both layouts, with or without symbols", {
-  pdf(NULL)
-  on.exit(dev.off())
   out <- daphniid_result()
-  marks <- plot_node_test(out, daphniids$tree, test = "site", level = 0.2)
+  p <- expect_ggplot(plot_node_test(out, daphniids$tree, test = "site", level = 0.2))
+  marks <- attr(p, "marks")
   expect_gt(nrow(marks), 0)
-  expect_silent(plot_node_test(out, daphniids$tree, test = "site", type = "fan", level = 0.2,
+  # one symbol per node, set and level, predictors above the node and events below
+  points <- ggplot2::layer_data(p, 4)
+  expect_equal(nrow(points), nrow(unique(marks[c("node", "set", "corrected")])))
+  expect_ggplot(plot_node_test(out, daphniids$tree, test = "site", type = "fan", level = 0.2,
                                legend = FALSE))
-  expect_equal(nrow(plot_node_test(out, daphniids$tree, level = 0)), 0)
-})
-
-test_that("symbols of a node stay apart, with predictors above events", {
-  expect_equal(symbol_steps(c(1, -1, 1), 1), c(0.6, -0.6, 1.6) * 1.3)
-})
-
-test_that("labels go towards the root and stay readable", {
-  phylogram <- label_place(5, 1, width = 2, gap = 1, angle = 0, room = 5)
-  expect_equal(unlist(phylogram), c(x = 3, y = 1, srt = 0))
-  expect_equal(label_place(5, 1, 2, 1, 0, room = 2)$x, 7)
-  left <- label_place(-5, 0, width = 2, gap = 1, angle = pi, room = 5)
-  expect_equal(c(left$x, left$srt), c(-3, 360))
-  top <- label_place(0, 5, width = 2, gap = 1, angle = pi / 2, room = 5)
-  expect_equal(c(top$x, top$y, top$srt), c(0, 3, 90))
+  expect_equal(nrow(attr(plot_node_test(out, daphniids$tree, level = 0), "marks")), 0)
+  expect_warning(plot_node_test(out, daphniids$tree, col = c("red", "blue"), level = 0.2),
+                 "`col` is deprecated")
+  expect_warning(plot_node_test(out, daphniids$tree, cex = 1, level = 0.2), "`cex` is deprecated")
 })
 
 test_that("a tree that cannot hold the nodes is an error", {
@@ -56,8 +49,6 @@ test_that("a tree that cannot hold the nodes is an error", {
 })
 
 test_that("the partition plot returns the three fractions in order", {
-  pdf(NULL)
-  on.exit(dev.off())
   set.seed(1)
   trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
   env <- runif(40, 0, 100)
@@ -65,25 +56,30 @@ test_that("the partition plot returns the three fractions in order", {
   comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
   colnames(comm) <- names(trait)
   out <- trait_partition(comm, trait, env, space, n_perm = 9)
-  shown <- plot_trait_partition(out)
+  shown <- attr(expect_ggplot(plot_trait_partition(out)), "fractions")
   expect_equal(shown$fraction, c("a", "b", "c", "d"))
   expect_equal(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c", "d"),
                                                                   out$fractions$fraction)])
   expect_true(any(shown$r2_adjusted < 0))
   expect_equal(shown$shown, pmax(shown$r2_adjusted, 0))
-  expect_silent(plot_trait_partition(out, value = "r2", test = "site"))
+  expect_ggplot(plot_trait_partition(out, value = "r2", test = "site"))
+  expect_error(plot_trait_partition(list()), "trait_partition")
+  expect_error(plot_trait_partition(out, labels = "a"), "two names")
+  expect_warning(plot_trait_partition(out, cex = 1), "`cex` is deprecated")
+  expect_warning(plot_trait_partition(out, test = "taxa"), "deprecated")
 })
 
 test_that("the heatmap holds predictors and events, with blanks where there is no value", {
-  pdf(NULL)
-  on.exit(dev.off())
   out <- daphniid_result()
-  values <- plot_node_heatmap(out, test = "site", level = 0.2)
+  values <- attr(expect_ggplot(plot_node_heatmap(out, test = "site", level = 0.2)), "values")
   expect_equal(colnames(values), c(colnames(daphniids$env), colnames(daphniids$biogeography)))
   expect_equal(rownames(values), as.character(out$nodes$node))
   expect_true(anyNA(values))
   only_env <- daphniid_result(NULL)
-  expect_equal(ncol(plot_node_heatmap(only_env, level = 0)), ncol(daphniids$env))
+  expect_equal(ncol(attr(plot_node_heatmap(only_env, level = 0), "values")),
+               ncol(daphniids$env))
+  expect_error(plot_node_heatmap(list()), "node_test")
+  expect_warning(plot_node_heatmap(out, level = 0.2, cex = 1), "`cex` is deprecated")
 })
 
 test_that("labels of small fractions stay apart and inside the line", {
@@ -96,15 +92,16 @@ test_that("labels of small fractions stay apart and inside the line", {
 })
 
 test_that("the second label goes to the side with more room", {
-  pdf(NULL)
-  on.exit(dev.off())
   x <- structure(list(component = "mean", fractions = data.frame(
     fraction = c("a", "b", "c", "d"), r2_adjusted = c(0.5, 0.1, 0.3, 0.1),
     p_max = c(0.01, NA, 0.2, NA))), class = "mc_trait_partition")
-  expect_equal(plot_trait_partition(x)$shown, c(0.5, 0.1, 0.3, 0.1))
+  p <- plot_trait_partition(x)
+  expect_equal(attr(p, "fractions")$shown, c(0.5, 0.1, 0.3, 0.1))
+  # c (0.3) on the right of the bar of space has more room than a (0.5) on its left? no
+  expect_equal(ggplot2::layer_data(p, 2)$hjust[2], 1)
   # a tested shared fraction is coloured like the others
   x$fractions$p_max[2] <- 0.01
-  expect_silent(plot_trait_partition(x))
+  expect_ggplot(plot_trait_partition(x))
 })
 
 test_that("plot_phylo_beta() orders sites and species", {
@@ -115,10 +112,18 @@ test_that("plot_phylo_beta() orders sites and species", {
   comm <- simulate_static(traits, env, incidence = TRUE)$abundance
   keep <- rowSums(comm) > 0
   out <- phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 3)
-  shown <- plot_phylo_beta(out, comm[keep, ], tree)
+  shown <- attr(expect_ggplot(plot_phylo_beta(out, comm[keep, ], tree)), "ordered")
   expect_equal(dim(shown), c(sum(keep), sum(colSums(comm) > 0)))
   expect_equal(sort(rowSums(shown)), sort(rowSums(comm[keep, ])))
-  expect_silent(plot(out, comm[keep, ], tree, axis = 1))
+  expect_ggplot(plot(out, comm[keep, ], tree, axis = 1))
+  # the columns follow the tips of the ladderized tree
+  ladder <- ape::ladderize(tree)
+  tips <- ladder$edge[ladder$edge[, 2] <= 8, 2]
+  expect_equal(colnames(shown), intersect(ladder$tip.label[tips], colnames(shown)))
   expect_error(plot_phylo_beta(out, comm[keep, ][-1, ], tree), "occupied sites")
   expect_error(plot_phylo_beta(out, comm[keep, ], tree, axis = 99), "`axis`")
+  expect_warning(plot_phylo_beta(out, comm[keep, ], tree, cex = 1), "`cex` is deprecated")
+  no_lengths <- tree
+  no_lengths$edge.length <- NULL
+  expect_ggplot(plot_phylo_beta(out, comm[keep, ], no_lengths))
 })

@@ -10,9 +10,12 @@ plot_traits(
   traits = c(1, 2),
   regimes = NULL,
   colours = NULL,
-  labels = FALSE,
-  legend = "topleft",
-  ...
+  tip_labels = FALSE,
+  legend = TRUE,
+  point_size = 1.8,
+  linewidth = 0.7,
+  ...,
+  labels = NULL
 )
 }
 \arguments{
@@ -30,15 +33,19 @@ of the edges (from \code{\link[=paint_regimes]{paint_regimes()}}) or a tree with
 \item{colours}{Colours of the regimes, named by regime or in the order of the sorted
 regimes; one colour when there are no regimes.}
 
-\item{labels}{Should the tips be labelled?}
+\item{tip_labels}{Should the tips be labelled?}
 
-\item{legend}{Where to put the legend of the regimes (a keyword of
-\code{\link[graphics:legend]{graphics::legend()}}), or \code{NULL} for none.}
+\item{legend}{Draw the legend of the regimes?}
 
-\item{...}{Further arguments to \code{\link[graphics:plot]{graphics::plot()}}, such as \code{main}, \code{xlim} or \code{asp}.}
+\item{point_size}{Size of the tips.}
+
+\item{linewidth}{Width of the branches.}
+
+\item{labels, ...}{Deprecated: \code{labels} is now \code{tip_labels}; graphical arguments of base
+graphics are no longer used (modify the ggplot object instead).}
 }
 \value{
-\code{NULL}, invisibly; called for the plot.
+A ggplot object.
 }
 \description{
 Draws simulated traits with the tree that generated them. With two traits, a
@@ -53,7 +60,7 @@ so the branches show the simulated path between nodes, not a reconstruction. Wit
 attribute, only the tips are drawn.
 }
 \examples{
-\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(2)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
