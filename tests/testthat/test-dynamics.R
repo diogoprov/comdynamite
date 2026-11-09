@@ -153,3 +153,47 @@ test_that("a niche with several axes multiplies the responses to each axis", {
                                       env = cbind(ls$env, ls$env),
                                       env_time = matrix(0, 5, 5)), "env_time")
 })
+
+test_that("a simulation with several niche axes keeps the tree and works downstream", {
+  set.seed(12)
+  tree <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
+  t1 <- species_traits(tree)
+  t2 <- species_traits(tree, rmax_range = c(1, 1))
+  ls <- landscape_implicit(6)
+  alpha <- competition_matrix(tree, "none")
+  sim <- simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 30,
+                                env = cbind(ls$env, rev(ls$env)))
+  expect_identical(sim$tree, attr(t1, "tree"))
+  expect_named(sim$env, c("axis1", "axis2"))
+  named <- simulate_metacommunity(ls, list(temp = t1, rain = t2), alpha, n_steps = 5,
+                                  env = cbind(ls$env, rev(ls$env)))
+  expect_named(named$env, c("temp", "rain"))
+  d <- as_mc_data(sim)
+  expect_identical(d$tree, sim$tree)
+  expect_named(d$traits, c("optimum_axis1", "optimum_axis2"))
+  expect_equal(d$traits$optimum_axis2, t2$optimum)
+  # summary_stats() uses the first axis, as if given its trait and environment
+  set.seed(3)
+  s <- summary_stats(sim, n_null = 5)
+  set.seed(3)
+  s1 <- summary_stats(sim, trait = stats::setNames(t1$optimum, rownames(t1)),
+                      env = sim$env$axis1, n_null = 5)
+  expect_equal(s, s1)
+  expect_error(sample_individuals(sim), "one environmental axis")
+})
+
+test_that("summary_stats() and sample_individuals() use the env that set growth", {
+  set.seed(13)
+  tree <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
+  t1 <- species_traits(tree)
+  ls <- landscape_implicit(6)
+  e <- rev(ls$env)
+  sim <- simulate_metacommunity(ls, t1, competition_matrix(tree, "none"), n_steps = 30,
+                                env = matrix(e))
+  set.seed(4)
+  s <- summary_stats(sim, n_null = 5)
+  set.seed(4)
+  expect_equal(s, summary_stats(sim, env = e, n_null = 5))
+  ind <- sample_individuals(sim, n = 2)
+  expect_equal(ind$env, e[match(ind$site, rownames(sim$abundance))])
+})

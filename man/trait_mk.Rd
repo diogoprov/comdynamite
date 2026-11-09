@@ -91,5 +91,6 @@ Revell, L. J. (2024). Testing for heterogeneous rates of discrete character evol
 phylogenies. \emph{Journal of Evolutionary Biology}, 37, 1591--1602. \doi{10.1093/jeb/voae119}
 }
 \seealso{
-\code{\link[=tip_history_metrics]{tip_history_metrics()}}, \code{\link[=trait_rates]{trait_rates()}} for continuous traits.
+\code{\link[=tip_history_metrics]{tip_history_metrics()}}, \code{\link[=trait_rates]{trait_rates()}} for continuous traits, and \code{\link[=traits_ou]{traits_ou()}},
+which takes the mapped history as \code{regimes} (optima and rates that change with the state).
 }

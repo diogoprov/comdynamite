@@ -23,28 +23,35 @@
 #' and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
 #' gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
 #' 2015); [rate_matrix()] builds them with the structures that mvMORPH fits. The strength of
-#' selection `alpha` and the optimum `theta` are the same for all traits. Under Brownian motion
+#' selection `alpha` is the same for all traits; the optimum `theta` can differ between traits
+#' (a matrix with one column per trait), so that regimes shift each trait by a different
+#' amount. Under Brownian motion
 #' (`alpha = 0`) the traits of the tips have covariance \eqn{\sum_k R_k \otimes C_k}{sum_k
 #' kronecker(R_k, C_k)}, where \eqn{R_k} is the rate matrix of regime \eqn{k} and \eqn{C_k} the
 #' phylogenetic covariance matrix built from the time spent in regime \eqn{k} (Clavel et al.
 #' 2015).
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
-#' @param n_traits Number of traits. Taken from the rate matrices when `sigma2` gives them.
+#' @param n_traits Number of traits. Taken from the rate matrices when `sigma2` gives them, or
+#'   else from the columns of `theta` when it is a matrix.
 #' @param alpha Strength of selection towards the optimum (0 = Brownian
 #'   motion).
 #' @param sigma2 Rate of the stochastic (drift) component: one number for all traits, which
 #'   then evolve independently; a symmetric positive semidefinite rate matrix with one row and
 #'   column per trait, for correlated traits; or a named list or vector with a matrix or a
-#'   number per regime (names as in `regimes`). See [rate_matrix()].
-#' @param theta Optimum of each regime: one value for a single optimum, or a
-#'   named vector with one value per regime (names as in `regimes`).
+#'   number per regime (names as in `regimes`). See [rate_matrix()]. Regimes in the list but
+#'   not in the tree are ignored.
+#' @param theta Optimum of each regime: one unnamed value for a single optimum, or a
+#'   named vector with one value per regime (names as in `regimes`). For optima that differ
+#'   between traits, a matrix with one column per trait and one row per regime, with the
+#'   regimes as row names (one unnamed row for a single optimum).
 #' @param regimes Selective regime of each branch, in the order of the edges
 #'   of `tree` reordered "cladewise" (`ape::reorder.phylo(tree, "cladewise")`),
 #'   as returned by [paint_regimes()]; or a tree with the same edges as `tree` and a mapped
-#'   history (class `simmap`), whose states are the regimes. `NULL` puts every branch in one
-#'   regime.
-#' @param root Trait value at the root.
+#'   history (class `simmap`, from [trait_mk()] or `phytools::make.simmap()`), whose states are
+#'   the regimes, in any order of edges. The mapped tree can also be passed as `tree` itself.
+#'   `NULL` puts every branch in one regime.
+#' @param root Trait value at the root: one number for all traits, or one per trait.
 #' @return Matrix with one row per tip (tip labels as row names) and one
 #'   column per trait, named as the columns of the rate matrix, if any. The attribute `nodes` holds the values at the internal nodes, one row
 #'   per node named by its number in `tree$edge`, the root first.
@@ -75,6 +82,10 @@
 #' r <- rate_matrix(c(1, 0.5), correlation = 0.8)
 #' y <- traits_ou(tr, sigma2 = r)
 #' cor(y)
+#' # the shift to regime 1 moves the optimum of trait 1 but not of trait 2
+#' th <- rbind(`0` = c(0, 0), `1` = c(10, 0))
+#' z <- traits_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
+#' plot_traits(z, tr, regimes = reg)
 #' @export
 traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       regimes = NULL, root = 0) {
@@ -82,18 +93,23 @@ traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
   order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
   maps <- NULL
   if (inherits(regimes, "phylo")) {
-    if (is.null(regimes$maps) || !identical(unname(regimes$edge), unname(tree$edge))) {
+    # match the edges by parent and child, whatever the order of the edges of each tree
+    at <- match(paste(tree$edge[order, 1], tree$edge[order, 2]),
+                paste(regimes$edge[, 1], regimes$edge[, 2]))
+    if (is.null(regimes$maps) || nrow(regimes$edge) != nrow(tree$edge) || anyNA(at)) {
       stop("a tree given as `regimes` needs a mapped history (class `simmap`) and the same ",
            "edges as `tree`", call. = FALSE)
     }
-    maps <- regimes$maps[order]
+    maps <- regimes$maps[at]
     regimes <- NULL
   }
   tree <- ape::reorder.phylo(tree, "cladewise")
   ne <- nrow(tree$edge)
   t <- tree$edge.length
   if (is.null(maps)) {
-    if (is.null(regimes) && length(theta) != 1) stop("several optima need `regimes`")
+    if (is.null(regimes) && (if (is.matrix(theta)) nrow(theta) else length(theta)) != 1) {
+      stop("several optima need `regimes`", call. = FALSE)
+    }
     if (is.null(regimes)) {
       reg <- rep("0", ne)
     } else {
@@ -104,7 +120,7 @@ traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
   }
   states <- unique(unlist(lapply(maps, names), use.names = FALSE))
   by_regime <- function(value, what) {
-    if (length(value) == 1 && !is.list(value)) {
+    if (length(value) == 1 && is.null(names(value)) && !is.list(value)) {
       return(stats::setNames(rep(list(value[[1]]), length(states)), states))
     }
     if (is.null(names(value)) || !all(states %in% names(value))) {
@@ -113,7 +129,17 @@ traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
     }
     as.list(value)[states]
   }
-  th <- unlist(by_regime(theta, "theta"))
+  sigma2 <- strip_rate_matrix(sigma2)
+  th <- if (is.matrix(theta)) {  # one row per regime, one column per trait
+    if (nrow(theta) == 1 && is.null(rownames(theta))) {
+      stats::setNames(rep(list(theta[1, ]), length(states)), states)
+    } else {
+      by_regime(stats::setNames(lapply(seq_len(nrow(theta)), function(i) theta[i, ]),
+                                rownames(theta)), "theta")
+    }
+  } else {
+    by_regime(theta, "theta")
+  }
   rates <- if (is.matrix(sigma2)) {
     stats::setNames(rep(list(sigma2), length(states)), states)
   } else {
@@ -140,6 +166,16 @@ traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       s >= 0, logical(1)))) {
       stop("`sigma2` must be zero or more", call. = FALSE)
     }
+  }
+  if (is.matrix(theta)) {
+    if (n_traits == 1 && !multivariate) n_traits <- ncol(theta)
+    if (ncol(theta) != n_traits) {
+      stop("`theta` has ", ncol(theta), " columns but there are ", n_traits, " traits",
+           call. = FALSE)
+    }
+  }
+  if (!is.numeric(root) || anyNA(root) || !length(root) %in% c(1, n_traits)) {
+    stop("`root` needs 1 or ", n_traits, " numbers", call. = FALSE)
   }
   n_tip <- ape::Ntip(tree)
   x <- matrix(0, n_tip + tree$Nnode, n_traits)

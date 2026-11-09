@@ -38,9 +38,10 @@
 #' @param scale For `"proportional"`, the multiplier of each regime, named by regime.
 #' @param eigenvalues For `"shared"`, a named list with the eigenvalues of each regime, one per
 #'   trait.
-#' @return A symmetric matrix with one row and column per trait, or, for the multi-regime
-#'   structures, a named list of them, one per regime. The attribute `constraint` holds the
-#'   structure. Either can be passed to `traits_ou(sigma2 = )`.
+#' @return An object of class `rate_matrix`: a symmetric matrix with one row and column per
+#'   trait, or, for the multi-regime structures, a named list of them, one per regime. The
+#'   attribute `constraint` holds the structure. Either can be passed to
+#'   `traits_ou(sigma2 = )`; [plot()][plot.rate_matrix] draws them as ellipses.
 #' @references
 #'   Adams, D. C. (2013). Comparing evolutionary rates for different phenotypic traits on a
 #'   phylogeny using likelihood. *Systematic Biology*, 62, 181--192.
@@ -49,18 +50,20 @@
 #'   Clavel, J., Escarguel, G., & Merceron, G. (2015). mvMORPH: an R package for fitting
 #'   multivariate evolutionary models to morphometric data. *Methods in Ecology and
 #'   Evolution*, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
-#' @seealso [traits_ou()], which simulates traits with these matrices.
+#' @seealso [traits_ou()], which simulates traits with these matrices, and [plot_traits()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' rate_matrix(c(1, 2), correlation = 0.5)
 #' rate_matrix(1, correlation = 0.3, constraint = "equal", n_traits = 3)
 #' # two habitats, the open one evolving four times faster in all directions
 #' r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
 #'                  scale = c(forest = 1, open = 4))
+#' r
+#' plot(r)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
 #' habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 #' x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
-#' head(x)
+#' plot_traits(x, habitat, regimes = habitat)
 #' # several correlated traits in community assembly
 #' assemble_community(x, size = 10, rule = "limiting_similarity")$community
 #' @export
@@ -143,7 +146,39 @@ rate_matrix <- function(variance = 1, correlation = 0,
   }
   out <- if (is.list(out)) lapply(out, name_it) else name_it(out)
   attr(out, "constraint") <- constraint
+  class(out) <- c("rate_matrix", class(out))
   out
+}
+
+#' @rdname rate_matrix
+#' @param x A `rate_matrix` object.
+#' @param ... Not used.
+#' @export
+print.rate_matrix <- function(x, ...) {
+  several <- is.list(x)
+  m <- if (several) x[[1]] else x
+  cat("<rate_matrix>", attr(x, "constraint"), "structure,", ncol(m), "traits")
+  if (several) cat(",", length(x), "regimes")
+  cat("\n")
+  if (several) {
+    for (k in names(x)) {
+      cat("\nregime ", k, ":\n", sep = "")
+      print(unclass(x[[k]]))
+    }
+  } else {
+    print(matrix(unclass(x), nrow(x), dimnames = dimnames(x)))
+  }
+  invisible(x)
+}
+
+# the rate matrices of sigma2 as plain matrices
+strip_rate_matrix <- function(x) {
+  if (!inherits(x, "rate_matrix")) return(x)
+  if (is.list(x)) {
+    lapply(unclass(x), unclass)
+  } else {
+    matrix(unclass(x), nrow(x), dimnames = dimnames(x))
+  }
 }
 
 # rate matrix from the variances and a common correlation or a correlation matrix

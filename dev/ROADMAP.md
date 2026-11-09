@@ -698,6 +698,12 @@ pacotes de referência em vez de reimplementá-los.
       Falta: nicho com correlação entre eixos (matriz de largura por espécie) na dinâmica;
       competição a partir da distância entre traits (hoje `competition_matrix()` é aleatória
       ou filogenética); paisagens que gerem vários eixos ambientais de uma vez.
+      Auditoria (2026-11-08): corrigidos `theta` nomeado reciclado, simulação com vários eixos
+      sem árvore (e `as_mc_data()`/`summary_stats()`/`sample_individuals()` a jusante), traits
+      com NA na montagem, simmap em outra ordem de ramos; `theta` por trait; classes
+      `rate_matrix` e `mc_assembly`; `plot_traits()`, `plot.rate_matrix()`, `plot_assembly()`;
+      GAUSE 23x mais rápido com a mesma ordem; artigo "Correlated traits and assembly in trait
+      space". Falta ainda: `alpha` matricial no OU (como `mvOU()`).
 - [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
       `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra

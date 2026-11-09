@@ -2,6 +2,7 @@
 % Please edit documentation in R/assembly.R
 \name{assemble_community}
 \alias{assemble_community}
+\alias{print.mc_assembly}
 \title{Assemble a local community from a regional pool by rules}
 \usage{
 assemble_community(
@@ -13,6 +14,8 @@ assemble_community(
   distance = c("euclidean", "standardized", "mahalanobis"),
   trait_cov = NULL
 )
+
+\method{print}{mc_assembly}(x, ...)
 }
 \arguments{
 \item{traits}{Numeric vector (one trait) or matrix (one column per trait),
@@ -39,10 +42,18 @@ Removal stops as soon as no two remaining species are closer than this
 
 \item{trait_cov}{For \code{distance = "mahalanobis"}, an optional covariance matrix of the
 traits, one row and column per trait, used instead of the covariance in the pool.}
+
+\item{x}{An \code{mc_assembly} object from \code{assemble_community()}.}
+
+\item{...}{Not used.}
 }
 \value{
-A list with \code{community} (names of the species kept) and \code{removed}
-(names of the species removed, in order of removal).
+An \code{mc_assembly} object: a list with \code{community} (names of the species kept),
+\code{removed} (names of the species removed, in order of removal), the \code{rule}, \code{distance} and
+\code{optimum} (for filtering) used, the \code{traits} of the pool as a matrix, and \code{metric}, the
+matrix \eqn{S} of the distances, \eqn{\sqrt{(x - y)^\top S^{-1} (x - y)}}{sqrt((x - y)'
+  S^-1 (x - y))} (the identity for Euclidean distances). \code{\link[=plot_assembly]{plot_assembly()}} draws it in trait
+space.
 }
 \description{
 Static community assembly, without population dynamics, following Kraft et
@@ -100,7 +111,9 @@ assemble_community(x, size = 16, rule = "limiting_similarity")$community
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 # correlated traits: distances that discount the correlation
 y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-assemble_community(y, size = 16, distance = "mahalanobis")$community
+a <- assemble_community(y, size = 16, distance = "mahalanobis")
+a
+plot_assembly(a)
 \dontshow{\}) # examplesIf}
 }
 \references{

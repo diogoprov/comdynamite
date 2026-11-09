@@ -60,8 +60,12 @@
 #'   `"standardized"` or `"mahalanobis"`; see Details.
 #' @param trait_cov For `distance = "mahalanobis"`, an optional covariance matrix of the
 #'   traits, one row and column per trait, used instead of the covariance in the pool.
-#' @return A list with `community` (names of the species kept) and `removed`
-#'   (names of the species removed, in order of removal).
+#' @return An `mc_assembly` object: a list with `community` (names of the species kept),
+#'   `removed` (names of the species removed, in order of removal), the `rule`, `distance` and
+#'   `optimum` (for filtering) used, the `traits` of the pool as a matrix, and `metric`, the
+#'   matrix \eqn{S} of the distances, \eqn{\sqrt{(x - y)^\top S^{-1} (x - y)}}{sqrt((x - y)'
+#'   S^-1 (x - y))} (the identity for Euclidean distances). [plot_assembly()] draws it in trait
+#'   space.
 #' @references
 #'   Colwell, R. K., & Winkler, D. W. (1984). A null model for null models in
 #'   biogeography. In D. R. Strong, D. Simberloff, L. G. Abele, & A. B.
@@ -85,7 +89,9 @@
 #' assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 #' # correlated traits: distances that discount the correlation
 #' y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-#' assemble_community(y, size = 16, distance = "mahalanobis")$community
+#' a <- assemble_community(y, size = 16, distance = "mahalanobis")
+#' a
+#' plot_assembly(a)
 #' @export
 assemble_community <- function(traits, size,
                                rule = c("limiting_similarity", "filtering", "neutral"),
@@ -95,6 +101,8 @@ assemble_community <- function(traits, size,
   rule <- match.arg(rule)
   distance <- match.arg(distance)
   x <- as.matrix(traits)
+  if (!is.numeric(x)) stop("`traits` must be numeric (one column per trait)", call. = FALSE)
+  if (anyNA(x)) stop("`traits` has missing values", call. = FALSE)
   if (is.null(rownames(x))) {
     named <- if (is.null(dim(traits))) names(traits)
     if (is.null(named)) warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
@@ -104,6 +112,7 @@ assemble_community <- function(traits, size,
   n <- nrow(x)
   stopifnot(size >= 1, size <= n)
   w <- trait_whitening(x, distance, trait_cov)  # Euclidean distances on x %*% w
+  opt <- NULL
   removed <- switch(rule,
     neutral = sample(sp, n - size),
     filtering = {
@@ -111,13 +120,30 @@ assemble_community <- function(traits, size,
         match.arg(optimum, c("ancestral", "derived")),
         ancestral = rep(0, ncol(x)),
         derived = apply(x, 2, max))
-      stopifnot(length(opt) == ncol(x))
+      if (length(opt) != ncol(x)) {
+        stop("`optimum` needs one value per trait (", ncol(x), ")", call. = FALSE)
+      }
       d <- sqrt(rowSums((sweep(x, 2, opt) %*% w)^2))
       ord <- order(-d, stats::runif(n))  # farthest first, random tie-break
       sp[ord[seq_len(n - size)]]
     },
     limiting_similarity = gause_removal(x %*% w, size, min_distance))
-  list(community = setdiff(sp, removed), removed = removed)
+  structure(list(community = setdiff(sp, removed), removed = removed, rule = rule,
+                 distance = distance, optimum = opt, traits = x,
+                 metric = solve(tcrossprod(w))),
+            class = "mc_assembly")
+}
+
+#' @rdname assemble_community
+#' @param x An `mc_assembly` object from `assemble_community()`.
+#' @param ... Not used.
+#' @export
+print.mc_assembly <- function(x, ...) {
+  cat("<mc_assembly>", x$rule, "with", x$distance, "distances:", length(x$community), "of",
+      nrow(x$traits), "species kept\n")
+  cat("community:", paste(utils::head(x$community, 10), collapse = ", "),
+      if (length(x$community) > 10) "...", "\n")
+  invisible(x)
 }
 
 # matrix w such that Euclidean distances between the rows of x %*% w are the chosen distances
@@ -157,23 +183,37 @@ trait_whitening <- function(x, distance, trait_cov = NULL) {
 }
 
 # GAUSE (Colwell & Winkler 1984): remove, from the closest pair, the species
-# with the smaller sum of distances to the remaining species
+# with the smaller sum of distances to the remaining species. The nearest neighbour of each
+# species is kept up to date, so each step costs O(n) instead of O(n^2); the closest pairs are
+# listed in the order of which(arr.ind = TRUE) on the remaining species, so the random draws,
+# and the species removed, are the same as when scanning the whole matrix at each step
 gause_removal <- function(x, size, min_distance = NULL) {
   d <- as.matrix(stats::dist(x))
   diag(d) <- Inf
-  keep <- rep(TRUE, nrow(d))
+  n <- nrow(d)
+  keep <- rep(TRUE, n)
+  nn <- apply(d, 1, min)  # distance to the nearest remaining species
+  nn_at <- max.col(-d, ties.method = "first")
+  nn_at[!is.finite(nn)] <- NA
   removed <- character(0)
   while (sum(keep) > size) {
-    sub <- d[keep, keep, drop = FALSE]
-    dmin <- min(sub)
+    dmin <- min(nn[keep])
     if (!is.null(min_distance) && dmin >= min_distance) break
-    idx <- which(keep)
-    pairs <- which(sub == dmin, arr.ind = TRUE)
-    pair <- idx[pairs[sample.int(nrow(pairs), 1), ]]
-    tot <- vapply(pair, function(i) sum(d[i, keep & seq_along(keep) != i]), 0)
+    rows <- which(keep & nn == dmin)
+    pairs <- do.call(rbind, lapply(rows, function(r) cbind(r, which(keep & d[r, ] == dmin))))
+    pairs <- pairs[order(pairs[, 2], pairs[, 1]), , drop = FALSE]
+    pair <- pairs[sample.int(nrow(pairs), 1), ]
+    tot <- vapply(pair, function(i) sum(d[i, keep & seq_len(n) != i]), 0)
     victim <- if (tot[1] == tot[2]) pair[sample.int(2, 1)] else pair[which.min(tot)]
     keep[victim] <- FALSE
     removed <- c(removed, rownames(d)[victim])
+    d[victim, ] <- Inf
+    d[, victim] <- Inf
+    stale <- which(keep & nn_at == victim)
+    for (i in stale) {
+      nn_at[i] <- which.min(d[i, ])
+      nn[i] <- d[i, nn_at[i]]
+    }
   }
   removed
 }

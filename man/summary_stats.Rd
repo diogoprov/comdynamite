@@ -24,9 +24,12 @@ parts: the trait is the column \code{optimum}, or the only numeric column of \co
 
 \item{tree}{Optional \code{phylo} object, matched to species by name.}
 
-\item{trait}{Optional numeric vector with one value per species, named by species.}
+\item{trait}{Optional numeric vector with one value per species, named by species. For a
+simulation, the optimum of each species by default; with a niche of several axes, the
+optimum on the first axis.}
 
-\item{env}{Optional numeric vector with one value per site.}
+\item{env}{Optional numeric vector with one value per site. For a simulation, the
+environment that set growth by default; with a niche of several axes, the first axis.}
 
 \item{coords}{Optional matrix or data frame with one row per site and the coordinates in
 columns.}
