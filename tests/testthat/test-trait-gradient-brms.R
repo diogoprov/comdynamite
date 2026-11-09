@@ -5,7 +5,8 @@ tgb_sim <- function() {
                                 competition_matrix(tree, "none"), n_steps = 100,
                                 seed_steps = 1:5)
   ind <- sample_individuals(sim, n = 3, intraspecific_sd = 1)
-  list(tree = tree, tg = trait_gradient(ind, abundance = "abundance"))
+  list(tree = tree, tg = trait_gradient(ind, abundance = "abundance",
+                                        species_weights = "occurrence"))
 }
 
 # posterior draws with the columns brms gives, from known values
@@ -127,4 +128,66 @@ test_that("diagnostics are read from the draws and the sampler", {
   expect_lt(d$max_rhat, 1.01)
   np$Value[1] <- 2
   expect_equal(tg_diagnostics_from(draws, np)$divergent, 2L)
+})
+
+test_that("species names with spaces are found as brms writes them", {
+  sp <- c("Hyla one", "Hyla two", "c", "d")
+  draws <- fake_draws(gsub(" ", ".", sp))
+  s <- tg_brms_summary(draws, sp, center = 0, scale = 1)
+  expect_identical(s$species$species, sp)
+  expect_false(anyNA(s$species$beta))
+})
+
+test_that("a species alone in all its sites has no beta", {
+  sp <- c("x", "y", "z", "w")
+  s <- tg_brms_summary(fake_draws(sp), sp, 0, 1, no_beta = "y")
+  expect_true(all(is.na(s$species[s$species$species == "y", 2:7])))
+  expect_false(anyNA(s$species[s$species$species == "y", 8:10]))
+  expect_false(anyNA(s$species$beta[-2]))
+})
+
+test_that("unequal weights and a strong OU warn, and a failed summary keeps the fit", {
+  skip_if_not_installed("brms")
+  skip_if_not_installed("posterior")
+  d <- tgb_sim()
+  m <- tg_brms_data(d$tg, d$tree)
+  expect_lte(m$kish, 1)
+  expect_gt(m$kish, 0)
+  expect_warning(tg_brms_data(d$tg, d$tree, ou_alpha = 1e4), "cannot be told apart")
+  sp <- m$species
+  local_mocked_bindings(
+    run_brm = function(...) posterior::as_draws_df(fake_draws(sp)[, -3]),
+    tg_brms_diagnostics = function(fit) tg_diagnostics_table(1.001, 1000, 1000, 0),
+    tg_brms_data = function(...) {
+      out <- m
+      out$kish <- 0.3
+      out
+    })
+  w <- character()
+  res <- withCallingHandlers(trait_gradient_brms(d$tg, d$tree),
+                             warning = function(e) {
+                               w <<- c(w, conditionMessage(e))
+                               invokeRestart("muffleWarning")
+                             })
+  expect_true(any(grepl("effective sample", w)))
+  expect_true(any(grepl("could not summarise", w)))
+  expect_null(res$signal)
+  expect_false(is.null(res$fit))
+  expect_output(print(res), "could not be summarised")
+})
+
+test_that("diagnostics include the phylogenetic shares", {
+  skip_if_not_installed("posterior")
+  set.seed(4)
+  n <- 500
+  names <- c("sd_phylo__sitemean_Intercept", "sd_species__sitemean_Intercept", "lp__")
+  arr <- array(abs(rnorm(n * 4 * 3)) + 0.1, c(n, 4, 3), dimnames = list(NULL, NULL, names))
+  np <- data.frame(Parameter = "divergent__", Value = 0)
+  good <- tg_diagnostics_from(posterior::as_draws_array(arr), np)
+  expect_lt(good$max_rhat, 1.01)
+  # chains stuck at opposite ends of lambda
+  arr[, 1:2, 1] <- arr[, 1:2, 1] * 0.2
+  arr[, 3:4, 2] <- arr[, 3:4, 2] * 0.2
+  bad <- tg_diagnostics_from(posterior::as_draws_array(arr), np)
+  expect_gt(bad$max_rhat, 1.01)
 })

@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- `trait_gradient_test()` has two nulls for conserved niches: `null = "phylo"`, the
+  phylogenetic permutations of Lapointe & Garland (2001), in which species means move
+  preferably among relatives, and `null = "bm"`, means simulated by Brownian motion. In
+  simulations where the trait and the niches both evolve along the tree, the phylogenetic
+  permutations bring the error from 14–23% (exchange among all species) to 2–11%; `"bm"` is
+  exact there but fails for traits without phylogenetic structure.
+- `trait_gradient_brms()` fits with brms (in Suggests) a bivariate phylogenetic mixed model in
+  which the position of species along the gradient (beta) and their mean trait are latent
+  effects estimated from every site, and returns the phylogenetic share of beta, alpha and the
+  mean with credible intervals, the phylogenetic correlations, species values and convergence
+  diagnostics. Priors are explicit and documented; `ou_alpha` gives an OU structure with a
+  given strength; `pp_check()` works on the result.
+
 - `trait_gradient()` runs the trait-gradient analysis of Ackerly & Cornwell (2007): each
   species' trait splits into its position along the gradient of community trait means
   (beta) and its difference from co-occurring species (alpha), with niche breadth and the

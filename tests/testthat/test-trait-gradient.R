@@ -279,4 +279,12 @@ test_that("trait_gradient_test() runs the phylogenetic and Brownian nulls", {
   expect_error(trait_gradient_test(tg, n_null = 2, null = "bm",
                                    tree = ape::drop.tip(d$tree, tg$species$species[1])),
                "not in `tree`")
+  flat <- tg
+  flat$species$mean <- 5
+  expect_error(trait_gradient_test(flat, n_null = 2, null = "bm", tree = d$tree), "do not vary")
+  twin <- d$tree
+  twin <- ape::keep.tip(twin, tg$species$species)
+  twin$edge.length[twin$edge[, 2] <= ape::Ntip(twin)] <- 0 # sister tips coincide
+  expect_error(suppressWarnings(trait_gradient_test(tg, n_null = 2, null = "bm", tree = twin)),
+               "singular|distance 0")
 })

@@ -73,13 +73,19 @@ With \code{ou_alpha}, \eqn{A} is the correlation matrix of an Ornstein-Uhlenbeck
 strength \eqn{a} = \code{ou_alpha} and a fixed root, as in \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}}:
 \eqn{C_{ij} = e^{-a(d_i + d_j - 2 s_{ij})} (1 - e^{-2 a s_{ij}}) / (2a)}, scaled to
 correlations. \eqn{a} is taken as known, not estimated: take it from the OU fit of
-\code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}}, or fit several values and compare them with \code{\link[brms:loo]{brms::loo()}}. The same
-\eqn{a} applies to \eqn{\beta} and \eqn{\bar t}, because their phylogenetic correlation needs
-one matrix. As \eqn{a} goes to 0 the matrix is that of Brownian motion.
+\code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}} for \eqn{\beta} (\code{response == "beta"}, \code{model == "OU"}, column
+\code{a}), which is in the same units. The same \eqn{a} applies to \eqn{\beta} and \eqn{\bar t}, because their
+phylogenetic correlation needs one matrix. As \eqn{a} goes to 0 the matrix is that of
+Brownian motion; at large \eqn{a} it approaches the identity, and the phylogenetic and
+species effects can no longer be told apart (the function warns). Comparing values of
+\eqn{a} by cross-validation needs one response at a time, \code{brms::loo(fit, resp = "sitemean")}, because the two responses are fitted to different subsets of rows; the
+comparison is then conditional on the other response.
 
 The phylogenetic share of the variance among species is
 \eqn{\lambda = \sigma^2_u / (\sigma^2_u + \sigma^2_v)}, between 0 (no phylogenetic signal)
-and 1 (Brownian motion). For \eqn{\alpha}, \eqn{\sigma^2_u(\alpha) = \sigma^2_u(t) +
+and 1 (the structure of \code{A} only: Brownian motion, or the OU process given). On a tree that
+is not ultrametric, scaling the Brownian covariance to correlations is not Brownian motion,
+because the tips have different variances. For \eqn{\alpha}, \eqn{\sigma^2_u(\alpha) = \sigma^2_u(t) +
 \sigma^2_u(p) - 2 \rho_u \sigma_u(t) \sigma_u(p)}, and likewise for \eqn{\sigma^2_v(\alpha)}.
 The phylogenetic correlation of \eqn{\beta} with \eqn{\bar t} is \eqn{\rho_u}, and with
 \eqn{\alpha} it follows from the same terms.
@@ -87,12 +93,20 @@ The phylogenetic correlation of \eqn{\beta} with \eqn{\bar t} is \eqn{\rho_u}, a
 Both responses are centred on the mean trait value and divided by its standard deviation, so
 that \eqn{\alpha} keeps its meaning, and the results are returned in trait units. Weights
 (from \code{species_weights} in \code{\link[=trait_gradient]{trait_gradient()}}) are divided by their mean, so that they change
-the relative influence of populations without changing the amount of data.
+the relative influence of populations without changing their number. brms treats a weighted
+observation as that many full observations, so unequal weights, such as abundances, make the
+posterior too narrow: the effective sample is \eqn{(\sum w)^2 / \sum w^2} rather than the
+number of populations. The function warns when this is below 70\% of the populations;
+\code{species_weights = "occurrence"} avoids the problem.
 
 \strong{Priors}, on the standardised scale: \code{normal(0, 1)} for the intercepts, \code{exponential(1)}
 for the standard deviations of species effects and residuals, and \code{lkj(2)} for the
-correlations; give \code{prior} to change them. Check convergence (\code{diagnostics}: R-hat below
-1.01, bulk and tail effective sample sizes above 400, no divergent transitions) and the fit,
+correlations; give \code{prior} to change them. Two independent \code{exponential(1)} priors on the
+phylogenetic and species standard deviations put a U-shaped prior on \eqn{\lambda}: a quarter
+of its mass below 0.1 and a quarter above 0.9. With few species the posterior of
+\eqn{\lambda} follows that prior. Check convergence (\code{diagnostics}: R-hat below
+1.01, bulk and tail effective sample sizes above 400, no divergent transitions, over the
+population-level, group-level and species effects, \code{lp__} and the two \eqn{\lambda}) and the fit,
 with \code{\link[bayesplot:pp_check]{bayesplot::pp_check()}} on the result, before reading the estimates.
 }
 \section{Limits}{
@@ -101,8 +115,15 @@ The phylogenetic part is Brownian motion or an Ornstein-Uhlenbeck process with a
 strength, shared by both responses; \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}} estimates the strength. Site
 means of species that share a site are almost the same
 number, but the model treats them as independent observations, so the posterior of
-\eqn{\beta} is somewhat too narrow when species share many sites. Sites where a species is
-the only species have no site mean without it and enter only its trait.
+\eqn{\beta} is somewhat too narrow when species share many sites. The site mean of a
+population also contains the trait values of the species it lives with, so when relatives
+co-occur, the phylogenetic correlation \eqn{\rho_u} of \eqn{\beta} and \eqn{\bar t} is
+inflated by their shared values, not only by niche conservatism. The residuals of the two
+responses are taken as independent (no residual correlation), which ignores the slope of
+the trait on the gradient within species; \code{\link[=trait_gradient]{trait_gradient()}} estimates those slopes. Sites
+where a species is the only species have no site mean without it and enter only its trait;
+a species that is alone in all its sites has no data on \eqn{\beta}, and its \eqn{\beta}
+and \eqn{\alpha} are returned as \code{NA}.
 
 Splitting the variance among species into a phylogenetic and a non-phylogenetic part needs
 many species. In trials with 18 species the posterior of \eqn{\lambda} had modes near 0 and

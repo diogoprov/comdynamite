@@ -756,8 +756,15 @@ pacotes de referência em vez de reimplementá-los.
       Validação: o curveball rejeita 26–66% nos testes de variância sem triagem de traits, por
       isso deixou de ser o padrão; o nulo por espécies fica em 4,7–7,3%, mas sobe a 10–17%
       quando trait e nicho têm sinal filogenético (associação herdada). Auditoria Fable feita
-      e corrigida. Fica para depois: nulo com permutação restrita pela filogenia; modelo
-      bayesiano conjunto (β latente) em brms como exemplo.
+      e corrigida.
+- [x] TGA, extensões (pedido em 2026-11-09): nulo `"phylo"` com as permutações filogenéticas
+      de Lapointe & Garland (2001), conferidas com o PDF (k ≥ 1, valor de i vai para j), e nulo
+      `"bm"`; validação: com trait e nicho filogenéticos o erro cai de 14–23% para 2–11%, e o
+      `"bm"` falha para traits sem estrutura filogenética. `trait_gradient_brms()`: modelo
+      bivariado em brms com β e média latentes, parte filogenética e não filogenética, λ com
+      intervalo, priors explícitos, diagnósticos e `pp_check()`; OU com α dado (sugestão do
+      usuário: A da covariância OU com raiz fixa). Com 18 espécies λ é bimodal e as cadeias não
+      misturam; com 41 converge e recupera λ.
 
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).

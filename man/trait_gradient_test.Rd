@@ -77,8 +77,10 @@ divided by its sum to give the probability \eqn{p_{ij}} that the mean of species
 moves to species \eqn{j} (staying is the most likely move). Species are taken in random
 order, and each mean moves to a species not yet occupied, with the probabilities of the
 remaining species rescaled to sum to one; the last mean takes the last free species. Large
-\eqn{k} approaches \code{"species"} (equally likely permutations); \eqn{k = 1} gives no exchange
-across the root. Lapointe & Garland (2001) illustrate \eqn{k} from 1.01 to 2.
+\eqn{k} approaches \code{"species"} (equally likely permutations); on an ultrametric tree
+\eqn{k = 1} gives no exchange across the root. Lapointe & Garland (2001) illustrate \eqn{k}
+from 1.0 to 2. A species with no close relative keeps its own mean in many nulls (about half
+of them in our trials with \eqn{k = 1.1}), so the test has little power for such species.
 
 \strong{\code{null = "bm"}.} The species means are replaced by values simulated by Brownian motion on
 \code{tree}, with the mean and rate estimated from the observed means by restricted maximum

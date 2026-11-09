@@ -23,13 +23,20 @@
 #' strength \eqn{a} = `ou_alpha` and a fixed root, as in [trait_gradient_phylo()]:
 #' \eqn{C_{ij} = e^{-a(d_i + d_j - 2 s_{ij})} (1 - e^{-2 a s_{ij}}) / (2a)}, scaled to
 #' correlations. \eqn{a} is taken as known, not estimated: take it from the OU fit of
-#' [trait_gradient_phylo()], or fit several values and compare them with [brms::loo()]. The same
-#' \eqn{a} applies to \eqn{\beta} and \eqn{\bar t}, because their phylogenetic correlation needs
-#' one matrix. As \eqn{a} goes to 0 the matrix is that of Brownian motion.
+#' [trait_gradient_phylo()] for \eqn{\beta} (`response == "beta"`, `model == "OU"`, column
+#' `a`), which is in the same units. The same \eqn{a} applies to \eqn{\beta} and \eqn{\bar t}, because their
+#' phylogenetic correlation needs one matrix. As \eqn{a} goes to 0 the matrix is that of
+#' Brownian motion; at large \eqn{a} it approaches the identity, and the phylogenetic and
+#' species effects can no longer be told apart (the function warns). Comparing values of
+#' \eqn{a} by cross-validation needs one response at a time, `brms::loo(fit, resp =
+#' "sitemean")`, because the two responses are fitted to different subsets of rows; the
+#' comparison is then conditional on the other response.
 #'
 #' The phylogenetic share of the variance among species is
 #' \eqn{\lambda = \sigma^2_u / (\sigma^2_u + \sigma^2_v)}, between 0 (no phylogenetic signal)
-#' and 1 (Brownian motion). For \eqn{\alpha}, \eqn{\sigma^2_u(\alpha) = \sigma^2_u(t) +
+#' and 1 (the structure of `A` only: Brownian motion, or the OU process given). On a tree that
+#' is not ultrametric, scaling the Brownian covariance to correlations is not Brownian motion,
+#' because the tips have different variances. For \eqn{\alpha}, \eqn{\sigma^2_u(\alpha) = \sigma^2_u(t) +
 #' \sigma^2_u(p) - 2 \rho_u \sigma_u(t) \sigma_u(p)}, and likewise for \eqn{\sigma^2_v(\alpha)}.
 #' The phylogenetic correlation of \eqn{\beta} with \eqn{\bar t} is \eqn{\rho_u}, and with
 #' \eqn{\alpha} it follows from the same terms.
@@ -37,12 +44,20 @@
 #' Both responses are centred on the mean trait value and divided by its standard deviation, so
 #' that \eqn{\alpha} keeps its meaning, and the results are returned in trait units. Weights
 #' (from `species_weights` in [trait_gradient()]) are divided by their mean, so that they change
-#' the relative influence of populations without changing the amount of data.
+#' the relative influence of populations without changing their number. brms treats a weighted
+#' observation as that many full observations, so unequal weights, such as abundances, make the
+#' posterior too narrow: the effective sample is \eqn{(\sum w)^2 / \sum w^2} rather than the
+#' number of populations. The function warns when this is below 70% of the populations;
+#' `species_weights = "occurrence"` avoids the problem.
 #'
 #' **Priors**, on the standardised scale: `normal(0, 1)` for the intercepts, `exponential(1)`
 #' for the standard deviations of species effects and residuals, and `lkj(2)` for the
-#' correlations; give `prior` to change them. Check convergence (`diagnostics`: R-hat below
-#' 1.01, bulk and tail effective sample sizes above 400, no divergent transitions) and the fit,
+#' correlations; give `prior` to change them. Two independent `exponential(1)` priors on the
+#' phylogenetic and species standard deviations put a U-shaped prior on \eqn{\lambda}: a quarter
+#' of its mass below 0.1 and a quarter above 0.9. With few species the posterior of
+#' \eqn{\lambda} follows that prior. Check convergence (`diagnostics`: R-hat below
+#' 1.01, bulk and tail effective sample sizes above 400, no divergent transitions, over the
+#' population-level, group-level and species effects, `lp__` and the two \eqn{\lambda}) and the fit,
 #' with [bayesplot::pp_check()] on the result, before reading the estimates.
 #'
 #' @section Limits:
@@ -50,8 +65,15 @@
 #' strength, shared by both responses; [trait_gradient_phylo()] estimates the strength. Site
 #' means of species that share a site are almost the same
 #' number, but the model treats them as independent observations, so the posterior of
-#' \eqn{\beta} is somewhat too narrow when species share many sites. Sites where a species is
-#' the only species have no site mean without it and enter only its trait.
+#' \eqn{\beta} is somewhat too narrow when species share many sites. The site mean of a
+#' population also contains the trait values of the species it lives with, so when relatives
+#' co-occur, the phylogenetic correlation \eqn{\rho_u} of \eqn{\beta} and \eqn{\bar t} is
+#' inflated by their shared values, not only by niche conservatism. The residuals of the two
+#' responses are taken as independent (no residual correlation), which ignores the slope of
+#' the trait on the gradient within species; [trait_gradient()] estimates those slopes. Sites
+#' where a species is the only species have no site mean without it and enter only its trait;
+#' a species that is alone in all its sites has no data on \eqn{\beta}, and its \eqn{\beta}
+#' and \eqn{\alpha} are returned as `NA`.
 #'
 #' Splitting the variance among species into a phylogenetic and a non-phylogenetic part needs
 #' many species. In trials with 18 species the posterior of \eqn{\lambda} had modes near 0 and
@@ -110,6 +132,12 @@ trait_gradient_brms <- function(x, tree, ou_alpha = NULL, prior = NULL, chains =
   }
   check_tree(tree)
   model <- tg_brms_data(x, tree, ou_alpha)
+  if (model$kish < 0.7) {
+    warning("the weights leave an effective sample of ", round(100 * model$kish),
+            "% of the populations, and the posterior treats the weighted data as if all ",
+            "populations were full observations, so its intervals are too narrow; consider ",
+            "species_weights = \"occurrence\" in trait_gradient()", call. = FALSE)
+  }
   prior <- prior %||% tg_brms_priors()
   args <- list(...)
   if (is.null(args$control)) args$control <- list(adapt_delta = 0.95)
@@ -117,7 +145,13 @@ trait_gradient_brms <- function(x, tree, ou_alpha = NULL, prior = NULL, chains =
                                  prior = prior, chains = chains, iter = iter, warmup = warmup,
                                  cores = cores, seed = seed), args))
   draws <- as.data.frame(posterior::as_draws_df(fit))
-  summary <- tg_brms_summary(draws, model$species, model$center, model$scale)
+  summary <- tryCatch(
+    tg_brms_summary(draws, model$species, model$center, model$scale, model$no_beta),
+    error = function(e) {
+      warning("could not summarise the posterior (", conditionMessage(e), "); the fit is in ",
+              "`fit`", call. = FALSE)
+      list(signal = NULL, variances = NULL, species = NULL)
+    })
   diagnostics <- tg_brms_diagnostics(fit)
   if (!diagnostics$ok) {
     warning("the model has not converged or has divergent transitions; see `diagnostics`",
@@ -154,13 +188,20 @@ tg_brms_data <- function(x, tree, ou_alpha = NULL) {
                      phylo = p$species, species = p$species, site = p$site,
                      stringsAsFactors = FALSE)
   A <- phylo_correlation(ape::keep.tip(tree, species), species, ou_alpha)
+  if (!is.null(ou_alpha) && max(abs(A[upper.tri(A)])) < 0.01) {
+    warning("with this `ou_alpha` the phylogenetic correlations are all below 0.01, so the ",
+            "phylogenetic and species effects cannot be told apart", call. = FALSE)
+  }
+  w <- data$w
+  kish <- sum(w)^2 / sum(w^2) / length(w)
+  no_beta <- setdiff(species, unique(p$species[has_p]))
   formula <- brms::bf(sitemean | weights(w) + subset(has_p) ~
                         1 + (1 | p | gr(phylo, cov = A)) + (1 | q | species)) +
     brms::bf(trait | weights(w) + subset(measured) ~
                1 + (1 | p | gr(phylo, cov = A)) + (1 | q | species)) +
     brms::set_rescor(FALSE)
   list(data = data, A = A, formula = formula, species = species, center = center,
-       scale = scale)
+       scale = scale, kish = kish, no_beta = no_beta)
 }
 
 # correlation matrix of the tips under Brownian motion (ou_alpha NULL) or an OU process with
@@ -189,7 +230,7 @@ tg_brms_priors <- function() {
 }
 
 # signal, variances and species values from a data frame of posterior draws
-tg_brms_summary <- function(draws, species, center, scale) {
+tg_brms_summary <- function(draws, species, center, scale, no_beta = character()) {
   col <- function(name) {
     if (!name %in% names(draws)) stop("the posterior has no parameter ", name, call. = FALSE)
     draws[[name]]
@@ -224,14 +265,18 @@ tg_brms_summary <- function(draws, species, center, scale) {
                              phylo_alpha = vp_alpha, species_alpha = vs_alpha,
                              phylo_mean = vp_mean, species_mean = vs_mean), "component")
   effect <- function(resp, sp) {
-    col(paste0("b_", resp, "_Intercept")) + col(paste0("r_phylo__", resp, "[", sp, ",Intercept]")) +
-      col(paste0("r_species__", resp, "[", sp, ",Intercept]"))
+    level <- gsub("[ \t\r\n]", ".", sp) # as brms writes factor levels in parameter names
+    col(paste0("b_", resp, "_Intercept")) +
+      col(paste0("r_phylo__", resp, "[", level, ",Intercept]")) +
+      col(paste0("r_species__", resp, "[", level, ",Intercept]"))
   }
   per_species <- lapply(species, function(sp) {
     beta <- center + scale * effect("sitemean", sp)
     mean <- center + scale * effect("trait", sp)
     alpha <- mean - beta
     v <- c(interval(beta), interval(alpha), interval(mean))
+    # a species always alone in its sites has no site mean: its beta is only the prior
+    if (sp %in% no_beta) v[1:6] <- NA_real_
     names(v) <- c("beta", "beta_lower", "beta_upper", "alpha", "alpha_lower", "alpha_upper",
                   "mean", "mean_lower", "mean_upper")
     v
@@ -246,12 +291,28 @@ tg_brms_diagnostics <- function(fit) {
 }
 
 tg_diagnostics_from <- function(draws, np) {
-  keep <- grep("^(b_|sd_|cor_|sigma_)", posterior::variables(draws), value = TRUE)
-  s <- posterior::summarise_draws(posterior::subset_draws(draws, variable = keep),
-                                  "rhat", "ess_bulk", "ess_tail")
+  vars <- posterior::variables(draws)
+  keep <- c(grep("^(b_|sd_|cor_|sigma_|r_)", vars, value = TRUE), intersect("lp__", vars))
+  draws <- posterior::subset_draws(draws, variable = keep)
+  s <- posterior::summarise_draws(draws, "rhat", "ess_bulk", "ess_tail")
+  rhat <- s$rhat
+  ess_bulk <- s$ess_bulk
+  ess_tail <- s$ess_tail
+  # the phylogenetic shares, which mix slowly when the two parts trade off
+  m <- function(name) posterior::extract_variable_matrix(draws, name)
+  for (resp in c("sitemean", "trait")) {
+    phylo <- paste0("sd_phylo__", resp, "_Intercept")
+    spec <- paste0("sd_species__", resp, "_Intercept")
+    if (all(c(phylo, spec) %in% keep)) {
+      lambda <- m(phylo)^2 / (m(phylo)^2 + m(spec)^2)
+      rhat <- c(rhat, posterior::rhat(lambda))
+      ess_bulk <- c(ess_bulk, posterior::ess_bulk(lambda))
+      ess_tail <- c(ess_tail, posterior::ess_tail(lambda))
+    }
+  }
   divergent <- sum(np$Value[np$Parameter == "divergent__"])
-  tg_diagnostics_table(max(s$rhat, na.rm = TRUE), min(s$ess_bulk, na.rm = TRUE),
-                       min(s$ess_tail, na.rm = TRUE), divergent)
+  tg_diagnostics_table(max(rhat, na.rm = TRUE), min(ess_bulk, na.rm = TRUE),
+                       min(ess_tail, na.rm = TRUE), divergent)
 }
 
 tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent) {
@@ -262,10 +323,15 @@ tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent) {
 
 #' @export
 print.mc_trait_gradient_brms <- function(x, ...) {
-  cat("Bayesian phylogenetic model of the trait gradient:", nrow(x$species), "species,",
+  cat("Bayesian phylogenetic model of the trait gradient:", nlevels(factor(x$data$species)),
+      "species,",
       if (is.null(x$ou_alpha)) "Brownian motion\n" else
         paste0("Ornstein-Uhlenbeck (a = ", format(signif(x$ou_alpha, 3)), ")\n"))
   d <- x$diagnostics
+  if (is.null(x$signal)) {
+    cat("The posterior could not be summarised; see `fit`\n")
+    return(invisible(x))
+  }
   cat("Convergence: max R-hat ", format(round(d$max_rhat, 3)), ", min ESS bulk ",
       round(d$min_ess_bulk), ", tail ", round(d$min_ess_tail), ", divergent transitions ",
       d$divergent, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")

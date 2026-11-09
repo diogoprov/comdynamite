@@ -344,8 +344,10 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' moves to species \eqn{j} (staying is the most likely move). Species are taken in random
 #' order, and each mean moves to a species not yet occupied, with the probabilities of the
 #' remaining species rescaled to sum to one; the last mean takes the last free species. Large
-#' \eqn{k} approaches `"species"` (equally likely permutations); \eqn{k = 1} gives no exchange
-#' across the root. Lapointe & Garland (2001) illustrate \eqn{k} from 1.01 to 2.
+#' \eqn{k} approaches `"species"` (equally likely permutations); on an ultrametric tree
+#' \eqn{k = 1} gives no exchange across the root. Lapointe & Garland (2001) illustrate \eqn{k}
+#' from 1.0 to 2. A species with no close relative keeps its own mean in many nulls (about half
+#' of them in our trials with \eqn{k = 1.1}), so the test has little power for such species.
 #'
 #' **`null = "bm"`.** The species means are replaced by values simulated by Brownian motion on
 #' `tree`, with the mean and rate estimated from the observed means by restricted maximum
@@ -469,9 +471,17 @@ trait_gradient_test <- function(x, n_null = 999,
   means <- stats::setNames(x$species$mean, species_ids)
   if (null == "phylo") transition <- phylo_transition(shared, phylo_k)
   if (null == "bm") {
+    if (!(stats::var(means) > 0)) {
+      stop("the species means do not vary, so null = \"bm\" cannot estimate a rate",
+           call. = FALSE)
+    }
+    root <- tryCatch(t(chol(shared)), error = function(e) {
+      stop("the covariance of `tree` is singular (tips at distance 0?); null = \"bm\" ",
+           "needs distinct tips", call. = FALSE)
+    })
     fit <- gls_known_error(means, rep(0, k), list(shared = shared, depth = diag(shared),
                                                  height = max(diag(shared))), "BM")
-    root <- t(chol(fit$sigma2 * shared))
+    root <- sqrt(fit$sigma2) * root
   }
   sims <- matrix(NA_real_, n_null, 3 + 2 * k)
   for (b in seq_len(n_null)) {
