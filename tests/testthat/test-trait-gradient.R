@@ -240,3 +240,51 @@ test_that("trait_gradient_phylo() marks OU fits at a bound and stops on constant
   expect_error(trait_gradient_phylo(flat, d$tree, responses = "beta", n_boot = 5),
                "does not vary")
 })
+
+test_that("phylogenetic permutations follow Lapointe & Garland (2001)", {
+  tree <- ape::read.tree(text = "((a:1,b:1):1,(c:1.5,d:1.5):0.5,e:2);")
+  sp <- c("a", "b", "c", "d", "e")
+  P <- phylo_transition(ape::vcv(tree)[sp, sp], 1.5)
+  expect_equal(unname(rowSums(P)), rep(1, 5))
+  expect_true(all(P > 0))
+  expect_true(all(apply(P, 1, which.max) == 1:5))
+  # an isolated species keeps its value more often than one with a close relative
+  expect_gt(P["e", "e"], P["a", "a"])
+  # k = 1: the most distant pairs get probability 0
+  expect_equal(min(phylo_transition(ape::vcv(tree)[sp, sp], 1)), 0)
+  set.seed(4)
+  v <- phylogenetic_permutation(1:5, P)
+  expect_setequal(v, 1:5)
+  # with k = 1 every species can still be placed
+  P1 <- phylo_transition(ape::vcv(tree)[sp, sp], 1)
+  for (i in 1:50) expect_setequal(phylogenetic_permutation(1:5, P1), 1:5)
+  star <- ape::read.tree(text = "(a:0,b:0);")
+  expect_error(phylo_transition(ape::vcv(star), 1.1), "distance 0")
+})
+
+test_that("trait_gradient_test() runs the phylogenetic and Brownian nulls", {
+  d <- tg_sim()
+  tg <- trait_gradient(d$ind, abundance = "abundance")
+  set.seed(8)
+  ph <- trait_gradient_test(tg, n_null = 19, null = "phylo", tree = d$tree)
+  expect_equal(ph$settings$phylo_k, 1.1)
+  expect_true("ses_alpha" %in% names(ph$species))
+  bm <- trait_gradient_test(tg, n_null = 19, null = "bm", tree = d$tree)
+  expect_null(bm$settings$burn_in)
+  expect_true(all(is.finite(bm$statistics$ses)))
+  expect_null(trait_gradient_test(tg, n_null = 2)$settings$phylo_k)
+  expect_error(trait_gradient_test(tg, n_null = 2, null = "phylo"), "needs `tree`")
+  expect_error(trait_gradient_test(tg, n_null = 2, null = "phylo", tree = d$tree, phylo_k = 0.5),
+               "`phylo_k`")
+  expect_error(trait_gradient_test(tg, n_null = 2, null = "bm",
+                                   tree = ape::drop.tip(d$tree, tg$species$species[1])),
+               "not in `tree`")
+  flat <- tg
+  flat$species$mean <- 5
+  expect_error(trait_gradient_test(flat, n_null = 2, null = "bm", tree = d$tree), "do not vary")
+  twin <- d$tree
+  twin <- ape::keep.tip(twin, tg$species$species)
+  twin$edge.length[twin$edge[, 2] <= ape::Ntip(twin)] <- 0 # sister tips coincide
+  expect_error(suppressWarnings(trait_gradient_test(tg, n_null = 2, null = "bm", tree = twin)),
+               "singular|distance 0")
+})

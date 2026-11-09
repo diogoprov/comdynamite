@@ -332,6 +332,37 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' unrelated to it: species that share sites share their site means. Use the curveball for the
 #' correlation only.
 #'
+#' **`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes the site of each
+#' population. It keeps the number of populations of each site but can place a species twice in
+#' one site, and it breaks the turnover of species as the curveball does.
+#'
+#' **`null = "phylo"`.** The phylogenetic permutations of Lapointe & Garland (2001): as
+#' `"species"`, but the mean of a species moves preferably to a close relative. Patristic
+#' distances are scaled by the largest, \eqn{d^*_{ij} = d_{ij} / d_{max}}, turned into
+#' similarities \eqn{s_{ij} = k - d^*_{ij}} with \eqn{k} = `phylo_k` \eqn{\ge 1}, and each row is
+#' divided by its sum to give the probability \eqn{p_{ij}} that the mean of species \eqn{i}
+#' moves to species \eqn{j} (staying is the most likely move). Species are taken in random
+#' order, and each mean moves to a species not yet occupied, with the probabilities of the
+#' remaining species rescaled to sum to one; the last mean takes the last free species. Large
+#' \eqn{k} approaches `"species"` (equally likely permutations); on an ultrametric tree
+#' \eqn{k = 1} gives no exchange across the root. Lapointe & Garland (2001) illustrate \eqn{k}
+#' from 1.0 to 2. A species with no close relative keeps its own mean in many nulls (about half
+#' of them in our trials with \eqn{k = 1.1}), so the test has little power for such species.
+#'
+#' **`null = "bm"`.** The species means are replaced by values simulated by Brownian motion on
+#' `tree`, with the mean and rate estimated from the observed means by restricted maximum
+#' likelihood; each species keeps its own variation among sites. The null is a trait that
+#' evolves along the tree and has nothing to do with assembly.
+#'
+#' Use `"phylo"` when the niches of species are conserved: under `"species"`, a trait that
+#' merely shares the phylogenetic structure of the niches looks sorted along the gradient.
+#' `"bm"` is exact only when the trait does evolve by Brownian motion: a trait with less
+#' phylogenetic structure than Brownian motion makes its variance tests reject (see
+#' Validation).
+#'
+#' The \eqn{\alpha} of a species is not tested under `"curveball"` and `"permute"`: the species
+#' mean does not change, so its test would mirror that of \eqn{\beta}.
+#'
 #' @section Validation:
 #' In simulated metacommunities (25 species, 20 sites, 150 replicates per scenario, 5% level,
 #' leave-one-out site means) with trait means drawn independently of the niches, the species
@@ -342,23 +373,33 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' null rejected in 10--17% although the trait plays no part in assembly: related species share
 #' both sites and trait values, and the test detects that association, not its cause.
 #'
-#' **`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes the site of each
-#' population. It keeps the number of populations of each site but can place a species twice in
-#' one site, and it breaks the turnover of species as the curveball does.
-#'
-#' The \eqn{\alpha} of a species is not tested under `"curveball"` and `"permute"`: the species
-#' mean does not change, so its test would mirror that of \eqn{\beta}.
+#' In the same design (150 replicates per scenario), for the three statistics:
+#' \tabular{lrrr}{
+#'   null \tab trait independent of niches \tab trait and niches on the tree \tab sorting \cr
+#'   `"species"` \tab 4.0--4.7% \tab 14--23% \tab 99--100% \cr
+#'   `"phylo"`, \eqn{k = 1.1} \tab 2.7--4.0% \tab 4.0--11% \tab 95--100% \cr
+#'   `"phylo"`, \eqn{k = 1.01} \tab 1.3--4.7% \tab 2.0--10% \tab 91--100% \cr
+#'   `"bm"` \tab 10--85% \tab 2.7--4.7% \tab 43--100%
+#' }
+#' The phylogenetic permutations bring the error back near the nominal level in both null
+#' scenarios, with some excess left for the correlation and the variance of \eqn{\alpha} when
+#' trait and niches share the tree; `"bm"` is exact in that scenario but fails when the trait
+#' has no phylogenetic structure, and loses power for the variance of \eqn{\beta}.
 #'
 #' @param x Result of [trait_gradient()].
 #' @param n_null Number of null communities.
-#' @param null `"species"` (the default), `"curveball"` or `"permute"`.
+#' @param null `"species"` (the default), `"phylo"`, `"bm"`, `"curveball"` or `"permute"`.
 #' @param burn_in,thin Trades of the curveball chain before the first null community and
 #'   between null communities; by default 50 and 5 times the number of sites, so that each site
 #'   takes part in about 10 trades between null communities.
+#' @param tree Phylogeny (`phylo`) with branch lengths, for `null = "phylo"` and `"bm"`; every
+#'   species of `x` must be a tip.
+#' @param phylo_k The constant \eqn{k \ge 1} of the phylogenetic permutations of
+#'   `null = "phylo"`: closer to 1, more exchanges among relatives only.
 #' @return An object of class `mc_trait_gradient_test`, a list with `statistics` (one row per
 #'   statistic: `observed`, `null_mean`, `null_sd`, `ses` and `p`), `species` (one row per
-#'   species: observed \eqn{\beta} with `ses_beta` and `p_beta`, and with `null = "species"`
-#'   also \eqn{\alpha} with `ses_alpha` and `p_alpha`), `null` (a matrix with one row per null
+#'   species: observed \eqn{\beta} with `ses_beta` and `p_beta`, and with `null = "species"`,
+#'   `"phylo"` or `"bm"` also \eqn{\alpha} with `ses_alpha` and `p_alpha`), `null` (a matrix with one row per null
 #'   community and one column per statistic) and the settings.
 #' @references Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community
 #'   assembly: partitioning of species trait values into within- and among-community
@@ -367,6 +408,10 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #'   Strona, G., Nappo, D., Boccacci, F., Fattorini, S., & San-Miguel-Ayanz, J. (2014). A fast
 #'   and unbiased procedure to randomize ecological binary matrices with fixed row and column
 #'   totals. *Nature Communications*, 5, 4114. \doi{10.1038/ncomms5114}
+#'
+#'   Lapointe, F.-J., & Garland, T., Jr. (2001). A generalized permutation model for the
+#'   analysis of cross-species data. *Journal of Classification*, 18, 109--127.
+#'   \doi{10.1007/s00357-001-0007-0}
 #' @seealso [trait_gradient()]
 #' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -380,9 +425,13 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' trait_gradient_test(tg, n_null = 99)
 #' # the correlation of beta and alpha against the curveball
 #' trait_gradient_test(tg, n_null = 99, null = "curveball")$statistics[1, ]
+#' # means exchanged among relatives, or simulated along the tree
+#' trait_gradient_test(tg, n_null = 99, null = "phylo", tree = tree)
+#' trait_gradient_test(tg, n_null = 99, null = "bm", tree = tree)
 #' @export
-trait_gradient_test <- function(x, n_null = 999, null = c("species", "curveball", "permute"),
-                                burn_in = NULL, thin = NULL) {
+trait_gradient_test <- function(x, n_null = 999,
+                                null = c("species", "phylo", "bm", "curveball", "permute"),
+                                burn_in = NULL, thin = NULL, tree = NULL, phylo_k = 1.1) {
   if (!inherits(x, "mc_trait_gradient")) {
     stop("`x` must come from trait_gradient()", call. = FALSE)
   }
@@ -402,14 +451,47 @@ trait_gradient_test <- function(x, n_null = 999, null = c("species", "curveball"
   observed <- tg_null_stats(x)
   species_ids <- x$species$species
   k <- length(species_ids)
+  by_tree <- null %in% c("phylo", "bm")
+  if (by_tree) {
+    if (is.null(tree)) stop("`null = \"", null, "\"` needs `tree`", call. = FALSE)
+    check_tree(tree)
+    absent <- setdiff(species_ids, tree$tip.label)
+    if (length(absent) > 0) {
+      stop("species of `x` not in `tree`: ", paste(absent, collapse = ", "), call. = FALSE)
+    }
+    if (!is.numeric(phylo_k) || length(phylo_k) != 1 || is.na(phylo_k) || phylo_k < 1) {
+      stop("`phylo_k` must be one number, 1 or more", call. = FALSE)
+    }
+    shared <- ape::vcv(ape::keep.tip(tree, species_ids))[species_ids, species_ids]
+  } else {
+    phylo_k <- NULL
+  }
   site_of <- pops$site
   if (null == "curveball") site_of <- curveball_sites(site_of, pops$species, burn_in)
   means <- stats::setNames(x$species$mean, species_ids)
+  if (null == "phylo") transition <- phylo_transition(shared, phylo_k)
+  if (null == "bm") {
+    if (!(stats::var(means) > 0)) {
+      stop("the species means do not vary, so null = \"bm\" cannot estimate a rate",
+           call. = FALSE)
+    }
+    root <- tryCatch(t(chol(shared)), error = function(e) {
+      stop("the covariance of `tree` is singular (tips at distance 0?); null = \"bm\" ",
+           "needs distinct tips", call. = FALSE)
+    })
+    fit <- gls_known_error(means, rep(0, k), list(shared = shared, depth = diag(shared),
+                                                 height = max(diag(shared))), "BM")
+    root <- sqrt(fit$sigma2) * root
+  }
   sims <- matrix(NA_real_, n_null, 3 + 2 * k)
   for (b in seq_len(n_null)) {
     moved <- pops
-    if (null == "species") {
-      shuffled <- stats::setNames(sample(means), species_ids)
+    if (null %in% c("species", "phylo", "bm")) {
+      shuffled <- switch(null,
+                         species = sample(means),
+                         phylo = phylogenetic_permutation(means, transition),
+                         bm = fit$mu + as.vector(root %*% stats::rnorm(k)))
+      shuffled <- stats::setNames(shuffled, species_ids)
       moved$trait <- pops$trait - means[pops$species] + shuffled[pops$species]
     } else {
       site_of <- if (null == "curveball") curveball_sites(site_of, pops$species, thin) else
@@ -431,7 +513,7 @@ trait_gradient_test <- function(x, n_null = 999, null = c("species", "curveball"
   species <- data.frame(species = species_ids, beta = observed[b_cols],
                         ses_beta = compared$ses[b_cols], p_beta = compared$p[b_cols],
                         row.names = NULL)
-  if (null == "species") {
+  if (null %in% c("species", "phylo", "bm")) {
     a_cols <- 3 + k + seq_len(k)
     species$alpha <- observed[a_cols]
     species$ses_alpha <- compared$ses[a_cols]
@@ -441,8 +523,38 @@ trait_gradient_test <- function(x, n_null = 999, null = c("species", "curveball"
   }
   structure(list(statistics = statistics, species = species, null = sims,
                  settings = c(settings, list(null = null, n_null = n_null, burn_in = burn_in,
-                                             thin = thin))),
+                                             thin = thin, phylo_k = phylo_k))),
             class = "mc_trait_gradient_test")
+}
+
+# initial transition probabilities of the phylogenetic permutations of Lapointe & Garland
+# (2001): similarities k - d / d_max, divided by their row sums
+phylo_transition <- function(shared, k) {
+  depth <- diag(shared)
+  d <- outer(depth, depth, "+") - 2 * shared
+  d_max <- max(d)
+  if (!(d_max > 0)) stop("the species are at distance 0 in `tree`", call. = FALSE)
+  similarity <- k - d / d_max
+  similarity / rowSums(similarity)
+}
+
+# one phylogenetic permutation of `values`: species in random order send their value to a free
+# position with the transition probabilities of the free positions, rescaled; the last value
+# takes the last free position. With k = 1 a probability can be 0.
+phylogenetic_permutation <- function(values, transition) {
+  n <- length(values)
+  out <- values
+  free <- rep(TRUE, n)
+  for (i in sample.int(n)) {
+    options <- which(free)
+    prob <- transition[i, options]
+    pick <- if (length(options) == 1) options else if (sum(prob) > 0)
+      options[sample.int(length(options), 1, prob = prob)] else
+        options[sample.int(length(options), 1)]
+    out[pick] <- values[i]
+    free[pick] <- FALSE
+  }
+  out
 }
 
 # the populations of a trait_gradient() result as the input of tg_compute(), with

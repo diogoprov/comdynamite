@@ -756,8 +756,24 @@ pacotes de referência em vez de reimplementá-los.
       Validação: o curveball rejeita 26–66% nos testes de variância sem triagem de traits, por
       isso deixou de ser o padrão; o nulo por espécies fica em 4,7–7,3%, mas sobe a 10–17%
       quando trait e nicho têm sinal filogenético (associação herdada). Auditoria Fable feita
-      e corrigida. Fica para depois: nulo com permutação restrita pela filogenia; modelo
-      bayesiano conjunto (β latente) em brms como exemplo.
+      e corrigida.
+- [x] TGA, extensões (pedido em 2026-11-09): nulo `"phylo"` com as permutações filogenéticas
+      de Lapointe & Garland (2001), conferidas com o PDF (k ≥ 1, valor de i vai para j), e nulo
+      `"bm"`; validação: com trait e nicho filogenéticos o erro cai de 14–23% para 2–11%, e o
+      `"bm"` falha para traits sem estrutura filogenética. `trait_gradient_brms()`: modelo
+      bivariado em brms com β e média latentes, parte filogenética e não filogenética, λ com
+      intervalo, priors explícitos, diagnósticos e `pp_check()`; OU com α dado (sugestão do
+      usuário: A da covariância OU com raiz fixa). Com 18 espécies λ é bimodal e as cadeias não
+      misturam. Validação com ~43 espécies (20 réplicas): λ = 1 recuperado em 8/10 (5 passam
+      em todos os diagnósticos); λ = 0 recuperado em 8/10, mas nenhuma passa (ESS 180–400);
+      4 réplicas com cadeias divididas. Auditoria Fable corrigida (nomes com espaço, Kish,
+      diagnósticos de λ, loo por resposta, β NA para espécies sempre sozinhas).
+      Validação 2 (4000 iterações, pesos de ocorrência, ~43 espécies): R-hat ≤ 1,03, mas
+      divergências na maioria; λ = 0 de novo perto de 0 (10/10 com divergências); λ de Pagel
+      0,5 NÃO é recuperado: medianas 0,007–0,81 (mediana 0,04), intervalo contém 0,5 em 12/20 e
+      exclui 0 em 3/20; só 4/20 passam. Documentado em Limits.
+- [ ] TGA bayesiana: reparametrizar para tirar o viés para 0 (prior direto em λ, p. ex. beta,
+      com sd total; exige Stan próprio ou `stanvars`) e atacar as divergências perto de λ = 0.
 
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).
