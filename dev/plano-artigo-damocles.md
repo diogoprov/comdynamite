@@ -100,6 +100,11 @@ Tudo em `data-raw/` no checkout principal, sem commit. A pasta `data-raw` está 
     32 Ma). A mais frequente é *Scinax hiemalis* (41 sítios); as demais têm de 1 a 6 sítios.
   - Limite: os registros sem nome válido (526 em SP) ficam de fora; "sp." e "aff." de estudos
     diferentes não são comparáveis.
+  - Falsas ausências: segundo o Diogo, o ATLANTIC AMPHIBIANS só incluiu estudos que passaram
+    por critérios de seleção (duração, métodos de amostragem etc.) para reduzir falsas
+    ausências. Não verifiquei os critérios: o PDF de metadados (ecy2392-sup-0002-MetadataS1)
+    retorna 403 na Wiley. Os campos `effort_months`, `active_methods` e `passive_methods`
+    dos sítios permitem uma análise de sensibilidade com filtros mais estritos.
 - Plano:
   - pool regional como análise principal;
   - pools de 112 e de 248 como sensibilidade;
@@ -289,7 +294,8 @@ Pendentes: nenhuma no momento.
   pontas. Mitigação: comparar com o Portik, que é molecular.
 - **Confusão entre barreira biogeográfica e dinâmica local** quando costa e interior
   compartilham o pool (2.2).
-- **Esforço heterogêneo no ATLANTIC AMPHIBIANS:** ausências falsas inflam μ. Pode exigir
+- **Esforço heterogêneo no ATLANTIC AMPHIBIANS:** ausências falsas inflam μ. A seleção de
+  estudos do próprio conjunto reduz o problema (2.2), mas não o elimina. Pode exigir
   um modelo de detecção. Com E6 dentro do artigo único, esse risco fica central: filtrar
   sítios por esforço e simular o efeito de detecção imperfeita sobre γ e μ (variante de S6).
 
