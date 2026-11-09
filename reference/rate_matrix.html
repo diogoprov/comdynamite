@@ -35,6 +35,7 @@ of evolution of each trait, and correlations are evolutionary correlations betwe
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -75,7 +76,10 @@ of evolution of each trait, and correlations are evolutionary correlations betwe
 <span>  n_traits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  eigenvalues <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'rate_matrix'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -108,12 +112,21 @@ matrix. For <code>"variance"</code>, a named list with the correlations of each 
 <dd><p>For <code>"shared"</code>, a named list with the eigenvalues of each regime, one per
 trait.</p></dd>
 
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>A <code>rate_matrix</code> object.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Not used.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A symmetric matrix with one row and column per trait, or, for the multi-regime
-structures, a named list of them, one per regime. The attribute <code>constraint</code> holds the
-structure. Either can be passed to <code>traits_ou(sigma2 = )</code>.</p>
+    <p>An object of class <code>rate_matrix</code>: a symmetric matrix with one row and column per
+trait, or, for the multi-regime structures, a named list of them, one per regime. The
+attribute <code>constraint</code> holds the structure. Either can be passed to
+<code>traits_ou(sigma2 = )</code>; <a href="plot.rate_matrix.html">plot()</a> draws them as ellipses.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -146,39 +159,45 @@ Evolution</em>, 6, 1311–1319. <a href="https://doi.org/10.1111/2041-210X.12420
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="traits_ou.html">traits_ou()</a></code>, which simulates traits with these matrices.</p></div>
+    <div class="dont-index"><p><code><a href="traits_ou.html">traits_ou()</a></code>, which simulates traits with these matrices, and <code><a href="plot_traits.html">plot_traits()</a></code>.</p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">rate_matrix</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;rate_matrix&gt; default structure, 2 traits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           trait1    trait2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait1 1.0000000 0.7071068</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait2 0.7071068 2.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"constraint")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "default"</span>
 <span class="r-in"><span><span class="fu">rate_matrix</span><span class="op">(</span><span class="fl">1</span>, correlation <span class="op">=</span> <span class="fl">0.3</span>, constraint <span class="op">=</span> <span class="st">"equal"</span>, n_traits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;rate_matrix&gt; equal structure, 3 traits</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        trait1 trait2 trait3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait1    1.0    0.3    0.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait2    0.3    1.0    0.3</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait3    0.3    0.3    1.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"constraint")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "equal"</span>
 <span class="r-in"><span><span class="co"># two habitats, the open one evolving four times faster in all directions</span></span></span>
 <span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">rate_matrix</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.5</span>, constraint <span class="op">=</span> <span class="st">"proportional"</span>,</span></span>
 <span class="r-in"><span>                 scale <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>forest <span class="op">=</span> <span class="fl">1</span>, open <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">r</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;rate_matrix&gt; proportional structure, 2 traits, 2 regimes</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> regime forest:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           trait1    trait2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait1 1.0000000 0.7071068</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait2 0.7071068 2.0000000</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> regime open:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          trait1   trait2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait1 4.000000 2.828427</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> trait2 2.828427 8.000000</span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="rate_matrix-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">habitat</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_mk.html">trait_mk</a></span><span class="op">(</span><span class="va">tr</span>, q <span class="op">=</span> <span class="fl">0.5</span>, states <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"forest"</span>, <span class="st">"open"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">habitat</span>, sigma2 <span class="op">=</span> <span class="va">r</span>, regimes <span class="op">=</span> <span class="va">habitat</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         trait1     trait2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t1  0.56212063 -0.6358557</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t2  0.54365812 -0.6260814</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t3 -0.06730175 -0.5904160</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t4 -0.41208589 -0.2280676</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t5 -0.46384701 -0.2697568</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> t6 -3.04661063 -1.8355874</span>
+<span class="r-in"><span><span class="fu"><a href="plot_traits.html">plot_traits</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">habitat</span>, regimes <span class="op">=</span> <span class="va">habitat</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="rate_matrix-2.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># several correlated traits in community assembly</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="assemble_community.html">assemble_community</a></span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">10</span>, rule <span class="op">=</span> <span class="st">"limiting_similarity"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t1"  "t6"  "t14" "t20" "t22" "t23" "t25" "t26" "t27" "t30"</span>

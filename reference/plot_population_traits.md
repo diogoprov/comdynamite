@@ -25,6 +25,7 @@ plot_population_traits(
   rug = TRUE,
   alpha = 0.35,
   colours = NULL,
+  highlight = NULL,
   bw = NULL,
   n = 512,
   ncol = NULL,
@@ -79,7 +80,14 @@ plot_population_traits(
   `individuals`, or named by species. `NULL` (the default) uses the
   Okabe-Ito palette for up to seven species and
   [`grDevices::hcl.colors()`](https://rdrr.io/r/grDevices/palettes.html)
-  (`"Dark 3"`) for more.
+  (`"Dark 3"`) for more. With `highlight`, the colours of the
+  highlighted species only.
+
+- highlight:
+
+  Species to draw in colour, on top of the others, which are drawn in
+  grey and left out of the legend. Useful when a site holds many
+  species, whose colours cannot all be told apart.
 
 - bw:
 
@@ -99,6 +107,11 @@ plot_population_traits(
 A ggplot object.
 
 ## Details
+
+With many species, `highlight` draws a few of them in colour and the
+rest in grey. For traits whose spread grows with their mean, such as
+body size, see the note on the bandwidth in
+[`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md).
 
 The ggplot object can be changed further, for instance with
 `+ ggplot2::facet_wrap(~ site, ncol = 2)`,

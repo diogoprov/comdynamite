@@ -116,7 +116,10 @@ character evolution on phylogenies. *Journal of Evolutionary Biology*,
 
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
-for continuous traits.
+for continuous traits, and
+[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+which takes the mapped history as `regimes` (optima and rates that
+change with the state).
 
 ## Examples
 

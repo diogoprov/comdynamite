@@ -108,7 +108,8 @@ simulate_metacommunity(
   one row per site and one column per element of `traits` (such as the
   `env` of several landscapes on the same grid). Needed when `traits` is
   a list; replaces the `env` of `landscape`. Not available with
-  `env_time`.
+  `env_time`. Columns without names take the names of `traits`, or
+  `axis1`, `axis2`, ...
 
 ## Value
 
@@ -118,7 +119,14 @@ the last step), `history` (sites x species x recorded steps array, or
 `extirpation` and `pool` used, `env` when given, and `tree` when the
 traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
-with a tree.
+with a tree. With a niche of several axes,
+[`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+keeps every axis (`env` and one `optimum_` column of traits per axis),
+while
+[`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+uses the first axis unless given `trait` and `env`, and
+[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+needs a single axis.
 
 ## Details
 

@@ -41,6 +41,7 @@ probability dispersal, and emigrants are redistributed among sites:"><meta prope
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -165,7 +166,8 @@ which conserves them. Spatially implicit landscapes are always multinomial.</p><
 <dd><p>Optional environmental axes of each site, a matrix or data frame with one row per
 site and one column per element of <code>traits</code> (such as the <code>env</code> of several landscapes on
 the same grid). Needed when <code>traits</code> is a list; replaces the <code>env</code> of <code>landscape</code>. Not
-available with <code>env_time</code>.</p></dd>
+available with <code>env_time</code>. Columns without names take the names of <code>traits</code>, or <code>axis1</code>,
+<code>axis2</code>, ...</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -174,7 +176,9 @@ available with <code>env_time</code>.</p></dd>
 at the last step), <code>history</code> (sites x species x recorded steps array, or
 <code>NULL</code>), and the <code>landscape</code>, <code>traits</code>, <code>alpha</code>, <code>dispersal</code>, <code>extirpation</code> and <code>pool</code>
 used, <code>env</code> when given, and <code>tree</code> when the traits came from <code><a href="species_traits.html">species_traits()</a></code> with a
-tree.</p>
+tree. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
+<code>optimum_</code> column of traits per axis), while <code><a href="summary_stats.html">summary_stats()</a></code> uses the first axis unless
+given <code>trait</code> and <code>env</code>, and <code><a href="sample_individuals.html">sample_individuals()</a></code> needs a single axis.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

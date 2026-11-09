@@ -41,10 +41,14 @@ summary_stats(
 - trait:
 
   Optional numeric vector with one value per species, named by species.
+  For a simulation, the optimum of each species by default; with a niche
+  of several axes, the optimum on the first axis.
 
 - env:
 
-  Optional numeric vector with one value per site.
+  Optional numeric vector with one value per site. For a simulation, the
+  environment that set growth by default; with a niche of several axes,
+  the first axis.
 
 - coords:
 

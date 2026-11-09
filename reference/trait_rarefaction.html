@@ -47,6 +47,7 @@ individuals within populations or species within sites; the rarefaction of speci
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -164,16 +165,16 @@ in the attribute <code>values</code>.</p>
 <span class="r-in"><span><span class="va">ind</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">10</span>, b <span class="op">=</span> <span class="fl">12</span>, c <span class="op">=</span> <span class="fl">15</span><span class="op">)</span><span class="op">[</span><span class="va">ind</span><span class="op">$</span><span class="va">species</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rare</span> <span class="op">&lt;-</span> <span class="fu">trait_rarefaction</span><span class="op">(</span><span class="va">ind</span>, n <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">4</span>, <span class="fl">8</span><span class="op">)</span>, reps <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">rare</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   effort statistic      mean        low      high reps</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      2   T_IP.IC 0.1725745 0.08750932 0.2771844   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      2   T_IC.IR 1.1399778 1.11425692 1.1519776   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2   T_PC.PR 1.3735930 1.34136002 1.3884881   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      4   T_IP.IC 0.1783959 0.14080405 0.2292743   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      4   T_IC.IR 1.0653356 1.05554298 1.0717343   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6      4   T_PC.PR 1.3888587 1.37405313 1.3984714   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7      8   T_IP.IC 0.1867279 0.16365975 0.2042643   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 8      8   T_IC.IR 1.0328705 1.03099574 1.0340827   10</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 9      8   T_PC.PR 1.3968893 1.39384630 1.3988592   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   effort statistic      mean       low      high reps</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      2   T_IP.IC 0.1792578 0.1114679 0.2825401   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      2   T_IC.IR 1.1253155 1.0673701 1.1558713   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      2   T_PC.PR 1.3538095 1.2787934 1.3944207   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      4   T_IP.IC 0.1761934 0.1233734 0.2363405   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      4   T_IC.IR 1.0593501 1.0317182 1.0713293   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6      4   T_PC.PR 1.3799166 1.3390941 1.3978650   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7      8   T_IP.IC 0.1863448 0.1504747 0.2177141   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8      8   T_IC.IR 1.0330574 1.0312667 1.0339801   10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9      8   T_PC.PR 1.3972044 1.3943099 1.3987061   10</span>
 <span class="r-in"><span><span class="co"># over the share of abundance covered by the species measured</span></span></span>
 <span class="r-in"><span><span class="fu">trait_rarefaction</span><span class="op">(</span><span class="va">ind</span>, cover <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.8</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   effort statistic      mean       low      high reps</span>

@@ -17,6 +17,9 @@ assemble_community(
   distance = c("euclidean", "standardized", "mahalanobis"),
   trait_cov = NULL
 )
+
+# S3 method for class 'mc_assembly'
+print(x, ...)
 ```
 
 ## Arguments
@@ -61,10 +64,24 @@ assemble_community(
   traits, one row and column per trait, used instead of the covariance
   in the pool.
 
+- x:
+
+  An `mc_assembly` object from `assemble_community()`.
+
+- ...:
+
+  Not used.
+
 ## Value
 
-A list with `community` (names of the species kept) and `removed` (names
-of the species removed, in order of removal).
+An `mc_assembly` object: a list with `community` (names of the species
+kept), `removed` (names of the species removed, in order of removal),
+the `rule`, `distance` and `optimum` (for filtering) used, the `traits`
+of the pool as a matrix, and `metric`, the matrix \\S\\ of the
+distances, \\\sqrt{(x - y)^\top S^{-1} (x - y)}\\ (the identity for
+Euclidean distances).
+[`plot_assembly()`](https://provetelab.org/comdynamite/reference/plot_assembly.md)
+draws it in trait space.
 
 ## Details
 
@@ -150,7 +167,9 @@ assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$commun
 #> [13] "t17" "t18" "t31" "t32"
 # correlated traits: distances that discount the correlation
 y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-assemble_community(y, size = 16, distance = "mahalanobis")$community
-#>  [1] "t3"  "t6"  "t8"  "t9"  "t11" "t13" "t16" "t17" "t18" "t20" "t23" "t25"
-#> [13] "t26" "t27" "t28" "t31"
+a <- assemble_community(y, size = 16, distance = "mahalanobis")
+a
+#> <mc_assembly> limiting_similarity with mahalanobis distances: 16 of 32 species kept
+#> community: t3, t6, t8, t9, t11, t13, t16, t17, t18, t20 ... 
+plot_assembly(a)
 ```

@@ -109,16 +109,16 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 40),
 ind$trait <- c(a = 10, b = 12, c = 15)[ind$species] + rnorm(200)
 rare <- trait_rarefaction(ind, n = c(2, 4, 8), reps = 10)
 rare
-#>   effort statistic      mean        low      high reps
-#> 1      2   T_IP.IC 0.1725745 0.08750932 0.2771844   10
-#> 2      2   T_IC.IR 1.1399778 1.11425692 1.1519776   10
-#> 3      2   T_PC.PR 1.3735930 1.34136002 1.3884881   10
-#> 4      4   T_IP.IC 0.1783959 0.14080405 0.2292743   10
-#> 5      4   T_IC.IR 1.0653356 1.05554298 1.0717343   10
-#> 6      4   T_PC.PR 1.3888587 1.37405313 1.3984714   10
-#> 7      8   T_IP.IC 0.1867279 0.16365975 0.2042643   10
-#> 8      8   T_IC.IR 1.0328705 1.03099574 1.0340827   10
-#> 9      8   T_PC.PR 1.3968893 1.39384630 1.3988592   10
+#>   effort statistic      mean       low      high reps
+#> 1      2   T_IP.IC 0.1792578 0.1114679 0.2825401   10
+#> 2      2   T_IC.IR 1.1253155 1.0673701 1.1558713   10
+#> 3      2   T_PC.PR 1.3538095 1.2787934 1.3944207   10
+#> 4      4   T_IP.IC 0.1761934 0.1233734 0.2363405   10
+#> 5      4   T_IC.IR 1.0593501 1.0317182 1.0713293   10
+#> 6      4   T_PC.PR 1.3799166 1.3390941 1.3978650   10
+#> 7      8   T_IP.IC 0.1863448 0.1504747 0.2177141   10
+#> 8      8   T_IC.IR 1.0330574 1.0312667 1.0339801   10
+#> 9      8   T_PC.PR 1.3972044 1.3943099 1.3987061   10
 # over the share of abundance covered by the species measured
 trait_rarefaction(ind, cover = c(0.5, 0.8, 1))
 #>   effort statistic      mean       low      high reps

@@ -35,6 +35,7 @@ reached):"><meta property="og:image" content="https://provetelab.org/comdynamite
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -75,7 +76,10 @@ reached):</p>
 <span>  min_distance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  distance <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"euclidean"</span>, <span class="st">"standardized"</span>, <span class="st">"mahalanobis"</span><span class="op">)</span>,</span>
 <span>  trait_cov <span class="op">=</span> <span class="cn">NULL</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'mc_assembly'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -120,11 +124,22 @@ Removal stops as soon as no two remaining species are closer than this
 <dd><p>For <code>distance = "mahalanobis"</code>, an optional covariance matrix of the
 traits, one row and column per trait, used instead of the covariance in the pool.</p></dd>
 
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>An <code>mc_assembly</code> object from <code>assemble_community()</code>.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Not used.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A list with <code>community</code> (names of the species kept) and <code>removed</code>
-(names of the species removed, in order of removal).</p>
+    <p>An <code>mc_assembly</code> object: a list with <code>community</code> (names of the species kept),
+<code>removed</code> (names of the species removed, in order of removal), the <code>rule</code>, <code>distance</code> and
+<code>optimum</code> (for filtering) used, the <code>traits</code> of the pool as a matrix, and <code>metric</code>, the
+matrix \(S\) of the distances, \(\sqrt{(x - y)^\top S^{-1} (x - y)}\) (the identity for Euclidean distances). <code><a href="plot_assembly.html">plot_assembly()</a></code> draws it in trait
+space.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -191,9 +206,12 @@ distance in statistics". <em>Sankhya A</em>, 80(Suppl. 1), 1–7.
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t17" "t18" "t31" "t32"</span>
 <span class="r-in"><span><span class="co"># correlated traits: distances that discount the correlation</span></span></span>
 <span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, sigma2 <span class="op">=</span> <span class="fu"><a href="rate_matrix.html">rate_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">assemble_community</span><span class="op">(</span><span class="va">y</span>, size <span class="op">=</span> <span class="fl">16</span>, distance <span class="op">=</span> <span class="st">"mahalanobis"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t3"  "t6"  "t8"  "t9"  "t11" "t13" "t16" "t17" "t18" "t20" "t23" "t25"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t26" "t27" "t28" "t31"</span>
+<span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">assemble_community</span><span class="op">(</span><span class="va">y</span>, size <span class="op">=</span> <span class="fl">16</span>, distance <span class="op">=</span> <span class="st">"mahalanobis"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">a</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_assembly&gt; limiting_similarity with mahalanobis distances: 16 of 32 species kept</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> community: t3, t6, t8, t9, t11, t13, t16, t17, t18, t20 ... </span>
+<span class="r-in"><span><span class="fu"><a href="plot_assembly.html">plot_assembly</a></span><span class="op">(</span><span class="va">a</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="assemble_community-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

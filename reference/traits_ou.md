@@ -34,7 +34,7 @@ traits_ou(
 - n_traits:
 
   Number of traits. Taken from the rate matrices when `sigma2` gives
-  them.
+  them, or else from the columns of `theta` when it is a matrix.
 
 - alpha:
 
@@ -48,11 +48,15 @@ traits_ou(
   or a named list or vector with a matrix or a number per regime (names
   as in `regimes`). See
   [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md).
+  Regimes in the list but not in the tree are ignored.
 
 - theta:
 
-  Optimum of each regime: one value for a single optimum, or a named
-  vector with one value per regime (names as in `regimes`).
+  Optimum of each regime: one unnamed value for a single optimum, or a
+  named vector with one value per regime (names as in `regimes`). For
+  optima that differ between traits, a matrix with one column per trait
+  and one row per regime, with the regimes as row names (one unnamed row
+  for a single optimum).
 
 - regimes:
 
@@ -61,12 +65,17 @@ traits_ou(
   returned by
   [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md);
   or a tree with the same edges as `tree` and a mapped history (class
-  `simmap`), whose states are the regimes. `NULL` puts every branch in
-  one regime.
+  `simmap`, from
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  or
+  [`phytools::make.simmap()`](https://rdrr.io/pkg/phytools/man/make.simmap.html)),
+  whose states are the regimes, in any order of edges. The mapped tree
+  can also be passed as `tree` itself. `NULL` puts every branch in one
+  regime.
 
 - root:
 
-  Trait value at the root.
+  Trait value at the root: one number for all traits, or one per trait.
 
 ## Value
 
@@ -93,11 +102,13 @@ covariances. A named list of matrices gives each regime its own matrix,
 as in the multi-rate models of mvMORPH (Clavel et al. 2015);
 [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
 builds them with the structures that mvMORPH fits. The strength of
-selection `alpha` and the optimum `theta` are the same for all traits.
-Under Brownian motion (`alpha = 0`) the traits of the tips have
-covariance \\\sum_k R_k \otimes C_k\\, where \\R_k\\ is the rate matrix
-of regime \\k\\ and \\C_k\\ the phylogenetic covariance matrix built
-from the time spent in regime \\k\\ (Clavel et al. 2015).
+selection `alpha` is the same for all traits; the optimum `theta` can
+differ between traits (a matrix with one column per trait), so that
+regimes shift each trait by a different amount. Under Brownian motion
+(`alpha = 0`) the traits of the tips have covariance \\\sum_k R_k
+\otimes C_k\\, where \\R_k\\ is the rate matrix of regime \\k\\ and
+\\C_k\\ the phylogenetic covariance matrix built from the time spent in
+regime \\k\\ (Clavel et al. 2015).
 
 ## References
 
@@ -147,4 +158,8 @@ cor(y)
 #>          trait1   trait2
 #> trait1 1.000000 0.943929
 #> trait2 0.943929 1.000000
+# the shift to regime 1 moves the optimum of trait 1 but not of trait 2
+th <- rbind(`0` = c(0, 0), `1` = c(10, 0))
+z <- traits_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
+plot_traits(z, tr, regimes = reg)
 ```

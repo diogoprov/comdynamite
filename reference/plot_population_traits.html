@@ -39,6 +39,7 @@ population integrates to one, which shows the shape of rare populations."><meta 
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -85,6 +86,7 @@ population integrates to one, which shows the shape of rare populations.</p>
 <span>  rug <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="fl">0.35</span>,</span>
 <span>  colours <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  highlight <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  bw <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n <span class="op">=</span> <span class="fl">512</span>,</span>
 <span>  ncol <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -137,7 +139,14 @@ measured.</p></dd>
 <dt id="arg-colours">colours<a class="anchor" aria-label="anchor" href="#arg-colours"></a></dt>
 <dd><p>Colours of the species: unnamed, in the order of first appearance in
 <code>individuals</code>, or named by species. <code>NULL</code> (the default) uses the Okabe-Ito palette for
-up to seven species and <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code> (<code>"Dark 3"</code>) for more.</p></dd>
+up to seven species and <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code> (<code>"Dark 3"</code>) for more. With
+<code>highlight</code>, the colours of the highlighted species only.</p></dd>
+
+
+<dt id="arg-highlight">highlight<a class="anchor" aria-label="anchor" href="#arg-highlight"></a></dt>
+<dd><p>Species to draw in colour, on top of the others, which are drawn in grey
+and left out of the legend. Useful when a site holds many species, whose colours cannot
+all be told apart.</p></dd>
 
 
 <dt id="arg-bw">bw<a class="anchor" aria-label="anchor" href="#arg-bw"></a></dt>
@@ -158,7 +167,10 @@ up to seven species and <code><a href="https://rdrr.io/r/grDevices/palettes.html
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The ggplot object can be changed further, for instance with <code>+ ggplot2::facet_wrap(~ site, ncol = 2)</code>, <code>+ ggplot2::scale_fill_viridis_d()</code> or <code>+ ggplot2::theme_classic()</code>.</p>
+    <p>With many species, <code>highlight</code> draws a few of them in colour and the rest in grey. For traits
+whose spread grows with their mean, such as body size, see the note on the bandwidth in
+<code><a href="trait_densities.html">trait_densities()</a></code>.</p>
+<p>The ggplot object can be changed further, for instance with <code>+ ggplot2::facet_wrap(~ site, ncol = 2)</code>, <code>+ ggplot2::scale_fill_viridis_d()</code> or <code>+ ggplot2::theme_classic()</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

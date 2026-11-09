@@ -47,6 +47,7 @@ distribution of the process: over a branch of length \(t\), a trait with value
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
     <li><a class="dropdown-item" href="../articles/evaluating-methods.html">Evaluating a method with simulated metacommunities</a></li>
     <li><a class="dropdown-item" href="../articles/branch-rates.html">Rates of trait evolution that vary among branches</a></li>
+    <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
@@ -105,7 +106,8 @@ distribution of the process: over a branch of length \(t\), a trait with value
 
 
 <dt id="arg-n-traits">n_traits<a class="anchor" aria-label="anchor" href="#arg-n-traits"></a></dt>
-<dd><p>Number of traits. Taken from the rate matrices when <code>sigma2</code> gives them.</p></dd>
+<dd><p>Number of traits. Taken from the rate matrices when <code>sigma2</code> gives them, or
+else from the columns of <code>theta</code> when it is a matrix.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
@@ -117,24 +119,28 @@ motion).</p></dd>
 <dd><p>Rate of the stochastic (drift) component: one number for all traits, which
 then evolve independently; a symmetric positive semidefinite rate matrix with one row and
 column per trait, for correlated traits; or a named list or vector with a matrix or a
-number per regime (names as in <code>regimes</code>). See <code><a href="rate_matrix.html">rate_matrix()</a></code>.</p></dd>
+number per regime (names as in <code>regimes</code>). See <code><a href="rate_matrix.html">rate_matrix()</a></code>. Regimes in the list but
+not in the tree are ignored.</p></dd>
 
 
 <dt id="arg-theta">theta<a class="anchor" aria-label="anchor" href="#arg-theta"></a></dt>
-<dd><p>Optimum of each regime: one value for a single optimum, or a
-named vector with one value per regime (names as in <code>regimes</code>).</p></dd>
+<dd><p>Optimum of each regime: one unnamed value for a single optimum, or a
+named vector with one value per regime (names as in <code>regimes</code>). For optima that differ
+between traits, a matrix with one column per trait and one row per regime, with the
+regimes as row names (one unnamed row for a single optimum).</p></dd>
 
 
 <dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>
 <dd><p>Selective regime of each branch, in the order of the edges
 of <code>tree</code> reordered "cladewise" (<code>ape::reorder.phylo(tree, "cladewise")</code>),
 as returned by <code><a href="paint_regimes.html">paint_regimes()</a></code>; or a tree with the same edges as <code>tree</code> and a mapped
-history (class <code>simmap</code>), whose states are the regimes. <code>NULL</code> puts every branch in one
-regime.</p></dd>
+history (class <code>simmap</code>, from <code><a href="trait_mk.html">trait_mk()</a></code> or <code><a href="https://rdrr.io/pkg/phytools/man/make.simmap.html" class="external-link">phytools::make.simmap()</a></code>), whose states are
+the regimes, in any order of edges. The mapped tree can also be passed as <code>tree</code> itself.
+<code>NULL</code> puts every branch in one regime.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
-<dd><p>Trait value at the root.</p></dd>
+<dd><p>Trait value at the root: one number for all traits, or one per trait.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -155,7 +161,9 @@ evolutionary rate matrix, whose diagonal holds the rate of each trait
 and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
 gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
 2015); <code><a href="rate_matrix.html">rate_matrix()</a></code> builds them with the structures that mvMORPH fits. The strength of
-selection <code>alpha</code> and the optimum <code>theta</code> are the same for all traits. Under Brownian motion
+selection <code>alpha</code> is the same for all traits; the optimum <code>theta</code> can differ between traits
+(a matrix with one column per trait), so that regimes shift each trait by a different
+amount. Under Brownian motion
 (<code>alpha = 0</code>) the traits of the tips have covariance \(\sum_k R_k \otimes C_k\), where \(R_k\) is the rate matrix of regime \(k\) and \(C_k\) the
 phylogenetic covariance matrix built from the time spent in regime \(k\) (Clavel et al.
 2015).</p>
@@ -201,6 +209,11 @@ of adaptation. <em>Evolution</em>, 51, 1341–1351.
 <span class="r-out co"><span class="r-pr">#&gt;</span>          trait1   trait2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait1 1.000000 0.943929</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> trait2 0.943929 1.000000</span>
+<span class="r-in"><span><span class="co"># the shift to regime 1 moves the optimum of trait 1 but not of trait 2</span></span></span>
+<span class="r-in"><span><span class="va">th</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>`0` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>, `1` <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">10</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">z</span> <span class="op">&lt;-</span> <span class="fu">traits_ou</span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">2</span>, sigma2 <span class="op">=</span> <span class="va">r</span>, theta <span class="op">=</span> <span class="va">th</span>, regimes <span class="op">=</span> <span class="va">reg</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="plot_traits.html">plot_traits</a></span><span class="op">(</span><span class="va">z</span>, <span class="va">tr</span>, regimes <span class="op">=</span> <span class="va">reg</span><span class="op">)</span></span></span>
+<span class="r-plt img"><img src="traits_ou-1.png" alt="" width="700" height="433"></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

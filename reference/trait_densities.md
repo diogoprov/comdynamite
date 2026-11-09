@@ -68,6 +68,16 @@ mean number of individuals per population as the sample size. A
 population of one individual then gets a kernel of that width around its
 value, instead of no density.
 
+One bandwidth suits populations whose spread is about the same. For
+traits whose spread grows with their mean, such as body size across
+species of very different sizes, the bandwidth follows the many small
+populations and the densities of large ones break into one peak per
+individual; the logarithm of the trait usually evens out the spread.
+With the default bandwidth, a warning is given when the trait is
+positive and the standard deviation of populations of three or more
+individuals rises with their mean (Spearman correlation above 0.7 over
+at least ten populations).
+
 ## References
 
 Carmona, C. P., de Bello, F., Mason, N. W. H., & Lepš, J. (2016). Traits

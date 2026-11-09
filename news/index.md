@@ -2,6 +2,59 @@
 
 ## comdynamite (development version)
 
+- Plots for several traits, in base graphics:
+  [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
+  draws traits from
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+  with their tree, as a phylomorphospace (two traits) or a traitgram
+  (one trait), with branches coloured by regime and the colour changing
+  where a mapped history changes;
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for
+  [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
+  draws each regime’s rate matrix as an ellipse;
+  [`plot_assembly()`](https://provetelab.org/comdynamite/reference/plot_assembly.md)
+  draws a community from
+  [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md)
+  in trait space, with the boundary of the filter or the contours of
+  limiting similarity in the metric of the assembly. New article,
+  “Correlated traits and assembly in trait space”.
+
+- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+  `theta` can be a matrix with one column per trait, so that a regime
+  shifts each trait’s optimum by its own amount; `root` can have one
+  value per trait and is checked; a mapped history is matched to the
+  tree by its edges, so it may come in another order of edges. A named
+  `theta` or `sigma2` of length one is no longer recycled to every
+  regime: it must name every regime, as before rate matrices were added.
+
+- [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
+  returns an object of class `rate_matrix`, with
+  [`print()`](https://rdrr.io/r/base/print.html) and
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods.
+  [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md)
+  returns an object of class `mc_assembly`, which keeps the rule,
+  distance, optimum, traits and the matrix of the metric, with a
+  [`print()`](https://rdrr.io/r/base/print.html) method; it stops on
+  missing or non-numeric traits instead of keeping such species or
+  failing later.
+
+- The limiting-similarity rule of
+  [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md)
+  keeps the nearest neighbour of each species up to date instead of
+  scanning the whole distance matrix at each removal: 23 times faster
+  for a pool of 2000 species reduced to 100 (from 10.6 to 0.46 s), with
+  the same species removed and the same random draws.
+
+- Simulations with a niche of several axes keep their tree.
+  [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  keeps one column of optima per axis,
+  [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
+  uses the first axis, and
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  stops with a clear message; both use the `env` that set growth when
+  `simulate_metacommunity(env = )` was given one. Axes of `env` without
+  names take the names of the list of traits, or `axis1`, `axis2`, …
+
 - Plots of null-model tests:
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) for
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
@@ -18,6 +71,11 @@
   and
   [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md)
   draws them with adjustable transparency.
+  [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md)
+  warns when the spread within populations rises with their mean (one
+  bandwidth then fits badly; the logarithm of the trait usually helps),
+  and `plot_population_traits(highlight = )` draws a few species in
+  colour and the rest in grey, for sites with many species.
 
 - Classic metrics of trait spacing and spread, for use with
   [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md):
@@ -52,7 +110,8 @@
   follows any statistic over the number of individuals per population or
   over `cover`, with a
   [`plot()`](https://rdrr.io/r/graphics/plot.default.html) method that
-  marks the 80% rule of Pakeman & Quested (2007) with a dashed line.
+  marks the 80% rule of Pakeman & Quested (2007) with a dashed line. Its
+  default statistic computes the T-statistics without permutations.
 
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md):
   the null model of `T_IC.IR` now keeps the observed regional variance

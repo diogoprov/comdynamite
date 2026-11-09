@@ -20,6 +20,9 @@ rate_matrix(
   scale = NULL,
   eigenvalues = NULL
 )
+
+# S3 method for class 'rate_matrix'
+print(x, ...)
 ```
 
 ## Arguments
@@ -53,12 +56,22 @@ rate_matrix(
   For `"shared"`, a named list with the eigenvalues of each regime, one
   per trait.
 
+- x:
+
+  A `rate_matrix` object.
+
+- ...:
+
+  Not used.
+
 ## Value
 
-A symmetric matrix with one row and column per trait, or, for the
-multi-regime structures, a named list of them, one per regime. The
-attribute `constraint` holds the structure. Either can be passed to
-`traits_ou(sigma2 = )`.
+An object of class `rate_matrix`: a symmetric matrix with one row and
+column per trait, or, for the multi-regime structures, a named list of
+them, one per regime. The attribute `constraint` holds the structure.
+Either can be passed to `traits_ou(sigma2 = )`;
+[plot()](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md)
+draws them as ellipses.
 
 ## Details
 
@@ -113,39 +126,46 @@ for fitting multivariate evolutionary models to morphometric data.
 ## See also
 
 [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
-which simulates traits with these matrices.
+which simulates traits with these matrices, and
+[`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md).
 
 ## Examples
 
 ``` r
 rate_matrix(c(1, 2), correlation = 0.5)
+#> <rate_matrix> default structure, 2 traits
 #>           trait1    trait2
 #> trait1 1.0000000 0.7071068
 #> trait2 0.7071068 2.0000000
-#> attr(,"constraint")
-#> [1] "default"
 rate_matrix(1, correlation = 0.3, constraint = "equal", n_traits = 3)
+#> <rate_matrix> equal structure, 3 traits
 #>        trait1 trait2 trait3
 #> trait1    1.0    0.3    0.3
 #> trait2    0.3    1.0    0.3
 #> trait3    0.3    0.3    1.0
-#> attr(,"constraint")
-#> [1] "equal"
 # two habitats, the open one evolving four times faster in all directions
 r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
                  scale = c(forest = 1, open = 4))
+r
+#> <rate_matrix> proportional structure, 2 traits, 2 regimes
+#> 
+#> regime forest:
+#>           trait1    trait2
+#> trait1 1.0000000 0.7071068
+#> trait2 0.7071068 2.0000000
+#> 
+#> regime open:
+#>          trait1   trait2
+#> trait1 4.000000 2.828427
+#> trait2 2.828427 8.000000
+plot(r)
+
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
-head(x)
-#>         trait1     trait2
-#> t1  0.56212063 -0.6358557
-#> t2  0.54365812 -0.6260814
-#> t3 -0.06730175 -0.5904160
-#> t4 -0.41208589 -0.2280676
-#> t5 -0.46384701 -0.2697568
-#> t6 -3.04661063 -1.8355874
+plot_traits(x, habitat, regimes = habitat)
+
 # several correlated traits in community assembly
 assemble_community(x, size = 10, rule = "limiting_similarity")$community
 #>  [1] "t1"  "t6"  "t14" "t20" "t22" "t23" "t25" "t26" "t27" "t30"
