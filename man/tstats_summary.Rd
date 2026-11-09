@@ -10,7 +10,8 @@ tstats_summary(x, level = 0.05)
 \item{x}{Data frame from \code{\link[=tstats]{tstats()}} with \code{nperm > 0}.}
 
 \item{level}{Size of the two-sided test of each site and of the mean. A site can deviate
-only if \code{1 / (1 + nperm) < level / 2}, so \code{nperm} must be at least \code{2 / level}; a warning
+only if \eqn{1 / (1 + \mathrm{nperm}) < \mathrm{level} / 2}{1 / (1 + nperm) < level / 2},
+so \code{nperm} must be at least \eqn{2 / \mathrm{level}}{2 / level}; a warning
 is given otherwise.}
 }
 \value{
@@ -27,9 +28,10 @@ of the mean over sites, and the sites that deviate.
 }
 \details{
 Each site is tested in both directions from the null values kept by \code{\link[=tstats]{tstats()}}: the p-value
-of a low value is \code{(1 + r) / (1 + n)}, where \code{r} is the number of null values at or below the
-observed one and \code{n} the number of null values, and that of a high value counts null values
-at or above it. A site deviates when one of the two is below \code{level / 2}, so that the two
+of a low value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)}, where \eqn{r} is the number of
+null values at or below the observed one and \eqn{n} the number of null values, and that of a
+high value counts null values at or above it. A site deviates when one of the two is below
+\eqn{\mathrm{level} / 2}{level / 2}, so that the two
 tests together have size \code{level}. A site cannot be tested when its observed value is missing
 or when every null value equals the observed one, as for \code{T_IP.IC} at a site with one
 species, where the statistic is 1 whatever the permutation; such sites get \code{NA} and are left

@@ -9,9 +9,10 @@
 #' of the mean over sites, and the sites that deviate.
 #'
 #' Each site is tested in both directions from the null values kept by [tstats()]: the p-value
-#' of a low value is `(1 + r) / (1 + n)`, where `r` is the number of null values at or below the
-#' observed one and `n` the number of null values, and that of a high value counts null values
-#' at or above it. A site deviates when one of the two is below `level / 2`, so that the two
+#' of a low value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)}, where \eqn{r} is the number of
+#' null values at or below the observed one and \eqn{n} the number of null values, and that of a
+#' high value counts null values at or above it. A site deviates when one of the two is below
+#' \eqn{\mathrm{level} / 2}{level / 2}, so that the two
 #' tests together have size `level`. A site cannot be tested when its observed value is missing
 #' or when every null value equals the observed one, as for `T_IP.IC` at a site with one
 #' species, where the statistic is 1 whatever the permutation; such sites get `NA` and are left
@@ -23,7 +24,8 @@
 #'
 #' @param x Data frame from [tstats()] with `nperm > 0`.
 #' @param level Size of the two-sided test of each site and of the mean. A site can deviate
-#'   only if `1 / (1 + nperm) < level / 2`, so `nperm` must be at least `2 / level`; a warning
+#'   only if \eqn{1 / (1 + \mathrm{nperm}) < \mathrm{level} / 2}{1 / (1 + nperm) < level / 2},
+#'   so `nperm` must be at least \eqn{2 / \mathrm{level}}{2 / level}; a warning
 #'   is given otherwise.
 #' @return A list with two data frames. `traits` has one row per trait and statistic, with the
 #'   columns `trait`, `statistic`, `n_sites` (testable sites), `percent_low`, `percent_high`,
@@ -108,7 +110,10 @@ tstats_summary <- function(x, level = 0.05) {
 #' individuals in the data by the same abundances. Their difference is the part of the
 #' community mean due to intraspecific variability. The sums of squares among sites of the
 #' specific mean (total), of the fixed mean (turnover) and of the difference (intraspecific)
-#' are related by `SS_total = SS_turnover + SS_intraspecific + SS_covariation`; a positive
+#' are related by
+#' \deqn{SS_{total} = SS_{turnover} + SS_{intraspecific} + SS_{covariation};}{SS_total =
+#' SS_turnover + SS_intraspecific + SS_covariation;}
+#' a positive
 #' covariation means that turnover and intraspecific variability move the community mean the
 #' same way. With a `formula`, each of the three site means is regressed on the variables of
 #' `env`, and the sums of squares are split into the parts explained by the model and the
