@@ -38,6 +38,7 @@ test_that("plot.rate_matrix() draws one ellipse per regime", {
   expect_ggplot(plot(r))
   expect_ggplot(plot(rate_matrix(c(1, 2, 3)), traits = c(1, 3), level = 2))
   expect_error(plot(rate_matrix(1)), "no ellipse")
+  expect_error(plot(r, traits = 1), "two traits")
   many <- rate_matrix(c(1, 2), constraint = "proportional",
                       scale = stats::setNames(1:8, letters[1:8]))
   expect_ggplot(plot(many))
@@ -53,6 +54,7 @@ test_that("plot_assembly() draws each rule", {
   expect_error(plot_assembly(list()), "output of assemble_community")
   one <- assemble_community(stats::setNames(rnorm(5), letters[1:5]), 2)
   expect_error(plot_assembly(one), "one trait")
+  expect_error(plot_assembly(a, traits = 1), "two traits")
 })
 
 test_that("old arguments of the plots still work, with a warning", {

@@ -65,6 +65,8 @@ test_that("the partition plot returns the three fractions in order", {
   expect_ggplot(plot_trait_partition(out, value = "r2", test = "site"))
   expect_error(plot_trait_partition(list()), "trait_partition")
   expect_error(plot_trait_partition(out, labels = "a"), "two names")
+  expect_warning(plot_trait_partition(out, cex = 1), "`cex` is deprecated")
+  expect_warning(plot_trait_partition(out, test = "taxa"), "deprecated")
 })
 
 test_that("the heatmap holds predictors and events, with blanks where there is no value", {
@@ -77,6 +79,7 @@ test_that("the heatmap holds predictors and events, with blanks where there is n
   expect_equal(ncol(attr(plot_node_heatmap(only_env, level = 0), "values")),
                ncol(daphniids$env))
   expect_error(plot_node_heatmap(list()), "node_test")
+  expect_warning(plot_node_heatmap(out, level = 0.2, cex = 1), "`cex` is deprecated")
 })
 
 test_that("labels of small fractions stay apart and inside the line", {
@@ -119,4 +122,8 @@ test_that("plot_phylo_beta() orders sites and species", {
   expect_equal(colnames(shown), intersect(ladder$tip.label[tips], colnames(shown)))
   expect_error(plot_phylo_beta(out, comm[keep, ][-1, ], tree), "occupied sites")
   expect_error(plot_phylo_beta(out, comm[keep, ], tree, axis = 99), "`axis`")
+  expect_warning(plot_phylo_beta(out, comm[keep, ], tree, cex = 1), "`cex` is deprecated")
+  no_lengths <- tree
+  no_lengths$edge.length <- NULL
+  expect_ggplot(plot_phylo_beta(out, comm[keep, ], no_lengths))
 })
