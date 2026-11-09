@@ -168,36 +168,51 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
 9. Frequência de extinção de manchas e autocorrelação espacial do ambiente (Leibold et al. 2022),
    cruzadas com a dispersão como na Fig. 5 de Leibold et al. (2019), para achar onde a
    neutralidade regional apaga o rastro da montagem nas taxas entre espécies.
-10. Variação intraespecífica e adaptação local: gerar indivíduos a partir das abundâncias
-    simuladas, com traits em torno da média da espécie ou ajustados ao ambiente do sítio, e
-    calcular as estatísticas T com `cati::Tstats()`. Adaptação local forte deve baixar T_IP.IC
-    e mudar T_PC.PR em relação ao cenário sem adaptação.
-    Feito com `sample_individuals()` e `tstats()` (`data-raw/demo_tstats.R`). Resultado: a
-    previsão de T_IP.IC estava errada para adaptação ao ambiente do sítio. As populações
-    convergem para o ambiente, as espécies co-ocorrentes ficam parecidas e T_IP.IC sobe
-    (0,02 → 1,0), enquanto T_IC.IR e T_PC.PR caem (0,54 e 0,89 → <0,01). T_IP.IC baixo exige
-    divergência entre co-ocorrentes (deslocamento de caráter), ainda não simulado. Para a
-    ponte: o sinal da adaptação local aparece em T_PC.PR e T_IC.IR, não em T_IP.IC. A escala
-    de T_IP.IC depende de `intraspecific_sd` em relação à dispersão dos ótimos no sítio.
-    Deslocamento de caráter (`displacement`) faz o contrário: T_IP.IC cai e T_PC.PR sobe, e os
-    dois processos se compensam (com h = 0,9, `displacement = 10` leva T_IP.IC de 0,61 a
-    0,011 e T_PC.PR de 0,010 a 0,59). Consequência para o artigo: as razões sozinhas não
-    separam "nem adaptação nem deslocamento" de "os dois fortes" (T_PC.PR 0,89 contra 0,59,
-    T_IP.IC 0,017 contra 0,011); é preciso olhar as três juntas, ou acrescentar o ambiente do
-    sítio (a adaptação local deixa as médias das populações correlacionadas com ele).
-    Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata dessa
-    compensação [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
-    Identificabilidade resolvida em simulação: no piloto ABC
-    (`data-raw/pilot_tstats_identifiability.R`), as três razões recuperam h (R² 0,87–0,89) mas mal
-    c (0,56–0,58); acrescentar o ambiente do sítio e a abundância dos competidores numa regressão
-    conjunta dentro de espécie (`population_shifts()`) recupera os dois (0,99 e 0,95–0,96). A
-    abordagem segue Goldberg & Lande (2006, Evolution 60:1344–1357, doi:10.1554/05-696.1) e
-    Adams & Collyer (2007, Evolution 61:510–515, doi:10.1111/j.1558-5646.2007.00063.x), que
-    pedem avaliar divergência entre simpátricas depois de descontar o gradiente ambiental
-    (verificadas no Crossref). Buscas no Consensus, Scholar Gateway e OpenAlex não acharam
-    nulo restrito por espécie para T_IP.IC; não é prova de que não exista. Para o artigo: a
-    mensagem é que as estatísticas T precisam do ambiente e da composição local para separar
-    os processos; o piloto usa o mesmo modelo que gera os dados, então é um limite superior.
+10. Variação intraespecífica, adaptação local e deslocamento de caráter. Indivíduos gerados a
+    partir das abundâncias simuladas com `sample_individuals()`, com traits ajustados ao ambiente
+    do sítio (`local_adaptation`, h) e afastados dos co-ocorrentes (`displacement`, c), e
+    estatísticas T com `tstats()` (`data-raw/demo_tstats.R`).
+    - Previsão corrigida. A adaptação local *sobe* T_IP.IC: as populações convergem para o
+      ambiente do sítio, as espécies co-ocorrentes ficam parecidas e a variância dentro da
+      comunidade encolhe (0,02 → 1,0), enquanto T_IC.IR e T_PC.PR caem (0,54 e 0,89 → < 0,01).
+      Só o deslocamento de caráter *baixa* T_IP.IC (e sobe T_PC.PR). A previsão original
+      ("adaptação local forte deve baixar T_IP.IC") estava errada.
+    - Os dois processos se compensam: com h = 0,9, `displacement = 10` leva T_IP.IC de 0,61 a
+      0,011 e T_PC.PR de 0,010 a 0,59, e "nem adaptação nem deslocamento" fica parecido com "os
+      dois fortes" (T_PC.PR 0,89 contra 0,59; T_IP.IC 0,017 contra 0,011). As razões sozinhas não
+      separam os processos.
+    - T_IP.IC só deve ser reportado com `null_ip = "species"`, que troca as médias das
+      populações entre populações da mesma espécie e mantém composição, abundâncias e variâncias
+      dentro das populações. O nulo por sítio (permutar indivíduos dentro do sítio, Taudiere &
+      Violle 2016) só pergunta se as populações diferem: dá efeito negativo grande sempre que
+      co-ocorrentes têm médias diferentes, mesmo sem nenhuma resposta ao sítio. Com o nulo por
+      espécie, o efeito padronizado é positivo sob convergência (adaptação local a um ambiente
+      comum) e negativo sob divergência (deslocamento). Buscas no Consensus, Scholar Gateway e OpenAlex não acharam
+      esse nulo na literatura das estatísticas T; não é prova de que não exista
+      [CITAR: nulo restrito por espécie para T_IP.IC, se houver].
+    - A inferência sobre os processos vem de `population_shifts()`, que ajusta h e c juntos às
+      médias das populações, dentro de espécie, com o ambiente do sítio e a abundância dos
+      competidores. No piloto ABC (`data-raw/pilot_tstats_identifiability.R`), as três razões
+      recuperam h (R² 0,87–0,89) mas mal c (0,56–0,58), e a regressão conjunta recupera os dois
+      (0,99 e 0,95–0,96); o piloto usa o mesmo modelo que gera os dados, então é um limite
+      superior. A abordagem segue Goldberg & Lande (2006, Evolution 60:1344–1357,
+      doi:10.1554/05-696.1) e Adams & Collyer (2007, Evolution 61:510–515,
+      doi:10.1111/j.1558-5646.2007.00063.x), que pedem avaliar a divergência entre simpátricas
+      depois de descontar o gradiente ambiental (verificadas no Crossref).
+    - Limite em dados reais: no desenho de São José dos Campos (20 poças, 15 espécies, ≤ 5
+      indivíduos por população; calibração por simulação do próprio desenho), h é recuperado sem
+      viés (±0,01 por desvio-padrão do gradiente), mas c não é identificável com a largura do
+      kernel livre: sem deslocamento, ĉ varia de −1,9 a 2,7 (90% central), e o poder para c = 4
+      fica em 30–36%. Com a largura fixa no valor verdadeiro, c é bem estimado; o problema é
+      identificar w. Desvios de populações inteiras também enviesam ĉ para baixo, o que o
+      bootstrap de `population_shifts()` incorpora no p-valor centrado.
+    - Para o artigo: as estatísticas T precisam do ambiente e da composição local para separar
+      os processos, e o experimento da ponte (abaixo) deve mapear em que desenhos amostrais e em
+      que metacomunidades (dispersão, extinção de manchas, autocorrelação do ambiente) c passa a
+      ser estimável.
+    Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata da
+    compensação entre adaptação local e deslocamento
+    [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas
