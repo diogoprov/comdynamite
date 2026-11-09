@@ -8,7 +8,7 @@
 #'
 #' With `per = "edge"`, each edge gets the geometric mean of the DR of the tips below it (the
 #' DR of its tip for a terminal edge), a value per edge in the order of `tree$edge` that can be
-#' given as the `edge_covariate` of [fit_damocles()] or [damocles_samples()]. DR is defined for
+#' given as the `edge_covariate` of [damocles_fit()] or [damocles_samples()]. DR is defined for
 #' tips; the value of an internal edge summarises its descendants and is not an estimate of the
 #' rate along that edge, unlike the branch-specific rates of model-based methods such as ClaDS.
 #' `data-raw/damocles_clads.R` checks the tip values against the equal-splits measure of
@@ -21,7 +21,7 @@
 #' @references Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O. (2012). The
 #'   global diversity of birds in space and time. *Nature*, 491, 444--448.
 #'   \doi{10.1038/nature11631}
-#' @seealso [fit_damocles()], [damocles_samples()].
+#' @seealso [damocles_fit()], [damocles_samples()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(10)
 #' tr <- treeshapesim::sim_tree_shape(20)

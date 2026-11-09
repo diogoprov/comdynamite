@@ -27,7 +27,7 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{tree}{A rooted, fully dichotomous \code{phylo} tree with branch lengths.}
 
 \item{regimes, edge_covariate}{A list of configurations, each a vector with one value per edge
-of \code{tree} in the order of \code{tree$edge} (see \code{\link[=fit_damocles]{fit_damocles()}}). Give one of the two.}
+of \code{tree} in the order of \code{tree$edge} (see \code{\link[=damocles_fit]{damocles_fit()}}). Give one of the two.}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -36,7 +36,7 @@ or \code{"mu"}; the other one is a single rate for the whole tree.}
 \code{"present"}.}
 
 \item{sympatry}{In \code{damocles_loglik()}, the probability that a present ancestor leaves both
-daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{fit_damocles()}, a fixed value, or
+daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{damocles_fit()}, a fixed value, or
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
 \item{cores}{Number of cores, with configurations fitted in parallel. Not available on
@@ -56,7 +56,7 @@ likelihood-ratio \code{statistic}, \code{df} and \code{p_value}), \code{constant
 edge (rows) in each configuration (columns).
 }
 \description{
-\code{damocles_samples()} fits \code{\link[=fit_damocles]{fit_damocles()}}, with parameters shared by all communities, once
+\code{damocles_samples()} fits \code{\link[=damocles_fit]{damocles_fit()}}, with parameters shared by all communities, once
 for each configuration in a list of \code{regimes} or of \code{edge_covariate}, and compares each fit
 with constant rates by \code{\link[=damocles_lrt]{damocles_lrt()}}. The configurations are typically samples from the
 posterior distribution of a method that estimates rates of diversification along the tree,
@@ -83,7 +83,7 @@ carries the sampling noise of each rate, and a noisy covariate attenuates its sl
 MAP rates of ClaDS with \code{beta = 2}, the MAP rates gave a slope of 1.6 and rejected constant
 rates, while single posterior samples gave a median slope of 0.22 and rejected constant
 rates in 65 of 100. For continuous rates, fit the posterior mean, median or MAP of each rate
-with \code{\link[=fit_damocles]{fit_damocles()}} for the estimate, and use the posterior samples to see whether the sign
+with \code{\link[=damocles_fit]{damocles_fit()}} for the estimate, and use the posterior samples to see whether the sign
 and the comparison with constant rates hold, knowing that each sample understates the
 slope.
 
@@ -128,5 +128,5 @@ practical concerns in the analysis of multi-rate diversification models. \emph{S
 Biology}, 66, 477--498. \doi{10.1093/sysbio/syx037}
 }
 \seealso{
-\code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=damocles_lrt]{damocles_lrt()}}, \code{\link[=damocles_partition_test]{damocles_partition_test()}}.
+\code{\link[=damocles_fit]{damocles_fit()}}, \code{\link[=damocles_lrt]{damocles_lrt()}}, \code{\link[=damocles_partition_test]{damocles_partition_test()}}.
 }

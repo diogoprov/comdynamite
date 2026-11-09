@@ -37,7 +37,7 @@ or \code{"mu"}; the other one is a single rate for the whole tree.}
 \code{"present"}.}
 
 \item{sympatry}{In \code{damocles_loglik()}, the probability that a present ancestor leaves both
-daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{fit_damocles()}, a fixed value, or
+daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{damocles_fit()}, a fixed value, or
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
 \item{tolerance, max_overlap}{Passed to \code{\link[=random_regimes]{random_regimes()}}: random clades hold between

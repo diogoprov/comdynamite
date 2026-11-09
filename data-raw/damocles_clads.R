@@ -1,5 +1,5 @@
 # Branch-specific rates of speciation from ClaDS (Maliet et al. 2019) and tip rates DR (Jetz et
-# al. 2012) as the edge covariates of fit_damocles() and damocles_samples(), with the example
+# al. 2012) as the edge covariates of damocles_fit() and damocles_samples(), with the example
 # fit of ClaDS2 to the Caprimulgidae in RPANDA 2.5 (GPL, only used here; archived on CRAN:
 # install the archived TESS and then remotes::install_github("hmorlon/PANDA")).
 # 1. dr_rates() against the equal-splits measure of picante::evol.distinct() (DR = 1 / ES).
@@ -10,8 +10,9 @@
 # 3. Twenty communities simulated under DAMOCLES with colonisation proportional to the square of
 #    the MAP branch rates of ClaDS (beta = 2; the rates vary little in this clade), then
 #    damocles_samples() over 100 posterior samples of the rates, and fits with the MAP rates and
-#    with DR per edge as covariates, compared by AIC with constant rates. The Caprimulgidae tree holds 61% of the species (sample_fraction), so it is
-#    not a complete regional pool; the communities here are simulated on it.
+#    with DR per edge as covariates, compared by AIC with constant rates. The Caprimulgidae
+#    tree holds 61% of the species (sample_fraction), so it is not a complete regional pool;
+#    the communities here are simulated on it.
 suppressMessages({
   devtools::load_all(".", quiet = TRUE)
   library(RPANDA)
@@ -47,9 +48,9 @@ covariates <- lapply(seq_len(nrow(samples)), function(i) samples[i, ])
 height <- max(ape::node.depth.edgelength(tree))
 z <- log(maps) - mean(log(maps))
 comm <- simulate_damocles(tree, exp(2 * z) / height, 1 / height, n = 20)
-constant <- fit_damocles(comm, tree, shared = TRUE)
-with_map <- fit_damocles(comm, tree, shared = TRUE, edge_covariate = maps, vary = "gamma")
-with_dr <- fit_damocles(comm, tree, shared = TRUE, edge_covariate = dr_rates(tree, "edge"),
+constant <- damocles_fit(comm, tree, shared = TRUE)
+with_map <- damocles_fit(comm, tree, shared = TRUE, edge_covariate = maps, vary = "gamma")
+with_dr <- damocles_fit(comm, tree, shared = TRUE, edge_covariate = dr_rates(tree, "edge"),
                         vary = "gamma")
 posterior <- damocles_samples(comm, tree, edge_covariate = covariates, vary = "gamma",
                               cores = cores)

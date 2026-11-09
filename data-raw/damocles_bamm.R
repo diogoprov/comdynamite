@@ -1,4 +1,4 @@
-# From BAMM output to the regimes and covariates of fit_damocles(), damocles_samples() and
+# From BAMM output to the regimes and covariates of damocles_fit(), damocles_samples() and
 # damocles_partition_test(), with the example data of BAMMtools (version 2.1.12; GPL, only used
 # here): the tree of whales and its BAMM event data.
 # 1. Regimes per edge from each posterior sample (edata$eventVectors), and the mean branch rate

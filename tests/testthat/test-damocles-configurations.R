@@ -53,7 +53,7 @@ test_that("damocles_samples fits each configuration and summarises them", {
   # one regime is the constant model, with no test
   expect_true(is.na(res$samples$p_value[3]))
   expect_equal(res$samples$loglik[3], attr(res$constant, "loglik_total"), tolerance = 1e-6)
-  expect_equal(res$samples$loglik[1], attr(fit_damocles(comm, tree, shared = TRUE,
+  expect_equal(res$samples$loglik[1], attr(damocles_fit(comm, tree, shared = TRUE,
                                                         regimes = reg, vary = "gamma"),
                                            "loglik_total"))
   expect_output(print(res), "3 configurations")

@@ -1,6 +1,6 @@
 #' DAMOCLES fits over many configurations of regimes or covariates
 #'
-#' `damocles_samples()` fits [fit_damocles()], with parameters shared by all communities, once
+#' `damocles_samples()` fits [damocles_fit()], with parameters shared by all communities, once
 #' for each configuration in a list of `regimes` or of `edge_covariate`, and compares each fit
 #' with constant rates by [damocles_lrt()]. The configurations are typically samples from the
 #' posterior distribution of a method that estimates rates of diversification along the tree,
@@ -26,7 +26,7 @@
 #' MAP rates of ClaDS with `beta = 2`, the MAP rates gave a slope of 1.6 and rejected constant
 #' rates, while single posterior samples gave a median slope of 0.22 and rejected constant
 #' rates in 65 of 100. For continuous rates, fit the posterior mean, median or MAP of each rate
-#' with [fit_damocles()] for the estimate, and use the posterior samples to see whether the sign
+#' with [damocles_fit()] for the estimate, and use the posterior samples to see whether the sign
 #' and the comparison with constant rates hold, knowing that each sample understates the
 #' slope.
 #'
@@ -44,9 +44,9 @@
 #' [clade_regimes()], and testing a configuration against random partitions with
 #' [damocles_partition_test()] guard against relying on one of them.
 #'
-#' @inheritParams fit_damocles
+#' @inheritParams damocles_fit
 #' @param regimes,edge_covariate A list of configurations, each a vector with one value per edge
-#'   of `tree` in the order of `tree$edge` (see [fit_damocles()]). Give one of the two.
+#'   of `tree` in the order of `tree$edge` (see [damocles_fit()]). Give one of the two.
 #' @param cores Number of cores, with configurations fitted in parallel. Not available on
 #'   Windows, where one core is used.
 #' @return A list of class `mc_damocles_samples` with `samples`, a data frame with one row per
@@ -62,7 +62,7 @@
 #'   Rabosky, D. L., Mitchell, J. S., & Chang, J. (2017). Is BAMM flawed? Theoretical and
 #'   practical concerns in the analysis of multi-rate diversification models. *Systematic
 #'   Biology*, 66, 477--498. \doi{10.1093/sysbio/syx037}
-#' @seealso [fit_damocles()], [damocles_lrt()], [damocles_partition_test()].
+#' @seealso [damocles_fit()], [damocles_lrt()], [damocles_partition_test()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(7)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -91,9 +91,9 @@ damocles_samples <- function(comm, tree, regimes = NULL, edge_covariate = NULL,
   }
   check_damocles_tree(tree)
   presence <- damocles_presence(comm, tree)
-  constant <- fit_damocles(presence, tree, root = root, shared = TRUE, sympatry = sympatry)
+  constant <- damocles_fit(presence, tree, root = root, shared = TRUE, sympatry = sympatry)
   run <- function(i) {
-    fit_damocles(presence, tree, root = root, shared = TRUE, sympatry = sympatry,
+    damocles_fit(presence, tree, root = root, shared = TRUE, sympatry = sympatry,
                  regimes = if (!is.null(regimes)) configurations[[i]],
                  edge_covariate = if (!is.null(edge_covariate)) configurations[[i]],
                  vary = vary)
@@ -288,7 +288,7 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
 #' edges) and colonisation three times faster in it, both tests rejected constant rates (p =
 #' 0.007 and 0.01; `data-raw/damocles_bamm.R`).
 #'
-#' @inheritParams fit_damocles
+#' @inheritParams damocles_fit
 #' @param regimes Regime of each edge of `tree`, in the order of `tree$edge`, with two or more
 #'   regimes.
 #' @param n_rand Number of random partitions.
@@ -324,9 +324,9 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
     stop("`regimes` needs two or more regimes", call. = FALSE)
   }
   presence <- damocles_presence(comm, tree)
-  constant <- fit_damocles(presence, tree, root = root, shared = TRUE, sympatry = sympatry)
+  constant <- damocles_fit(presence, tree, root = root, shared = TRUE, sympatry = sympatry)
   fit_with <- function(reg) {
-    fit_damocles(presence, tree, root = root, shared = TRUE, sympatry = sympatry,
+    damocles_fit(presence, tree, root = root, shared = TRUE, sympatry = sympatry,
                  regimes = reg, vary = vary)
   }
   fit <- fit_with(regimes)

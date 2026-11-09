@@ -25,7 +25,7 @@ recently and rapidly diversifying clades have short, heavily shared paths and a 
 \details{
 With \code{per = "edge"}, each edge gets the geometric mean of the DR of the tips below it (the
 DR of its tip for a terminal edge), a value per edge in the order of \code{tree$edge} that can be
-given as the \code{edge_covariate} of \code{\link[=fit_damocles]{fit_damocles()}} or \code{\link[=damocles_samples]{damocles_samples()}}. DR is defined for
+given as the \code{edge_covariate} of \code{\link[=damocles_fit]{damocles_fit()}} or \code{\link[=damocles_samples]{damocles_samples()}}. DR is defined for
 tips; the value of an internal edge summarises its descendants and is not an estimate of the
 rate along that edge, unlike the branch-specific rates of model-based methods such as ClaDS.
 \code{data-raw/damocles_clads.R} checks the tip values against the equal-splits measure of
@@ -45,5 +45,5 @@ global diversity of birds in space and time. \emph{Nature}, 491, 444--448.
 \doi{10.1038/nature11631}
 }
 \seealso{
-\code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=damocles_samples]{damocles_samples()}}.
+\code{\link[=damocles_fit]{damocles_fit()}}, \code{\link[=damocles_samples]{damocles_samples()}}.
 }
