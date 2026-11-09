@@ -8,6 +8,8 @@
   metacommunity](https://provetelab.org/comdynamite/articles/analysing-clades.md):
 - [Testing the whole
   tree](https://provetelab.org/comdynamite/articles/whole-tree.md):
+- [Trait-gradient
+  analysis](https://provetelab.org/comdynamite/articles/trait-gradient.md):
 
 ### Simulating data
 

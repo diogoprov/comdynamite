@@ -28,6 +28,7 @@ to the finest, fitted by restricted maximum likelihood (Messier et al. 2010)."><
     <li><a class="dropdown-item" href="../articles/preparing-data.html">Preparing your data</a></li>
     <li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
     <li><a class="dropdown-item" href="../articles/whole-tree.html">Testing the whole tree</a></li>
+    <li><a class="dropdown-item" href="../articles/trait-gradient.html">Trait-gradient analysis</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
@@ -116,6 +117,7 @@ ecological scales? A case for trait-based ecology. <em>Ecology Letters</em>, 13,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
+<code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
@@ -126,6 +128,10 @@ ecological scales? A case for trait-based ecology. <em>Ecology Letters</em>, 13,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,
 <code><a href="trait_flex.html">trait_flex()</a></code>,
+<code><a href="trait_gradient.html">trait_gradient()</a></code>,
+<code><a href="trait_gradient_phylo.html">trait_gradient_phylo()</a></code>,
+<code><a href="trait_gradient_test.html">trait_gradient_test()</a></code>,
+<code><a href="trait_gradient_weights.html">trait_gradient_weights()</a></code>,
 <code><a href="trait_rarefaction.html">trait_rarefaction()</a></code>,
 <code><a href="tstats.html">tstats()</a></code>,
 <code><a href="tstats_summary.html">tstats_summary()</a></code></p></div>
@@ -142,8 +148,8 @@ ecological scales? A case for trait-based ecology. <em>Ecology Letters</em>, 13,
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">nested_variance</span><span class="op">(</span><span class="va">d</span>, <span class="st">"trait"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region"</span>, <span class="st">"site"</span>, <span class="st">"population"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        level        trait</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     region 2.551909e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       site 3.509259e-17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     region 1.741575e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       site 1.125857e-17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 population 9.862820e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     within 1.371800e-02</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>

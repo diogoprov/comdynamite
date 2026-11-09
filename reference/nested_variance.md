@@ -64,6 +64,7 @@ Other trait variation among individuals:
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
+[`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
@@ -74,6 +75,10 @@ Other trait variation among individuals:
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+[`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
+[`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md),
+[`trait_gradient_test()`](https://provetelab.org/comdynamite/reference/trait_gradient_test.md),
+[`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md),
 [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md),
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
 [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
@@ -90,8 +95,8 @@ d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
 res <- nested_variance(d, "trait", c("region", "site", "population"))
 res
 #>        level        trait
-#> 1     region 2.551909e-08
-#> 2       site 3.509259e-17
+#> 1     region 1.741575e-08
+#> 2       site 1.125857e-17
 #> 3 population 9.862820e-01
 #> 4     within 1.371800e-02
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)

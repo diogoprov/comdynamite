@@ -127,6 +127,7 @@ Other trait variation among individuals:
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
+[`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
@@ -136,6 +137,10 @@ Other trait variation among individuals:
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+[`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
+[`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md),
+[`trait_gradient_test()`](https://provetelab.org/comdynamite/reference/trait_gradient_test.md),
+[`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md),
 [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md),
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
 [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)

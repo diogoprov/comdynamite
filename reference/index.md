@@ -179,8 +179,8 @@ Grids of scenarios, summaries and checks.
 
 ## Trait variation among individuals
 
-Individuals sampled from simulations, T-statistics, community trait
-indices and decompositions of trait variation.
+Individuals sampled from simulations, T-statistics, trait-gradient
+analysis, community trait indices and decompositions of trait variation.
 
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   : Individuals from a simulated metacommunity
@@ -192,6 +192,17 @@ indices and decompositions of trait variation.
   : Local adaptation and character displacement from population means
 - [`plot(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/plot.population_shifts.md)
   : Plot the profile of a fit of population shifts
+- [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md)
+  : Trait-gradient analysis
+- [`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md)
+  : Trait-gradient analysis with the two choices of weights
+- [`trait_gradient_test()`](https://provetelab.org/comdynamite/reference/trait_gradient_test.md)
+  : Null models of the trait-gradient analysis
+- [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
+  : Phylogenetic models of beta and alpha, with their sampling error
+- [`plot(`*`<mc_trait_gradient>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
+  [`plot(`*`<mc_trait_gradient_test>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
+  : Plot a trait-gradient analysis
 - [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
   : Trait indices of communities against null models
 - [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
