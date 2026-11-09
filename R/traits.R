@@ -45,7 +45,7 @@
 #' species_traits(tr, lambda = 1, sigma_signal = TRUE)
 #' species_traits(5)
 #' # optima from another model, here an Ornstein-Uhlenbeck process
-#' ou <- traits_ou(tr, alpha = 1, theta = 0)
+#' ou <- trait_ou(tr, alpha = 1, theta = 0)
 #' species_traits(tr, optima = ou[, 1])
 #' @export
 species_traits <- function(species, lambda = 1, optima_range = c(0, 100),

@@ -8,11 +8,12 @@ trait_mk(
   tree,
   q = 1,
   states = c("0", "1"),
-  root = NULL,
+  root_state = NULL,
   alpha = NULL,
   edge_rates = NULL,
   rate_classes = NULL,
-  class_switch = 0.1
+  class_switch = 0.1,
+  root = NULL
 )
 }
 \arguments{
@@ -24,7 +25,7 @@ its diagonal is ignored.}
 
 \item{states}{Names of the states, when \code{q} is one rate.}
 
-\item{root}{State at the root; \code{NULL} draws one with equal probabilities.}
+\item{root_state}{State at the root; \code{NULL} draws one with equal probabilities.}
 
 \item{alpha}{Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
 \code{NULL} for none. Small values make rates more uneven among branches.}
@@ -36,6 +37,8 @@ its diagonal is ignored.}
 \code{c(slow = 0.1, fast = 1)}; classes without names are called \code{R1}, \code{R2} and so on.}
 
 \item{class_switch}{Rate of moving from one hidden class to each other one.}
+
+\item{root}{Deprecated; use \code{root_state}.}
 }
 \value{
 The tree, reordered "cladewise", with class \code{c("simmap", "phylo")} and, as in
@@ -91,7 +94,7 @@ Revell, L. J. (2024). Testing for heterogeneous rates of discrete character evol
 phylogenies. \emph{Journal of Evolutionary Biology}, 37, 1591--1602. \doi{10.1093/jeb/voae119}
 }
 \seealso{
-\code{\link[=tip_history_metrics]{tip_history_metrics()}}, \code{\link[=trait_rates]{trait_rates()}} for continuous traits, and \code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}}, \code{\link[=trait_rates]{trait_rates()}} for continuous traits, and \code{\link[=trait_ou]{trait_ou()}},
 which takes the mapped history as \code{regimes} (optima and rates that change with the state).
 
 Other species traits:
@@ -109,8 +112,8 @@ Other species traits:
 \code{\link[=species_traits]{species_traits()}},
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

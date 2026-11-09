@@ -8,8 +8,10 @@ plot_assembly(
   x,
   traits = c(1, 2),
   colours = c("#0072B2", "grey60", "#D55E00"),
-  labels = FALSE,
-  ...
+  species_labels = FALSE,
+  point_size = 2,
+  ...,
+  labels = NULL
 )
 }
 \arguments{
@@ -19,13 +21,16 @@ plot_assembly(
 
 \item{colours}{Colours of the species kept and removed, and of the contours.}
 
-\item{labels}{Should the species be labelled?}
+\item{species_labels}{Should the species be labelled?}
 
-\item{...}{Further arguments to \code{\link[graphics:plot]{graphics::plot()}}. The aspect ratio is 1 by default
-(\code{asp = 1}), so that the contours of Euclidean distances are circles.}
+\item{point_size}{Size of the species.}
+
+\item{labels, ...}{Deprecated: \code{labels} is now \code{species_labels}; graphical arguments of base
+graphics are no longer used. The aspect ratio is always 1, so that the contours of
+Euclidean distances are circles.}
 }
 \value{
-\code{NULL}, invisibly; called for the plot.
+A ggplot object.
 }
 \description{
 Draws the regional pool in the plane of two traits, with the species kept by
@@ -46,16 +51,15 @@ of the two traits, and species that look inside a contour may lie outside it in 
 traits.
 }
 \examples{
-\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(40)
-y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
-op <- par(mfrow = c(1, 2))
-plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0)),
-              main = "Euclidean")
+y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0))) +
+  ggplot2::ggtitle("Euclidean")
 plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0),
-                                 distance = "mahalanobis"), main = "Mahalanobis")
-par(op)
+                                 distance = "mahalanobis")) +
+  ggplot2::ggtitle("Mahalanobis")
 \dontshow{\}) # examplesIf}
 }
 \seealso{

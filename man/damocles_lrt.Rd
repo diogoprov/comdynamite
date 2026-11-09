@@ -15,7 +15,7 @@ log-likelihood, AIC, and, for the alternative, the statistic, degrees of freedom
 p-value.
 }
 \description{
-\code{damocles_lrt()} compares two fits of \code{\link[=fit_damocles]{fit_damocles()}} to the same communities, where \code{null}
+\code{damocles_lrt()} compares two fits of \code{\link[=damocles_fit]{damocles_fit()}} to the same communities, where \code{null}
 is a special case of \code{alternative}: constant rates against rates that change among
 \code{regimes} or with an \code{edge_covariate} (where \code{beta = 0} gives the constant model), rates
 shared by all communities against separate rates, or \code{sympatry = 0} against an estimated
@@ -37,13 +37,13 @@ set.seed(5)
 tr <- treeshapesim::sim_tree_shape(40)
 reg <- clade_regimes(tr, list(A = ape::extract.clade(tr, ape::Ntip(tr) + 2)$tip.label))
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 5)
-constant <- fit_damocles(comm, tr, shared = TRUE)
-by_clade <- fit_damocles(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
+constant <- damocles_fit(comm, tr, shared = TRUE)
+by_clade <- damocles_fit(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
 damocles_lrt(constant, by_clade)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=clade_regimes]{clade_regimes()}}.
+\code{\link[=damocles_fit]{damocles_fit()}}, \code{\link[=clade_regimes]{clade_regimes()}}.
 
 Other dynamic null model:
 \code{\link[=clade_regimes]{clade_regimes()}},

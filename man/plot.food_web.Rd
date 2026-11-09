@@ -8,11 +8,13 @@
   x,
   panels = c("abundance", "trait", "rate"),
   time = NULL,
-  col = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
+  colours = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
   log_abundance = FALSE,
   legend = TRUE,
-  lwd = 2,
-  ...
+  linewidth = 0.8,
+  ...,
+  col = NULL,
+  lwd = NULL
 )
 }
 \arguments{
@@ -22,18 +24,19 @@
 
 \item{time}{Optional time at which to stop the curves; \code{NULL} draws the whole run.}
 
-\item{col}{Colours of the resource, the consumer and the predator.}
+\item{colours}{Colours of the resource, the consumer and the predator.}
 
-\item{log_abundance}{Draw abundances on a logarithmic axis (zeros are left out)?}
+\item{log_abundance}{Draw abundances as their base-10 logarithm (zeros are left out)?}
 
-\item{legend}{Add a legend to the first panel?}
+\item{legend}{Draw the legend of the levels?}
 
-\item{lwd}{Width of the lines.}
+\item{linewidth}{Width of the lines.}
 
-\item{...}{Other graphical parameters passed to \code{\link[graphics:plot]{graphics::plot()}}.}
+\item{col, lwd, ...}{Deprecated: \code{col} is now \code{colours} and \code{lwd} is \code{linewidth}; graphical
+arguments of base graphics are no longer used.}
 }
 \value{
-\code{x}, invisibly.
+A ggplot object.
 }
 \description{
 Draws the trajectories from \code{\link[=food_web_dynamics]{food_web_dynamics()}} in up to three stacked panels sharing
@@ -47,12 +50,14 @@ axes keep the limits of the whole run, so that successive plots are frames of an
 \code{\link[=animate_food_web]{animate_food_web()}} uses this to write a GIF.
 }
 \examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 x <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
                        traits = c(R = 10, N = 4, P = 6), introductions = c(P = 2000),
                        dt = 0.5)
 plot(x)
 # one frame: the state at time 1000, on the axes of the whole run
 plot(x, panels = c("abundance", "trait"), time = 1000)
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=animate_food_web]{animate_food_web()}}, \code{\link[=food_web_dynamics]{food_web_dynamics()}}

@@ -131,8 +131,8 @@ test_that("the default statistic of trait_rarefaction runs no permutations", {
   calls <- 0
   trace_fun <- function(...) calls <<- calls + 1
   local_mocked_bindings(
-    tstats = function(..., nperm) {
-      expect_equal(nperm, 0)
+    tstats = function(..., n_perm) {
+      expect_equal(n_perm, 0)
       calls <<- calls + 1
       data.frame(T_IP.IC = 1, T_IC.IR = 1, T_PC.PR = 1)
     }

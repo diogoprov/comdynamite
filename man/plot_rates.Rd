@@ -19,7 +19,7 @@ plot_rates(
 carries its tree and rates.}
 
 \item{rates}{Rate of each branch, in the order of the rows of \code{tree$edge}, or a result of
-\code{\link[=trait_rates]{trait_rates()}}, whose \code{edge_rate} is used. Left out when \code{tree} is a result of
+\code{\link[=trait_rates]{trait_rates()}}, whose \code{edge_rates} are used. Left out when \code{tree} is a result of
 \code{\link[=trait_rates]{trait_rates()}}.}
 
 \item{log}{Colour by the logarithm of the rate (the default), since rates are multiplicative.
@@ -70,8 +70,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

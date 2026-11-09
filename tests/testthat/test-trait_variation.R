@@ -13,7 +13,7 @@ test_that("tstats_summary() lists deviating sites and skips untestable ones", {
   d <- rbind(d, data.frame(site = "solo", species = "a", trait = 10 + rnorm(8),
                            other = rnorm(8)))
   set.seed(2)
-  res <- tstats(d, traits = c("trait", "other"), nperm = 49)
+  res <- tstats(d, traits = c("trait", "other"), n_perm = 49)
   s <- tstats_summary(res)
   expect_named(s, c("traits", "sites"))
   expect_equal(nrow(s$traits), 6)
@@ -33,7 +33,7 @@ test_that("tstats_summary() lists deviating sites and skips untestable ones", {
   # T_IP.IC is far below the null of permutation within sites when species differ
   expect_equal(ip$percent_low, 100)
   expect_lt(ip$p_mean_low, 0.05)
-  expect_error(tstats_summary(tstats(d, nperm = 0)), "nperm")
+  expect_error(tstats_summary(tstats(d, n_perm = 0)), "n_perm")
 })
 
 test_that("trait_flex() splits the community mean as Leps et al. (2011)", {
@@ -115,40 +115,40 @@ test_that("nested_variance() agrees with cati::partvar()", {
 
 test_that("community_index() computes observed values and keeps the null models apart", {
   d <- toy_individuals()
-  res <- community_index(d, stats::var, null = "local", nperm = 9)
+  res <- community_index(d, stats::var, null = "local", n_perm = 9)
   expect_equal(res$observed, as.vector(tapply(d$trait, d$site, stats::var)[unique(d$site)]))
   # permuting within sites cannot change an index that ignores species
   expect_true(all(abs(attr(res, "null") - rep(res$observed, each = 9)) < 1e-9))
   expect_true(all(is.na(res$ses)))
   # an index of species sees the permutation
   pop_var <- function(x, species) stats::var(tapply(x, species, mean))
-  sp <- community_index(d, pop_var, null = "local", nperm = 19)
+  sp <- community_index(d, pop_var, null = "local", n_perm = 19)
   # permuting within sites mixes the species, so the variance of their means falls
   expect_true(all(sp$ses > 0))
   # regional draws stay within the values of the data
-  reg <- community_index(d, mean, null = "regional.ind", nperm = 19)
+  reg <- community_index(d, mean, null = "regional.ind", n_perm = 19)
   expect_true(all(attr(reg, "null") >= min(d$trait) & attr(reg, "null") <= max(d$trait)))
   # the order of the rows does not matter for observed values
-  shuffled <- community_index(d[sample(nrow(d)), ], pop_var, null = "local", nperm = 0)
+  shuffled <- community_index(d[sample(nrow(d)), ], pop_var, null = "local", n_perm = 0)
   expect_equal(shuffled$observed[match(sp$site, shuffled$site)], sp$observed)
   expect_named(shuffled, c("site", "trait", "index", "observed"))
 })
 
 test_that("community_index() handles populations, several traits and checks the index", {
   d <- toy_individuals()
-  prab <- community_index(d, length, null = "regional.pop.prab", nperm = 5)
+  prab <- community_index(d, length, null = "regional.pop.prab", n_perm = 5)
   expect_equal(prab$observed,
                as.vector(tapply(d$species, d$site, function(s) length(unique(s)))[unique(d$site)]))
-  pop <- community_index(d, stats::var, null = "regional.pop", nperm = 5)
+  pop <- community_index(d, stats::var, null = "regional.pop", n_perm = 5)
   means <- unique(stats::ave(d$trait, d$site, d$species))
   expect_true(all(round(attr(pop, "null"), 8) >= 0))
-  two <- community_index(d, mean, traits = c("trait", "other"), null = "regional.ind", nperm = 5)
+  two <- community_index(d, mean, traits = c("trait", "other"), null = "regional.ind", n_perm = 5)
   expect_equal(unique(two$trait), c("trait", "other"))
   expect_equal(dim(attr(two, "null")), c(5, 12))
   # multivariate: rows move together, so the correlation within a site is kept by "local"
   d$twin <- d$trait * 2
   mv <- community_index(d, function(x) stats::cor(x[, 1], x[, 2]), traits = c("trait", "twin"),
-                        null = "local", nperm = 5, multivariate = TRUE)
+                        null = "local", n_perm = 5, multivariate = TRUE)
   expect_equal(unique(mv$trait), "multivariate")
   expect_true(all(abs(attr(mv, "null") - 1) < 1e-9))
   expect_error(community_index(d, range), "single number")
@@ -159,7 +159,7 @@ test_that("community_index() and trait_flex() agree with cati where cati is righ
   skip_if_not_installed("cati")
   d <- toy_individuals()
   d <- d[order(d$site), ]
-  ours <- community_index(d, stats::var, traits = c("trait", "other"), nperm = 0)
+  ours <- community_index(d, stats::var, traits = c("trait", "other"), n_perm = 0)
   theirs <- cati::ComIndex(as.matrix(d[c("trait", "other")]),
                            index = "tapply(x, ind.plot, var)", sp = factor(d$species),
                            ind.plot = factor(d$site), nullmodels = "regional.ind", nperm = 2,
@@ -180,16 +180,16 @@ test_that("the regional nulls of tstats() keep the observed denominators", {
   d <- data.frame(site = rep(sprintf("s%d", 1:4), each = 15),
                   species = sample(c("a", "b", "c"), 60, replace = TRUE))
   d$trait <- rnorm(60)
-  res <- tstats(d, nperm = 2000)
+  res <- tstats(d, n_perm = 2000)
   null <- attr(res, "null")
   # each site draws without replacement from the pool, so its variance is unbiased for var(z)
   expect_lt(abs(mean(null[, , "T_IC.IR"]) - 1), 0.02)
 })
 
-test_that("tstats_summary() warns when nperm is too small for the level", {
+test_that("tstats_summary() warns when n_perm is too small for the level", {
   d <- toy_individuals()
-  expect_warning(tstats_summary(tstats(d, nperm = 19)), "nperm >= 40")
-  expect_no_warning(tstats_summary(tstats(d, nperm = 40)))
+  expect_warning(tstats_summary(tstats(d, n_perm = 19)), "n_perm >= 40")
+  expect_no_warning(tstats_summary(tstats(d, n_perm = 40)))
 })
 
 test_that("trait_flex() guards the model against missing values, names and no intercept", {
@@ -224,7 +224,7 @@ test_that("the functions handle untestable statistics, missing values and bad in
                   species = rep(c("a", "b", "c"), each = 10))
   set.seed(4)
   d$trait <- rnorm(30)
-  s <- suppressWarnings(tstats_summary(tstats(d, nperm = 39)))
+  s <- suppressWarnings(tstats_summary(tstats(d, n_perm = 39)))
   pc <- s$traits[s$traits$statistic == "T_PC.PR", ]
   expect_equal(pc$n_sites, 0)
   expect_true(is.na(pc$percent_low) && is.na(pc$p_mean_low))
@@ -237,7 +237,7 @@ test_that("the functions handle untestable statistics, missing values and bad in
   expect_error(trait_flex(d, traits = "label"), "numeric")
   expect_error(community_index(d, mean, traits = "label"), "numeric")
   d$trait[d$site == "s01"] <- NA
-  res <- community_index(d, mean, nperm = 0)
+  res <- community_index(d, mean, n_perm = 0)
   expect_true(is.na(res$observed[res$site == "s01"]))
 })
 

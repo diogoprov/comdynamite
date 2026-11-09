@@ -5,17 +5,18 @@ fw <- function() {
 
 test_that("plot.food_web draws the panels and frames", {
   x <- fw()
-  pdf(NULL)
-  on.exit(dev.off())
-  expect_identical(plot(x), x)
-  expect_invisible(plot(x, panels = "trait", time = 200, log_abundance = TRUE))
-  expect_invisible(plot(x, panels = c("abundance", "rate"), log_abundance = TRUE,
-                        legend = FALSE))
+  skip_if_not_installed("ggplot2")
+  expect_ggplot(plot(x))
+  frame <- expect_ggplot(plot(x, panels = "trait", time = 200, log_abundance = TRUE))
+  expect_true(all(frame$data$time <= 200))
+  expect_ggplot(plot(x, panels = c("abundance", "rate"), log_abundance = TRUE,
+                     legend = FALSE))
+  expect_warning(plot(x, col = c("red", "blue", "green")), "`col` is deprecated")
   # a level absent during the whole run is left out
   y <- food_web_dynamics(seq(0, 100, by = 20), dt = 0.5)
-  expect_invisible(plot(y))
+  expect_ggplot(plot(y))
   expect_error(plot(x, time = c(1, 2)), "one number")
-  expect_error(plot(x, col = "red"), "three colours")
+  expect_error(plot(x, colours = "red"), "three colours")
   expect_error(plot(x, panels = "abundances"), "should be one of")
   z <- x
   z[c("R", "N", "P")] <- 0

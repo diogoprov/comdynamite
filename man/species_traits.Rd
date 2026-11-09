@@ -81,7 +81,7 @@ tr <- treeshapesim::sim_tree_shape(10)
 species_traits(tr, lambda = 1, sigma_signal = TRUE)
 species_traits(5)
 # optima from another model, here an Ornstein-Uhlenbeck process
-ou <- traits_ou(tr, alpha = 1, theta = 0)
+ou <- trait_ou(tr, alpha = 1, theta = 0)
 species_traits(tr, optima = ou[, 1])
 \dontshow{\}) # examplesIf}
 }
@@ -101,8 +101,8 @@ Other species traits:
 \code{\link[=tip_history_metrics]{tip_history_metrics()}},
 \code{\link[=trait_bm]{trait_bm()}},
 \code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
 \code{\link[=trait_rates]{trait_rates()}},
-\code{\link[=traits_ou]{traits_ou()}},
 \code{\link[=turnover_rates]{turnover_rates()}}
 }
 \concept{species traits}

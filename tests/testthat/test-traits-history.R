@@ -37,24 +37,24 @@ test_that("node values have the joint distribution of Brownian motion", {
   expect_true(all(attr(trait_bm(tree, 0, nodes = TRUE), "nodes") == 0))
 })
 
-test_that("traits_ou keeps the values at the nodes it walked through", {
+test_that("trait_ou keeps the values at the nodes it walked through", {
   tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
   set.seed(5)
-  x <- traits_ou(tree, n_traits = 2, root = 3)
+  x <- trait_ou(tree, n_traits = 2, root = 3)
   expect_equal(dim(attr(x, "nodes")), c(2, 2))
   expect_equal(unname(attr(x, "nodes")["4", ]), c(3, 3))
   expect_equal(rownames(attr(x, "nodes")), c("4", "5"))
   set.seed(5)
-  nodeless <- traits_ou(tree, n_traits = 2, root = 3)
+  nodeless <- trait_ou(tree, n_traits = 2, root = 3)
   attr(nodeless, "nodes") <- NULL
   set.seed(5)
-  expect_equal(unclass(traits_ou(tree, n_traits = 2, root = 3))[, ], nodeless[, ])
+  expect_equal(unclass(trait_ou(tree, n_traits = 2, root = 3))[, ], nodeless[, ])
 })
 
 test_that("trait_mk gives a history in the format of phytools", {
   set.seed(6)
   tree <- ape::rcoal(12)
-  h <- trait_mk(tree, q = 2, states = c("x", "y", "z"), root = "x")
+  h <- trait_mk(tree, q = 2, states = c("x", "y", "z"), root_state = "x")
   expect_s3_class(h, c("simmap", "phylo"))
   expect_equal(unname(rowSums(h$mapped.edge)), h$edge.length)
   expect_equal(vapply(h$maps, sum, numeric(1)), h$edge.length)
@@ -70,15 +70,15 @@ test_that("trait_mk gives a history in the format of phytools", {
 test_that("trait_mk follows the rates and checks its arguments", {
   tree <- ape::read.tree(text = "(a:1,b:1);")
   set.seed(7)
-  changes <- replicate(3000, length(trait_mk(tree, q = 0.7, root = "0")$maps[[1]]) - 1)
+  changes <- replicate(3000, length(trait_mk(tree, q = 0.7, root_state = "0")$maps[[1]]) - 1)
   # with two states and equal rates, changes along a branch of length 1 are Poisson(0.7)
   expect_equal(mean(changes), 0.7, tolerance = 0.06)
   q <- matrix(c(0, 0, 1, 0), 2, dimnames = list(c("a", "b"), c("a", "b")))
-  absorbing <- trait_mk(tree, q, root = "b")
+  absorbing <- trait_mk(tree, q, root_state = "b")
   expect_true(all(absorbing$states == "b"))
   expect_error(trait_mk(tree, matrix(1, 2, 2)), "same state names")
   expect_error(trait_mk(tree, -1), "zero or more")
-  expect_error(trait_mk(tree, 1, root = "w"), "one of the states")
+  expect_error(trait_mk(tree, 1, root_state = "w"), "one of the states")
   expect_true(trait_mk(tree, 1)$states[[1]] %in% c("0", "1"))
   three <- matrix(1, 3, 3, dimnames = list(letters[1:3], letters[1:3]))
   expect_true(all(trait_mk(tree, three * 5)$states %in% letters[1:3]))

@@ -7,10 +7,11 @@
 \method{plot}{trait_rarefaction}(
   x,
   reference = NULL,
-  colour = "#0072B2",
+  colours = "#0072B2",
   alpha = 0.25,
   scales = "free_y",
-  ...
+  ...,
+  colour = NULL
 )
 }
 \arguments{
@@ -20,13 +21,15 @@
 the lines. \code{NULL} (the default) marks the 80\% rule for \code{cover} and nothing for \code{n};
 \code{FALSE} draws no line.}
 
-\item{colour}{Colour of the line and band; the default is the blue of the Okabe-Ito palette.}
+\item{colours}{Colour of the line and band; the default is the blue of the Okabe-Ito palette.}
 
 \item{alpha}{Transparency of the band.}
 
 \item{scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.}
 
 \item{...}{Not used.}
+
+\item{colour}{Deprecated; use \code{colours}, as in the other plots.}
 }
 \value{
 A ggplot object.

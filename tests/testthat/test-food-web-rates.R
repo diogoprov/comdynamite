@@ -18,7 +18,7 @@ test_that("food_web_rates() gives each tip the speed of its level", {
   r_half <- food_web_rates(web, tree, c("R", "N", "R"), k = 3, window = 1)
   expect_equal(r_half[tip_edge[3]], 1 + 3 * speed[["R"]] * 0.5)
   out <- trait_rates(tree, edge_rates = r)
-  expect_equal(as.numeric(out$edge_rate), as.numeric(r))
+  expect_equal(as.numeric(out$edge_rates), as.numeric(r))
 })
 
 test_that("food_web_rates() checks its input", {

@@ -82,13 +82,13 @@ test_that("metrics work as indices of community_index()", {
                     species = sample(letters[1:3], 48, replace = TRUE),
                     a = rnorm(48), b = rnorm(48))
   res <- community_index(ind, list(MNND = mnnd, MST = mst_length, range = trait_range),
-                         traits = "a", null = "regional.ind", nperm = 9)
+                         traits = "a", null = "regional.ind", n_perm = 9)
   expect_equal(unique(res$index), c("MNND", "MST", "range"))
   s1 <- ind$a[ind$site == "s1"]
   expect_equal(res$observed[res$index == "MNND" & res$site == "s1"], mnnd(s1))
   expect_equal(res$observed[res$index == "range" & res$site == "s1"], diff(range(s1)))
   expect_equal(dim(attr(res, "null")), c(9, 12))
-  mv <- community_index(ind, mnnd, traits = c("a", "b"), multivariate = TRUE, nperm = 0)
+  mv <- community_index(ind, mnnd, traits = c("a", "b"), multivariate = TRUE, n_perm = 0)
   expect_equal(mv$observed[1], mnnd(as.matrix(ind[ind$site == "s1", c("a", "b")])))
   expect_equal(mv$index[1], "mnnd")
 })

@@ -8,10 +8,12 @@ plot_node_heatmap(
   x,
   test = c("max", "site", "joint"),
   level = 0.05,
-  col = c("#0072B2", "#D55E00"),
-  cex = 0.8,
+  colours = c("#0072B2", "#D55E00"),
+  text_size = 2.5,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 }
 \arguments{
@@ -23,17 +25,18 @@ See \code{\link[=node_test]{node_test()}} for what each one tests.}
 
 \item{level}{Significance level.}
 
-\item{col}{Colours of negative and positive values.}
+\item{colours}{Colours of negative and positive values.}
 
-\item{cex}{Size of the text.}
-
-\item{...}{Other arguments of \code{\link[graphics:image]{graphics::image()}}.}
+\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}).}
 
 \item{alpha}{Deprecated, use \code{level}.}
+
+\item{col, cex, ...}{Deprecated: \code{col} is now \code{colours} and \code{cex} is \code{text_size}; arguments of
+\code{\link[graphics:image]{graphics::image()}} are no longer used.}
 }
 \value{
-Invisibly, the matrix of semipartial correlations, with predictors followed by
-biogeographic events.
+A ggplot object, with the matrix of semipartial correlations (predictors followed
+by biogeographic events) in the attribute \code{values}.
 }
 \description{
 Draws a table of nodes by variables with the semipartial correlations of \code{\link[=node_test]{node_test()}},
@@ -42,15 +45,17 @@ after the false discovery rate, as in \code{\link[=plot_node_test]{plot_node_tes
 significant only as isolated tests. Blank cells could not be calculated.
 }
 \details{
-Rows are the node numbers of the tree. To find them, call \code{ape::nodelabels()} after
-\code{\link[=plot_node_test]{plot_node_test()}}.
+Rows are the node numbers of the tree, as in \code{tree$edge}; \code{ape::nodelabels()} on a plot of
+\code{\link[ape:plot.phylo]{ape::plot.phylo()}} shows where they are.
 }
 \examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 49)
 plot_node_heatmap(out, test = "site")
+\dontshow{\}) # examplesIf}
 }
 \references{
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity

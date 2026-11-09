@@ -1,7 +1,7 @@
 # a history with every branch in state "x", then changes set by hand
 fixed_history <- function(text) {
   tree <- ape::read.tree(text = text)
-  trait_mk(tree, q = 0, states = c("x", "y"), root = "x")
+  trait_mk(tree, q = 0, states = c("x", "y"), root_state = "x")
 }
 set_map <- function(h, e, m) {
   h$maps[[e]] <- m
@@ -60,7 +60,7 @@ test_that("history rates feed trait_rates and are checked", {
   h <- trait_mk(ape::rcoal(12), q = 1, states = c("x", "y"))
   rates <- history_rates(h, "state", state_rates = c(x = 1, y = 4))
   x <- trait_rates(h, edge_rates = rates)
-  expect_equal(x$edge_rate, rates)
+  expect_equal(x$edge_rates, rates)
   expect_equal(x$scaled$edge.length, h$edge.length * rates)
   expect_null(x$shifts)
   expect_error(trait_rates(h, edge_rates = 1:3), "one positive number")

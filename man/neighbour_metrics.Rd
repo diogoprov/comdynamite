@@ -104,7 +104,7 @@ mnnd(cbind(x, rev(x)))
 set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:5), each = 15),
                   species = sample(letters[1:4], 75, replace = TRUE), trait = rnorm(75))
-community_index(ind, mnnd, null = "regional.ind", nperm = 99)
+community_index(ind, mnnd, null = "regional.ind", n_perm = 99)
 }
 \references{
 Aiba, M., Katabuchi, M., Takafumi, H., Matsuzaki, S. S., Sasaki, T., & Hiura, T.
