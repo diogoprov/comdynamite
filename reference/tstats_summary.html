@@ -77,7 +77,8 @@ of the mean over sites, and the sites that deviate.</p>
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
 <dd><p>Size of the two-sided test of each site and of the mean. A site can deviate
-only if <code>1 / (1 + nperm) &lt; level / 2</code>, so <code>nperm</code> must be at least <code>2 / level</code>; a warning
+only if \(1 / (1 + \mathrm{nperm}) &lt; \mathrm{level} / 2\),
+so <code>nperm</code> must be at least \(2 / \mathrm{level}\); a warning
 is given otherwise.</p></dd>
 
 </dl></div>
@@ -92,9 +93,10 @@ by spaces). <code>sites</code> has one row per site, trait and statistic, with <
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Each site is tested in both directions from the null values kept by <code><a href="tstats.html">tstats()</a></code>: the p-value
-of a low value is <code>(1 + r) / (1 + n)</code>, where <code>r</code> is the number of null values at or below the
-observed one and <code>n</code> the number of null values, and that of a high value counts null values
-at or above it. A site deviates when one of the two is below <code>level / 2</code>, so that the two
+of a low value is \((1 + r) / (1 + n)\), where \(r\) is the number of
+null values at or below the observed one and \(n\) the number of null values, and that of a
+high value counts null values at or above it. A site deviates when one of the two is below
+\(\mathrm{level} / 2\), so that the two
 tests together have size <code>level</code>. A site cannot be tested when its observed value is missing
 or when every null value equals the observed one, as for <code>T_IP.IC</code> at a site with one
 species, where the statistic is 1 whatever the permutation; such sites get <code>NA</code> and are left

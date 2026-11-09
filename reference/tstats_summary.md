@@ -23,8 +23,9 @@ tstats_summary(x, level = 0.05)
 - level:
 
   Size of the two-sided test of each site and of the mean. A site can
-  deviate only if `1 / (1 + nperm) < level / 2`, so `nperm` must be at
-  least `2 / level`; a warning is given otherwise.
+  deviate only if \\1 / (1 + \mathrm{nperm}) \< \mathrm{level} / 2\\, so
+  `nperm` must be at least \\2 / \mathrm{level}\\; a warning is given
+  otherwise.
 
 ## Value
 
@@ -40,15 +41,16 @@ spaces). `sites` has one row per site, trait and statistic, with
 
 Each site is tested in both directions from the null values kept by
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md):
-the p-value of a low value is `(1 + r) / (1 + n)`, where `r` is the
-number of null values at or below the observed one and `n` the number of
-null values, and that of a high value counts null values at or above it.
-A site deviates when one of the two is below `level / 2`, so that the
-two tests together have size `level`. A site cannot be tested when its
-observed value is missing or when every null value equals the observed
-one, as for `T_IP.IC` at a site with one species, where the statistic is
-1 whatever the permutation; such sites get `NA` and are left out of the
-shares, instead of a small p-value in both directions.
+the p-value of a low value is \\(1 + r) / (1 + n)\\, where \\r\\ is the
+number of null values at or below the observed one and \\n\\ the number
+of null values, and that of a high value counts null values at or above
+it. A site deviates when one of the two is below \\\mathrm{level} / 2\\,
+so that the two tests together have size `level`. A site cannot be
+tested when its observed value is missing or when every null value
+equals the observed one, as for `T_IP.IC` at a site with one species,
+where the statistic is 1 whatever the permutation; such sites get `NA`
+and are left out of the shares, instead of a small p-value in both
+directions.
 
 The test of the mean compares the mean of the observed statistic over
 the testable sites with the mean over the same sites of each

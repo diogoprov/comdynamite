@@ -73,8 +73,8 @@ mean weights the mean of the species over all individuals in the data by
 the same abundances. Their difference is the part of the community mean
 due to intraspecific variability. The sums of squares among sites of the
 specific mean (total), of the fixed mean (turnover) and of the
-difference (intraspecific) are related by
-`SS_total = SS_turnover + SS_intraspecific + SS_covariation`; a positive
+difference (intraspecific) are related by \$\$SS\_{total} =
+SS\_{turnover} + SS\_{intraspecific} + SS\_{covariation};\$\$ a positive
 covariation means that turnover and intraspecific variability move the
 community mean the same way. With a `formula`, each of the three site
 means is regressed on the variables of `env`, and the sums of squares
