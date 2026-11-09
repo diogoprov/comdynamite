@@ -122,7 +122,11 @@
 #' estimate; it does change with strong displacement and with deviations of whole populations,
 #' so the intervals of `c` cover the true value less often than `level`. The correction removes
 #' most of the attenuation of `c` by sampling error when `w` is well identified; when it is not,
-#' the intervals are wide and the p-value is the better guide. Results change with the seed of
+#' the intervals are wide and the p-value is the better guide. The test is somewhat
+#' conservative: the null simulations take the variance of populations, which sets the bias of
+#' `c`, from the same data as the estimate, so their centre follows it, and in simulations with
+#' no displacement the test rejected at the 5% level in about 2--3% of data sets. Results change
+#' with the seed of
 #' the random number generator. The simulated values are in the attribute `bootstrap`, whose
 #' own attribute `population_sd` gives the population-level standard deviation of each set.
 #'

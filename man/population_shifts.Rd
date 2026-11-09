@@ -183,7 +183,11 @@ The correction and the intervals assume that the bias does not change with \code
 estimate; it does change with strong displacement and with deviations of whole populations,
 so the intervals of \code{c} cover the true value less often than \code{level}. The correction removes
 most of the attenuation of \code{c} by sampling error when \code{w} is well identified; when it is not,
-the intervals are wide and the p-value is the better guide. Results change with the seed of
+the intervals are wide and the p-value is the better guide. The test is somewhat
+conservative: the null simulations take the variance of populations, which sets the bias of
+\code{c}, from the same data as the estimate, so their centre follows it, and in simulations with
+no displacement the test rejected at the 5\% level in about 2--3\% of data sets. Results change
+with the seed of
 the random number generator. The simulated values are in the attribute \code{bootstrap}, whose
 own attribute \code{population_sd} gives the population-level standard deviation of each set.
 }

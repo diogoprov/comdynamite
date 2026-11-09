@@ -17,6 +17,8 @@
     moment equation weighted by precision. Taking the slopes of the full fit inflated that
     variance and the bias of `c` under the null, so the test rejected too often in large
     designs (up to 29% at the 5% level in the experiments of `data-raw/bridge_experiments.R`).
+    The test is now somewhat conservative (about 2--3% at the 5% level in simulations without
+    displacement), because the centre of the null simulations follows the estimate.
   - The documentation now gives the sign of the bias that deviations of whole populations
     cause in `c`: upward when most competitors are closer than `w` in trait, downward when most
     are farther.
