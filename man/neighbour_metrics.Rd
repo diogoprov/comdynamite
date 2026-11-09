@@ -104,7 +104,7 @@ mnnd(cbind(x, rev(x)))
 set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:5), each = 15),
                   species = sample(letters[1:4], 75, replace = TRUE), trait = rnorm(75))
-community_index(ind, mnnd, null = "regional.ind", nperm = 99)
+community_index(ind, mnnd, null = "regional.ind", n_perm = 99)
 }
 \references{
 Aiba, M., Katabuchi, M., Takafumi, H., Matsuzaki, S. S., Sasaki, T., & Hiura, T.
@@ -124,4 +124,23 @@ morphological dispersion, and the coexistence of plant species. \emph{Oikos}, 81
 }
 \seealso{
 \code{\link[=community_index]{community_index()}}.
+
+Other trait variation among individuals:
+\code{\link[=community_index]{community_index()}},
+\code{\link[=nested_variance]{nested_variance()}},
+\code{\link[=null_intervals]{null_intervals()}},
+\code{\link[=plot.nested_variance]{plot.nested_variance()}},
+\code{\link[=plot.trait_flex]{plot.trait_flex()}},
+\code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
+\code{\link[=plot.tstats]{plot.tstats()}},
+\code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_densities]{trait_densities()}},
+\code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_rarefaction]{trait_rarefaction()}},
+\code{\link[=tstats]{tstats()}},
+\code{\link[=tstats_summary]{tstats_summary()}}
 }
+\concept{trait variation among individuals}

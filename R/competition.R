@@ -32,7 +32,7 @@ competition_matrix <- function(species, type = c("none", "random", "phylo"),
   type <- match.arg(type)
   stopifnot(inter_max >= 0, scale > 0)
   is_tree <- inherits(species, "phylo")
-  if (type == "phylo" && !is_tree) stop("type = \"phylo\" needs a 'phylo' tree as `species`")
+  if (type == "phylo" && !is_tree) stop("type = \"phylo\" needs a 'phylo' tree as `species`", call. = FALSE)
   sp <- if (is_tree) species$tip.label else paste0("sp", seq_len(species))
   k <- length(sp)
   a <- matrix(0, k, k, dimnames = list(sp, sp))

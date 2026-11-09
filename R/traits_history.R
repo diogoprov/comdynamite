@@ -15,11 +15,12 @@
 #' probabilities.
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
+#' @param root Deprecated; use `root_state`.
 #' @param q One rate for every change between states (the equal-rates model), or a square matrix
 #'   of rates from the state of each row to the state of each column, with the states as names;
 #'   its diagonal is ignored.
 #' @param states Names of the states, when `q` is one rate.
-#' @param root State at the root; `NULL` draws one with equal probabilities.
+#' @param root_state State at the root; `NULL` draws one with equal probabilities.
 #' @param alpha Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
 #'   `NULL` for none. Small values make rates more uneven among branches.
 #' @param edge_rates Optional multipliers of the rates of each branch, in the order of the rows of
@@ -46,8 +47,9 @@
 #'
 #'   Revell, L. J. (2024). Testing for heterogeneous rates of discrete character evolution on
 #'   phylogenies. *Journal of Evolutionary Biology*, 37, 1591--1602. \doi{10.1093/jeb/voae119}
-#' @seealso [tip_history_metrics()], [trait_rates()] for continuous traits, and [traits_ou()],
+#' @seealso [tip_history_metrics()], [trait_rates()] for continuous traits, and [trait_ou()],
 #'   which takes the mapped history as `regimes` (optima and rates that change with the state).
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -60,9 +62,10 @@
 #' hr <- trait_mk(tr, q = 0.5, rate_classes = c(slow = 0.1, fast = 2), class_switch = 0.2)
 #' hr$classes
 #' @export
-trait_mk <- function(tree, q = 1, states = c("0", "1"), root = NULL, alpha = NULL,
-                     edge_rates = NULL, rate_classes = NULL, class_switch = 0.1) {
-  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length))
+trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha = NULL,
+                     edge_rates = NULL, rate_classes = NULL, class_switch = 0.1, root = NULL) {
+  check_tree(tree)
+  root <- renamed_arg(root_state, root, "root_state", "root")
   if (is.matrix(q)) {
     states <- rownames(q)
     if (is.null(states) || !identical(states, colnames(q))) {
@@ -91,7 +94,7 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root = NULL, alpha = NUL
   observed_q <- q
   diag(observed_q) <- -rowSums(q)
   root <- root %||% sample(states, 1)
-  if (!root %in% states) stop("`root` must be one of the states", call. = FALSE)
+  if (!root %in% states) stop("`root_state` must be one of the states", call. = FALSE)
 
   if (!is.null(rate_classes)) {
     if (!is.numeric(rate_classes) || length(rate_classes) < 2 || any(rate_classes < 0)) {
@@ -229,6 +232,7 @@ as_simmap <- function(tree, maps, at_node, states) {
 #'   Evolution*, 11, 18676--18690. \doi{10.1002/ece3.8476}
 #' @seealso [trait_mk()]
 #' @inherit trait_mk examples
+#' @family species traits
 #' @export
 tip_history_metrics <- function(history) {
   states <- history_states(history)

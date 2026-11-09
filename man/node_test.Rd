@@ -167,4 +167,11 @@ traits-environment relationships in the fourth-corner problem. \emph{Ecology}, 9
 a landscape with edges. \code{\link[=plot_node_test]{plot_node_test()}} and
 \code{\link[=plot_node_heatmap]{plot_node_heatmap()}} show the results. \code{\link[=pcc_test]{pcc_test()}} and
 \code{\link[=phylo_beta_test]{phylo_beta_test()}} test the whole tree at once.
+
+Other clades and biogeography:
+\code{\link[=biogeography_matrix]{biogeography_matrix()}},
+\code{\link[=node_contrasts]{node_contrasts()}},
+\code{\link[=plot_node_heatmap]{plot_node_heatmap()}},
+\code{\link[=plot_node_test]{plot_node_test()}}
 }
+\concept{clades and biogeography}

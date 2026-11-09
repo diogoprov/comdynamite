@@ -55,6 +55,7 @@
 #'   move the areas of that event, so they should not be used as `site_permutations`.
 #' @seealso [rigid_permutations()] keeps the shape of the sides and the distances between
 #'   them, and [torus_permutations()] gives a torus. [biogeography_matrix()] codes the events.
+#' @family restricted null models
 #' @examples
 #' coords <- expand.grid(x = 1:10, y = 1:6)
 #' event <- ifelse(coords$x <= 3 & coords$y <= 3, 1, ifelse(coords$x >= 8, -1, 0))

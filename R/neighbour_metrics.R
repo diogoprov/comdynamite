@@ -59,6 +59,7 @@
 #'   morphological dispersion, and the coexistence of plant species. *Oikos*, 81, 309--322.
 #'   \doi{10.2307/3547051}
 #' @seealso [community_index()].
+#' @family trait variation among individuals
 #' @examples
 #' x <- c(1, 2, 2, 5, 9)
 #' nn_distances(x)
@@ -69,7 +70,7 @@
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 15),
 #'                   species = sample(letters[1:4], 75, replace = TRUE), trait = rnorm(75))
-#' community_index(ind, mnnd, null = "regional.ind", nperm = 99)
+#' community_index(ind, mnnd, null = "regional.ind", n_perm = 99)
 #' @name neighbour_metrics
 NULL
 

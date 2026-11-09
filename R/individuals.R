@@ -95,6 +95,7 @@
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [tstats()] for the T-statistics; [subsample_individuals()] and
 #'   [trait_rarefaction()] for the same sampling schemes on real data.
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -108,7 +109,9 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
                                cover = NULL, min_n = 1) {
-  stopifnot(inherits(x, "mc_sim"))
+  if (!inherits(x, "mc_sim")) {
+    stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+  }
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
   species <- colnames(abundance)
@@ -196,7 +199,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' trait are left out for that trait.
 #'
 #' @section Null models:
-#' With `nperm > 0`, `method = "base"` compares each statistic with a null distribution, from
+#' With `n_perm > 0`, `method = "base"` compares each statistic with a null distribution, from
 #' the three null models of Taudiere & Violle (2016), implemented in base R from their
 #' description:
 #'
@@ -217,7 +220,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'
 #' The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
 #' mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
-#' with \eqn{n} = `nperm`, where \eqn{r} is the number of null values at or below the observed
+#' with \eqn{n} = `n_perm`, where \eqn{r} is the number of null values at or below the observed
 #' one (`alternative = "less"`), at or above it (`"greater"`), or twice the smaller of the two
 #' (`"two.sided"`, at most 1). Low values of the three statistics are the usual hypotheses
 #' (niche differentiation within communities for `T_IP.IC`, environmental filtering for the
@@ -268,7 +271,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' @param site,species Names of the columns with the site and the species of each individual.
 #' @param method `"base"` (the default), computed in base R, or `"cati"` for [cati::Tstats()];
 #'   it needs the package cati.
-#' @param nperm Number of randomisations of the null models; 0 or `NULL` for the observed
+#' @param nperm Deprecated; use `n_perm`.
+#' @param n_perm Number of randomisations of the null models; 0 or `NULL` for the observed
 #'   values only, much faster in simulation studies with many replicates.
 #' @param alternative Direction of the test of `method = "base"`: `"less"` (the default),
 #'   `"greater"` or `"two.sided"`.
@@ -281,7 +285,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' @return With `method = "base"`, a data frame with one row per site and trait and the columns
 #'   `site`, `trait`, `n_populations`, `T_IP.IC`, `T_IC.IR` and `T_PC.PR`; statistics that
 #'   cannot be computed, such as `T_PC.PR` for a site with one species, are `NA`. With
-#'   `nperm > 0`, also `ses_` and `p_` columns for each statistic, and the attribute `null`,
+#'   `n_perm > 0`, also `ses_` and `p_` columns for each statistic, and the attribute `null`,
 #'   an array (randomisation x row x statistic) with the null values. With `method = "cati"`,
 #'   the `Tstats` object of [cati::Tstats()], with the site names of `individuals`.
 #' @references Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits
@@ -294,6 +298,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   \doi{10.1016/j.tree.2011.11.014}
 #' @seealso [tstats_summary()] to summarise the tests, [sample_individuals()],
 #'   [population_shifts()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -301,21 +306,22 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'                               competition_matrix(tree, "none"), n_steps = 100,
 #'                               seed_steps = 1:5)
 #' ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
-#' none <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 0)
+#' none <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 0)
 #' local <- tstats(sample_individuals(sim, local_adaptation = 0.8, intraspecific_sd = 2),
-#'                 nperm = 0)
-#' apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), nperm = 0)
+#'                 n_perm = 0)
+#' apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), n_perm = 0)
 #' rbind(none = colMeans(none[ratios], na.rm = TRUE),
 #'       local = colMeans(local[ratios], na.rm = TRUE),
 #'       apart = colMeans(apart[ratios], na.rm = TRUE))
 #' # standardised effect sizes and p-values from the null models
-#' res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+#' res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 #' head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 #' @export
 tstats <- function(individuals, traits = "trait", site = "site", species = "species",
-                   method = c("base", "cati"), nperm = 99,
+                   method = c("base", "cati"), n_perm = 99,
                    alternative = c("less", "greater", "two.sided"),
-                   null_ip = c("site", "species"), ...) {
+                   null_ip = c("site", "species"), ..., nperm = NULL) {
+  n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   method <- match.arg(method)
   alternative <- match.arg(alternative)
   null_ip <- match.arg(null_ip)
@@ -328,9 +334,9 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   if (!is.numeric(values)) stop("the columns in `traits` must be numeric", call. = FALSE)
   site_id <- as.character(individuals[[site]])
   species_id <- as.character(individuals[[species]])
-  if (method == "cati") return(tstats_cati(values, site_id, species_id, nperm, ...))
-  nperm <- if (is.null(nperm)) 0 else nperm
-  stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
+  if (method == "cati") return(tstats_cati(values, site_id, species_id, n_perm, ...))
+  n_perm <- if (is.null(n_perm)) 0 else n_perm
+  check_count(n_perm, "n_perm", min = 0)
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
   site_levels <- unique(site_id)
   per_trait <- lapply(traits, function(trait) {
@@ -338,7 +344,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
     z <- values[keep, trait]
     groups <- tstats_groups(site_id[keep], species_id[keep], site_levels)
     observed <- t_ratios(z, groups)
-    null <- if (nperm > 0) tstats_null(z, groups, nperm, null_ip) else NULL
+    null <- if (n_perm > 0) tstats_null(z, groups, n_perm, null_ip) else NULL
     list(table = data.frame(site = site_levels, trait = trait,
                             n_populations = tabulate(groups$pop_site, length(site_levels)),
                             observed, stringsAsFactors = FALSE),
@@ -348,7 +354,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   rownames(out) <- NULL
   out[ratios] <- lapply(out[ratios], finite_or_na)
   class(out) <- c("tstats", class(out))
-  if (nperm == 0) return(out)
+  if (n_perm == 0) return(out)
   null <- do.call(abind_rows, lapply(per_trait, `[[`, "null"))
   for (stat in ratios) {
     compared <- null_compare(out[[stat]], null[, , stat], alternative)
@@ -430,6 +436,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
 #'   Goldberg, E. E., & Lande, R. (2006). Ecological and reproductive character displacement on
 #'   an environmental gradient. *Evolution*, 60, 1344--1357. \doi{10.1554/05-696.1}
 #' @seealso [sample_individuals()], [tstats()] with `null_ip = "species"`.
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -553,7 +560,7 @@ t_ratios <- function(z, g, var_r = NULL) {
 }
 
 # null values (randomisation x site x statistic) of the three null models
-tstats_null <- function(z, g, nperm, null_ip = "site") {
+tstats_null <- function(z, g, n_perm, null_ip = "site") {
   n <- length(z)
   positions <- unlist(g$by_site, use.names = FALSE)
   sizes <- lengths(g$by_site)
@@ -562,9 +569,9 @@ tstats_null <- function(z, g, nperm, null_ip = "site") {
   deviation <- z - carried
   var_r <- stats::var(z)
   same_species <- Filter(function(ix) length(ix) > 1, split(seq_len(g$n_pops), g$pop_species))
-  out <- array(NA_real_, c(nperm, g$n_sites, 3),
+  out <- array(NA_real_, c(n_perm, g$n_sites, 3),
                list(NULL, NULL, c("T_IP.IC", "T_IC.IR", "T_PC.PR")))
-  for (i in seq_len(nperm)) {
+  for (i in seq_len(n_perm)) {
     if (null_ip == "site") {
       within <- z
       for (ix in g$by_site) within[ix] <- z[ix[sample.int(length(ix))]]
@@ -603,18 +610,18 @@ group_var <- function(x, g, n_groups) {
 }
 
 # standardised effect sizes and permutation p-values of observed values (vector of length m)
-# against null values (matrix nperm x m); NA where the observed value or every null value is
+# against null values (matrix n_perm x m); NA where the observed value or every null value is
 # missing
 null_compare <- function(obs, sims, alternative = c("less", "greater", "two.sided")) {
   alternative <- match.arg(alternative)
   sims <- matrix(sims, ncol = length(obs))
   sims[!is.finite(sims)] <- NA
-  nperm <- nrow(sims)
+  n_perm <- nrow(sims)
   valid <- colSums(!is.na(sims))
   null_mean <- colMeans(sims, na.rm = TRUE)
   null_sd <- apply(sims, 2, function(v) if (sum(!is.na(v)) > 1) stats::sd(v, na.rm = TRUE) else NA)
-  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  below <- colSums(sims <= rep(obs, each = n_perm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = n_perm), na.rm = TRUE)
   p <- switch(alternative, less = (1 + below) / (1 + valid),
               greater = (1 + above) / (1 + valid),
               two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
@@ -642,7 +649,7 @@ abind_rows <- function(...) {
   out
 }
 
-tstats_cati <- function(values, site_id, species_id, nperm, ...) {
+tstats_cati <- function(values, site_id, species_id, n_perm, ...) {
   if (!cati_available()) {
     stop("`method = \"cati\"` needs the package cati: install.packages(\"cati\"). ",
          "`method = \"base\"` gives the observed values without null models.", call. = FALSE)
@@ -651,7 +658,7 @@ tstats_cati <- function(values, site_id, species_id, nperm, ...) {
   safe <- sprintf("site%0*d", nchar(length(original)), seq_along(original))
   site_map <- stats::setNames(original, safe)
   plots <- factor(safe[match(site_id, original)], levels = safe)
-  res <- cati::Tstats(values, ind.plot = plots, sp = factor(species_id), nperm = nperm,
+  res <- cati::Tstats(values, ind.plot = plots, sp = factor(species_id), nperm = n_perm,
                       printprogress = FALSE, ...)
   restore_site_names(res, site_map)
 }

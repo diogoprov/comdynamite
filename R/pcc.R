@@ -13,12 +13,13 @@
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' dim(phylo_eigenvectors(treeshapesim::sim_tree_shape(10)))
 #' @export
 phylo_eigenvectors <- function(tree, squared = FALSE) {
-  stopifnot(inherits(tree, "phylo"))
+  check_tree(tree)
   pd <- ape::cophenetic.phylo(tree)[tree$tip.label, tree$tip.label]
   b <- -0.5 * if (squared) pd^2 else pd
   b <- sweep(b, 1, rowMeans(b))
@@ -68,6 +69,7 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)

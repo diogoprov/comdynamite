@@ -80,4 +80,13 @@ communities. \emph{Plant Ecology}, 216, 709--724.
 \seealso{
 \code{\link[=plot_phylo_beta]{plot_phylo_beta()}} shows the result. \code{\link[=pcc_test]{pcc_test()}} is the other framework of the
 same article.
+
+Other the whole tree:
+\code{\link[=pcc_test]{pcc_test()}},
+\code{\link[=pcps_test]{pcps_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }
+\concept{the whole tree}

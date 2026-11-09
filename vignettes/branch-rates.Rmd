@@ -9,7 +9,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4.5,
-                      eval = requireNamespace("treeshapesim", quietly = TRUE))
+                      eval = requireNamespace("treeshapesim", quietly = TRUE) &&
+                        requireNamespace("ggplot2", quietly = TRUE))
 ```
 
 Methods that estimate a rate of trait evolution for each branch of a tree are increasingly
@@ -34,15 +35,10 @@ which needs RRphylo and mvMORPH; the rest runs here.
 library(comdynamite)
 set.seed(7)
 tree <- treeshapesim::sim_tree_shape(40)
-
-# colour of each branch by the logarithm of its rate, from slow (dark) to fast (light)
-plot_rates <- function(tree, rates, main = "") {
-  pal <- grDevices::hcl.colors(30, "viridis")
-  col <- if (diff(range(rates)) > 0) pal[cut(log(rates), 30, labels = FALSE)] else pal[15]
-  ape::plot.phylo(tree, edge.color = col, edge.width = 2.5, show.tip.label = FALSE,
-                  main = main)
-}
 ```
+
+`plot_rates()` colours each branch by its rate, on a logarithmic scale, from slow (dark) to
+fast (light).
 
 ## Rates as a model
 
@@ -55,11 +51,9 @@ Brownian motion along the tree (`"gbm"`), or rates drawn independently for each 
 shift <- trait_rates(tree, "shift", shifts = 2, shift_size = c(8, 1 / 8))
 gbm <- trait_rates(tree, "gbm", rate_sd = 0.8)
 iid <- trait_rates(tree, "iid", rate_sd = 0.8)
-op <- par(mfrow = c(1, 3), mar = c(0.5, 0.5, 2, 0.5))
-plot_rates(tree, shift$edge_rate, "shift")
-plot_rates(tree, gbm$edge_rate, "gbm")
-plot_rates(tree, iid$edge_rate, "iid")
-par(op)
+plot_rates(shift, title = "shift")
+plot_rates(gbm, title = "gbm")
+plot_rates(iid, title = "iid")
 ```
 
 Each result keeps the rates (`edge_rate`), the trait values at the tips (`tips`) and nodes
@@ -90,11 +84,9 @@ model with biogeography of Drury et al. (2016); `data-raw/validation_sympatry.R`
 against RPANDA.
 
 ```{r history-plot, fig.height = 3.5}
-op <- par(mfrow = c(1, 3), mar = c(0.5, 0.5, 2, 0.5))
-plot_rates(tree, state, "state")
-plot_rates(tree, burst, "burst")
-plot_rates(tree, sympatry, "sympatry")
-par(op)
+plot_rates(tree, state, title = "state")
+plot_rates(tree, burst, title = "burst")
+plot_rates(tree, sympatry, title = "sympatry")
 x <- trait_rates(habitat, edge_rates = state)
 head(x$tips)
 ```

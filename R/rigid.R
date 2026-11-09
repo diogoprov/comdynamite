@@ -108,6 +108,7 @@
 #'   Ecology*, 89, 947--959.
 #' @seealso [patch_permutations()] moves each patch on its own, and [torus_permutations()]
 #'   gives a torus. [biogeography_matrix()] codes the events.
+#' @family restricted null models
 #' @examples
 #' coords <- expand.grid(x = 1:10, y = 1:6)
 #' event <- ifelse(coords$x <= 3 & coords$y <= 3, 1, ifelse(coords$x >= 5 & coords$x <= 6, -1, 0))

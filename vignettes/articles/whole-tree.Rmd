@@ -68,10 +68,12 @@ pcps
 ```
 
 Unlike the method of `pcc_test()`, which works on eigenvectors of the tree, this one takes
-eigenvectors of the sites, so `scores` can be plotted against the environment.
+eigenvectors of the sites, so `scores` can be plotted against the environment. `plot()` draws
+the sites on the first two axes, coloured by the environment, with each species as an arrow
+from the correlation of its column of the matrix P with the axes.
 
-```{r}
-plot(env, pcps$scores[, 1], xlab = "Environment", ylab = "PCPS 1")
+```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(pcps)
 ```
 
 When sites are neighbours and the environment and the communities are both autocorrelated, free

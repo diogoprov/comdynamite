@@ -12,14 +12,16 @@
 #' @param x Result of [food_web_dynamics()].
 #' @param panels Panels to draw, in order: any of `"abundance"`, `"trait"` and `"rate"`.
 #' @param time Optional time at which to stop the curves; `NULL` draws the whole run.
-#' @param col Colours of the resource, the consumer and the predator.
-#' @param log_abundance Draw abundances on a logarithmic axis (zeros are left out)?
-#' @param legend Add a legend to the first panel?
-#' @param lwd Width of the lines.
-#' @param ... Other graphical parameters passed to [graphics::plot()].
-#' @return `x`, invisibly.
+#' @param colours Colours of the resource, the consumer and the predator.
+#' @param log_abundance Draw abundances as their base-10 logarithm (zeros are left out)?
+#' @param legend Draw the legend of the levels?
+#' @param linewidth Width of the lines.
+#' @param col,lwd,... Deprecated: `col` is now `colours` and `lwd` is `linewidth`; graphical
+#'   arguments of base graphics are no longer used.
+#' @return A ggplot object.
 #' @seealso [animate_food_web()], [food_web_dynamics()]
-#' @examples
+#' @family coevolution in food webs
+#' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' x <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
 #'                        traits = c(R = 10, N = 4, P = 6), introductions = c(P = 2000),
 #'                        dt = 0.5)
@@ -28,60 +30,64 @@
 #' plot(x, panels = c("abundance", "trait"), time = 1000)
 #' @export
 plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NULL,
-                          col = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
-                          log_abundance = FALSE, legend = TRUE, lwd = 2, ...) {
+                          colours = c(R = "#009E73", N = "#0072B2", P = "#D55E00"),
+                          log_abundance = FALSE, legend = TRUE, linewidth = 0.8, ...,
+                          col = NULL, lwd = NULL) {
+  need_ggplot("plot() of food_web_dynamics()")
+  colours <- renamed_arg(colours, col, "colours", "col")
+  linewidth <- renamed_arg(linewidth, lwd, "linewidth", "lwd")
+  legend <- legend_flag(legend)
   check_food_web(x)
   panels <- unique(match.arg(panels, several.ok = TRUE))
-  if (length(col) != 3) stop("`col` must give three colours, for R, N and P", call. = FALSE)
+  if (length(colours) != 3) {
+    stop("`colours` must give three colours, for R, N and P", call. = FALSE)
+  }
   if (!is.null(time) && (!is.numeric(time) || length(time) != 1 || !is.finite(time))) {
     stop("`time` must be one number", call. = FALSE)
   }
-  col <- stats::setNames(unname(col), c("R", "N", "P"))
+  colours <- stats::setNames(unname(colours), c("Resource", "Consumer", "Predator"))
   levels <- c("R", "N", "P")[vapply(c("R", "N", "P"), function(l) any(x[[l]] > 0), logical(1))]
   if (length(levels) == 0) stop("every level is absent during the run", call. = FALSE)
-  shown <- if (is.null(time)) rep(TRUE, nrow(x)) else x$time <= time
-  arrivals <- attr(x, "introductions")
-  labels <- c(abundance = "Abundance", trait = "Mean trait", rate = "Rate of trait change")
+  level_names <- c(R = "Resource", N = "Consumer", P = "Predator")
+  titles <- c(abundance = if (log_abundance) "Abundance (log10)" else "Abundance",
+              trait = "Mean trait", rate = "Rate of trait change")
   columns <- list(abundance = levels, trait = paste0("z_", levels),
                   rate = paste0("rate_", levels))
-
-  old <- graphics::par(mfrow = c(length(panels), 1), mar = c(0.5, 4.5, 0.5, 1),
-                       oma = c(4, 0, 1, 0))
-  on.exit(graphics::par(old))
-  for (k in seq_along(panels)) {
-    panel <- panels[k]
+  long <- do.call(rbind, lapply(panels, function(panel) {
     values <- as.matrix(x[columns[[panel]]])
     # an absent level has no trait or rate to show
     values[as.matrix(x[levels]) <= 0] <- NA
-    log_axis <- panel == "abundance" && log_abundance
-    if (log_axis) values[values <= 0] <- NA
-    ylim <- range(values, na.rm = TRUE)
-    graphics::plot(range(x$time), ylim, type = "n", xaxt = "n", xlab = "",
-                   ylab = labels[[panel]], log = if (log_axis) "y" else "", las = 1, ...)
-    if (k == length(panels)) {
-      graphics::axis(1)
-      graphics::mtext("Time", side = 1, line = 2.5, cex = 0.8)
+    if (panel == "abundance" && log_abundance) {
+      values[values <= 0] <- NA
+      values <- log10(values)
     }
-    if (length(arrivals) > 0) graphics::abline(v = arrivals, lty = 2, col = "grey60")
-    for (j in seq_along(levels)) {
-      graphics::lines(x$time[shown], values[shown, j], col = col[levels[j]], lwd = lwd)
-      if (!is.null(time) && any(shown)) {
-        last <- max(which(shown))
-        graphics::points(x$time[last], values[last, j], pch = 19, col = col[levels[j]])
-      }
-    }
-    if (k == 1 && legend) {
-      names_shown <- c(R = "Resource", N = "Consumer", P = "Predator")[levels]
-      graphics::legend("topright", legend = names_shown, col = col[levels], lwd = lwd,
-                       bg = grDevices::adjustcolor("white", 0.85), box.col = NA,
-                       cex = 0.8)
-    }
+    data.frame(time = rep(x$time, length(levels)), value = as.vector(values),
+               level = rep(unname(level_names[levels]), each = nrow(x)), panel = titles[[panel]])
+  }))
+  long$panel <- factor(long$panel, unname(titles[panels]))
+  long$level <- factor(long$level, unname(level_names[levels]))
+  shown <- if (is.null(time)) long else long[long$time <= time, , drop = FALSE]
+  .data <- ggplot2::.data
+  p <- ggplot2::ggplot(shown, ggplot2::aes(.data$time, .data$value, colour = .data$level)) +
+    # the whole run sets the limits, so that frames of an animation share their axes
+    ggplot2::geom_blank(data = long)
+  arrivals <- attr(x, "introductions")
+  if (length(arrivals) > 0) {
+    p <- p + ggplot2::geom_vline(xintercept = arrivals, linetype = "dashed", colour = "grey60")
   }
-  if (!is.null(time)) {
-    graphics::mtext(paste("Time", format(time)), side = 3, outer = TRUE, line = -0.2,
-                    cex = 0.8, adj = 0.02)
+  p <- p + ggplot2::geom_line(linewidth = linewidth, na.rm = TRUE)
+  if (!is.null(time) && nrow(shown) > 0) {
+    now <- shown[shown$time == max(shown$time), , drop = FALSE]
+    p <- p + ggplot2::geom_point(data = now, size = 2, na.rm = TRUE) +
+      ggplot2::labs(title = paste("Time", format(time)))
   }
-  invisible(x)
+  p + ggplot2::facet_wrap(ggplot2::vars(.data$panel), ncol = 1, scales = "free_y",
+                          strip.position = "left") +
+    ggplot2::scale_colour_manual(values = colours[levels(long$level)], name = NULL,
+                                 guide = if (legend) "legend" else "none") +
+    ggplot2::labs(x = "Time", y = NULL) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(strip.placement = "outside", legend.position = "top")
 }
 
 #' Animate the dynamics of a food web
@@ -96,9 +102,10 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #'   number of rows.
 #' @param delay Seconds between frames.
 #' @param width,height Size of the GIF in pixels.
-#' @param ... Other arguments of [plot.food_web()], such as `panels` or `col`.
+#' @param ... Other arguments of [plot.food_web()], such as `panels` or `colours`.
 #' @return The path of the GIF, invisibly.
 #' @seealso [plot.food_web()]
+#' @family coevolution in food webs
 #' @examples
 #' \donttest{
 #' if (requireNamespace("gifski", quietly = TRUE)) {
@@ -123,7 +130,8 @@ animate_food_web <- function(x, file = "food_web.gif", frames = 100, delay = 0.0
     stop("`delay` must be one positive number", call. = FALSE)
   }
   rows <- unique(round(seq(1, nrow(x), length.out = frames)))
-  gifski::save_gif(for (r in rows) plot.food_web(x, time = x$time[r], ...),
+  need_ggplot("animate_food_web()")
+  gifski::save_gif(for (r in rows) print(plot.food_web(x, time = x$time[r], ...)),
                    gif_file = file, width = width, height = height, delay = delay,
                    progress = FALSE)
   invisible(file)

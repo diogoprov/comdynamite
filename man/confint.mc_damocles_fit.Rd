@@ -21,7 +21,7 @@ A data frame with the community (\code{"shared"} for shared parameters), the par
 its estimate and the lower and upper bounds.
 }
 \description{
-Confidence intervals for the parameters of \code{\link[=fit_damocles]{fit_damocles()}} from the profile likelihood: the
+Confidence intervals for the parameters of \code{\link[=damocles_fit]{damocles_fit()}} from the profile likelihood: the
 interval holds the values at which the log-likelihood, maximised over the other parameters,
 is within \eqn{\chi^2_1(\mathrm{level}) / 2}{qchisq(level, 1) / 2} of its maximum, half the
 \code{level} quantile of a chi-squared distribution with one degree of freedom. With shared
@@ -37,10 +37,18 @@ scale (\code{sympatry}) is reported as the edge of the parameter space (0 or \co
 set.seed(6)
 tr <- treeshapesim::sim_tree_shape(40)
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 10)
-fit <- fit_damocles(comm, tr, shared = TRUE)
+fit <- damocles_fit(comm, tr, shared = TRUE)
 confint(fit)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=fit_damocles]{fit_damocles()}}.
+\code{\link[=damocles_fit]{damocles_fit()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

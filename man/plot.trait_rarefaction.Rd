@@ -7,10 +7,11 @@
 \method{plot}{trait_rarefaction}(
   x,
   reference = NULL,
-  colour = "#0072B2",
+  colours = "#0072B2",
   alpha = 0.25,
   scales = "free_y",
-  ...
+  ...,
+  colour = NULL
 )
 }
 \arguments{
@@ -20,13 +21,15 @@
 the lines. \code{NULL} (the default) marks the 80\% rule for \code{cover} and nothing for \code{n};
 \code{FALSE} draws no line.}
 
-\item{colour}{Colour of the line and band; the default is the blue of the Okabe-Ito palette.}
+\item{colours}{Colour of the line and band; the default is the blue of the Okabe-Ito palette.}
 
 \item{alpha}{Transparency of the band.}
 
 \item{scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.}
 
 \item{...}{Not used.}
+
+\item{colour}{Deprecated; use \code{colours}, as in the other plots.}
 }
 \value{
 A ggplot object.
@@ -58,4 +61,23 @@ proportion of the species need to be measured? \emph{Applied Vegetation Science}
 }
 \seealso{
 \code{\link[=trait_rarefaction]{trait_rarefaction()}}.
+
+Other trait variation among individuals:
+\code{\link[=community_index]{community_index()}},
+\code{\link{neighbour_metrics}},
+\code{\link[=nested_variance]{nested_variance()}},
+\code{\link[=null_intervals]{null_intervals()}},
+\code{\link[=plot.nested_variance]{plot.nested_variance()}},
+\code{\link[=plot.trait_flex]{plot.trait_flex()}},
+\code{\link[=plot.tstats]{plot.tstats()}},
+\code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_densities]{trait_densities()}},
+\code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_rarefaction]{trait_rarefaction()}},
+\code{\link[=tstats]{tstats()}},
+\code{\link[=tstats_summary]{tstats_summary()}}
 }
+\concept{trait variation among individuals}

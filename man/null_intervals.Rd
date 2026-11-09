@@ -7,7 +7,7 @@
 null_intervals(x, level = 0.95, inner = 0.5)
 }
 \arguments{
-\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{nperm > 0}.}
+\item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{n_perm > 0}.}
 
 \item{level}{Coverage of the outer null interval, and \code{1 - level} the size of the two-sided
 test that defines \code{deviation}.}
@@ -32,8 +32,27 @@ set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
                   species = sample(c("a", "b", "c"), 120, replace = TRUE))
 ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(120)
-head(null_intervals(tstats(ind, nperm = 99)))
+head(null_intervals(tstats(ind, n_perm = 99)))
 }
 \seealso{
 \code{\link[=plot.tstats]{plot.tstats()}}, \code{\link[=tstats_summary]{tstats_summary()}}.
+
+Other trait variation among individuals:
+\code{\link[=community_index]{community_index()}},
+\code{\link{neighbour_metrics}},
+\code{\link[=nested_variance]{nested_variance()}},
+\code{\link[=plot.nested_variance]{plot.nested_variance()}},
+\code{\link[=plot.trait_flex]{plot.trait_flex()}},
+\code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
+\code{\link[=plot.tstats]{plot.tstats()}},
+\code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_densities]{trait_densities()}},
+\code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_rarefaction]{trait_rarefaction()}},
+\code{\link[=tstats]{tstats()}},
+\code{\link[=tstats_summary]{tstats_summary()}}
 }
+\concept{trait variation among individuals}

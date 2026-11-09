@@ -20,14 +20,14 @@ assemble_community(
 \arguments{
 \item{traits}{Numeric vector (one trait) or matrix (one column per trait),
 with species names as names or row names. For example, the output of
-\code{\link[=traits_ou]{traits_ou()}}.}
+\code{\link[=trait_ou]{trait_ou()}}.}
 
 \item{size}{Number of species in the local community.}
 
 \item{rule}{Assembly rule.}
 
 \item{optimum}{For \code{rule = "filtering"}: the niche optimum, either
-\code{"ancestral"} (the root state, 0 by default in \code{\link[=traits_ou]{traits_ou()}}),
+\code{"ancestral"} (the root state, 0 by default in \code{\link[=trait_ou]{trait_ou()}}),
 \code{"derived"} (the maximum of each trait in the pool, one extreme corner of
 trait space), or a numeric vector with one value per
 trait.}
@@ -91,7 +91,7 @@ covariance \code{S} centred on the optimum (Mahalanobis 1936, reprinted 2018).
 }
 
 The choice is a statement about niche axes. With correlated traits, such as those of
-\code{\link[=traits_ou]{traits_ou()}} with a rate matrix from \code{\link[=rate_matrix]{rate_matrix()}}, Euclidean distances, standardised or
+\code{\link[=trait_ou]{trait_ou()}} with a rate matrix from \code{\link[=rate_matrix]{rate_matrix()}}, Euclidean distances, standardised or
 not, count the shared direction of variation more than once: two traits that measure one
 niche axis double the weight of that axis. \code{"mahalanobis"} treats each independent
 direction of variation as one axis, and is the better choice when the traits are
@@ -106,11 +106,11 @@ which is free of the phylogenetic dependence among species), pass it as \code{tr
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(32)
-x <- traits_ou(tr, n_traits = 2)
+x <- trait_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$community
 # correlated traits: distances that discount the correlation
-y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 a <- assemble_community(y, size = 16, distance = "mahalanobis")
 a
 plot_assembly(a)
@@ -132,3 +132,8 @@ Mahalanobis, P. C. (2018). Reprint of: Mahalanobis, P. C. (1936) "On the general
 distance in statistics". \emph{Sankhya A}, 80(Suppl. 1), 1--7.
 \doi{10.1007/s13171-019-00164-5}
 }
+\seealso{
+Other rule-based assembly:
+\code{\link[=plot_assembly]{plot_assembly()}}
+}
+\concept{rule-based assembly}

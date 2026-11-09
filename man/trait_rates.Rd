@@ -15,8 +15,9 @@ trait_rates(
   shift_branch = FALSE,
   relative = TRUE,
   rate_sd = 0.5,
-  root_value = 0,
-  edge_rates = NULL
+  root = 0,
+  edge_rates = NULL,
+  root_value = NULL
 )
 }
 \arguments{
@@ -46,10 +47,12 @@ after it to \code{sigma2} times \code{shift_size} (\code{FALSE})?}
 \item{rate_sd}{Standard deviation of the logarithm of the rate: per square root of time for
 \code{"gbm"} and among branches for \code{"iid"}.}
 
-\item{root_value}{Trait value at the root.}
+\item{root}{Trait value at the root.}
 
 \item{edge_rates}{Optional rate of each branch, in the order of the rows of \code{tree$edge}, such as
 those of \code{\link[=history_rates]{history_rates()}}. When given, \code{model} and its arguments are ignored.}
+
+\item{root_value}{Deprecated; use \code{root}.}
 }
 \value{
 A list with
@@ -57,7 +60,8 @@ A list with
 \item \code{tips}: the trait at the tips, named by species;
 \item \code{nodes}: the trait at the internal nodes, named by their numbers in \code{tree$edge}, the
 root first;
-\item \code{edge_rate}: the rate of each branch, in the order of the rows of \code{tree$edge};
+\item \code{edge_rates}: the rate of each branch, in the order of the rows of \code{tree$edge}, as in
+\code{\link[=trait_mk]{trait_mk()}} (also as \code{edge_rate}, its name before 0.7.0, until 1.0.0);
 \item \code{node_rate}: for \code{"gbm"}, the rate at every node, tips first, named by node number;
 \code{NULL} otherwise;
 \item \code{shifts}: for \code{"shift"}, a data frame with the \code{edge} (row of \code{tree$edge}), the \code{node}
@@ -111,7 +115,7 @@ b <- trait_rates(tr, "shift", shift_rate = 0.1, relative = FALSE,
                  shift_size = function(n) stats::rexp(n))
 b$shifts
 g <- trait_rates(tr, "gbm", rate_sd = 0.5)
-summary(g$edge_rate)
+summary(g$edge_rates)
 # as the environmental optima of a metacommunity
 traits <- species_traits(tr, optima = g$tips)
 \dontshow{\}) # examplesIf}
@@ -138,4 +142,24 @@ Thomas, G. H., & Freckleton, R. P. (2012). MOTMOT: models of trait macroevolutio
 \seealso{
 \code{\link[=trait_bm]{trait_bm()}} for a single rate, \code{\link[=trait_mk]{trait_mk()}} for discrete traits with rates that
 vary among branches.
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

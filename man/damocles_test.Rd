@@ -31,7 +31,7 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{gamma, mu}{Rates of local colonisation and extinction used to simulate the null
 communities, one value for all communities or one per community, or lists with one rate,
 or one rate per edge of \code{tree}, per community; \code{NULL} (the default) estimates both with
-\code{\link[=fit_damocles]{fit_damocles()}}, with \code{shared}, \code{sympatry}, \code{regimes}, \code{edge_covariate} and \code{vary} passed
+\code{\link[=damocles_fit]{damocles_fit()}}, with \code{shared}, \code{sympatry}, \code{regimes}, \code{edge_covariate} and \code{vary} passed
 on to it.}
 
 \item{root}{Prior on the state at the root, used both in the fit and in the simulations
@@ -39,7 +39,7 @@ on to it.}
 probabilities).}
 
 \item{shared}{When the rates are estimated, \code{TRUE} fits one pair shared by all communities
-(see \code{\link[=fit_damocles]{fit_damocles()}}) and \code{FALSE} (the default) one pair per community.}
+(see \code{\link[=damocles_fit]{damocles_fit()}}) and \code{FALSE} (the default) one pair per community.}
 
 \item{sympatry}{Probability that a present ancestor leaves both daughters present, used in
 the simulations (see \code{\link[=simulate_damocles]{simulate_damocles()}}); \code{NULL} estimates it with the rates.}
@@ -71,7 +71,7 @@ null (\code{ses_mpd_damocles}, \code{p_mpd_damocles}, ...) and against random dr
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 \code{\link[=simulate_damocles]{simulate_damocles()}}), with the rates of colonisation and local extinction estimated from
-that community (or shared by all communities) by \code{\link[=fit_damocles]{fit_damocles()}} or given, and one from
+that community (or shared by all communities) by \code{\link[=damocles_fit]{damocles_fit()}} or given, and one from
 random draws of the same number of species from the tips, the static null model the dynamic
 one is compared with in that study.
 }
@@ -106,5 +106,13 @@ Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 community structure. \emph{Ecology Letters}, 18, 153--163. \doi{10.1111/ele.12395}
 }
 \seealso{
-\code{\link[=simulate_damocles]{simulate_damocles()}}, \code{\link[=fit_damocles]{fit_damocles()}}.
+\code{\link[=simulate_damocles]{simulate_damocles()}}, \code{\link[=damocles_fit]{damocles_fit()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

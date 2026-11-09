@@ -21,7 +21,7 @@ regimes that occur as levels: \code{background} first, then the clades.
 }
 \description{
 \code{clade_regimes()} assigns each edge of \code{tree} to a regime named after the clade it lies in,
-for the \code{regimes} of \code{\link[=fit_damocles]{fit_damocles()}} and \code{\link[=damocles_test]{damocles_test()}}: a partition of the tree defined
+for the \code{regimes} of \code{\link[=damocles_fit]{damocles_fit()}} and \code{\link[=damocles_test]{damocles_test()}}: a partition of the tree defined
 a priori, such as families or biogeographic groups, against which partitions from methods
 that estimate shifts in rates of diversification can be compared.
 }
@@ -43,5 +43,13 @@ table(reg)
 \dontshow{\}) # examplesIf}
 }
 \seealso{
-\code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=damocles_lrt]{damocles_lrt()}}.
+\code{\link[=damocles_fit]{damocles_fit()}}, \code{\link[=damocles_lrt]{damocles_lrt()}}.
+
+Other dynamic null model:
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

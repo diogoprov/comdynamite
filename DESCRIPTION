@@ -24,7 +24,6 @@ Depends:
     R (>= 4.1.0)
 Imports:
     ape,
-    graphics,
     grDevices,
     parallel,
     stats,
@@ -34,7 +33,7 @@ Suggests:
     cati,
     future,
     future.apply,
-    ggplot2,
+    ggplot2 (>= 3.5.0),
     gifski,
     knitr,
     nlme,

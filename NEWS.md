@@ -1,5 +1,41 @@
 # comdynamite (development version)
 
+- All plots now use ggplot2 (in Suggests, version 3.5.0 or later) and return a ggplot object,
+  which can be changed further with ggplot2: `plot_node_test()` (both layouts),
+  `plot_node_heatmap()`, `plot_trait_partition()`, `plot_phylo_beta()`, `plot_traits()`,
+  `plot()` of `rate_matrix()`, `plot_assembly()`, `plot()` of `food_web_dynamics()` and the
+  frames of `animate_food_web()`. Tables these functions used to return invisibly are kept as
+  attributes (`marks`, `values`, `fractions`, `ordered`). Colours are `colours` and text sizes
+  `text_size` everywhere; `col`, `cex`, `lwd` and logical `labels` (now `tip_labels` or
+  `species_labels`) still work, with a warning, until 1.0.0. `legend` is `TRUE` or `FALSE`;
+  a position keyword is still accepted. Arguments of base graphics passed in `...` are no
+  longer used.
+
+- Renamed for consistency; the old names still work, with a warning, until 1.0.0:
+  `traits_ou()` is now `trait_ou()` (like `trait_bm()`, `trait_mk()` and `trait_rates()`);
+  `fit_damocles()` is now `damocles_fit()`; the `nperm` argument of `tstats()` and
+  `community_index()` is now `n_perm`, as in the rest of the package; `trait_rates(root_value)`
+  is now `root`, as in `trait_ou()`; `trait_mk(root)` is now `root_state`, since it is a state;
+  `plot()` of `trait_rarefaction()` takes `colours`, as the other plots. `trait_rates()` returns
+  the rates as `edge_rates`, as `trait_mk()` does (`edge_rate` is kept until 1.0.0).
+- `tstats_summary(level = )` is now the coverage of the null distribution (default 0.95), as in
+  `null_intervals()` and `plot()` of `tstats()`; values below 0.5 are read as the size of the
+  test, as before, with a warning.
+
+- `plot_rates()` draws any rate per branch on the tree, from `trait_rates()`,
+  `history_rates()`, `turnover_rates()`, `food_web_rates()` or an estimator, with ggplot2.
+  `plot()` for `pcps_test()` draws the sites on two principal coordinates, coloured by a
+  predictor, with the species as arrows; `pcps_test()` now also returns `share`, `species` and
+  `env` for it. The vignette "Rates of trait evolution that vary among branches" and the
+  article on the whole tree use them.
+- Clearer errors: functions that take a tree say so when given something else, instead of
+  repeating a failed condition, and `species_traits()`, `competition_matrix()`,
+  `assemble_community()`, `sample_individuals()`, `tstats()`, `community_index()` and
+  `trait_rarefaction()` name the argument at fault. `damocles_loglik()` and the functions that
+  call it stop when no species of `comm` is a tip of the tree.
+- Help pages link to the other functions of their group (`@family`), following the groups of
+  the reference index. The example of `paint_regimes()` uses a tree from treeshapesim.
+
 - Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`
   with their tree, as a phylomorphospace (two traits) or a traitgram (one trait), with branches
   coloured by regime and the colour changing where a mapped history changes;

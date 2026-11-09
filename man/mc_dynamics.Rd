@@ -71,3 +71,12 @@ set.seed(1)
 out <- mc_dynamics(matrix(5, 20, 1), matrix(0.05), dispersal = 0, n_steps = 200)
 mean(out$abundance)
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=growth_rates]{growth_rates()}},
+\code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
+\code{\link[=simulate_static]{simulate_static()}}
+}
+\concept{simulate metacommunities}

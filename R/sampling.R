@@ -31,6 +31,7 @@
 #'   proportion of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [trait_rarefaction()], [sample_individuals()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(c("s1", "s2"), each = 50),
@@ -119,6 +120,7 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
 #'   value), with a [plot()][plot.trait_rarefaction] method. The values of all subsamples are
 #'   in the attribute `values`.
 #' @seealso [subsample_individuals()], [tstats()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 40),
@@ -136,7 +138,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
             is.numeric(level), length(level) == 1, level > 0, level < 1)
   if (is.null(statistic)) {
     statistic <- function(d) {
-      t <- tstats(d, site = site, species = species, nperm = 0)
+      t <- tstats(d, site = site, species = species, n_perm = 0)
       colMeans(t[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
     }
   }
@@ -147,7 +149,9 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
       size <- table(paste(individuals[[site]], individuals[[species]], sep = "\r"))
       n <- seq(2, max(2, stats::median(size)))
     }
-    stopifnot(is.numeric(n), all(n >= 1), all(n == round(n)))
+    if (!is.numeric(n) || any(is.na(n)) || any(n < 1) || any(n != round(n))) {
+      stop("`n` must be whole numbers, 1 or more", call. = FALSE)
+    }
     effort <- sort(unique(n))
   } else {
     stopifnot(is.numeric(cover), all(cover > 0 & cover <= 1))
@@ -203,7 +207,8 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #' @param reference Levels of effort marked by dashed lines; named values are written next to
 #'   the lines. `NULL` (the default) marks the 80% rule for `cover` and nothing for `n`;
 #'   `FALSE` draws no line.
-#' @param colour Colour of the line and band; the default is the blue of the Okabe-Ito palette.
+#' @param colours Colour of the line and band; the default is the blue of the Okabe-Ito palette.
+#' @param colour Deprecated; use `colours`, as in the other plots.
 #' @param alpha Transparency of the band.
 #' @param scales Passed to [ggplot2::facet_wrap()].
 #' @param ... Not used.
@@ -212,6 +217,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #'   proportion of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [trait_rarefaction()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:5), each = 40),
@@ -222,8 +228,9 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #' # a rule of the study, for the number of individuals
 #' plot(trait_rarefaction(ind, n = 2:10, reps = 10), reference = c("protocol" = 5))
 #' @export
-plot.trait_rarefaction <- function(x, reference = NULL, colour = "#0072B2", alpha = 0.25,
-                                   scales = "free_y", ...) {
+plot.trait_rarefaction <- function(x, reference = NULL, colours = "#0072B2", alpha = 0.25,
+                                   scales = "free_y", ..., colour = NULL) {
+  colour <- renamed_arg(colours, colour, "colours", "colour")
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of trait_rarefaction() needs the package ggplot2", call. = FALSE) # nocov
   }

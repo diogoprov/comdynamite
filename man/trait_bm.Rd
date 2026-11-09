@@ -32,3 +32,24 @@ set.seed(1)
 trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_ou]{trait_ou()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
+}
+\concept{species traits}

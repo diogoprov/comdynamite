@@ -38,8 +38,9 @@
 #'   by the tips, ready to be used as `comm` in the other functions of the package.
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
-#' @seealso [damocles_loglik()] and [fit_damocles()] for the likelihood, [damocles_test()] for
+#' @seealso [damocles_loglik()] and [damocles_fit()] for the likelihood, [damocles_test()] for
 #'   the null model of phylogenetic community structure.
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -92,7 +93,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' the observed states below each branch, given its state, are carried along the branch by the
 #' analytical solution of the backward equations of the two-state process, and combined at each
 #' node by the rule of speciation (allopatric, or with probability `sympatry` leaving both
-#' daughters present). `fit_damocles()` finds the maximum-likelihood rates, and optionally
+#' daughters present). `damocles_fit()` finds the maximum-likelihood rates, and optionally
 #' `sympatry`.
 #'
 #' At the root, `"both"` averages the likelihoods given an absent and a present ancestor, as the
@@ -106,7 +107,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' 60 tips gave estimates of `mu` from zero to several thousand, with the same likelihoods as
 #' `DAMOCLES::DAMOCLES_ML()`; the ratio of the two rates is better estimated than each one.
 #'
-#' With `shared = TRUE`, `fit_damocles()` estimates one pair of rates for all communities by
+#' With `shared = TRUE`, `damocles_fit()` estimates one pair of rates for all communities by
 #' maximising the sum of their log-likelihoods, which treats the communities as independent
 #' realisations of the same process on the same tree. Pooling communities narrows the
 #' estimates: in `data-raw/validation_damocles.R`, with `gamma = mu = 1` on trees of 60 tips and
@@ -121,7 +122,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' on \eqn{2 (m - 1)}{2 * (m - 1)} degrees of freedom, with \eqn{m} communities, to ask whether
 #' the rates differ among communities.
 #'
-#' With `sympatry = NULL`, `fit_damocles()` also estimates the probability that a present
+#' With `sympatry = NULL`, `damocles_fit()` also estimates the probability that a present
 #' ancestor leaves both daughters present, on the logit scale. A single community says almost
 #' nothing about it: in `data-raw/validation_damocles.R`, with `sympatry = 0.5` and
 #' `gamma = mu = 1` on trees of 60 tips, 90% of the estimates fell between 0 and 1 from one
@@ -131,7 +132,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' conservative) to ask whether strictly allopatric speciation is enough.
 #'
 #' Rates can change across the tree. `damocles_loglik()` and [simulate_damocles()] take one rate
-#' per edge, and `fit_damocles()` estimates rates that differ among `regimes` of the edges (a
+#' per edge, and `damocles_fit()` estimates rates that differ among `regimes` of the edges (a
 #' partition defined a priori with [clade_regimes()], or the configuration of rate shifts of a
 #' method such as BAMM) or that change with an `edge_covariate` (such as branch-specific rates
 #' of speciation from a method such as ClaDS), for colonisation, extinction or both (`vary`).
@@ -155,7 +156,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' @inheritParams simulate_damocles
 #' @param root Prior on the state of the ancestor at the root: `"both"`, `"absent"` or
 #'   `"present"`.
-#' @return `damocles_loglik()`: the log-likelihood of each community. `fit_damocles()`: a data
+#' @return `damocles_loglik()`: the log-likelihood of each community. `damocles_fit()`: a data
 #'   frame of class `mc_damocles_fit` with one row per community and the columns `gamma`, `mu`,
 #'   `sympatry` (fixed or estimated), `loglik`, `richness` and `convergence` (0 when [stats::optim()] converged). With
 #'   `shared = TRUE` every row holds the same rates and convergence code, `loglik` is the
@@ -164,13 +165,14 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [damocles_test()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(2)
 #' tr <- treeshapesim::sim_tree_shape(60)
 #' comm <- simulate_damocles(tr, gamma = 1, mu = 2, n = 2)
 #' damocles_loglik(comm, tr, gamma = 1, mu = 2)
-#' fit_damocles(comm, tr)
-#' fit_damocles(comm, tr, shared = TRUE)
+#' damocles_fit(comm, tr)
+#' damocles_fit(comm, tr, shared = TRUE)
 #' @export
 damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "present"),
                             sympatry = 0) {
@@ -191,7 +193,7 @@ damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "p
 #'   sum of their log-likelihoods; if `FALSE` (the default), separate parameters for each
 #'   community.
 #' @param sympatry In `damocles_loglik()`, the probability that a present ancestor leaves both
-#'   daughters present (see [simulate_damocles()]). In `fit_damocles()`, a fixed value, or
+#'   daughters present (see [simulate_damocles()]). In `damocles_fit()`, a fixed value, or
 #'   `NULL` to estimate it with the rates (shared or not, as they are).
 #' @param regimes Optional regime of each edge of `tree`, in the order of `tree$edge` (a factor
 #'   or character vector), such as from [clade_regimes()] or from a configuration of rate shifts
@@ -205,7 +207,7 @@ damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "p
 #' @param vary Which rates change among `regimes` or with `edge_covariate`: `"both"`, `"gamma"`
 #'   or `"mu"`; the other one is a single rate for the whole tree.
 #' @export
-fit_damocles <- function(comm, tree, root = c("both", "absent", "present"), start = NULL,
+damocles_fit <- function(comm, tree, root = c("both", "absent", "present"), start = NULL,
                          shared = FALSE, sympatry = 0, regimes = NULL, edge_covariate = NULL,
                          vary = c("both", "gamma", "mu")) {
   root <- match.arg(root)
@@ -275,7 +277,7 @@ print.mc_damocles_fit <- function(x, ...) {
 #' distance (MNTD) among the species present in each community with two null distributions: one
 #' from communities simulated along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 #' [simulate_damocles()]), with the rates of colonisation and local extinction estimated from
-#' that community (or shared by all communities) by [fit_damocles()] or given, and one from
+#' that community (or shared by all communities) by [damocles_fit()] or given, and one from
 #' random draws of the same number of species from the tips, the static null model the dynamic
 #' one is compared with in that study.
 #'
@@ -301,10 +303,10 @@ print.mc_damocles_fit <- function(x, ...) {
 #' @param gamma,mu Rates of local colonisation and extinction used to simulate the null
 #'   communities, one value for all communities or one per community, or lists with one rate,
 #'   or one rate per edge of `tree`, per community; `NULL` (the default) estimates both with
-#'   [fit_damocles()], with `shared`, `sympatry`, `regimes`, `edge_covariate` and `vary` passed
+#'   [damocles_fit()], with `shared`, `sympatry`, `regimes`, `edge_covariate` and `vary` passed
 #'   on to it.
 #' @param shared When the rates are estimated, `TRUE` fits one pair shared by all communities
-#'   (see [fit_damocles()]) and `FALSE` (the default) one pair per community.
+#'   (see [damocles_fit()]) and `FALSE` (the default) one pair per community.
 #' @param sympatry Probability that a present ancestor leaves both daughters present, used in
 #'   the simulations (see [simulate_damocles()]); `NULL` estimates it with the rates.
 #' @param root Prior on the state at the root, used both in the fit and in the simulations
@@ -318,7 +320,8 @@ print.mc_damocles_fit <- function(x, ...) {
 #'   (`ses_mpd_random`, `p_mpd_random`, ...), plus `n_valid`.
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
-#' @seealso [simulate_damocles()], [fit_damocles()].
+#' @seealso [simulate_damocles()], [damocles_fit()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(3)
 #' tr <- treeshapesim::sim_tree_shape(40)
@@ -341,7 +344,7 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
     stop("give both `gamma` and `mu`, or neither to estimate them", call. = FALSE)
   }
   if (is.null(gamma)) {
-    fit <- fit_damocles(presence, tree, root = root, shared = shared, sympatry = sympatry,
+    fit <- damocles_fit(presence, tree, root = root, shared = shared, sympatry = sympatry,
                         regimes = regimes, edge_covariate = edge_covariate, vary = vary)
     parameters <- as.data.frame(unclass(fit))[, attr(fit, "parameters"), drop = FALSE]
     edge_rates <- attr(fit, "edge_rates")
@@ -485,6 +488,9 @@ damocles_presence <- function(comm, tree) {
          call. = FALSE)
   }
   tips <- tree$tip.label
+  if (!any(colnames(comm) %in% tips)) {
+    stop("no species of `comm` is a tip of `tree`: check the names", call. = FALSE)
+  }
   only_comm <- setdiff(colnames(comm), tips)
   only_tree <- setdiff(tips, colnames(comm))
   if (length(only_comm) > 0) {

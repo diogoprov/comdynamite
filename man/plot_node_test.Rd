@@ -10,11 +10,13 @@ plot_node_test(
   test = c("max", "site", "joint"),
   type = c("phylogram", "fan"),
   level = 0.05,
-  col = c("#0072B2", "#D55E00"),
-  cex = 0.8,
+  colours = c("#0072B2", "#D55E00"),
+  text_size = 2.8,
   legend = TRUE,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 }
 \arguments{
@@ -31,19 +33,21 @@ names of the variables along the radii so that they stay clear of the species.}
 
 \item{level}{Significance level.}
 
-\item{col}{Colours of predictors and biogeographic events.}
+\item{colours}{Colours of predictors and biogeographic events.}
 
-\item{cex}{Size of the text.}
+\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}).}
 
-\item{legend}{Add a legend?}
-
-\item{...}{Other arguments of \code{\link[ape:plot.phylo]{ape::plot.phylo()}}.}
+\item{legend}{Draw the legend?}
 
 \item{alpha}{Deprecated, use \code{level}.}
+
+\item{col, cex, ...}{Deprecated: \code{col} is now \code{colours} and \code{cex} is \code{text_size} (in mm,
+about 3.5 times the old value); arguments of \code{\link[ape:plot.phylo]{ape::plot.phylo()}} are no longer used.}
 }
 \value{
-Invisibly, a data frame with one row per symbol, with \code{node}, \code{set}, \code{variable},
-\code{p}, \code{p_adjusted} and \code{corrected}, which is \code{TRUE} for solid symbols.
+A ggplot object, with the table of symbols in the attribute \code{marks}: one row per
+symbol, with \code{node}, \code{set}, \code{variable}, \code{p}, \code{p_adjusted} and \code{corrected}, which is \code{TRUE}
+for solid symbols.
 }
 \description{
 Draws the tree with the associations found by \code{\link[=node_test]{node_test()}} at each node, as in
@@ -61,6 +65,7 @@ As the smallest p-value is 1 / (\code{n_perm} + 1), solid symbols need many perm
 With few species, \code{test = "max"} may leave no symbols at all (see \code{\link[=node_test]{node_test()}}).
 }
 \examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 nodes <- node_contrasts(daphniids$tree)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
@@ -72,6 +77,7 @@ out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 999)
 plot_node_test(out, daphniids$tree, test = "site")
 }
+\dontshow{\}) # examplesIf}
 }
 \references{
 Benjamini, Y., & Hochberg, Y. (1995). Controlling the false discovery rate: a
@@ -83,3 +89,11 @@ phylogenetics: separating the roles of environmental filters and historical
 biogeography. \emph{Ecology Letters}, 13, 1290--1299.
 \doi{10.1111/j.1461-0248.2010.01523.x}
 }
+\seealso{
+Other clades and biogeography:
+\code{\link[=biogeography_matrix]{biogeography_matrix()}},
+\code{\link[=node_contrasts]{node_contrasts()}},
+\code{\link[=node_test]{node_test()}},
+\code{\link[=plot_node_heatmap]{plot_node_heatmap()}}
+}
+\concept{clades and biogeography}

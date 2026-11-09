@@ -2,7 +2,7 @@
 % Please edit documentation in R/damocles.R
 \name{damocles_loglik}
 \alias{damocles_loglik}
-\alias{fit_damocles}
+\alias{damocles_fit}
 \title{Likelihood of local presences under the DAMOCLES model}
 \usage{
 damocles_loglik(
@@ -14,7 +14,7 @@ damocles_loglik(
   sympatry = 0
 )
 
-fit_damocles(
+damocles_fit(
   comm,
   tree,
   root = c("both", "absent", "present"),
@@ -45,7 +45,7 @@ takes.}
 \code{"present"}.}
 
 \item{sympatry}{In \code{damocles_loglik()}, the probability that a present ancestor leaves both
-daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{fit_damocles()}, a fixed value, or
+daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{damocles_fit()}, a fixed value, or
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
 \item{start}{Optional starting rates, \code{c(gamma = , mu = )}; by default the optimisation
@@ -70,7 +70,7 @@ geometric mean} its geometric mean, with \code{rate} and \eqn{\beta}{beta} estim
 or \code{"mu"}; the other one is a single rate for the whole tree.}
 }
 \value{
-\code{damocles_loglik()}: the log-likelihood of each community. \code{fit_damocles()}: a data
+\code{damocles_loglik()}: the log-likelihood of each community. \code{damocles_fit()}: a data
 frame of class \code{mc_damocles_fit} with one row per community and the columns \code{gamma}, \code{mu},
 \code{sympatry} (fixed or estimated), \code{loglik}, \code{richness} and \code{convergence} (0 when \code{\link[stats:optim]{stats::optim()}} converged). With
 \code{shared = TRUE} every row holds the same rates and convergence code, \code{loglik} is the
@@ -85,7 +85,7 @@ algorithm of Pigot & Etienne (2015, Box 1): from the tips to the root, the proba
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
 node by the rule of speciation (allopatric, or with probability \code{sympatry} leaving both
-daughters present). \code{fit_damocles()} finds the maximum-likelihood rates, and optionally
+daughters present). \code{damocles_fit()} finds the maximum-likelihood rates, and optionally
 \code{sympatry}.
 }
 \details{
@@ -100,7 +100,7 @@ nearly none of them, the likelihood surface is flat and the estimates are poor. 
 60 tips gave estimates of \code{mu} from zero to several thousand, with the same likelihoods as
 \code{DAMOCLES::DAMOCLES_ML()}; the ratio of the two rates is better estimated than each one.
 
-With \code{shared = TRUE}, \code{fit_damocles()} estimates one pair of rates for all communities by
+With \code{shared = TRUE}, \code{damocles_fit()} estimates one pair of rates for all communities by
 maximising the sum of their log-likelihoods, which treats the communities as independent
 realisations of the same process on the same tree. Pooling communities narrows the
 estimates: in \code{data-raw/validation_damocles.R}, with \code{gamma = mu = 1} on trees of 60 tips and
@@ -115,7 +115,7 @@ log-likelihoods of separate and shared fits can be compared with a chi-squared d
 on \eqn{2 (m - 1)}{2 * (m - 1)} degrees of freedom, with \eqn{m} communities, to ask whether
 the rates differ among communities.
 
-With \code{sympatry = NULL}, \code{fit_damocles()} also estimates the probability that a present
+With \code{sympatry = NULL}, \code{damocles_fit()} also estimates the probability that a present
 ancestor leaves both daughters present, on the logit scale. A single community says almost
 nothing about it: in \code{data-raw/validation_damocles.R}, with \code{sympatry = 0.5} and
 \code{gamma = mu = 1} on trees of 60 tips, 90\% of the estimates fell between 0 and 1 from one
@@ -125,7 +125,7 @@ degree of freedom, on the boundary of the parameter space, so the chi-squared p-
 conservative) to ask whether strictly allopatric speciation is enough.
 
 Rates can change across the tree. \code{damocles_loglik()} and \code{\link[=simulate_damocles]{simulate_damocles()}} take one rate
-per edge, and \code{fit_damocles()} estimates rates that differ among \code{regimes} of the edges (a
+per edge, and \code{damocles_fit()} estimates rates that differ among \code{regimes} of the edges (a
 partition defined a priori with \code{\link[=clade_regimes]{clade_regimes()}}, or the configuration of rate shifts of a
 method such as BAMM) or that change with an \code{edge_covariate} (such as branch-specific rates
 of speciation from a method such as ClaDS), for colonisation, extinction or both (\code{vary}).
@@ -148,8 +148,8 @@ set.seed(2)
 tr <- treeshapesim::sim_tree_shape(60)
 comm <- simulate_damocles(tr, gamma = 1, mu = 2, n = 2)
 damocles_loglik(comm, tr, gamma = 1, mu = 2)
-fit_damocles(comm, tr)
-fit_damocles(comm, tr, shared = TRUE)
+damocles_fit(comm, tr)
+damocles_fit(comm, tr, shared = TRUE)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -158,4 +158,12 @@ community structure. \emph{Ecology Letters}, 18, 153--163. \doi{10.1111/ele.1239
 }
 \seealso{
 \code{\link[=simulate_damocles]{simulate_damocles()}}, \code{\link[=damocles_test]{damocles_test()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

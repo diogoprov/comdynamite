@@ -145,4 +145,9 @@ Ecology}, 89, 947--959.
 \seealso{
 \code{\link[=patch_permutations]{patch_permutations()}} moves each patch on its own, and \code{\link[=torus_permutations]{torus_permutations()}}
 gives a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
+
+Other restricted null models:
+\code{\link[=patch_permutations]{patch_permutations()}},
+\code{\link[=torus_permutations]{torus_permutations()}}
 }
+\concept{restricted null models}

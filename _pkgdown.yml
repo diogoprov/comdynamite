@@ -30,7 +30,7 @@ reference:
   contents:
   - species_traits
   - trait_bm
-  - traits_ou
+  - trait_ou
   - rate_matrix
   - plot.rate_matrix
   - plot_traits
@@ -40,6 +40,7 @@ reference:
   - partner_turnover
   - turnover_rates
   - food_web_rates
+  - plot_rates
   - tip_history_metrics
   - as_herodotools
   - region_pool
@@ -69,6 +70,7 @@ reference:
   contents:
   - pcc_test
   - pcps_test
+  - plot.mc_pcps
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta

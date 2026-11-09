@@ -1,0 +1,69 @@
+test_that("tree_layout() matches the coordinates of ape::plot.phylo()", {
+  set.seed(3)
+  tree <- ape::rtree(15)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  ape::plot.phylo(tree, plot = FALSE)
+  lp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
+  l <- tree_layout(tree)
+  expect_equal(l$x, lp$xx)
+  expect_equal(l$y, lp$yy)
+})
+
+test_that("plot_rates() draws one L-shaped segment per branch and checks its input", {
+  skip_if_not_installed("ggplot2")
+  set.seed(1)
+  tree <- ape::rtree(10)
+  rates <- rexp(nrow(tree$edge))
+  p <- plot_rates(tree, rates, tip_labels = TRUE, title = "x")
+  expect_s3_class(p, "ggplot")
+  expect_equal(nrow(p$data), 2 * nrow(tree$edge))
+  expect_equal(p$data$rate, rep(rates, 2))
+  x <- trait_rates(tree, "iid", rate_sd = 0.5)
+  expect_equal(plot_rates(tree, x)$data$rate, rep(x$edge_rates, 2))
+  expect_s3_class(plot_rates(tree, rates - 1, log = FALSE), "ggplot")
+  expect_error(plot_rates(tree, rates - 1), "positive")
+  expect_error(plot_rates(tree, rates[-1]), "one value per branch")
+  no_length <- tree
+  no_length$edge.length <- NULL
+  expect_error(plot_rates(no_length, rates), "branch lengths")
+})
+
+test_that("pcps_test() keeps what plot() needs and plot() checks its arguments", {
+  skip_if_not_installed("ggplot2")
+  set.seed(2)
+  tree <- ape::rtree(10)
+  comm <- matrix(rpois(20 * 10, 2), 20, dimnames = list(NULL, tree$tip.label))
+  env <- cbind(temp = seq_len(20), rain = rnorm(20))
+  res <- pcps_test(comm, tree, env, n_perm = 9)
+  expect_equal(dim(res$species), c(10, ncol(res$scores)))
+  expect_equal(length(res$share), ncol(res$scores))
+  expect_equal(colnames(res$env), c("temp", "rain"))
+  p <- plot(res, env = "rain")
+  expect_s3_class(p, "ggplot")
+  expect_equal(p$data$env, env[, "rain"])
+  expect_s3_class(plot(res, env = NULL, species = FALSE), "ggplot")
+  expect_s3_class(plot(res, axes = c(2, 3), species_labels = FALSE), "ggplot")
+  expect_error(plot(res, axes = c(1, 1)), "two different axes")
+  expect_error(plot(res, env = "pH"), "one column")
+  old <- res
+  old$species <- NULL
+  expect_error(plot(old), "older version")
+})
+
+test_that("plot_rates() takes a result of trait_rates() alone", {
+  skip_if_not_installed("ggplot2")
+  set.seed(4)
+  x <- trait_rates(ape::rtree(8), "gbm", rate_sd = 0.5)
+  expect_equal(plot_rates(x)$data$rate, rep(x$edge_rates, 2))
+  expect_error(plot_rates(x$tree), "`rates` is missing")
+})
+
+test_that("plot() of pcps_test() names an unnamed predictor", {
+  skip_if_not_installed("ggplot2")
+  set.seed(6)
+  tree <- ape::rtree(10)
+  comm <- matrix(rpois(200, 2), 20, dimnames = list(NULL, tree$tip.label))
+  p <- plot(pcps_test(comm, tree, seq_len(20), n_perm = 9))
+  expect_equal(p$scales$get_scales("colour")$name, "env1")
+})

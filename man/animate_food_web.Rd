@@ -26,7 +26,7 @@ number of rows.}
 
 \item{width, height}{Size of the GIF in pixels.}
 
-\item{...}{Other arguments of \code{\link[=plot.food_web]{plot.food_web()}}, such as \code{panels} or \code{col}.}
+\item{...}{Other arguments of \code{\link[=plot.food_web]{plot.food_web()}}, such as \code{panels} or \code{colours}.}
 }
 \value{
 The path of the GIF, invisibly.
@@ -47,4 +47,10 @@ if (requireNamespace("gifski", quietly = TRUE)) {
 }
 \seealso{
 \code{\link[=plot.food_web]{plot.food_web()}}
+
+Other coevolution in food webs:
+\code{\link[=food_web_dynamics]{food_web_dynamics()}},
+\code{\link[=food_web_params]{food_web_params()}},
+\code{\link[=plot.food_web]{plot.food_web()}}
 }
+\concept{coevolution in food webs}

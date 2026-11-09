@@ -32,6 +32,7 @@
 #'   biogeography and community ecology. *Journal of Biogeography*, 51, 533--543.
 #'   \doi{10.1111/jbi.14610}
 #' @seealso [trait_mk()], [region_pool()], [arrival_ages()], [tip_history_metrics()]
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -83,6 +84,7 @@ as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
 #'   `site1`, `site2` and so on, as in [simulate_metacommunity()].
 #' @return Logical matrix of sites x species.
 #' @inherit as_herodotools examples
+#' @family species traits
 #' @export
 region_pool <- function(history, regions) {
   tips <- history_states(history)$tips
@@ -107,6 +109,7 @@ region_pool <- function(history, regions) {
 #' @return Matrix of sites x species with the age of arrival, `NA` where the species is absent
 #'   or where its tip is in another region.
 #' @inherit as_herodotools examples
+#' @family species traits
 #' @export
 arrival_ages <- function(history, x, regions) {
   d <- if (inherits(x, c("mc_sim", "mc_data"))) as_mc_data(x) else mc_data(x)

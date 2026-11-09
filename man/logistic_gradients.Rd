@@ -46,3 +46,12 @@ Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 of spatial contingency and environmental filtering on metacommunity
 phylogenetics. \emph{Ecology}, 93, S14--S30. \doi{10.1890/11-0494.1}
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=growth_rates]{growth_rates()}},
+\code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
+\code{\link[=simulate_static]{simulate_static()}}
+}
+\concept{simulate metacommunities}

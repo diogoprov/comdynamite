@@ -4,15 +4,17 @@
 \alias{tstats_summary}
 \title{Summary of the null-model tests of T-statistics}
 \usage{
-tstats_summary(x, level = 0.05)
+tstats_summary(x, level = 0.95)
 }
 \arguments{
-\item{x}{Data frame from \code{\link[=tstats]{tstats()}} with \code{nperm > 0}.}
+\item{x}{Data frame from \code{\link[=tstats]{tstats()}} with \code{n_perm > 0}.}
 
-\item{level}{Size of the two-sided test of each site and of the mean. A site can deviate
-only if \eqn{1 / (1 + \mathrm{nperm}) < \mathrm{level} / 2}{1 / (1 + nperm) < level / 2},
-so \code{nperm} must be at least \eqn{2 / \mathrm{level}}{2 / level}; a warning
-is given otherwise.}
+\item{level}{Coverage of the null distribution, as in \code{\link[=null_intervals]{null_intervals()}} and
+\code{\link[=plot.tstats]{plot.tstats()}}: each site and the mean are tested two-sided at size
+\eqn{\alpha = 1 - \mathrm{level}}{alpha = 1 - level}. A site can deviate only if
+\eqn{1 / (1 + \mathrm{n_perm}) < \alpha / 2}{1 / (1 + n_perm) < alpha / 2}, so \code{n_perm}
+must be at least \eqn{2 / \alpha}{2 / alpha}; a warning is given otherwise. Before 0.7.0
+\code{level} was the size (0.05); values below 0.5 are still read that way, with a warning.}
 }
 \value{
 A list with two data frames. \code{traits} has one row per trait and statistic, with the
@@ -48,10 +50,29 @@ tree <- treeshapesim::sim_tree_shape(20)
 sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
-res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 tstats_summary(res)$traits
 \dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=tstats]{tstats()}}.
+
+Other trait variation among individuals:
+\code{\link[=community_index]{community_index()}},
+\code{\link{neighbour_metrics}},
+\code{\link[=nested_variance]{nested_variance()}},
+\code{\link[=null_intervals]{null_intervals()}},
+\code{\link[=plot.nested_variance]{plot.nested_variance()}},
+\code{\link[=plot.trait_flex]{plot.trait_flex()}},
+\code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
+\code{\link[=plot.tstats]{plot.tstats()}},
+\code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_densities]{trait_densities()}},
+\code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_rarefaction]{trait_rarefaction()}},
+\code{\link[=tstats]{tstats()}}
 }
+\concept{trait variation among individuals}

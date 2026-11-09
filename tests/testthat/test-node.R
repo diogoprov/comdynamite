@@ -404,10 +404,12 @@ test_that("result methods give tables and plots", {
   rownames(traits) <- tree$tip.label
   part <- trait_partition(comm, traits, env, rnorm(30), n_perm = 3)
   expect_equal(as.data.frame(part), summary(part))
-  expect_silent(plot(part))
+  if (requireNamespace("ggplot2", quietly = TRUE)) expect_s3_class(plot(part), "ggplot")
   expect_warning(plot(part, test = "taxa"), "use `\"species\"`")
   out <- node_test(comm, node_contrasts(tree), env, n_perm = 3)
-  expect_silent(plot(out, tree, level = 0.5))
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    expect_s3_class(plot(out, tree, level = 0.5), "ggplot")
+  }
 })
 
 test_that("the heatmap handles repeated names and empty results", {
@@ -417,7 +419,8 @@ test_that("the heatmap handles repeated names and empty results", {
   env <- cbind(same = rnorm(20))
   events <- cbind(same = rep(c(1, -1), 10))
   out <- node_test(comm, node_contrasts(tree), env, events, n_perm = 3)
-  expect_equal(ncol(plot_node_heatmap(out, level = 1)), 2)
+  skip_if_not_installed("ggplot2")
+  expect_equal(ncol(attr(plot_node_heatmap(out, level = 1), "values")), 2)
   out$semipartial[] <- NA
   out$biogeography$semipartial[] <- NA
   expect_error(plot_node_heatmap(out), "no node was tested")

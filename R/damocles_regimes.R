@@ -1,7 +1,7 @@
 #' Regimes of the edges of a tree from a list of clades
 #'
 #' `clade_regimes()` assigns each edge of `tree` to a regime named after the clade it lies in,
-#' for the `regimes` of [fit_damocles()] and [damocles_test()]: a partition of the tree defined
+#' for the `regimes` of [damocles_fit()] and [damocles_test()]: a partition of the tree defined
 #' a priori, such as families or biogeographic groups, against which partitions from methods
 #' that estimate shifts in rates of diversification can be compared.
 #'
@@ -18,7 +18,8 @@
 #' @param stem If `TRUE`, the stem edge of each clade belongs to it.
 #' @return A factor with one regime per edge of `tree`, in the order of `tree$edge`, with the
 #'   regimes that occur as levels: `background` first, then the clades.
-#' @seealso [fit_damocles()], [damocles_lrt()].
+#' @seealso [damocles_fit()], [damocles_lrt()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(4)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -63,7 +64,7 @@ clade_regimes <- function(tree, clades, background = "background", stem = FALSE)
 
 #' Likelihood-ratio test between nested DAMOCLES fits
 #'
-#' `damocles_lrt()` compares two fits of [fit_damocles()] to the same communities, where `null`
+#' `damocles_lrt()` compares two fits of [damocles_fit()] to the same communities, where `null`
 #' is a special case of `alternative`: constant rates against rates that change among
 #' `regimes` or with an `edge_covariate` (where `beta = 0` gives the constant model), rates
 #' shared by all communities against separate rates, or `sympatry = 0` against an estimated
@@ -82,19 +83,20 @@ clade_regimes <- function(tree, clades, background = "background", stem = FALSE)
 #' @return A data frame with one row per model: number of free parameters, total
 #'   log-likelihood, AIC, and, for the alternative, the statistic, degrees of freedom and
 #'   p-value.
-#' @seealso [fit_damocles()], [clade_regimes()].
+#' @seealso [damocles_fit()], [clade_regimes()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(5)
 #' tr <- treeshapesim::sim_tree_shape(40)
 #' reg <- clade_regimes(tr, list(A = ape::extract.clade(tr, ape::Ntip(tr) + 2)$tip.label))
 #' comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 5)
-#' constant <- fit_damocles(comm, tr, shared = TRUE)
-#' by_clade <- fit_damocles(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
+#' constant <- damocles_fit(comm, tr, shared = TRUE)
+#' by_clade <- damocles_fit(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
 #' damocles_lrt(constant, by_clade)
 #' @export
 damocles_lrt <- function(null, alternative) {
   if (!inherits(null, "mc_damocles_fit") || !inherits(alternative, "mc_damocles_fit")) {
-    stop("`null` and `alternative` must be fits of `fit_damocles()`", call. = FALSE)
+    stop("`null` and `alternative` must be fits of `damocles_fit()`", call. = FALSE)
   }
   same <- identical(attr(null, "damocles")$presence, attr(alternative, "damocles")$presence)
   if (!same) stop("the two fits must be to the same communities", call. = FALSE)
@@ -113,7 +115,7 @@ damocles_lrt <- function(null, alternative) {
 
 #' Profile-likelihood intervals of DAMOCLES parameters
 #'
-#' Confidence intervals for the parameters of [fit_damocles()] from the profile likelihood: the
+#' Confidence intervals for the parameters of [damocles_fit()] from the profile likelihood: the
 #' interval holds the values at which the log-likelihood, maximised over the other parameters,
 #' is within \eqn{\chi^2_1(\mathrm{level}) / 2}{qchisq(level, 1) / 2} of its maximum, half the
 #' `level` quantile of a chi-squared distribution with one degree of freedom. With shared
@@ -131,12 +133,13 @@ damocles_lrt <- function(null, alternative) {
 #' @param ... Not used.
 #' @return A data frame with the community (`"shared"` for shared parameters), the parameter,
 #'   its estimate and the lower and upper bounds.
-#' @seealso [fit_damocles()].
+#' @seealso [damocles_fit()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(6)
 #' tr <- treeshapesim::sim_tree_shape(40)
 #' comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 10)
-#' fit <- fit_damocles(comm, tr, shared = TRUE)
+#' fit <- damocles_fit(comm, tr, shared = TRUE)
 #' confint(fit)
 #' @exportS3Method stats::confint
 confint.mc_damocles_fit <- function(object, parm = NULL, level = 0.95, ...) {

@@ -9,11 +9,13 @@ plot_trait_partition(
   value = c("r2_adjusted", "r2", "r2_component"),
   test = c("max", "site", "species"),
   level = 0.05,
-  col = "#0072B2",
+  colours = "#0072B2",
   labels = c("Environment", "Space"),
-  cex = 0.9,
+  text_size = 3.2,
   ...,
-  alpha = NULL
+  alpha = NULL,
+  col = NULL,
+  cex = NULL
 )
 }
 \arguments{
@@ -27,19 +29,20 @@ plot_trait_partition(
 
 \item{level}{Significance level.}
 
-\item{col}{Colour of significant segments.}
+\item{colours}{Colour of significant segments.}
 
 \item{labels}{Names of the two sets of predictors.}
 
-\item{cex}{Size of the text.}
-
-\item{...}{Other arguments of \code{\link[graphics:plot.window]{graphics::plot.window()}}.}
+\item{text_size}{Size of the text, in mm.}
 
 \item{alpha}{Deprecated, use \code{level}.}
+
+\item{col, cex, ...}{Deprecated: \code{col} is now \code{colours} and \code{cex} is \code{text_size}; arguments of
+\code{\link[graphics:plot.window]{graphics::plot.window()}} are no longer used.}
 }
 \value{
-Invisibly, the rows of \code{x$fractions} for \code{a}, \code{b}, \code{c} and \code{d}, with \code{shown}, the
-values drawn.
+A ggplot object, with the rows of \code{x$fractions} for \code{a}, \code{b}, \code{c} and \code{d} in the
+attribute \code{fractions}, with \code{shown}, the values drawn.
 }
 \description{
 Draws the total variation as a line divided into the fractions of \code{\link[=trait_partition]{trait_partition()}},
@@ -54,6 +57,7 @@ Negative fractions are shown as zero, following Legendre (2008). The result of
 \code{\link[=trait_partition]{trait_partition()}} keeps them, because all fractions sum to one only with them.
 }
 \examples{
+\dontshow{if (requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
 trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
 env <- runif(40, 0, 100)
@@ -62,6 +66,7 @@ comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
 plot_trait_partition(out)
+\dontshow{\}) # examplesIf}
 }
 \references{
 Desdevises, Y., Legendre, P., Azouzi, L., & Morand, S. (2003). Quantifying
@@ -72,3 +77,9 @@ Legendre, P. (2008). Studying beta diversity: ecological variation partitioning 
 multiple regression and canonical analysis. \emph{Journal of Plant Ecology}, 1, 3--8.
 \doi{10.1093/jpe/rtm001}
 }
+\seealso{
+Other environment and space:
+\code{\link[=phylo_vector]{phylo_vector()}},
+\code{\link[=trait_partition]{trait_partition()}}
+}
+\concept{environment and space}
