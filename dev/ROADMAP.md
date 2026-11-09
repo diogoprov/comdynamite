@@ -511,9 +511,13 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
-Estado em 2026-11-08: itens de código concluídos (PRs 30–38) e vignette tutorial de taxas por
-ramo feita. Faltam o artigo de taxas por ramo, os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
-demonstração das estatísticas T; ver o item de indivíduos) e a rodada de UX.
+Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–50, sem PR aberto), com a
+vignette tutorial de taxas por ramo (PR 42), os substitutos do cati e as ferramentas de traits
+de indivíduos (PRs 45, 47 e 49), as equações em LaTeX no site (PRs 46 e 48) e a auditoria dos
+traits multivariados (PR 50). Em andamento numa sessão: o PR B do DAMOCLES (validação rodando).
+Faltam o artigo de taxas por ramo, os experimentos da ponte Leibold–Januario (a previsão do
+cenário 10 foi contrariada pela demonstração das estatísticas T; ver o item de indivíduos;
+decisão pendente) e o restante da rodada de UX.
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
@@ -666,6 +670,16 @@ pacotes de referência em vez de reimplementá-los.
       Em aberto: o nulo de T_PC.PR (método publicado, denominador recalculado) tem tamanho
       um pouco acima do nominal na cauda inferior (0,068 contra 0,04); pensar num nulo que
       sorteie médias de população diretamente, com o denominador observado.
+      Quinta rodada (PRs 47 e 49, ferramentas para dados de indivíduos): métodos `plot()` em
+      ggplot2 para `tstats()`, `community_index()`, `trait_flex()` e `nested_variance()`
+      (intervalos nulos aninhados ou SES; `null_intervals()` devolve a tabela);
+      `trait_densities()` e `plot_population_traits()` (densidades por população e comunidade,
+      ideia do TPD de Carmona et al. 2016, 2019; aviso quando a largura de banda única ajusta
+      mal, com `highlight`); métricas clássicas de vizinhança (`mnnd`, `sdnnd`, `mst_length`,
+      `trait_range` etc.); esforço amostral com `sample_individuals(cover, min_n)`,
+      `subsample_individuals()` e `trait_rarefaction()`. Testadas com os dados reais do
+      Leandro (983 anuros); `population_shifts()` se aplica a esses dados (espécies com ≥ 2
+      populações de ≥ 2 indivíduos).
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -733,6 +747,14 @@ pacotes de referência em vez de reimplementá-los.
       métodos de plot (taxas por ramo pintadas na árvore, ordenação PCPS; as trajetórias de
       `food_web_dynamics()` já têm `plot.food_web()` e `animate_food_web()`); melhorar a documentação (exemplos, `@seealso`, uma vignette de taxas
       por ramo) e as mensagens de erro.
+      Feito até 2026-11-09: equações da ajuda em LaTeX renderizadas pelo KaTeX no site (PRs 46
+      e 48); `plot_traits()`, `plot.rate_matrix()`, `plot_assembly()` (PR 50); plots dos nulos
+      e das densidades de traits (PRs 47 e 49); vignette tutorial `branch-rates` (PR 42).
+      Falta: revisão de nomes e argumentos; plot das taxas por ramo na árvore (hoje só um
+      auxiliar dentro da vignette) e da ordenação PCPS; mensagens de erro; decidir o estilo
+      gráfico, porque agora há dois: R base (plots de `node_test`, `phylo_beta`,
+      `trait_partition`, food web, traits multivariados) e ggplot2 em `Suggests` (plots de
+      traits de indivíduos e nulos).
 
 **Concluído quando:** cada opção tiver teste e exemplo em vignette.
 
