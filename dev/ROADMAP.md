@@ -746,6 +746,19 @@ pacotes de referência em vez de reimplementá-los.
       presença × trait); traits contínuos e colonização dependente de parentesco só por
       simulação.
 
+- [x] Análise de gradiente de traits de Ackerly & Cornwell (2007) (pedido em 2026-11-09):
+      `trait_gradient()`, `trait_gradient_weights()`, `trait_gradient_test()`,
+      `trait_gradient_phylo()` e `plot()`. Reimplementada das equações (o script do material
+      suplementar não tem licença; só foi lido e usado para conferir: `leave_one_out = FALSE`
+      bate com ele a 1e-14). Três correções: médias de sítio sem a espécie focal; pesos de
+      sítio e de espécie separados; nulo e erro (troca de médias entre espécies como nulo
+      padrão, curveball só para a correlação β–α, GLS por REML com erro de bootstrap em BM/OU).
+      Validação: o curveball rejeita 26–66% nos testes de variância sem triagem de traits, por
+      isso deixou de ser o padrão; o nulo por espécies fica em 4,7–7,3%, mas sobe a 10–17%
+      quando trait e nicho têm sinal filogenético (associação herdada). Auditoria Fable feita
+      e corrigida. Fica para depois: nulo com permutação restrita pela filogenia; modelo
+      bayesiano conjunto (β latente) em brms como exemplo.
+
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).
       PR 52: `plot_rates()` (taxas por ramo pintadas na árvore) e `plot()` do PCPS; mensagens de

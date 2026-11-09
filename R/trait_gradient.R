@@ -329,10 +329,18 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' `burn_in` trades and then `thin` trades between null communities. Because it also breaks
 #' the turnover of species along the gradient, the variances of \eqn{\beta} and \eqn{\alpha}
 #' differ from the null whenever composition changes among sites, even when traits are
-#' unrelated to it: species that share sites share their site means. In simulations with
-#' traits exchanged among species (no trait sorting), the variance tests under the curveball
-#' rejected in 23--57% of 200 replicates at the 5% level, whereas the test of the correlation
-#' rejected in 5.5%. Use the curveball for the correlation only.
+#' unrelated to it: species that share sites share their site means. Use the curveball for the
+#' correlation only.
+#'
+#' @section Validation:
+#' In simulated metacommunities (25 species, 20 sites, 150 replicates per scenario, 5% level,
+#' leave-one-out site means) with trait means drawn independently of the niches, the species
+#' null rejected in 4.7% (variance of \eqn{\beta}), 5.3% (variance of \eqn{\alpha}) and 7.3%
+#' (correlation) of replicates; the curveball rejected in 5.3% for the correlation but in
+#' 26--66% for the variances. With traits that sort species along the gradient, all tests
+#' rejected in 98--100%. When the trait and the niches both evolve along the tree, the species
+#' null rejected in 10--17% although the trait plays no part in assembly: related species share
+#' both sites and trait values, and the test detects that association, not its cause.
 #'
 #' **`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes the site of each
 #' population. It keeps the number of populations of each site but can place a species twice in

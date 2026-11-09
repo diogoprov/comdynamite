@@ -9,8 +9,11 @@
     `leave_one_out = FALSE` reproduces the original script.
   - The weights of site means and of species means are chosen separately;
     `trait_gradient_weights()` compares the four combinations.
-  - `trait_gradient_test()` uses a curveball null model that keeps the richness of sites and
-    the frequency of species, with the original permutation as an option.
+  - `trait_gradient_test()` exchanges the trait means of species among species by default,
+    keeping the communities as observed; a curveball null (richness of sites and frequency of
+    species fixed) and the original permutation are options. In simulations, the variance
+    tests under the curveball and the original permutation reject far too often when species
+    turn over along the gradient, so they are for the correlation of beta and alpha only.
   - `trait_gradient_phylo()` fits a model without phylogeny, Brownian motion and an OU process
     to beta, alpha and the species mean by REML, with the bootstrap standard errors of each
     value added to the covariance, and compares them by AIC.

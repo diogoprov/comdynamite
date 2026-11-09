@@ -45,15 +45,21 @@ plot(tg)
 
 ## Leaving the focal species out
 
-With the focal species inside the site means, \(\beta_i\) contains \(\bar t_i\). In poor sites
-this ties \(\beta\) to the trait of the species and makes \(\beta\) and \(\alpha\) look more
-related than they are.
+With the focal species inside the site means, \(\beta_i\) contains \(\bar t_i\), and the
+more so the fewer species share its sites. The original \(\beta\) is pulled toward the mean
+of the species itself; below are the species where the two versions differ most.
 
 ```{r}
 original <- trait_gradient(ind, abundance = "abundance", leave_one_out = FALSE)
-c(leave_one_out = cor(tg$species$beta, tg$species$alpha),
-  original = cor(original$species$beta, original$species$alpha))
+both <- data.frame(species = tg$species$species, mean = tg$species$mean,
+                   beta = tg$species$beta, beta_original = original$species$beta)
+head(both[order(-abs(both$beta - both$beta_original)), ])
 ```
+
+The raw correlation of \(\beta\) and \(\alpha\) is not readable on its own under either
+version, because \(\alpha = \bar t - \beta\): read it against a null model, as below. In
+simulations without trait sorting, the curveball test of the correlation rejected in 49% of
+replicates with the original site means and in 5% with the leave-one-out means.
 
 ## Weights
 
@@ -64,16 +70,26 @@ the four combinations of weights for sites and species and correlates them with 
 trait_gradient_weights(ind, abundance = "abundance")$correlation
 ```
 
-## Null model
+## Null models
 
-`trait_gradient_test()` moves species among sites with the curveball algorithm, which keeps
-the richness of every site and the number of sites of every species. Populations keep their
-trait values and abundances when they move.
+`trait_gradient_test()` exchanges the trait means of species among species and keeps the
+communities as observed, which tests whether species with similar traits live in similar
+communities.
 
 ```{r}
 test <- trait_gradient_test(tg, n_null = 199)
 test
 plot(test)
+```
+
+The curveball null moves species among sites instead, keeping the richness of every site and
+the number of sites of every species. It also breaks the turnover of species along the
+gradient, so its tests of the variances reject whenever composition changes among sites; use
+it for the correlation of \(\beta\) and \(\alpha\) only. The help page of
+`trait_gradient_test()` gives the error rates of both nulls in simulations.
+
+```{r}
+trait_gradient_test(tg, n_null = 199, null = "curveball")$statistics[1, ]
 ```
 
 ## Phylogeny
@@ -88,7 +104,9 @@ ph
 ```
 
 In this simulation the optima evolve by Brownian motion (`lambda = 1`), so \(\beta\), which
-follows the optima, should prefer Brownian motion over the model without phylogeny.
+follows the optima, should prefer Brownian motion over the model without phylogeny. A fit of
+the OU process with its strength at a bound is marked in `at_bound`: at the lower bound it is
+Brownian motion.
 
 ## References
 
