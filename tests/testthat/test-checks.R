@@ -33,3 +33,12 @@ test_that("other arguments are checked with their names", {
   comm <- matrix(1, 1, 2, dimnames = list(NULL, c("p", "q")))
   expect_error(damocles_loglik(comm, tree, 1, 1), "no species of `comm`")
 })
+
+test_that("plots and rarefaction name the bad argument", {
+  tree <- ape::rtree(5)
+  expect_error(plot_node_test(list(), tree), "`x` must come from node_test()")
+  expect_error(plot_phylo_beta(list(), matrix(1), tree), "`x` must come from phylo_beta_test()")
+  ind <- data.frame(site = rep(c("a", "b"), each = 6), species = rep(c("x", "y"), 6),
+                    trait = rnorm(12))
+  expect_error(trait_rarefaction(ind, n = "a"), "`n` must be whole numbers")
+})
