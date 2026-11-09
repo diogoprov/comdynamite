@@ -137,6 +137,10 @@ reference:
   - damocles_lrt
   - confint.mc_damocles_fit
   - clade_regimes
+  - damocles_samples
+  - damocles_partition_test
+  - random_regimes
+  - dr_rates
 
 articles:
 - title: Analysing data

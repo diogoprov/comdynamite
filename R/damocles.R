@@ -606,7 +606,7 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
       stop("`regimes` needs one regime for each edge of `tree`, in the order of `tree$edge`, ",
            "with no missing values", call. = FALSE)
     }
-    regimes <- factor(regimes)
+    regimes <- droplevels(factor(regimes))
     if (!is.null(tree$root.edge) && length(unique(regimes[at_root])) > 1) {
       stop(root_msg, call. = FALSE)
     }

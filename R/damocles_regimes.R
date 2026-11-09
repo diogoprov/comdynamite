@@ -13,7 +13,8 @@
 #' clades that hold them. Edges in no clade take the regime `background`.
 #'
 #' @param tree A rooted `phylo` tree.
-#' @param clades A named list of character vectors, the tips of each clade.
+#' @param clades A named list with, for each clade, a character vector of its tips or one node
+#'   number (of `tree`, as in `tree$edge`) at its base.
 #' @param background Name of the regime of the edges outside every clade.
 #' @param stem If `TRUE`, the stem edge of each clade belongs to it.
 #' @return A factor with one regime per edge of `tree`, in the order of `tree$edge`, with the
@@ -37,21 +38,24 @@ clade_regimes <- function(tree, clades, background = "background", stem = FALSE)
     stop("`background` must be one name, different from the names of `clades`", call. = FALSE)
   }
   n_tip <- ape::Ntip(tree)
-  preorder <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
   out <- rep(background, nrow(tree$edge))
   for (name in names(clades)) {
     tips <- clades[[name]]
-    unknown <- setdiff(tips, tree$tip.label)
-    if (length(unknown) > 0) {
-      stop("tips of clade ", name, " not in `tree`: ", species_list(unknown), call. = FALSE)
+    if (is.numeric(tips)) {
+      if (length(tips) != 1 || !tips %in% seq_len(n_tip + tree$Nnode)) {
+        stop("clade ", name, " must be one node of `tree`", call. = FALSE)
+      }
+      node <- tips
+      tips <- NULL
+    } else {
+      unknown <- setdiff(tips, tree$tip.label)
+      if (length(unknown) > 0) {
+        stop("tips of clade ", name, " not in `tree`: ", species_list(unknown), call. = FALSE)
+      }
+      node <- if (length(tips) == 1) match(tips, tree$tip.label) else ape::getMRCA(tree, tips)
     }
-    node <- if (length(tips) == 1) match(tips, tree$tip.label) else ape::getMRCA(tree, tips)
-    inside <- logical(n_tip + tree$Nnode)
-    inside[node] <- TRUE
-    for (e in preorder) {
-      if (inside[tree$edge[e, 1]]) inside[tree$edge[e, 2]] <- TRUE
-    }
-    if (sum(inside[seq_len(n_tip)]) > length(unique(tips))) {
+    inside <- damocles_below(tree, node)
+    if (!is.null(tips) && sum(inside[seq_len(n_tip)]) > length(unique(tips))) {
       warning("the tips of clade ", name, " are not monophyletic; it covers every ",
               "descendant of their common ancestor", call. = FALSE)
     }
@@ -180,6 +184,16 @@ confint.mc_damocles_fit <- function(object, parm = NULL, level = 0.95, ...) {
 }
 
 # --- internals ---------------------------------------------------------------------------
+
+# the nodes at or below `node`
+damocles_below <- function(tree, node) {
+  inside <- logical(ape::Ntip(tree) + tree$Nnode)
+  inside[node] <- TRUE
+  for (e in ape::reorder.phylo(tree, "cladewise", index.only = TRUE)) {
+    if (inside[tree$edge[e, 1]]) inside[tree$edge[e, 2]] <- TRUE
+  }
+  inside
+}
 
 damocles_total_loglik <- function(fit) attr(fit, "loglik_total") %||% sum(fit$loglik)
 

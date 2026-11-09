@@ -733,10 +733,15 @@ pacotes de referência em vez de reimplementá-los.
       relaxada (`sympatry`, probabilidade de as duas filhas ficarem presentes) feita em
       2026-11-08. Taxas por regime de ramo e com covariável por ramo (`regimes`,
       `edge_covariate`, `vary`), `clade_regimes()`, `damocles_lrt()` e `confint()` por perfil
-      feitos em 2026-11-08 (PR A das ressalvas). Falta o PR B: lista de configurações
-      (amostras da posterior de BAMM/ClaDS) com resumo; teste contra partições aleatórias de
-      mesma complexidade; exemplos de conversão em data-raw com BAMMtools e RPANDA (verificar
-      no Crossref a crítica publicada à BAMM antes de citar). Próximos, em ordem de
+      feitos em 2026-11-08 (PR A das ressalvas). PR B feito em 2026-11-08:
+      `damocles_samples()` (lista de configurações com resumo), `damocles_partition_test()` e
+      `random_regimes()` (partições aleatórias de mesma complexidade), `clade_regimes()` com
+      nós, `dr_rates()` (DR de Jetz et al. 2012), conversão de BAMM e ClaDS em
+      `data-raw/damocles_bamm.R` e `data-raw/damocles_clads.R`; `max_overlap` em
+      `random_regimes()` (sem ele o teste contra partições aleatórias não tinha poder). Falta:
+      checar se o teste contra partições aleatórias é levemente liberal (4/40 sem efeito) com
+      mais réplicas.
+      Próximos, em ordem de
       facilidade: taxas por época (quadratura do fator integrante, sem EDO); trait discreto coevoluindo com a presença (estado
       presença × trait); traits contínuos e colonização dependente de parentesco só por
       simulação.

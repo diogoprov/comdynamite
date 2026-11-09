@@ -9,7 +9,8 @@ clade_regimes(tree, clades, background = "background", stem = FALSE)
 \arguments{
 \item{tree}{A rooted \code{phylo} tree.}
 
-\item{clades}{A named list of character vectors, the tips of each clade.}
+\item{clades}{A named list with, for each clade, a character vector of its tips or one node
+number (of \code{tree}, as in \code{tree$edge}) at its base.}
 
 \item{background}{Name of the regime of the edges outside every clade.}
 
