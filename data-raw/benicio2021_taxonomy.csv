@@ -7,7 +7,6 @@
 "Adenomera_marmorata","Adenomera_marmorata","Adenomera_marmorata","Adenomera_marmorata","match","",TRUE
 "Adenomerasp_J","Adenomera_sp_J","Adenomera_sp_J",NA,"graft","",TRUE
 "Agalychnis_callidryas",NA,"Agalychnis_callidryas","Agalychnis_callidryas","match","",FALSE
-"Agalychnis_granulosa",NA,"Agalychnis_granulosa","Hylomantis_granulosa","rename","Agalychnis granulosa is now in Hylomantis",FALSE
 "Allobates_femoralis",NA,"Allobates_femoralis","Allobates_femoralis","match","",FALSE
 "Allobates_zaparo",NA,"Allobates_zaparo","Allobates_zaparo","match","",FALSE
 "Allophryne_ruthveni",NA,"Allophryne_ruthveni","Allophryne_ruthveni","match","",FALSE
@@ -27,35 +26,35 @@
 "Aplastodiscus_weygoldti",NA,"Aplastodiscus_weygoldti","Aplastodiscus_weygoldti","match","",FALSE
 "Arcovomer_passarellii",NA,"Arcovomer_passarellii","Arcovomer_passarellii","match","",FALSE
 "Barycholos_ternetzi",NA,"Barycholos_ternetzi","Barycholos_ternetzi","match","",FALSE
-"Hypsiboas_albomarginatus","Hypsiboas_albomarginatus","Boana_albomarginatus","Boana_albomarginata","rename","",TRUE
+"Hypsiboas_albomarginatus","Hypsiboas_albomarginatus","Boana_albomarginata","Boana_albomarginata","rename","",TRUE
 "Hypsiboas_albopunctata","Hypsiboas_albopunctata","Boana_albopunctata","Boana_albopunctata","rename","",TRUE
-"Hypsiboas_alfarroi",NA,"Boana_alfarroi","Boana_alfaroi","rename","",FALSE
+"Hypsiboas_alfarroi",NA,"Boana_alfaroi","Boana_alfaroi","rename","",FALSE
 "Hypsiboas_bandeirantes","Hypsiboas_bandeirantes","Boana_bandeirantes","Boana_bandeirantes","rename","",TRUE
-"Hypsiboas_bischoffi","Hypsiboas_bischoffii","Boana_bischoffii","Boana_bischoffi","rename","",TRUE
+"Hypsiboas_bischoffi","Hypsiboas_bischoffii","Boana_bischoffi","Boana_bischoffi","rename","",TRUE
 "Hypsiboas_caingua","Hypsiboas_caingua","Boana_caingua","Boana_caingua","rename","",TRUE
 "Hypsiboascaipora","Hypsiboas_caipora","Boana_caipora","Boana_caipora","rename","",TRUE
-"Hypsiboas_calcaratus",NA,"Boana_calcaratus","Boana_calcarata","rename","",FALSE
+"Hypsiboas_calcaratus",NA,"Boana_calcarata","Boana_calcarata","rename","",FALSE
 "Hypsiboas_crepitans",NA,"Boana_crepitans","Boana_crepitans","rename","",FALSE
 "Hypsiboas_ericae",NA,"Boana_ericae","Boana_ericae","rename","",FALSE
 "Hypsiboas_faber","Hypsiboas_faber","Boana_faber","Boana_faber","rename","",TRUE
-"Hypsiboas_fasciatus",NA,"Boana_fasciatus","Boana_fasciata","rename","",FALSE
+"Hypsiboas_fasciatus",NA,"Boana_fasciata","Boana_fasciata","rename","",FALSE
 "Hypsiboas_joaquini",NA,"Boana_joaquini","Boana_joaquini","rename","",FALSE
 "Hypsiboas_lanciformis",NA,"Boana_lanciformis","Boana_lanciformis","rename","",FALSE
-"Hypsiboas_leptolineatus",NA,"Boana_leptolineatus","Boana_leptolineata","rename","",FALSE
+"Hypsiboas_leptolineatus",NA,"Boana_leptolineata","Boana_leptolineata","rename","",FALSE
 "Hypsiboas_lundii","Hypsiboas_lundii","Boana_lundii","Boana_lundii","rename","",TRUE
-"Hypsiboas_marginatus",NA,"Boana_marginatus","Boana_marginata","rename","",FALSE
-"Hypsiboas_multifasciatus",NA,"Boana_multifasciatus","Boana_multifasciata","rename","",FALSE
+"Hypsiboas_marginatus",NA,"Boana_marginata","Boana_marginata","rename","",FALSE
+"Hypsiboas_multifasciatus",NA,"Boana_multifasciata","Boana_multifasciata","rename","",FALSE
 "Hypsiboas_pardalis","Hypsiboas_pardalis","Boana_pardalis","Boana_pardalis","rename","",TRUE
-"Hypsiboas_polytaenius",NA,"Boana_polytaenius","Boana_polytaenia","rename","",FALSE
-"Hypsiboas_pulchellus","Hypsiboas_pulchellus","Boana_pulchellus","Boana_pulchella","rename","",TRUE
-"Hypsiboas_semiguttatus",NA,"Boana_semiguttatus","Boana_semiguttata","rename","",FALSE
-"Hypsiboas_semilineatus","Hypsiboas_semilineatus","Boana_semilineatus","Boana_semilineata","rename","",TRUE
+"Hypsiboas_polytaenius",NA,"Boana_polytaenia","Boana_polytaenia","rename","",FALSE
+"Hypsiboas_pulchellus","Hypsiboas_pulchellus","Boana_pulchella","Boana_pulchella","rename","",TRUE
+"Hypsiboas_semiguttatus",NA,"Boana_semiguttata","Boana_semiguttata","rename","",FALSE
+"Hypsiboas_semilineatus","Hypsiboas_semilineatus","Boana_semilineata","Boana_semilineata","rename","",TRUE
 "Hypsiboas_sibleszi",NA,"Boana_sibleszi","Boana_sibleszi","rename","",FALSE
 "Bokermannohyla_alvarengai",NA,"Bokermannohyla_alvarengai","Bokermannohyla_alvarengai","match","",FALSE
-"Bokermannohyla_izecksoni","Bokermannohyla_izecksoni","Bokermannohyla_izecksoni",NA,"graft","",TRUE
-"Bokermannohyla_astartea","Bokermanohyla_astartea","Bokermanohyla_astartea","Bokermannohyla_astartea","match","",TRUE
-"Bokermannohyla_circumdata","Bokermanohyla_circumdata","Bokermanohyla_circumdata","Bokermannohyla_circumdata","match","",TRUE
-"Bokermannohyla_hylax","Bokermanohyla_hylax","Bokermanohyla_hylax","Bokermannohyla_hylax","match","",TRUE
+"Bokermannohyla_astartea","Bokermanohyla_astartea","Bokermannohyla_astartea","Bokermannohyla_astartea","match","",TRUE
+"Bokermannohyla_circumdata","Bokermanohyla_circumdata","Bokermannohyla_circumdata","Bokermannohyla_circumdata","match","",TRUE
+"Bokermannohyla_hylax","Bokermanohyla_hylax","Bokermannohyla_hylax","Bokermannohyla_hylax","match","",TRUE
+"Bokermannohyla_izecksoni","Bokermannohyla_izecksoni","Bokermannohyla_izecksohni",NA,"graft","",TRUE
 "Brachycephalus_ephippium",NA,"Brachycephalus_ephippium","Brachycephalus_ephippium","match","",FALSE
 "Brachycephalus_pitanga","Brachycephalus_pitanga","Brachycephalus_pitanga","Brachycephalus_pitanga","match","",TRUE
 "Ceratophrys_aurita",NA,"Ceratophrys_aurita","Ceratophrys_aurita","match","",FALSE
@@ -63,12 +62,12 @@
 "Ceratophrys_joazeirensis",NA,"Ceratophrys_joazeirensis","Ceratophrys_joazeirensis","match","",FALSE
 "Ceratophrys_ornata",NA,"Ceratophrys_ornata","Ceratophrys_ornata","match","",FALSE
 "Chiasmocleis_albopunctata","Chiasmocleis_albopunctata","Chiasmocleis_albopunctata","Chiasmocleis_albopunctata","match","",TRUE
-"Chiasmocleis_cruci",NA,"Chiasmocleis_cruci","Chiasmocleis_crucis","rename","",FALSE
+"Chiasmocleis_cruci",NA,"Chiasmocleis_crucis","Chiasmocleis_crucis","rename","",FALSE
 "Chiasmocleis_leucosticta","Chiasmocleis_leucosticta","Chiasmocleis_leucosticta","Chiasmocleis_leucosticta","match","",TRUE
 "Chiasmocleis_mantiqueira",NA,"Chiasmocleis_mantiqueira","Chiasmocleis_mantiqueira","match","",FALSE
 "Corythomantis_greeningi",NA,"Corythomantis_greeningi","Corythomantis_greeningi","match","",FALSE
 "Crossodactylus_caramaschii","Crossodactylus_caramaschii","Crossodactylus_caramaschii","Crossodactylus_caramaschii","match","",TRUE
-"Crossodactylus_schmdti",NA,"Crossodactylus_schmdti","Crossodactylus_schmidti","rename","",FALSE
+"Crossodactylus_schmdti",NA,"Crossodactylus_schmidti","Crossodactylus_schmidti","rename","",FALSE
 "Cycloramphus_acangatan","Cycloramphus_acangatan","Cycloramphus_acangatan","Cycloramphus_acangatan","match","",TRUE
 "Cycloramphus_boraceiensis","Cycloramphus_boraceiensis","Cycloramphus_boraceiensis","Cycloramphus_boraceiensis","match","",TRUE
 "Cycloramphus_eleutherodactylus","Cycloramphus_eleutherodactylus","Cycloramphus_eleutherodactylus","Cycloramphus_eleutherodactylus","match","",TRUE
@@ -77,9 +76,9 @@
 "Dendrobates_auratus",NA,"Dendrobates_auratus","Dendrobates_auratus","match","",FALSE
 "Dendrobates_leucomelas",NA,"Dendrobates_leucomelas","Dendrobates_leucomelas","match","",FALSE
 "Dendrobates_tinctorius",NA,"Dendrobates_tinctorius","Dendrobates_tinctorius","match","",FALSE
-"Dendrophryniscus_brevipollicatus","Dendrophryniscus_brevipolicatus","Dendrophryniscus_brevipolicatus","Dendrophryniscus_brevipollicatus","match","",TRUE
+"Dendrophryniscus_brevipollicatus","Dendrophryniscus_brevipolicatus","Dendrophryniscus_brevipollicatus","Dendrophryniscus_brevipollicatus","match","",TRUE
 "Dendrophryniscus_leucomystax",NA,"Dendrophryniscus_leucomystax","Dendrophryniscus_leucomystax","match","",FALSE
-"Dendrophryniscus_sp","Dendrophryniscus_sp.","Dendrophryniscus_sp.",NA,"graft","",TRUE
+"Dendrophryniscus_sp","Dendrophryniscus_sp.","Dendrophryniscus_sp",NA,"graft","",TRUE
 "Dendropsophus_anceps",NA,"Dendropsophus_anceps","Dendropsophus_anceps","match","",FALSE
 "Dendropsophus_berthalutzae","Dendropsophus_berthalutzae","Dendropsophus_berthalutzae","Dendropsophus_berthalutzae","match","",TRUE
 "Dendropsophus_ebraccatus",NA,"Dendropsophus_ebraccatus","Dendropsophus_ebraccatus","match","",FALSE
@@ -102,7 +101,7 @@
 "Elachistocleis_cesarii","Elachistocleis_cesarii","Elachistocleis_cesarii","Elachistocleis_cesarii","match","",TRUE
 "Engystomops_petersi",NA,"Engystomops_petersi","Engystomops_petersi","match","",FALSE
 "Euparkerella_brasiliensis",NA,"Euparkerella_brasiliensis","Euparkerella_brasiliensis","match","",FALSE
-"Fritziana_aff._fissilis","Fritziana_aff._fissilis","Fritziana_aff._fissilis",NA,"graft","",TRUE
+"Fritziana_aff._fissilis","Fritziana_aff._fissilis","Fritziana_aff_fissilis",NA,"graft","",TRUE
 "Fritziana_goeldii",NA,"Fritziana_goeldii","Fritziana_goeldii","match","",FALSE
 "Fritziana_ohausi",NA,"Fritziana_ohausi","Fritziana_ohausi","match","",FALSE
 "Gastrotheca_cornuta",NA,"Gastrotheca_cornuta","Gastrotheca_cornuta","match","",FALSE
@@ -113,16 +112,17 @@
 "Holoaden_luederwaldti",NA,"Holoaden_luederwaldti","Holoaden_luederwaldti","match","",FALSE
 "Hylodes_asper","Hylodes_asper","Hylodes_asper","Hylodes_asper","match","",TRUE
 "Hylodes_dactylocinus","Hylodes_dactylocinus","Hylodes_dactylocinus","Hylodes_dactylocinus","match","",TRUE
-"Hylodes_hayeri",NA,"Hylodes_hayeri","Hylodes_heyeri","rename","",FALSE
+"Hylodes_hayeri",NA,"Hylodes_heyeri","Hylodes_heyeri","rename","",FALSE
 "Hylodes_phyllodes","Hylodes_phyllodes","Hylodes_phyllodes","Hylodes_phyllodes","match","",TRUE
 "Hylodes_sazimai","Hylodes_sazimai","Hylodes_sazimai","Hylodes_sazimai","match","",TRUE
-"Ischnocnemaguentheri_C1","Ischnocnema_guentheri_C1","Ischnocnema_guentheri_C1",NA,"graft","lineage of the I. guentheri complex; check against current taxonomy",TRUE
-"Ischnocnemaguentheri_C3","Ischnocnema_guentheri_C3","Ischnocnema_guentheri_C3",NA,"graft","lineage of the I. guentheri complex; check against current taxonomy",TRUE
-"Ischnocnemaguentheri_C4","Ischnocnema_guentheri_C4","Ischnocnema_guentheri_C4",NA,"graft","lineage of the I. guentheri complex; check against current taxonomy",TRUE
-"Ischnocnema_henseli","Ischnocnema_henseli","Ischnocnema_henseli","Ischnocnema_henselii","rename","",TRUE
+"Agalychnis_granulosa",NA,"Hylomantis_granulosa","Hylomantis_granulosa","rename","Agalychnis granulosa is now in Hylomantis",FALSE
+"Ischnocnema_henseli","Ischnocnema_henseli","Ischnocnema_henselii","Ischnocnema_henselii","rename","",TRUE
 "Ischnocnema_holti",NA,"Ischnocnema_holti","Ischnocnema_holti","match","",FALSE
 "Ischnocnema_juipoca",NA,"Ischnocnema_juipoca","Ischnocnema_juipoca","match","",FALSE
 "Ischnocnema_parva","Ischnocnema_parva","Ischnocnema_parva","Ischnocnema_parva","match","",TRUE
+"Ischnocnemaguentheri_C1","Ischnocnema_guentheri_C1","Ischnocnema_sp1",NA,"graft","Ischnocnema guentheri C1 of Benicio et al., unnamed lineage",TRUE
+"Ischnocnemaguentheri_C3","Ischnocnema_guentheri_C3","Ischnocnema_sp2",NA,"graft","Ischnocnema guentheri C3 of Benicio et al., unnamed lineage",TRUE
+"Ischnocnemaguentheri_C4","Ischnocnema_guentheri_C4","Ischnocnema_sp3",NA,"graft","Ischnocnema guentheri C4 of Benicio et al., unnamed lineage",TRUE
 "Itapotihyla_langsdorffii","Itapotihyla_langsdorffii","Itapotihyla_langsdorffii","Itapotihyla_langsdorffii","match","",TRUE
 "Leptodactylus_chaquensis","Leptodactylus_chaquensis","Leptodactylus_chaquensis","Leptodactylus_chaquensis","match","",TRUE
 "Leptodactylus_flavopictus","Leptodactylus_flavopictus","Leptodactylus_flavopictus","Leptodactylus_flavopictus","match","",TRUE
@@ -137,11 +137,9 @@
 "Leptodactylus_podicipinus","Leptodactylus_podicipinus","Leptodactylus_podicipinus","Leptodactylus_podicipinus","match","",TRUE
 "Leptodactylus_rhodomystax",NA,"Leptodactylus_rhodomystax","Leptodactylus_rhodomystax","match","",FALSE
 "Limnomedusa_macroglossa",NA,"Limnomedusa_macroglossa","Limnomedusa_macroglossa","match","",FALSE
+"Lysapus_laevis",NA,"Lysapsus_laevis","Lysapsus_laevis","rename","",FALSE
 "Lysapsus_limellum",NA,"Lysapsus_limellum","Lysapsus_limellum","match","",FALSE
-"Lysapus_laevis",NA,"Lysapus_laevis","Lysapsus_laevis","rename","",FALSE
 "Macrogenioglottus_alipioi",NA,"Macrogenioglottus_alipioi","Macrogenioglottus_alipioi","match","",FALSE
-"Megaelosia_aff._boticariana","Megaelosia_aff._boticariana","Megaelosia_aff._boticariana",NA,"graft","distinct from M. boticariana in the 248-species tree",TRUE
-"Megaelosia_boticariana",NA,"Megaelosia_boticariana","Phantasmarana_boticariana","rename","Megaelosia boticariana is now in Phantasmarana",FALSE
 "Megaelosia_goeldii",NA,"Megaelosia_goeldii","Megaelosia_goeldii","match","",FALSE
 "Melanophryniscus_devincenzii",NA,"Melanophryniscus_devincenzii","Melanophryniscus_devincenzii","match","",FALSE
 "Melanophryniscus_moreirae",NA,"Melanophryniscus_moreirae","Melanophryniscus_moreirae","match","",FALSE
@@ -150,10 +148,12 @@
 "Odontophrynus_carvalhoi",NA,"Odontophrynus_carvalhoi","Odontophrynus_carvalhoi","match","",FALSE
 "Odontophrynus_cultripes",NA,"Odontophrynus_cultripes","Odontophrynus_cultripes","match","",FALSE
 "Osteocephalus_taurinus",NA,"Osteocephalus_taurinus","Osteocephalus_taurinus","match","",FALSE
-"Paratelmatobius_aff._cardosoi",NA,"Paratelmatobius_aff._cardosoi",NA,"graft","",FALSE
+"Paratelmatobius_aff._cardosoi",NA,"Paratelmatobius_aff_cardosoi",NA,"graft","",FALSE
 "Paratelmatobius_cardosoi","Paratelmatobius_cardosoi","Paratelmatobius_cardosoi","Paratelmatobius_cardosoi","match","",TRUE
 "Paratelmatobius_gaigeae","Paratelmatobius_gaigeae","Paratelmatobius_gaigeae","Paratelmatobius_gaigeae","match","",TRUE
 "Paratelmatobius_poecilogaster",NA,"Paratelmatobius_poecilogaster","Paratelmatobius_poecilogaster","match","",FALSE
+"Megaelosia_aff._boticariana","Megaelosia_aff._boticariana","Phantasmarana_aff_boticariana",NA,"graft","distinct from M. boticariana in the 248-species tree",TRUE
+"Megaelosia_boticariana",NA,"Phantasmarana_boticariana","Phantasmarana_boticariana","rename","Megaelosia boticariana is now in Phantasmarana",FALSE
 "Phasmahyla_cochranae",NA,"Phasmahyla_cochranae","Phasmahyla_cochranae","match","",FALSE
 "Phasmahyla_exilis",NA,"Phasmahyla_exilis","Phasmahyla_exilis","match","",FALSE
 "Phasmahyla_guttata",NA,"Phasmahyla_guttata","Phasmahyla_guttata","match","",FALSE
@@ -213,7 +213,7 @@
 "Rhinella_ornata","Rhinella_ornata","Rhinella_ornata","Rhinella_ornata","match","",TRUE
 "Rhinella_pygmaea",NA,"Rhinella_pygmaea","Rhinella_pygmaea","match","",FALSE
 "Rhinella_schneideri","Rhinella_schneideri","Rhinella_schneideri","Rhinella_schneideri","match","",TRUE
-"Scinax_argyreonatus","Scinax_argyreonatus","Scinax_argyreonatus","Scinax_argyreornatus","rename","",TRUE
+"Scinax_argyreonatus","Scinax_argyreonatus","Scinax_argyreornatus","Scinax_argyreornatus","rename","",TRUE
 "Scinax_crospedospilus","Scinax_crospedospilus","Scinax_crospedospilus","Scinax_crospedospilus","match","",TRUE
 "Scinax_fuscomarginatus","Scinax_fuscomarginatus","Scinax_fuscomarginatus","Scinax_fuscomarginatus","match","",TRUE
 "Scinax_fuscovarius","Scinax_fuscovarius","Scinax_fuscovarius","Scinax_fuscovarius","match","",TRUE
@@ -222,7 +222,7 @@
 "Scinax_littoralis","Scinax_littoralis","Scinax_littoralis","Scinax_littoralis","match","",TRUE
 "Scinax_nasicus",NA,"Scinax_nasicus","Scinax_nasicus","match","",FALSE
 "Scinax_obtriangulatus","Scinax_obtriangulatus","Scinax_obtriangulatus","Scinax_obtriangulatus","match","",TRUE
-"Scinaxperereca-aff.hayii","Scinax_perereca__aff.hayii","Scinax_perereca__aff.hayii","Scinax_perereca","rename","labelled Scinax_perereca in the feng tree of Benicio et al.",TRUE
+"Scinaxperereca-aff.hayii","Scinax_perereca__aff.hayii","Scinax_perereca","Scinax_perereca","rename","labelled Scinax_perereca in the feng tree of Benicio et al.",TRUE
 "Scinax_perpusillus","Scinax_perpusillus","Scinax_perpusillus","Scinax_perpusillus","match","",TRUE
 "Scinax_rizibilis","Scinax_rizibilis","Scinax_rizibilis","Scinax_rizibilis","match","",TRUE
 "Scinax_ruber",NA,"Scinax_ruber","Scinax_ruber","match","",FALSE

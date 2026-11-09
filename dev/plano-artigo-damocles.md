@@ -59,21 +59,21 @@ Tudo em `data-raw/` no checkout principal, sem commit. A pasta `data-raw` está 
 
 - Feito por `data-raw/benicio2021_trees.R`, que escreve `data-raw/benicio2021_taxonomy.csv`
   (nome na árvore de 248, nome na matriz, nome canônico, nome no Portik, ação, nota). O nome
-  canônico é o da matriz, para os dados casarem sem conversão.
+  canônico é o do Portik quando existe, senão um nome corrigido; a matriz casa com as árvores
+  por `comm_name` → `name`.
 - Das 248: 202 casam direto, 34 por renomeação (gênero gramatical em *Boana*, grafias,
   *Hylomantis granulosa*, *Phantasmarana boticariana*, *Scinax perereca*) e 12 são
   enxertadas, 10 delas nas comunidades: *Adenomera* sp. J, *Aplastodiscus* sp. 5,
-  *Bokermannohyla izecksoni*, *Dendrophryniscus* sp., *Fritziana* aff. *fissilis*, as três
-  linhagens de *Ischnocnema guentheri*, *Megaelosia* aff. *boticariana*, *Paratelmatobius*
-  aff. *cardosoi*, *Phrynomedusa dryade*, *Rhinella fernandezae*.
+  *Bokermannohyla izecksohni*, *Dendrophryniscus* sp., *Fritziana* aff. *fissilis*,
+  *Ischnocnema* sp1–sp3, *Phantasmarana* aff. *boticariana*, *Paratelmatobius* aff.
+  *cardosoi*, *Phrynomedusa dryade*, *Rhinella fernandezae*.
 - Enxerto: no ramo-tronco do ancestral comum (no Portik) das espécies do pool que formam o
   clado-irmão na árvore de Benício, na mesma altura relativa entre esse ancestral e o pai.
   Sempre sobre o pool de 248, que contém os clados-irmãos de todas, e depois podado.
-- *Ischnocnema guentheri* C1, C3 e C4: enxertadas como linhagens distintas (o Portik só tem
-  *I. guentheri* e *I. henselii*). Separam-se de *I. henselii* a cerca de 20–23 Ma na árvore
-  resultante, o que vem da datação do Portik. **Falta conferir** a taxonomia atual do
-  complexo; se alguma linhagem corresponder a *I. guentheri* sensu stricto, ela passa a casar
-  direto.
+- *Ischnocnema guentheri* C1, C3 e C4 (decidido em 2026-11-09): linhagens ainda sem nome e
+  com divergências antigas, tratadas como *Ischnocnema* sp1, sp2 e sp3. Enxertadas como
+  táxons distintos; separam-se de *I. henselii* a cerca de 20–23 Ma na árvore resultante.
+
 ### 2.2 Definição do pool regional (decisão central)
 
 - Com a árvore de 112 espécies, o pool é a união das 14 comunidades: nenhuma espécie está
@@ -84,12 +84,24 @@ Tudo em `data-raw/` no checkout principal, sem commit. A pasta `data-raw` está 
   mais entraram por terem sequências no GenBank, para apoiar a inferência. A lista confirma:
   inclui espécies do Nordeste, como *Adelophryne baturitensis*, e da Amazônia. Serve como
   análise de sensibilidade, não como pool principal.
-- Com a árvore do Portik (5.326 espécies), o pool pode ser qualquer lista. Pool principal
-  proposto: as espécies da Mata Atlântica de São Paulo (ou da Serra do Mar e do interior
-  paulista) no ATLANTIC AMPHIBIANS, que também alimenta E6. A lista precisa da mesma
-  harmonização de nomes, e as espécies sem posição no Portik são enxertadas ou excluídas.
+- **Pool regional (decidido em 2026-11-09): Mata Atlântica da Serra do Mar e do interior,
+  incluindo as regiões de Cerrado.** Operacionalizado como os anuros com nome válido nos 447
+  sítios do ATLANTIC AMPHIBIANS no estado de São Paulo, que cobrem costa, Serra do Mar e
+  interior, e contêm as 14 áreas. Ficam de fora *Rana catesbeiana* (introduzida) e
+  *I. guentheri*: os registros paulistas do complexo são tomados como as linhagens sp1–sp3,
+  que entram pelas comunidades, para não contar o complexo duas vezes. Somam-se as 10
+  espécies das comunidades sem nome válido no ATLANTIC AMPHIBIANS. Total: 222 espécies
+  (`data-raw/benicio2021_regional_pool.csv`).
+  - 199 casam com o Portik (com *Ololygon* → *Scinax*, *Pithecopus* → *Phyllomedusa*,
+    *Phantasmarana* e gênero do epíteto);
+  - 9 são enxertos guiados pela árvore de Benício;
+  - 14 são enxertadas em ponto uniforme sobre os ramos do clado dos congêneres, sorteado de
+    novo em cada árvore. Para as ex-*Ololygon*, o clado é o grupo *catharinae* (21 pontas,
+    32 Ma). A mais frequente é *Scinax hiemalis* (41 sítios); as demais têm de 1 a 6 sítios.
+  - Limite: os registros sem nome válido (526 em SP) ficam de fora; "sp." e "aff." de estudos
+    diferentes não são comparáveis.
 - Plano:
-  - pool regional do ATLANTIC AMPHIBIANS como análise principal;
+  - pool regional como análise principal;
   - pools de 112 e de 248 como sensibilidade;
   - a simulação S6 quantifica o viés esperado.
 - Costa e interior: o DAMOCLES assume um único pool. Duas formas, a comparar:
@@ -209,16 +221,17 @@ num PR próprio.
 
 ## 4. Caso de estudo: ordem das análises
 
-- **E1. Taxonomia e árvore do pool (feito em 2026-11-09, exceto o pool regional):**
-  `data-raw/benicio2021_trees.R` constrói a tabela de 2.1 e poda a melhor árvore do Portik
-  e os 100 bootstraps até 248 e 112 espécies, com os enxertos. Idades da raiz: 166 Ma para
-  248 (bootstraps de 160 a 195) e 115 Ma para 112 (106 a 154). A distância RF normalizada à
-  árvore de Benício é 0,20 para 248 e 0,19 para 112. Falta o pool regional (2.2).
+- **E1. Taxonomia e árvore do pool (feito em 2026-11-09):** `data-raw/benicio2021_trees.R`
+  constrói as tabelas de 2.1 e 2.2 e uma árvore-mestre por árvore do Portik (melhor e 100
+  bootstraps), com todos os enxertos; cada pool é podado dela. Idades da raiz: 115 Ma para
+  112 e para o pool regional (bootstraps de 106 a 154) e 166 Ma para 248 (160 a 195). A
+  distância RF normalizada à árvore de Benício é 0,19 para 112 e 0,20 para 248.
   - **Piloto de tempo** (melhor árvore, 14 comunidades, um núcleo): `damocles_fit(shared =
     TRUE)` leva 0,8 s com 112 espécies e 1,6 s com 248; com DR como covariável de γ, 2,4 s e
     3,3 s; um ajuste por comunidade, 10 s e 14 s. Com 6 núcleos, 1.000 réplicas de S1 com
     três modelos cada levam algo como 15–30 min por cenário, e os 100 bootstraps, poucos
-    minutos. O custo não limita o plano com estes tamanhos; pools de milhares de espécies
+    minutos. Com o pool regional (222), o ajuste constante leva 1,4 s. O custo não limita o
+    plano com estes tamanhos; pools de milhares de espécies
     (E6) ainda precisam de piloto próprio.
 - **E2. Regimes e taxas:**
   - BAMM do Vasquez-Restrepo: o zip tem o event data de cada uma das 100 corridas de
@@ -263,10 +276,10 @@ Tomadas em 2026-11-09:
 3. Baixar a parte de anfíbios do Figshare, depois de conferir o conteúdo.
 4. Contatar Etienne e Pigot só quando houver resultado concreto.
 
-Pendentes:
+5. Pool regional: Mata Atlântica da Serra do Mar e do interior, com o Cerrado (2.2).
+6. *Ischnocnema guentheri* C1, C3 e C4 como *Ischnocnema* sp1–sp3 (2.1).
 
-1. *Ischnocnema guentheri* C1, C3 e C4: conferir a taxonomia atual do complexo (2.1).
-2. Recorte geográfico do pool regional no ATLANTIC AMPHIBIANS (2.2).
+Pendentes: nenhuma no momento.
 
 ## 7. Riscos
 
