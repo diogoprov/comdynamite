@@ -31,8 +31,8 @@ alone do not count); species with fewer sites, or not in \code{tree}, are left o
 \value{
 An object of class \code{mc_trait_gradient_phylo}, a list with \code{models} (one row per
 response and model: \code{response}, \code{model}, \code{mu}, \code{sigma2}, \code{a}, \code{half_life} (\eqn{\ln 2 / a},
-in units of branch length), \code{loglik}, \code{n_par}, \code{aic} and \code{delta_aic} within each
-response), \code{data} (one row per species used: values and standard errors) and \code{tree}
+in units of branch length), \code{at_bound} (an OU fit with \eqn{a} at a bound), \code{loglik},
+\code{n_par}, \code{aic} and \code{delta_aic} within each response), \code{data} (one row per species used: values and standard errors) and \code{tree}
 (the tree pruned to those species).
 }
 \description{
@@ -59,7 +59,16 @@ Ornstein-Uhlenbeck process with a root at \eqn{\mu} and strength \eqn{a},
 where \eqn{d_i} is the distance from the root to tip \eqn{i} and \eqn{s_{ij}} the length
 shared by \eqn{i} and \eqn{j}. The parameters are estimated by restricted maximum
 likelihood, so AIC compares the covariance models with the same mean. Without the error
-term, species with few sites, whose values are noisy, would look like fast evolution.
+term, the noise of species seen in few sites passes for evolution near the tips, which an
+OU process fits better: in simulations of \eqn{\beta} under Brownian motion (100
+replicates, 30 species, 25 sites), AIC chose OU in 22 without the error term and in 9 with
+it.
+
+\eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
+lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
+such fits are marked in \code{at_bound} and their half-life is \code{NA}. AIC differences among three
+models fitted to few species are unstable, and the bootstrap standard error of a species
+seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

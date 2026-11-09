@@ -118,15 +118,25 @@ test_that("trait_gradient_test() returns the statistics and species tests", {
   d <- tg_sim()
   tg <- trait_gradient(d$ind, abundance = "abundance")
   set.seed(3)
-  res <- trait_gradient_test(tg, n_null = 19, burn_in = 50, thin = 5)
+  k <- nrow(tg$species)
+  res <- trait_gradient_test(tg, n_null = 19)
   expect_s3_class(res, "mc_trait_gradient_test")
+  expect_equal(res$settings$null, "species")
+  expect_null(res$settings$thin)
   expect_equal(res$statistics$statistic, c("cor_beta_alpha", "var_beta", "var_alpha"))
-  expect_equal(nrow(res$species), nrow(tg$species))
-  expect_equal(dim(res$null), c(19, 3 + 2 * nrow(tg$species)))
+  expect_named(res$species, c("species", "beta", "ses_beta", "p_beta", "alpha", "ses_alpha",
+                              "p_alpha"))
+  expect_equal(dim(res$null), c(19, 3 + 2 * k))
   expect_true(all(res$statistics$p > 0 & res$statistics$p <= 1))
-  expect_output(print(res), "curveball")
+  expect_output(print(res), "species")
+  cb <- trait_gradient_test(tg, n_null = 9, null = "curveball", burn_in = 50, thin = 5)
+  expect_named(cb$species, c("species", "beta", "ses_beta", "p_beta"))
+  expect_equal(dim(cb$null), c(9, 3 + k))
+  expect_equal(trait_gradient_test(tg, n_null = 2, null = "curveball")$settings$thin,
+               5 * nrow(tg$sites))
   perm <- trait_gradient_test(tg, n_null = 9, null = "permute")
   expect_equal(perm$settings$null, "permute")
+  expect_error(trait_gradient_test(tg, n_null = 2, null = "curveball", thin = 0), "`thin`")
   expect_error(trait_gradient_test(list()), "come from trait_gradient")
   expect_error(trait_gradient_test(tg, n_null = 0), "`n_null`")
 })
@@ -182,4 +192,51 @@ test_that("plots of the trait-gradient analysis", {
   expect_ggplot(plot(tg, type = "beta_alpha", species_labels = TRUE))
   expect_ggplot(plot(trait_gradient_test(tg, n_null = 9, burn_in = 10, thin = 2)))
   expect_error(plot(tg, colour = c("red", "blue")))
+})
+
+test_that("the null models start from the observed values with every choice of weights", {
+  ab <- transform(toy, abundance = c(5, 1, 2, 1, 1, 1))
+  for (sw in c("abundance", "occurrence")) for (pw in c("abundance", "occurrence")) {
+    for (loo in c(TRUE, FALSE)) {
+      tg <- trait_gradient(ab, abundance = "abundance", site_weights = sw, species_weights = pw,
+                           leave_one_out = loo)
+      again <- tg_compute(tg_records(tg), tg$settings, slopes = FALSE)
+      expect_equal(tg_null_stats(again), tg_null_stats(tg))
+    }
+  }
+})
+
+test_that("n_alone counts sites with one species with or without leave-one-out", {
+  lonely <- rbind(toy, data.frame(site = c("D", "E"), species = "s4", trait = c(7, 8),
+                                  abundance = 1))
+  loo <- trait_gradient(lonely)$species
+  orig <- trait_gradient(lonely, leave_one_out = FALSE)$species
+  expect_equal(loo$n_alone, orig$n_alone)
+  expect_equal(orig$n_alone[4], 2L)
+  expect_true(is.na(loo$beta[4]))
+  expect_equal(orig$beta[4], orig$mean[4])
+})
+
+test_that("the species null exchanges species means and keeps the communities", {
+  d <- tg_sim()
+  tg <- trait_gradient(d$ind, abundance = "abundance")
+  set.seed(6)
+  res <- trait_gradient_test(tg, n_null = 49)
+  # a test of the variance of beta under the species null is not trivially significant
+  expect_true(all(is.finite(res$statistics$ses)))
+  expect_equal(nrow(res$species), nrow(tg$species))
+})
+
+test_that("trait_gradient_phylo() marks OU fits at a bound and stops on constant values", {
+  d <- tg_sim(n_tips = 25, n_sites = 20)
+  tg <- trait_gradient(d$ind, abundance = "abundance")
+  set.seed(7)
+  ph <- trait_gradient_phylo(tg, d$tree, responses = "beta", n_boot = 19)
+  ou <- ph$models[ph$models$model == "OU", ]
+  expect_type(ou$at_bound, "logical")
+  expect_true(is.na(ou$half_life) == ou$at_bound)
+  flat <- tg
+  flat$species$beta <- 1
+  expect_error(trait_gradient_phylo(flat, d$tree, responses = "beta", n_boot = 5),
+               "does not vary")
 })

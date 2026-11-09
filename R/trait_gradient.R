@@ -24,13 +24,19 @@
 #' @section The three changes:
 #' **Leave-one-out site means.** In the original analysis \eqn{p_j} includes the focal species,
 #' so \eqn{\beta_i} contains \eqn{\bar t_i}: in sites with few species, \eqn{\beta} follows the
-#' trait of the species itself and the correlation between \eqn{\beta} and \eqn{\bar t}, and
-#' between \eqn{\beta} and \eqn{\alpha}, is inflated. With `leave_one_out = TRUE` (the default)
-#' \eqn{\beta_i}, \eqn{R_i} and \eqn{b_i} use
+#' trait of the species itself, and \eqn{\beta} is correlated with \eqn{\bar t} and with
+#' \eqn{\alpha} even when traits are unrelated to where species live. With
+#' `leave_one_out = TRUE` (the default) \eqn{\beta_i}, \eqn{R_i} and \eqn{b_i} use
 #' \eqn{p_j^{(-i)} = (\sum_{k \ne i} a_{kj} t_{kj}) / \sum_{k \ne i} a_{kj}}, and sites where
-#' species \eqn{i} is alone are left out of its values (counted in `n_alone`). The jackknife of
-#' the original script does the same, as an option; `leave_one_out = FALSE` gives the original
-#' values.
+#' species \eqn{i} is the only species are left out of its values (counted in `n_alone`). The
+#' jackknife of the original script does the same, as an option; `leave_one_out = FALSE` gives
+#' the original values.
+#'
+#' Leaving the species out does not make the raw correlation of \eqn{\beta} and \eqn{\alpha}
+#' readable on its own. Because \eqn{\alpha = \bar t - \beta}, without any assembly the
+#' correlation is negative, near \eqn{-sd(\beta) / sd(\alpha)}, whereas with the focal species in
+#' the site means it is positive. Read it against a null model, as its standardised effect size
+#' in [trait_gradient_test()].
 #'
 #' **Weights.** The weights of the site means (`site_weights`) and of the species means and
 #' \eqn{\beta} (`species_weights`) are chosen apart, as abundance or occurrence; the original
@@ -56,12 +62,13 @@
 #' @return An object of class `mc_trait_gradient`, a list with
 #'   \describe{
 #'     \item{species}{one row per species: `species`, `n_sites`, `n_alone` (sites where the
-#'       species is alone), `mean` (\eqn{\bar t_i}), `beta`, `alpha`, `breadth` (\eqn{R_i}),
+#'       species is the only species; left out of its values when `leave_one_out = TRUE`), `mean` (\eqn{\bar t_i}), `beta`, `alpha`, `breadth` (\eqn{R_i}),
 #'       `slope` (\eqn{b_i}), `slope_se`, `intercept` and `min_site`, `max_site` (range of the
 #'       site means of its sites).}
 #'     \item{sites}{one row per site: `site`, `n_species` and `mean` (\eqn{p_j}, with all
 #'       species).}
-#'     \item{populations}{one row per population: `site`, `species`, `weight`, `trait`
+#'     \item{populations}{one row per population: `site`, `species`, `abundance` (1 without
+#'       `abundance`), `weight` (the weight of the population in the species means), `trait`
 #'       (with species means filled in), `measured` and `site_mean` (\eqn{p_j}, or
 #'       \eqn{p_j^{(-i)}}).}
 #'     \item{settings}{the arguments.}
@@ -83,8 +90,7 @@
 #' head(tg$species)
 #' # the original, with the focal species in the site means
 #' original <- trait_gradient(ind, abundance = "abundance", leave_one_out = FALSE)
-#' c(leave_one_out = cor(tg$species$beta, tg$species$alpha),
-#'   original = cor(original$species$beta, original$species$alpha))
+#' head(cbind(leave_one_out = tg$species$beta, original = original$species$beta))
 #' @export
 trait_gradient <- function(data, trait = "trait", site = "site", species = "species",
                            abundance = NULL,
@@ -171,6 +177,7 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
     p <- site_mean[pops$site]
   }
   p <- as.vector(p)
+  alone <- as.vector(table(pops$site)[pops$site]) == 1
   species_ids <- sort(unique(pops$species))
   rows <- split(seq_len(nrow(pops)), factor(pops$species, species_ids))
   stats <- t(vapply(rows, function(r) {
@@ -187,7 +194,7 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
       ww <- w[use]
       fit <- weighted_slope(x, y, ww)
     }
-    c(length(r), sum(!ok), tbar, beta, tbar - beta, range_p[2] - range_p[1], fit,
+    c(length(r), sum(alone[r]), tbar, beta, tbar - beta, range_p[2] - range_p[1], fit,
       range_p)
   }, numeric(11)))
   species_table <- data.frame(species = species_ids, stats, row.names = NULL)
@@ -202,7 +209,8 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
   site_ids <- names(site_mean)
   sites <- data.frame(site = site_ids, n_species = as.integer(table(pops$site)[site_ids]),
                       mean = as.vector(site_mean), row.names = NULL)
-  populations <- data.frame(site = pops$site, species = pops$species, weight = w_species,
+  populations <- data.frame(site = pops$site, species = pops$species,
+                            abundance = pops$abundance, weight = w_species,
                             trait = t_full, measured = measured, site_mean = p,
                             stringsAsFactors = FALSE)
   list(species = species_table, sites = sites, populations = populations)
@@ -296,35 +304,54 @@ trait_gradient_weights <- function(data, abundance, ...) {
   list(beta = beta, alpha = alpha, correlation = correlation)
 }
 
-#' Null model of the trait-gradient analysis
+#' Null models of the trait-gradient analysis
 #'
-#' Compares the values of [trait_gradient()] with those of communities in which the species
-#' are moved among sites while the richness of each site and the number of sites of each
-#' species stay as observed (the curveball algorithm of Strona et al. 2014). Each population
-#' keeps its trait value and abundance when it moves, so the null breaks only the association
-#' between the traits of species and the sites they share.
+#' Compares the values of [trait_gradient()] with those of null communities. The default null
+#' (`"species"`) keeps every community as observed and exchanges the trait means of species
+#' among species, so it asks whether the traits of species follow the sites they share. The
+#' curveball null (`"curveball"`, Strona et al. 2014) keeps the traits and moves species among
+#' sites, with the richness of each site and the number of sites of each species fixed, so it
+#' asks whether the observed co-occurrences matter given the traits.
 #'
 #' @details
-#' The null model of Ackerly & Cornwell (2007) permutes the site of each population
-#' (`null = "permute"`), which changes the richness of sites and can place a species twice in
-#' one site. Under that null, species of few sites have extreme \eqn{\beta} by chance and
-#' rich sites pull every \eqn{\beta} toward the overall mean. The curveball null keeps both
-#' margins, so the remaining signal comes from which species co-occur.
+#' Statistics: the correlation of \eqn{\beta} and \eqn{\alpha}, the variance of \eqn{\beta}
+#' (how far species spread along the gradient) and the variance of \eqn{\alpha}, and the
+#' \eqn{\beta} of each species. Tests are two-sided.
 #'
-#' The chain starts at the observed communities, runs `burn_in` trades and then `thin` trades
-#' between null communities. Statistics: the correlation of \eqn{\beta} and \eqn{\alpha}, the
-#' variance of \eqn{\beta} and the variance of \eqn{\alpha}, and the \eqn{\beta} and
-#' \eqn{\alpha} of each species. Tests are two-sided.
+#' **`null = "species"`.** The trait values of species \eqn{i} become
+#' \eqn{t_{ij} - \bar t_i + \bar t_{\pi(i)}} for a random permutation \eqn{\pi} of species: each
+#' species carries the mean of another and keeps its own variation among sites. Sites,
+#' abundances and co-occurrences stay as observed. This is the null for the variances: a large
+#' variance of \eqn{\beta} means that species with similar traits live in similar communities.
+#'
+#' **`null = "curveball"`.** Populations move among sites with their trait values and
+#' abundances by curveball trades; the chain starts at the observed communities and runs
+#' `burn_in` trades and then `thin` trades between null communities. Because it also breaks
+#' the turnover of species along the gradient, the variances of \eqn{\beta} and \eqn{\alpha}
+#' differ from the null whenever composition changes among sites, even when traits are
+#' unrelated to it: species that share sites share their site means. In simulations with
+#' traits exchanged among species (no trait sorting), the variance tests under the curveball
+#' rejected in 23--57% of 200 replicates at the 5% level, whereas the test of the correlation
+#' rejected in 5.5%. Use the curveball for the correlation only.
+#'
+#' **`null = "permute"`**, the null of Ackerly & Cornwell (2007), permutes the site of each
+#' population. It keeps the number of populations of each site but can place a species twice in
+#' one site, and it breaks the turnover of species as the curveball does.
+#'
+#' The \eqn{\alpha} of a species is not tested under `"curveball"` and `"permute"`: the species
+#' mean does not change, so its test would mirror that of \eqn{\beta}.
 #'
 #' @param x Result of [trait_gradient()].
 #' @param n_null Number of null communities.
-#' @param null `"curveball"` (the default) or `"permute"`, the null of the original analysis.
+#' @param null `"species"` (the default), `"curveball"` or `"permute"`.
 #' @param burn_in,thin Trades of the curveball chain before the first null community and
-#'   between null communities.
+#'   between null communities; by default 50 and 5 times the number of sites, so that each site
+#'   takes part in about 10 trades between null communities.
 #' @return An object of class `mc_trait_gradient_test`, a list with `statistics` (one row per
 #'   statistic: `observed`, `null_mean`, `null_sd`, `ses` and `p`), `species` (one row per
-#'   species: observed \eqn{\beta} and \eqn{\alpha} with their `ses_` and `p_`), `null` (a
-#'   matrix with one row per null community and one column per statistic) and the settings.
+#'   species: observed \eqn{\beta} with `ses_beta` and `p_beta`, and with `null = "species"`
+#'   also \eqn{\alpha} with `ses_alpha` and `p_alpha`), `null` (a matrix with one row per null
+#'   community and one column per statistic) and the settings.
 #' @references Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community
 #'   assembly: partitioning of species trait values into within- and among-community
 #'   components. *Ecology Letters*, 10, 135--145. \doi{10.1111/j.1461-0248.2006.01006.x}
@@ -343,29 +370,44 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' ind <- sample_individuals(sim, n = 5, intraspecific_sd = 1)
 #' tg <- trait_gradient(ind, abundance = "abundance")
 #' trait_gradient_test(tg, n_null = 99)
+#' # the correlation of beta and alpha against the curveball
+#' trait_gradient_test(tg, n_null = 99, null = "curveball")$statistics[1, ]
 #' @export
-trait_gradient_test <- function(x, n_null = 999, null = c("curveball", "permute"),
-                                burn_in = 1000, thin = 100) {
+trait_gradient_test <- function(x, n_null = 999, null = c("species", "curveball", "permute"),
+                                burn_in = NULL, thin = NULL) {
   if (!inherits(x, "mc_trait_gradient")) {
     stop("`x` must come from trait_gradient()", call. = FALSE)
   }
   null <- match.arg(null)
   check_count(n_null, "n_null")
-  check_count(burn_in, "burn_in", min = 0)
-  check_count(thin, "thin")
   pops <- tg_records(x)
+  n_sites <- nrow(x$sites)
+  if (null == "curveball") {
+    burn_in <- burn_in %||% (50 * n_sites)
+    thin <- thin %||% (5 * n_sites)
+    check_count(burn_in, "burn_in", min = 0)
+    check_count(thin, "thin")
+  } else {
+    burn_in <- thin <- NULL
+  }
   settings <- x$settings
   observed <- tg_null_stats(x)
   species_ids <- x$species$species
   k <- length(species_ids)
   site_of <- pops$site
   if (null == "curveball") site_of <- curveball_sites(site_of, pops$species, burn_in)
+  means <- stats::setNames(x$species$mean, species_ids)
   sims <- matrix(NA_real_, n_null, 3 + 2 * k)
   for (b in seq_len(n_null)) {
-    site_of <- if (null == "curveball") curveball_sites(site_of, pops$species, thin) else
-      sample(pops$site)
     moved <- pops
-    moved$site <- site_of
+    if (null == "species") {
+      shuffled <- stats::setNames(sample(means), species_ids)
+      moved$trait <- pops$trait - means[pops$species] + shuffled[pops$species]
+    } else {
+      site_of <- if (null == "curveball") curveball_sites(site_of, pops$species, thin) else
+        sample(pops$site)
+      moved$site <- site_of
+    }
     sims[b, ] <- tg_null_stats(tg_compute(moved, settings, slopes = FALSE))
   }
   labels <- c("cor_beta_alpha", "var_beta", "var_alpha", paste0("beta_", species_ids),
@@ -378,11 +420,17 @@ trait_gradient_test <- function(x, n_null = 999, null = c("curveball", "permute"
                            null_sd = sd_null[1:3], ses = compared$ses[1:3],
                            p = compared$p[1:3], row.names = NULL)
   b_cols <- 3 + seq_len(k)
-  a_cols <- 3 + k + seq_len(k)
   species <- data.frame(species = species_ids, beta = observed[b_cols],
                         ses_beta = compared$ses[b_cols], p_beta = compared$p[b_cols],
-                        alpha = observed[a_cols], ses_alpha = compared$ses[a_cols],
-                        p_alpha = compared$p[a_cols], row.names = NULL)
+                        row.names = NULL)
+  if (null == "species") {
+    a_cols <- 3 + k + seq_len(k)
+    species$alpha <- observed[a_cols]
+    species$ses_alpha <- compared$ses[a_cols]
+    species$p_alpha <- compared$p[a_cols]
+  } else {
+    sims <- sims[, seq_len(3 + k), drop = FALSE]
+  }
   structure(list(statistics = statistics, species = species, null = sims,
                  settings = c(settings, list(null = null, n_null = n_null, burn_in = burn_in,
                                              thin = thin))),
@@ -390,10 +438,10 @@ trait_gradient_test <- function(x, n_null = 999, null = c("curveball", "permute"
 }
 
 # the populations of a trait_gradient() result as the input of tg_compute(), with
-# unmeasured trait values back to NA and the abundance as weight
+# unmeasured trait values back to NA
 tg_records <- function(x) {
   p <- x$populations
-  data.frame(site = p$site, species = p$species, abundance = p$weight,
+  data.frame(site = p$site, species = p$species, abundance = p$abundance,
              trait = ifelse(p$measured, p$trait, NA_real_), stringsAsFactors = FALSE)
 }
 
@@ -460,7 +508,16 @@ print.mc_trait_gradient_test <- function(x, ...) {
 #' where \eqn{d_i} is the distance from the root to tip \eqn{i} and \eqn{s_{ij}} the length
 #' shared by \eqn{i} and \eqn{j}. The parameters are estimated by restricted maximum
 #' likelihood, so AIC compares the covariance models with the same mean. Without the error
-#' term, species with few sites, whose values are noisy, would look like fast evolution.
+#' term, the noise of species seen in few sites passes for evolution near the tips, which an
+#' OU process fits better: in simulations of \eqn{\beta} under Brownian motion (100
+#' replicates, 30 species, 25 sites), AIC chose OU in 22 without the error term and in 9 with
+#' it.
+#'
+#' \eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
+#' lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
+#' such fits are marked in `at_bound` and their half-life is `NA`. AIC differences among three
+#' models fitted to few species are unstable, and the bootstrap standard error of a species
+#' seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 #'
 #' @param x Result of [trait_gradient()].
 #' @param tree Phylogeny (`phylo`) with branch lengths; its tips are matched to species by
@@ -472,8 +529,8 @@ print.mc_trait_gradient_test <- function(x, ...) {
 #'   alone do not count); species with fewer sites, or not in `tree`, are left out.
 #' @return An object of class `mc_trait_gradient_phylo`, a list with `models` (one row per
 #'   response and model: `response`, `model`, `mu`, `sigma2`, `a`, `half_life` (\eqn{\ln 2 / a},
-#'   in units of branch length), `loglik`, `n_par`, `aic` and `delta_aic` within each
-#'   response), `data` (one row per species used: values and standard errors) and `tree`
+#'   in units of branch length), `at_bound` (an OU fit with \eqn{a} at a bound), `loglik`,
+#'   `n_par`, `aic` and `delta_aic` within each response), `data` (one row per species used: values and standard errors) and `tree`
 #'   (the tree pruned to those species).
 #' @references Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community
 #'   assembly: partitioning of species trait values into within- and among-community
@@ -519,6 +576,7 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
   fits <- lapply(responses, function(r) {
     y <- data[[r]]
     v <- data[[paste0("se_", r)]]^2
+    if (stats::var(y) == 0) stop("`", r, "` does not vary among species", call. = FALSE)
     do.call(rbind, lapply(models, function(m) {
       f <- gls_known_error(y, v, covs, m)
       data.frame(response = r, model = m, f, row.names = NULL)
@@ -601,15 +659,18 @@ gls_known_error <- function(y, v, covs, model) {
     best <- fits[[which.min(vapply(fits, `[[`, numeric(1), "value"))]]
     a <- exp(best$par[2]) / h
     log_s2 <- best$par[1]
+    at_bound <- abs(best$par[2] - log(1e-3)) < 1e-4 || abs(best$par[2] - log(50)) < 1e-4
   } else {
     best <- stats::optimize(function(z) -reml(z), c(lower, upper))
     log_s2 <- best$minimum
     a <- NA_real_
+    at_bound <- NA
   }
   ll <- reml(log_s2, a)
   k <- 2 + (model == "OU")
   data.frame(mu = attr(ll, "mu"), sigma2 = exp(log_s2), a = a,
-             half_life = if (model == "OU") log(2) / a else NA_real_,
+             half_life = if (model == "OU" && !at_bound) log(2) / a else NA_real_,
+             at_bound = at_bound,
              loglik = as.numeric(ll), n_par = k, aic = -2 * as.numeric(ll) + 2 * k)
 }
 
@@ -617,8 +678,9 @@ gls_known_error <- function(y, v, covs, model) {
 print.mc_trait_gradient_phylo <- function(x, ...) {
   cat("Phylogenetic models of the trait-gradient analysis:", nrow(x$data), "species\n")
   m <- x$models
-  num <- vapply(m, is.numeric, logical(1))
+  num <- vapply(m, is.numeric, logical(1)) & names(m) != "delta_aic"
   m[num] <- lapply(m[num], function(v) signif(v, 3))
+  m$delta_aic <- round(m$delta_aic, 2)
   print(m, row.names = FALSE)
   invisible(x)
 }

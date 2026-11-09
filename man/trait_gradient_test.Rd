@@ -2,14 +2,14 @@
 % Please edit documentation in R/trait_gradient.R
 \name{trait_gradient_test}
 \alias{trait_gradient_test}
-\title{Null model of the trait-gradient analysis}
+\title{Null models of the trait-gradient analysis}
 \usage{
 trait_gradient_test(
   x,
   n_null = 999,
-  null = c("curveball", "permute"),
-  burn_in = 1000,
-  thin = 100
+  null = c("species", "curveball", "permute"),
+  burn_in = NULL,
+  thin = NULL
 )
 }
 \arguments{
@@ -17,35 +17,54 @@ trait_gradient_test(
 
 \item{n_null}{Number of null communities.}
 
-\item{null}{\code{"curveball"} (the default) or \code{"permute"}, the null of the original analysis.}
+\item{null}{\code{"species"} (the default), \code{"curveball"} or \code{"permute"}.}
 
 \item{burn_in, thin}{Trades of the curveball chain before the first null community and
-between null communities.}
+between null communities; by default 50 and 5 times the number of sites, so that each site
+takes part in about 10 trades between null communities.}
 }
 \value{
 An object of class \code{mc_trait_gradient_test}, a list with \code{statistics} (one row per
 statistic: \code{observed}, \code{null_mean}, \code{null_sd}, \code{ses} and \code{p}), \code{species} (one row per
-species: observed \eqn{\beta} and \eqn{\alpha} with their \code{ses_} and \code{p_}), \code{null} (a
-matrix with one row per null community and one column per statistic) and the settings.
+species: observed \eqn{\beta} with \code{ses_beta} and \code{p_beta}, and with \code{null = "species"}
+also \eqn{\alpha} with \code{ses_alpha} and \code{p_alpha}), \code{null} (a matrix with one row per null
+community and one column per statistic) and the settings.
 }
 \description{
-Compares the values of \code{\link[=trait_gradient]{trait_gradient()}} with those of communities in which the species
-are moved among sites while the richness of each site and the number of sites of each
-species stay as observed (the curveball algorithm of Strona et al. 2014). Each population
-keeps its trait value and abundance when it moves, so the null breaks only the association
-between the traits of species and the sites they share.
+Compares the values of \code{\link[=trait_gradient]{trait_gradient()}} with those of null communities. The default null
+(\code{"species"}) keeps every community as observed and exchanges the trait means of species
+among species, so it asks whether the traits of species follow the sites they share. The
+curveball null (\code{"curveball"}, Strona et al. 2014) keeps the traits and moves species among
+sites, with the richness of each site and the number of sites of each species fixed, so it
+asks whether the observed co-occurrences matter given the traits.
 }
 \details{
-The null model of Ackerly & Cornwell (2007) permutes the site of each population
-(\code{null = "permute"}), which changes the richness of sites and can place a species twice in
-one site. Under that null, species of few sites have extreme \eqn{\beta} by chance and
-rich sites pull every \eqn{\beta} toward the overall mean. The curveball null keeps both
-margins, so the remaining signal comes from which species co-occur.
+Statistics: the correlation of \eqn{\beta} and \eqn{\alpha}, the variance of \eqn{\beta}
+(how far species spread along the gradient) and the variance of \eqn{\alpha}, and the
+\eqn{\beta} of each species. Tests are two-sided.
 
-The chain starts at the observed communities, runs \code{burn_in} trades and then \code{thin} trades
-between null communities. Statistics: the correlation of \eqn{\beta} and \eqn{\alpha}, the
-variance of \eqn{\beta} and the variance of \eqn{\alpha}, and the \eqn{\beta} and
-\eqn{\alpha} of each species. Tests are two-sided.
+\strong{\code{null = "species"}.} The trait values of species \eqn{i} become
+\eqn{t_{ij} - \bar t_i + \bar t_{\pi(i)}} for a random permutation \eqn{\pi} of species: each
+species carries the mean of another and keeps its own variation among sites. Sites,
+abundances and co-occurrences stay as observed. This is the null for the variances: a large
+variance of \eqn{\beta} means that species with similar traits live in similar communities.
+
+\strong{\code{null = "curveball"}.} Populations move among sites with their trait values and
+abundances by curveball trades; the chain starts at the observed communities and runs
+\code{burn_in} trades and then \code{thin} trades between null communities. Because it also breaks
+the turnover of species along the gradient, the variances of \eqn{\beta} and \eqn{\alpha}
+differ from the null whenever composition changes among sites, even when traits are
+unrelated to it: species that share sites share their site means. In simulations with
+traits exchanged among species (no trait sorting), the variance tests under the curveball
+rejected in 23--57\% of 200 replicates at the 5\% level, whereas the test of the correlation
+rejected in 5.5\%. Use the curveball for the correlation only.
+
+\strong{\code{null = "permute"}}, the null of Ackerly & Cornwell (2007), permutes the site of each
+population. It keeps the number of populations of each site but can place a species twice in
+one site, and it breaks the turnover of species as the curveball does.
+
+The \eqn{\alpha} of a species is not tested under \code{"curveball"} and \code{"permute"}: the species
+mean does not change, so its test would mirror that of \eqn{\beta}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -57,6 +76,8 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
 ind <- sample_individuals(sim, n = 5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
 trait_gradient_test(tg, n_null = 99)
+# the correlation of beta and alpha against the curveball
+trait_gradient_test(tg, n_null = 99, null = "curveball")$statistics[1, ]
 \dontshow{\}) # examplesIf}
 }
 \references{

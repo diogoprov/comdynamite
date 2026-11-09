@@ -1,0 +1,101 @@
+---
+title: "Trait-gradient analysis"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4.5)
+```
+
+The trait-gradient analysis of Ackerly & Cornwell (2007) places each species along the
+gradient defined by the mean trait of the communities it lives in. The species mean
+\(\bar t_i\) splits into \(\beta_i\), the mean of the communities of the species, and
+\(\alpha_i = \bar t_i - \beta_i\), its difference from the species it co-occurs with. The
+gradient is built from the trait itself, so no environmental variable has to be chosen
+beforehand. \(\beta\) measures where a species sorts among communities, and \(\alpha\)
+measures how it differs within them.
+
+`trait_gradient()` follows the original analysis with three changes, described in its help
+page: site means leave out the focal species, the weights of site means and of species means
+are chosen apart, and the tests use a null model with fixed margins and a phylogenetic model
+that carries the sampling error of each value. The results below are simulated.
+
+```{r}
+library(comdynamite)
+
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(30)
+sim <- simulate_metacommunity(landscape_implicit(25), species_traits(tree, lambda = 1),
+                              competition_matrix(tree, "none"), n_steps = 100,
+                              seed_steps = 1:5)
+ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
+tg <- trait_gradient(ind, abundance = "abundance")
+tg
+```
+
+## The gradient
+
+Each grey point is a population, at the mean of its site without the species itself. Lines
+are the slopes of species over the range of their sites, and large points are the species
+means at \((\beta_i, \bar t_i)\). Species above the dashed line have positive \(\alpha\):
+they carry larger values than the species they live with.
+
+```{r}
+plot(tg)
+```
+
+## Leaving the focal species out
+
+With the focal species inside the site means, \(\beta_i\) contains \(\bar t_i\). In poor sites
+this ties \(\beta\) to the trait of the species and makes \(\beta\) and \(\alpha\) look more
+related than they are.
+
+```{r}
+original <- trait_gradient(ind, abundance = "abundance", leave_one_out = FALSE)
+c(leave_one_out = cor(tg$species$beta, tg$species$alpha),
+  original = cor(original$species$beta, original$species$alpha))
+```
+
+## Weights
+
+Abundance weights let the dominant species set the gradient. `trait_gradient_weights()` runs
+the four combinations of weights for sites and species and correlates them with the first.
+
+```{r}
+trait_gradient_weights(ind, abundance = "abundance")$correlation
+```
+
+## Null model
+
+`trait_gradient_test()` moves species among sites with the curveball algorithm, which keeps
+the richness of every site and the number of sites of every species. Populations keep their
+trait values and abundances when they move.
+
+```{r}
+test <- trait_gradient_test(tg, n_null = 199)
+test
+plot(test)
+```
+
+## Phylogeny
+
+`trait_gradient_phylo()` asks whether \(\beta\), \(\alpha\) and the species mean are
+conserved. Each value has a bootstrap standard error, added to the covariance of the model,
+so a species seen in few sites does not pass for fast evolution.
+
+```{r}
+ph <- trait_gradient_phylo(tg, tree, n_boot = 199)
+ph
+```
+
+In this simulation the optima evolve by Brownian motion (`lambda = 1`), so \(\beta\), which
+follows the optima, should prefer Brownian motion over the model without phylogeny.
+
+## References
+
+Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly:
+partitioning of species trait values into within- and among-community components.
+*Ecology Letters*, 10, 135–145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+
+Strona, G., Nappo, D., Boccacci, F., Fattorini, S., & San-Miguel-Ayanz, J. (2014). A fast and
+unbiased procedure to randomize ecological binary matrices with fixed row and column totals.
+*Nature Communications*, 5, 4114. https://doi.org/10.1038/ncomms5114

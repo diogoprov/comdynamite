@@ -39,12 +39,13 @@ means and of the species means and \eqn{\beta}. Both default to \code{"abundance
 An object of class \code{mc_trait_gradient}, a list with
 \describe{
 \item{species}{one row per species: \code{species}, \code{n_sites}, \code{n_alone} (sites where the
-species is alone), \code{mean} (\eqn{\bar t_i}), \code{beta}, \code{alpha}, \code{breadth} (\eqn{R_i}),
+species is the only species; left out of its values when \code{leave_one_out = TRUE}), \code{mean} (\eqn{\bar t_i}), \code{beta}, \code{alpha}, \code{breadth} (\eqn{R_i}),
 \code{slope} (\eqn{b_i}), \code{slope_se}, \code{intercept} and \code{min_site}, \code{max_site} (range of the
 site means of its sites).}
 \item{sites}{one row per site: \code{site}, \code{n_species} and \code{mean} (\eqn{p_j}, with all
 species).}
-\item{populations}{one row per population: \code{site}, \code{species}, \code{weight}, \code{trait}
+\item{populations}{one row per population: \code{site}, \code{species}, \code{abundance} (1 without
+\code{abundance}), \code{weight} (the weight of the population in the species means), \code{trait}
 (with species means filled in), \code{measured} and \code{site_mean} (\eqn{p_j}, or
 \eqn{p_j^{(-i)}}).}
 \item{settings}{the arguments.}
@@ -76,13 +77,19 @@ of the species to the gradient within its range.
 
 \strong{Leave-one-out site means.} In the original analysis \eqn{p_j} includes the focal species,
 so \eqn{\beta_i} contains \eqn{\bar t_i}: in sites with few species, \eqn{\beta} follows the
-trait of the species itself and the correlation between \eqn{\beta} and \eqn{\bar t}, and
-between \eqn{\beta} and \eqn{\alpha}, is inflated. With \code{leave_one_out = TRUE} (the default)
-\eqn{\beta_i}, \eqn{R_i} and \eqn{b_i} use
+trait of the species itself, and \eqn{\beta} is correlated with \eqn{\bar t} and with
+\eqn{\alpha} even when traits are unrelated to where species live. With
+\code{leave_one_out = TRUE} (the default) \eqn{\beta_i}, \eqn{R_i} and \eqn{b_i} use
 \eqn{p_j^{(-i)} = (\sum_{k \ne i} a_{kj} t_{kj}) / \sum_{k \ne i} a_{kj}}, and sites where
-species \eqn{i} is alone are left out of its values (counted in \code{n_alone}). The jackknife of
-the original script does the same, as an option; \code{leave_one_out = FALSE} gives the original
-values.
+species \eqn{i} is the only species are left out of its values (counted in \code{n_alone}). The
+jackknife of the original script does the same, as an option; \code{leave_one_out = FALSE} gives
+the original values.
+
+Leaving the species out does not make the raw correlation of \eqn{\beta} and \eqn{\alpha}
+readable on its own. Because \eqn{\alpha = \bar t - \beta}, without any assembly the
+correlation is negative, near \eqn{-sd(\beta) / sd(\alpha)}, whereas with the focal species in
+the site means it is positive. Read it against a null model, as its standardised effect size
+in \code{\link[=trait_gradient_test]{trait_gradient_test()}}.
 
 \strong{Weights.} The weights of the site means (\code{site_weights}) and of the species means and
 \eqn{\beta} (\code{species_weights}) are chosen apart, as abundance or occurrence; the original
@@ -107,8 +114,7 @@ tg <- trait_gradient(ind, abundance = "abundance")
 head(tg$species)
 # the original, with the focal species in the site means
 original <- trait_gradient(ind, abundance = "abundance", leave_one_out = FALSE)
-c(leave_one_out = cor(tg$species$beta, tg$species$alpha),
-  original = cor(original$species$beta, original$species$alpha))
+head(cbind(leave_one_out = tg$species$beta, original = original$species$beta))
 \dontshow{\}) # examplesIf}
 }
 \references{

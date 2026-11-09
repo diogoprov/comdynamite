@@ -95,14 +95,19 @@ reference:
   - equilibrium_check
   - as.data.frame.mc_sim
 - title: Trait variation among individuals
-  desc: Individuals sampled from simulations, T-statistics, community trait indices and
-    decompositions of trait variation.
+  desc: Individuals sampled from simulations, T-statistics, trait-gradient analysis, community
+    trait indices and decompositions of trait variation.
   contents:
   - sample_individuals
   - tstats
   - tstats_summary
   - population_shifts
   - plot.population_shifts
+  - trait_gradient
+  - trait_gradient_weights
+  - trait_gradient_test
+  - trait_gradient_phylo
+  - plot.mc_trait_gradient
   - community_index
   - trait_flex
   - plot.trait_flex
@@ -149,6 +154,7 @@ articles:
   - articles/preparing-data
   - articles/analysing-clades
   - articles/whole-tree
+  - articles/trait-gradient
 - title: Simulating data
   navbar: Simulating data
   contents:
