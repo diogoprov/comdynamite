@@ -24,7 +24,8 @@
 #' * `"standardized"`: Euclidean distance on traits divided by their standard deviation in
 #'   the pool, so each trait weighs the same whatever its units.
 #' * `"mahalanobis"`: Euclidean distance after removing the correlations between traits,
-#'   `sqrt((x - y)' S^-1 (x - y))`, with `S` the covariance matrix of the traits in the pool,
+#'   \eqn{\sqrt{(x - y)^\top S^{-1} (x - y)}}{sqrt((x - y)' S^-1 (x - y))}, with \eqn{S} the
+#'   covariance matrix of the traits in the pool,
 #'   or `trait_cov`. In the filter, removing species by decreasing Mahalanobis distance to
 #'   the optimum is removing them by increasing value of a multivariate Gaussian niche with
 #'   covariance `S` centred on the optimum (Mahalanobis 1936, reprinted 2018).

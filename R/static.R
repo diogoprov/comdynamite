@@ -2,8 +2,10 @@
 #'
 #' Draws species abundances directly from unimodal responses to an
 #' environmental gradient, without population dynamics, competition or
-#' dispersal. The expected abundance of species j at site i is
-#' `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the Gaussian
+#' dispersal. The expected abundance of species \eqn{j} at site \eqn{i} is
+#' \eqn{r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))}{r_max[j] * exp(-(env[i] -
+#' optimum[j])^2 / (2 * sigma[j]^2))}, with \eqn{r_j} = `r_max`, \eqn{\theta_j}{theta_j} =
+#' `optimum`, \eqn{\sigma_j}{sigma_j} = `sigma` and \eqn{E_i} the environment, the Gaussian
 #' response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
 #' default, observed abundances are Poisson counts with that mean, as in
 #' Peres-Neto & Kembel (2015) and Duarte et al. (2016), where `r_max` lies between
@@ -100,10 +102,11 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' Simulate presences and absences from logistic responses
 #'
 #' The two-gradient simulation of Appendix C of Peres-Neto et al. (2012), after
-#' Ives & Helmus (2011). The probability that species j occurs at site t along
-#' gradient x is `plogis(a[j] + b[j] * x[t])`, where `a` is a normal deviate and
-#' the slope `b` evolves on the tree. With several gradients, each with its own
-#' `a` and `b`, the probabilities multiply. A value drawn for each site from
+#' Ives & Helmus (2011). The probability that species \eqn{j} occurs at site \eqn{t} along
+#' gradient \eqn{x} is \eqn{\mathrm{logit}^{-1}(a_j + b_j x_t)}{plogis(a[j] + b[j] * x[t])},
+#' where \eqn{a} is a normal deviate and the slope \eqn{b} evolves on the tree. With several
+#' gradients, each with its own \eqn{a} and \eqn{b}, the probabilities multiply. A value drawn
+#' for each site from
 #' `reduction` then reduces them, which adds noise.
 #'
 #' Appendix C says that a species is present when a normally generated value is

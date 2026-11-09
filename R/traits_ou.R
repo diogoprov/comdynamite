@@ -5,10 +5,12 @@
 #' King (2004). Along each branch the trait is pulled towards the optimum
 #' `theta` of the selective regime of that branch with strength `alpha`, while
 #' drifting with rate `sigma2`. Values are drawn exactly from the transition
-#' distribution of the process: over a branch of length t, a trait with value
-#' x at the start has, at the end, a normal distribution with mean
-#' `theta + (x - theta) * exp(-alpha * t)` and variance
-#' `sigma2 / (2 * alpha) * (1 - exp(-2 * alpha * t))`.
+#' distribution of the process: over a branch of length \eqn{t}, a trait with value
+#' \eqn{x} at the start has, at the end, a normal distribution with mean
+#' \eqn{\theta + (x - \theta) e^{-\alpha t}}{theta + (x - theta) * exp(-alpha * t)} and variance
+#' \eqn{\frac{\sigma^2}{2 \alpha} (1 - e^{-2 \alpha t})}{sigma2 / (2 * alpha) * (1 - exp(-2 *
+#' alpha * t))}, with \eqn{\sigma^2}{sigma2} = `sigma2`, \eqn{\alpha}{alpha} = `alpha` and
+#' \eqn{\theta}{theta} = `theta`.
 #'
 #' With `alpha = 0` the process is Brownian motion with rate `sigma2`, and the
 #' optima play no role. With regimes given as a vector, each branch belongs to a single
@@ -22,9 +24,10 @@
 #' gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
 #' 2015); [rate_matrix()] builds them with the structures that mvMORPH fits. The strength of
 #' selection `alpha` and the optimum `theta` are the same for all traits. Under Brownian motion
-#' (`alpha = 0`) the traits of the tips have covariance `sum_k kronecker(R_k, C_k)`, where `R_k`
-#' is the rate matrix of regime k and `C_k` the phylogenetic covariance matrix built from the
-#' time spent in regime k (Clavel et al. 2015).
+#' (`alpha = 0`) the traits of the tips have covariance \eqn{\sum_k R_k \otimes C_k}{sum_k
+#' kronecker(R_k, C_k)}, where \eqn{R_k} is the rate matrix of regime \eqn{k} and \eqn{C_k} the
+#' phylogenetic covariance matrix built from the time spent in regime \eqn{k} (Clavel et al.
+#' 2015).
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
 #' @param n_traits Number of traits. Taken from the rate matrices when `sigma2` gives them.

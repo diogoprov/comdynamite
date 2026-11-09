@@ -92,8 +92,9 @@ individuals across sites, biases the null and makes the test anti-conservative. 
 model of \code{T_PC.PR} the population means are themselves computed from the values drawn, so
 their regional variance is computed again from them, as in Taudiere & Violle (2016).
 
-The standardised effect size is \verb{(observed - mean of null) / sd of null}, and the p-value
-is \code{(1 + r) / (1 + nperm)}, where \code{r} is the number of null values at or below the observed
+The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
+mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
+with \eqn{n} = \code{nperm}, where \eqn{r} is the number of null values at or below the observed
 one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice the smaller of the two
 (\code{"two.sided"}, at most 1). Low values of the three statistics are the usual hypotheses
 (niche differentiation within communities for \code{T_IP.IC}, environmental filtering for the

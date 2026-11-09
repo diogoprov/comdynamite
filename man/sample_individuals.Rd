@@ -65,46 +65,56 @@ populations with a single individual are removed before computing T-statistics.}
 Data frame with one row per individual and the columns \code{site}, \code{species},
 \code{individual} (its number within the population), \code{abundance} (of the population), \code{env}
 (of the site), \code{optimum} (of the species), \code{population_mean} (the expected value of the
-population, \code{theta_j + h_j (E_i - theta_j) + d_ij}, after character displacement) and
+population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
 \code{trait}. Populations with no
 individual measured are absent.
 }
 \description{
 Draws individuals from the populations of a simulated metacommunity and gives each one a
 trait value, so that intraspecific variation and local adaptation can be studied with the
-T-statistics of Violle et al. (2012) (\code{\link[=tstats]{tstats()}}). The trait is the environmental optimum of
-\code{\link[=species_traits]{species_traits()}}, the one that sets growth in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}. The value of
-individual \code{k} of species \code{j} at site \code{i} is
+T-statistics of Violle et al. (2012) (\code{\link[=tstats]{tstats()}}).
 }
 \details{
-\code{z_ijk = theta_j + h_j (E_i - theta_j) + d_ij + e_ijk},
+The trait is the environmental optimum of \code{\link[=species_traits]{species_traits()}}, the one that sets growth in
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}. The value of individual \eqn{k} of species \eqn{j} at site
+\eqn{i} is
 
-where \code{theta_j} is the optimum of the species, \code{E_i} the environment of the site,
-\code{h_j} (\code{local_adaptation}) the fraction of the gap between them that the population closes,
-\code{d_ij ~ N(0, population_sd^2)} a deviation of the population that does not track the
-environment (drift, founder effects), and \code{e_ijk ~ N(0, intraspecific_sd^2)} the variation
-among individuals of a population. With \code{local_adaptation = 0} and \code{population_sd = 0} all
+\deqn{z_{ijk} = \theta_j + h_j (E_i - \theta_j) + d_{ij} + e_{ijk},}{z_ijk = theta_j +
+  h_j (E_i - theta_j) + d_ij + e_ijk,}
+
+where \eqn{\theta_j}{theta_j} is the optimum of the species, \eqn{E_i}{E_i} the environment
+of the site, \eqn{h_j}{h_j} (\code{local_adaptation}) the fraction of the gap between them that the
+population closes, \eqn{d_{ij} \sim N(0, s_p^2)}{d_ij ~ N(0, s_p^2)} (with \eqn{s_p}{s_p} =
+\code{population_sd}) a deviation of the population that does not track the environment (drift,
+founder effects), and \eqn{e_{ijk} \sim N(0, s_e^2)}{e_ijk ~ N(0, s_e^2)} (with
+\eqn{s_e}{s_e} = \code{intraspecific_sd}) the variation among individuals of a population. With
+\code{local_adaptation = 0} and \code{population_sd = 0} all
 populations of a species share its mean; with \code{local_adaptation = 1} every population sits on
 the environment of its site and species no longer differ within a site.
 
 With \code{displacement > 0}, the populations of each site also diverge from one another, as in
 ecological character displacement. Their means are the equilibrium of
 
-\verb{mu_ij = m_ij + c sum_k p_ik (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2))},
+\deqn{\mu_{ij} = m_{ij} + c \sum_k p_{ik} (\mu_{ij} - \mu_{ik})
+  \exp\left(-\frac{(\mu_{ij} - \mu_{ik})^2}{2 w^2}\right),}{mu_ij = m_ij + c sum_k p_ik
+  (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2)),}
 
-where \code{m_ij} is the mean above (\code{theta_j + h_j (E_i - theta_j) + d_ij}), \code{c} is
-\code{displacement}, \code{p_ik} the share of species \code{k} among the individuals of the site and \code{w}
-(\code{displacement_width}) the width of a Gaussian competition kernel. Each population is pushed
-away from the populations close to it in trait, more so from abundant ones, and held near
-\code{m_ij}, so \code{c} sets the strength of competition relative to the selection that keeps the
-population near \code{m_ij}. The push from one competitor is largest at a distance \code{w} and at
-most \verb{c w exp(-1/2)}, about \verb{0.6 c w}. The equilibrium is found by damped fixed-point
-iteration from \code{m_ij}, with steps of \code{1 / (1 + c)}. Populations with the same \code{m_ij}, as
-with \code{local_adaptation = 1} and no \code{population_sd}, are not pushed apart, since the push is
-symmetric. With \code{c > 1}, however, the equilibrium with equal means is unstable: populations
-whose \code{m_ij} differ even slightly end up about \verb{w sqrt(2 log c)} apart, and several
-equilibria can exist, of which the iteration finds the one reached from \code{m_ij}. The size of
-the displacement therefore grows with \code{c} only slowly once \code{c} exceeds 1.
+where \eqn{m_{ij} = \theta_j + h_j (E_i - \theta_j) + d_{ij}}{m_ij = theta_j + h_j (E_i -
+theta_j) + d_ij} is the mean above, \eqn{c} is \code{displacement}, \eqn{p_{ik}}{p_ik} the share
+of species \eqn{k} among the individuals of the site and \eqn{w} (\code{displacement_width}) the
+width of a Gaussian competition kernel. Each population is pushed away from the populations
+close to it in trait, more so from abundant ones, and held near \eqn{m_{ij}}{m_ij}, so
+\eqn{c} sets the strength of competition relative to the selection that keeps the
+population near \eqn{m_{ij}}{m_ij}. The push from one competitor is largest at a distance
+\eqn{w} and at most \eqn{c w e^{-1/2}}{c w exp(-1/2)}, about \eqn{0.6 c w}. The
+equilibrium is found by damped fixed-point iteration from \eqn{m_{ij}}{m_ij}, with steps of
+\eqn{1 / (1 + c)}. Populations with the same \eqn{m_{ij}}{m_ij}, as with
+\code{local_adaptation = 1} and no \code{population_sd}, are not pushed apart, since the push is
+symmetric. With \eqn{c > 1}, however, the equilibrium with equal means is unstable:
+populations whose \eqn{m_{ij}}{m_ij} differ even slightly end up about
+\eqn{w \sqrt{2 \log c}}{w sqrt(2 log c)} apart, and several equilibria can exist, of which
+the iteration finds the one reached from \eqn{m_{ij}}{m_ij}. The size of the displacement
+therefore grows with \eqn{c} only slowly once \eqn{c} exceeds 1.
 
 The traits of individuals are drawn after the simulation and do not feed back on the
 dynamics: abundances are those of the species means. The function describes the pattern

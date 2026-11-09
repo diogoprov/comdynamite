@@ -49,10 +49,12 @@ Hansen (1997), with the multi-optimum ("multi-peak") extension of Butler &
 King (2004). Along each branch the trait is pulled towards the optimum
 \code{theta} of the selective regime of that branch with strength \code{alpha}, while
 drifting with rate \code{sigma2}. Values are drawn exactly from the transition
-distribution of the process: over a branch of length t, a trait with value
-x at the start has, at the end, a normal distribution with mean
-\code{theta + (x - theta) * exp(-alpha * t)} and variance
-\code{sigma2 / (2 * alpha) * (1 - exp(-2 * alpha * t))}.
+distribution of the process: over a branch of length \eqn{t}, a trait with value
+\eqn{x} at the start has, at the end, a normal distribution with mean
+\eqn{\theta + (x - \theta) e^{-\alpha t}}{theta + (x - theta) * exp(-alpha * t)} and variance
+\eqn{\frac{\sigma^2}{2 \alpha} (1 - e^{-2 \alpha t})}{sigma2 / (2 * alpha) * (1 - exp(-2 *
+alpha * t))}, with \eqn{\sigma^2}{sigma2} = \code{sigma2}, \eqn{\alpha}{alpha} = \code{alpha} and
+\eqn{\theta}{theta} = \code{theta}.
 }
 \details{
 With \code{alpha = 0} the process is Brownian motion with rate \code{sigma2}, and the
@@ -67,9 +69,10 @@ and whose off-diagonal elements hold the evolutionary covariances. A named list 
 gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
 2015); \code{\link[=rate_matrix]{rate_matrix()}} builds them with the structures that mvMORPH fits. The strength of
 selection \code{alpha} and the optimum \code{theta} are the same for all traits. Under Brownian motion
-(\code{alpha = 0}) the traits of the tips have covariance \verb{sum_k kronecker(R_k, C_k)}, where \code{R_k}
-is the rate matrix of regime k and \code{C_k} the phylogenetic covariance matrix built from the
-time spent in regime k (Clavel et al. 2015).
+(\code{alpha = 0}) the traits of the tips have covariance \eqn{\sum_k R_k \otimes C_k}{sum_k
+kronecker(R_k, C_k)}, where \eqn{R_k} is the rate matrix of regime \eqn{k} and \eqn{C_k} the
+phylogenetic covariance matrix built from the time spent in regime \eqn{k} (Clavel et al.
+2015).
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

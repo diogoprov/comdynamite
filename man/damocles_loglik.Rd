@@ -61,8 +61,10 @@ estimated by another method: the rates in \code{vary} are estimated separately f
 
 \item{edge_covariate}{Optional positive number for each edge of \code{tree}, in the order of
 \code{tree$edge}, such as branch-specific rates of speciation estimated by another method: the
-rates in \code{vary} change with it as \verb{rate * (x / geometric mean of x)^beta}, with \code{rate} and
-\code{beta} estimated. Give \code{regimes} or \code{edge_covariate}, not both.}
+rates in \code{vary} change with it as \eqn{\mathrm{rate} \cdot (x / \bar{x}_g)^\beta}{rate *
+(x / geometric mean of x)^beta}, where \eqn{x} is the covariate and \eqn{\bar{x}_g}{the
+geometric mean} its geometric mean, with \code{rate} and \eqn{\beta}{beta} estimated. Give
+\code{regimes} or \code{edge_covariate}, not both.}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -110,8 +112,8 @@ assumption of independence matters: neighbouring sites that share their colonisa
 or communities nested in one another, are not independent replicates and pooling them
 overstates the information on the rates. Twice the difference between the summed
 log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
-on \verb{2 * (number of communities - 1)} degrees of freedom to ask whether the rates differ among
-communities.
+on \eqn{2 (m - 1)}{2 * (m - 1)} degrees of freedom, with \eqn{m} communities, to ask whether
+the rates differ among communities.
 
 With \code{sympatry = NULL}, \code{fit_damocles()} also estimates the probability that a present
 ancestor leaves both daughters present, on the logit scale. A single community says almost
