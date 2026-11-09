@@ -27,7 +27,7 @@ plot_traits(
 - x:
 
   Traits of the tips from
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md):
   a matrix with one row per tip, named by tip label.
 
 - tree:
@@ -42,7 +42,7 @@ plot_traits(
 - regimes:
 
   Regimes of the branches, as in
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md):
   a vector in the cladewise order of the edges (from
   [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md))
   or a tree with a mapped history (class `simmap`, from
@@ -77,14 +77,14 @@ plot_traits(
 ## Details
 
 The values of the internal nodes are those kept by
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 in the attribute `nodes`, so the branches show the simulated path
 between nodes, not a reconstruction. Without that attribute, only the
 tips are drawn.
 
 ## See also
 
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
 and
 [`plot.rate_matrix()`](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md).
@@ -104,8 +104,8 @@ Other species traits:
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples
@@ -116,7 +116,7 @@ tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 r <- rate_matrix(c(1, 1), correlation = list(forest = 0.8, open = -0.8),
                  constraint = "variance")
-x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 plot_traits(x, habitat, regimes = habitat)
 
 # traitgram of the first trait

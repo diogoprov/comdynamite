@@ -129,7 +129,7 @@ apply(sim_t$history > 0, 3, function(x) mean(rowSums(x)))
 
 ## Traits under one or several adaptive optima
 
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 simulates traits under an Ornstein-Uhlenbeck process (Hansen 1997). With
 `alpha = 0` it is Brownian motion; with `alpha > 0` traits are pulled
 towards an optimum, and
@@ -140,9 +140,9 @@ gives clades their own optimum (multi-peak OU; Butler & King 2004).
 
 pool <- treeshapesim::sim_tree_shape(32)
 node <- ape::getMRCA(pool, pool$tip.label[1:8])
-in_clade <- rownames(traits_ou(pool)) %in% ape::extract.clade(pool, node)$tip.label
+in_clade <- rownames(trait_ou(pool)) %in% ape::extract.clade(pool, node)$tip.label
 reg <- paint_regimes(pool, nodes = node)
-x_ou <- traits_ou(pool, alpha = 2, theta = c(`0` = 0, `1` = 5), regimes = reg)
+x_ou <- trait_ou(pool, alpha = 2, theta = c(`0` = 0, `1` = 5), regimes = reg)
 tapply(x_ou[, 1], ifelse(in_clade, "clade (optimum 5)", "rest (optimum 0)"), mean)
 #> clade (optimum 5)  rest (optimum 0) 
 #>         3.8228309         0.1872388
@@ -166,7 +166,7 @@ size:
 ``` r
 
 pool <- treeshapesim::sim_tree_shape(32)
-x <- traits_ou(pool, n_traits = 2)
+x <- trait_ou(pool, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 #>  [1] "t1"  "t3"  "t6"  "t9"  "t10" "t13" "t14" "t17" "t19" "t22" "t26" "t27"
 #> [13] "t29" "t30" "t31" "t32"
@@ -182,7 +182,7 @@ mpd <- function(tree, sp) mean(as.dist(ape::cophenetic.phylo(tree)[sp, sp]))
 rules <- c("limiting_similarity", "filtering", "neutral")
 res <- replicate(100, {
   pool <- treeshapesim::sim_tree_shape(32)
-  x <- traits_ou(pool, n_traits = 2)
+  x <- trait_ou(pool, n_traits = 2)
   sapply(rules, function(r) mpd(pool, assemble_community(x, 16, r)$community))
 })
 rowMeans(res)

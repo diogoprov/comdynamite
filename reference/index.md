@@ -50,7 +50,7 @@ Traits with phylogenetic signal and evolutionary regimes.
   : Species traits, with or without phylogenetic signal
 - [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
   : Trait evolution by Brownian motion with Pagel's lambda
-- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+- [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
   : Traits evolving by an Ornstein-Uhlenbeck process with one or several
   optima
 - [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
@@ -274,7 +274,7 @@ Colonisation and local extinction along the tree (DAMOCLES).
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
   : Local presence along a tree: the dynamic null model of DAMOCLES
 - [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
   : Likelihood of local presences under the DAMOCLES model
 - [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   : Phylogenetic community structure against the dynamic null model of

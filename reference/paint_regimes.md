@@ -1,7 +1,7 @@
 # Assign selective regimes to clades
 
 Paints the branches of a tree with selective regimes for
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md):
 every branch starts in regime `"0"`, and the branches descending from
 each node in `nodes` take a new regime (`"1"`, `"2"`, ...). Nodes are
 painted in order, so a later node nested in an earlier one overrides it.
@@ -31,7 +31,7 @@ paint_regimes(tree, nodes, stem = FALSE)
 
 Character vector with the regime of each branch, in the order of
 `tree$edge` after reordering it "cladewise" (the order
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 uses).
 
 ## See also
@@ -51,8 +51,8 @@ Other species traits:
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples

@@ -76,7 +76,7 @@ Other rule-based assembly:
 ``` r
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(40)
-y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 op <- par(mfrow = c(1, 2))
 plot_assembly(assemble_community(y, 15, rule = "filtering", optimum = c(0, 0)),
               main = "Euclidean")

@@ -116,8 +116,8 @@ Other species traits:
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples
@@ -145,7 +145,7 @@ species_traits(5)
 #> sp4   0.00000 10.0110535 4.025692
 #> sp5  45.81600 10.7434132 5.782485
 # optima from another model, here an Ornstein-Uhlenbeck process
-ou <- traits_ou(tr, alpha = 1, theta = 0)
+ou <- trait_ou(tr, alpha = 1, theta = 0)
 species_traits(tr, optima = ou[, 1])
 #>       optimum     sigma    r_max
 #> t1   95.73952 20.537509 6.528234

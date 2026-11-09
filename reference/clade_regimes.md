@@ -2,7 +2,7 @@
 
 `clade_regimes()` assigns each edge of `tree` to a regime named after
 the clade it lies in, for the `regimes` of
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 and
 [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md):
 a partition of the tree defined a priori, such as families or
@@ -51,7 +51,7 @@ in no clade take the regime `background`.
 
 ## See also
 
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
 [`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md).
 
 Other dynamic null model:

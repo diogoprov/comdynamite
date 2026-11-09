@@ -14,9 +14,10 @@ community_index(
   site = "site",
   species = "species",
   null = c("local", "regional.ind", "regional.pop", "regional.pop.prab"),
-  nperm = 99,
+  n_perm = 99,
   alternative = c("two.sided", "less", "greater"),
-  multivariate = FALSE
+  multivariate = FALSE,
+  nperm = NULL
 )
 ```
 
@@ -50,7 +51,7 @@ community_index(
 
   Null model (see Details).
 
-- nperm:
+- n_perm:
 
   Number of randomisations; 0 for the observed values only.
 
@@ -63,12 +64,16 @@ community_index(
 
   If `TRUE`, the index receives all traits at once.
 
+- nperm:
+
+  Deprecated; use `n_perm`.
+
 ## Value
 
 A data frame of class `community_index` with one row per site, trait (or
 `"multivariate"` with `multivariate = TRUE`) and index, and the columns
 `site`, `trait`, `index` (the name in the list, or the name of the
-function), `observed`, and with `nperm > 0` also `ses` and `p`; the
+function), `observed`, and with `n_perm > 0` also `ses` and `p`; the
 attribute `null` holds the null values (randomisation x row), and
 [plot()](https://provetelab.org/comdynamite/reference/plot.tstats.md)
 draws the tests. Individuals with a missing value are left out for that
@@ -145,7 +150,7 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 20),
                   species = sample(letters[1:4], 100, replace = TRUE))
 ind$trait <- c(a = 1, b = 2, c = 3, d = 4)[ind$species] + rnorm(100, sd = 0.3)
 # range of trait values within sites, against draws from the whole region
-community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 99)
+community_index(ind, function(x) diff(range(x)), null = "regional.ind", n_perm = 99)
 #>   site trait index observed         ses    p
 #> 1   s1 trait index 3.155201 -1.79804612 0.12
 #> 2   s2 trait index 3.695020  0.53805219 0.68
@@ -154,7 +159,7 @@ community_index(ind, function(x) diff(range(x)), null = "regional.ind", nperm = 
 #> 5   s5 trait index 3.579527 -0.02346576 0.94
 # variance among the population means of a site
 pop_var <- function(x, species) stats::var(tapply(x, species, mean))
-community_index(ind, pop_var, null = "local", nperm = 99)
+community_index(ind, pop_var, null = "local", n_perm = 99)
 #>   site trait   index observed      ses    p
 #> 1   s1 trait pop_var 1.476106 4.219795 0.02
 #> 2   s2 trait pop_var 1.577807 7.631109 0.02
@@ -163,7 +168,7 @@ community_index(ind, pop_var, null = "local", nperm = 99)
 #> 5   s5 trait pop_var 1.713591 4.415371 0.02
 # several indices at once, on the same randomised communities
 community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
-                null = "regional.ind", nperm = 99)
+                null = "regional.ind", n_perm = 99)
 #>    site trait    index    observed          ses    p
 #> 1    s1 trait variance  0.96184073 -1.204549411 0.24
 #> 2    s2 trait variance  1.01906139 -1.315648430 0.24

@@ -23,7 +23,7 @@ in R, to analyse data and to simulate it.
 | Dynamics with growth, competition and dispersal, as in Thompson et al. (2020) | [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
 | Static communities along gradients | [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md), [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md) | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
 | Assembly by rules, without dynamics, as in Kraft et al. (2007) | [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md) | [Watching assembly](https://provetelab.org/comdynamite/articles/watching-assembly.html) |
-| Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
+| Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
 | Does a method work? Type I error and power by simulation | all of the above | [Evaluating methods](https://provetelab.org/comdynamite/articles/evaluating-methods.html) |
 
 In R,
@@ -217,7 +217,7 @@ Traits with phylogenetic signal and evolutionary regimes.
   : Species traits, with or without phylogenetic signal
 - [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
   : Trait evolution by Brownian motion with Pagel's lambda
-- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+- [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
   : Traits evolving by an Ornstein-Uhlenbeck process with one or several
   optima
 - [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md)
@@ -441,7 +441,7 @@ Colonisation and local extinction along the tree (DAMOCLES).
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
   : Local presence along a tree: the dynamic null model of DAMOCLES
 - [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
   : Likelihood of local presences under the DAMOCLES model
 - [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   : Phylogenetic community structure against the dynamic null model of

@@ -89,7 +89,7 @@ reached):</p>
 <dl><dt id="arg-traits">traits<a class="anchor" aria-label="anchor" href="#arg-traits"></a></dt>
 <dd><p>Numeric vector (one trait) or matrix (one column per trait),
 with species names as names or row names. For example, the output of
-<code><a href="traits_ou.html">traits_ou()</a></code>.</p></dd>
+<code><a href="trait_ou.html">trait_ou()</a></code>.</p></dd>
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
@@ -102,7 +102,7 @@ with species names as names or row names. For example, the output of
 
 <dt id="arg-optimum">optimum<a class="anchor" aria-label="anchor" href="#arg-optimum"></a></dt>
 <dd><p>For <code>rule = "filtering"</code>: the niche optimum, either
-<code>"ancestral"</code> (the root state, 0 by default in <code><a href="traits_ou.html">traits_ou()</a></code>),
+<code>"ancestral"</code> (the root state, 0 by default in <code><a href="trait_ou.html">trait_ou()</a></code>),
 <code>"derived"</code> (the maximum of each trait in the pool, one extreme corner of
 trait space), or a numeric vector with one value per
 trait.</p></dd>
@@ -166,7 +166,7 @@ or <code>trait_cov</code>. In the filter, removing species by decreasing Mahalan
 the optimum is removing them by increasing value of a multivariate Gaussian niche with
 covariance <code>S</code> centred on the optimum (Mahalanobis 1936, reprinted 2018).</p></li>
 </ul><p>The choice is a statement about niche axes. With correlated traits, such as those of
-<code><a href="traits_ou.html">traits_ou()</a></code> with a rate matrix from <code><a href="rate_matrix.html">rate_matrix()</a></code>, Euclidean distances, standardised or
+<code><a href="trait_ou.html">trait_ou()</a></code> with a rate matrix from <code><a href="rate_matrix.html">rate_matrix()</a></code>, Euclidean distances, standardised or
 not, count the shared direction of variation more than once: two traits that measure one
 niche axis double the weight of that axis. <code>"mahalanobis"</code> treats each independent
 direction of variation as one axis, and is the better choice when the traits are
@@ -202,7 +202,7 @@ distance in statistics". <em>Sankhya A</em>, 80(Suppl. 1), 1–7.
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tr</span> <span class="op">&lt;-</span> <span class="fu">treeshapesim</span><span class="fu">::</span><span class="fu"><a href="https://provetelab.org/treeshapesim/reference/sim_tree_shape.html" class="external-link">sim_tree_shape</a></span><span class="op">(</span><span class="fl">32</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, n_traits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_ou.html">trait_ou</a></span><span class="op">(</span><span class="va">tr</span>, n_traits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">assemble_community</span><span class="op">(</span><span class="va">x</span>, size <span class="op">=</span> <span class="fl">16</span>, rule <span class="op">=</span> <span class="st">"limiting_similarity"</span><span class="op">)</span><span class="op">$</span><span class="va">community</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t1"  "t2"  "t3"  "t7"  "t8"  "t12" "t13" "t14" "t16" "t22" "t23" "t25"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t26" "t29" "t30" "t32"</span>
@@ -210,7 +210,7 @@ distance in statistics". <em>Sankhya A</em>, 80(Suppl. 1), 1–7.
 <span class="r-out co"><span class="r-pr">#&gt;</span>  [1] "t1"  "t2"  "t3"  "t6"  "t7"  "t9"  "t10" "t11" "t13" "t14" "t15" "t16"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [13] "t17" "t18" "t31" "t32"</span>
 <span class="r-in"><span><span class="co"># correlated traits: distances that discount the correlation</span></span></span>
-<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, sigma2 <span class="op">=</span> <span class="fu"><a href="rate_matrix.html">rate_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_ou.html">trait_ou</a></span><span class="op">(</span><span class="va">tr</span>, sigma2 <span class="op">=</span> <span class="fu"><a href="rate_matrix.html">rate_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">a</span> <span class="op">&lt;-</span> <span class="fu">assemble_community</span><span class="op">(</span><span class="va">y</span>, size <span class="op">=</span> <span class="fl">16</span>, distance <span class="op">=</span> <span class="st">"mahalanobis"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">a</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_assembly&gt; limiting_similarity with mahalanobis distances: 16 of 32 species kept</span>

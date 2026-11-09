@@ -28,7 +28,7 @@ print(x, ...)
 
   Numeric vector (one trait) or matrix (one column per trait), with
   species names as names or row names. For example, the output of
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md).
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md).
 
 - size:
 
@@ -42,7 +42,7 @@ print(x, ...)
 
   For `rule = "filtering"`: the niche optimum, either `"ancestral"` (the
   root state, 0 by default in
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)),
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)),
   `"derived"` (the maximum of each trait in the pool, one extreme corner
   of trait space), or a numeric vector with one value per trait.
 
@@ -120,7 +120,7 @@ optimum, is chosen by `distance`:
 
 The choice is a statement about niche axes. With correlated traits, such
 as those of
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 with a rate matrix from
 [`rate_matrix()`](https://provetelab.org/comdynamite/reference/rate_matrix.md),
 Euclidean distances, standardised or not, count the shared direction of
@@ -163,7 +163,7 @@ Other rule-based assembly:
 ``` r
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(32)
-x <- traits_ou(tr, n_traits = 2)
+x <- trait_ou(tr, n_traits = 2)
 assemble_community(x, size = 16, rule = "limiting_similarity")$community
 #>  [1] "t1"  "t2"  "t3"  "t7"  "t8"  "t12" "t13" "t14" "t16" "t22" "t23" "t25"
 #> [13] "t26" "t29" "t30" "t32"
@@ -171,7 +171,7 @@ assemble_community(x, size = 16, rule = "filtering", optimum = "derived")$commun
 #>  [1] "t1"  "t2"  "t3"  "t6"  "t7"  "t9"  "t10" "t11" "t13" "t14" "t15" "t16"
 #> [13] "t17" "t18" "t31" "t32"
 # correlated traits: distances that discount the correlation
-y <- traits_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+y <- trait_ou(tr, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 a <- assemble_community(y, size = 16, distance = "mahalanobis")
 a
 #> <mc_assembly> limiting_similarity with mahalanobis distances: 16 of 32 species kept

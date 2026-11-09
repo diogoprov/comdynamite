@@ -1,7 +1,7 @@
 # Profile-likelihood intervals of DAMOCLES parameters
 
 Confidence intervals for the parameters of
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 from the profile likelihood: the interval holds the values at which the
 log-likelihood, maximised over the other parameters, is within
 \\\chi^2_1(\mathrm{level}) / 2\\ of its maximum, half the `level`
@@ -46,7 +46,7 @@ parameter, its estimate and the lower and upper bounds.
 
 ## See also
 
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
 
 Other dynamic null model:
 [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),
@@ -61,7 +61,7 @@ Other dynamic null model:
 set.seed(6)
 tr <- treeshapesim::sim_tree_shape(40)
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 10)
-fit <- fit_damocles(comm, tr, shared = TRUE)
+fit <- damocles_fit(comm, tr, shared = TRUE)
 confint(fit)
 #>   community parameter     estimate     lower     upper
 #> 1    shared     gamma 6.814352e-01 0.5287597 0.8632444

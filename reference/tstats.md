@@ -13,10 +13,11 @@ tstats(
   site = "site",
   species = "species",
   method = c("base", "cati"),
-  nperm = 99,
+  n_perm = 99,
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
-  ...
+  ...,
+  nperm = NULL
 )
 ```
 
@@ -41,7 +42,7 @@ tstats(
   [`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html);
   it needs the package cati.
 
-- nperm:
+- n_perm:
 
   Number of randomisations of the null models; 0 or `NULL` for the
   observed values only, much faster in simulation studies with many
@@ -65,12 +66,16 @@ tstats(
   [`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html),
   such as `reg.pool` or `independantTraits`.
 
+- nperm:
+
+  Deprecated; use `n_perm`.
+
 ## Value
 
 With `method = "base"`, a data frame with one row per site and trait and
 the columns `site`, `trait`, `n_populations`, `T_IP.IC`, `T_IC.IR` and
 `T_PC.PR`; statistics that cannot be computed, such as `T_PC.PR` for a
-site with one species, are `NA`. With `nperm > 0`, also `ses_` and `p_`
+site with one species, are `NA`. With `n_perm > 0`, also `ses_` and `p_`
 columns for each statistic, and the attribute `null`, an array
 (randomisation x row x statistic) with the null values. With
 `method = "cati"`, the `Tstats` object of
@@ -101,7 +106,7 @@ Individuals with a missing value of a trait are left out for that trait.
 
 ## Null models
 
-With `nperm > 0`, `method = "base"` compares each statistic with a null
+With `n_perm > 0`, `method = "base"` compares each statistic with a null
 distribution, from the three null models of Taudiere & Violle (2016),
 implemented in base R from their description:
 
@@ -128,7 +133,7 @@ in Taudiere & Violle (2016).
 
 The standardised effect size is \\(T\_{obs} - \bar T\_{null}) /
 s\_{null}\\, and the p-value is \\(1 + r) / (1 + n)\\, with \\n\\ =
-`nperm`, where \\r\\ is the number of null values at or below the
+`n_perm`, where \\r\\ is the number of null values at or below the
 observed one (`alternative = "less"`), at or above it (`"greater"`), or
 twice the smaller of the two (`"two.sided"`, at most 1). Low values of
 the three statistics are the usual hypotheses (niche differentiation
@@ -238,10 +243,10 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
 ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
-none <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 0)
+none <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 0)
 local <- tstats(sample_individuals(sim, local_adaptation = 0.8, intraspecific_sd = 2),
-                nperm = 0)
-apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), nperm = 0)
+                n_perm = 0)
+apart <- tstats(sample_individuals(sim, displacement = 2, intraspecific_sd = 2), n_perm = 0)
 rbind(none = colMeans(none[ratios], na.rm = TRUE),
       local = colMeans(local[ratios], na.rm = TRUE),
       apart = colMeans(apart[ratios], na.rm = TRUE))
@@ -250,7 +255,7 @@ rbind(none = colMeans(none[ratios], na.rm = TRUE),
 #> local 0.33914930 0.03219661 0.03057455
 #> apart 0.01278061 0.91639355 1.13307743
 # standardised effect sizes and p-values from the null models
-res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 #>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC
 #> 1 site1 0.016376543  -13.545376      0.01

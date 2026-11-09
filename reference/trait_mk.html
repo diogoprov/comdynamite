@@ -72,11 +72,12 @@ history against which reconstructions can be compared, for example by <code><a h
 <span>  <span class="va">tree</span>,</span>
 <span>  q <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  states <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span>, <span class="st">"1"</span><span class="op">)</span>,</span>
-<span>  root <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  root_state <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  alpha <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  edge_rates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  rate_classes <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  class_switch <span class="op">=</span> <span class="fl">0.1</span></span>
+<span>  class_switch <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  root <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -98,7 +99,7 @@ its diagonal is ignored.</p></dd>
 <dd><p>Names of the states, when <code>q</code> is one rate.</p></dd>
 
 
-<dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
+<dt id="arg-root-state">root_state<a class="anchor" aria-label="anchor" href="#arg-root-state"></a></dt>
 <dd><p>State at the root; <code>NULL</code> draws one with equal probabilities.</p></dd>
 
 
@@ -119,6 +120,10 @@ its diagonal is ignored.</p></dd>
 
 <dt id="arg-class-switch">class_switch<a class="anchor" aria-label="anchor" href="#arg-class-switch"></a></dt>
 <dd><p>Rate of moving from one hidden class to each other one.</p></dd>
+
+
+<dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
+<dd><p>Deprecated; use <code>root_state</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -157,7 +162,7 @@ phylogenies. <em>Journal of Evolutionary Biology</em>, 37, 1591–1602. <a href=
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>, <code><a href="trait_rates.html">trait_rates()</a></code> for continuous traits, and <code><a href="traits_ou.html">traits_ou()</a></code>,
+    <div class="dont-index"><p><code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>, <code><a href="trait_rates.html">trait_rates()</a></code> for continuous traits, and <code><a href="trait_ou.html">trait_ou()</a></code>,
 which takes the mapped history as <code>regimes</code> (optima and rates that change with the state).</p>
 <p>Other species traits:
 <code><a href="arrival_ages.html">arrival_ages()</a></code>,
@@ -174,8 +179,8 @@ which takes the mapped history as <code>regimes</code> (optima and rates that ch
 <code><a href="species_traits.html">species_traits()</a></code>,
 <code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>,
 <code><a href="trait_bm.html">trait_bm()</a></code>,
+<code><a href="trait_ou.html">trait_ou()</a></code>,
 <code><a href="trait_rates.html">trait_rates()</a></code>,
-<code><a href="traits_ou.html">traits_ou()</a></code>,
 <code><a href="turnover_rates.html">turnover_rates()</a></code></p></div>
     </div>
 

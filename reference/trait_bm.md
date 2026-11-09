@@ -51,8 +51,8 @@ Other species traits:
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples

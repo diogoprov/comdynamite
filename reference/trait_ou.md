@@ -14,7 +14,7 @@ variance \\\frac{\sigma^2}{2 \alpha} (1 - e^{-2 \alpha t})\\, with
 ## Usage
 
 ``` r
-traits_ou(
+trait_ou(
   tree,
   n_traits = 1,
   alpha = 0,
@@ -159,12 +159,12 @@ Other species traits:
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(20)
 # Brownian motion
-traits_ou(tr, alpha = 0)[1:3, ]
+trait_ou(tr, alpha = 0)[1:3, ]
 #>         t1         t2         t3 
 #> -0.6621385 -0.5839205 -0.7438592 
 # two optima: the clade of node 25 evolves towards 10, the rest towards 0
 reg <- paint_regimes(tr, nodes = 25)
-x <- traits_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
+x <- trait_ou(tr, alpha = 2, theta = c(`0` = 0, `1` = 10), regimes = reg)
 round(x[, 1], 1)
 #>   t1   t2   t3   t4   t5   t6   t7   t8   t9  t10  t11  t12  t13  t14  t15  t16 
 #>  0.0  0.2  0.2  7.4  8.0  8.0  8.4  7.9  8.3  8.6  8.8  8.2  8.5  8.5  0.7  0.0 
@@ -172,13 +172,13 @@ round(x[, 1], 1)
 #>  0.0 -0.3 -0.7  0.9 
 # two correlated traits
 r <- rate_matrix(c(1, 0.5), correlation = 0.8)
-y <- traits_ou(tr, sigma2 = r)
+y <- trait_ou(tr, sigma2 = r)
 cor(y)
 #>          trait1   trait2
 #> trait1 1.000000 0.943929
 #> trait2 0.943929 1.000000
 # the shift to regime 1 moves the optimum of trait 1 but not of trait 2
 th <- rbind(`0` = c(0, 0), `1` = c(10, 0))
-z <- traits_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
+z <- trait_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
 plot_traits(z, tr, regimes = reg)
 ```

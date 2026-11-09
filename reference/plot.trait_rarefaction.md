@@ -17,10 +17,11 @@ field or study has one.
 plot(
   x,
   reference = NULL,
-  colour = "#0072B2",
+  colours = "#0072B2",
   alpha = 0.25,
   scales = "free_y",
-  ...
+  ...,
+  colour = NULL
 )
 ```
 
@@ -37,7 +38,7 @@ plot(
   to the lines. `NULL` (the default) marks the 80% rule for `cover` and
   nothing for `n`; `FALSE` draws no line.
 
-- colour:
+- colours:
 
   Colour of the line and band; the default is the blue of the Okabe-Ito
   palette.
@@ -54,6 +55,10 @@ plot(
 - ...:
 
   Not used.
+
+- colour:
+
+  Deprecated; use `colours`, as in the other plots.
 
 ## Value
 

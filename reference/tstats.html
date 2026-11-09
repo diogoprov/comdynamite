@@ -68,10 +68,11 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 <span>  site <span class="op">=</span> <span class="st">"site"</span>,</span>
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"base"</span>, <span class="st">"cati"</span><span class="op">)</span>,</span>
-<span>  nperm <span class="op">=</span> <span class="fl">99</span>,</span>
+<span>  n_perm <span class="op">=</span> <span class="fl">99</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"less"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span><span class="op">)</span>,</span>
 <span>  null_ip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"species"</span><span class="op">)</span>,</span>
-<span>  <span class="va">...</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  nperm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -97,7 +98,7 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 it needs the package cati.</p></dd>
 
 
-<dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>
+<dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>Number of randomisations of the null models; 0 or <code>NULL</code> for the observed
 values only, much faster in simulation studies with many replicates.</p></dd>
 
@@ -118,13 +119,17 @@ Null models).</p></dd>
 <dd><p>Further arguments to <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>, such as <code>reg.pool</code> or
 <code>independantTraits</code>.</p></dd>
 
+
+<dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>
+<dd><p>Deprecated; use <code>n_perm</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>With <code>method = "base"</code>, a data frame with one row per site and trait and the columns
 <code>site</code>, <code>trait</code>, <code>n_populations</code>, <code>T_IP.IC</code>, <code>T_IC.IR</code> and <code>T_PC.PR</code>; statistics that
 cannot be computed, such as <code>T_PC.PR</code> for a site with one species, are <code>NA</code>. With
-<code>nperm &gt; 0</code>, also <code>ses_</code> and <code>p_</code> columns for each statistic, and the attribute <code>null</code>,
+<code>n_perm &gt; 0</code>, also <code>ses_</code> and <code>p_</code> columns for each statistic, and the attribute <code>null</code>,
 an array (randomisation x row x statistic) with the null values. With <code>method = "cati"</code>,
 the <code>Tstats</code> object of <code><a href="https://adrientaudiere.github.io/cati/reference/Tstats.html" class="external-link">cati::Tstats()</a></code>, with the site names of <code>individuals</code>.</p>
     </div>
@@ -148,7 +153,7 @@ trait are left out for that trait.</p>
     <h2 id="null-models">Null models<a class="anchor" aria-label="anchor" href="#null-models"></a></h2>
 
 
-<p>With <code>nperm &gt; 0</code>, <code>method = "base"</code> compares each statistic with a null distribution, from
+<p>With <code>n_perm &gt; 0</code>, <code>method = "base"</code> compares each statistic with a null distribution, from
 the three null models of Taudiere &amp; Violle (2016), implemented in base R from their
 description:</p><ul><li><p><code>T_IP.IC</code>: trait values are permuted among the individuals of each site, which keeps the
 variance of the site and breaks the structure of populations within it;</p></li>
@@ -164,7 +169,7 @@ individuals across sites, biases the null and makes the test anti-conservative. 
 model of <code>T_PC.PR</code> the population means are themselves computed from the values drawn, so
 their regional variance is computed again from them, as in Taudiere &amp; Violle (2016).</p>
 <p>The standardised effect size is \((T_{obs} - \bar T_{null}) / s_{null}\), and the p-value is \((1 + r) / (1 + n)\),
-with \(n\) = <code>nperm</code>, where \(r\) is the number of null values at or below the observed
+with \(n\) = <code>n_perm</code>, where \(r\) is the number of null values at or below the observed
 one (<code>alternative = "less"</code>), at or above it (<code>"greater"</code>), or twice the smaller of the two
 (<code>"two.sided"</code>, at most 1). Low values of the three statistics are the usual hypotheses
 (niche differentiation within communities for <code>T_IP.IC</code>, environmental filtering for the
@@ -251,10 +256,10 @@ community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
 <span class="r-in"><span>                              <span class="fu"><a href="competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">100</span>,</span></span>
 <span class="r-in"><span>                              seed_steps <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ratios</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"T_IP.IC"</span>, <span class="st">"T_IC.IR"</span>, <span class="st">"T_PC.PR"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">none</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">none</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, n_perm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">local</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, local_adaptation <span class="op">=</span> <span class="fl">0.8</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">apart</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, displacement <span class="op">=</span> <span class="fl">2</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                n_perm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">apart</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, displacement <span class="op">=</span> <span class="fl">2</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, n_perm <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>none <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">none</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      local <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">local</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>      apart <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">apart</span><span class="op">[</span><span class="va">ratios</span><span class="op">]</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -263,7 +268,7 @@ community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
 <span class="r-out co"><span class="r-pr">#&gt;</span> local 0.33914930 0.03219661 0.03057455</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> apart 0.01278061 0.91639355 1.13307743</span>
 <span class="r-in"><span><span class="co"># standardised effect sizes and p-values from the null models</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"T_IP.IC"</span>, <span class="st">"ses_T_IP.IC"</span>, <span class="st">"p_T_IP.IC"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1 0.016376543  -13.545376      0.01</span>

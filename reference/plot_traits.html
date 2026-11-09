@@ -88,7 +88,7 @@ shift in a mapped history.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>Traits of the tips from <code><a href="traits_ou.html">traits_ou()</a></code>: a matrix with one row per tip, named by tip
+<dd><p>Traits of the tips from <code><a href="trait_ou.html">trait_ou()</a></code>: a matrix with one row per tip, named by tip
 label.</p></dd>
 
 
@@ -101,7 +101,7 @@ label.</p></dd>
 
 
 <dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>
-<dd><p>Regimes of the branches, as in <code><a href="traits_ou.html">traits_ou()</a></code>: a vector in the cladewise order
+<dd><p>Regimes of the branches, as in <code><a href="trait_ou.html">trait_ou()</a></code>: a vector in the cladewise order
 of the edges (from <code><a href="paint_regimes.html">paint_regimes()</a></code>) or a tree with a mapped history (class <code>simmap</code>, from
 <code><a href="trait_mk.html">trait_mk()</a></code>). <code>NULL</code> draws every branch in one colour.</p></dd>
 
@@ -130,13 +130,13 @@ regimes; one colour when there are no regimes.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The values of the internal nodes are those kept by <code><a href="traits_ou.html">traits_ou()</a></code> in the attribute <code>nodes</code>,
+    <p>The values of the internal nodes are those kept by <code><a href="trait_ou.html">trait_ou()</a></code> in the attribute <code>nodes</code>,
 so the branches show the simulated path between nodes, not a reconstruction. Without that
 attribute, only the tips are drawn.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="traits_ou.html">traits_ou()</a></code>, <code><a href="rate_matrix.html">rate_matrix()</a></code> and <code><a href="plot.rate_matrix.html">plot.rate_matrix()</a></code>.</p>
+    <div class="dont-index"><p><code><a href="trait_ou.html">trait_ou()</a></code>, <code><a href="rate_matrix.html">rate_matrix()</a></code> and <code><a href="plot.rate_matrix.html">plot.rate_matrix()</a></code>.</p>
 <p>Other species traits:
 <code><a href="arrival_ages.html">arrival_ages()</a></code>,
 <code><a href="as_herodotools.html">as_herodotools()</a></code>,
@@ -152,8 +152,8 @@ attribute, only the tips are drawn.</p>
 <code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>,
 <code><a href="trait_bm.html">trait_bm()</a></code>,
 <code><a href="trait_mk.html">trait_mk()</a></code>,
+<code><a href="trait_ou.html">trait_ou()</a></code>,
 <code><a href="trait_rates.html">trait_rates()</a></code>,
-<code><a href="traits_ou.html">traits_ou()</a></code>,
 <code><a href="turnover_rates.html">turnover_rates()</a></code></p></div>
     </div>
 
@@ -164,7 +164,7 @@ attribute, only the tips are drawn.</p>
 <span class="r-in"><span><span class="va">habitat</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_mk.html">trait_mk</a></span><span class="op">(</span><span class="va">tr</span>, q <span class="op">=</span> <span class="fl">0.5</span>, states <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"forest"</span>, <span class="st">"open"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="rate_matrix.html">rate_matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span>, correlation <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>forest <span class="op">=</span> <span class="fl">0.8</span>, open <span class="op">=</span> <span class="op">-</span><span class="fl">0.8</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                 constraint <span class="op">=</span> <span class="st">"variance"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">habitat</span>, sigma2 <span class="op">=</span> <span class="va">r</span>, regimes <span class="op">=</span> <span class="va">habitat</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_ou.html">trait_ou</a></span><span class="op">(</span><span class="va">habitat</span>, sigma2 <span class="op">=</span> <span class="va">r</span>, regimes <span class="op">=</span> <span class="va">habitat</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">plot_traits</span><span class="op">(</span><span class="va">x</span>, <span class="va">habitat</span>, regimes <span class="op">=</span> <span class="va">habitat</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="plot_traits-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="co"># traitgram of the first trait</span></span></span>

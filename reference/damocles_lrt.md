@@ -1,7 +1,7 @@
 # Likelihood-ratio test between nested DAMOCLES fits
 
 `damocles_lrt()` compares two fits of
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 to the same communities, where `null` is a special case of
 `alternative`: constant rates against rates that change among `regimes`
 or with an `edge_covariate` (where `beta = 0` gives the constant model),
@@ -41,7 +41,7 @@ between those rates and the local dynamics, not evidence of a mechanism.
 
 ## See also
 
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
 [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md).
 
 Other dynamic null model:
@@ -58,8 +58,8 @@ set.seed(5)
 tr <- treeshapesim::sim_tree_shape(40)
 reg <- clade_regimes(tr, list(A = ape::extract.clade(tr, ape::Ntip(tr) + 2)$tip.label))
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 5)
-constant <- fit_damocles(comm, tr, shared = TRUE)
-by_clade <- fit_damocles(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
+constant <- damocles_fit(comm, tr, shared = TRUE)
+by_clade <- damocles_fit(comm, tr, shared = TRUE, regimes = reg, vary = "gamma")
 damocles_lrt(constant, by_clade)
 #>             n_par    loglik      AIC    statistic df   p_value
 #> null            2 -91.68836 187.3767           NA NA        NA

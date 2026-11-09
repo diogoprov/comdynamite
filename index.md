@@ -23,7 +23,7 @@ in R, to analyse data and to simulate it.
 | Dynamics with growth, competition and dispersal, as in Thompson et al. (2020) | [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
 | Static communities along gradients | [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md), [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md) | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
 | Assembly by rules, without dynamics, as in Kraft et al. (2007) | [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md) | [Watching assembly](https://provetelab.org/comdynamite/articles/watching-assembly.html) |
-| Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
+| Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
 | Does a method work? Type I error and power by simulation | all of the above | [Evaluating methods](https://provetelab.org/comdynamite/articles/evaluating-methods.html) |
 
 In R,

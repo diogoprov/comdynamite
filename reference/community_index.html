@@ -72,9 +72,10 @@ communities.</p>
 <span>  site <span class="op">=</span> <span class="st">"site"</span>,</span>
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  null <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"local"</span>, <span class="st">"regional.ind"</span>, <span class="st">"regional.pop"</span>, <span class="st">"regional.pop.prab"</span><span class="op">)</span>,</span>
-<span>  nperm <span class="op">=</span> <span class="fl">99</span>,</span>
+<span>  n_perm <span class="op">=</span> <span class="fl">99</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two.sided"</span>, <span class="st">"less"</span>, <span class="st">"greater"</span><span class="op">)</span>,</span>
-<span>  multivariate <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  multivariate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  nperm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -107,7 +108,7 @@ functions, all computed on the same observed and randomised communities, such as
 <dd><p>Null model (see Details).</p></dd>
 
 
-<dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>
+<dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>Number of randomisations; 0 for the observed values only.</p></dd>
 
 
@@ -119,13 +120,17 @@ functions, all computed on the same observed and randomised communities, such as
 <dt id="arg-multivariate">multivariate<a class="anchor" aria-label="anchor" href="#arg-multivariate"></a></dt>
 <dd><p>If <code>TRUE</code>, the index receives all traits at once.</p></dd>
 
+
+<dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>
+<dd><p>Deprecated; use <code>n_perm</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A data frame of class <code>community_index</code> with one row per site, trait (or
 <code>"multivariate"</code> with <code>multivariate = TRUE</code>) and index, and the columns <code>site</code>, <code>trait</code>,
 <code>index</code> (the name in the list, or the name of the function), <code>observed</code>, and with
-<code>nperm &gt; 0</code> also <code>ses</code> and <code>p</code>; the attribute <code>null</code> holds the null values
+<code>n_perm &gt; 0</code> also <code>ses</code> and <code>p</code>; the attribute <code>null</code> holds the null values
 (randomisation x row), and <a href="plot.tstats.html">plot()</a> draws the tests. Individuals with a missing value are left out for that trait
 (for any trait with <code>multivariate = TRUE</code>).</p>
     </div>
@@ -186,7 +191,7 @@ to detect and quantify multi-level community assembly processes. <em>Ecography</
 <span class="r-in"><span>                  species <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="va">letters</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">100</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ind</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span>, b <span class="op">=</span> <span class="fl">2</span>, c <span class="op">=</span> <span class="fl">3</span>, d <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">[</span><span class="va">ind</span><span class="op">$</span><span class="va">species</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># range of trait values within sites, against draws from the whole region</span></span></span>
-<span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, null <span class="op">=</span> <span class="st">"regional.ind"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/diff.html" class="external-link">diff</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span><span class="op">)</span>, null <span class="op">=</span> <span class="st">"regional.ind"</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   site trait index observed         ses    p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait index 3.155201 -1.79804612 0.12</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait index 3.695020  0.53805219 0.68</span>
@@ -195,7 +200,7 @@ to detect and quantify multi-level community assembly processes. <em>Ecography</
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait index 3.579527 -0.02346576 0.94</span>
 <span class="r-in"><span><span class="co"># variance among the population means of a site</span></span></span>
 <span class="r-in"><span><span class="va">pop_var</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span>, <span class="va">species</span><span class="op">)</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tapply.html" class="external-link">tapply</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">species</span>, <span class="va">mean</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="va">pop_var</span>, null <span class="op">=</span> <span class="st">"local"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="va">pop_var</span>, null <span class="op">=</span> <span class="st">"local"</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   site trait   index observed      ses    p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait pop_var 1.476106 4.219795 0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait pop_var 1.577807 7.631109 0.02</span>
@@ -204,7 +209,7 @@ to detect and quantify multi-level community assembly processes. <em>Ecography</
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait pop_var 1.713591 4.415371 0.02</span>
 <span class="r-in"><span><span class="co"># several indices at once, on the same randomised communities</span></span></span>
 <span class="r-in"><span><span class="fu">community_index</span><span class="op">(</span><span class="va">ind</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>variance <span class="op">=</span> <span class="fu">stats</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">var</a></span>, MNND <span class="op">=</span> <span class="va">mnnd</span>, kurtosis <span class="op">=</span> <span class="va">trait_kurtosis</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                null <span class="op">=</span> <span class="st">"regional.ind"</span>, nperm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                null <span class="op">=</span> <span class="st">"regional.ind"</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    site trait    index    observed          ses    p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1    s1 trait variance  0.96184073 -1.204549411 0.24</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2    s2 trait variance  1.01906139 -1.315648430 0.24</span>

@@ -183,8 +183,8 @@ optima are rescaled to <code>optima_range</code>, or ranked with <code>uniform_o
 <code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>,
 <code><a href="trait_bm.html">trait_bm()</a></code>,
 <code><a href="trait_mk.html">trait_mk()</a></code>,
+<code><a href="trait_ou.html">trait_ou()</a></code>,
 <code><a href="trait_rates.html">trait_rates()</a></code>,
-<code><a href="traits_ou.html">traits_ou()</a></code>,
 <code><a href="turnover_rates.html">turnover_rates()</a></code></p></div>
     </div>
 
@@ -212,7 +212,7 @@ optima are rescaled to <code>optima_range</code>, or ranked with <code>uniform_o
 <span class="r-out co"><span class="r-pr">#&gt;</span> sp4   0.00000 10.0110535 4.025692</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sp5  45.81600 10.7434132 5.782485</span>
 <span class="r-in"><span><span class="co"># optima from another model, here an Ornstein-Uhlenbeck process</span></span></span>
-<span class="r-in"><span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="traits_ou.html">traits_ou</a></span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">1</span>, theta <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_ou.html">trait_ou</a></span><span class="op">(</span><span class="va">tr</span>, alpha <span class="op">=</span> <span class="fl">1</span>, theta <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">species_traits</span><span class="op">(</span><span class="va">tr</span>, optima <span class="op">=</span> <span class="va">ou</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       optimum     sigma    r_max</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> t1   95.73952 20.537509 6.528234</span>

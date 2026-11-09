@@ -10,7 +10,7 @@ the tips to the root, the probabilities of the observed states below
 each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process,
 and combined at each node by the rule of speciation (allopatric, or with
-probability `sympatry` leaving both daughters present). `fit_damocles()`
+probability `sympatry` leaving both daughters present). `damocles_fit()`
 finds the maximum-likelihood rates, and optionally `sympatry`.
 
 ## Usage
@@ -25,7 +25,7 @@ damocles_loglik(
   sympatry = 0
 )
 
-fit_damocles(
+damocles_fit(
   comm,
   tree,
   root = c("both", "absent", "present"),
@@ -74,7 +74,7 @@ fit_damocles(
   In `damocles_loglik()`, the probability that a present ancestor leaves
   both daughters present (see
   [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)).
-  In `fit_damocles()`, a fixed value, or `NULL` to estimate it with the
+  In `damocles_fit()`, a fixed value, or `NULL` to estimate it with the
   rates (shared or not, as they are).
 
 - start:
@@ -115,7 +115,7 @@ fit_damocles(
 ## Value
 
 `damocles_loglik()`: the log-likelihood of each community.
-`fit_damocles()`: a data frame of class `mc_damocles_fit` with one row
+`damocles_fit()`: a data frame of class `mc_damocles_fit` with one row
 per community and the columns `gamma`, `mu`, `sympatry` (fixed or
 estimated), `loglik`, `richness` and `convergence` (0 when
 [`stats::optim()`](https://rdrr.io/r/stats/optim.html) converged). With
@@ -141,7 +141,7 @@ several thousand, with the same likelihoods as
 `DAMOCLES::DAMOCLES_ML()`; the ratio of the two rates is better
 estimated than each one.
 
-With `shared = TRUE`, `fit_damocles()` estimates one pair of rates for
+With `shared = TRUE`, `damocles_fit()` estimates one pair of rates for
 all communities by maximising the sum of their log-likelihoods, which
 treats the communities as independent realisations of the same process
 on the same tree. Pooling communities narrows the estimates: in
@@ -159,7 +159,7 @@ with a chi-squared distribution on \\2 (m - 1)\\ degrees of freedom,
 with \\m\\ communities, to ask whether the rates differ among
 communities.
 
-With `sympatry = NULL`, `fit_damocles()` also estimates the probability
+With `sympatry = NULL`, `damocles_fit()` also estimates the probability
 that a present ancestor leaves both daughters present, on the logit
 scale. A single community says almost nothing about it: in
 `data-raw/validation_damocles.R`, with `sympatry = 0.5` and
@@ -173,7 +173,7 @@ is enough.
 
 Rates can change across the tree. `damocles_loglik()` and
 [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)
-take one rate per edge, and `fit_damocles()` estimates rates that differ
+take one rate per edge, and `damocles_fit()` estimates rates that differ
 among `regimes` of the edges (a partition defined a priori with
 [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),
 or the configuration of rate shifts of a method such as BAMM) or that
@@ -226,12 +226,12 @@ comm <- simulate_damocles(tr, gamma = 1, mu = 2, n = 2)
 damocles_loglik(comm, tr, gamma = 1, mu = 2)
 #>      sim1      sim2 
 #> -28.13747 -22.54596 
-fit_damocles(comm, tr)
+damocles_fit(comm, tr)
 #> DAMOCLES rates by maximum likelihood (Pigot & Etienne 2015)
 #>      gamma       mu sympatry loglik richness convergence
 #> sim1 1.794 4.61e+00        0  -27.8       11           0
 #> sim2 0.476 1.46e-09        0  -21.9        8           0
-fit_damocles(comm, tr, shared = TRUE)
+damocles_fit(comm, tr, shared = TRUE)
 #> DAMOCLES rates by maximum likelihood (Pigot & Etienne 2015)
 #> Parameters shared by 2 communities; total log-likelihood -50.6593 
 #>      gamma   mu sympatry loglik richness convergence

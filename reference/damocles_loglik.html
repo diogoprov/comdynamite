@@ -6,7 +6,7 @@ algorithm of Pigot &amp;amp; Etienne (2015, Box 1): from the tips to the root, t
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
 node by the rule of speciation (allopatric, or with probability sympatry leaving both
-daughters present). fit_damocles() finds the maximum-likelihood rates, and optionally
+daughters present). damocles_fit() finds the maximum-likelihood rates, and optionally
 sympatry."><meta property="og:description" content="damocles_loglik() computes the exact log-likelihood of the presences and absences of the
 species of a clade in a local community, given their tree and the rates of local colonisation
 gamma and extinction mu, under the model of simulate_damocles(). It follows the pruning
@@ -14,7 +14,7 @@ algorithm of Pigot &amp;amp; Etienne (2015, Box 1): from the tips to the root, t
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
 node by the rule of speciation (allopatric, or with probability sympatry leaving both
-daughters present). fit_damocles() finds the maximum-likelihood rates, and optionally
+daughters present). damocles_fit() finds the maximum-likelihood rates, and optionally
 sympatry."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -77,7 +77,7 @@ algorithm of Pigot &amp; Etienne (2015, Box 1): from the tips to the root, the p
 the observed states below each branch, given its state, are carried along the branch by the
 analytical solution of the backward equations of the two-state process, and combined at each
 node by the rule of speciation (allopatric, or with probability <code>sympatry</code> leaving both
-daughters present). <code>fit_damocles()</code> finds the maximum-likelihood rates, and optionally
+daughters present). <code>damocles_fit()</code> finds the maximum-likelihood rates, and optionally
 <code>sympatry</code>.</p>
     </div>
 
@@ -92,7 +92,7 @@ daughters present). <code>fit_damocles()</code> finds the maximum-likelihood rat
 <span>  sympatry <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">fit_damocles</span><span class="op">(</span></span>
+<span><span class="fu">damocles_fit</span><span class="op">(</span></span>
 <span>  <span class="va">comm</span>,</span>
 <span>  <span class="va">tree</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
@@ -138,7 +138,7 @@ takes.</p></dd>
 
 <dt id="arg-sympatry">sympatry<a class="anchor" aria-label="anchor" href="#arg-sympatry"></a></dt>
 <dd><p>In <code>damocles_loglik()</code>, the probability that a present ancestor leaves both
-daughters present (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>). In <code>fit_damocles()</code>, a fixed value, or
+daughters present (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>). In <code>damocles_fit()</code>, a fixed value, or
 <code>NULL</code> to estimate it with the rates (shared or not, as they are).</p></dd>
 
 
@@ -173,7 +173,7 @@ or <code>"mu"</code>; the other one is a single rate for the whole tree.</p></dd
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p><code>damocles_loglik()</code>: the log-likelihood of each community. <code>fit_damocles()</code>: a data
+    <p><code>damocles_loglik()</code>: the log-likelihood of each community. <code>damocles_fit()</code>: a data
 frame of class <code>mc_damocles_fit</code> with one row per community and the columns <code>gamma</code>, <code>mu</code>,
 <code>sympatry</code> (fixed or estimated), <code>loglik</code>, <code>richness</code> and <code>convergence</code> (0 when <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim()</a></code> converged). With
 <code>shared = TRUE</code> every row holds the same rates and convergence code, <code>loglik</code> is the
@@ -192,7 +192,7 @@ nearly none of them, the likelihood surface is flat and the estimates are poor. 
 <code>data-raw/validation_damocles.R</code>, ten communities simulated with <code>gamma = mu = 1</code> on trees of
 60 tips gave estimates of <code>mu</code> from zero to several thousand, with the same likelihoods as
 <code>DAMOCLES::DAMOCLES_ML()</code>; the ratio of the two rates is better estimated than each one.</p>
-<p>With <code>shared = TRUE</code>, <code>fit_damocles()</code> estimates one pair of rates for all communities by
+<p>With <code>shared = TRUE</code>, <code>damocles_fit()</code> estimates one pair of rates for all communities by
 maximising the sum of their log-likelihoods, which treats the communities as independent
 realisations of the same process on the same tree. Pooling communities narrows the
 estimates: in <code>data-raw/validation_damocles.R</code>, with <code>gamma = mu = 1</code> on trees of 60 tips and
@@ -206,7 +206,7 @@ overstates the information on the rates. Twice the difference between the summed
 log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
 on \(2 (m - 1)\) degrees of freedom, with \(m\) communities, to ask whether
 the rates differ among communities.</p>
-<p>With <code>sympatry = NULL</code>, <code>fit_damocles()</code> also estimates the probability that a present
+<p>With <code>sympatry = NULL</code>, <code>damocles_fit()</code> also estimates the probability that a present
 ancestor leaves both daughters present, on the logit scale. A single community says almost
 nothing about it: in <code>data-raw/validation_damocles.R</code>, with <code>sympatry = 0.5</code> and
 <code>gamma = mu = 1</code> on trees of 60 tips, 90% of the estimates fell between 0 and 1 from one
@@ -215,7 +215,7 @@ with shared rates, and compare the fit with that of <code>sympatry = 0</code> by
 degree of freedom, on the boundary of the parameter space, so the chi-squared p-value is
 conservative) to ask whether strictly allopatric speciation is enough.</p>
 <p>Rates can change across the tree. <code>damocles_loglik()</code> and <code><a href="simulate_damocles.html">simulate_damocles()</a></code> take one rate
-per edge, and <code>fit_damocles()</code> estimates rates that differ among <code>regimes</code> of the edges (a
+per edge, and <code>damocles_fit()</code> estimates rates that differ among <code>regimes</code> of the edges (a
 partition defined a priori with <code><a href="clade_regimes.html">clade_regimes()</a></code>, or the configuration of rate shifts of a
 method such as BAMM) or that change with an <code>edge_covariate</code> (such as branch-specific rates
 of speciation from a method such as ClaDS), for colonisation, extinction or both (<code>vary</code>).
@@ -256,12 +256,12 @@ community structure. <em>Ecology Letters</em>, 18, 153–163. <a href="https://d
 <span class="r-in"><span><span class="fu">damocles_loglik</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, gamma <span class="op">=</span> <span class="fl">1</span>, mu <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      sim1      sim2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -28.13747 -22.54596 </span>
-<span class="r-in"><span><span class="fu">fit_damocles</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">damocles_fit</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES rates by maximum likelihood (Pigot &amp; Etienne 2015)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      gamma       mu sympatry loglik richness convergence</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sim1 1.794 4.61e+00        0  -27.8       11           0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> sim2 0.476 1.46e-09        0  -21.9        8           0</span>
-<span class="r-in"><span><span class="fu">fit_damocles</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, shared <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">damocles_fit</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, shared <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES rates by maximum likelihood (Pigot &amp; Etienne 2015)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameters shared by 2 communities; total log-likelihood -50.6593 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      gamma   mu sympatry loglik richness convergence</span>

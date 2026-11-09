@@ -76,8 +76,9 @@ the rates that generated the data. Three models of how rates vary are available:
 <span>  shift_branch <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  relative <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  rate_sd <span class="op">=</span> <span class="fl">0.5</span>,</span>
-<span>  root_value <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  edge_rates <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  root <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  edge_rates <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  root_value <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -131,7 +132,7 @@ after it to <code>sigma2</code> times <code>shift_size</code> (<code>FALSE</code
 <code>"gbm"</code> and among branches for <code>"iid"</code>.</p></dd>
 
 
-<dt id="arg-root-value">root_value<a class="anchor" aria-label="anchor" href="#arg-root-value"></a></dt>
+<dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
 <dd><p>Trait value at the root.</p></dd>
 
 
@@ -139,13 +140,18 @@ after it to <code>sigma2</code> times <code>shift_size</code> (<code>FALSE</code
 <dd><p>Optional rate of each branch, in the order of the rows of <code>tree$edge</code>, such as
 those of <code><a href="history_rates.html">history_rates()</a></code>. When given, <code>model</code> and its arguments are ignored.</p></dd>
 
+
+<dt id="arg-root-value">root_value<a class="anchor" aria-label="anchor" href="#arg-root-value"></a></dt>
+<dd><p>Deprecated; use <code>root</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A list with</p><ul><li><p><code>tips</code>: the trait at the tips, named by species;</p></li>
 <li><p><code>nodes</code>: the trait at the internal nodes, named by their numbers in <code>tree$edge</code>, the
 root first;</p></li>
-<li><p><code>edge_rate</code>: the rate of each branch, in the order of the rows of <code>tree$edge</code>;</p></li>
+<li><p><code>edge_rates</code>: the rate of each branch, in the order of the rows of <code>tree$edge</code>, as in
+<code><a href="trait_mk.html">trait_mk()</a></code> (also as <code>edge_rate</code>, its name before 0.7.0, until 1.0.0);</p></li>
 <li><p><code>node_rate</code>: for <code>"gbm"</code>, the rate at every node, tips first, named by node number;
 <code>NULL</code> otherwise;</p></li>
 <li><p><code>shifts</code>: for <code>"shift"</code>, a data frame with the <code>edge</code> (row of <code>tree$edge</code>), the <code>node</code>
@@ -216,7 +222,7 @@ vary among branches.</p>
 <code><a href="tip_history_metrics.html">tip_history_metrics()</a></code>,
 <code><a href="trait_bm.html">trait_bm()</a></code>,
 <code><a href="trait_mk.html">trait_mk()</a></code>,
-<code><a href="traits_ou.html">traits_ou()</a></code>,
+<code><a href="trait_ou.html">trait_ou()</a></code>,
 <code><a href="turnover_rates.html">turnover_rates()</a></code></p></div>
     </div>
 
@@ -238,7 +244,7 @@ vary among branches.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] edge       node       position   multiplier rate      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;0 rows&gt; (or 0-length row.names)</span>
 <span class="r-in"><span><span class="va">g</span> <span class="op">&lt;-</span> <span class="fu">trait_rates</span><span class="op">(</span><span class="va">tr</span>, <span class="st">"gbm"</span>, rate_sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">g</span><span class="op">$</span><span class="va">edge_rate</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">g</span><span class="op">$</span><span class="va">edge_rates</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  0.3990  0.7932  0.8618  0.8986  0.9967  1.7629 </span>
 <span class="r-in"><span><span class="co"># as the environmental optima of a metacommunity</span></span></span>

@@ -9,7 +9,7 @@ test of the mean over sites, and the sites that deviate.
 ## Usage
 
 ``` r
-tstats_summary(x, level = 0.05)
+tstats_summary(x, level = 0.95)
 ```
 
 ## Arguments
@@ -18,14 +18,19 @@ tstats_summary(x, level = 0.05)
 
   Data frame from
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
-  with `nperm > 0`.
+  with `n_perm > 0`.
 
 - level:
 
-  Size of the two-sided test of each site and of the mean. A site can
-  deviate only if \\1 / (1 + \mathrm{nperm}) \< \mathrm{level} / 2\\, so
-  `nperm` must be at least \\2 / \mathrm{level}\\; a warning is given
-  otherwise.
+  Coverage of the null distribution, as in
+  [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md)
+  and
+  [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md):
+  each site and the mean are tested two-sided at size \\\alpha = 1 -
+  \mathrm{level}\\. A site can deviate only if \\1 / (1 +
+  \mathrm{n_perm}) \< \alpha / 2\\, so `n_perm` must be at least \\2 /
+  \alpha\\; a warning is given otherwise. Before 0.7.0 `level` was the
+  size (0.05); values below 0.5 are still read that way, with a warning.
 
 ## Value
 
@@ -87,7 +92,7 @@ tree <- treeshapesim::sim_tree_shape(20)
 sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
-res <- tstats(sample_individuals(sim, intraspecific_sd = 2), nperm = 99)
+res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 tstats_summary(res)$traits
 #>   trait statistic n_sites percent_low percent_high    mean_ses p_mean_low
 #> 1 trait   T_IP.IC      15   100.00000     0.000000 -14.3546962       0.01

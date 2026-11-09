@@ -2,7 +2,7 @@
 
 Builds the evolutionary rate matrix (the covariance of the changes of
 several traits per unit time) for multivariate trait evolution with
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 with the structures that mvMORPH fits
 (`mvBM(param = list(constraint = ))`, Clavel et al. 2015). Variances are
 rates of evolution of each trait, and correlations are evolutionary
@@ -69,7 +69,7 @@ print(x, ...)
 An object of class `rate_matrix`: a symmetric matrix with one row and
 column per trait, or, for the multi-regime structures, a named list of
 them, one per regime. The attribute `constraint` holds the structure.
-Either can be passed to `traits_ou(sigma2 = )`;
+Either can be passed to `trait_ou(sigma2 = )`;
 [plot()](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md)
 draws them as ellipses.
 
@@ -79,7 +79,7 @@ One matrix, for the whole tree:
 
 - `"default"`: any rate matrix, with the variances in `variance` and the
   correlations in `correlation`. A matrix supplied by the user can also
-  be passed directly to `traits_ou(sigma2 = )`.
+  be passed directly to `trait_ou(sigma2 = )`.
 
 - `"diagonal"`: traits evolve independently, each with its own rate.
 
@@ -89,7 +89,7 @@ One matrix, for the whole tree:
 - `"equal"`: all traits with the same rate, correlated (Adams 2013).
 
 One matrix per selective regime, for multi-regime models (`regimes` in
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)):
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)):
 
 - `"proportional"`: matrices proportional to each other, the matrix
   built from `variance` and `correlation` multiplied by `scale`, one
@@ -125,7 +125,7 @@ for fitting multivariate evolutionary models to morphometric data.
 
 ## See also
 
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 which simulates traits with these matrices, and
 [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md).
 
@@ -144,8 +144,8 @@ Other species traits:
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples
@@ -182,7 +182,7 @@ plot(r)
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
-x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = r, regimes = habitat)
 plot_traits(x, habitat, regimes = habitat)
 
 # several correlated traits in community assembly

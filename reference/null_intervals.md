@@ -26,7 +26,7 @@ null_intervals(x, level = 0.95, inner = 0.5)
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
   or
   [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
-  with `nperm > 0`.
+  with `n_perm > 0`.
 
 - level:
 
@@ -76,7 +76,7 @@ set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
                   species = sample(c("a", "b", "c"), 120, replace = TRUE))
 ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(120)
-head(null_intervals(tstats(ind, nperm = 99)))
+head(null_intervals(tstats(ind, n_perm = 99)))
 #>   site trait statistic    observed null_median  null_low null_high inner_low
 #> 1   s1 trait   T_IP.IC 0.009373208    1.045136 0.6343477  1.132411 0.9543454
 #> 2   s2 trait   T_IP.IC 0.022171031    1.034900 0.6993979  1.218829 0.9206989

@@ -15,11 +15,12 @@ trait_mk(
   tree,
   q = 1,
   states = c("0", "1"),
-  root = NULL,
+  root_state = NULL,
   alpha = NULL,
   edge_rates = NULL,
   rate_classes = NULL,
-  class_switch = 0.1
+  class_switch = 0.1,
+  root = NULL
 )
 ```
 
@@ -39,7 +40,7 @@ trait_mk(
 
   Names of the states, when `q` is one rate.
 
-- root:
+- root_state:
 
   State at the root; `NULL` draws one with equal probabilities.
 
@@ -63,6 +64,10 @@ trait_mk(
 - class_switch:
 
   Rate of moving from one hidden class to each other one.
+
+- root:
+
+  Deprecated; use `root_state`.
 
 ## Value
 
@@ -117,7 +122,7 @@ character evolution on phylogenies. *Journal of Evolutionary Biology*,
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
 for continuous traits, and
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 which takes the mapped history as `regimes` (optima and rates that
 change with the state).
 
@@ -136,8 +141,8 @@ Other species traits:
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples

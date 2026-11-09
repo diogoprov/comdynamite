@@ -7,7 +7,7 @@ along the tree under the DAMOCLES model (Pigot & Etienne 2015;
 [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)),
 with the rates of colonisation and local extinction estimated from that
 community (or shared by all communities) by
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 or given, and one from random draws of the same number of species from
 the tips, the static null model the dynamic one is compared with in that
 study.
@@ -54,7 +54,7 @@ damocles_test(
   communities, one value for all communities or one per community, or
   lists with one rate, or one rate per edge of `tree`, per community;
   `NULL` (the default) estimates both with
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
+  [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
   with `shared`, `sympatry`, `regimes`, `edge_covariate` and `vary`
   passed on to it.
 
@@ -68,7 +68,7 @@ damocles_test(
 
   When the rates are estimated, `TRUE` fits one pair shared by all
   communities (see
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md))
+  [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md))
   and `FALSE` (the default) one pair per community.
 
 - sympatry:
@@ -143,7 +143,7 @@ phylogenetic community structure. *Ecology Letters*, 18, 153–163.
 ## See also
 
 [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md).
 
 Other dynamic null model:
 [`clade_regimes()`](https://provetelab.org/comdynamite/reference/clade_regimes.md),

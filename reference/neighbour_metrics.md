@@ -163,7 +163,7 @@ mnnd(cbind(x, rev(x)))
 set.seed(1)
 ind <- data.frame(site = rep(paste0("s", 1:5), each = 15),
                   species = sample(letters[1:4], 75, replace = TRUE), trait = rnorm(75))
-community_index(ind, mnnd, null = "regional.ind", nperm = 99)
+community_index(ind, mnnd, null = "regional.ind", n_perm = 99)
 #>   site trait index   observed        ses    p
 #> 1   s1 trait  mnnd 0.21951480  1.5305257 0.12
 #> 2   s2 trait  mnnd 0.11803015 -0.6224601 0.58

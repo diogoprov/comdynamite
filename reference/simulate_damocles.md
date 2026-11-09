@@ -93,7 +93,7 @@ phylogenetic community structure. *Ecology Letters*, 18, 153–163.
 
 [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 and
-[`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+[`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
 for the likelihood,
 [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
 for the null model of phylogenetic community structure.

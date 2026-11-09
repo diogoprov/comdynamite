@@ -67,7 +67,7 @@ par(op)
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
 simulates a discrete character on the tree, here the habitat of each
 lineage, with changes inside branches.
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 takes that mapped history as `regimes`, so that the rates (and, with
 `alpha > 0`, the optima) change at the moment the habitat changes.
 [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
@@ -77,7 +77,7 @@ habitat, or, for one trait, as a traitgram.
 ``` r
 
 habitat <- trait_mk(tree, q = 0.4, states = c("forest", "open"))
-x <- traits_ou(habitat, sigma2 = flip, regimes = habitat)
+x <- trait_ou(habitat, sigma2 = flip, regimes = habitat)
 op <- par(mfrow = c(1, 2))
 plot_traits(x, habitat, regimes = habitat)
 plot_traits(x, habitat, traits = 1, regimes = habitat)
@@ -97,7 +97,7 @@ optimum of the first trait only.
 ``` r
 
 theta <- rbind(forest = c(0, 0), open = c(4, 0))
-y <- traits_ou(habitat, alpha = 2, sigma2 = rate_matrix(c(1, 1), correlation = 0.5),
+y <- trait_ou(habitat, alpha = 2, sigma2 = rate_matrix(c(1, 1), correlation = 0.5),
                theta = theta, regimes = habitat)
 plot_traits(y, habitat, regimes = habitat)
 ```
@@ -120,7 +120,7 @@ boundary of the filter around the optimum.
 
 ``` r
 
-z <- traits_ou(tree, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
+z <- trait_ou(tree, sigma2 = rate_matrix(c(1, 4), correlation = 0.9))
 op <- par(mfrow = c(1, 2))
 plot_assembly(assemble_community(z, 20, rule = "filtering", optimum = c(0, 0)),
               main = "Euclidean")
@@ -190,7 +190,7 @@ head(as_mc_data(sim)$traits)
 
 [`data-raw/validation_mvtraits.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/validation_mvtraits.R)
 compares
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
 with mvMORPH (version 1.2.3). Over 20000 simulations with two regimes
 that change within branches, the covariances of the tips stayed within
 2.9 Monte Carlo standard errors of their expected value, \sum_k R_k

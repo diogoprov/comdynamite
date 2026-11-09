@@ -3,13 +3,13 @@
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp;amp; Etienne 2015;
 simulate_damocles()), with the rates of colonisation and local extinction estimated from
-that community (or shared by all communities) by fit_damocles() or given, and one from
+that community (or shared by all communities) by damocles_fit() or given, and one from
 random draws of the same number of species from the tips, the static null model the dynamic
 one is compared with in that study."><meta property="og:description" content="damocles_test() compares the mean pairwise distance (MPD) and the mean nearest taxon
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp;amp; Etienne 2015;
 simulate_damocles()), with the rates of colonisation and local extinction estimated from
-that community (or shared by all communities) by fit_damocles() or given, and one from
+that community (or shared by all communities) by damocles_fit() or given, and one from
 random draws of the same number of species from the tips, the static null model the dynamic
 one is compared with in that study."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -70,7 +70,7 @@ one is compared with in that study."><meta property="og:image" content="https://
 distance (MNTD) among the species present in each community with two null distributions: one
 from communities simulated along the tree under the DAMOCLES model (Pigot &amp; Etienne 2015;
 <code><a href="simulate_damocles.html">simulate_damocles()</a></code>), with the rates of colonisation and local extinction estimated from
-that community (or shared by all communities) by <code><a href="damocles_loglik.html">fit_damocles()</a></code> or given, and one from
+that community (or shared by all communities) by <code><a href="damocles_loglik.html">damocles_fit()</a></code> or given, and one from
 random draws of the same number of species from the tips, the static null model the dynamic
 one is compared with in that study.</p>
     </div>
@@ -115,7 +115,7 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 <dd><p>Rates of local colonisation and extinction used to simulate the null
 communities, one value for all communities or one per community, or lists with one rate,
 or one rate per edge of <code>tree</code>, per community; <code>NULL</code> (the default) estimates both with
-<code><a href="damocles_loglik.html">fit_damocles()</a></code>, with <code>shared</code>, <code>sympatry</code>, <code>regimes</code>, <code>edge_covariate</code> and <code>vary</code> passed
+<code><a href="damocles_loglik.html">damocles_fit()</a></code>, with <code>shared</code>, <code>sympatry</code>, <code>regimes</code>, <code>edge_covariate</code> and <code>vary</code> passed
 on to it.</p></dd>
 
 
@@ -127,7 +127,7 @@ probabilities).</p></dd>
 
 <dt id="arg-shared">shared<a class="anchor" aria-label="anchor" href="#arg-shared"></a></dt>
 <dd><p>When the rates are estimated, <code>TRUE</code> fits one pair shared by all communities
-(see <code><a href="damocles_loglik.html">fit_damocles()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
+(see <code><a href="damocles_loglik.html">damocles_fit()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
 
 
 <dt id="arg-sympatry">sympatry<a class="anchor" aria-label="anchor" href="#arg-sympatry"></a></dt>
@@ -186,7 +186,7 @@ community structure. <em>Ecology Letters</em>, 18, 153–163. <a href="https://d
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="simulate_damocles.html">simulate_damocles()</a></code>, <code><a href="damocles_loglik.html">fit_damocles()</a></code>.</p>
+    <div class="dont-index"><p><code><a href="simulate_damocles.html">simulate_damocles()</a></code>, <code><a href="damocles_loglik.html">damocles_fit()</a></code>.</p>
 <p>Other dynamic null model:
 <code><a href="clade_regimes.html">clade_regimes()</a></code>,
 <code><a href="confint.mc_damocles_fit.html">confint.mc_damocles_fit()</a></code>,

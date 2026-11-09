@@ -2,6 +2,43 @@
 
 ## comdynamite (development version)
 
+- Renamed for consistency; the old names still work, with a warning,
+  until 1.0.0:
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
+  is now
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
+  (like
+  [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  and
+  [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md));
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
+  is now
+  [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md);
+  the `nperm` argument of
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  and
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  is now `n_perm`, as in the rest of the package;
+  `trait_rates(root_value)` is now `root`, as in
+  [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md);
+  `trait_mk(root)` is now `root_state`, since it is a state;
+  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
+  [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+  takes `colours`, as the other plots.
+  [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md)
+  returns the rates as `edge_rates`, as
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  does (`edge_rate` is kept until 1.0.0).
+
+- `tstats_summary(level = )` is now the coverage of the null
+  distribution (default 0.95), as in
+  [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md)
+  and [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md);
+  values below 0.5 are read as the size of the test, as before, with a
+  warning.
+
 - [`plot_rates()`](https://provetelab.org/comdynamite/reference/plot_rates.md)
   draws any rate per branch on the tree, from
   [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
@@ -41,7 +78,7 @@
 - Plots for several traits, in base graphics:
   [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
   draws traits from
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   with their tree, as a phylomorphospace (two traits) or a traitgram
   (one trait), with branches coloured by regime and the colour changing
   where a mapped history changes;
@@ -55,7 +92,7 @@
   limiting similarity in the metric of the assembly. New article,
   “Correlated traits and assembly in trait space”.
 
-- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+- [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md):
   `theta` can be a matrix with one column per trait, so that a regime
   shifts each trait’s optimum by its own amount; `root` can have one
   value per trait and is checked; a mapped history is matched to the
@@ -258,7 +295,7 @@
   and
   [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
   take one rate per edge;
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   and
   [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   estimate rates that differ among `regimes` of the edges or change with
@@ -276,7 +313,7 @@
 
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
   [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   and
   [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   take `sympatry`, the probability that a locally present ancestor
@@ -320,7 +357,7 @@
   each axis, as in
   [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md).
 
-- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+- [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   simulates several correlated traits: `sigma2` can be an evolutionary
   rate matrix, or a named list with one matrix (or one rate) per
   selective regime, as in the multi-rate models of mvMORPH (Clavel et
@@ -367,7 +404,7 @@
 
 - [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md),
   [`damocles_loglik()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
-  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
+  [`fit_damocles()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   and
   [`damocles_test()`](https://provetelab.org/comdynamite/reference/damocles_test.md)
   implement the dynamic null model of community assembly of Pigot &
@@ -552,7 +589,7 @@
   `trait_bm(nodes = TRUE)` and `species_traits(nodes = TRUE)` give the
   values at the internal nodes, drawn after everything else so that the
   other values stay the same with the same seed;
-  [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md)
+  [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md)
   keeps them as the attribute `nodes`.
   [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
   simulates a discrete trait under the Mk model and keeps every change,
@@ -999,7 +1036,7 @@ Checks of data:
   limiting similarity (GAUSE algorithm of Colwell & Winkler 1984),
   habitat filtering and neutral assembly, as in Kraft et al. (2007).
 
-- [`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md):
+- [`traits_ou()`](https://provetelab.org/comdynamite/reference/comdynamite-deprecated.md):
   traits under an Ornstein-Uhlenbeck process with one or several optima
   (multi-peak OU; Brownian motion when `alpha = 0`), with
   [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md)

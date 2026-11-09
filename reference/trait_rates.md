@@ -19,8 +19,9 @@ trait_rates(
   shift_branch = FALSE,
   relative = TRUE,
   rate_sd = 0.5,
-  root_value = 0,
-  edge_rates = NULL
+  root = 0,
+  edge_rates = NULL,
+  root_value = NULL
 )
 ```
 
@@ -73,7 +74,7 @@ trait_rates(
   Standard deviation of the logarithm of the rate: per square root of
   time for `"gbm"` and among branches for `"iid"`.
 
-- root_value:
+- root:
 
   Trait value at the root.
 
@@ -84,6 +85,10 @@ trait_rates(
   [`history_rates()`](https://provetelab.org/comdynamite/reference/history_rates.md).
   When given, `model` and its arguments are ignored.
 
+- root_value:
+
+  Deprecated; use `root`.
+
 ## Value
 
 A list with
@@ -93,8 +98,10 @@ A list with
 - `nodes`: the trait at the internal nodes, named by their numbers in
   `tree$edge`, the root first;
 
-- `edge_rate`: the rate of each branch, in the order of the rows of
-  `tree$edge`;
+- `edge_rates`: the rate of each branch, in the order of the rows of
+  `tree$edge`, as in
+  [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
+  (also as `edge_rate`, its name before 0.7.0, until 1.0.0);
 
 - `node_rate`: for `"gbm"`, the rate at every node, tips first, named by
   node number; `NULL` otherwise;
@@ -192,7 +199,7 @@ Other species traits:
 [`tip_history_metrics()`](https://provetelab.org/comdynamite/reference/tip_history_metrics.md),
 [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md),
 [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md),
-[`traits_ou()`](https://provetelab.org/comdynamite/reference/traits_ou.md),
+[`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md),
 [`turnover_rates()`](https://provetelab.org/comdynamite/reference/turnover_rates.md)
 
 ## Examples
@@ -214,7 +221,7 @@ b$shifts
 #> [1] edge       node       position   multiplier rate      
 #> <0 rows> (or 0-length row.names)
 g <- trait_rates(tr, "gbm", rate_sd = 0.5)
-summary(g$edge_rate)
+summary(g$edge_rates)
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 #>  0.3990  0.7932  0.8618  0.8986  0.9967  1.7629 
 # as the environmental optima of a metacommunity
