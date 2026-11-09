@@ -111,3 +111,15 @@ test_that("sampling helpers handle edge inputs", {
   skip_if_not_installed("ggplot2")
   expect_s3_class(plot(r), "ggplot")
 })
+
+test_that("trait_rarefaction over cover with a fixed n keeps the replicates", {
+  set.seed(6)
+  ind <- data.frame(site = rep(c("s1", "s2"), each = 20),
+                    species = sample(c("a", "b", "c"), 40, replace = TRUE), trait = rnorm(40))
+  r <- trait_rarefaction(ind, statistic = function(x) c(m = mean(x$trait)), cover = c(0.5, 1),
+                         n = 2, reps = 3)
+  expect_equal(attr(r, "by"), "cover")
+  expect_equal(nrow(attr(r, "values")[[1]]), 3)
+  expect_equal(r$reps, c(3, 3))
+  expect_error(trait_rarefaction(ind, cover = 0.5, n = 1.5), "round")
+})
