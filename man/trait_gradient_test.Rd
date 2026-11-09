@@ -7,9 +7,11 @@
 trait_gradient_test(
   x,
   n_null = 999,
-  null = c("species", "curveball", "permute"),
+  null = c("species", "phylo", "bm", "curveball", "permute"),
   burn_in = NULL,
-  thin = NULL
+  thin = NULL,
+  tree = NULL,
+  phylo_k = 1.1
 )
 }
 \arguments{
@@ -17,17 +19,23 @@ trait_gradient_test(
 
 \item{n_null}{Number of null communities.}
 
-\item{null}{\code{"species"} (the default), \code{"curveball"} or \code{"permute"}.}
+\item{null}{\code{"species"} (the default), \code{"phylo"}, \code{"bm"}, \code{"curveball"} or \code{"permute"}.}
 
 \item{burn_in, thin}{Trades of the curveball chain before the first null community and
 between null communities; by default 50 and 5 times the number of sites, so that each site
 takes part in about 10 trades between null communities.}
+
+\item{tree}{Phylogeny (\code{phylo}) with branch lengths, for \code{null = "phylo"} and \code{"bm"}; every
+species of \code{x} must be a tip.}
+
+\item{phylo_k}{The constant \eqn{k \ge 1} of the phylogenetic permutations of
+\code{null = "phylo"}: closer to 1, more exchanges among relatives only.}
 }
 \value{
 An object of class \code{mc_trait_gradient_test}, a list with \code{statistics} (one row per
 statistic: \code{observed}, \code{null_mean}, \code{null_sd}, \code{ses} and \code{p}), \code{species} (one row per
-species: observed \eqn{\beta} with \code{ses_beta} and \code{p_beta}, and with \code{null = "species"}
-also \eqn{\alpha} with \code{ses_alpha} and \code{p_alpha}), \code{null} (a matrix with one row per null
+species: observed \eqn{\beta} with \code{ses_beta} and \code{p_beta}, and with \code{null = "species"},
+\code{"phylo"} or \code{"bm"} also \eqn{\alpha} with \code{ses_alpha} and \code{p_alpha}), \code{null} (a matrix with one row per null
 community and one column per statistic) and the settings.
 }
 \description{
@@ -56,6 +64,35 @@ the turnover of species along the gradient, the variances of \eqn{\beta} and \eq
 differ from the null whenever composition changes among sites, even when traits are
 unrelated to it: species that share sites share their site means. Use the curveball for the
 correlation only.
+
+\strong{\code{null = "permute"}}, the null of Ackerly & Cornwell (2007), permutes the site of each
+population. It keeps the number of populations of each site but can place a species twice in
+one site, and it breaks the turnover of species as the curveball does.
+
+\strong{\code{null = "phylo"}.} The phylogenetic permutations of Lapointe & Garland (2001): as
+\code{"species"}, but the mean of a species moves preferably to a close relative. Patristic
+distances are scaled by the largest, \eqn{d^*_{ij} = d_{ij} / d_{max}}, turned into
+similarities \eqn{s_{ij} = k - d^*_{ij}} with \eqn{k} = \code{phylo_k} \eqn{\ge 1}, and each row is
+divided by its sum to give the probability \eqn{p_{ij}} that the mean of species \eqn{i}
+moves to species \eqn{j} (staying is the most likely move). Species are taken in random
+order, and each mean moves to a species not yet occupied, with the probabilities of the
+remaining species rescaled to sum to one; the last mean takes the last free species. Large
+\eqn{k} approaches \code{"species"} (equally likely permutations); \eqn{k = 1} gives no exchange
+across the root. Lapointe & Garland (2001) illustrate \eqn{k} from 1.01 to 2.
+
+\strong{\code{null = "bm"}.} The species means are replaced by values simulated by Brownian motion on
+\code{tree}, with the mean and rate estimated from the observed means by restricted maximum
+likelihood; each species keeps its own variation among sites. The null is a trait that
+evolves along the tree and has nothing to do with assembly.
+
+Use \code{"phylo"} when the niches of species are conserved: under \code{"species"}, a trait that
+merely shares the phylogenetic structure of the niches looks sorted along the gradient.
+\code{"bm"} is exact only when the trait does evolve by Brownian motion: a trait with less
+phylogenetic structure than Brownian motion makes its variance tests reject (see
+Validation).
+
+The \eqn{\alpha} of a species is not tested under \code{"curveball"} and \code{"permute"}: the species
+mean does not change, so its test would mirror that of \eqn{\beta}.
 }
 \section{Validation}{
 
@@ -68,12 +105,18 @@ rejected in 98--100\%. When the trait and the niches both evolve along the tree,
 null rejected in 10--17\% although the trait plays no part in assembly: related species share
 both sites and trait values, and the test detects that association, not its cause.
 
-\strong{\code{null = "permute"}}, the null of Ackerly & Cornwell (2007), permutes the site of each
-population. It keeps the number of populations of each site but can place a species twice in
-one site, and it breaks the turnover of species as the curveball does.
-
-The \eqn{\alpha} of a species is not tested under \code{"curveball"} and \code{"permute"}: the species
-mean does not change, so its test would mirror that of \eqn{\beta}.
+In the same design (150 replicates per scenario), for the three statistics:
+\tabular{lrrr}{
+null \tab trait independent of niches \tab trait and niches on the tree \tab sorting \cr
+\code{"species"} \tab 4.0--4.7\% \tab 14--23\% \tab 99--100\% \cr
+\code{"phylo"}, \eqn{k = 1.1} \tab 2.7--4.0\% \tab 4.0--11\% \tab 95--100\% \cr
+\code{"phylo"}, \eqn{k = 1.01} \tab 1.3--4.7\% \tab 2.0--10\% \tab 91--100\% \cr
+\code{"bm"} \tab 10--85\% \tab 2.7--4.7\% \tab 43--100\%
+}
+The phylogenetic permutations bring the error back near the nominal level in both null
+scenarios, with some excess left for the correlation and the variance of \eqn{\alpha} when
+trait and niches share the tree; \code{"bm"} is exact in that scenario but fails when the trait
+has no phylogenetic structure, and loses power for the variance of \eqn{\beta}.
 }
 
 \examples{
@@ -88,6 +131,9 @@ tg <- trait_gradient(ind, abundance = "abundance")
 trait_gradient_test(tg, n_null = 99)
 # the correlation of beta and alpha against the curveball
 trait_gradient_test(tg, n_null = 99, null = "curveball")$statistics[1, ]
+# means exchanged among relatives, or simulated along the tree
+trait_gradient_test(tg, n_null = 99, null = "phylo", tree = tree)
+trait_gradient_test(tg, n_null = 99, null = "bm", tree = tree)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -98,6 +144,10 @@ components. \emph{Ecology Letters}, 10, 135--145. \doi{10.1111/j.1461-0248.2006.
 Strona, G., Nappo, D., Boccacci, F., Fattorini, S., & San-Miguel-Ayanz, J. (2014). A fast
 and unbiased procedure to randomize ecological binary matrices with fixed row and column
 totals. \emph{Nature Communications}, 5, 4114. \doi{10.1038/ncomms5114}
+
+Lapointe, F.-J., & Garland, T., Jr. (2001). A generalized permutation model for the
+analysis of cross-species data. \emph{Journal of Classification}, 18, 109--127.
+\doi{10.1007/s00357-001-0007-0}
 }
 \seealso{
 \code{\link[=trait_gradient]{trait_gradient()}}
@@ -119,6 +169,7 @@ Other trait variation among individuals:
 \code{\link[=trait_densities]{trait_densities()}},
 \code{\link[=trait_flex]{trait_flex()}},
 \code{\link[=trait_gradient]{trait_gradient()}},
+\code{\link[=trait_gradient_brms]{trait_gradient_brms()}},
 \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}},
 \code{\link[=trait_gradient_weights]{trait_gradient_weights()}},
 \code{\link[=trait_rarefaction]{trait_rarefaction()}},
