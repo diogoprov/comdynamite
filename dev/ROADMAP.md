@@ -764,7 +764,12 @@ pacotes de referência em vez de reimplementá-los.
       bivariado em brms com β e média latentes, parte filogenética e não filogenética, λ com
       intervalo, priors explícitos, diagnósticos e `pp_check()`; OU com α dado (sugestão do
       usuário: A da covariância OU com raiz fixa). Com 18 espécies λ é bimodal e as cadeias não
-      misturam; com 41 converge e recupera λ.
+      misturam. Validação com ~43 espécies (20 réplicas): λ = 1 recuperado em 8/10 (5 passam
+      em todos os diagnósticos); λ = 0 recuperado em 8/10, mas nenhuma passa (ESS 180–400);
+      4 réplicas com cadeias divididas. Auditoria Fable corrigida (nomes com espaço, Kish,
+      diagnósticos de λ, loo por resposta, β NA para espécies sempre sozinhas).
+- [ ] TGA bayesiana: validar λ intermediário (~0,5), cuja recuperação a auditoria pediu antes de
+      afirmá-la, e testar se cadeias mais longas resolvem o caso λ = 0.
 
 - [x] Rodada de UX antes de fechar a 0.7.0 (pedido em 2026-11-08; concluída em 2026-11-09):
       equações da ajuda em LaTeX pelo KaTeX (PRs 46 e 48); vignette `branch-rates` (PR 42).

@@ -78,9 +78,15 @@
 #' Splitting the variance among species into a phylogenetic and a non-phylogenetic part needs
 #' many species. In trials with 18 species the posterior of \eqn{\lambda} had modes near 0 and
 #' 1 and the chains did not mix (R-hat 1.04--1.27), even with `adapt_delta = 0.99` and
-#' tighter priors; with 41 species they converged (R-hat 1.01, bulk ESS 800) and recovered
-#' \eqn{\lambda_\beta} near 1 (interval 0.99--1) for niches that evolved by Brownian motion and
-#' near 0 (0--0.02) for niches without phylogenetic signal. Check `diagnostics` always.
+#' tighter priors. In 20 trials with 39--45 species, 30 sites and the default settings (4
+#' chains of 2000 iterations), niches that evolved by Brownian motion gave \eqn{\lambda_\beta}
+#' near 1 (median 0.998--0.9995) in 8 of 10 trials, 5 of them passing every diagnostic; niches
+#' without phylogenetic signal gave \eqn{\lambda_\beta} near 0 (median 0.001--0.005) in 8 of 10
+#' trials, but none passed every diagnostic (bulk ESS 180--400, and up to 4 divergent
+#' transitions). In the remaining 4 trials the chains split between the two ends
+#' (R-hat 1.39--1.75). Intermediate values of \eqn{\lambda} were not tested. Run longer
+#' chains when the effective sample sizes are low, and do not read a fit that fails
+#' `diagnostics`.
 #'
 #' @param x Result of [trait_gradient()].
 #' @param tree Phylogeny (`phylo`) with branch lengths; species not in it are left out.
