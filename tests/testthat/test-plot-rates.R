@@ -50,3 +50,11 @@ test_that("pcps_test() keeps what plot() needs and plot() checks its arguments",
   old$species <- NULL
   expect_error(plot(old), "older version")
 })
+
+test_that("plot_rates() takes a result of trait_rates() alone", {
+  skip_if_not_installed("ggplot2")
+  set.seed(4)
+  x <- trait_rates(ape::rtree(8), "gbm", rate_sd = 0.5)
+  expect_equal(plot_rates(x)$data$rate, rep(x$edge_rate, 2))
+  expect_error(plot_rates(x$tree), "`rates` is missing")
+})

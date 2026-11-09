@@ -37,6 +37,7 @@
 #' phylogenetics: separating the roles of environmental filters and historical
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @family clades and biogeography
 #' @examples
 #' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
@@ -54,7 +55,9 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
                            type = c("phylogram", "fan"), level = 0.05,
                            col = c("#0072B2", "#D55E00"), cex = 0.8, legend = TRUE, ..., alpha = NULL) {
   level <- deprecated_level(level, alpha)
-  stopifnot(inherits(x, "mc_node_test"), inherits(tree, "phylo"), length(col) == 2)
+  if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
+  check_tree(tree, branch_lengths = FALSE)
+  stopifnot(length(col) == 2)
   test <- match.arg(test)
   type <- match.arg(type)
   check_node_tree(x, tree)
@@ -104,6 +107,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #' phylogenetics: separating the roles of environmental filters and historical
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @family clades and biogeography
 #' @examples
 #' nodes <- node_contrasts(daphniids$tree)
 #' set.seed(1)
@@ -235,6 +239,7 @@ label_place <- function(x, y, width, gap, angle, room) {
 #' Legendre, P. (2008). Studying beta diversity: ecological variation partitioning by
 #' multiple regression and canonical analysis. *Journal of Plant Ecology*, 1, 3--8.
 #' \doi{10.1093/jpe/rtm001}
+#' @family environment and space
 #' @examples
 #' set.seed(1)
 #' trait <- stats::setNames(seq(0, 100, 10), letters[1:11])
@@ -330,6 +335,7 @@ fraction_positions <- function(edges, width) {
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -342,7 +348,8 @@ fraction_positions <- function(edges, width) {
 #' plot_phylo_beta(out, comm[keep, ], tree)
 #' @export
 plot_phylo_beta <- function(x, comm, tree, axis = 1, col = "#0072B2", cex = 0.7, ...) {
-  stopifnot(inherits(x, "mc_phylo_beta"), inherits(tree, "phylo"))
+  if (!inherits(x, "mc_phylo_beta")) stop("`x` must come from phylo_beta_test()", call. = FALSE)
+  check_tree(tree, branch_lengths = FALSE)
   matched <- present_species(check_phylo_comm(comm, tree, allow_empty = TRUE))
   comm <- matched$comm[rowSums(matched$comm) > 0, , drop = FALSE]
   scores <- as.matrix(x$scores)

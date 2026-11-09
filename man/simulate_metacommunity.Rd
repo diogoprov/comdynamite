@@ -161,3 +161,12 @@ process-based metacommunity framework linking local and regional scale
 community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 \doi{10.1111/ele.13568}
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=growth_rates]{growth_rates()}},
+\code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_static]{simulate_static()}}
+}
+\concept{simulate metacommunities}

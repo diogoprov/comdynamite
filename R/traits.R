@@ -38,6 +38,7 @@
 #' @return Data frame with columns `optimum`, `sigma` and `r_max`, one row per
 #'   species, with species names as row names. With a tree, the attribute `tree` holds it, and
 #'   with `nodes = TRUE` the attribute `nodes` holds the optima at its internal nodes.
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -56,9 +57,11 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
     k <- ape::Ntip(species)
     sp <- species$tip.label
   } else {
-    stopifnot(length(species) == 1, species >= 1)
+    if (!is.numeric(species) || length(species) != 1 || is.na(species) || species < 1) {
+      stop("`species` must be a `phylo` tree or the number of species", call. = FALSE)
+    }
     if (sigma_signal || rmax_signal)
-      stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`")
+      stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`", call. = FALSE)
     k <- as.integer(species)
     sp <- paste0("sp", seq_len(k))
   }
@@ -123,6 +126,7 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #' @return Named numeric vector with the simulated trait value of each tip. With `nodes = TRUE`,
 #'   the attribute `nodes` holds the values at the internal nodes, named by their numbers in
 #'   `tree$edge`, the root first.
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
@@ -160,6 +164,7 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #'   species.
 #' @return Numeric matrix with one row per site and one column per species:
 #'   the density-independent growth rate of each species at each site.
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' g <- growth_rates(seq(0, 100, 10), species_traits(3))

@@ -132,3 +132,8 @@ Mahalanobis, P. C. (2018). Reprint of: Mahalanobis, P. C. (1936) "On the general
 distance in statistics". \emph{Sankhya A}, 80(Suppl. 1), 1--7.
 \doi{10.1007/s13171-019-00164-5}
 }
+\seealso{
+Other rule-based assembly:
+\code{\link[=plot_assembly]{plot_assembly()}}
+}
+\concept{rule-based assembly}

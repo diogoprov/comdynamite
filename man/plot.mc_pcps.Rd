@@ -58,4 +58,13 @@ phylogenetic eigenvectors across metacommunities. \emph{Frontiers of Biogeograph
 }
 \seealso{
 \code{\link[=pcps_test]{pcps_test()}}.
+
+Other the whole tree:
+\code{\link[=pcc_test]{pcc_test()}},
+\code{\link[=pcps_test]{pcps_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_beta_test]{phylo_beta_test()}},
+\code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }
+\concept{the whole tree}

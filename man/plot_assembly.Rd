@@ -60,4 +60,8 @@ par(op)
 }
 \seealso{
 \code{\link[=assemble_community]{assemble_community()}}.
+
+Other rule-based assembly:
+\code{\link[=assemble_community]{assemble_community()}}
 }
+\concept{rule-based assembly}

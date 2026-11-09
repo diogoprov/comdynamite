@@ -7,9 +7,11 @@
 #' or [food_web_rates()], or estimates such as those of RRphylo, as long as they follow the
 #' order of the rows of `tree$edge`.
 #'
-#' @param tree A `phylo` object with branch lengths.
+#' @param tree A `phylo` object with branch lengths, or a result of [trait_rates()], which
+#'   carries its tree and rates.
 #' @param rates Rate of each branch, in the order of the rows of `tree$edge`, or a result of
-#'   [trait_rates()], whose `edge_rate` is used.
+#'   [trait_rates()], whose `edge_rate` is used. Left out when `tree` is a result of
+#'   [trait_rates()].
 #' @param log Colour by the logarithm of the rate (the default), since rates are multiplicative.
 #'   Needs positive rates; use `FALSE` for estimates that can be negative.
 #' @param palette Name of a palette of [grDevices::hcl.colors()].
@@ -18,22 +20,27 @@
 #' @param title Title of the plot, or `NULL`.
 #' @return A ggplot object.
 #' @seealso [trait_rates()], [history_rates()], [turnover_rates()].
+#' @family species traits
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(30)
 #' x <- trait_rates(tree, "shift", shifts = 2, shift_size = c(8, 1 / 8))
-#' plot_rates(tree, x)
+#' plot_rates(x)
 #' habitat <- trait_mk(tree, q = 0.5, states = c("forest", "open"))
 #' plot_rates(tree, history_rates(habitat, "state", state_rates = c(forest = 1, open = 5)))
 #' @export
-plot_rates <- function(tree, rates, log = TRUE, palette = "viridis", tip_labels = FALSE,
+plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_labels = FALSE,
                        linewidth = 1, title = NULL) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot_rates() needs the package ggplot2", call. = FALSE) # nocov
   }
-  if (!inherits(tree, "phylo") || is.null(tree$edge.length)) {
-    stop("`tree` must be a phylo object with branch lengths", call. = FALSE)
+  if (!inherits(tree, "phylo") && is.list(tree) && inherits(tree$tree, "phylo") &&
+      !is.null(tree$edge_rate)) {
+    if (is.null(rates)) rates <- tree$edge_rate
+    tree <- tree$tree
   }
+  check_tree(tree)
+  if (is.null(rates)) stop("`rates` is missing", call. = FALSE)
   if (is.list(rates) && !is.null(rates$edge_rate)) rates <- rates$edge_rate
   if (!is.numeric(rates) || length(rates) != nrow(tree$edge)) {
     stop("`rates` must have one value per branch (", nrow(tree$edge), "), in the order of ",

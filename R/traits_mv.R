@@ -51,6 +51,7 @@
 #'   multivariate evolutionary models to morphometric data. *Methods in Ecology and
 #'   Evolution*, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
 #' @seealso [traits_ou()], which simulates traits with these matrices, and [plot_traits()].
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' rate_matrix(c(1, 2), correlation = 0.5)
 #' rate_matrix(1, correlation = 0.3, constraint = "equal", n_traits = 3)

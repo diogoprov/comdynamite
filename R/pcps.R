@@ -64,6 +64,7 @@
 #' \doi{10.1111/j.1461-0248.2010.01456.x}
 #' @seealso [pcc_test()] and [phylo_beta_test()] for other tests over the whole tree, and
 #'   [torus_permutations()], [rigid_permutations()].
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(12)
@@ -205,6 +206,7 @@ pcps_fit <- function(gower, scores, env) {
 #' Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring
 #' phylogenetic eigenvectors across metacommunities. *Frontiers of Biogeography*, 6.
 #' \doi{10.21425/F5FBG22943}
+#' @family the whole tree
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(12)

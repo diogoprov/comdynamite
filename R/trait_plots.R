@@ -17,6 +17,7 @@
 #'   `null_high`, `inner_low`, `inner_high`, `ses`, `p_low`, `p_high` and `deviation`
 #'   (`"low"`, `"high"`, `"none"` or `NA` for sites that cannot be tested).
 #' @seealso [plot.tstats()], [tstats_summary()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
@@ -100,6 +101,7 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @seealso [null_intervals()], [tstats_summary()], [plot.trait_flex()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:8), each = 20),
@@ -301,6 +303,7 @@ hatch_lines <- function(rects, spacing) {
 #'   (TPD): measuring functional diversity across scales based on TPD with R. *Ecology*, 100,
 #'   e02876. \doi{10.1002/ecy.2876}
 #' @seealso [plot_population_traits()].
+#' @family trait variation among individuals
 #' @examples
 #' set.seed(1)
 #' ind <- data.frame(site = rep(c("s1", "s2"), each = 30),
@@ -435,6 +438,7 @@ check_spread_scale <- function(z, pop) {
 #' @param ncol,scales Passed to [ggplot2::facet_wrap()].
 #' @return A ggplot object.
 #' @seealso [trait_densities()], [tstats()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
 #' set.seed(1)
 #' ind <- data.frame(site = rep(paste0("s", 1:4), each = 40),

@@ -264,4 +264,9 @@ and Evolution}, 6, 1169--1178. \doi{10.1111/2041-210X.12407}
 }
 \seealso{
 \code{\link[=plot_trait_partition]{plot_trait_partition()}}
+
+Other environment and space:
+\code{\link[=phylo_vector]{phylo_vector()}},
+\code{\link[=plot_trait_partition]{plot_trait_partition()}}
 }
+\concept{environment and space}

@@ -35,3 +35,10 @@ sim <- simulate_metacommunity(landscape_implicit(10), species_traits(tree),
 suppressWarnings(equilibrium_check(sim))
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other simulation studies:
+\code{\link[=as.data.frame.mc_sim]{as.data.frame.mc_sim()}},
+\code{\link[=run_scenarios]{run_scenarios()}},
+\code{\link[=summary_stats]{summary_stats()}}
+}
+\concept{simulation studies}

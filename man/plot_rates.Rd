@@ -6,7 +6,7 @@
 \usage{
 plot_rates(
   tree,
-  rates,
+  rates = NULL,
   log = TRUE,
   palette = "viridis",
   tip_labels = FALSE,
@@ -15,10 +15,12 @@ plot_rates(
 )
 }
 \arguments{
-\item{tree}{A \code{phylo} object with branch lengths.}
+\item{tree}{A \code{phylo} object with branch lengths, or a result of \code{\link[=trait_rates]{trait_rates()}}, which
+carries its tree and rates.}
 
 \item{rates}{Rate of each branch, in the order of the rows of \code{tree$edge}, or a result of
-\code{\link[=trait_rates]{trait_rates()}}, whose \code{edge_rate} is used.}
+\code{\link[=trait_rates]{trait_rates()}}, whose \code{edge_rate} is used. Left out when \code{tree} is a result of
+\code{\link[=trait_rates]{trait_rates()}}.}
 
 \item{log}{Colour by the logarithm of the rate (the default), since rates are multiplicative.
 Needs positive rates; use \code{FALSE} for estimates that can be negative.}
@@ -45,11 +47,31 @@ order of the rows of \code{tree$edge}.
 set.seed(1)
 tree <- treeshapesim::sim_tree_shape(30)
 x <- trait_rates(tree, "shift", shifts = 2, shift_size = c(8, 1 / 8))
-plot_rates(tree, x)
+plot_rates(x)
 habitat <- trait_mk(tree, q = 0.5, states = c("forest", "open"))
 plot_rates(tree, history_rates(habitat, "state", state_rates = c(forest = 1, open = 5)))
 \dontshow{\}) # examplesIf}
 }
 \seealso{
 \code{\link[=trait_rates]{trait_rates()}}, \code{\link[=history_rates]{history_rates()}}, \code{\link[=turnover_rates]{turnover_rates()}}.
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

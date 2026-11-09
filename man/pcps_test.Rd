@@ -95,4 +95,13 @@ phylogenetic structure. \emph{Ecology Letters}, 13, 587--596.
 \seealso{
 \code{\link[=pcc_test]{pcc_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}} for other tests over the whole tree, and
 \code{\link[=torus_permutations]{torus_permutations()}}, \code{\link[=rigid_permutations]{rigid_permutations()}}.
+
+Other the whole tree:
+\code{\link[=pcc_test]{pcc_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_beta_test]{phylo_beta_test()}},
+\code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }
+\concept{the whole tree}

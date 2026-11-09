@@ -73,3 +73,13 @@ environmental drivers of phylogenetic variation across ecological
 communities. \emph{Plant Ecology}, 216, 709--724.
 \doi{10.1007/s11258-014-0405-0}
 }
+\seealso{
+Other the whole tree:
+\code{\link[=pcps_test]{pcps_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_beta_test]{phylo_beta_test()}},
+\code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
+}
+\concept{the whole tree}
