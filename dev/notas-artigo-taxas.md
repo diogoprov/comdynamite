@@ -171,8 +171,14 @@ subconjunto. 48 min em 6 núcleos.
   | 3 | 20 × 5 | 0,93 (0,99) | 0,41 (0,13) | 0,88 (0,04) | 2,34 (3,02) |
   | 3 | 100 × 20 | 0,99 (1,00) | 0,49 (0,04) | 0,78 (0,02) | 2,72 (3,36) |
 
-  O teste deixou de rejeitar demais; em 100 × 20 ficou conservador (mediana do p 0,58, só 2,5%
-  abaixo de 0,1). Os intervalos de c = 3 cobrem mais, mas ainda bem abaixo de 95%, e a correção
+  O teste deixou de rejeitar demais; em 100 × 20 pareceu conservador (0 de 81 rejeições,
+  mediana do p 0,58). Diagnóstico à parte (100 × 20, extinção 0,01, 6 metacomunidades): a forma
+  do nulo está certa (150 redraws verdadeiros contra o nulo de um conjunto de dados: rejeição
+  0,03–0,11, média 0,055), mas cada conjunto de dados contra o próprio nulo rejeita 3,3% (180
+  conjuntos; somando a rodada acima, 6 de 261 ≈ 2,3%). O centro do nulo acompanha a estimativa
+  (correlação entre ĉ e a média das réplicas nulas 0,2–0,33), sobretudo pelo dp de população,
+  estimado dos mesmos resíduos que movem ĉ. Decisão: documentar o leve conservadorismo (PR
+  #58) em vez de calibrar por bootstrap duplo (custo nboot²). Os intervalos de c = 3 cobrem mais, mas ainda bem abaixo de 95%, e a correção
   agora fica curta em vez de passar do ponto: o viés de ĉ muda com c, como a documentação
   avisa. Sob c = 0 em 100 × 20, ĥ tem viés +0,03 com intervalo de largura 0,05, e a cobertura
   de c e h cai porque o conjunto ajustado é gerado com c0 = ĉ > 0. Recomendação: usar
