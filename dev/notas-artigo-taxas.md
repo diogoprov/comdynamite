@@ -119,6 +119,49 @@ identificável (correlação entre mudança verdadeira e taxa verdadeira de 0,29
   conversão de divergência entre populações em especiação (o elo de Januario) fica fora por
   enquanto. Plano para fechar esse limite em `dev/plano-especiacao.md`.
 
+### Experimento da ponte (resultados, `data-raw/bridge_experiments.R`)
+
+Árvore de 30 espécies, grade 10 × 10, 600 passos; dispersão {0,001; 0,01; 0,1} × extinção de
+manchas {0; 0,01; 0,05} × autocorrelação do ambiente (`env_bandwidth` {0,5; 3}), 20 réplicas
+(360 simulações); h {0; 0,5} × c {0; 1; 3}; desenhos de 20 ou 100 sítios × 5 ou 20 indivíduos
+por população; `intraspecific_sd = 5`, `population_sd = 1`. Bootstrap (nboot = 99) num
+subconjunto. 48 min em 6 núcleos.
+
+- Dispersão 0,001 com extinção 0,05 colapsa a metacomunidade (sem indivíduos amostrados): 40
+  simulações sem dados na camada de indivíduos. É o limite em que a extinção vence a
+  recolonização.
+- Taxas por ramo: a correlação de Spearman entre a taxa RRphylo das pontas e o turnover de
+  parceiros fica entre −0,01 e 0,20 (média por célula), maior com dispersão intermediária ou
+  alta. O rastro da montagem nas taxas por ramo, mesmo plantado por `turnover_rates()`, é
+  fraco, como na vignette. (A correlação em todos os ramos não é interpretável:
+  `turnover_rates(window = 0.1)` só muda as pontas e os ramos internos ficam todos com taxa 1.)
+- h é recuperado em todos os desenhos (RMSE 0,01–0,04).
+- c é identificável nestes desenhos, ao contrário de SJC: poder para c = 1 (contra o nulo c = 0
+  da mesma célula) de 0,78 com 20 sítios × 5 indivíduos e w livre, e ≥ 0,94 nos outros
+  desenhos; com w fixo, ≥ 0,997. Os desenhos com 20 sítios × 5 indivíduos perdem poder em
+  metacomunidades com dispersão muito baixa ou extinção (0,53–0,68 em várias células). O erro
+  de ĉ cai sobretudo com mais indivíduos por população (5 → 20) e com mais espécies por sítio;
+  a beta diversidade da composição não importa.
+- Com w livre, c forte é atenuado (c = 3: mediana 1,85–2,43); com w fixo quase não (2,81–2,97).
+- O aviso de w mal identificado aparece em 95–99% das réplicas sem deslocamento e quase nunca
+  com c ≥ 1: funciona como diagnóstico de ausência de deslocamento.
+- Estatísticas T (nulo por espécie, 100 sítios × 20 indivíduos): SES de T_IP.IC 0,08 sem
+  processo, 4,15 só com adaptação local, −0,8 a −1,0 só com deslocamento e 0,25 com h = 0,5 e
+  c = 3: a compensação entre os dois processos aparece também com o nulo por espécie.
+- Bootstrap de `population_shifts()`: tamanho 0,025 com 20 sítios × 5 indivíduos, mas **0,29
+  com 100 sítios × 20 indivíduos** (sem deslocamento, ĉ fica entre 0,03 e 0,24 com h = 0,5, e
+  o gerador do bootstrap não reproduz esse viés positivo). Cobertura dos intervalos de c = 3
+  de 0,04–0,13 e correção mediana 3,02–3,36. O bootstrap não é confiável em desenhos grandes;
+  a causa precisa ser investigada antes de recomendá-lo.
+- Por que c é identificável aqui e não em SJC: não resolvido. Os desenhos têm números de
+  populações parecidos; a diferença provável está na razão entre a largura do kernel e o
+  espaçamento das médias das espécies e na razão sinal/ruído, que precisa ser medida nos dois
+  casos (interpretação nossa).
+- Ressalva de escala: h e c entram na amostragem, não evoluem na dinâmica; as taxas por ramo
+  vêm de `turnover_rates()`; as duas camadas não compartilham o trait. O experimento testa a
+  recuperação de sinais plantados sob estruturas de montagem realistas, não se a montagem causa
+  evolução, e o desacoplamento de Januario et al. (2025) fica fora.
+
 ## McPeek (2017), *Evolutionary Community Ecology*
 
 Leitura feita por subagente; três citações conferidas no texto extraído.
