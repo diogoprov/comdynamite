@@ -71,3 +71,11 @@ test_that("plots and rarefaction name the bad argument", {
                     trait = rnorm(12))
   expect_error(trait_rarefaction(ind, n = "a"), "`n` must be whole numbers")
 })
+
+test_that("tstats_summary() checks `level`", {
+  ind <- data.frame(site = rep(c("a", "b"), each = 6), species = rep(c("x", "y"), 6),
+                    trait = rnorm(12))
+  res <- tstats(ind, n_perm = 49)
+  expect_error(tstats_summary(res, level = 1), "`level` must be one number between 0 and 1")
+  expect_error(tstats_summary(res, level = "a"), "`level`")
+})
