@@ -40,6 +40,7 @@
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [damocles_loglik()] and [fit_damocles()] for the likelihood, [damocles_test()] for
 #'   the null model of phylogenetic community structure.
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -164,6 +165,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [damocles_test()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(2)
 #' tr <- treeshapesim::sim_tree_shape(60)
@@ -319,6 +321,7 @@ print.mc_damocles_fit <- function(x, ...) {
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [fit_damocles()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(3)
 #' tr <- treeshapesim::sim_tree_shape(40)
@@ -485,6 +488,9 @@ damocles_presence <- function(comm, tree) {
          call. = FALSE)
   }
   tips <- tree$tip.label
+  if (!any(colnames(comm) %in% tips)) {
+    stop("no species of `comm` is a tip of `tree`: check the names", call. = FALSE)
+  }
   only_comm <- setdiff(colnames(comm), tips)
   only_tree <- setdiff(tips, colnames(comm))
   if (length(only_comm) > 0) {

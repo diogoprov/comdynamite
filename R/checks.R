@@ -11,6 +11,26 @@ check_comm <- function(comm) {
 
 # numeric predictors in the order of the sites of `comm`, each with variance and, when
 # `collinear` is FALSE, none a combination of the others
+# stops unless `tree` is a phylo object (with branch lengths, if asked); `name` is the argument
+check_tree <- function(tree, branch_lengths = TRUE, name = "`tree`") {
+  if (!inherits(tree, "phylo")) {
+    stop(name, " must be a `phylo` object, such as one from treeshapesim::sim_tree_shape()",
+         call. = FALSE)
+  }
+  if (branch_lengths && is.null(tree$edge.length)) {
+    stop(name, " needs branch lengths", call. = FALSE)
+  }
+  invisible(tree)
+}
+
+# stops unless `x` is one whole number of at least `min`
+check_count <- function(x, name, min = 1) {
+  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x != round(x) || x < min) {
+    stop("`", name, "` must be one whole number, ", min, " or more", call. = FALSE)
+  }
+  invisible(x)
+}
+
 check_env <- function(env, comm, name = "`env`", collinear = FALSE) {
   if (is.null(env)) stop(name, " is NULL", call. = FALSE)
   check_numeric_columns(env, name, paste("Move names of sites to row names and code factors as",

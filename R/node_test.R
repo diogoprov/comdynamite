@@ -25,6 +25,7 @@
 #' phylogenetics: separating the roles of environmental filters and historical
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @family clades and biogeography
 #' @examples
 #' node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
 #'
@@ -33,7 +34,7 @@
 #' round(node_contrasts(tree, branch_lengths = TRUE), 3)
 #' @export
 node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
-  stopifnot(inherits(tree, "phylo"))
+  check_tree(tree, branch_lengths = FALSE)
   if (branch_lengths && is.null(tree$edge.length)) {
     stop("`tree` has no branch lengths", call. = FALSE)
   }
@@ -206,6 +207,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   a landscape with edges. [plot_node_test()] and
 #'   [plot_node_heatmap()] show the results. [pcc_test()] and
 #'   [phylo_beta_test()] test the whole tree at once.
+#' @family clades and biogeography
 #' @examples
 #' # daphniids of Leibold et al. (2010)
 #' nodes <- node_contrasts(daphniids$tree)
@@ -357,6 +359,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
 #' phylogenetics: separating the roles of environmental filters and historical
 #' biogeography. *Ecology Letters*, 13, 1290--1299.
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
+#' @family clades and biogeography
 #' @examples
 #' area <- rep(c("north", "centre", "south", NA), c(8, 6, 6, 10))
 #'

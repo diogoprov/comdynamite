@@ -28,9 +28,12 @@ sites.}
 List of class \code{mc_pcps} with \code{tests}, a data frame with one row for all the
 dissimilarity (\code{whole}) and one for each axis, and the columns \code{share}, the share of the
 positive eigenvalues; \code{r2}; \code{statistic}, the F statistic; \code{p_site}, \code{p_species} and
-\code{p_max}; \code{scores}, the sites on all the axes with positive eigenvalues; and
+\code{p_max}; \code{scores}, the sites on all the axes with positive eigenvalues; \code{share}, the
+share of each of those axes; \code{species}, the
+correlation of each species' column of the matrix P with those axes (its position in the
+biplot of the package PCPS); \code{env}, the predictors of the occupied sites; and
 \code{permutations}, the numbers of permutations and whether those of sites were free or
-restricted.
+restricted. \code{\link[=plot.mc_pcps]{plot.mc_pcps()}} draws the ordination.
 }
 \description{
 Tests whether the phylogenetic composition of sites follows the environment, with the
@@ -71,7 +74,9 @@ tree <- treeshapesim::sim_tree_shape(12)
 traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100), rmax_range = c(0, 30))
 env <- seq(0, 100, length.out = 36)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
-pcps_test(comm, tree, env, n_perm = 49)
+res <- pcps_test(comm, tree, env, n_perm = 49)
+res
+if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -90,4 +95,13 @@ phylogenetic structure. \emph{Ecology Letters}, 13, 587--596.
 \seealso{
 \code{\link[=pcc_test]{pcc_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}} for other tests over the whole tree, and
 \code{\link[=torus_permutations]{torus_permutations()}}, \code{\link[=rigid_permutations]{rigid_permutations()}}.
+
+Other the whole tree:
+\code{\link[=pcc_test]{pcc_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_beta_test]{phylo_beta_test()}},
+\code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }
+\concept{the whole tree}

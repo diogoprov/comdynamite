@@ -19,6 +19,7 @@
 #' @return A factor with one regime per edge of `tree`, in the order of `tree$edge`, with the
 #'   regimes that occur as levels: `background` first, then the clades.
 #' @seealso [fit_damocles()], [damocles_lrt()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(4)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -83,6 +84,7 @@ clade_regimes <- function(tree, clades, background = "background", stem = FALSE)
 #'   log-likelihood, AIC, and, for the alternative, the statistic, degrees of freedom and
 #'   p-value.
 #' @seealso [fit_damocles()], [clade_regimes()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(5)
 #' tr <- treeshapesim::sim_tree_shape(40)
@@ -132,6 +134,7 @@ damocles_lrt <- function(null, alternative) {
 #' @return A data frame with the community (`"shared"` for shared parameters), the parameter,
 #'   its estimate and the lower and upper bounds.
 #' @seealso [fit_damocles()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(6)
 #' tr <- treeshapesim::sim_tree_shape(40)

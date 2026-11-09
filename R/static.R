@@ -54,6 +54,7 @@
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -142,6 +143,7 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' tr <- ape::compute.brlen(ape::stree(32, "balanced"), method = "Grafen")
@@ -151,7 +153,8 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
                               slope_sd = 1, lambda = 1, reduction = c(0.5, 1),
                               draw = c("uniform", "normal")) {
   draw <- match.arg(draw)
-  stopifnot(inherits(tree, "phylo"), intercept_sd >= 0, slope_sd >= 0,
+  check_tree(tree)
+  stopifnot(intercept_sd >= 0, slope_sd >= 0,
             length(reduction) == 2)
   grads <- if (is.list(gradients)) as.list(gradients) else list(gradients)
   stopifnot(all(vapply(grads, is.numeric, logical(1))),
@@ -204,6 +207,7 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' head(logistic_gradients(6))

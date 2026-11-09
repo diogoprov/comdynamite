@@ -56,4 +56,10 @@ plot(x, panels = c("abundance", "trait"), time = 1000)
 }
 \seealso{
 \code{\link[=animate_food_web]{animate_food_web()}}, \code{\link[=food_web_dynamics]{food_web_dynamics()}}
+
+Other coevolution in food webs:
+\code{\link[=animate_food_web]{animate_food_web()}},
+\code{\link[=food_web_dynamics]{food_web_dynamics()}},
+\code{\link[=food_web_params]{food_web_params()}}
 }
+\concept{coevolution in food webs}

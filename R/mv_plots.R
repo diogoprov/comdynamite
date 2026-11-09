@@ -25,6 +25,7 @@
 #' @param ... Further arguments to [graphics::plot()], such as `main`, `xlim` or `asp`.
 #' @return `NULL`, invisibly; called for the plot.
 #' @seealso [traits_ou()], [rate_matrix()] and [plot.rate_matrix()].
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(2)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -61,7 +62,7 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
     if (labels) graphics::text(x[, traits[1]], x[, traits[2]], rownames(x), pos = 3, cex = 0.7)
     return(invisible(NULL))
   }
-  stopifnot(inherits(tree, "phylo"))
+  check_tree(tree, branch_lengths = FALSE)
   n_tip <- ape::Ntip(tree)
   if (!all(tree$tip.label %in% rownames(x)) || nrow(nodes) != tree$Nnode) {
     stop("`x` does not match `tree`: give the tree that `traits_ou()` simulated on",
@@ -134,6 +135,7 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
 #' @param ... Further arguments to [graphics::plot()].
 #' @return `NULL`, invisibly; called for the plot.
 #' @seealso [rate_matrix()], [plot_traits()].
+#' @family species traits
 #' @examples
 #' r <- rate_matrix(c(1, 2), correlation = 0.6, constraint = "shared",
 #'                  eigenvalues = list(slow = c(1, 0.2), fast = c(1, 2)))
@@ -185,6 +187,7 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL,
 #'   (`asp = 1`), so that the contours of Euclidean distances are circles.
 #' @return `NULL`, invisibly; called for the plot.
 #' @seealso [assemble_community()].
+#' @family rule-based assembly
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(40)

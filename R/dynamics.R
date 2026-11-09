@@ -98,6 +98,7 @@
 #'   process-based metacommunity framework linking local and regional scale
 #'   community ecology. *Ecology Letters*, 23, 1314--1329.
 #'   \doi{10.1111/ele.13568}
+#' @family simulate metacommunities
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' ls <- landscape_implicit(30)
@@ -182,6 +183,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
 #' @param sites,species Optional names of sites and species.
 #' @return List with `abundance` and `history`, as in
 #'   [simulate_metacommunity()], and `pool` as a logical matrix, or `NULL` without it.
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' # one species alone converges to (r - 1) / alpha = (5 - 1) / 0.05 = 80

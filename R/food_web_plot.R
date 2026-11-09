@@ -19,6 +19,7 @@
 #' @param ... Other graphical parameters passed to [graphics::plot()].
 #' @return `x`, invisibly.
 #' @seealso [animate_food_web()], [food_web_dynamics()]
+#' @family coevolution in food webs
 #' @examples
 #' x <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
 #'                        traits = c(R = 10, N = 4, P = 6), introductions = c(P = 2000),
@@ -99,6 +100,7 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #' @param ... Other arguments of [plot.food_web()], such as `panels` or `col`.
 #' @return The path of the GIF, invisibly.
 #' @seealso [plot.food_web()]
+#' @family coevolution in food webs
 #' @examples
 #' \donttest{
 #' if (requireNamespace("gifski", quietly = TRUE)) {

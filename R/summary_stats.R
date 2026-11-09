@@ -63,6 +63,7 @@
 #'   Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple
 #'   biodiversity patterns improves the inference of metacommunity processes. *Ecology*, 103,
 #'   e3683. \doi{10.1002/ecy.3683}
+#' @family simulation studies
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)

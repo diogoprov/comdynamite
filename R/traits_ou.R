@@ -69,6 +69,7 @@
 #'   \doi{10.1111/j.1558-5646.1997.tb01457.x}
 #' @seealso [paint_regimes()] to assign regimes to clades, [rate_matrix()] for rate matrices,
 #'   [trait_mk()] for a history of regimes that change within branches.
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -89,7 +90,9 @@
 #' @export
 traits_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       regimes = NULL, root = 0) {
-  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length), n_traits >= 1, alpha >= 0)
+  check_tree(tree)
+  check_count(n_traits, "n_traits")
+  if (!is.numeric(alpha) || any(alpha < 0)) stop("`alpha` must be 0 or more", call. = FALSE)
   order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
   maps <- NULL
   if (inherits(regimes, "phylo")) {
@@ -242,11 +245,14 @@ matrix_root <- function(m) {
 #' @return Character vector with the regime of each branch, in the order of
 #'   `tree$edge` after reordering it "cladewise" (the order [traits_ou()]
 #'   uses).
+#' @family species traits
 #' @examples
-#' tr <- ape::read.tree(text = "((a:1,b:1):1,(c:1,d:1):1);")
-#' paint_regimes(tr, nodes = 6)
+#' set.seed(1)
+#' tr <- treeshapesim::sim_tree_shape(8)
+#' table(paint_regimes(tr, nodes = 10))
 #' @export
 paint_regimes <- function(tree, nodes, stem = FALSE) {
+  check_tree(tree, branch_lengths = FALSE)
   tree <- ape::reorder.phylo(tree, "cladewise")
   n_tip <- ape::Ntip(tree)
   stopifnot(all(nodes > n_tip), all(nodes <= n_tip + tree$Nnode))

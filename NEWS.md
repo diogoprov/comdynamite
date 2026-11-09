@@ -13,6 +13,19 @@
     accounts for the choice of the width and is centred on the mean of the simulations without
     displacement, a first-order bias correction of `c`, and intervals for `c` and the slopes.
   - `plot()` draws the profile of R², `c` and `h` along the width.
+- `plot_rates()` draws any rate per branch on the tree, from `trait_rates()`,
+  `history_rates()`, `turnover_rates()`, `food_web_rates()` or an estimator, with ggplot2.
+  `plot()` for `pcps_test()` draws the sites on two principal coordinates, coloured by a
+  predictor, with the species as arrows; `pcps_test()` now also returns `share`, `species` and
+  `env` for it. The vignette "Rates of trait evolution that vary among branches" and the
+  article on the whole tree use them.
+- Clearer errors: functions that take a tree say so when given something else, instead of
+  repeating a failed condition, and `species_traits()`, `competition_matrix()`,
+  `assemble_community()`, `sample_individuals()`, `tstats()`, `community_index()` and
+  `trait_rarefaction()` name the argument at fault. `damocles_loglik()` and the functions that
+  call it stop when no species of `comm` is a tip of the tree.
+- Help pages link to the other functions of their group (`@family`), following the groups of
+  the reference index. The example of `paint_regimes()` uses a tree from treeshapesim.
 
 - Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`
   with their tree, as a phylomorphospace (two traits) or a traitgram (one trait), with branches

@@ -99,3 +99,10 @@ Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple
 biodiversity patterns improves the inference of metacommunity processes. \emph{Ecology}, 103,
 e3683. \doi{10.1002/ecy.3683}
 }
+\seealso{
+Other simulation studies:
+\code{\link[=as.data.frame.mc_sim]{as.data.frame.mc_sim()}},
+\code{\link[=equilibrium_check]{equilibrium_check()}},
+\code{\link[=run_scenarios]{run_scenarios()}}
+}
+\concept{simulation studies}

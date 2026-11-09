@@ -72,3 +72,9 @@ Legendre, P. (2008). Studying beta diversity: ecological variation partitioning 
 multiple regression and canonical analysis. \emph{Journal of Plant Ecology}, 1, 3--8.
 \doi{10.1093/jpe/rtm001}
 }
+\seealso{
+Other environment and space:
+\code{\link[=phylo_vector]{phylo_vector()}},
+\code{\link[=trait_partition]{trait_partition()}}
+}
+\concept{environment and space}

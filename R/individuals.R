@@ -95,6 +95,7 @@
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
 #' @seealso [tstats()] for the T-statistics; [subsample_individuals()] and
 #'   [trait_rarefaction()] for the same sampling schemes on real data.
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -108,7 +109,9 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
                                cover = NULL, min_n = 1) {
-  stopifnot(inherits(x, "mc_sim"))
+  if (!inherits(x, "mc_sim")) {
+    stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+  }
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
   species <- colnames(abundance)
@@ -294,6 +297,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   \doi{10.1016/j.tree.2011.11.014}
 #' @seealso [tstats_summary()] to summarise the tests, [sample_individuals()],
 #'   [population_shifts()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -330,7 +334,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   species_id <- as.character(individuals[[species]])
   if (method == "cati") return(tstats_cati(values, site_id, species_id, nperm, ...))
   nperm <- if (is.null(nperm)) 0 else nperm
-  stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
+  check_count(nperm, "nperm", min = 0)
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
   site_levels <- unique(site_id)
   per_trait <- lapply(traits, function(trait) {

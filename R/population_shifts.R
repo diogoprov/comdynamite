@@ -140,6 +140,7 @@
 #'   Goldberg, E. E., & Lande, R. (2006). Ecological and reproductive character displacement on
 #'   an environmental gradient. *Evolution*, 60, 1344--1357. \doi{10.1554/05-696.1}
 #' @seealso [sample_individuals()], [tstats()] with `null_ip = "species"`.
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
