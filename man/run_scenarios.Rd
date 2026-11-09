@@ -55,3 +55,10 @@ out <- run_scenarios(scenarios, one_run, shared_pool, n_rep = 2)
 aggregate(alpha ~ dispersal + lambda, out, mean)
 \dontshow{\}) # examplesIf}
 }
+\seealso{
+Other simulation studies:
+\code{\link[=as.data.frame.mc_sim]{as.data.frame.mc_sim()}},
+\code{\link[=equilibrium_check]{equilibrium_check()}},
+\code{\link[=summary_stats]{summary_stats()}}
+}
+\concept{simulation studies}

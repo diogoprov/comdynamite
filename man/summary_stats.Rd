@@ -24,9 +24,12 @@ parts: the trait is the column \code{optimum}, or the only numeric column of \co
 
 \item{tree}{Optional \code{phylo} object, matched to species by name.}
 
-\item{trait}{Optional numeric vector with one value per species, named by species.}
+\item{trait}{Optional numeric vector with one value per species, named by species. For a
+simulation, the optimum of each species by default; with a niche of several axes, the
+optimum on the first axis.}
 
-\item{env}{Optional numeric vector with one value per site.}
+\item{env}{Optional numeric vector with one value per site. For a simulation, the
+environment that set growth by default; with a niche of several axes, the first axis.}
 
 \item{coords}{Optional matrix or data frame with one row per site and the coordinates in
 columns.}
@@ -43,7 +46,8 @@ same names and results can be bound by rows.
 }
 \details{
 \code{alpha}, \code{gamma} and \code{beta} are the mean number of species per site, the number of species
-in all sites and \code{gamma / alpha}. \code{occupancy} and \code{occupancy_sd} are the mean and the
+in all sites and \eqn{\gamma / \alpha}{gamma / alpha}. \code{occupancy} and \code{occupancy_sd} are the
+mean and the
 standard deviation of the share of sites each species occupies, over the species present.
 \code{abundance} is the mean number of individuals per site, \code{evenness} the mean Pielou
 evenness of sites with two or more species, \code{evenness_regional} the same for all sites
@@ -95,3 +99,10 @@ Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple
 biodiversity patterns improves the inference of metacommunity processes. \emph{Ecology}, 103,
 e3683. \doi{10.1002/ecy.3683}
 }
+\seealso{
+Other simulation studies:
+\code{\link[=as.data.frame.mc_sim]{as.data.frame.mc_sim()}},
+\code{\link[=equilibrium_check]{equilibrium_check()}},
+\code{\link[=run_scenarios]{run_scenarios()}}
+}
+\concept{simulation studies}

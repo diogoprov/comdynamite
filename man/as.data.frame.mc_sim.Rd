@@ -30,3 +30,10 @@ sim <- simulate_metacommunity(landscape_implicit(4), species_traits(5),
                               seed_steps = 1:2, record_steps = c(5, 10))
 head(as.data.frame(sim))
 }
+\seealso{
+Other simulation studies:
+\code{\link[=equilibrium_check]{equilibrium_check()}},
+\code{\link[=run_scenarios]{run_scenarios()}},
+\code{\link[=summary_stats]{summary_stats()}}
+}
+\concept{simulation studies}

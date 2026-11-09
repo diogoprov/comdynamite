@@ -119,4 +119,10 @@ Press. \doi{10.23943/princeton/9780691088778.001.0001}
 }
 \seealso{
 \code{\link[=food_web_dynamics]{food_web_dynamics()}}
+
+Other coevolution in food webs:
+\code{\link[=animate_food_web]{animate_food_web()}},
+\code{\link[=food_web_dynamics]{food_web_dynamics()}},
+\code{\link[=plot.food_web]{plot.food_web()}}
 }
+\concept{coevolution in food webs}

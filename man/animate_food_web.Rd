@@ -47,4 +47,10 @@ if (requireNamespace("gifski", quietly = TRUE)) {
 }
 \seealso{
 \code{\link[=plot.food_web]{plot.food_web()}}
+
+Other coevolution in food webs:
+\code{\link[=food_web_dynamics]{food_web_dynamics()}},
+\code{\link[=food_web_params]{food_web_params()}},
+\code{\link[=plot.food_web]{plot.food_web()}}
 }
+\concept{coevolution in food webs}

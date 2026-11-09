@@ -92,6 +92,7 @@
 #' ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 #' traits--environment relationships in the fourth-corner problem. *Ecology*, 93,
 #' 1525--1526. \doi{10.1890/12-0126.1}
+#' @family environment and space
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -189,7 +190,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #' of the component. Each fraction is tested by permutations of sites, which move the
 #' predictors of all sites together, and by permutations of the trait values among species,
 #' and `p_max` is the larger p-value, as in [phylo_vector()]. The statistic of `a` and `c` is
-#' the share of the component that the other set leaves unexplained, `a / (a + d)` within the
+#' the share of the component that the other set leaves unexplained, \eqn{a / (a + d)} within
+#' the
 #' component, which is a monotone function of the partial F statistic of the set given the
 #' other (Anderson & Legendre 1999). The fraction itself, which the original code tests, is
 #' not, and its test loses most of its power when the other set explains much: see the
@@ -382,6 +384,7 @@ print.mc_phylo_vector <- function(x, ...) {
 #' Wagner, H. H., & Dray, S. (2015). Generating spatially constrained null models for
 #' irregularly spaced data using Moran spectral randomization methods. *Methods in Ecology
 #' and Evolution*, 6, 1169--1178. \doi{10.1111/2041-210X.12407}
+#' @family environment and space
 #' @examplesIf requireNamespace("adespatial", quietly = TRUE)
 #' set.seed(1)
 #' coords <- cbind(1:40)

@@ -48,12 +48,14 @@ by time. Three models link the history to the rate:
 several regimes (O'Meara et al. 2006).
 \item \code{"burst"}: each change of state, such as the colonisation of a new habitat or region,
 multiplies the rate by \code{1 + burst}, and the excess decays exponentially with time scale
-\code{decay}, also along the descending branches, until the next change. The rate at time \code{u}
-after the last change is \code{sigma2 * (1 + burst * exp(-u / decay))}; before any change it is
+\code{decay}, also along the descending branches, until the next change. The rate at time
+\eqn{u} after the last change is \eqn{\mathrm{sigma2}\, (1 + \mathrm{burst}\,
+  e^{-u / \mathrm{decay}})}{sigma2 * (1 + burst * exp(-u / decay))}; before any change it is
 \code{sigma2}. This follows the expectation of McPeek (2017) that selection, and so evolution,
 is strongest when a lineage first adapts to a new community.
 \item \code{"sympatry"}: the rate depends on the number of lineages that share the state at each
-moment, counting the lineage itself, as \code{sigma2 * exp(r * n)}; a negative \code{r} slows
+moment, counting the lineage itself, as \eqn{\mathrm{sigma2}\, e^{r n}}{sigma2 * exp(r *
+  n)}, with \eqn{n} that number; a negative \eqn{r} slows
 evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
 biogeography of Drury et al. (2016).
 }
@@ -86,4 +88,24 @@ rates of continuous trait evolution using likelihood. \emph{Evolution}, 60, 922-
 }
 \seealso{
 \code{\link[=trait_rates]{trait_rates()}}, \code{\link[=trait_mk]{trait_mk()}}, \code{\link[=as_herodotools]{as_herodotools()}}
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

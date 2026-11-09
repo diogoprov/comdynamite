@@ -38,7 +38,8 @@ that the rates change when a level is added (scenario 4 of the notes on branch r
 The speed of a level is the mean of its rate of trait change, \eqn{|d\bar z / dt|}, over
 the steps at which it is present. Like \code{\link[=turnover_rates]{turnover_rates()}}, the food web runs in ecological
 time and only informs the tip branches: over the last \code{window} units of time of each tip
-branch the rate is \code{sigma2 * (1 + k * speed)} of the level of the tip, and elsewhere it is
+branch the rate is \eqn{\mathrm{sigma2}\, (1 + k \cdot \mathrm{speed})}{sigma2 * (1 + k *
+speed)} of the level of the tip, and elsewhere it is
 \code{sigma2}. These speeds are directional changes of the mean trait under selection, not the
 variance per unit time of Brownian motion, so they give relative rates among levels, scaled
 by \code{k}, not an equivalence between the two.
@@ -63,4 +64,24 @@ Press. \doi{10.23943/princeton/9780691088778.001.0001}
 }
 \seealso{
 \code{\link[=food_web_dynamics]{food_web_dynamics()}}, \code{\link[=turnover_rates]{turnover_rates()}}, \code{\link[=trait_rates]{trait_rates()}}
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

@@ -17,7 +17,8 @@ traits_ou(
 \arguments{
 \item{tree}{A rooted \code{phylo} tree with branch lengths.}
 
-\item{n_traits}{Number of traits. Taken from the rate matrices when \code{sigma2} gives them.}
+\item{n_traits}{Number of traits. Taken from the rate matrices when \code{sigma2} gives them, or
+else from the columns of \code{theta} when it is a matrix.}
 
 \item{alpha}{Strength of selection towards the optimum (0 = Brownian
 motion).}
@@ -25,18 +26,22 @@ motion).}
 \item{sigma2}{Rate of the stochastic (drift) component: one number for all traits, which
 then evolve independently; a symmetric positive semidefinite rate matrix with one row and
 column per trait, for correlated traits; or a named list or vector with a matrix or a
-number per regime (names as in \code{regimes}). See \code{\link[=rate_matrix]{rate_matrix()}}.}
+number per regime (names as in \code{regimes}). See \code{\link[=rate_matrix]{rate_matrix()}}. Regimes in the list but
+not in the tree are ignored.}
 
-\item{theta}{Optimum of each regime: one value for a single optimum, or a
-named vector with one value per regime (names as in \code{regimes}).}
+\item{theta}{Optimum of each regime: one unnamed value for a single optimum, or a
+named vector with one value per regime (names as in \code{regimes}). For optima that differ
+between traits, a matrix with one column per trait and one row per regime, with the
+regimes as row names (one unnamed row for a single optimum).}
 
 \item{regimes}{Selective regime of each branch, in the order of the edges
 of \code{tree} reordered "cladewise" (\code{ape::reorder.phylo(tree, "cladewise")}),
 as returned by \code{\link[=paint_regimes]{paint_regimes()}}; or a tree with the same edges as \code{tree} and a mapped
-history (class \code{simmap}), whose states are the regimes. \code{NULL} puts every branch in one
-regime.}
+history (class \code{simmap}, from \code{\link[=trait_mk]{trait_mk()}} or \code{phytools::make.simmap()}), whose states are
+the regimes, in any order of edges. The mapped tree can also be passed as \code{tree} itself.
+\code{NULL} puts every branch in one regime.}
 
-\item{root}{Trait value at the root.}
+\item{root}{Trait value at the root: one number for all traits, or one per trait.}
 }
 \value{
 Matrix with one row per tip (tip labels as row names) and one
@@ -49,10 +54,12 @@ Hansen (1997), with the multi-optimum ("multi-peak") extension of Butler &
 King (2004). Along each branch the trait is pulled towards the optimum
 \code{theta} of the selective regime of that branch with strength \code{alpha}, while
 drifting with rate \code{sigma2}. Values are drawn exactly from the transition
-distribution of the process: over a branch of length t, a trait with value
-x at the start has, at the end, a normal distribution with mean
-\code{theta + (x - theta) * exp(-alpha * t)} and variance
-\code{sigma2 / (2 * alpha) * (1 - exp(-2 * alpha * t))}.
+distribution of the process: over a branch of length \eqn{t}, a trait with value
+\eqn{x} at the start has, at the end, a normal distribution with mean
+\eqn{\theta + (x - \theta) e^{-\alpha t}}{theta + (x - theta) * exp(-alpha * t)} and variance
+\eqn{\frac{\sigma^2}{2 \alpha} (1 - e^{-2 \alpha t})}{sigma2 / (2 * alpha) * (1 - exp(-2 *
+alpha * t))}, with \eqn{\sigma^2}{sigma2} = \code{sigma2}, \eqn{\alpha}{alpha} = \code{alpha} and
+\eqn{\theta}{theta} = \code{theta}.
 }
 \details{
 With \code{alpha = 0} the process is Brownian motion with rate \code{sigma2}, and the
@@ -66,10 +73,13 @@ evolutionary rate matrix, whose diagonal holds the rate of each trait
 and whose off-diagonal elements hold the evolutionary covariances. A named list of matrices
 gives each regime its own matrix, as in the multi-rate models of mvMORPH (Clavel et al.
 2015); \code{\link[=rate_matrix]{rate_matrix()}} builds them with the structures that mvMORPH fits. The strength of
-selection \code{alpha} and the optimum \code{theta} are the same for all traits. Under Brownian motion
-(\code{alpha = 0}) the traits of the tips have covariance \verb{sum_k kronecker(R_k, C_k)}, where \code{R_k}
-is the rate matrix of regime k and \code{C_k} the phylogenetic covariance matrix built from the
-time spent in regime k (Clavel et al. 2015).
+selection \code{alpha} is the same for all traits; the optimum \code{theta} can differ between traits
+(a matrix with one column per trait), so that regimes shift each trait by a different
+amount. Under Brownian motion
+(\code{alpha = 0}) the traits of the tips have covariance \eqn{\sum_k R_k \otimes C_k}{sum_k
+kronecker(R_k, C_k)}, where \eqn{R_k} is the rate matrix of regime \eqn{k} and \eqn{C_k} the
+phylogenetic covariance matrix built from the time spent in regime \eqn{k} (Clavel et al.
+2015).
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -85,6 +95,10 @@ round(x[, 1], 1)
 r <- rate_matrix(c(1, 0.5), correlation = 0.8)
 y <- traits_ou(tr, sigma2 = r)
 cor(y)
+# the shift to regime 1 moves the optimum of trait 1 but not of trait 2
+th <- rbind(`0` = c(0, 0), `1` = c(10, 0))
+z <- traits_ou(tr, alpha = 2, sigma2 = r, theta = th, regimes = reg)
+plot_traits(z, tr, regimes = reg)
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -103,4 +117,24 @@ of adaptation. \emph{Evolution}, 51, 1341--1351.
 \seealso{
 \code{\link[=paint_regimes]{paint_regimes()}} to assign regimes to clades, \code{\link[=rate_matrix]{rate_matrix()}} for rate matrices,
 \code{\link[=trait_mk]{trait_mk()}} for a history of regimes that change within branches.
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=rate_matrix]{rate_matrix()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

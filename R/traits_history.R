@@ -46,7 +46,9 @@
 #'
 #'   Revell, L. J. (2024). Testing for heterogeneous rates of discrete character evolution on
 #'   phylogenies. *Journal of Evolutionary Biology*, 37, 1591--1602. \doi{10.1093/jeb/voae119}
-#' @seealso [tip_history_metrics()], [trait_rates()] for continuous traits.
+#' @seealso [tip_history_metrics()], [trait_rates()] for continuous traits, and [traits_ou()],
+#'   which takes the mapped history as `regimes` (optima and rates that change with the state).
+#' @family species traits
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(10)
@@ -61,7 +63,7 @@
 #' @export
 trait_mk <- function(tree, q = 1, states = c("0", "1"), root = NULL, alpha = NULL,
                      edge_rates = NULL, rate_classes = NULL, class_switch = 0.1) {
-  stopifnot(inherits(tree, "phylo"), !is.null(tree$edge.length))
+  check_tree(tree)
   if (is.matrix(q)) {
     states <- rownames(q)
     if (is.null(states) || !identical(states, colnames(q))) {
@@ -228,6 +230,7 @@ as_simmap <- function(tree, maps, at_node, states) {
 #'   Evolution*, 11, 18676--18690. \doi{10.1002/ece3.8476}
 #' @seealso [trait_mk()]
 #' @inherit trait_mk examples
+#' @family species traits
 #' @export
 tip_history_metrics <- function(history) {
   states <- history_states(history)

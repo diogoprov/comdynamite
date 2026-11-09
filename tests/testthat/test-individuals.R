@@ -60,7 +60,7 @@ test_that("sample_individuals() checks its arguments", {
   expect_error(sample_individuals(sim, intraspecific_sd = -1), "negative")
   expect_error(sample_individuals(sim, population_sd = 1:3), "one per species")
   expect_error(sample_individuals(sim, local_adaptation = c(sp1 = 0.5)), "no value for")
-  expect_error(sample_individuals(list()), "mc_sim")
+  expect_error(sample_individuals(list()), "simulate_metacommunity")
   expect_error(sample_individuals(sim, local_adaptation = "a"), "must be numbers")
   expect_error(sample_individuals(sim, intraspecific_sd = NA_real_), "must be numbers")
 })
@@ -248,4 +248,91 @@ test_that("character displacement leaves sites with a single species alone", {
   apart <- sample_individuals(sim, intraspecific_sd = 0, displacement = 3)
   first <- rownames(sim$abundance)[1]
   expect_equal(apart$trait[apart$site == first], base$trait[base$site == first])
+})
+
+test_that("the species null of T_IP.IC moves populations only within species", {
+  sim <- small_sim()
+  set.seed(2)
+  ind <- sample_individuals(sim, n = 6, intraspecific_sd = 1)
+  res <- tstats(ind, nperm = 20, null_ip = "species", alternative = "two.sided")
+  base <- tstats(ind, nperm = 0)
+  expect_equal(res[names(base)], base)
+  # when every species occurs at one site, nothing can move and the null equals the observation
+  single <- ind
+  single$species <- paste(single$site, single$species)
+  kept <- tstats(single, nperm = 5, null_ip = "species")
+  expect_equal(attr(kept, "null")[, , "T_IP.IC"],
+               matrix(kept$T_IP.IC, 5, nrow(kept), byrow = TRUE))
+  expect_true(all(is.finite(res$ses_T_IP.IC) | is.na(res$ses_T_IP.IC)))
+  expect_true(all(res$p_T_IP.IC <= 1, na.rm = TRUE))
+  expect_error(tstats(ind, null_ip = "region"))
+})
+
+test_that("the species null of T_IP.IC tells convergence from divergence", {
+  set.seed(3)
+  sim <- simulate_metacommunity(landscape_implicit(15), species_traits(10),
+                                competition_matrix(10, "none"), n_steps = 100,
+                                seed_steps = 1:5)
+  ses <- function(...) {
+    ind <- sample_individuals(sim, n = 10, intraspecific_sd = 1, ...)
+    mean(tstats(ind, nperm = 39, null_ip = "species")$ses_T_IP.IC, na.rm = TRUE)
+  }
+  expect_gt(ses(local_adaptation = 0.9), 2)
+  expect_lt(ses(displacement = 10), 0)
+})
+
+test_that("group_sum() gives zero to groups without members", {
+  expect_equal(group_sum(c(1, 2, 3), c(1, 3, 3), 4), c(1, 0, 5, 0))
+  expect_equal(group_mean(c(1, 2, 3), c(1, 3, 3), 3), c(1, NaN, 2.5))
+})
+
+test_that("population_shifts() recovers local adaptation and displacement", {
+  set.seed(4)
+  sim <- simulate_metacommunity(landscape_implicit(15), species_traits(10),
+                                competition_matrix(10, "none"), n_steps = 100,
+                                seed_steps = 1:5)
+  w <- mean(sim$traits$sigma)
+  # without displacement the width is not identified, so it is fixed here
+  local <- population_shifts(sample_individuals(sim, n = 200, local_adaptation = 0.6,
+                                                intraspecific_sd = 0.5), width = w)
+  expect_equal(local$local_adaptation, 0.6, tolerance = 0.05)
+  expect_lt(abs(local$displacement), 0.5)
+  both <- population_shifts(sample_individuals(sim, n = 200, local_adaptation = 0.4,
+                                               displacement = 3, intraspecific_sd = 0.5),
+                            width = w)
+  expect_equal(both$local_adaptation, 0.4, tolerance = 0.1)
+  expect_equal(both$displacement, 3, tolerance = 0.2)
+  expect_gt(both$r_squared, 0.8)
+  expect_equal(attr(both, "profile")$width, w)
+  expect_named(both, c("local_adaptation", "displacement", "width", "r_squared",
+                       "n_populations", "n_species"))
+  free <- population_shifts(sample_individuals(sim, n = 200, local_adaptation = 0.4,
+                                               displacement = 3, intraspecific_sd = 0.5))
+  expect_equal(nrow(attr(free, "profile")), 22)
+  expect_equal(free$width, attr(free, "profile")$width[which.min(attr(free, "profile")$rss)])
+})
+
+test_that("population_shifts() checks its input", {
+  sim <- small_sim()
+  ind <- sample_individuals(sim, n = 4)
+  expect_error(population_shifts(ind[setdiff(names(ind), "env")]), "no column env")
+  ind$env <- as.character(ind$env)
+  expect_error(population_shifts(ind), "numeric")
+  one <- sample_individuals(sim, n = 1)
+  expect_error(population_shifts(one), "two populations")
+  # with no competitors anywhere, displacement cannot be estimated
+  solo <- sample_individuals(sim, n = 5)
+  solo$site <- paste(solo$site, solo$species)
+  solo$env <- solo$env + rnorm(nrow(solo))[match(solo$site, unique(solo$site))]
+  solo$species <- "a"
+  expect_true(is.na(population_shifts(solo)$displacement))
+})
+
+test_that("tstats() returns NA for a trait without values", {
+  sim <- small_sim()
+  ind <- sample_individuals(sim, n = 4)
+  ind$empty <- NA_real_
+  res <- tstats(ind, traits = c("trait", "empty"), nperm = 0)
+  expect_true(all(is.na(res$T_IP.IC[res$trait == "empty"])))
+  expect_false(all(is.na(res$T_IP.IC[res$trait == "trait"])))
 })

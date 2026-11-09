@@ -26,4 +26,10 @@ landscape_implicit(20)
 }
 \seealso{
 \code{\link[=landscape_grid]{landscape_grid()}} for a spatially explicit landscape.
+
+Other landscapes:
+\code{\link[=dispersal_kernel]{dispersal_kernel()}},
+\code{\link[=env_over_time]{env_over_time()}},
+\code{\link[=landscape_grid]{landscape_grid()}}
 }
+\concept{landscapes}

@@ -80,7 +80,8 @@ functional responses of the links where it feeds, but only the numerator of the 
 it is eaten. Selection gradients are central differences of this fitness with respect to
 \code{z} at the mean, so the three attack forms share one implementation. Abundances and means
 are integrated together by a fourth-order Runge-Kutta method with a fixed step \code{dt}, which
-must be short against the fastest rate of the system (about a tenth of \code{1 / c0} or less):
+must be short against the fastest rate of the system (about a tenth of \eqn{1 / c_0}{1 / c0}
+or less):
 halving \code{dt} should leave the result unchanged, and a run whose state stops being finite
 or whose abundances overshoot below zero stops with an error.
 
@@ -135,4 +136,10 @@ coevolution of community structure. \emph{The American Naturalist}, 189, E91--E1
 \seealso{
 \code{\link[=food_web_params]{food_web_params()}}; \code{\link[=plot.food_web]{plot.food_web()}} and \code{\link[=animate_food_web]{animate_food_web()}} to draw the
 results; \code{\link[=trait_rates]{trait_rates()}} for rates that vary among branches of a tree.
+
+Other coevolution in food webs:
+\code{\link[=animate_food_web]{animate_food_web()}},
+\code{\link[=food_web_params]{food_web_params()}},
+\code{\link[=plot.food_web]{plot.food_web()}}
 }
+\concept{coevolution in food webs}

@@ -2,6 +2,7 @@
 % Please edit documentation in R/traits_mv.R
 \name{rate_matrix}
 \alias{rate_matrix}
+\alias{print.rate_matrix}
 \title{Evolutionary rate matrices with restricted structures}
 \usage{
 rate_matrix(
@@ -13,6 +14,8 @@ rate_matrix(
   scale = NULL,
   eigenvalues = NULL
 )
+
+\method{print}{rate_matrix}(x, ...)
 }
 \arguments{
 \item{variance}{Rate of each trait (variance per unit time), recycled to the number of
@@ -29,11 +32,16 @@ matrix. For \code{"variance"}, a named list with the correlations of each regime
 
 \item{eigenvalues}{For \code{"shared"}, a named list with the eigenvalues of each regime, one per
 trait.}
+
+\item{x}{A \code{rate_matrix} object.}
+
+\item{...}{Not used.}
 }
 \value{
-A symmetric matrix with one row and column per trait, or, for the multi-regime
-structures, a named list of them, one per regime. The attribute \code{constraint} holds the
-structure. Either can be passed to \code{traits_ou(sigma2 = )}.
+An object of class \code{rate_matrix}: a symmetric matrix with one row and column per
+trait, or, for the multi-regime structures, a named list of them, one per regime. The
+attribute \code{constraint} holds the structure. Either can be passed to
+\code{traits_ou(sigma2 = )}; \link[=plot.rate_matrix]{plot()} draws them as ellipses.
 }
 \description{
 Builds the evolutionary rate matrix (the covariance of the changes of several traits per
@@ -75,11 +83,13 @@ rate_matrix(1, correlation = 0.3, constraint = "equal", n_traits = 3)
 # two habitats, the open one evolving four times faster in all directions
 r <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
                  scale = c(forest = 1, open = 4))
+r
+plot(r)
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(30)
 habitat <- trait_mk(tr, q = 0.5, states = c("forest", "open"))
 x <- traits_ou(habitat, sigma2 = r, regimes = habitat)
-head(x)
+plot_traits(x, habitat, regimes = habitat)
 # several correlated traits in community assembly
 assemble_community(x, size = 10, rule = "limiting_similarity")$community
 \dontshow{\}) # examplesIf}
@@ -94,5 +104,25 @@ multivariate evolutionary models to morphometric data. \emph{Methods in Ecology 
 Evolution}, 6, 1311--1319. \doi{10.1111/2041-210X.12420}
 }
 \seealso{
-\code{\link[=traits_ou]{traits_ou()}}, which simulates traits with these matrices.
+\code{\link[=traits_ou]{traits_ou()}}, which simulates traits with these matrices, and \code{\link[=plot_traits]{plot_traits()}}.
+
+Other species traits:
+\code{\link[=arrival_ages]{arrival_ages()}},
+\code{\link[=as_herodotools]{as_herodotools()}},
+\code{\link[=food_web_rates]{food_web_rates()}},
+\code{\link[=history_rates]{history_rates()}},
+\code{\link[=paint_regimes]{paint_regimes()}},
+\code{\link[=partner_turnover]{partner_turnover()}},
+\code{\link[=plot.rate_matrix]{plot.rate_matrix()}},
+\code{\link[=plot_rates]{plot_rates()}},
+\code{\link[=plot_traits]{plot_traits()}},
+\code{\link[=region_pool]{region_pool()}},
+\code{\link[=species_traits]{species_traits()}},
+\code{\link[=tip_history_metrics]{tip_history_metrics()}},
+\code{\link[=trait_bm]{trait_bm()}},
+\code{\link[=trait_mk]{trait_mk()}},
+\code{\link[=trait_rates]{trait_rates()}},
+\code{\link[=traits_ou]{traits_ou()}},
+\code{\link[=turnover_rates]{turnover_rates()}}
 }
+\concept{species traits}

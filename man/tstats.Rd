@@ -12,6 +12,7 @@ tstats(
   method = c("base", "cati"),
   nperm = 99,
   alternative = c("less", "greater", "two.sided"),
+  null_ip = c("site", "species"),
   ...
 )
 }
@@ -31,6 +32,11 @@ values only, much faster in simulation studies with many replicates.}
 
 \item{alternative}{Direction of the test of \code{method = "base"}: \code{"less"} (the default),
 \code{"greater"} or \code{"two.sided"}.}
+
+\item{null_ip}{Null model of \code{T_IP.IC} for \code{method = "base"}: \code{"site"} (the default), trait
+values permuted within each site as in Taudiere & Violle (2016), or \code{"species"}, the
+means of populations exchanged among the populations of each species (see the section
+Null models).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
@@ -79,12 +85,40 @@ as many of these values as it has individuals, drawn without replacement from th
 population means are computed again from the values drawn.
 }
 
-The standardised effect size is \verb{(observed - mean of null) / sd of null}, and the p-value
-is \code{(1 + r) / (1 + nperm)}, where \code{r} is the number of null values at or below the observed
+The null model of \code{T_IC.IR} leaves the regional pool as it is, so its denominator (the
+variance among all individuals) stays that of the observed data, and only the variance
+within sites is randomised. Taking the denominator from the values drawn, which repeat
+individuals across sites, biases the null and makes the test anti-conservative. In the null
+model of \code{T_PC.PR} the population means are themselves computed from the values drawn, so
+their regional variance is computed again from them, as in Taudiere & Violle (2016).
+
+The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
+mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
+with \eqn{n} = \code{nperm}, where \eqn{r} is the number of null values at or below the observed
 one (\code{alternative = "less"}), at or above it (\code{"greater"}), or twice the smaller of the two
 (\code{"two.sided"}, at most 1). Low values of the three statistics are the usual hypotheses
 (niche differentiation within communities for \code{T_IP.IC}, environmental filtering for the
 others), so \code{"less"} tests them. Each trait is randomised on its own.
+
+The null model of \code{T_IP.IC} asks only whether populations differ: permuting individuals
+within a site removes its populations, so null values are near 1, and co-occurring species
+with different means give a large negative effect size even when each population sits where
+its species would be at any site. With \code{null_ip = "species"}, the mean of each
+population is instead exchanged at random with that of another population of the same
+species, and its individuals keep their number and their deviations from the mean. Each site
+keeps its species, their abundances and the variances within populations; only which mean of
+a species sits at which site is broken. Moving whole populations instead would also break
+the match between the abundance of a species at a site and its trait, which environmental
+filtering of abundances creates, and would test that instead. The standardised effect size is near zero when the position of a population does not depend on
+the site, positive when co-occurring populations are closer than expected from their species
+(convergence, as under local adaptation to a shared environment), and negative when they are
+further apart (divergence, as under character displacement); \code{alternative = "two.sided"}
+tests both. Species found at a single site keep their mean. Means of populations with
+different numbers of individuals carry different sampling error and are not fully
+exchangeable, which makes the test conservative (effect sizes shrink toward zero and a test
+at 5\% rejects less often than 5\% when nothing acts) but not anti-conservative. Local adaptation and character
+displacement move this statistic in opposite directions and can cancel; see
+\code{\link[=population_shifts]{population_shifts()}} to estimate both.
 
 \code{method = "cati"} calls \code{\link[cati:Tstats]{cati::Tstats()}} (Taudiere & Violle 2016) instead and returns its
 object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
@@ -139,5 +173,25 @@ community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 \doi{10.1016/j.tree.2011.11.014}
 }
 \seealso{
-\code{\link[=sample_individuals]{sample_individuals()}}.
+\code{\link[=tstats_summary]{tstats_summary()}} to summarise the tests, \code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=population_shifts]{population_shifts()}}.
+
+Other trait variation among individuals:
+\code{\link[=community_index]{community_index()}},
+\code{\link{neighbour_metrics}},
+\code{\link[=nested_variance]{nested_variance()}},
+\code{\link[=null_intervals]{null_intervals()}},
+\code{\link[=plot.nested_variance]{plot.nested_variance()}},
+\code{\link[=plot.trait_flex]{plot.trait_flex()}},
+\code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
+\code{\link[=plot.tstats]{plot.tstats()}},
+\code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=sample_individuals]{sample_individuals()}},
+\code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_densities]{trait_densities()}},
+\code{\link[=trait_flex]{trait_flex()}},
+\code{\link[=trait_rarefaction]{trait_rarefaction()}},
+\code{\link[=tstats_summary]{tstats_summary()}}
 }
+\concept{trait variation among individuals}

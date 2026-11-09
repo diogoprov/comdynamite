@@ -45,4 +45,12 @@ table(reg)
 }
 \seealso{
 \code{\link[=fit_damocles]{fit_damocles()}}, \code{\link[=damocles_lrt]{damocles_lrt()}}.
+
+Other dynamic null model:
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

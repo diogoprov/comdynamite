@@ -17,6 +17,7 @@
 #' @param n_rep Number of replicates.
 #' @param seed Integer that sets all the seeds.
 #' @return Data frame with the columns of `scenarios`, `replicate` and the statistics.
+#' @family simulation studies
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' scenarios <- expand.grid(dispersal = c(0.001, 0.1), lambda = c(0, 1))
 #' shared_pool <- function() {
@@ -76,6 +77,7 @@ cell_seed <- function(seed) {
 #'   species per site, and `abundance`, the mean individuals per site, with their means in the
 #'   two halves (`early`, `late`), the relative `change` and whether it is `settled`, invisibly.
 #'   It gives a warning if any statistic has not settled.
+#' @family simulation studies
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -116,6 +118,7 @@ equilibrium_check <- function(x, tolerance = 0.05) {
 #' @return Data frame with `site`, `species`, `step` and `abundance`, from `history`, or from
 #'   `abundance` with `step` as `NA` if no steps were recorded. `tibble::as_tibble()` turns it
 #'   into a tibble.
+#' @family simulation studies
 #' @examples
 #' set.seed(1)
 #' sim <- simulate_metacommunity(landscape_implicit(4), species_traits(5),

@@ -28,6 +28,7 @@
 #' environmental drivers of phylogenetic variation across ecological
 #' communities. *Plant Ecology*, 216, 709--724.
 #' \doi{10.1007/s11258-014-0405-0}
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(5)
@@ -57,8 +58,8 @@ phylo_beta <- function(comm, tree) {
 #' The equations printed in the article omit the 1 in the adjusted R2, the
 #' transpose in the hat matrix and the centring of the matrix that is regressed.
 #' Here the predictors and the matrix are centred, and the residual degrees of
-#' freedom are `n - p - 1`, with `n - 1` for the total, instead of the printed
-#' `n - p` and `n`. The pseudo-F and R2 therefore equal those of a distance-based
+#' freedom are \eqn{n - p - 1}, with \eqn{n - 1} for the total, instead of the printed
+#' \eqn{n - p} and \eqn{n}. The pseudo-F and R2 therefore equal those of a distance-based
 #' redundancy analysis in vegan. The printed degrees of freedom would multiply
 #' the pseudo-F by a constant, which does not change the permutation tests.
 #'
@@ -93,6 +94,7 @@ phylo_beta <- function(comm, tree) {
 #' \doi{10.1007/s11258-014-0405-0}
 #' @seealso [plot_phylo_beta()] shows the result. [pcc_test()] is the other framework of the
 #'   same article.
+#' @family the whole tree
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)

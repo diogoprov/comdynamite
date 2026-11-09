@@ -50,8 +50,10 @@ estimated by another method: the rates in \code{vary} are estimated separately f
 
 \item{edge_covariate}{Optional positive number for each edge of \code{tree}, in the order of
 \code{tree$edge}, such as branch-specific rates of speciation estimated by another method: the
-rates in \code{vary} change with it as \verb{rate * (x / geometric mean of x)^beta}, with \code{rate} and
-\code{beta} estimated. Give \code{regimes} or \code{edge_covariate}, not both.}
+rates in \code{vary} change with it as \eqn{\mathrm{rate} \cdot (x / \bar{x}_g)^\beta}{rate *
+(x / geometric mean of x)^beta}, where \eqn{x} is the covariate and \eqn{\bar{x}_g}{the
+geometric mean} its geometric mean, with \code{rate} and \eqn{\beta}{beta} estimated. Give
+\code{regimes} or \code{edge_covariate}, not both.}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -81,11 +83,14 @@ DAMOCLES; simulated communities with fewer than two species have no MPD or MNTD 
 out of the null distribution, and \code{n_valid} counts the ones kept. Distances are the
 cophenetic distances of \code{tree}, which should hold every species of the regional pool.
 
-Standardised effect sizes are \verb{(observed - mean of the null) / sd of the null}, as in
+Standardised effect sizes are \eqn{(x_{obs} - \bar{x}_{null}) / s_{null}}{(observed - mean
+of the null) / sd of the null}, as in
 \code{\link[=summary_stats]{summary_stats()}}: negative values mean the species present are more closely related than
 expected (clustering) and positive values that they are less related (overdispersion). Note
 that \code{DAMOCLES::DAMOCLES_bootstrap()} reports the opposite sign. The p-values are lower-tail
-ranks, \verb{(number of null values <= observed + 1) / (n_valid + 1)}; values near one point to
+ranks, \eqn{(r + 1) / (n + 1)}{(r + 1) / (n + 1)}, with \eqn{r} the number of null values at
+or below the observed one and \eqn{n} the number of valid null values; values near one point
+to
 overdispersion.
 }
 \examples{
@@ -102,4 +107,12 @@ community structure. \emph{Ecology Letters}, 18, 153--163. \doi{10.1111/ele.1239
 }
 \seealso{
 \code{\link[=simulate_damocles]{simulate_damocles()}}, \code{\link[=fit_damocles]{fit_damocles()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=confint.mc_damocles_fit]{confint.mc_damocles_fit()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

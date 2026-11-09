@@ -2,6 +2,7 @@ url: https://provetelab.org/comdynamite/
 
 template:
   bootstrap: 5
+  math-rendering: katex
 
 reference:
 - title: Data
@@ -31,12 +32,15 @@ reference:
   - trait_bm
   - traits_ou
   - rate_matrix
+  - plot.rate_matrix
+  - plot_traits
   - trait_mk
   - trait_rates
   - history_rates
   - partner_turnover
   - turnover_rates
   - food_web_rates
+  - plot_rates
   - tip_history_metrics
   - as_herodotools
   - region_pool
@@ -66,6 +70,7 @@ reference:
   contents:
   - pcc_test
   - pcps_test
+  - plot.mc_pcps
   - phylo_eigenvectors
   - phylo_beta_test
   - phylo_beta
@@ -89,8 +94,27 @@ reference:
   - summary_stats
   - equilibrium_check
   - as.data.frame.mc_sim
+- title: Trait variation among individuals
+  desc: Individuals sampled from simulations, T-statistics, community trait indices and
+    decompositions of trait variation.
+  contents:
   - sample_individuals
   - tstats
+  - tstats_summary
+  - population_shifts
+  - community_index
+  - trait_flex
+  - plot.trait_flex
+  - nested_variance
+  - plot.nested_variance
+  - null_intervals
+  - plot.tstats
+  - trait_densities
+  - plot_population_traits
+  - neighbour_metrics
+  - subsample_individuals
+  - trait_rarefaction
+  - plot.trait_rarefaction
 - title: Results
   desc: Tables, summaries and plots of results.
   contents:
@@ -102,6 +126,7 @@ reference:
   desc: Community assembly without population dynamics.
   contents:
   - assemble_community
+  - plot_assembly
 - title: Dynamic null model
   desc: Colonisation and local extinction along the tree (DAMOCLES).
   contents:
@@ -130,6 +155,7 @@ articles:
   - phylogenetic-structure
   - evaluating-methods
   - branch-rates
+  - articles/correlated-traits
   - articles/watching-assembly
 - title: Validation
   navbar: Validation

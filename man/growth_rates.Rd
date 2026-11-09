@@ -19,11 +19,12 @@ Numeric matrix with one row per site and one column per species:
 the density-independent growth rate of each species at each site.
 }
 \description{
-Density-independent growth rate of species j at site i,
-\code{r_max[j] * exp(-(E[i] - optimum[j])^2 / (2 * sigma[j]^2))}: a Gaussian
-response whose standard deviation is the niche breadth \code{sigma}. This
-\code{sigma} equals \code{sqrt(2)} times the niche breadth parameter of Thompson et
-al. (2020).
+Density-independent growth rate of species \eqn{j} at site \eqn{i},
+\eqn{r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))}{r_max[j] * exp(-(E[i] - optimum[j])^2 /
+(2 * sigma[j]^2))}, with \eqn{r_j} = \code{r_max}, \eqn{\theta_j}{theta_j} = \code{optimum} and
+\eqn{\sigma_j}{sigma_j} = \code{sigma}: a Gaussian response whose standard deviation is the niche
+breadth \code{sigma}. This \code{sigma} equals \eqn{\sqrt{2}}{sqrt(2)} times the niche breadth
+parameter of Thompson et al. (2020).
 }
 \details{
 With several environmental axes, each species has a response to each axis and the growth
@@ -38,3 +39,12 @@ set.seed(1)
 g <- growth_rates(seq(0, 100, 10), species_traits(3))
 round(g, 2)
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
+\code{\link[=simulate_static]{simulate_static()}}
+}
+\concept{simulate metacommunities}

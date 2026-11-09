@@ -9,8 +9,9 @@ phylo_eigenvectors(tree, squared = FALSE)
 \arguments{
 \item{tree}{A \code{phylo} object.}
 
-\item{squared}{Use \code{-PD^2 / 2}, as in a classic principal coordinate analysis,
-instead of \code{-PD / 2}, the form printed by Peres-Neto & Kembel (2015)?}
+\item{squared}{Use \eqn{-\mathrm{PD}^2 / 2}{-PD^2 / 2}, as in a classic principal coordinate
+analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the form printed by Peres-Neto &
+Kembel (2015)?}
 }
 \value{
 Matrix with one row per tip and one column per positive eigenvalue.
@@ -31,3 +32,13 @@ environmental drivers of phylogenetic variation across ecological
 communities. \emph{Plant Ecology}, 216, 709--724.
 \doi{10.1007/s11258-014-0405-0}
 }
+\seealso{
+Other the whole tree:
+\code{\link[=pcc_test]{pcc_test()}},
+\code{\link[=pcps_test]{pcps_test()}},
+\code{\link[=phylo_beta]{phylo_beta()}},
+\code{\link[=phylo_beta_test]{phylo_beta_test()}},
+\code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
+\code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
+}
+\concept{the whole tree}

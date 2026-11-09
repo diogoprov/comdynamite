@@ -40,6 +40,7 @@
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [damocles_loglik()] and [fit_damocles()] for the likelihood, [damocles_test()] for
 #'   the null model of phylogenetic community structure.
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(30)
@@ -118,8 +119,8 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' or communities nested in one another, are not independent replicates and pooling them
 #' overstates the information on the rates. Twice the difference between the summed
 #' log-likelihoods of separate and shared fits can be compared with a chi-squared distribution
-#' on `2 * (number of communities - 1)` degrees of freedom to ask whether the rates differ among
-#' communities.
+#' on \eqn{2 (m - 1)}{2 * (m - 1)} degrees of freedom, with \eqn{m} communities, to ask whether
+#' the rates differ among communities.
 #'
 #' With `sympatry = NULL`, `fit_damocles()` also estimates the probability that a present
 #' ancestor leaves both daughters present, on the logit scale. A single community says almost
@@ -164,6 +165,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [damocles_test()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(2)
 #' tr <- treeshapesim::sim_tree_shape(60)
@@ -198,8 +200,10 @@ damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "p
 #'   estimated by another method: the rates in `vary` are estimated separately for each regime.
 #' @param edge_covariate Optional positive number for each edge of `tree`, in the order of
 #'   `tree$edge`, such as branch-specific rates of speciation estimated by another method: the
-#'   rates in `vary` change with it as `rate * (x / geometric mean of x)^beta`, with `rate` and
-#'   `beta` estimated. Give `regimes` or `edge_covariate`, not both.
+#'   rates in `vary` change with it as \eqn{\mathrm{rate} \cdot (x / \bar{x}_g)^\beta}{rate *
+#'   (x / geometric mean of x)^beta}, where \eqn{x} is the covariate and \eqn{\bar{x}_g}{the
+#'   geometric mean} its geometric mean, with `rate` and \eqn{\beta}{beta} estimated. Give
+#'   `regimes` or `edge_covariate`, not both.
 #' @param vary Which rates change among `regimes` or with `edge_covariate`: `"both"`, `"gamma"`
 #'   or `"mu"`; the other one is a single rate for the whole tree.
 #' @export
@@ -284,11 +288,14 @@ print.mc_damocles_fit <- function(x, ...) {
 #' out of the null distribution, and `n_valid` counts the ones kept. Distances are the
 #' cophenetic distances of `tree`, which should hold every species of the regional pool.
 #'
-#' Standardised effect sizes are `(observed - mean of the null) / sd of the null`, as in
+#' Standardised effect sizes are \eqn{(x_{obs} - \bar{x}_{null}) / s_{null}}{(observed - mean
+#' of the null) / sd of the null}, as in
 #' [summary_stats()]: negative values mean the species present are more closely related than
 #' expected (clustering) and positive values that they are less related (overdispersion). Note
 #' that `DAMOCLES::DAMOCLES_bootstrap()` reports the opposite sign. The p-values are lower-tail
-#' ranks, `(number of null values <= observed + 1) / (n_valid + 1)`; values near one point to
+#' ranks, \eqn{(r + 1) / (n + 1)}{(r + 1) / (n + 1)}, with \eqn{r} the number of null values at
+#' or below the observed one and \eqn{n} the number of valid null values; values near one point
+#' to
 #' overdispersion.
 #'
 #' @inheritParams damocles_loglik
@@ -314,6 +321,7 @@ print.mc_damocles_fit <- function(x, ...) {
 #' @references Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic
 #'   community structure. *Ecology Letters*, 18, 153--163. \doi{10.1111/ele.12395}
 #' @seealso [simulate_damocles()], [fit_damocles()].
+#' @family dynamic null model
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(3)
 #' tr <- treeshapesim::sim_tree_shape(40)
@@ -480,6 +488,9 @@ damocles_presence <- function(comm, tree) {
          call. = FALSE)
   }
   tips <- tree$tip.label
+  if (!any(colnames(comm) %in% tips)) {
+    stop("no species of `comm` is a tip of `tree`: check the names", call. = FALSE)
+  }
   only_comm <- setdiff(colnames(comm), tips)
   only_tree <- setdiff(tips, colnames(comm))
   if (length(only_comm) > 0) {

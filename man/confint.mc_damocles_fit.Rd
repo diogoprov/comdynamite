@@ -23,9 +23,12 @@ its estimate and the lower and upper bounds.
 \description{
 Confidence intervals for the parameters of \code{\link[=fit_damocles]{fit_damocles()}} from the profile likelihood: the
 interval holds the values at which the log-likelihood, maximised over the other parameters,
-is within \code{qchisq(level, 1) / 2} of its maximum. With shared parameters there is one interval
+is within \eqn{\chi^2_1(\mathrm{level}) / 2}{qchisq(level, 1) / 2} of its maximum, half the
+\code{level} quantile of a chi-squared distribution with one degree of freedom. With shared
+parameters there is one interval
 per parameter; otherwise one per community. A bound the profile does not reach within a
-factor of \code{exp(10)} of the estimate (rates), 10 units (slopes \code{beta}) or 10 units on the logit
+factor of \eqn{e^{10}}{exp(10)} of the estimate (rates), 10 units (slopes \code{beta}) or 10 units
+on the logit
 scale (\code{sympatry}) is reported as the edge of the parameter space (0 or \code{Inf} for rates,
 \code{-Inf} or \code{Inf} for slopes, 0 or 1 for \code{sympatry}): the data do not bound it.
 }
@@ -40,4 +43,12 @@ confint(fit)
 }
 \seealso{
 \code{\link[=fit_damocles]{fit_damocles()}}.
+
+Other dynamic null model:
+\code{\link[=clade_regimes]{clade_regimes()}},
+\code{\link[=damocles_loglik]{damocles_loglik()}},
+\code{\link[=damocles_lrt]{damocles_lrt()}},
+\code{\link[=damocles_test]{damocles_test()}},
+\code{\link[=simulate_damocles]{simulate_damocles()}}
 }
+\concept{dynamic null model}

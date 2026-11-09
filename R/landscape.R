@@ -9,6 +9,7 @@
 #' @return An `mc_landscape` object: a list with `env` (one value per site),
 #'   and `coords`, `dist` and `dispersal` set to `NULL`.
 #' @seealso [landscape_grid()] for a spatially explicit landscape.
+#' @family landscapes
 #' @examples
 #' set.seed(1)
 #' landscape_implicit(20)
@@ -41,6 +42,7 @@ landscape_implicit <- function(n_sites, env_range = c(0, 100)) {
 #'   diagonal).
 #' @seealso [torus_permutations()] for site permutations that keep the spatial
 #'   structure of a torus.
+#' @family landscapes
 #' @examples
 #' set.seed(1)
 #' ls <- landscape_grid(side = 8)
@@ -73,6 +75,7 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
 #' @param scale Scale of the kernel, in the units of `dist`.
 #' @return Row-stochastic matrix with a zero diagonal: row s gives the
 #'   probabilities that an emigrant from site s reaches each site.
+#' @family landscapes
 #' @examples
 #' d <- as.matrix(dist(cbind(1:5, 0)))
 #' round(dispersal_kernel(d, scale = 1), 2)
@@ -100,10 +103,12 @@ dispersal_kernel <- function(dist, scale) {
 #' @param n_perm Number of permutations to keep, drawn without replacement. The default keeps
 #'   all of them.
 #' @return Integer matrix with one permutation of the site indices per row, excluding the
-#'   identity (`8 * side^2 - 1` rows on a square grid with `side > 2`).
+#'   identity (\eqn{8\, \mathrm{side}^2 - 1}{8 * side^2 - 1} rows on a square grid with
+#'   `side > 2`).
 #' @references Harms, K. E., Condit, R., Hubbell, S. P., & Foster, R. B. (2001). Habitat
 #'   associations of trees and shrubs in a 50-ha neotropical forest plot. *Journal of
 #'   Ecology*, 89, 947--959.
+#' @family restricted null models
 #' @examples
 #' p <- torus_permutations(4)
 #' dim(p)
@@ -149,6 +154,7 @@ torus_permutations <- function(side, symmetries = TRUE, n_perm = NULL) {
 #' @param sd Stationary standard deviation of the deviations.
 #' @return Matrix with one row per site and one column per time step, for the
 #'   `env_time` argument of [simulate_metacommunity()].
+#' @family landscapes
 #' @examples
 #' set.seed(1)
 #' e <- env_over_time(c(20, 50, 80), n_steps = 100, rho = 0.95, sd = 5)

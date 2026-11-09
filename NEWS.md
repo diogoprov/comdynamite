@@ -1,5 +1,101 @@
 # comdynamite (development version)
 
+- `plot_rates()` draws any rate per branch on the tree, from `trait_rates()`,
+  `history_rates()`, `turnover_rates()`, `food_web_rates()` or an estimator, with ggplot2.
+  `plot()` for `pcps_test()` draws the sites on two principal coordinates, coloured by a
+  predictor, with the species as arrows; `pcps_test()` now also returns `share`, `species` and
+  `env` for it. The vignette "Rates of trait evolution that vary among branches" and the
+  article on the whole tree use them.
+- Clearer errors: functions that take a tree say so when given something else, instead of
+  repeating a failed condition, and `species_traits()`, `competition_matrix()`,
+  `assemble_community()`, `sample_individuals()`, `tstats()`, `community_index()` and
+  `trait_rarefaction()` name the argument at fault. `damocles_loglik()` and the functions that
+  call it stop when no species of `comm` is a tip of the tree.
+- Help pages link to the other functions of their group (`@family`), following the groups of
+  the reference index. The example of `paint_regimes()` uses a tree from treeshapesim.
+
+- Plots for several traits, in base graphics: `plot_traits()` draws traits from `traits_ou()`
+  with their tree, as a phylomorphospace (two traits) or a traitgram (one trait), with branches
+  coloured by regime and the colour changing where a mapped history changes;
+  `plot()` for `rate_matrix()` draws each regime's rate matrix as an ellipse; `plot_assembly()`
+  draws a community from `assemble_community()` in trait space, with the boundary of the filter
+  or the contours of limiting similarity in the metric of the assembly. New article,
+  "Correlated traits and assembly in trait space".
+- `traits_ou()`: `theta` can be a matrix with one column per trait, so that a regime shifts
+  each trait's optimum by its own amount; `root` can have one value per trait and is checked;
+  a mapped history is matched to the tree by its edges, so it may come in another order of
+  edges. A named `theta` or `sigma2` of length one is no longer recycled to every regime: it
+  must name every regime, as before rate matrices were added.
+- `rate_matrix()` returns an object of class `rate_matrix`, with `print()` and `plot()`
+  methods. `assemble_community()` returns an object of class `mc_assembly`, which keeps the
+  rule, distance, optimum, traits and the matrix of the metric, with a `print()` method; it
+  stops on missing or non-numeric traits instead of keeping such species or failing later.
+- The limiting-similarity rule of `assemble_community()` keeps the nearest neighbour of each
+  species up to date instead of scanning the whole distance matrix at each removal: 23 times
+  faster for a pool of 2000 species reduced to 100 (from 10.6 to 0.46 s), with the same species
+  removed and the same random draws.
+- Simulations with a niche of several axes keep their tree. `as_mc_data()` keeps one column of
+  optima per axis, `summary_stats()` uses the first axis, and `sample_individuals()` stops with
+  a clear message; both use the `env` that set growth when `simulate_metacommunity(env = )` was
+  given one. Axes of `env` without names take the names of the list of traits, or `axis1`,
+  `axis2`, ...
+
+- Plots of null-model tests: `plot()` for `tstats()` and `community_index()` draws, site by
+  site, the null interval (hatched by default) with the observed value coloured by the test, or
+  the standardised effect sizes; `null_intervals()` returns the table behind it.
+- `trait_densities()` gives trait probability densities of populations and communities
+  (Carmona et al. 2016, 2019) with one bandwidth for all populations, and
+  `plot_population_traits()` draws them with adjustable transparency. `trait_densities()` warns
+  when the spread within populations rises with their mean (one bandwidth then fits badly; the
+  logarithm of the trait usually helps), and `plot_population_traits(highlight = )` draws a few
+  species in colour and the rest in grey, for sites with many species.
+- Classic metrics of trait spacing and spread, for use with `community_index()`: `mnnd()`,
+  `sdnnd()`, `cvnnd()`, `min_nnd()`, `max_nnd()`, `mnd()`, `sdnd()`, `cvnd()`, `mst_length()`,
+  `mst_ratio()`, `trait_range()`, `trait_kurtosis()` and `nn_distances()`. Zero distances count
+  (cati discards them), and one-trait metrics use sorted values instead of distance matrices.
+- `community_index()` accepts a named list of indices, computed on the same randomised
+  communities, and returns them in one table with an `index` column.
+- Sampling effort: `sample_individuals()` gains `cover` (measure only the most abundant species
+  of each site, as in Pakeman & Quested 2007) and `min_n`; `subsample_individuals()` applies
+  the same schemes to real data, and `trait_rarefaction()` follows any statistic over the
+  number of individuals per population or over `cover`, with a `plot()` method that marks the
+  80% rule of Pakeman & Quested (2007) with a dashed line. Its default statistic computes the
+  T-statistics without permutations.
+- `tstats()`: the null model of `T_IC.IR` now keeps the observed regional variance as the
+  denominator. It was computed from the values drawn, which repeat individuals across sites;
+  this biased the null upward and made the tests anti-conservative (about 6% of sites
+  rejected per tail at a nominal 4% in simulations with random traits).
+- New functions for analyses of intraspecific trait variation, written from the published
+  definitions to replace functions of cati 0.99.6 that give wrong results (an audit found
+  bugs reported as adrientaudiere/cati#13 to #21): `tstats_summary()` summarises the tests of
+  `tstats()` (shares of sites below and above the null, test of the mean over sites, the sites
+  that deviate), with sites that cannot be tested left out instead of given small p-values;
+  `trait_flex()` splits community-weighted means into species turnover, intraspecific
+  variability and covariation (Lepš et al. 2011), with environmental variables matched to sites
+  by name, and a `plot()` method (ggplot2) with explained and residual sums of squares; `nested_variance()` gives REML variance components across nested levels (nlme in
+  Suggests) and stops when the factors are not ordered from the broadest to the finest level,
+  with a `plot()` method that draws stacked bars of the shares in Okabe-Ito colours (ggplot2
+  in Suggests);
+  `community_index()` compares any trait index of communities with four null models, with all
+  traits of an individual kept together in multivariate indices. The standardised effect size
+  is now `NA` when the null values do not vary, as for an index that a randomisation cannot
+  change.
+
+- `population_shifts()` estimates local adaptation (`h`) and character displacement (`c`)
+  together from the population means of individuals, by a regression within species on the
+  environment of the site and on the push predicted from co-occurring competitors, with the
+  individuals of each population split in halves against the bias of sampling error and the
+  kernel width profiled. `tstats(null_ip = "species")` adds a null model for T_IP.IC that
+  exchanges population means among the populations of each species, so that its effect size
+  is near zero when the site does not matter, positive under convergence and negative under
+  divergence; the null model of Taudiere & Violle (2016) is far below zero for any set of
+  distinct species. In `data-raw/pilot_tstats_identifiability.R` (ABC, `h ~ U(0, 1)`,
+  `c ~ U(0, 10)`, ten individuals per population, metacommunities of the pseudo-observations
+  left out), the T-statistics alone recover `h` (R2 0.87 to 0.89 over tolerances) but
+  hardly `c` (0.56 to 0.58), while the estimates of `population_shifts()` recover both (0.99,
+  and 0.95 to 0.96; recoverable at tolerance 0.05). `group_sum()`, used inside `tstats()`, now gives zero to empty groups, and `tstats()`
+  no longer fails on a trait without values.
+
 - `sample_individuals(displacement = , displacement_width = )` adds character displacement:
   the populations of each site sit at the equilibrium between selection toward their mean
   without competitors and a push away from close competitors through a Gaussian competition

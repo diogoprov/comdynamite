@@ -39,8 +39,10 @@ so remove them if a method requires it.
 \description{
 Draws species abundances directly from unimodal responses to an
 environmental gradient, without population dynamics, competition or
-dispersal. The expected abundance of species j at site i is
-\code{r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))}, the Gaussian
+dispersal. The expected abundance of species \eqn{j} at site \eqn{i} is
+\eqn{r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))}{r_max[j] * exp(-(env[i] -
+optimum[j])^2 / (2 * sigma[j]^2))}, with \eqn{r_j} = \code{r_max}, \eqn{\theta_j}{theta_j} =
+\code{optimum}, \eqn{\sigma_j}{sigma_j} = \code{sigma} and \eqn{E_i} the environment, the Gaussian
 response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
 default, observed abundances are Poisson counts with that mean, as in
 Peres-Neto & Kembel (2015) and Duarte et al. (2016), where \code{r_max} lies between
@@ -89,3 +91,12 @@ Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 of spatial contingency and environmental filtering on metacommunity
 phylogenetics. \emph{Ecology}, 93, S14--S30. \doi{10.1890/11-0494.1}
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=growth_rates]{growth_rates()}},
+\code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}
+}
+\concept{simulate metacommunities}

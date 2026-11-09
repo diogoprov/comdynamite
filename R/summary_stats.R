@@ -5,7 +5,8 @@
 #' same names and results can be bound by rows.
 #'
 #' `alpha`, `gamma` and `beta` are the mean number of species per site, the number of species
-#' in all sites and `gamma / alpha`. `occupancy` and `occupancy_sd` are the mean and the
+#' in all sites and \eqn{\gamma / \alpha}{gamma / alpha}. `occupancy` and `occupancy_sd` are the
+#' mean and the
 #' standard deviation of the share of sites each species occupies, over the species present.
 #' `abundance` is the mean number of individuals per site, `evenness` the mean Pielou
 #' evenness of sites with two or more species, `evenness_regional` the same for all sites
@@ -44,8 +45,11 @@
 #'   parts: the trait is the column `optimum`, or the only numeric column of `traits`, and
 #'   `env` the only numeric column of `env`.
 #' @param tree Optional `phylo` object, matched to species by name.
-#' @param trait Optional numeric vector with one value per species, named by species.
-#' @param env Optional numeric vector with one value per site.
+#' @param trait Optional numeric vector with one value per species, named by species. For a
+#'   simulation, the optimum of each species by default; with a niche of several axes, the
+#'   optimum on the first axis.
+#' @param env Optional numeric vector with one value per site. For a simulation, the
+#'   environment that set growth by default; with a niche of several axes, the first axis.
 #' @param coords Optional matrix or data frame with one row per site and the coordinates in
 #'   columns.
 #' @param n_null Number of shuffles of species for `ses_mpd` and `ses_mntd`.
@@ -59,6 +63,7 @@
 #'   Meester, L., & Chase, J. M. (2022). Accounting for temporal change in multiple
 #'   biodiversity patterns improves the inference of metacommunity processes. *Ecology*, 103,
 #'   e3683. \doi{10.1002/ecy.3683}
+#' @family simulation studies
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -81,10 +86,11 @@ summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NUL
   if (inherits(x, "mc_sim")) {
     comm <- x$abundance
     series <- x$history
-    env <- env %||% x$landscape$env %||% x$env
+    niche <- sim_niche(x)  # the first axis of a niche with several
+    env <- env %||% niche$env
     coords <- coords %||% x$landscape$coords
-    if (is.null(trait) && !is.null(x$traits)) {
-      trait <- stats::setNames(x$traits$optimum, rownames(x$traits))
+    if (is.null(trait) && !is.null(niche$traits)) {
+      trait <- stats::setNames(niche$traits$optimum, rownames(niche$traits))
     }
   } else if (length(dim(x)) == 3) {
     series <- x

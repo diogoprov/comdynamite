@@ -62,21 +62,25 @@ which conserves them. Spatially implicit landscapes are always multinomial.}
 \item{env}{Optional environmental axes of each site, a matrix or data frame with one row per
 site and one column per element of \code{traits} (such as the \code{env} of several landscapes on
 the same grid). Needed when \code{traits} is a list; replaces the \code{env} of \code{landscape}. Not
-available with \code{env_time}.}
+available with \code{env_time}. Columns without names take the names of \code{traits}, or \code{axis1},
+\code{axis2}, ...}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
 used, \code{env} when given, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a
-tree.
+tree. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
+\code{optimum_} column of traits per axis), while \code{\link[=summary_stats]{summary_stats()}} uses the first axis unless
+given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis.
 }
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
 each time step, abundances are drawn as
-\verb{N' ~ Poisson(r N / (1 + N alpha'))}, where \code{r} holds the growth rates of
-each species at each site (\code{\link[=growth_rates]{growth_rates()}}) and \code{alpha} the competition
-coefficients (\code{\link[=competition_matrix]{competition_matrix()}}). Each individual then emigrates with
+\eqn{N' \sim \mathrm{Poisson}(r N / (1 + N \alpha'))}{N' ~ Poisson(r N / (1 + N alpha'))},
+where \eqn{r} holds the growth rates of each species at each site (\code{\link[=growth_rates]{growth_rates()}}) and
+\eqn{\alpha}{alpha} the competition coefficients (\code{\link[=competition_matrix]{competition_matrix()}}). Each individual
+then emigrates with
 probability \code{dispersal}, and emigrants are redistributed among sites:
 }
 \details{
@@ -157,3 +161,12 @@ process-based metacommunity framework linking local and regional scale
 community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 \doi{10.1111/ele.13568}
 }
+\seealso{
+Other simulate metacommunities:
+\code{\link[=growth_rates]{growth_rates()}},
+\code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_logistic]{simulate_logistic()}},
+\code{\link[=simulate_static]{simulate_static()}}
+}
+\concept{simulate metacommunities}

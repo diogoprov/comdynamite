@@ -2,9 +2,10 @@
 #'
 #' Runs the process-based model of Thompson et al. (2020) on a landscape. At
 #' each time step, abundances are drawn as
-#' `N' ~ Poisson(r N / (1 + N alpha'))`, where `r` holds the growth rates of
-#' each species at each site ([growth_rates()]) and `alpha` the competition
-#' coefficients ([competition_matrix()]). Each individual then emigrates with
+#' \eqn{N' \sim \mathrm{Poisson}(r N / (1 + N \alpha'))}{N' ~ Poisson(r N / (1 + N alpha'))},
+#' where \eqn{r} holds the growth rates of each species at each site ([growth_rates()]) and
+#' \eqn{\alpha}{alpha} the competition coefficients ([competition_matrix()]). Each individual
+#' then emigrates with
 #' probability `dispersal`, and emigrants are redistributed among sites:
 #'
 #' * spatially implicit landscapes ([landscape_implicit()]): the emigrants of
@@ -63,7 +64,8 @@
 #' @param env Optional environmental axes of each site, a matrix or data frame with one row per
 #'   site and one column per element of `traits` (such as the `env` of several landscapes on
 #'   the same grid). Needed when `traits` is a list; replaces the `env` of `landscape`. Not
-#'   available with `env_time`.
+#'   available with `env_time`. Columns without names take the names of `traits`, or `axis1`,
+#'   `axis2`, ...
 #' @param alpha Competition matrix from [competition_matrix()]. Species are matched to the
 #'   rows of `traits` by name, or by position if `alpha` has no names.
 #' @param dispersal Emigration probability, one value or one per species.
@@ -88,12 +90,15 @@
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
 #'   used, `env` when given, and `tree` when the traits came from [species_traits()] with a
-#'   tree.
+#'   tree. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
+#'   `optimum_` column of traits per axis), while [summary_stats()] uses the first axis unless
+#'   given `trait` and `env`, and [sample_individuals()] needs a single axis.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
 #'   Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 #'   process-based metacommunity framework linking local and regional scale
 #'   community ecology. *Ecology Letters*, 23, 1314--1329.
 #'   \doi{10.1111/ele.13568}
+#' @family simulate metacommunities
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' ls <- landscape_implicit(30)
@@ -121,8 +126,12 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   if (several || !is.null(env)) {
     if (!is.null(env_time)) stop("`env_time` is not available with `env`", call. = FALSE)
     trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
-    env <- as.data.frame(env %||% stop("a list of traits needs `env`, one column per element",
-                                       call. = FALSE))
+    if (is.null(env)) stop("a list of traits needs `env`, one column per element", call. = FALSE)
+    unnamed <- is.null(colnames(env)) && !is.data.frame(env)
+    env <- as.data.frame(env)
+    if (unnamed) {
+      names(env) <- (if (several) names(traits)) %||% paste0("axis", seq_len(ncol(env)))
+    }
     if (nrow(env) != length(landscape$env) || ncol(env) != length(trait_list)) {
       stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
            "set of traits (", length(trait_list), ")", call. = FALSE)
@@ -154,10 +163,11 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation, pool = pool, initial = initial,
                      immigration = immigration)
+  tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
-                        pool = out$pool, tree = attr(traits, "tree"))), class = "mc_sim")
+                        pool = out$pool, tree = tree)), class = "mc_sim")
 }
 
 #' Metacommunity dynamics from growth rates
@@ -173,6 +183,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
 #' @param sites,species Optional names of sites and species.
 #' @return List with `abundance` and `history`, as in
 #'   [simulate_metacommunity()], and `pool` as a logical matrix, or `NULL` without it.
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' # one species alone converges to (r - 1) / alpha = (5 - 1) / 0.05 = 80

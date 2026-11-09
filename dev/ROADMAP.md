@@ -639,9 +639,33 @@ pacotes de referência em vez de reimplementá-los.
       com `displacement = 10`). O SES de T_IP.IC já é muito negativo sem deslocamento: o nulo
       testa se as populações do sítio diferem, não se divergiram. Falta: vários traits por
       indivíduo (agora que `assemble_community()` tem vários traits), traits de indivíduos que
-      afetam a dinâmica (hoje são sorteados depois), identificabilidade (combinações de
-      adaptação e deslocamento que dão as mesmas razões) e cruzar com dispersão e extinção de
+      afetam a dinâmica (hoje são sorteados depois) e cruzar com dispersão e extinção de
       manchas (cenário 9) para a ponte Leibold–Januario.
+      Terceira rodada (identificabilidade): `tstats(null_ip = "species")` troca as médias das
+      populações entre populações da mesma espécie (SES ≈ 0 sem processo, > 0 com
+      convergência, < 0 com divergência; conservador com n desigual, nunca anticonservador;
+      trocar populações inteiras testaria a filtragem de abundâncias e deu 22% de rejeição sob
+      H0). `population_shifts()` ajusta h e c juntos (regressão dentro de espécie no ambiente
+      e no empurrão previsto pelos competidores, metades sorteadas contra o erro amostral, w
+      por perfil refinado com `optimize()`). Piloto ABC
+      (`data-raw/pilot_tstats_identifiability.R`, metacomunidades de teste fora da referência,
+      500 pseudo-observações): só as razões dão R² 0,87–0,89 para h e 0,56–0,58 para c;
+      com `population_shifts()`, 0,99 e 0,95–0,96, recuperáveis na tolerância 0,05. Auditoria
+      independente (Fable) antes da rodada final mudou o desenho do piloto e o refinamento de
+      w. Limites: modelo do piloto é o mesmo que gera os dados, sem `population_sd`, com n = 10
+      e `intraspecific_sd` = 2 fixos; `c` atenua com c alto e com `fraction`.
+      Quarta rodada (substitutos do cati): auditoria completa do cati 0.99.6 achou bugs em
+      `ComIndexMulti`, `ComIndex` (regional.pop, ordem de `sp`), `sum_Tstats`, rótulos de
+      `Tstats`, p-valores e `ses()` (cati#13 a #21). Reescritos a partir das definições:
+      `tstats_summary()`, `trait_flex()` (Lepš et al. 2011), `nested_variance()` (checa a
+      ordem do aninhamento) e `community_index()` (quatro nulos, multivariado). Conferidos
+      contra o cati onde ele está certo e na reanálise do capítulo 1 do Leandro.
+      Auditoria Fable das funções novas: corrigido o denominador do nulo de T_IC.IR em
+      `tstats()` (recalculado a partir dos valores sorteados, anticonservador; o cati faz o
+      mesmo); `trait_flex()` com NA em `env`, variável chamada `y` e fórmula sem intercepto.
+      Em aberto: o nulo de T_PC.PR (método publicado, denominador recalculado) tem tamanho
+      um pouco acima do nominal na cauda inferior (0,068 contra 0,04); pensar num nulo que
+      sorteie médias de população diretamente, com o denominador observado.
 - [x] Funções que usam traits, como `assemble_community()`, com mais de um trait e com
       restrições na estrutura entre traits, como em `mvSIM()` e nos ajustes do mvMORPH:
       sem covariância (`"diagonal"`), taxas iguais (`"equal"`), variâncias ou correlações
@@ -674,6 +698,12 @@ pacotes de referência em vez de reimplementá-los.
       Falta: nicho com correlação entre eixos (matriz de largura por espécie) na dinâmica;
       competição a partir da distância entre traits (hoje `competition_matrix()` é aleatória
       ou filogenética); paisagens que gerem vários eixos ambientais de uma vez.
+      Auditoria (2026-11-08): corrigidos `theta` nomeado reciclado, simulação com vários eixos
+      sem árvore (e `as_mc_data()`/`summary_stats()`/`sample_individuals()` a jusante), traits
+      com NA na montagem, simmap em outra ordem de ramos; `theta` por trait; classes
+      `rate_matrix` e `mc_assembly`; `plot_traits()`, `plot.rate_matrix()`, `plot_assembly()`;
+      GAUSE 23x mais rápido com a mesma ordem; artigo "Correlated traits and assembly in trait
+      space". Falta ainda: `alpha` matricial no OU (como `mvOU()`).
 - [x] Modelo nulo dinâmico do DAMOCLES (Pigot & Etienne 2015): colonização e extinção
       local ao longo da árvore. Feito em `R/damocles.R`: `simulate_damocles()`,
       `damocles_loglik()`, `fit_damocles()` (ML em base R) e `damocles_test()` (MPD/MNTD contra

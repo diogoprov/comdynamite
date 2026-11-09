@@ -2,35 +2,48 @@
 #'
 #' Draws individuals from the populations of a simulated metacommunity and gives each one a
 #' trait value, so that intraspecific variation and local adaptation can be studied with the
-#' T-statistics of Violle et al. (2012) ([tstats()]). The trait is the environmental optimum of
-#' [species_traits()], the one that sets growth in [simulate_metacommunity()]. The value of
-#' individual `k` of species `j` at site `i` is
+#' T-statistics of Violle et al. (2012) ([tstats()]).
 #'
-#' `z_ijk = theta_j + h_j (E_i - theta_j) + d_ij + e_ijk`,
+#' The trait is the environmental optimum of [species_traits()], the one that sets growth in
+#' [simulate_metacommunity()]. The value of individual \eqn{k} of species \eqn{j} at site
+#' \eqn{i} is
 #'
-#' where `theta_j` is the optimum of the species, `E_i` the environment of the site,
-#' `h_j` (`local_adaptation`) the fraction of the gap between them that the population closes,
-#' `d_ij ~ N(0, population_sd^2)` a deviation of the population that does not track the
-#' environment (drift, founder effects), and `e_ijk ~ N(0, intraspecific_sd^2)` the variation
-#' among individuals of a population. With `local_adaptation = 0` and `population_sd = 0` all
+#' \deqn{z_{ijk} = \theta_j + h_j (E_i - \theta_j) + d_{ij} + e_{ijk},}{z_ijk = theta_j +
+#'   h_j (E_i - theta_j) + d_ij + e_ijk,}
+#'
+#' where \eqn{\theta_j}{theta_j} is the optimum of the species, \eqn{E_i}{E_i} the environment
+#' of the site, \eqn{h_j}{h_j} (`local_adaptation`) the fraction of the gap between them that the
+#' population closes, \eqn{d_{ij} \sim N(0, s_p^2)}{d_ij ~ N(0, s_p^2)} (with \eqn{s_p}{s_p} =
+#' `population_sd`) a deviation of the population that does not track the environment (drift,
+#' founder effects), and \eqn{e_{ijk} \sim N(0, s_e^2)}{e_ijk ~ N(0, s_e^2)} (with
+#' \eqn{s_e}{s_e} = `intraspecific_sd`) the variation among individuals of a population. With
+#' `local_adaptation = 0` and `population_sd = 0` all
 #' populations of a species share its mean; with `local_adaptation = 1` every population sits on
 #' the environment of its site and species no longer differ within a site.
 #'
 #' With `displacement > 0`, the populations of each site also diverge from one another, as in
 #' ecological character displacement. Their means are the equilibrium of
 #'
-#' `mu_ij = m_ij + c sum_k p_ik (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2))`,
+#' \deqn{\mu_{ij} = m_{ij} + c \sum_k p_{ik} (\mu_{ij} - \mu_{ik})
+#'   \exp\left(-\frac{(\mu_{ij} - \mu_{ik})^2}{2 w^2}\right),}{mu_ij = m_ij + c sum_k p_ik
+#'   (mu_ij - mu_ik) exp(-(mu_ij - mu_ik)^2 / (2 w^2)),}
 #'
-#' where `m_ij` is the mean above (`theta_j + h_j (E_i - theta_j) + d_ij`), `c` is
-#' `displacement`, `p_ik` the share of species `k` among the individuals of the site and `w`
-#' (`displacement_width`) the width of a Gaussian competition kernel. Each population is pushed
-#' away from the populations close to it in trait, more so from abundant ones, and held near
-#' `m_ij`, so `c` sets the strength of competition relative to the selection that keeps the
-#' population near `m_ij`. The push from one competitor is largest at a distance `w` and at
-#' most `c w exp(-1/2)`, about `0.6 c w`. The equilibrium is found by damped fixed-point
-#' iteration from `m_ij`, with steps of `1 / (1 + c)`. Populations with the same `m_ij`, as
-#' with `local_adaptation = 1` and no `population_sd`, are not pushed apart, since the push is
-#' symmetric.
+#' where \eqn{m_{ij} = \theta_j + h_j (E_i - \theta_j) + d_{ij}}{m_ij = theta_j + h_j (E_i -
+#' theta_j) + d_ij} is the mean above, \eqn{c} is `displacement`, \eqn{p_{ik}}{p_ik} the share
+#' of species \eqn{k} among the individuals of the site and \eqn{w} (`displacement_width`) the
+#' width of a Gaussian competition kernel. Each population is pushed away from the populations
+#' close to it in trait, more so from abundant ones, and held near \eqn{m_{ij}}{m_ij}, so
+#' \eqn{c} sets the strength of competition relative to the selection that keeps the
+#' population near \eqn{m_{ij}}{m_ij}. The push from one competitor is largest at a distance
+#' \eqn{w} and at most \eqn{c w e^{-1/2}}{c w exp(-1/2)}, about \eqn{0.6 c w}. The
+#' equilibrium is found by damped fixed-point iteration from \eqn{m_{ij}}{m_ij}, with steps of
+#' \eqn{1 / (1 + c)}. Populations with the same \eqn{m_{ij}}{m_ij}, as with
+#' `local_adaptation = 1` and no `population_sd`, are not pushed apart, since the push is
+#' symmetric. With \eqn{c > 1}, however, the equilibrium with equal means is unstable:
+#' populations whose \eqn{m_{ij}}{m_ij} differ even slightly end up about
+#' \eqn{w \sqrt{2 \log c}}{w sqrt(2 log c)} apart, and several equilibria can exist, of which
+#' the iteration finds the one reached from \eqn{m_{ij}}{m_ij}. The size of the displacement
+#' therefore grows with \eqn{c} only slowly once \eqn{c} exceeds 1.
 #'
 #' The traits of individuals are drawn after the simulation and do not feed back on the
 #' dynamics: abundances are those of the species means. The function describes the pattern
@@ -43,6 +56,12 @@
 #' @param fraction Optional probability that each individual is measured, so that the number
 #'   measured in a population is Binomial(abundance, `fraction`), proportional to abundance on
 #'   average.
+#' @param cover Optional share (0 to 1) of the abundance of each site covered by the species
+#'   measured: species are taken from the most abundant down until they reach `cover`, and the
+#'   rest are not measured, as in field protocols that measure the species making up 80% of the
+#'   abundance (Pakeman & Quested 2007). `NULL` (the default) measures every species.
+#' @param min_n Populations with fewer individuals measured than `min_n` are left out, as when
+#'   populations with a single individual are removed before computing T-statistics.
 #' @param local_adaptation Fraction (0 to 1) of the gap between the optimum of the species and
 #'   the environment of the site that each population closes; one value or one per species
 #'   (named by species, or in their order). The same holds for the two standard deviations.
@@ -63,14 +82,20 @@
 #' @return Data frame with one row per individual and the columns `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
 #'   (of the site), `optimum` (of the species), `population_mean` (the expected value of the
-#'   population, `theta_j + h_j (E_i - theta_j) + d_ij`, after character displacement) and
+#'   population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
 #'   `trait`. Populations with no
 #'   individual measured are absent.
 #' @references Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof,
 #'   C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability
 #'   in community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
 #'   \doi{10.1016/j.tree.2011.11.014}
-#' @seealso [tstats()] for the T-statistics.
+#'
+#'   Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what proportion
+#'   of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
+#'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
+#' @seealso [tstats()] for the T-statistics; [subsample_individuals()] and
+#'   [trait_rarefaction()] for the same sampling schemes on real data.
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(15)
@@ -82,13 +107,21 @@
 #' @export
 sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
-                               displacement_width = NULL, step = NULL, env = NULL) {
-  stopifnot(inherits(x, "mc_sim"))
+                               displacement_width = NULL, step = NULL, env = NULL,
+                               cover = NULL, min_n = 1) {
+  if (!inherits(x, "mc_sim")) {
+    stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+  }
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
   species <- colnames(abundance)
   k <- length(species)
-  if (is.null(env)) env <- x$landscape$env
+  niche <- sim_niche(x)
+  if (niche$n_axes > 1) {
+    stop("sample_individuals() needs a simulation with one environmental axis, not ",
+         niche$n_axes, call. = FALSE)
+  }
+  if (is.null(env)) env <- niche$env
   if (!is.numeric(env) || length(env) != length(sites) || anyNA(env)) {
     stop("`env` needs one number per site (", length(sites), ")", call. = FALSE)
   }
@@ -107,13 +140,19 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
                        nrow(abundance), dimnames = dimnames(abundance))
   }
-  theta <- x$traits[species, "optimum"]
+  if (!is.null(cover)) {
+    dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), k), cover)
+    measured[!dominant] <- 0
+  }
+  stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
+  measured[measured < min_n] <- 0
+  theta <- niche$traits[species, "optimum"]
   pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) +
     sweep(outer(env, theta, "-"), 2, h, "*") +
     sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, pop_sd, "*")
   stopifnot(is.numeric(displacement), length(displacement) == 1, displacement >= 0)
   if (displacement > 0) {
-    width <- displacement_width %||% mean(x$traits$sigma)
+    width <- displacement_width %||% mean(niche$traits$sigma)
     stopifnot(is.numeric(width), length(width) == 1, width > 0)
     for (i in seq_along(sites)) {
       present <- which(abundance[i, ] > 0)
@@ -172,12 +211,40 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   as many of these values as it has individuals, drawn without replacement from the region;
 #'   population means are computed again from the values drawn.
 #'
-#' The standardised effect size is `(observed - mean of null) / sd of null`, and the p-value
-#' is `(1 + r) / (1 + nperm)`, where `r` is the number of null values at or below the observed
+#' The null model of `T_IC.IR` leaves the regional pool as it is, so its denominator (the
+#' variance among all individuals) stays that of the observed data, and only the variance
+#' within sites is randomised. Taking the denominator from the values drawn, which repeat
+#' individuals across sites, biases the null and makes the test anti-conservative. In the null
+#' model of `T_PC.PR` the population means are themselves computed from the values drawn, so
+#' their regional variance is computed again from them, as in Taudiere & Violle (2016).
+#'
+#' The standardised effect size is \eqn{(T_{obs} - \bar T_{null}) / s_{null}}{(T_obs -
+#' mean(T_null)) / sd(T_null)}, and the p-value is \eqn{(1 + r) / (1 + n)}{(1 + r) / (1 + n)},
+#' with \eqn{n} = `nperm`, where \eqn{r} is the number of null values at or below the observed
 #' one (`alternative = "less"`), at or above it (`"greater"`), or twice the smaller of the two
 #' (`"two.sided"`, at most 1). Low values of the three statistics are the usual hypotheses
 #' (niche differentiation within communities for `T_IP.IC`, environmental filtering for the
 #' others), so `"less"` tests them. Each trait is randomised on its own.
+#'
+#' The null model of `T_IP.IC` asks only whether populations differ: permuting individuals
+#' within a site removes its populations, so null values are near 1, and co-occurring species
+#' with different means give a large negative effect size even when each population sits where
+#' its species would be at any site. With `null_ip = "species"`, the mean of each
+#' population is instead exchanged at random with that of another population of the same
+#' species, and its individuals keep their number and their deviations from the mean. Each site
+#' keeps its species, their abundances and the variances within populations; only which mean of
+#' a species sits at which site is broken. Moving whole populations instead would also break
+#' the match between the abundance of a species at a site and its trait, which environmental
+#' filtering of abundances creates, and would test that instead. The standardised effect size is near zero when the position of a population does not depend on
+#' the site, positive when co-occurring populations are closer than expected from their species
+#' (convergence, as under local adaptation to a shared environment), and negative when they are
+#' further apart (divergence, as under character displacement); `alternative = "two.sided"`
+#' tests both. Species found at a single site keep their mean. Means of populations with
+#' different numbers of individuals carry different sampling error and are not fully
+#' exchangeable, which makes the test conservative (effect sizes shrink toward zero and a test
+#' at 5% rejects less often than 5% when nothing acts) but not anti-conservative. Local adaptation and character
+#' displacement move this statistic in opposite directions and can cancel; see
+#' [population_shifts()] to estimate both.
 #'
 #' `method = "cati"` calls [cati::Tstats()] (Taudiere & Violle 2016) instead and returns its
 #' object. Both methods give the same observed values. Two problems of cati 0.99.6 affect it:
@@ -208,6 +275,10 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   values only, much faster in simulation studies with many replicates.
 #' @param alternative Direction of the test of `method = "base"`: `"less"` (the default),
 #'   `"greater"` or `"two.sided"`.
+#' @param null_ip Null model of `T_IP.IC` for `method = "base"`: `"site"` (the default), trait
+#'   values permuted within each site as in Taudiere & Violle (2016), or `"species"`, the
+#'   means of populations exchanged among the populations of each species (see the section
+#'   Null models).
 #' @param ... Further arguments to [cati::Tstats()], such as `reg.pool` or
 #'   `independantTraits`.
 #' @return With `method = "base"`, a data frame with one row per site and trait and the columns
@@ -224,7 +295,9 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   V., & Messier, J. (2012). The return of the variance: intraspecific variability in
 #'   community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
 #'   \doi{10.1016/j.tree.2011.11.014}
-#' @seealso [sample_individuals()].
+#' @seealso [tstats_summary()] to summarise the tests, [sample_individuals()],
+#'   [population_shifts()].
+#' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tree <- treeshapesim::sim_tree_shape(20)
@@ -245,9 +318,11 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' @export
 tstats <- function(individuals, traits = "trait", site = "site", species = "species",
                    method = c("base", "cati"), nperm = 99,
-                   alternative = c("less", "greater", "two.sided"), ...) {
+                   alternative = c("less", "greater", "two.sided"),
+                   null_ip = c("site", "species"), ...) {
   method <- match.arg(method)
   alternative <- match.arg(alternative)
+  null_ip <- match.arg(null_ip)
   stopifnot(is.data.frame(individuals), is.character(traits), length(traits) >= 1)
   missing_columns <- setdiff(c(traits, site, species), names(individuals))
   if (length(missing_columns) > 0) {
@@ -259,7 +334,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   species_id <- as.character(individuals[[species]])
   if (method == "cati") return(tstats_cati(values, site_id, species_id, nperm, ...))
   nperm <- if (is.null(nperm)) 0 else nperm
-  stopifnot(length(nperm) == 1, nperm >= 0, nperm == round(nperm))
+  check_count(nperm, "nperm", min = 0)
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
   site_levels <- unique(site_id)
   per_trait <- lapply(traits, function(trait) {
@@ -267,7 +342,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
     z <- values[keep, trait]
     groups <- tstats_groups(site_id[keep], species_id[keep], site_levels)
     observed <- t_ratios(z, groups)
-    null <- if (nperm > 0) tstats_null(z, groups, nperm) else NULL
+    null <- if (nperm > 0) tstats_null(z, groups, nperm, null_ip) else NULL
     list(table = data.frame(site = site_levels, trait = trait,
                             n_populations = tabulate(groups$pop_site, length(site_levels)),
                             observed, stringsAsFactors = FALSE),
@@ -276,24 +351,179 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   out <- do.call(rbind, lapply(per_trait, `[[`, "table"))
   rownames(out) <- NULL
   out[ratios] <- lapply(out[ratios], finite_or_na)
+  class(out) <- c("tstats", class(out))
   if (nperm == 0) return(out)
   null <- do.call(abind_rows, lapply(per_trait, `[[`, "null"))
   for (stat in ratios) {
-    sims <- null[, , stat, drop = FALSE][, , 1]
-    sims <- matrix(sims, nperm)
-    obs <- out[[stat]]
-    valid <- colSums(is.finite(sims))
-    null_mean <- colMeans(sims, na.rm = TRUE)
-    null_sd <- apply(sims, 2, stats::sd, na.rm = TRUE)
-    below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
-    above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
-    p <- switch(alternative, less = (1 + below) / (1 + valid),
-                greater = (1 + above) / (1 + valid),
-                two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
-    out[[paste0("ses_", stat)]] <- finite_or_na((obs - null_mean) / null_sd)
-    out[[paste0("p_", stat)]] <- ifelse(is.na(obs) | valid == 0, NA_real_, p)
+    compared <- null_compare(out[[stat]], null[, , stat], alternative)
+    out[[paste0("ses_", stat)]] <- compared$ses
+    out[[paste0("p_", stat)]] <- compared$p
   }
   attr(out, "null") <- null
+  out
+}
+
+#' Local adaptation and character displacement from population means
+#'
+#' Estimates how far the populations of a species follow the environment of their site and
+#' how far co-occurring species push them apart, by fitting both terms of the model of
+#' [sample_individuals()] at once to the means of the populations:
+#'
+#' \deqn{m_{ij} = a_j + h E_i + c \sum_k p_{ik} (m_{ij} - m_{ik})
+#'   \exp\left(-\frac{(m_{ij} - m_{ik})^2}{2 w^2}\right),}{m_ij = a_j + h E_i +
+#'   c sum_k p_ik (m_ij - m_ik) exp(-(m_ij - m_ik)^2 / (2 w^2)),}
+#'
+#' where \eqn{m_{ij}}{m_ij} is the mean of species \eqn{j} at site \eqn{i}, \eqn{a_j}{a_j} a
+#' constant of the species, \eqn{E_i}{E_i} the environment of the site and
+#' \eqn{p_{ik}}{p_ik} the relative abundance of species \eqn{k} among the species measured at
+#' the site. In [sample_individuals()], \eqn{a_j = (1 - h) \theta_j}{a_j = (1 - h) theta_j},
+#' `h` is `local_adaptation`, `c` is `displacement` and `w` is `displacement_width`. The
+#' constants of the species are removed by centring each variable within species, and `h` and
+#' `c` are the coefficients of a regression through the origin; `w`, when not given, is the
+#' value of a grid that leaves the smallest residual sum of squares.
+#'
+#' Local adaptation alone moves the populations of a species along the environment, and
+#' displacement alone moves them away from the species they meet. The two leave different
+#' signatures, but each term alone picks up part of the other: the slope of population means on
+#' the environment falls when displacement pulls co-occurring populations apart, and the
+#' spread of a site rises with displacement and falls with local adaptation. Fitting both
+#' terms together separates them when populations of the same species meet different
+#' environments and different competitors. The approach follows the advice of Goldberg & Lande
+#' (2006) and Adams & Collyer (2007) to judge divergence among sympatric species after the
+#' variation of the trait along the environment is accounted for, here with the strength of
+#' competition at each site in place of a contrast between sympatry and allopatry.
+#'
+#' @section Sampling error:
+#' The mean of a population enters both sides of the equation, so its sampling error would
+#' correlate the push of competitors with the response and inflate `c`. The individuals of each
+#' population are therefore split at random in two halves (so the estimates change slightly
+#' with the seed of the random number generator): the response is the
+#' mean of one half, and the own mean in the push is that of the other half (competitors enter
+#' with their full means). Both assignments are stacked in one fit. Only populations with at
+#' least two individuals, of species with at least two such populations, enter as responses;
+#' all populations enter as competitors. Sampling error left in the push still biases `c`
+#' toward zero, more so with few individuals per population and with strong displacement:
+#' strongly displaced populations sit in the tail of the kernel of their competitors, where the
+#' push is small but its sampling error is not. Competitors are the populations present in
+#' `individuals`, so species that occur at a site but were not measured (as with `fraction`
+#' in [sample_individuals()]) are missing from the push and bias `c` as well. The estimates are best read as
+#' summary statistics, with their uncertainty and bias found by simulating the design, as in
+#' approximate Bayesian computation.
+#'
+#' Without displacement the width is not identified: the residual sum of squares changes little
+#' along the grid, and a narrow kernel, which acts on few pairs of populations, can give a value
+#' of `c` far from zero, of either sign. Look at the attribute `profile`, or fix `width` from
+#' independent knowledge of the niche widths, before reading `c` as evidence of displacement.
+#'
+#' @param individuals Data frame with one row per individual, such as from
+#'   [sample_individuals()].
+#' @param trait,site,species,env,abundance Names of the columns with the trait value, the
+#'   site, the species, the environment of the site and the abundance of the population.
+#' @param width Width `w` of the competition kernel; `NULL` (the default) chooses it from a
+#'   grid of multiples (1/8 to 4) of the median standard deviation of population means within
+#'   sites, refined by [stats::optimize()] between the neighbours of the best value of the
+#'   grid. `c` is estimated at that width, and the two trade off when data are few.
+#' @return A data frame with one row and the columns `local_adaptation` (`h`),
+#'   `displacement` (`c`), `width` (`w`), `r_squared` (of the fit within species),
+#'   `n_populations` and `n_species` (that entered as responses). The attribute `profile` holds
+#'   the residual sum of squares for each width tried.
+#' @references Adams, D. C., & Collyer, M. L. (2007). Analysis of character divergence along
+#'   environmental gradients and other covariates. *Evolution*, 61, 510--515.
+#'   \doi{10.1111/j.1558-5646.2007.00063.x}
+#'
+#'   Goldberg, E. E., & Lande, R. (2006). Ecological and reproductive character displacement on
+#'   an environmental gradient. *Evolution*, 60, 1344--1357. \doi{10.1554/05-696.1}
+#' @seealso [sample_individuals()], [tstats()] with `null_ip = "species"`.
+#' @family trait variation among individuals
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
+#'                               competition_matrix(tree, "none"), n_steps = 100,
+#'                               seed_steps = 1:5)
+#' ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
+#' population_shifts(ind)
+#' @export
+population_shifts <- function(individuals, trait = "trait", site = "site", species = "species",
+                              env = "env", abundance = "abundance", width = NULL) {
+  stopifnot(is.data.frame(individuals))
+  columns <- c(trait, site, species, env, abundance)
+  missing_columns <- setdiff(columns, names(individuals))
+  if (length(missing_columns) > 0) {
+    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
+  }
+  d <- individuals[stats::complete.cases(individuals[columns]), columns]
+  names(d) <- c("trait", "site", "species", "env", "abundance")
+  if (!is.numeric(d$trait) || !is.numeric(d$env) || !is.numeric(d$abundance)) {
+    stop("trait, environment and abundance must be numeric", call. = FALSE)
+  }
+  label <- paste(d$site, d$species, sep = "\r")
+  first <- !duplicated(label)
+  pops <- d[first, c("site", "species", "env", "abundance")]
+  pid <- match(label, label[first])
+  n_pops <- nrow(pops)
+  pops$n <- tabulate(pid, n_pops)
+  pops$mean <- group_mean(d$trait, pid, n_pops)
+  odd <- stats::ave(stats::runif(length(pid)), pid, FUN = function(u) rank(u) %% 2) == 1
+  halves <- cbind(group_mean(d$trait[odd], pid[odd], n_pops),
+                  group_mean(d$trait[!odd], pid[!odd], n_pops))
+  by_site <- split(seq_len(n_pops), pops$site)
+  share <- pops$abundance / stats::ave(pops$abundance, pops$site, FUN = sum)
+  use <- pops$n >= 2
+  use <- use & stats::ave(use, pops$species, FUN = sum) >= 2
+  if (!any(use)) {
+    stop("no species has two populations with at least two individuals", call. = FALSE)
+  }
+  push_of <- function(own, w) {
+    out <- numeric(n_pops)
+    for (ix in by_site) {
+      if (length(ix) < 2) next
+      gap <- outer(own[ix], pops$mean[ix], "-")
+      diag(gap) <- 0
+      out[ix] <- as.vector((gap * exp(-gap^2 / (2 * w^2))) %*% share[ix])
+    }
+    out
+  }
+  sp <- rep(pops$species[use], 2)
+  centre <- function(v) v - stats::ave(v, sp)
+  y <- centre(c(halves[use, 1], halves[use, 2]))
+  e <- centre(rep(pops$env[use], 2))
+  fit_width <- function(w) {
+    x <- cbind(local_adaptation = e,
+               displacement = centre(c(push_of(halves[, 2], w)[use],
+                                       push_of(halves[, 1], w)[use])))
+    keep <- colSums(x^2) > 0
+    coef <- c(local_adaptation = NA_real_, displacement = NA_real_)
+    fit <- stats::lm.fit(x[, keep, drop = FALSE], y)
+    coef[keep] <- fit$coefficients
+    list(coef = coef, rss = sum(fit$residuals^2))
+  }
+  if (is.null(width)) {
+    spread <- stats::median(vapply(by_site, function(ix) {
+      if (length(ix) < 2) NA_real_ else stats::sd(pops$mean[ix])
+    }, numeric(1)), na.rm = TRUE)
+    if (!is.finite(spread) || spread <= 0) spread <- stats::sd(pops$mean)
+    grid <- spread * 2^seq(-3, 2, by = 0.25)
+  } else {
+    stopifnot(is.numeric(width), length(width) >= 1, all(width > 0))
+    grid <- width
+  }
+  fits <- lapply(grid, fit_width)
+  rss <- vapply(fits, `[[`, numeric(1), "rss")
+  if (is.null(width)) {
+    at <- which.min(rss)
+    bounds <- log(grid[c(max(at - 1, 1), min(at + 1, length(grid)))])
+    refined <- exp(stats::optimize(function(lw) fit_width(exp(lw))$rss, bounds)$minimum)
+    grid <- c(grid, refined)
+    fits <- c(fits, list(fit_width(refined)))
+    rss <- c(rss, fits[[length(fits)]]$rss)
+  }
+  best <- which.min(rss)
+  out <- data.frame(local_adaptation = fits[[best]]$coef[["local_adaptation"]],
+                    displacement = fits[[best]]$coef[["displacement"]], width = grid[best],
+                    r_squared = 1 - rss[best] / sum(y^2), n_populations = sum(use),
+                    n_species = length(unique(pops$species[use])))
+  attr(out, "profile") <- data.frame(width = grid, rss = rss)
   out
 }
 
@@ -303,40 +533,55 @@ tstats_groups <- function(site_id, species_id, site_levels) {
   pop_levels <- unique(population)
   site <- match(site_id, site_levels)
   pop <- match(population, pop_levels)
-  list(site = site, pop = pop, pop_site = site[match(seq_along(pop_levels), pop)],
+  first <- match(seq_along(pop_levels), pop)
+  list(site = site, pop = pop, pop_site = site[first], pop_species = species_id[first],
        n_sites = length(site_levels), n_pops = length(pop_levels),
        by_site = split(seq_along(site), factor(site, seq_along(site_levels))))
 }
 
-# the three ratios per site, from trait values and the groups of tstats_groups()
-t_ratios <- function(z, g) {
+# the three ratios per site, from trait values and the groups of tstats_groups(); var_r fixes
+# the denominator of T_IC.IR (variance among all individuals), which its null model does not
+# randomise
+t_ratios <- function(z, g, var_r = NULL) {
   z <- z - mean(z)
   pop_mean <- group_mean(z, g$pop, g$n_pops)
   pop_var <- group_var(z, g$pop, g$n_pops)
   var_ic <- group_var(z, g$site, g$n_sites)
   has_var <- !is.na(pop_var)
-  mean_ip <- group_sum(ifelse(has_var, pop_var, 0), g$pop_site, g$n_sites) /
+  pop_var[!has_var] <- 0
+  mean_ip <- group_sum(pop_var, g$pop_site, g$n_sites) /
     group_sum(as.numeric(has_var), g$pop_site, g$n_sites)
   var_pc <- group_var(pop_mean, g$pop_site, g$n_sites)
-  data.frame(T_IP.IC = mean_ip / var_ic, T_IC.IR = var_ic / stats::var(z),
+  if (is.null(var_r)) var_r <- stats::var(z)
+  data.frame(T_IP.IC = mean_ip / var_ic, T_IC.IR = var_ic / var_r,
              T_PC.PR = var_pc / stats::var(pop_mean))
 }
 
 # null values (randomisation x site x statistic) of the three null models
-tstats_null <- function(z, g, nperm) {
+tstats_null <- function(z, g, nperm, null_ip = "site") {
   n <- length(z)
   positions <- unlist(g$by_site, use.names = FALSE)
   sizes <- lengths(g$by_site)
-  carried <- group_mean(z, g$pop, g$n_pops)[g$pop]
+  pop_mean <- group_mean(z, g$pop, g$n_pops)
+  carried <- pop_mean[g$pop]
+  deviation <- z - carried
+  var_r <- stats::var(z)
+  same_species <- Filter(function(ix) length(ix) > 1, split(seq_len(g$n_pops), g$pop_species))
   out <- array(NA_real_, c(nperm, g$n_sites, 3),
                list(NULL, NULL, c("T_IP.IC", "T_IC.IR", "T_PC.PR")))
   for (i in seq_len(nperm)) {
-    within <- z
-    for (ix in g$by_site) within[ix] <- z[ix[sample.int(length(ix))]]
-    out[i, , "T_IP.IC"] <- t_ratios(within, g)$T_IP.IC
+    if (null_ip == "site") {
+      within <- z
+      for (ix in g$by_site) within[ix] <- z[ix[sample.int(length(ix))]]
+      out[i, , "T_IP.IC"] <- t_ratios(within, g)$T_IP.IC
+    } else {
+      swapped <- pop_mean
+      for (ix in same_species) swapped[ix] <- pop_mean[ix[sample.int(length(ix))]]
+      out[i, , "T_IP.IC"] <- t_ratios(swapped[g$pop] + deviation, g)$T_IP.IC
+    }
     regional <- numeric(n)
     regional[positions] <- unlist(lapply(sizes, function(m) z[sample.int(n, m)]))
-    out[i, , "T_IC.IR"] <- t_ratios(regional, g)$T_IC.IR
+    out[i, , "T_IC.IR"] <- t_ratios(regional, g, var_r = var_r)$T_IC.IR
     populations <- numeric(n)
     populations[positions] <- unlist(lapply(sizes, function(m) carried[sample.int(n, m)]))
     out[i, , "T_PC.PR"] <- t_ratios(populations, g)$T_PC.PR
@@ -344,8 +589,12 @@ tstats_null <- function(z, g, nperm) {
   out
 }
 
+# sums of x by integer group 1..n_groups; groups without members sum to 0
 group_sum <- function(x, g, n_groups) {
-  as.vector(rowsum(x, factor(g, seq_len(n_groups)), reorder = TRUE))
+  sums <- rowsum(x, g, reorder = TRUE)
+  out <- numeric(n_groups)
+  out[as.integer(rownames(sums))] <- sums
+  out
 }
 
 group_mean <- function(x, g, n_groups) group_sum(x, g, n_groups) / tabulate(g, n_groups)
@@ -356,6 +605,29 @@ group_var <- function(x, g, n_groups) {
   out <- group_sum((x - mean_g[g])^2, g, n_groups) / (n - 1)
   out[n < 2] <- NA_real_
   out
+}
+
+# standardised effect sizes and permutation p-values of observed values (vector of length m)
+# against null values (matrix nperm x m); NA where the observed value or every null value is
+# missing
+null_compare <- function(obs, sims, alternative = c("less", "greater", "two.sided")) {
+  alternative <- match.arg(alternative)
+  sims <- matrix(sims, ncol = length(obs))
+  sims[!is.finite(sims)] <- NA
+  nperm <- nrow(sims)
+  valid <- colSums(!is.na(sims))
+  null_mean <- colMeans(sims, na.rm = TRUE)
+  null_sd <- apply(sims, 2, function(v) if (sum(!is.na(v)) > 1) stats::sd(v, na.rm = TRUE) else NA)
+  below <- colSums(sims <= rep(obs, each = nperm), na.rm = TRUE)
+  above <- colSums(sims >= rep(obs, each = nperm), na.rm = TRUE)
+  p <- switch(alternative, less = (1 + below) / (1 + valid),
+              greater = (1 + above) / (1 + valid),
+              two.sided = pmin(1, 2 * pmin(1 + below, 1 + above) / (1 + valid)))
+  # null values that differ only by rounding (an index the randomisation cannot change) have
+  # no spread
+  null_sd[null_sd <= 1e-10 * pmax(1, abs(null_mean))] <- NA
+  list(ses = finite_or_na((obs - null_mean) / null_sd),
+       p = ifelse(is.na(obs) | valid == 0, NA_real_, p))
 }
 
 finite_or_na <- function(v) ifelse(is.finite(v), v, NA_real_)

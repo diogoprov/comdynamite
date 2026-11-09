@@ -90,6 +90,11 @@ as_mc_data.mc_sim <- function(x, ...) {
   if (is.list(env) && !is.data.frame(env)) env <- as.data.frame(env)
   if (is.numeric(env) && is.null(dim(env))) env <- data.frame(env = env)
   traits <- if (is.data.frame(x$traits)) x$traits
+  if (sim_niche(x)$n_axes > 1) {  # one column with the optima of each axis
+    traits <- as.data.frame(lapply(x$traits, function(t) t$optimum),
+                            row.names = rownames(x$traits[[1]]))
+    names(traits) <- paste0("optimum_", names(env))
+  }
   mc_data(x$abundance, tree = x$tree, traits = traits, env = env, coords = x$landscape$coords,
           series = x$history, ...)
 }
@@ -155,6 +160,15 @@ data_part <- function(data, part, argument = part) {
 }
 
 # one predictor or trait from a data frame of an mc_data object
+# environment and traits of one niche axis of a simulation, and the number of axes
+sim_niche <- function(x, axis = 1) {
+  several <- is.list(x$traits) && !is.data.frame(x$traits) && length(x$traits) > 0 &&
+    all(vapply(x$traits, is.data.frame, logical(1)))
+  list(env = if (is.data.frame(x$env)) x$env[[axis]] else x$landscape$env %||% x$env,
+       traits = if (several) x$traits[[axis]] else x$traits,
+       n_axes = if (several) length(x$traits) else 1L)
+}
+
 one_column <- function(table, part, prefer = NULL) {
   if (is.null(table)) return(NULL)
   numeric <- names(table)[vapply(table, is.numeric, logical(1))]

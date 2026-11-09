@@ -187,6 +187,17 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
     sítio (a adaptação local deixa as médias das populações correlacionadas com ele).
     Interpretação nossa; não verifiquei se a literatura das estatísticas T já trata dessa
     compensação [CITAR: trabalhos sobre T_IP/IC e deslocamento de caráter ou plasticidade].
+    Identificabilidade resolvida em simulação: no piloto ABC
+    (`data-raw/pilot_tstats_identifiability.R`), as três razões recuperam h (R² 0,87–0,89) mas mal
+    c (0,56–0,58); acrescentar o ambiente do sítio e a abundância dos competidores numa regressão
+    conjunta dentro de espécie (`population_shifts()`) recupera os dois (0,99 e 0,95–0,96). A
+    abordagem segue Goldberg & Lande (2006, Evolution 60:1344–1357, doi:10.1554/05-696.1) e
+    Adams & Collyer (2007, Evolution 61:510–515, doi:10.1111/j.1558-5646.2007.00063.x), que
+    pedem avaliar divergência entre simpátricas depois de descontar o gradiente ambiental
+    (verificadas no Crossref). Buscas no Consensus, Scholar Gateway e OpenAlex não acharam
+    nulo restrito por espécie para T_IP.IC; não é prova de que não exista. Para o artigo: a
+    mensagem é que as estatísticas T precisam do ambiente e da composição local para separar
+    os processos; o piloto usa o mesmo modelo que gera os dados, então é um limite superior.
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas

@@ -2,8 +2,10 @@
 #'
 #' Draws species abundances directly from unimodal responses to an
 #' environmental gradient, without population dynamics, competition or
-#' dispersal. The expected abundance of species j at site i is
-#' `r_max[j] * exp(-(env[i] - optimum[j])^2 / (2 * sigma[j]^2))`, the Gaussian
+#' dispersal. The expected abundance of species \eqn{j} at site \eqn{i} is
+#' \eqn{r_j \exp(-(E_i - \theta_j)^2 / (2 \sigma_j^2))}{r_max[j] * exp(-(env[i] -
+#' optimum[j])^2 / (2 * sigma[j]^2))}, with \eqn{r_j} = `r_max`, \eqn{\theta_j}{theta_j} =
+#' `optimum`, \eqn{\sigma_j}{sigma_j} = `sigma` and \eqn{E_i} the environment, the Gaussian
 #' response of Dray & Legendre (2008), also used by Peres-Neto et al. (2012). By
 #' default, observed abundances are Poisson counts with that mean, as in
 #' Peres-Neto & Kembel (2015) and Duarte et al. (2016), where `r_max` lies between
@@ -52,6 +54,7 @@
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(20)
@@ -100,10 +103,11 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' Simulate presences and absences from logistic responses
 #'
 #' The two-gradient simulation of Appendix C of Peres-Neto et al. (2012), after
-#' Ives & Helmus (2011). The probability that species j occurs at site t along
-#' gradient x is `plogis(a[j] + b[j] * x[t])`, where `a` is a normal deviate and
-#' the slope `b` evolves on the tree. With several gradients, each with its own
-#' `a` and `b`, the probabilities multiply. A value drawn for each site from
+#' Ives & Helmus (2011). The probability that species \eqn{j} occurs at site \eqn{t} along
+#' gradient \eqn{x} is \eqn{\mathrm{logit}^{-1}(a_j + b_j x_t)}{plogis(a[j] + b[j] * x[t])},
+#' where \eqn{a} is a normal deviate and the slope \eqn{b} evolves on the tree. With several
+#' gradients, each with its own \eqn{a} and \eqn{b}, the probabilities multiply. A value drawn
+#' for each site from
 #' `reduction` then reduces them, which adds noise.
 #'
 #' Appendix C says that a species is present when a normally generated value is
@@ -139,6 +143,7 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' tr <- ape::compute.brlen(ape::stree(32, "balanced"), method = "Grafen")
@@ -148,7 +153,8 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
                               slope_sd = 1, lambda = 1, reduction = c(0.5, 1),
                               draw = c("uniform", "normal")) {
   draw <- match.arg(draw)
-  stopifnot(inherits(tree, "phylo"), intercept_sd >= 0, slope_sd >= 0,
+  check_tree(tree)
+  stopifnot(intercept_sd >= 0, slope_sd >= 0,
             length(reduction) == 2)
   grads <- if (is.list(gradients)) as.list(gradients) else list(gradients)
   stopifnot(all(vapply(grads, is.numeric, logical(1))),
@@ -201,6 +207,7 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #' Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects
 #' of spatial contingency and environmental filtering on metacommunity
 #' phylogenetics. *Ecology*, 93, S14--S30. \doi{10.1890/11-0494.1}
+#' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
 #' head(logistic_gradients(6))

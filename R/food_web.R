@@ -54,6 +54,7 @@
 #' @references McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton University
 #'   Press. \doi{10.23943/princeton/9780691088778.001.0001}
 #' @seealso [food_web_dynamics()]
+#' @family coevolution in food webs
 #' @examples
 #' p <- food_web_params(c0 = 10, d = 0.2)
 #' p$c0
@@ -111,7 +112,8 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #' it is eaten. Selection gradients are central differences of this fitness with respect to
 #' `z` at the mean, so the three attack forms share one implementation. Abundances and means
 #' are integrated together by a fourth-order Runge-Kutta method with a fixed step `dt`, which
-#' must be short against the fastest rate of the system (about a tenth of `1 / c0` or less):
+#' must be short against the fastest rate of the system (about a tenth of \eqn{1 / c_0}{1 / c0}
+#' or less):
 #' halving `dt` should leave the result unchanged, and a run whose state stops being finite
 #' or whose abundances overshoot below zero stops with an error.
 #'
@@ -178,6 +180,7 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #'   \doi{10.1086/691101}
 #' @seealso [food_web_params()]; [plot.food_web()] and [animate_food_web()] to draw the
 #'   results; [trait_rates()] for rates that vary among branches of a tree.
+#' @family coevolution in food webs
 #' @examples
 #' # a consumer invades a resource at its demographic and evolutionary equilibrium
 #' # (figure 3.2 of McPeek 2017)

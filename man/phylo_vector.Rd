@@ -140,3 +140,9 @@ ter Braak, C. J. F., Cormont, A., & Dray, S. (2012). Improved testing of species
 traits--environment relationships in the fourth-corner problem. \emph{Ecology}, 93,
 1525--1526. \doi{10.1890/12-0126.1}
 }
+\seealso{
+Other environment and space:
+\code{\link[=plot_trait_partition]{plot_trait_partition()}},
+\code{\link[=trait_partition]{trait_partition()}}
+}
+\concept{environment and space}

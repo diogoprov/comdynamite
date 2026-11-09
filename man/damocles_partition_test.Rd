@@ -70,16 +70,21 @@ change. The random partitions keep the number of parameters and the sizes of the
 this test asks instead whether the partition given is better placed than arbitrary ones:
 whether the regimes from a method of diversification, or a partition defined a priori,
 carry information on local colonisation and extinction beyond rate heterogeneity in general.
-\code{data-raw/validation_damocles.R} shows the difference between the two tests.
-VALIDATION_PLACEHOLDER
+\code{data-raw/validation_damocles.R} shows the difference between the two tests: with 40
+replicates of 10 communities on trees of 60 tips and a clade holding about a quarter of the
+edges, the chi-squared test rejected constant rates in 3 of 40 without an effect, in 40 of
+40 with colonisation faster in the clade, and in 29 of 40 with it faster in another clade of
+similar size; the test against random partitions rejected in 4, 37 and 0 of 40. The 4 of 40
+without an effect is within sampling error of 5\% but may be slightly liberal.
 
-The random partitions keep the sizes of the clades, so for a clade that covers a large part
-of the tree few placements differ much from it, many random partitions capture the same
-rates, and the test has little power: with the whales and the best BAMM configuration of
-BAMMtools (a regime on 69 of 172 edges) and colonisation three times faster in it, the
-chi-squared test rejected constant rates but the test against random partitions did not
-(\code{data-raw/damocles_bamm.R}). A non-significant result is then no evidence against the
-partition.
+Random partitions that nearly coincide with the one tested, such as the clade one edge
+above it, capture the same rates and leave the test without power: with \code{max_overlap = 1}
+the test against random partitions rejected in none of 40 replicates with the effect in the
+clade. The default \code{max_overlap = 0.25} keeps only placements elsewhere on the tree, so the
+test asks whether the partition beats partitions of the same complexity placed somewhere
+else. With the whales and the best BAMM configuration of BAMMtools (a regime on 69 of 172
+edges) and colonisation three times faster in it, both tests rejected constant rates (p =
+0.007 and 0.01; \code{data-raw/damocles_bamm.R}).
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
