@@ -20,6 +20,13 @@
 #    beta = 0 (type I error) or 1 (power), and mu = 1. The regimes are the crown clade of one
 #    of the two daughters of the root against the rest, with gamma 1 in both (type I error)
 #    or 3 in the clade and 0.5 elsewhere (power).
+# 7. damocles_partition_test() against the chi-squared test of damocles_lrt(), 40 replicates
+#    of 10 communities on trees of 60 tips, 49 random partitions each. The partition tested
+#    is the clade (with its stem) whose subtree holds about a quarter of the edges; colonisation
+#    is 1 everywhere (no effect), 3 in that clade and 0.5 elsewhere (effect in the clade), or 3
+#    in another clade of similar size placed at random and 0.5 elsewhere (effect elsewhere).
+#    Random partitions overlap the tested clade at most 0.25 (Jaccard), the default; a first
+#    run with max_overlap = 1 rejected in 0 of 40 replicates in every scenario.
 suppressMessages({
   devtools::load_all(".", quiet = TRUE)
   library(DAMOCLES)
@@ -174,6 +181,40 @@ cat("6. likelihood-ratio tests against constant rates, proportion of 100 with p 
     "(effect 0: type I error; 1: power)\n")
 print(lrt_settings)
 
+# 7. partition test ----------------------------------------------------------------------------
+# another clade like `tested` overlapping less than a quarter of it, or NULL if 100 draws fail
+elsewhere_clade <- function(tree, tested) {
+  for (attempt in seq_len(100)) {
+    other <- random_regimes(tree, tested)
+    if (mean(other[tested == "A"] == "A") < 0.25) return(other)
+  }
+  NULL
+}
+partition_one <- function(i, scenario) {
+  repeat {  # a new tree when no clade elsewhere fits (scenario "elsewhere" only)
+    tree <- treeshapesim::sim_tree_shape(60)
+    size <- damocles_subtree_size(tree)
+    edge <- which.min(abs(size - nrow(tree$edge) / 4))
+    tested <- clade_regimes(tree, list(A = tree$edge[edge, 2]), stem = TRUE)
+    true <- switch(scenario, none = NULL, clade = tested,
+                   elsewhere = elsewhere_clade(tree, tested))
+    if (scenario != "elsewhere" || !is.null(true)) break
+  }
+  gamma <- if (is.null(true)) 1 else ifelse(true == "A", 3, 0.5)
+  comm <- simulate_damocles(tree, gamma, 1, n = 10)
+  res <- damocles_partition_test(comm, tree, tested, n_rand = 49, vary = "gamma")
+  c(chisq = res$p_chisq < 0.05, random = res$p_random < 0.05)
+}
+partition <- t(vapply(c("none", "clade", "elsewhere"), function(scenario) {
+  out <- colMeans(do.call(rbind, parallel::mclapply(seq_len(40), partition_one,
+                                                    scenario = scenario, mc.cores = cores)))
+  message(format(Sys.time(), "%H:%M"), " section 7, scenario ", scenario, " done")
+  out
+}, numeric(2)))
+cat("7. proportion of 40 replicates rejecting at 0.05: chi-squared against constant rates and",
+    "test against random partitions\n")
+print(partition)
+
 saveRDS(list(loglik_diffs = diffs, ml = ml, sims = sims, shared = shared, sympatry = sympatry,
-             lrt = lrt_settings),
+             lrt = lrt_settings, partition = partition),
         "data-raw/validation_damocles.rds")
