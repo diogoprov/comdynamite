@@ -26,8 +26,9 @@
 # MODE: "lrt" (default) runs the likelihood-ratio tests, "partition" the partition tests; a
 # partition test costs about as much as 100 likelihood-ratio replicates, so the two run apart,
 # and its 49 random partitions are fitted on 24 cores (fixed, as the random streams depend on
-# the number of cores), with WORKERS %/% 24 replicates at a time, so that a replicate ends in
-# minutes and survives spot interruptions.
+# the number of cores), with WORKERS %/% 12 replicates at a time (twice as many processes as
+# cores, to fill the cores left idle while a replicate fits its constant and observed models
+# alone), so that a replicate ends in minutes and survives spot interruptions.
 # Each replicate is saved in JOBS (default data-raw/s1_jobs, ignored by git; files sXX_rYYYY
 # for the likelihood-ratio tests, pXX_rYYYY for the partition tests) with its own seed, and
 # skipped on a rerun, so a run cut short (a spot instance on AWS; data-raw/aws/) resumes.
@@ -117,7 +118,7 @@ invisible(parallel::mclapply(todo, function(j) {
   if (is.null(r$error)) r$error <- NA_character_
   saveRDS(cbind(s, rep = jobs$rep[j], r), jobs$file[j])
   NULL
-}, mc.cores = if (mode == "lrt") workers else max(1, workers %/% partition_cores),
+}, mc.cores = if (mode == "lrt") workers else max(1, workers %/% (partition_cores / 2)),
    mc.preschedule = FALSE))
 elapsed <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 done <- file.exists(jobs$file)
