@@ -3,7 +3,7 @@ title: "comdynamite: an R package to simulate and analyse metacommunities with t
 author:
   - name: Diogo B. Provete
     orcid: 0000-0002-0097-0651
-    email: dbprovete@gmail.com
+    email: diogo.provete@ufms.br
     corresponding: true
     affiliations:
       - name: Universidade Federal de Mato Grosso do Sul
