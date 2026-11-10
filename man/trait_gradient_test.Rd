@@ -171,7 +171,7 @@ Other trait variation among individuals:
 \code{\link[=trait_densities]{trait_densities()}},
 \code{\link[=trait_flex]{trait_flex()}},
 \code{\link[=trait_gradient]{trait_gradient()}},
-\code{\link[=trait_gradient_brms]{trait_gradient_brms()}},
+\code{\link[=trait_gradient_bayes]{trait_gradient_bayes()}},
 \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}},
 \code{\link[=trait_gradient_weights]{trait_gradient_weights()}},
 \code{\link[=trait_rarefaction]{trait_rarefaction()}},

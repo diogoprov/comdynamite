@@ -31,8 +31,8 @@ Imports:
 Suggests:
     adespatial,
     bayesplot,
-    brms,
     cati,
+    cmdstanr,
     future,
     future.apply,
     ggplot2 (>= 3.5.0),
@@ -48,8 +48,9 @@ Suggests:
     tibble,
     treeshapesim,
     vegan
-Additional_repositories: https://diogoprov.r-universe.dev
-Remotes: diogoprov/treeshapesim
+Additional_repositories: https://diogoprov.r-universe.dev, https://stan-dev.r-universe.dev
+Remotes: diogoprov/treeshapesim,
+    stan-dev/cmdstanr
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 URL: https://provetelab.org/comdynamite/,

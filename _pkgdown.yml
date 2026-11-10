@@ -107,8 +107,8 @@ reference:
   - trait_gradient_weights
   - trait_gradient_test
   - trait_gradient_phylo
-  - trait_gradient_brms
-  - pp_check.mc_trait_gradient_brms
+  - trait_gradient_bayes
+  - pp_check.mc_trait_gradient_bayes
   - plot.mc_trait_gradient
   - community_index
   - trait_flex

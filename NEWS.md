@@ -6,14 +6,15 @@
   simulations where the trait and the niches both evolve along the tree, the phylogenetic
   permutations bring the error from 14–23% (exchange among all species) to 2–11%; `"bm"` is
   exact there but fails for traits without phylogenetic structure.
-- `trait_gradient_brms()` fits with brms (in Suggests) a bivariate phylogenetic mixed model in
-  which the position of species along the gradient (beta) and their mean trait are latent
-  effects estimated from every site, and returns the phylogenetic share of beta, alpha and the
-  mean with credible intervals, the phylogenetic correlations, species values and convergence
-  diagnostics. Priors are explicit and documented; `ou_alpha` gives an OU structure with a
-  given strength; `pp_check()` works on the result. In simulations with about 40 species it
-  told strong phylogenetic signal from none but pulled intermediate signal (Pagel's lambda
-  0.5) toward 0, often with divergent transitions; see Limits before using it.
+- `trait_gradient_bayes()` fits in Stan (through cmdstanr, in Suggests) a bivariate
+  phylogenetic mixed model in which the position of species along the gradient (beta) and
+  their mean trait are latent effects estimated from every site. It returns the phylogenetic
+  share lambda of beta, alpha and the mean with credible intervals, the phylogenetic
+  correlations, species values and convergence diagnostics. Lambda has its own prior
+  (`lambda_prior`, uniform by default) instead of the U-shaped prior implied by independent
+  priors on two standard deviations; `ou_alpha` gives an OU structure with a given strength;
+  `pp_check()` works on the result. In simulations with about 40 species it recovered lambda
+  near 0 and 1, and estimated intermediate lambda low with wide intervals (see Limits).
 
 - `trait_gradient()` runs the trait-gradient analysis of Ackerly & Cornwell (2007): each
   species' trait splits into its position along the gradient of community trait means
