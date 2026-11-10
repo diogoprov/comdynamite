@@ -6,28 +6,76 @@ churn_sim <- function(seed = 1, n_steps = 120, record = TRUE) {
                          record_steps = if (record) seq_len(n_steps))
 }
 
+# the loop of mc_dynamics() before the colonisation history was recorded (no pool, initial or
+# record_steps), to check that recording it changes no abundance for the same seed
+old_dynamics <- function(r, alpha, dispersal, n_steps, seed_steps, seed_mean = 0.5,
+                         disp_matrix = NULL, extirpation = 0, immigration = "poisson") {
+  m <- nrow(r)
+  k_all <- ncol(r)
+  dispersal <- rep_len(dispersal, k_all)
+  extirpation <- rep_len(extirpation, k_all)
+  alive <- seq_len(k_all)
+  k <- k_all
+  p_em <- rep(dispersal, each = m)
+  p_ex <- rep(extirpation, each = m)
+  at <- t(alpha)
+  n <- matrix(stats::rpois(m * k, seed_mean), m, k)
+  last_seed <- max(c(0, seed_steps))
+  for (step in seq_len(n_steps)) {
+    if (step %in% seed_steps) n <- n + stats::rpois(m * k, seed_mean)
+    keep <- colSums(n) > 0
+    if (step > last_seed && !all(keep)) {
+      alive <- alive[keep]
+      n <- n[, keep, drop = FALSE]
+      at <- at[keep, keep, drop = FALSE]
+      k <- length(alive)
+      p_em <- rep(dispersal[alive], each = m)
+      p_ex <- rep(extirpation[alive], each = m)
+    }
+    if (k > 0) {
+      lam <- r[, alive, drop = FALSE] * n / (1 + n %*% at)
+      n <- matrix(stats::rpois(m * k, lam), m, k)
+      em <- matrix(stats::rbinom(m * k, n, p_em), m, k)
+      tot <- colSums(em)
+      if (any(tot > 0)) {
+        if (!is.null(disp_matrix) && immigration == "multinomial") {
+          n <- n - em + place_emigrants(em, disp_matrix)
+        } else if (!is.null(disp_matrix)) {
+          n <- n - em + matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
+        } else {
+          w <- sweep(-em, 2, tot, "+")
+          imm <- matrix(0L, m, k)
+          for (j in which(tot > 0)) imm[, j] <- stats::rmultinom(1, tot[j], w[, j])
+          n <- n - em + imm
+        }
+      }
+      if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
+    }
+  }
+  abundance <- matrix(0L, m, k_all)
+  abundance[, alive] <- n
+  abundance
+}
+
 test_that("recording the colonisation history leaves abundances as before", {
-  # sums from comdynamite 0.6.3.9000 before the history was recorded, same seeds
-  set.seed(1)
-  a <- simulate_metacommunity(landscape_implicit(12), species_traits(8),
-                              competition_matrix(8, "none"), n_steps = 60, seed_steps = 1:5,
-                              record_steps = c(10, 60))
-  expect_equal(sum(a$abundance), 2011)
-  set.seed(2)
-  b <- simulate_metacommunity(landscape_grid(5), species_traits(6),
-                              competition_matrix(6, "random"), n_steps = 80,
-                              extirpation = 0.01, dispersal = 0.05)
-  expect_equal(sum(b$abundance), 2387)
-  set.seed(3)
-  c3 <- simulate_metacommunity(landscape_grid(5), species_traits(6),
-                               competition_matrix(6, "random"), n_steps = 80,
-                               extirpation = 0.01, dispersal = 0.05,
-                               immigration = "multinomial")
-  expect_equal(sum(c3$abundance), 1701)
-  set.seed(4)
-  ind <- sample_individuals(a, n = 5, local_adaptation = 0.3, population_sd = 0.5,
-                            displacement = 1)
-  expect_equal(sum(ind$trait), 12729.16, tolerance = 1e-6)
+  compare <- function(seed, landscape, k, ...) {
+    set.seed(seed)
+    traits <- species_traits(k)
+    alpha <- competition_matrix(k, "random")
+    r <- unname(growth_rates(landscape$env, traits))
+    set.seed(seed + 100)
+    new <- mc_dynamics(r, alpha, n_steps = 80, disp_matrix = landscape$dispersal, ...)
+    set.seed(seed + 100)
+    old <- old_dynamics(r, alpha, n_steps = 80, disp_matrix = landscape$dispersal, ...)
+    expect_identical(unname(new$abundance), old)
+    expect_gt(sum(old), 0)
+  }
+  compare(1, landscape_implicit(12), 8, dispersal = 0.05, seed_steps = 1:5,
+          extirpation = 0.01)
+  compare(2, landscape_grid(5), 6, dispersal = 0.05, seed_steps = seq(10, 50, 10),
+          extirpation = 0.01)
+  compare(3, landscape_grid(5), 6, dispersal = 0.05, seed_steps = 1:5, extirpation = 0.01,
+          immigration = "multinomial")
 })
 
 test_that("sample_individuals() defaults ignore the history and draw nothing more", {
