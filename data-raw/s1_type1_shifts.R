@@ -24,7 +24,10 @@
 # with ratio 1 (shifts with no change in rate). REPS replicates per setting (default 500),
 # PARTITION replicates with the partition test (default 50), WORKERS processes (default 6).
 # MODE: "lrt" (default) runs the likelihood-ratio tests, "partition" the partition tests; a
-# partition test costs about as much as 100 likelihood-ratio replicates, so the two run apart.
+# partition test costs about as much as 100 likelihood-ratio replicates, so the two run apart,
+# and its 49 random partitions are fitted on 24 cores (fixed, as the random streams depend on
+# the number of cores), with WORKERS %/% 24 replicates at a time, so that a replicate ends in
+# minutes and survives spot interruptions.
 # Each replicate is saved in JOBS (default data-raw/s1_jobs, ignored by git; files sXX_rYYYY
 # for the likelihood-ratio tests, pXX_rYYYY for the partition tests) with its own seed, and
 # skipped on a rerun, so a run cut short (a spot instance on AWS; data-raw/aws/) resumes.
@@ -67,11 +70,13 @@ one_lrt <- function(setting) {
     shifted_tips = mean(sim$tip_regime > 0), shifted_edges = mean(sim$regimes != "0"),
     convergence = max(null$convergence, both$convergence, gamma$convergence, dr$convergence))
 }
+partition_cores <- 24
 one_partition <- function(setting) {
   d <- simulate(setting)
   test <- quiet(damocles_partition_test(d$comm, d$sim$tree, d$sim$regimes, n_rand = 49,
                                         vary = "both",
-                                        tolerance = if (setting$n_shifts > 1) 3 else 2))
+                                        tolerance = if (setting$n_shifts > 1) 3 else 2,
+                                        cores = partition_cores))
   data.frame(p_partition = test$p_random, p_partition_chisq = test$p_chisq,
              shifted_tips = mean(d$sim$tip_regime > 0))
 }
@@ -95,7 +100,8 @@ todo <- which(!file.exists(jobs$file))
 todo <- todo[order(-cost[todo])]
 started <- Sys.time()
 cat("S1 (", mode, "): ", length(todo), " of ", nrow(jobs), " replicates to run on ", workers,
-    " workers\n", sep = "")
+    " workers", if (mode == "partition") paste0(" (", partition_cores, " per replicate)"), "\n",
+    sep = "")
 columns <- if (mode == "lrt") {
   c("p_both", "p_gamma", "p_dr", "shifted_tips", "shifted_edges", "convergence")
 } else {
@@ -111,7 +117,8 @@ invisible(parallel::mclapply(todo, function(j) {
   if (is.null(r$error)) r$error <- NA_character_
   saveRDS(cbind(s, rep = jobs$rep[j], r), jobs$file[j])
   NULL
-}, mc.cores = workers, mc.preschedule = FALSE))
+}, mc.cores = if (mode == "lrt") workers else max(1, workers %/% partition_cores),
+   mc.preschedule = FALSE))
 elapsed <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 done <- file.exists(jobs$file)
 if (!all(done)) stop(sum(!done), " replicates missing in ", jobs_dir, call. = FALSE)
