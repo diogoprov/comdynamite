@@ -329,4 +329,5 @@ Leitura feita por subagente; três citações conferidas no texto extraído.
 
 Para os cenários 1, 2, 5 e 8 o pacote já tem quase tudo: `simulate_metacommunity()` dá a
 história de ocupação e `trait_rates(shift_edges = )` ou `trait_mk(edge_rates = )` aceitam taxas
-definidas por ramo. Falta a função que traduz a história da metacomunidade em taxas por ramo.
+definidas por ramo, e `history_rates()` e `turnover_rates()` traduzem a história da metacomunidade
+em taxas por ramo. Os resultados estão no artigo `vignettes/articles/rates-assembly.Rmd`.
