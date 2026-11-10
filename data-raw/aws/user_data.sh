@@ -16,6 +16,8 @@ WORKERS=__WORKERS__
 REPS=__REPS__
 MAX_HOURS=__MAX_HOURS__
 EXTRA_ENV="__EXTRA_ENV__"
+# "auto": all vCPUs but two, so the supervisor can fall back on smaller instance types
+[ "${WORKERS}" = "auto" ] && WORKERS=$(( $(nproc) - 2 ))
 # watchdog: terminate after MAX_HOURS whatever happens (shutdown = terminate)
 shutdown -h +$((MAX_HOURS * 60))
 WORK=/opt/comdynamite
