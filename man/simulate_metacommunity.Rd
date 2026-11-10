@@ -70,7 +70,8 @@ An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
 at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
 used, \code{env} when given, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a
-tree. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
+tree, the colonisation history (\code{arrival}, \code{propagule}, \code{immigrants}, \code{migrant_load};
+see the section Colonisation history) and \code{n_steps}. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
 \code{optimum_} column of traits per axis), while \code{\link[=summary_stats]{summary_stats()}} uses the first axis unless
 given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis.
 }
@@ -124,6 +125,33 @@ results with the same seed are the same as before they existed. A tree from else
 one simulated with gen3sis or a model of state-dependent diversification, enters through
 \code{\link[=species_traits]{species_traits()}}; drop extinct lineages first, since they have no distribution.
 }
+\section{Colonisation history}{
+
+The simulation records, for every population (a species at a site) present at the last step,
+when and how it was founded, for arrival-dependent trait deviations in
+\code{\link[=sample_individuals]{sample_individuals()}} (founder effects and monopolization):
+\itemize{
+\item \code{arrival}, the step at which the population was last founded: the first step at whose end
+it is present after being absent at the end of the previous one. Populations present at
+the end of step 1, from \code{initial} or the first draw of seeds, have arrival 1; a population
+lost to extirpation or competition and founded again gets the step of the new arrival.
+\item \code{propagule}, the number of founders: the seeds (or \code{initial} individuals) and immigrants
+that reached the site at the step of arrival.
+\item \code{immigrants}, the number of immigrants and seeds that reached the population after its
+arrival.
+\item \code{migrant_load}, the sum over the steps since arrival of the share of the population made
+up of newcomers: immigrants over the abundance after dispersal, plus seeds over the
+abundance before reproduction. Each newcomer carries the species mean, so under complete
+mixing a deviation of the population shrinks by a factor \eqn{1 - m_t \approx
+  e^{-m_t}}{1 - m_t ~ exp(-m_t)} at a step where newcomers make up a share \eqn{m_t}{m_t},
+and by about \eqn{e^{-L}}{exp(-L)} over the steps with migrant load \eqn{L}.
+}
+
+Each is a sites x species matrix, \code{NA} for populations absent at the last step. Recording
+them takes no random draws, so abundances are the same as without them for the same seed.
+\code{\link[=colonisation_history]{colonisation_history()}} returns them as a table.
+}
+
 \section{Article and archived code}{
 
 The article of Thompson et al. (2020) and the code archived with it
@@ -163,6 +191,7 @@ community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 }
 \seealso{
 Other simulate metacommunities:
+\code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},

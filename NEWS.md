@@ -1,5 +1,24 @@
 # comdynamite (development version)
 
+- `simulate_metacommunity()` and `mc_dynamics()` record the colonisation history of every
+  population present at the last step: `arrival` (the step of the last founding, reset by
+  recolonisation after local extinction; 1 for populations present from the start),
+  `propagule` (the number of founders), `immigrants` (immigrants and seeds since arrival) and
+  `migrant_load` (the summed share of newcomers in the population since arrival), all sites x
+  species matrices, plus `n_steps`. No random draws are added, so abundances are unchanged for
+  the same seed. `colonisation_history()` returns them as a table.
+- `sample_individuals()` has two arrival-dependent population deviations, both off by default
+  (which keeps earlier results for the same seed):
+  - `founder_sd`: founder effects, a deviation drawn at colonisation with standard deviation
+    `founder_sd / sqrt(founders)` that persists and is eroded by gene flow by
+    `exp(-gene_flow * migrant_load)`;
+  - `monopolization`: evolution-mediated priority effects (Urban & De Meester 2009), in which a
+    population closes the gap between the optimum of its species and the environment of its
+    site at a rate per step since its arrival, toward a balance between selection and
+    migration set by `gene_flow`. Early colonists end up better matched to their site than
+    late arrivals.
+  With either, the result gains an `arrival` column. Neither feeds back on the dynamics.
+
 - `nested_variance()` has a `crossed` argument for a second hierarchy crossed with `factors`,
   such as genus > species crossed with region > site, with a level for the interaction of the
   finest levels (the population, species by site; `interaction = TRUE`). When species occur at

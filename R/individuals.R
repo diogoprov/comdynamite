@@ -50,6 +50,54 @@
 #' that local adaptation would leave in samples of individuals, not its demographic
 #' consequences.
 #'
+#' @section Founder effects and monopolization:
+#' `population_sd` and `local_adaptation` treat every population of a species alike, whatever
+#' its history. Two further mechanisms make the mean of a population depend on when and how it
+#' was founded, from the colonisation history recorded by [simulate_metacommunity()] (see
+#' [colonisation_history()]). Both need the last step (`step = NULL`). For a population founded
+#' at step \eqn{a_{ij}}{a_ij} by \eqn{n_{ij}}{n_ij} individuals, with migrant load
+#' \eqn{L_{ij}}{L_ij} since then and \eqn{T} steps in the simulation:
+#'
+#' * **Founder effects** (`founder_sd`, \eqn{s_f}{s_f}): the population starts from the mean of
+#'   its founders, a deviation \eqn{f_{ij} \sim N(0, s_f^2 / n_{ij})}{f_ij ~ N(0, s_f^2 / n_ij)}
+#'   from the species mean, so few founders deviate more. `founder_sd` is thus the deviation
+#'   of a population founded by a single individual. The deviation persists, and gene flow
+#'   erodes it toward the species mean: it is multiplied by \eqn{g_{ij} = \exp(-\gamma
+#'   L_{ij})}{g_ij = exp(-gamma L_ij)}, where \eqn{\gamma}{gamma} is `gene_flow`.
+#' * **Monopolization** (`monopolization`, a rate \eqn{\rho}{rho} per step): after arrival the
+#'   population adapts to its site, closing a share \eqn{u_{ij}}{u_ij} of the gap between the
+#'   optimum of the species and the environment. Without gene flow, \eqn{u_{ij} = 1 -
+#'   \exp(-\rho t_{ij})}{u_ij = 1 - exp(-rho t_ij)}, where \eqn{t_{ij} = T - a_{ij}}{t_ij = T -
+#'   a_ij} is the age of the population. Newcomers pull it back toward the species mean, so
+#'   \eqn{du/dt = \rho (1 - u) - \gamma \bar m u}{du/dt = rho (1 - u) - gamma mbar u}, with
+#'   \eqn{\bar m = L_{ij} / t_{ij}}{mbar = L_ij / t_ij} the mean migrant load per step since
+#'   arrival, whose solution is \eqn{u_{ij} = \rho / (\rho + \gamma \bar m) [1 - \exp(-\rho
+#'   t_{ij} - \gamma L_{ij})]}{u_ij = rho / (rho + gamma mbar) (1 - exp(-rho t_ij - gamma
+#'   L_ij))}: adaptation tends to a balance between selection and migration instead of
+#'   reaching the environment. Early colonists have had longer to adapt and end up closer to
+#'   the environment of their site than late arrivals, which is the evolution-mediated
+#'   priority effect of the monopolization hypothesis (Urban & De Meester 2009; De Meester et
+#'   al. 2016). The gap between early and late colonists is largest when \eqn{1 / \rho}{1 /
+#'   rho} is close to the spread of arrival times; much faster adaptation brings every
+#'   population to the balance and erases it. It combines with
+#'   `local_adaptation` (\eqn{h_j}{h_j}) so that the share of the gap closed is
+#'   \eqn{h_j + (1 - h_j) u_{ij}}{h_j + (1 - h_j) u_ij}.
+#'
+#' The mean of the population is then \eqn{\theta_j + [h_j + (1 - h_j) u_{ij}] (E_i -
+#' \theta_j) + d_{ij} + g_{ij} f_{ij}}{theta_j + (h_j + (1 - h_j) u_ij) (E_i - theta_j) + d_ij
+#' + g_ij f_ij}, before character displacement. Use `population_sd` for deviations unrelated to
+#' history (drift at equilibrium, unmeasured microhabitat), `local_adaptation` for adaptation
+#' that every population reaches whatever its age, `founder_sd` for random deviations set at
+#' colonisation and kept by isolation, and `monopolization` for adaptation that depends on
+#' arrival order. The two arrival-dependent mechanisms leave different signatures: founder
+#' deviations are random in direction and largest in populations founded by few individuals
+#' and receiving few immigrants, while monopolization moves populations toward the environment
+#' of their site, more so the earlier they arrived. With `gene_flow = 0` neither is eroded.
+#' Erosion of founder deviations multiplies them by the product of the shares of residents over
+#' the steps, approximated by \eqn{\exp(-L)}{exp(-L)}; monopolization assumes newcomers arrived
+#' at a constant rate since arrival, \eqn{\bar m}{mbar}, rather than following the steps in
+#' which they actually came.
+#'
 #' @param x An `mc_sim` object from [simulate_metacommunity()].
 #' @param n Number of individuals measured in each population, or all of them when the
 #'   population is smaller. Ignored when `fraction` is given.
@@ -79,12 +127,25 @@
 #'   abundances at the last step.
 #' @param env Optional environment of each site at the sampled step. The default is the
 #'   environment of the landscape; give it for simulations with `env_time`.
+#' @param founder_sd Standard deviation of the founder deviation of a population founded by a
+#'   single individual (\eqn{s_f}{s_f} in the section Founder effects and monopolization); the
+#'   deviation of a population founded by \eqn{n} individuals has standard deviation
+#'   `founder_sd / sqrt(n)`. One value or one per species; 0 (the default) for none.
+#' @param monopolization Rate per time step (\eqn{\rho}{rho}) at which a population closes the
+#'   gap between the optimum of its species and the environment of its site after it arrives,
+#'   so that early colonists end up better adapted than late ones. One value or one per
+#'   species; 0 (the default) for none.
+#' @param gene_flow Rate (\eqn{\gamma}{gamma}) at which immigration erodes founder deviations
+#'   and adaptation since arrival, per unit of migrant load: 1 (the default) when every
+#'   newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
+#'   Has no effect without `founder_sd` or `monopolization`.
 #' @return Data frame with one row per individual and the columns `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
 #'   (of the site), `optimum` (of the species), `population_mean` (the expected value of the
 #'   population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
-#'   `trait`. Populations with no
-#'   individual measured are absent.
+#'   `trait`, and with `founder_sd` or `monopolization` also `arrival` (the step at which the
+#'   population was founded), before `trait`. Populations with no individual measured are
+#'   absent.
 #' @references Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof,
 #'   C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability
 #'   in community ecology. *Trends in Ecology & Evolution*, 27, 244--252.
@@ -93,7 +154,15 @@
 #'   Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what proportion
 #'   of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
 #'   \doi{10.1111/j.1654-109x.2007.tb00507.x}
-#' @seealso [tstats()] for the T-statistics; [subsample_individuals()] and
+#'
+#'   Urban, M. C., & De Meester, L. (2009). Community monopolization: local adaptation enhances
+#'   priority effects in an evolving metacommunity. *Proceedings of the Royal Society B:
+#'   Biological Sciences*, 276, 4129--4138. \doi{10.1098/rspb.2009.1382}
+#'
+#'   De Meester, L., Vanoverbeke, J., Kilsdonk, L. J., & Urban, M. C. (2016). Evolving
+#'   perspectives on monopolization and priority effects. *Trends in Ecology & Evolution*, 31,
+#'   136--146. \doi{10.1016/j.tree.2015.12.009}
+#' @seealso [colonisation_history()] for the arrival history; [tstats()] for the T-statistics; [subsample_individuals()] and
 #'   [trait_rarefaction()] for the same sampling schemes on real data.
 #' @family trait variation among individuals
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -104,11 +173,24 @@
 #'                               seed_steps = 1:5)
 #' ind <- sample_individuals(sim, n = 10, local_adaptation = 0.5, intraspecific_sd = 2)
 #' head(ind)
+#' # arrival-dependent deviations need colonisation after the start: extirpation and dispersal
+#' sim2 <- simulate_metacommunity(landscape_implicit(20), species_traits(tree),
+#'                                competition_matrix(tree, "phylo"), n_steps = 200,
+#'                                dispersal = 0.005, extirpation = 0.01)
+#' # founder effects: deviations set at colonisation, larger with few founders, eroded by
+#' # immigration
+#' founders <- sample_individuals(sim2, founder_sd = 2, intraspecific_sd = 0.5)
+#' # monopolization: early colonists close more of the gap to the environment of their site
+#' mono <- sample_individuals(sim2, monopolization = 0.02, intraspecific_sd = 0)
+#' closed <- (mono$population_mean - mono$optimum) / (mono$env - mono$optimum)
+#' early <- mono$arrival <= stats::median(mono$arrival)
+#' c(early = mean(closed[early]), late = mean(closed[!early]))
 #' @export
 sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
-                               cover = NULL, min_n = 1) {
+                               cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
+                               gene_flow = 1) {
   if (!inherits(x, "mc_sim")) {
     stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
   }
@@ -132,6 +214,16 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (any(pop_sd < 0) || any(ind_sd < 0)) {
     stop("`population_sd` and `intraspecific_sd` must not be negative", call. = FALSE)
   }
+  found_sd <- per_species(founder_sd, species, "founder_sd")
+  mono <- per_species(monopolization, species, "monopolization")
+  flow <- per_species(gene_flow, species, "gene_flow")
+  if (any(found_sd < 0) || any(mono < 0) || any(flow < 0)) {
+    stop("`founder_sd`, `monopolization` and `gene_flow` must not be negative", call. = FALSE)
+  }
+  historical <- any(found_sd > 0) || any(mono > 0)
+  if (historical) {
+    history <- arrival_terms(x, step, sites, species, mono, flow)
+  }
   if (is.null(fraction)) {
     stopifnot(length(n) == 1, n >= 1, n == round(n))
     measured <- pmin(abundance, n)
@@ -147,9 +239,19 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
   measured[measured < min_n] <- 0
   theta <- niche$traits[species, "optimum"]
-  pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) +
-    sweep(outer(env, theta, "-"), 2, h, "*") +
+  closed <- if (historical) {
+    matrix(h, length(sites), k, byrow = TRUE) + sweep(history$adapted, 2, 1 - h, "*")
+  } else {
+    matrix(h, length(sites), k, byrow = TRUE)
+  }
+  pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) + closed * outer(env, theta, "-") +
     sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, pop_sd, "*")
+  if (any(found_sd > 0)) {
+    founder <- sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, found_sd, "*")
+    founder <- founder * history$erosion / sqrt(history$propagule)
+    founder[is.na(founder)] <- 0
+    pop_mean <- pop_mean + founder
+  }
   stopifnot(is.numeric(displacement), length(displacement) == 1, displacement >= 0)
   if (displacement > 0) {
     width <- displacement_width %||% mean(niche$traits$sigma)
@@ -175,6 +277,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                     abundance = as.vector(abundance)[occupied][rows],
                     env = env[site_of][rows], optimum = theta[species_of][rows],
                     population_mean = pop_mean[occupied][rows], stringsAsFactors = FALSE)
+  if (historical) out$arrival <- history$arrival[occupied][rows]
   out$trait <- out$population_mean + stats::rnorm(nrow(out)) * ind_sd[species_of][rows]
   out
 }
@@ -539,6 +642,28 @@ displace <- function(target, abundance, strength, width, tol = 1e-8, max_iter = 
   warning("character displacement did not converge at a site; ",
           "a smaller `displacement` may help", call. = FALSE)
   mu
+}
+
+# the arrival step, founders, erosion by gene flow, exp(-gene_flow * migrant load), and share
+# of the gap to the environment closed since arrival, the solution of du/dt = rate (1 - u) -
+# gene_flow mbar u with mbar = load / age, of every population (sites x species, in the order
+# of `sites` and `species`)
+arrival_terms <- function(x, step, sites, species, rate, flow) {
+  check_history(x)
+  if (!is.null(step) && !identical(as.numeric(step), as.numeric(x$n_steps))) {
+    stop("`founder_sd` and `monopolization` need the last step (`step = NULL`): the ",
+         "colonisation history is recorded at the end of the simulation only", call. = FALSE)
+  }
+  arrival <- x$arrival[sites, species, drop = FALSE]
+  erosion <- exp(-sweep(x$migrant_load[sites, species, drop = FALSE], 2, flow, "*"))
+  age <- x$n_steps - arrival
+  selection <- sweep(age, 2, rate, "*")
+  pull <- sweep(x$migrant_load[sites, species, drop = FALSE], 2, flow, "*")
+  # rate / (rate + gene_flow mbar) = selection / (selection + pull), both times the age
+  adapted <- selection / (selection + pull) * (1 - exp(-selection - pull))
+  adapted[is.na(adapted)] <- 0
+  list(arrival = arrival, propagule = x$propagule[sites, species, drop = FALSE],
+       erosion = erosion, adapted = adapted)
 }
 
 sampled_abundance <- function(x, step) {

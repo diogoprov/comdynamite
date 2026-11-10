@@ -58,7 +58,8 @@ only where \code{pool} allows.}
 which conserves them. Spatially implicit landscapes are always multinomial.}
 }
 \value{
-List with \code{abundance} and \code{history}, as in
+List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},
+\code{propagule}, \code{immigrants}, \code{migrant_load}) and \code{n_steps}, as in
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, and \code{pool} as a logical matrix, or \code{NULL} without it.
 }
 \description{
@@ -73,6 +74,7 @@ mean(out$abundance)
 }
 \seealso{
 Other simulate metacommunities:
+\code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},

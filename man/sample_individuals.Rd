@@ -16,7 +16,10 @@ sample_individuals(
   step = NULL,
   env = NULL,
   cover = NULL,
-  min_n = 1
+  min_n = 1,
+  founder_sd = 0,
+  monopolization = 0,
+  gene_flow = 1
 )
 }
 \arguments{
@@ -60,14 +63,30 @@ abundance (Pakeman & Quested 2007). \code{NULL} (the default) measures every spe
 
 \item{min_n}{Populations with fewer individuals measured than \code{min_n} are left out, as when
 populations with a single individual are removed before computing T-statistics.}
+
+\item{founder_sd}{Standard deviation of the founder deviation of a population founded by a
+single individual (\eqn{s_f}{s_f} in the section Founder effects and monopolization); the
+deviation of a population founded by \eqn{n} individuals has standard deviation
+\code{founder_sd / sqrt(n)}. One value or one per species; 0 (the default) for none.}
+
+\item{monopolization}{Rate per time step (\eqn{\rho}{rho}) at which a population closes the
+gap between the optimum of its species and the environment of its site after it arrives,
+so that early colonists end up better adapted than late ones. One value or one per
+species; 0 (the default) for none.}
+
+\item{gene_flow}{Rate (\eqn{\gamma}{gamma}) at which immigration erodes founder deviations
+and adaptation since arrival, per unit of migrant load: 1 (the default) when every
+newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
+Has no effect without \code{founder_sd} or \code{monopolization}.}
 }
 \value{
 Data frame with one row per individual and the columns \code{site}, \code{species},
 \code{individual} (its number within the population), \code{abundance} (of the population), \code{env}
 (of the site), \code{optimum} (of the species), \code{population_mean} (the expected value of the
 population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
-\code{trait}. Populations with no
-individual measured are absent.
+\code{trait}, and with \code{founder_sd} or \code{monopolization} also \code{arrival} (the step at which the
+population was founded), before \code{trait}. Populations with no individual measured are
+absent.
 }
 \description{
 Draws individuals from the populations of a simulated metacommunity and gives each one a
@@ -121,6 +140,57 @@ dynamics: abundances are those of the species means. The function describes the 
 that local adaptation would leave in samples of individuals, not its demographic
 consequences.
 }
+\section{Founder effects and monopolization}{
+
+\code{population_sd} and \code{local_adaptation} treat every population of a species alike, whatever
+its history. Two further mechanisms make the mean of a population depend on when and how it
+was founded, from the colonisation history recorded by \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} (see
+\code{\link[=colonisation_history]{colonisation_history()}}). Both need the last step (\code{step = NULL}). For a population founded
+at step \eqn{a_{ij}}{a_ij} by \eqn{n_{ij}}{n_ij} individuals, with migrant load
+\eqn{L_{ij}}{L_ij} since then and \eqn{T} steps in the simulation:
+\itemize{
+\item \strong{Founder effects} (\code{founder_sd}, \eqn{s_f}{s_f}): the population starts from the mean of
+its founders, a deviation \eqn{f_{ij} \sim N(0, s_f^2 / n_{ij})}{f_ij ~ N(0, s_f^2 / n_ij)}
+from the species mean, so few founders deviate more. \code{founder_sd} is thus the deviation
+of a population founded by a single individual. The deviation persists, and gene flow
+erodes it toward the species mean: it is multiplied by \eqn{g_{ij} = \exp(-\gamma
+  L_{ij})}{g_ij = exp(-gamma L_ij)}, where \eqn{\gamma}{gamma} is \code{gene_flow}.
+\item \strong{Monopolization} (\code{monopolization}, a rate \eqn{\rho}{rho} per step): after arrival the
+population adapts to its site, closing a share \eqn{u_{ij}}{u_ij} of the gap between the
+optimum of the species and the environment. Without gene flow, \eqn{u_{ij} = 1 -
+  \exp(-\rho t_{ij})}{u_ij = 1 - exp(-rho t_ij)}, where \eqn{t_{ij} = T - a_{ij}}{t_ij = T -
+  a_ij} is the age of the population. Newcomers pull it back toward the species mean, so
+\eqn{du/dt = \rho (1 - u) - \gamma \bar m u}{du/dt = rho (1 - u) - gamma mbar u}, with
+\eqn{\bar m = L_{ij} / t_{ij}}{mbar = L_ij / t_ij} the mean migrant load per step since
+arrival, whose solution is \eqn{u_{ij} = \rho / (\rho + \gamma \bar m) [1 - \exp(-\rho
+  t_{ij} - \gamma L_{ij})]}{u_ij = rho / (rho + gamma mbar) (1 - exp(-rho t_ij - gamma
+  L_ij))}: adaptation tends to a balance between selection and migration instead of
+reaching the environment. Early colonists have had longer to adapt and end up closer to
+the environment of their site than late arrivals, which is the evolution-mediated
+priority effect of the monopolization hypothesis (Urban & De Meester 2009; De Meester et
+al. 2016). The gap between early and late colonists is largest when \eqn{1 / \rho}{1 /
+  rho} is close to the spread of arrival times; much faster adaptation brings every
+population to the balance and erases it. It combines with
+\code{local_adaptation} (\eqn{h_j}{h_j}) so that the share of the gap closed is
+\eqn{h_j + (1 - h_j) u_{ij}}{h_j + (1 - h_j) u_ij}.
+}
+
+The mean of the population is then \eqn{\theta_j + [h_j + (1 - h_j) u_{ij}] (E_i -
+\theta_j) + d_{ij} + g_{ij} f_{ij}}{theta_j + (h_j + (1 - h_j) u_ij) (E_i - theta_j) + d_ij
++ g_ij f_ij}, before character displacement. Use \code{population_sd} for deviations unrelated to
+history (drift at equilibrium, unmeasured microhabitat), \code{local_adaptation} for adaptation
+that every population reaches whatever its age, \code{founder_sd} for random deviations set at
+colonisation and kept by isolation, and \code{monopolization} for adaptation that depends on
+arrival order. The two arrival-dependent mechanisms leave different signatures: founder
+deviations are random in direction and largest in populations founded by few individuals
+and receiving few immigrants, while monopolization moves populations toward the environment
+of their site, more so the earlier they arrived. With \code{gene_flow = 0} neither is eroded.
+Erosion of founder deviations multiplies them by the product of the shares of residents over
+the steps, approximated by \eqn{\exp(-L)}{exp(-L)}; monopolization assumes newcomers arrived
+at a constant rate since arrival, \eqn{\bar m}{mbar}, rather than following the steps in
+which they actually came.
+}
+
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
 set.seed(1)
@@ -130,6 +200,18 @@ sim <- simulate_metacommunity(landscape_implicit(10), species_traits(tree),
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 10, local_adaptation = 0.5, intraspecific_sd = 2)
 head(ind)
+# arrival-dependent deviations need colonisation after the start: extirpation and dispersal
+sim2 <- simulate_metacommunity(landscape_implicit(20), species_traits(tree),
+                               competition_matrix(tree, "phylo"), n_steps = 200,
+                               dispersal = 0.005, extirpation = 0.01)
+# founder effects: deviations set at colonisation, larger with few founders, eroded by
+# immigration
+founders <- sample_individuals(sim2, founder_sd = 2, intraspecific_sd = 0.5)
+# monopolization: early colonists close more of the gap to the environment of their site
+mono <- sample_individuals(sim2, monopolization = 0.02, intraspecific_sd = 0)
+closed <- (mono$population_mean - mono$optimum) / (mono$env - mono$optimum)
+early <- mono$arrival <= stats::median(mono$arrival)
+c(early = mean(closed[early]), late = mean(closed[!early]))
 \dontshow{\}) # examplesIf}
 }
 \references{
@@ -141,9 +223,17 @@ in community ecology. \emph{Trends in Ecology & Evolution}, 27, 244--252.
 Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what proportion
 of the species need to be measured? \emph{Applied Vegetation Science}, 10, 91--96.
 \doi{10.1111/j.1654-109x.2007.tb00507.x}
+
+Urban, M. C., & De Meester, L. (2009). Community monopolization: local adaptation enhances
+priority effects in an evolving metacommunity. \emph{Proceedings of the Royal Society B:
+Biological Sciences}, 276, 4129--4138. \doi{10.1098/rspb.2009.1382}
+
+De Meester, L., Vanoverbeke, J., Kilsdonk, L. J., & Urban, M. C. (2016). Evolving
+perspectives on monopolization and priority effects. \emph{Trends in Ecology & Evolution}, 31,
+136--146. \doi{10.1016/j.tree.2015.12.009}
 }
 \seealso{
-\code{\link[=tstats]{tstats()}} for the T-statistics; \code{\link[=subsample_individuals]{subsample_individuals()}} and
+\code{\link[=colonisation_history]{colonisation_history()}} for the arrival history; \code{\link[=tstats]{tstats()}} for the T-statistics; \code{\link[=subsample_individuals]{subsample_individuals()}} and
 \code{\link[=trait_rarefaction]{trait_rarefaction()}} for the same sampling schemes on real data.
 
 Other trait variation among individuals:

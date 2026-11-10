@@ -46,6 +46,30 @@
 #' one simulated with gen3sis or a model of state-dependent diversification, enters through
 #' [species_traits()]; drop extinct lineages first, since they have no distribution.
 #'
+#' @section Colonisation history:
+#' The simulation records, for every population (a species at a site) present at the last step,
+#' when and how it was founded, for arrival-dependent trait deviations in
+#' [sample_individuals()] (founder effects and monopolization):
+#'
+#' * `arrival`, the step at which the population was last founded: the first step at whose end
+#'   it is present after being absent at the end of the previous one. Populations present at
+#'   the end of step 1, from `initial` or the first draw of seeds, have arrival 1; a population
+#'   lost to extirpation or competition and founded again gets the step of the new arrival.
+#' * `propagule`, the number of founders: the seeds (or `initial` individuals) and immigrants
+#'   that reached the site at the step of arrival.
+#' * `immigrants`, the number of immigrants and seeds that reached the population after its
+#'   arrival.
+#' * `migrant_load`, the sum over the steps since arrival of the share of the population made
+#'   up of newcomers: immigrants over the abundance after dispersal, plus seeds over the
+#'   abundance before reproduction. Each newcomer carries the species mean, so under complete
+#'   mixing a deviation of the population shrinks by a factor \eqn{1 - m_t \approx
+#'   e^{-m_t}}{1 - m_t ~ exp(-m_t)} at a step where newcomers make up a share \eqn{m_t}{m_t},
+#'   and by about \eqn{e^{-L}}{exp(-L)} over the steps with migrant load \eqn{L}.
+#'
+#' Each is a sites x species matrix, `NA` for populations absent at the last step. Recording
+#' them takes no random draws, so abundances are the same as without them for the same seed.
+#' [colonisation_history()] returns them as a table.
+#'
 #' @section Article and archived code:
 #' The article of Thompson et al. (2020) and the code archived with it
 #' (\doi{10.5281/zenodo.3708350}) differ in points that change results. Beta is
@@ -90,7 +114,8 @@
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
 #'   used, `env` when given, and `tree` when the traits came from [species_traits()] with a
-#'   tree. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
+#'   tree, the colonisation history (`arrival`, `propagule`, `immigrants`, `migrant_load`;
+#'   see the section Colonisation history) and `n_steps`. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
 #'   `optimum_` column of traits per axis), while [summary_stats()] uses the first axis unless
 #'   given `trait` and `env`, and [sample_individuals()] needs a single axis.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
@@ -181,7 +206,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
 #' @param disp_matrix Row-stochastic dispersal matrix (sites x sites), or
 #'   `NULL` for uniform dispersal.
 #' @param sites,species Optional names of sites and species.
-#' @return List with `abundance` and `history`, as in
+#' @return List with `abundance`, `history`, the colonisation history (`arrival`,
+#'   `propagule`, `immigrants`, `migrant_load`) and `n_steps`, as in
 #'   [simulate_metacommunity()], and `pool` as a logical matrix, or `NULL` without it.
 #' @family simulate metacommunities
 #' @examples
@@ -239,10 +265,20 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
   if (!is.null(pool)) n[!pool] <- 0L
   last_seed <- max(c(0, seed_steps))
+  # colonisation history of every population (sites x all species): step of the last arrival,
+  # number of founders, and immigrants and migrant load since then; no random draws, so seeds
+  # give the same abundances as before
+  arrival <- matrix(NA_integer_, m, k_all)
+  propagule <- matrix(NA_integer_, m, k_all)
+  immigrants <- matrix(0, m, k_all)
+  load <- matrix(0, m, k_all)
+  present <- matrix(FALSE, m, k_all)
   for (step in seq_len(n_steps)) {
+    added <- 0L
     if (step %in% seed_steps) {
       seeds <- stats::rpois(m * k, seed_mean)
-      n <- n + if (is.null(inside)) seeds else seeds * inside
+      added <- if (is.null(inside)) seeds else seeds * inside
+      n <- n + added
     }
     keep <- colSums(n) > 0
     if (step > last_seed && !all(keep)) {
@@ -256,32 +292,83 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
     }
     if (k > 0) {
       r_now <- r_fun(step)[, alive, drop = FALSE]
+      start <- n
       lam <- r_now * n / (1 + n %*% at)
       n <- matrix(stats::rpois(m * k, lam), m, k)
       em <- matrix(stats::rbinom(m * k, n, p_em), m, k)
       tot <- colSums(em)
+      imm <- 0L
       if (any(tot > 0)) {
         if (!is.null(disp_matrix) && immigration == "multinomial") {
-          n <- n - em + place_emigrants(em, disp_matrix)
+          imm <- place_emigrants(em, disp_matrix)
         } else if (!is.null(disp_matrix)) {
-          n <- n - em + matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
+          imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
         } else {
           w <- sweep(-em, 2, tot, "+")
           imm <- matrix(0L, m, k)
           for (j in which(tot > 0)) imm[, j] <- stats::rmultinom(1, tot[j], w[, j])
-          n <- n - em + imm
         }
+        n <- n - em + imm
       }
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
       if (!is.null(inside)) n[!inside] <- 0L
+      was <- present[, alive, drop = FALSE]
+      now <- n > 0
+      new_pop <- now & !was
+      stay <- now & was
+      if (any(new_pop)) {
+        cols <- arrival[, alive, drop = FALSE]
+        cols[new_pop] <- step
+        arrival[, alive] <- cols
+        # a population absent at the end of the last step starts from its seeds (or `initial`)
+        # and the immigrants of this step
+        cols <- propagule[, alive, drop = FALSE]
+        cols[new_pop] <- as.integer((start + imm)[new_pop])
+        propagule[, alive] <- cols
+        cols <- immigrants[, alive, drop = FALSE]
+        cols[new_pop] <- 0
+        immigrants[, alive] <- cols
+        cols <- load[, alive, drop = FALSE]
+        cols[new_pop] <- 0
+        load[, alive] <- cols
+      }
+      if (any(stay) && (any(imm > 0) || any(added > 0))) {
+        # immigrants and seeds into populations already there: their number, and the share of
+        # the population they make up, summed over steps (the migrant load)
+        imm <- imm + matrix(0L, m, k)
+        added <- added + matrix(0L, m, k)
+        arriving <- (imm + added)[stay]
+        share <- imm[stay] / n[stay] + added[stay] / start[stay]
+        cols <- immigrants[, alive, drop = FALSE]
+        cols[stay] <- cols[stay] + arriving
+        immigrants[, alive] <- cols
+        cols <- load[, alive, drop = FALSE]
+        cols[stay] <- cols[stay] + share
+        load[, alive] <- cols
+      }
+      lost <- was & !now
+      if (any(lost)) {
+        cols <- arrival[, alive, drop = FALSE]
+        cols[lost] <- NA_integer_
+        arrival[, alive] <- cols
+      }
+      present[, alive] <- now
     }
     if (!is.null(history) && step %in% record_steps)
       history[, alive, match(step, record_steps)] <- n
   }
   abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
   abundance[, alive] <- n
-  list(abundance = abundance, history = history, pool = pool)
+  absent <- abundance == 0
+  arrival[absent] <- NA_integer_
+  propagule[absent] <- NA_integer_
+  immigrants[absent] <- NA
+  load[absent] <- NA
+  labels <- list(sites, species)
+  dimnames(arrival) <- dimnames(propagule) <- dimnames(immigrants) <- dimnames(load) <- labels
+  list(abundance = abundance, history = history, pool = pool, arrival = arrival,
+       propagule = propagule, immigrants = immigrants, migrant_load = load, n_steps = n_steps)
 }
 
 # immigrants when the emigrants of each species at each site go to the other sites
@@ -331,6 +418,53 @@ site_species <- function(x, sites, species, name) {
   out <- x[rows, species, drop = FALSE]
   dimnames(out) <- list(sites, species)
   out
+}
+
+#' Colonisation history of a simulated metacommunity
+#'
+#' The arrival step, number of founders, immigrants since arrival and migrant load of every
+#' population present at the last step of a simulation, recorded by
+#' [simulate_metacommunity()] (see its section Colonisation history).
+#'
+#' @param x An `mc_sim` object from [simulate_metacommunity()].
+#' @return Data frame with one row per population present at the last step and the columns
+#'   `site`, `species`, `abundance`, `arrival`, `age` (`n_steps - arrival`), `propagule`,
+#'   `immigrants` and `migrant_load`, ordered by site and species.
+#' @family simulate metacommunities
+#' @seealso [sample_individuals()], whose `founder_sd` and `monopolization` use this history.
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(10)
+#' sim <- simulate_metacommunity(landscape_implicit(10), species_traits(tree),
+#'                               competition_matrix(tree, "phylo"), n_steps = 100,
+#'                               extirpation = 0.01)
+#' head(colonisation_history(sim))
+#' @export
+colonisation_history <- function(x) {
+  check_history(x)
+  a <- x$abundance
+  present <- which(a > 0)
+  m <- nrow(a)
+  site_of <- (present - 1) %% m + 1
+  species_of <- (present - 1) %/% m + 1
+  by_site <- order(site_of, species_of)
+  present <- present[by_site]
+  data.frame(site = rownames(a)[site_of[by_site]], species = colnames(a)[species_of[by_site]],
+             abundance = a[present], arrival = x$arrival[present],
+             age = x$n_steps - x$arrival[present], propagule = x$propagule[present],
+             immigrants = x$immigrants[present], migrant_load = x$migrant_load[present],
+             stringsAsFactors = FALSE)
+}
+
+check_history <- function(x) {
+  if (!inherits(x, "mc_sim")) {
+    stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+  }
+  if (is.null(x$arrival)) {
+    stop("`x` has no colonisation history: it comes from simulate_metacommunity() only, ",
+         "and simulations made before comdynamite 0.6.3.9000 must be run again", call. = FALSE)
+  }
+  invisible(x)
 }
 
 #' @export
