@@ -511,14 +511,11 @@ cobertura medida em dados simulados.
 
 ## v0.7.0: evolução de traits e modelos nulos
 
-Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–55), com a
-vignette tutorial de taxas por ramo (PR 42), os substitutos do cati e as ferramentas de traits
-de indivíduos (PRs 45, 47 e 49), as equações em LaTeX no site (PRs 46 e 48), a auditoria dos
-traits multivariados (PR 50) e a rodada de UX (PRs 52, 54 e 55). Abertos: o PR B do DAMOCLES
-(PR 56) e as opções novas de `population_shifts()` (PR 53). Faltam o artigo de taxas por ramo
-e os experimentos da ponte Leibold–Januario (a previsão do cenário 10 foi contrariada pela
-demonstração das estatísticas T; ver o item de indivíduos; o desenho vai ao usuário antes de
-rodar).
+Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–65), incluindo o PR B do
+DAMOCLES (PR 56), as opções novas de `population_shifts()` (PR 53), o modelo Stan de
+`trait_gradient_bayes()` (PR 64) e os efeitos de fundador (PR 65). O artigo de taxas por ramo
+(`vignettes/articles/rates-assembly.Rmd`) fecha a versão como estudo de recuperação; o teste
+causal (montagem → taxas de evolução de traits) fica para o bloco eco-evolutivo.
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
@@ -549,7 +546,7 @@ pacotes de referência em vez de reimplementá-los.
       teto 0,24–0,35); o BM com regimes do mvMORPH recupera a razão entre taxas (medianas 1,02,
       2,12 e 5,46 para 1, 2 e 5); a taxa do RRphylo nas pontas acompanha pouco a troca de
       parceiros (rho mediano 0,10).
-- [ ] Artigo (vignette) sobre taxas por ramo. Citar obrigatoriamente Hubert et al. (2015),
+- [x] Artigo (vignette) sobre taxas por ramo. Citar obrigatoriamente Hubert et al. (2015),
       modelos de especiação em metacomunidades, e Januario et al. (2025), persistência
       metapopulacional contra taxas de especiação nas pontas (sinal filogenético, mas sem
       relação com a especiação). Ponte: os dois tratam de taxas de diversificação; aqui as
@@ -560,7 +557,14 @@ pacotes de referência em vez de reimplementá-los.
       Ecology*. Notas de leitura e cenários de simulação em `dev/notas-artigo-taxas.md`.
       Incluir os resultados da validação e o limite de identificabilidade (uma realização por
       ramo).
-- [ ] Ponte Leibold–Januario como eixo do artigo (detalhes em `dev/notas-artigo-taxas.md`).
+      Feito em 2026-11-09: `vignettes/articles/rates-assembly.Rmd`, artigo do pkgdown, como
+      estudo de recuperação (sinais plantados, não emergentes), com resumos em
+      `data-raw/vignette_rates_assembly.R`. Resultados: identificabilidade das taxas por ramo;
+      rastro fraco da troca de parceiros nas taxas entre espécies (rho 0,03–0,17); sinal claro
+      entre populações; compensação nas estatísticas T com o nulo restrito à espécie;
+      identificabilidade de c governada pela largura do kernel; poder do teste de Januario et
+      al. (2025).
+- [x] Ponte Leibold–Januario como eixo do artigo (detalhes em `dev/notas-artigo-taxas.md`).
       Leibold et al. (2022) apontam que os modelos macroecológicos não incorporam quanto a
       adaptação local e a montagem alteram especiação e extinção e, por elas, as filogenias.
       Januario et al. (2025) testaram uma versão disso, a persistência metapopulacional
@@ -579,6 +583,12 @@ pacotes de referência em vez de reimplementá-los.
       chegada, as três taxas relativas da Fig. 1 de Leibold et al. (2022). Cuidado: Leibold et
       al. e Urban et al. falam de escala ecológica; Januario et al. de taxas de especiação, e
       nós de taxas de evolução de traits. O artigo deve dizer isso.
+      Experimentos em `data-raw/bridge_experiments.R`, `bridge_narrow.R`,
+      `bridge_bootstrap.R`, `januario_power.R` e `januario_essim.R` (notas em
+      `dev/notas-januario.md`). Com clados completamente amostrados (eles usaram 189 espécies esparsas de uma
+      árvore grande, não testado aqui), o PGLS de log DR sobre persistência rejeita no nível do seu
+      tamanho (0,04–0,10) mesmo com elo causal forte, enquanto o ES-sim (Harvey & Rabosky 2018)
+      sobre τ detecta 0,59, 0,89 e 0,98 para b = 0,25, 0,5 e 1, com tamanho 0,015.
 - [x] `food_web_dynamics()`: modelo eco-evolutivo de três níveis tróficos do capítulo 3 de
       McPeek (2017), eq. 3.7–3.17 e 3.20–3.21, reimplementado das equações publicadas (o
       código MATLAB do autor não tem licença declarada; em novembro de 2026 estava fora do ar em
@@ -842,7 +852,7 @@ Analisar, chamando os pacotes de referência sobre a estrutura comum:
 - [ ] Sinal filogenético em traits discretos: Rao decomposto nos nós (`adiv`, `ade4`).
 - [ ] Diversificação por região: GeoHiSSE (Caetano et al. 2018), no lugar do GeoSSE
       usado no artigo, e testes baseados nas pontas, como FiSSE (Rabosky & Goldberg
-      2017) e ES-sim (Harvey & Rabosky 2017).
+      2017) e ES-sim (Harvey & Rabosky 2018).
 - [ ] Curvas de linhagens no tempo por região (`ape`).
 - [ ] DEC (BioGeoBEARS; Matzke 2014) e tempo de colonização por idades crown e stem.
 - [ ] MPD, MNTD e análogos funcionais, com o pool definido em três extensões: só uma

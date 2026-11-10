@@ -150,7 +150,7 @@ one_replicate <- function(b, link = c("extirpation", "dispersal"), window = 30, 
                             p_dr_eps = p_dr[["eps"]], p_dr_tau = p_dr[["tau"]],
                             p_true_eps = p_true[["eps"]], p_true_tau = p_true[["tau"]]),
        clock = vapply(clock, as.numeric, numeric(1), units = "secs"),
-       data = d)
+       data = d, tree = tr)
 }
 
 RNGkind("L'Ecuyer-CMRG")
