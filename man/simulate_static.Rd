@@ -93,6 +93,7 @@ phylogenetics. \emph{Ecology}, 93, S14--S30. \doi{10.1890/11-0494.1}
 }
 \seealso{
 Other simulate metacommunities:
+\code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
