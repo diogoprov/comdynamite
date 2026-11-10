@@ -50,3 +50,10 @@ test_that("faster regimes have more speciation per unit of branch length", {
   }, numeric(1))
   expect_gt(stats::median(ratios), 2)
 })
+
+test_that("sim_shift_tree() stops when no tree meets the conditions", {
+  set.seed(5)
+  # Two regimes cannot both hold 60% of the tips.
+  expect_error(sim_shift_tree(20, n_shifts = 1, min_fraction = 0.6, max_tries = 3),
+               "no tree met the conditions in 3 tries")
+})
