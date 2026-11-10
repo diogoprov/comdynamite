@@ -59,7 +59,7 @@ two hierarchies crossed with each other (factors and crossed), such as a spatial
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Variance components of traits across nested or crossed levels</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.7.0/R/trait_variation.R" class="external-link"><code>R/trait_variation.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/trait_variation.R" class="external-link"><code>R/trait_variation.R</code></a></small>
       <div class="d-none name"><code>nested_variance.Rd</code></div>
     </div>
 
@@ -189,8 +189,8 @@ ecological scales? A case for trait-based ecology. <em>Ecology Letters</em>, 13,
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">nested_variance</span><span class="op">(</span><span class="va">d</span>, <span class="st">"trait"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"region"</span>, <span class="st">"site"</span>, <span class="st">"population"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>        level        trait</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1     region 2.551909e-08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       site 3.509259e-17</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     region 1.741575e-08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       site 1.125857e-17</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 population 9.862820e-01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4     within 1.371800e-02</span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"ggplot2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
