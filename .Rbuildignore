@@ -9,3 +9,4 @@
 ^dev$
 ^CITATION\.cff$
 ^vignettes/articles$
+^paper$
