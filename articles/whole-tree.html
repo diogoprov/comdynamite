@@ -146,13 +146,15 @@ other along the sites when composition follows the environment.</p>
 <div class="section level2">
 <h2 id="principal-coordinates-of-phylogenetic-structure">Principal coordinates of phylogenetic structure<a class="anchor" aria-label="anchor" href="#principal-coordinates-of-phylogenetic-structure"></a>
 </h2>
-<p><code><a href="../reference/pcps_test.html">pcps_test()</a></code> is the method of the package PCPS. Each
-species shares its relative abundance with its relatives, in proportion
-to their similarity on the tree, and the principal coordinates of the
-resulting matrix order sites by phylogenetic composition. The test
-covers all the dissimilarity and, separately, each axis in
-<code>axes</code>, whose <code>share</code> is its part of the
-variation.</p>
+<p><code><a href="../reference/pcps_test.html">pcps_test()</a></code> computes the principal coordinates of
+phylogenetic structure (Duarte 2011; Duarte et al. 2016), the method of
+the package PCPS (Debastiani &amp; Duarte 2014). By phylogenetic fuzzy
+weighting (Pillar &amp; Duarte 2010), each species shares its relative
+abundance with its relatives, in proportion to their similarity on the
+tree, and the principal coordinates of the resulting matrix order sites
+by phylogenetic composition. The test covers all the dissimilarity and,
+separately, each axis in <code>axes</code>, whose <code>share</code> is
+its part of the variation.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pcps</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pcps_test.html">pcps_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">pcps</span></span>
@@ -171,6 +173,21 @@ its column of the matrix P with the axes.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pcps</span><span class="op">)</span></span></code></pre></div>
 <p><img src="whole-tree_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
+<p>With many species the arrows are hard to read. <code>clades</code>
+draws the species as stars grouped into clades instead, either the k
+deepest clades of the tree or groups given by name, such as families, as
+in Fig. 1 of Debastiani &amp; Duarte (2014). The plot then shows which
+lineages go with which sites.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pcps</span>, clades <span class="op">=</span> <span class="fl">4</span>, species_labels <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="whole-tree_files/figure-html/unnamed-chunk-8-1.png" class="r-plt" alt="" width="576"></p>
+<p>The package PCPS also draws a curve of phylogenetic signal at the
+metacommunity level (<code>pcps.curve()</code>), from regressions of
+community-weighted mean traits on an increasing number of axes. In
+simulations by its authors, the curve of traits with low or high
+phylogenetic signal did not depart from that expected under Brownian
+motion (Duarte et al. 2018), so it does not measure the signal of the
+trait, and comdynamite does not implement it.</p>
 <p>When sites are neighbours and the environment and the communities are
 both autocorrelated, free permutations of sites reject far too often.
 <code>site_permutations</code> takes a restricted null model, such as
@@ -203,11 +220,27 @@ model, such as those of <code><a href="../reference/torus_permutations.html">tor
 a torus.</p>
 </div>
 <div class="section level2">
-<h2 id="reference">Reference<a class="anchor" aria-label="anchor" href="#reference"></a>
+<h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Debastiani, V. J., &amp; Duarte, L. D. S. (2014). PCPS – an R-package
+for exploring phylogenetic eigenvectors across metacommunities.
+<em>Frontiers of Biogeography</em>, 6, 144–148. <a href="https://doi.org/10.21425/F5FBG22943" class="external-link uri">https://doi.org/10.21425/F5FBG22943</a></p>
+<p>Duarte, L. D. S. (2011). Phylogenetic habitat filtering influences
+forest nucleation in grasslands. <em>Oikos</em>, 120, 208–215. <a href="https://doi.org/10.1111/j.1600-0706.2010.18898.x" class="external-link uri">https://doi.org/10.1111/j.1600-0706.2010.18898.x</a></p>
+<p>Duarte, L. D. S., Debastiani, V. J., Carlucci, M. B., &amp;
+Diniz-Filho, J. A. F. (2018). Analyzing community-weighted trait means
+across environmental gradients: should phylogeny stay or should it go?
+<em>Ecology</em>, 99, 385–398. <a href="https://doi.org/10.1002/ecy.2081" class="external-link uri">https://doi.org/10.1002/ecy.2081</a></p>
+<p>Duarte, L. D. S., Debastiani, V. J., Freitas, A. V. L., &amp; Pillar,
+V. D. (2016). Dissecting phylogenetic fuzzy weighting: theory and
+application in metacommunity phylogenetics. <em>Methods in Ecology and
+Evolution</em>, 7, 937–946. <a href="https://doi.org/10.1111/2041-210X.12547" class="external-link uri">https://doi.org/10.1111/2041-210X.12547</a></p>
 <p>Peres-Neto, P. R., &amp; Kembel, S. W. (2015). Phylogenetic gradient
 analysis: environmental drivers of phylogenetic variation across
 ecological communities. <em>Plant Ecology</em>, 216, 709–724. <a href="https://doi.org/10.1007/s11258-014-0405-0" class="external-link uri">https://doi.org/10.1007/s11258-014-0405-0</a></p>
+<p>Pillar, V. D., &amp; Duarte, L. D. S. (2010). A framework for
+metacommunity analysis of phylogenetic structure. <em>Ecology
+Letters</em>, 13, 587–596. <a href="https://doi.org/10.1111/j.1461-0248.2010.01456.x" class="external-link uri">https://doi.org/10.1111/j.1461-0248.2010.01456.x</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -4,7 +4,10 @@ Draws the sites on two principal coordinates of
 [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
 coloured by a predictor, with the species as arrows from the correlation
 of their column of the matrix P with the axes, as in the biplot of the
-package PCPS (Debastiani & Duarte 2014).
+package PCPS (Debastiani & Duarte 2014). With `clades`, the species are
+drawn as stars coloured by clade, each clade with its outline and name,
+as in Fig. 1 of Debastiani & Duarte (2014), which shows which lineages
+go with which sites.
 
 ## Usage
 
@@ -16,6 +19,7 @@ plot(
   env = 1,
   species = TRUE,
   species_labels = TRUE,
+  clades = NULL,
   palette = "viridis",
   point_size = 2.5,
   ...
@@ -46,7 +50,16 @@ plot(
 
 - species_labels:
 
-  Write the names of the species at the arrows.
+  Write the names of the species at the arrows or stars.
+
+- clades:
+
+  Optional grouping of the species into clades: a single number k, which
+  cuts the tree into its k deepest clades by splitting, one at a time,
+  the clade whose crown is nearest the root; or a vector of clade names
+  named by species, such as families, in which species left out are
+  drawn in grey without a clade. Each clade with at least three species
+  gets its convex hull.
 
 - palette:
 

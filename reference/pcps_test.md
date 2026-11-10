@@ -61,7 +61,8 @@ the axes with positive eigenvalues; `share`, the share of each of those
 axes; `species`, the correlation of each species' column of the matrix P
 with those axes (its position in the biplot of the package PCPS); `env`,
 the predictors of the occupied sites; and `permutations`, the numbers of
-permutations and whether those of sites were free or restricted.
+permutations and whether those of sites were free or restricted; and
+`tree`, the tree pruned to the species present.
 [`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md)
 draws the ordination.
 
