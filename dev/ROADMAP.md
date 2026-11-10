@@ -126,6 +126,25 @@ base sem dinâmica.
       do artigo, onde fica à frente (.945, .947), e um erro de .058 onde a outra rodada
       deu .068, o que mostra o ruído desses valores.
 - [x] Heatmaps do artigo para visualizar os eixos de `scores`: `plot_phylo_beta()`, com `axis`.
+- [x] `plot()` de `pcps_test()` com `clades` (pedido em 2026-11-10): os k clados mais
+      profundos ou grupos dados por nome (famílias), em estrelas com envoltório e nome, como na
+      Fig. 1 de Debastiani & Duarte (2014).
+- [ ] Validação do `pcps.curve()` do PCPS (pedido em 2026-11-10; não implementado). Debastiani &
+      Duarte (2014) o descrevem com a linha 1:1 da curva PSR (Diniz-Filho et al. 2012) e um nulo
+      que embaralha pontas, sem validação. Duarte et al. (2018, *Ecology* 99:385–398) o
+      reformularam como curva NTDR, com nulo de traits simulados por BM na árvore real e
+      composição fixa, mais a curva com filogenia em estrela. Na simulação deles, a curva
+      observada nunca saiu do envelope do BM, com K médio de 0,02 a 1,57, e os próprios autores
+      concluem que ela não mede o sinal do trait; ela só indica quando corrigir pela filogenia a
+      regressão do CWM contra o ambiente. Ressalvas nossas (não testadas): o R² sobe
+      mecanicamente com o número de eixos até 1 em n − 1, e o envelope é comparado eixo a eixo,
+      sem teste global (faltaria uma estatística única, como a área entre as curvas). Estudo
+      proposto, com verdade conhecida em `data-raw/validation_pcps_curve.R`: variar o sinal no
+      trait (λ ou o ρ de Grafen) e na distribuição (λ dos ótimos em `species_traits()`) e medir
+      erro tipo I e poder da curva com o nulo de 2014 e com o de 2018, e de uma estatística de
+      área; comparar com a correção filogenética do CWM de Duarte et al. (2018) e com os testes
+      de CWM de Peres-Neto et al. (2017) e Zelený (2018). Só implementar no pacote se tiver
+      poder; senão, o resultado vai para o artigo `whole-tree`.
 - [x] Registrado em `?phylo_beta`: a matriz de MPD não é sempre euclidiana, ao contrário do
       que o artigo afirma, e o pseudo-F não exige isso. A nota antiga de que o picante não traz
       as funções que o artigo anuncia não diz quais são: fica fora do texto até ser conferida.
@@ -1018,3 +1037,11 @@ Conferidas no Crossref em 2026-11-05.
 - Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof, C., Jung, V., & Messier, J. (2012). *Trends in Ecology & Evolution*, 27, 244–252. https://doi.org/10.1016/j.tree.2011.11.014
 - Vehtari, A., et al. (2017). *Statistics and Computing*, 27, 1413–1432. https://doi.org/10.1007/s11222-016-9696-4
 - Wood, S. N. (2010). *Nature*, 466, 1102–1104. https://doi.org/10.1038/nature09319
+
+Conferidas no Crossref em 2026-11-10 (item do `pcps.curve()`).
+
+- Debastiani, V. J., & Duarte, L. D. S. (2014). *Frontiers of Biogeography*, 6, 144–148. https://doi.org/10.21425/F5FBG22943
+- Diniz-Filho, J. A. F., Rangel, T. F., Santos, T., & Bini, L. M. (2012). *Evolution*, 66, 1079–1090. https://doi.org/10.1111/j.1558-5646.2011.01499.x
+- Duarte, L. D. S., Debastiani, V. J., Carlucci, M. B., & Diniz-Filho, J. A. F. (2018). *Ecology*, 99, 385–398. https://doi.org/10.1002/ecy.2081
+- Peres-Neto, P. R., Dray, S., & ter Braak, C. J. F. (2017). *Ecography*, 40, 806–816. https://doi.org/10.1111/ecog.02302
+- Zelený, D. (2018). *Journal of Vegetation Science*, 29, 953–966. https://doi.org/10.1111/jvs.12688

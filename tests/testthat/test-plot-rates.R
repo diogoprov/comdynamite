@@ -67,3 +67,44 @@ test_that("plot() of pcps_test() names an unnamed predictor", {
   p <- plot(pcps_test(comm, tree, seq_len(20), n_perm = 9))
   expect_equal(p$scales$get_scales("colour")$name, "env1")
 })
+
+test_that("plot() of pcps_test() groups species into clades", {
+  skip_if_not_installed("ggplot2")
+  set.seed(8)
+  tree <- ape::rcoal(12)
+  comm <- matrix(rpois(30 * 12, 2), 30, dimnames = list(NULL, tree$tip.label))
+  env <- cbind(temp = seq_len(30))
+  res <- pcps_test(comm, tree, env, n_perm = 9)
+  expect_s3_class(res$tree, "phylo")
+  # k deepest clades: the first split is the root, and each further split is the crown nearest
+  # the root
+  two <- pcps_clades(2, res$tree, rownames(res$species))
+  root_children <- res$tree$edge[res$tree$edge[, 1] == ape::Ntip(res$tree) + 1, 2]
+  first <- if (root_children[1] <= 12) res$tree$tip.label[root_children[1]] else
+    ape::extract.clade(res$tree, root_children[1])$tip.label
+  expect_equal(nlevels(two), 2)
+  expect_length(unique(two[rownames(res$species) %in% first]), 1)
+  four <- pcps_clades(4, res$tree, rownames(res$species))
+  expect_equal(nlevels(four), 4)
+  expect_false(anyNA(four))
+  # each clade of four is nested in one clade of two
+  expect_true(all(tapply(as.character(two), four, function(z) length(unique(z))) == 1))
+  p <- plot(res, clades = 4)
+  expect_s3_class(p, "ggplot")
+  expect_true(any(vapply(p$layers, function(l) inherits(l$geom, "GeomPolygon"), logical(1))))
+  expect_equal(p$scales$get_scales("fill")$name, "temp")
+  families <- stats::setNames(rep(c("Hylidae", "Leptodactylidae"), each = 5),
+                              res$tree$tip.label[1:10])
+  q <- plot(res, clades = families)
+  expect_s3_class(q, "ggplot")
+  expect_true(any(vapply(q$layers, function(l) {
+    inherits(l$geom, "GeomPoint") && identical(l$aes_params$colour, "grey60")
+  }, logical(1))))
+  expect_s3_class(plot(res, clades = 3, env = NULL, species_labels = FALSE), "ggplot")
+  expect_error(plot(res, clades = 1), "between 2 and")
+  expect_error(plot(res, clades = c("a", "b")), "named by species")
+  expect_error(plot(res, clades = c(x = "a")), "no species")
+  old <- res
+  old$tree <- NULL
+  expect_error(plot(old, clades = 2), "older version")
+})
