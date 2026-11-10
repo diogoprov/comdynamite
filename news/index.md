@@ -2,6 +2,18 @@
 
 ## comdynamite (development version)
 
+- New article “Does metacommunity assembly leave a trace in branch
+  rates?”, a recovery study with planted signals. Branch rates are
+  weakly identified. Partner turnover planted in the rates is barely
+  recovered among species, but local adaptation and character
+  displacement are recovered among populations. The T-statistics
+  compensate when both act, and displacement is identifiable only when
+  the competition kernel is not much narrower than the spacing of
+  species. With fully sampled clades, a PGLS of DR on metapopulation
+  persistence, as in Januario et al. (2025), has no power under a causal
+  link, whereas ES-sim on turnover has. Simulations are in
+  `data-raw/bridge_*.R` and `data-raw/januario_*.R`.
+
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)

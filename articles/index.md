@@ -21,6 +21,8 @@
   metacommunities](https://provetelab.org/comdynamite/articles/evaluating-methods.md):
 - [Rates of trait evolution that vary among
   branches](https://provetelab.org/comdynamite/articles/branch-rates.md):
+- [Does metacommunity assembly leave a trace in branch
+  rates?](https://provetelab.org/comdynamite/articles/rates-assembly.md):
 - [Correlated traits and assembly in trait
   space](https://provetelab.org/comdynamite/articles/correlated-traits.md):
 - [Watching a metacommunity
