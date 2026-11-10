@@ -57,9 +57,11 @@ plot_phylo_beta(beta, comm, tree)
 
 ## Principal coordinates of phylogenetic structure
 
-`pcps_test()` is the method of the package PCPS. Each species shares its relative abundance
-with its relatives, in proportion to their similarity on the tree, and the principal coordinates
-of the resulting matrix order sites by phylogenetic composition. The test covers all the
+`pcps_test()` computes the principal coordinates of phylogenetic structure (Duarte 2011; Duarte
+et al. 2016), the method of the package PCPS (Debastiani & Duarte 2014). By phylogenetic fuzzy
+weighting (Pillar & Duarte 2010), each species shares its relative abundance with its relatives,
+in proportion to their similarity on the tree, and the principal coordinates of the resulting
+matrix order sites by phylogenetic composition. The test covers all the
 dissimilarity and, separately, each axis in `axes`, whose `share` is its part of the variation.
 
 ```{r}
@@ -75,6 +77,21 @@ from the correlation of its column of the matrix P with the axes.
 ```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
 plot(pcps)
 ```
+
+With many species the arrows are hard to read. `clades` draws the species as stars grouped
+into clades instead, either the k deepest clades of the tree or groups given by name, such as
+families, as in Fig. 1 of Debastiani & Duarte (2014). The plot then shows which lineages go
+with which sites.
+
+```{r, eval = requireNamespace("ggplot2", quietly = TRUE)}
+plot(pcps, clades = 4, species_labels = FALSE)
+```
+
+The package PCPS also draws a curve of phylogenetic signal at the metacommunity level
+(`pcps.curve()`), from regressions of community-weighted mean traits on an increasing number of
+axes. In simulations by its authors, the curve of traits with low or high phylogenetic signal
+did not depart from that expected under Brownian motion (Duarte et al. 2018), so it does not
+measure the signal of the trait, and comdynamite does not implement it.
 
 When sites are neighbours and the environment and the communities are both autocorrelated, free
 permutations of sites reject far too often. `site_permutations` takes a restricted null model,
@@ -98,8 +115,27 @@ rejection rates of these tests with those published.
 Permutations of sites treat them as exchangeable. When they are neighbours, `site_permutations`
 takes a restricted null model, such as those of `torus_permutations()` for a grid on a torus.
 
-## Reference
+## References
+
+Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring phylogenetic
+eigenvectors across metacommunities. *Frontiers of Biogeography*, 6, 144--148.
+<https://doi.org/10.21425/F5FBG22943>
+
+Duarte, L. D. S. (2011). Phylogenetic habitat filtering influences forest nucleation in
+grasslands. *Oikos*, 120, 208--215. <https://doi.org/10.1111/j.1600-0706.2010.18898.x>
+
+Duarte, L. D. S., Debastiani, V. J., Carlucci, M. B., & Diniz-Filho, J. A. F. (2018). Analyzing
+community-weighted trait means across environmental gradients: should phylogeny stay or should
+it go? *Ecology*, 99, 385--398. <https://doi.org/10.1002/ecy.2081>
+
+Duarte, L. D. S., Debastiani, V. J., Freitas, A. V. L., & Pillar, V. D. (2016). Dissecting
+phylogenetic fuzzy weighting: theory and application in metacommunity phylogenetics. *Methods
+in Ecology and Evolution*, 7, 937--946. <https://doi.org/10.1111/2041-210X.12547>
 
 Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental
 drivers of phylogenetic variation across ecological communities. *Plant Ecology*, 216,
 709--724. <https://doi.org/10.1007/s11258-014-0405-0>
+
+Pillar, V. D., & Duarte, L. D. S. (2010). A framework for metacommunity analysis of
+phylogenetic structure. *Ecology Letters*, 13, 587--596.
+<https://doi.org/10.1111/j.1461-0248.2010.01456.x>

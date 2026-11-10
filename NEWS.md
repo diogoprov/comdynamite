@@ -1,5 +1,14 @@
 # comdynamite (development version)
 
+- `plot()` of `pcps_test()` has a `clades` argument. It takes either the number of the
+  deepest clades of the tree or a vector of clade names, such as families, named by species,
+  and draws the species as stars coloured by clade, each clade with its convex hull and name,
+  as in Fig. 1 of Debastiani & Duarte (2014). With clades, the predictor fills the sites.
+  Sites are now drawn below the species. `pcps_test()` keeps the pruned tree as `tree`.
+- The article "Testing the whole tree" cites the origin of the principal coordinates of
+  phylogenetic structure and explains why the curve of phylogenetic signal of the package PCPS
+  (`pcps.curve()`) is not implemented.
+
 # comdynamite 0.7.0
 
 - New article "Does metacommunity assembly leave a trace in branch rates?", a recovery study

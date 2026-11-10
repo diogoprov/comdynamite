@@ -10,6 +10,7 @@
   env = 1,
   species = TRUE,
   species_labels = TRUE,
+  clades = NULL,
   palette = "viridis",
   point_size = 2.5,
   ...
@@ -25,7 +26,13 @@ to \code{\link[=pcps_test]{pcps_test()}}, or \code{NULL} for no colour.}
 
 \item{species}{Draw the species as arrows.}
 
-\item{species_labels}{Write the names of the species at the arrows.}
+\item{species_labels}{Write the names of the species at the arrows or stars.}
+
+\item{clades}{Optional grouping of the species into clades: a single number k, which cuts
+the tree into its k deepest clades by splitting, one at a time, the clade whose crown is
+nearest the root; or a vector of clade names named by species, such as families, in which
+species left out are drawn in grey without a clade. Each clade with at least three species
+gets its convex hull.}
 
 \item{palette}{Name of a palette of \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}} for the predictor.}
 
@@ -39,7 +46,9 @@ A ggplot object.
 \description{
 Draws the sites on two principal coordinates of \code{\link[=pcps_test]{pcps_test()}}, coloured by a predictor, with
 the species as arrows from the correlation of their column of the matrix P with the axes,
-as in the biplot of the package PCPS (Debastiani & Duarte 2014).
+as in the biplot of the package PCPS (Debastiani & Duarte 2014). With \code{clades}, the species
+are drawn as stars coloured by clade, each clade with its outline and name, as in Fig. 1 of
+Debastiani & Duarte (2014), which shows which lineages go with which sites.
 }
 \examples{
 \dontshow{if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

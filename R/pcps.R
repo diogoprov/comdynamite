@@ -49,7 +49,8 @@
 #'   correlation of each species' column of the matrix P with those axes (its position in the
 #'   biplot of the package PCPS); `env`, the predictors of the occupied sites; and
 #'   `permutations`, the numbers of permutations and whether those of sites were free or
-#'   restricted. [plot.mc_pcps()] draws the ordination.
+#'   restricted; and `tree`, the tree pruned to the species present. [plot.mc_pcps()] draws
+#'   the ordination.
 #' @references
 #' Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring
 #' phylogenetic eigenvectors across metacommunities. *Frontiers of Biogeography*, 6.
@@ -132,7 +133,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   rownames(species) <- colnames(comm)
   rownames(ordination$scores) <- rownames(comm)
   structure(list(tests = tests, scores = ordination$scores, share = ordination$share,
-                 species = species, env = env,
+                 species = species, env = env, tree = tree,
                  permutations = permutation_record(n_perm, site_permutations)),
             class = "mc_pcps")
 }
@@ -189,14 +190,21 @@ pcps_fit <- function(gower, scores, env) {
 #'
 #' Draws the sites on two principal coordinates of [pcps_test()], coloured by a predictor, with
 #' the species as arrows from the correlation of their column of the matrix P with the axes,
-#' as in the biplot of the package PCPS (Debastiani & Duarte 2014).
+#' as in the biplot of the package PCPS (Debastiani & Duarte 2014). With `clades`, the species
+#' are drawn as stars coloured by clade, each clade with its outline and name, as in Fig. 1 of
+#' Debastiani & Duarte (2014), which shows which lineages go with which sites.
 #'
 #' @param x Result of [pcps_test()].
 #' @param axes The two principal coordinates to draw.
 #' @param env Predictor that colours the sites: a column number or name of the predictors given
 #'   to [pcps_test()], or `NULL` for no colour.
 #' @param species Draw the species as arrows.
-#' @param species_labels Write the names of the species at the arrows.
+#' @param species_labels Write the names of the species at the arrows or stars.
+#' @param clades Optional grouping of the species into clades: a single number k, which cuts
+#'   the tree into its k deepest clades by splitting, one at a time, the clade whose crown is
+#'   nearest the root; or a vector of clade names named by species, such as families, in which
+#'   species left out are drawn in grey without a clade. Each clade with at least three species
+#'   gets its convex hull.
 #' @param palette Name of a palette of [grDevices::hcl.colors()] for the predictor.
 #' @param point_size Size of the site points.
 #' @param ... Not used.
@@ -216,7 +224,7 @@ pcps_fit <- function(gower, scores, env) {
 #' plot(pcps_test(comm, tree, env, n_perm = 19))
 #' @export
 plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_labels = TRUE,
-                         palette = "viridis", point_size = 2.5, ...) {
+                         clades = NULL, palette = "viridis", point_size = 2.5, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of pcps_test() needs the package ggplot2", call. = FALSE) # nocov
   }
@@ -248,29 +256,114 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
   p <- ggplot2::ggplot(sites, ggplot2::aes(x = .data$a1, y = .data$a2)) +
     ggplot2::geom_hline(yintercept = 0, colour = "grey85") +
     ggplot2::geom_vline(xintercept = 0, colour = "grey85")
+  group <- NULL
+  if (!is.null(clades)) {
+    if (is.null(x$tree)) {
+      stop("`x` comes from an older version of pcps_test(); run it again to use `clades`",
+           call. = FALSE)
+    }
+    group <- pcps_clades(clades, x$tree, rownames(x$species))
+  }
+  if (is.null(colour_name)) {
+    p <- p + ggplot2::geom_point(size = point_size)
+  } else if (is.null(group) || !species) {
+    p <- p + ggplot2::geom_point(ggplot2::aes(colour = .data$env), size = point_size) +
+      ggplot2::scale_colour_gradientn(colours = grDevices::hcl.colors(30, palette),
+                                      name = colour_name)
+  } else {
+    # the colour scale belongs to the clades, so the predictor fills the sites
+    p <- p + ggplot2::geom_point(ggplot2::aes(fill = .data$env), shape = 21, colour = "grey30",
+                                 stroke = 0.3, size = point_size) +
+      ggplot2::scale_fill_gradientn(colours = grDevices::hcl.colors(30, palette),
+                                    name = colour_name)
+  }
   if (species) {
-    # arrows scaled to the spread of the sites, as in a biplot
+    # species scaled to the spread of the sites, as in a biplot
     scale <- 0.9 * max(abs(as.matrix(sites[c("a1", "a2")]))) /
       max(abs(x$species[, axes]), na.rm = TRUE)
     sp <- data.frame(a1 = x$species[, axes[1]] * scale, a2 = x$species[, axes[2]] * scale,
                      label = rownames(x$species))
-    sp <- sp[stats::complete.cases(sp), , drop = FALSE]
-    p <- p + ggplot2::geom_segment(data = sp, ggplot2::aes(x = 0, y = 0, xend = .data$a1,
-                                                           yend = .data$a2),
-                                   colour = "grey50", linewidth = 0.4,
-                                   arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "cm")))
+    if (!is.null(group)) sp$clade <- group
+    sp <- sp[stats::complete.cases(sp[c("a1", "a2")]), , drop = FALSE]
+    if (is.null(group)) {
+      p <- p + ggplot2::geom_segment(data = sp, ggplot2::aes(x = 0, y = 0, xend = .data$a1,
+                                                             yend = .data$a2),
+                                     colour = "grey50", linewidth = 0.4,
+                                     arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "cm")))
+    } else {
+      p <- p + pcps_clade_layers(sp)
+    }
     if (species_labels) {
       p <- p + ggplot2::geom_text(data = sp, ggplot2::aes(label = .data$label),
                                   colour = "grey30", size = 3, vjust = -0.4)
     }
   }
-  if (is.null(colour_name)) {
-    p <- p + ggplot2::geom_point(size = point_size)
-  } else {
-    p <- p + ggplot2::geom_point(ggplot2::aes(colour = .data$env), size = point_size) +
-      ggplot2::scale_colour_gradientn(colours = grDevices::hcl.colors(30, palette),
-                                      name = colour_name)
-  }
   p + ggplot2::labs(x = axis_label(axes[1]), y = axis_label(axes[2])) +
     ggplot2::coord_equal() + ggplot2::theme_minimal()
+}
+
+# clade of each species, from a number of clades or a vector named by species
+pcps_clades <- function(clades, tree, species) {
+  if (is.numeric(clades) && length(clades) == 1 && is.null(names(clades))) {
+    n_tip <- ape::Ntip(tree)
+    if (is.na(clades) || clades != round(clades) || clades < 2 || clades > n_tip) {
+      stop("`clades` as a number must be a whole number between 2 and ", n_tip, call. = FALSE)
+    }
+    depth <- ape::node.depth.edgelength(tree)
+    groups <- n_tip + 1
+    while (length(groups) < clades) {
+      internal <- groups[groups > n_tip]
+      split <- internal[which.min(depth[internal])]
+      groups <- c(setdiff(groups, split), tree$edge[tree$edge[, 1] == split, 2])
+    }
+    groups <- groups[order(depth[groups])]
+    member <- character(n_tip)
+    for (g in seq_along(groups)) {
+      tips <- if (groups[g] <= n_tip) tree$tip.label[groups[g]] else
+        ape::extract.clade(tree, groups[g])$tip.label
+      member[match(tips, tree$tip.label)] <- LETTERS[(g - 1) %% 26 + 1]
+    }
+    return(factor(member[match(species, tree$tip.label)], levels = LETTERS[seq_along(groups)]))
+  }
+  if (is.null(names(clades)) || length(clades) == 0) {
+    stop("`clades` must be a number of clades or a vector of clade names named by species",
+         call. = FALSE)
+  }
+  if (!any(species %in% names(clades))) {
+    stop("no species of `x` is among the names of `clades`", call. = FALSE)
+  }
+  factor(as.character(clades)[match(species, names(clades))])
+}
+
+# stars coloured by clade, convex hulls of clades with three or more species and their names
+pcps_clade_layers <- function(sp) {
+  .data <- ggplot2::.data
+  grouped <- sp[!is.na(sp$clade), , drop = FALSE]
+  hulls <- do.call(rbind, lapply(split(grouped, grouped$clade, drop = TRUE), function(d) {
+    if (nrow(d) < 3) return(NULL)
+    d[grDevices::chull(d$a1, d$a2), c("a1", "a2", "clade")]
+  }))
+  centres <- stats::aggregate(cbind(a1, a2) ~ clade, grouped, mean)
+  layers <- list()
+  if (!is.null(hulls)) {
+    layers <- c(layers, ggplot2::geom_polygon(data = hulls,
+                                              ggplot2::aes(colour = .data$clade,
+                                                           group = .data$clade),
+                                              fill = NA, linetype = 2, linewidth = 0.4,
+                                              show.legend = FALSE))
+  }
+  if (any(is.na(sp$clade))) {
+    layers <- c(layers, ggplot2::geom_point(data = sp[is.na(sp$clade), , drop = FALSE],
+                                            shape = 8, colour = "grey60", size = 2))
+  }
+  n_clades <- nlevels(droplevels(grouped$clade))
+  # names under the stars, so a clade of one species still shows its star
+  c(layers,
+    ggplot2::geom_label(data = centres, ggplot2::aes(label = .data$clade,
+                                                     colour = .data$clade),
+                        size = 3.5, fontface = "bold", fill = grDevices::adjustcolor("white", 0.7),
+                        vjust = 1.4, show.legend = FALSE),
+    ggplot2::geom_point(data = grouped, ggplot2::aes(colour = .data$clade), shape = 8, size = 2),
+    ggplot2::scale_colour_manual(values = grDevices::hcl.colors(max(n_clades, 2), "Dark 3"),
+                                 name = "Clade"))
 }

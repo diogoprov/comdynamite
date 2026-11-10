@@ -33,7 +33,8 @@ share of each of those axes; \code{species}, the
 correlation of each species' column of the matrix P with those axes (its position in the
 biplot of the package PCPS); \code{env}, the predictors of the occupied sites; and
 \code{permutations}, the numbers of permutations and whether those of sites were free or
-restricted. \code{\link[=plot.mc_pcps]{plot.mc_pcps()}} draws the ordination.
+restricted; and \code{tree}, the tree pruned to the species present. \code{\link[=plot.mc_pcps]{plot.mc_pcps()}} draws
+the ordination.
 }
 \description{
 Tests whether the phylogenetic composition of sites follows the environment, with the
