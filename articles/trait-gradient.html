@@ -254,27 +254,29 @@ motion.</p>
 <h2 id="a-bayesian-model-with-latent-beta">A Bayesian model with latent beta<a class="anchor" aria-label="anchor" href="#a-bayesian-model-with-latent-beta"></a>
 </h2>
 <p><code><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo()</a></code> first computes <span class="math inline">\beta</span> and then models it with a standard
-error. <code><a href="../reference/trait_gradient_brms.html">trait_gradient_brms()</a></code> instead fits one bivariate
-model in which <span class="math inline">\beta</span> and the species
-mean are latent species effects, with a phylogenetic and a
+error. <code><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes()</a></code> instead fits in Stan one
+bivariate model in which <span class="math inline">\beta</span> and the
+species mean are latent species effects, with a phylogenetic and a
 non-phylogenetic part, estimated from every site of every species. The
-phylogenetic share <span class="math inline">\lambda</span> of <span class="math inline">\beta</span>, <span class="math inline">\alpha</span> and the mean comes with a credible
-interval. It needs brms, and many species: with about 20 species the
-chains do not separate the two parts, and even with 40 they mix poorly
-when <span class="math inline">\beta</span> has no phylogenetic signal.
-Abundance weights make the posterior too narrow, so the model below uses
-occurrence weights for species.</p>
+phylogenetic share <span class="math inline">\lambda</span> of <span class="math inline">\beta</span>, <span class="math inline">\alpha</span> and the mean has its own prior and
+comes with a credible interval. It needs cmdstanr and many species (see
+the Limits section of its help page). Abundance weights make the
+posterior too narrow, so the model below uses occurrence weights for
+species.</p>
+<p>In simulations with about 40 species, <span class="math inline">\lambda</span> of <span class="math inline">\beta</span> near 0 and near 1 was recovered, while
+intermediate signal came out low with wide intervals; the help page
+gives the numbers.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tg_occ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span>, species_weights <span class="op">=</span> <span class="st">"occurrence"</span><span class="op">)</span></span>
-<span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_brms.html">trait_gradient_brms</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="va">bayes</span><span class="op">$</span><span class="va">diagnostics</span>   <span class="co"># R-hat, effective sample sizes, divergent transitions</span></span>
 <span><span class="va">bayes</span><span class="op">$</span><span class="va">signal</span></span>
 <span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">bayes</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span></span>
 <span><span class="co"># an OU structure with the strength fitted to beta by trait_gradient_phylo()</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">a</span><span class="op">[</span><span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">response</span> <span class="op">==</span> <span class="st">"beta"</span> <span class="op">&amp;</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">model</span> <span class="op">==</span> <span class="st">"OU"</span><span class="op">]</span></span>
-<span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_brms.html">trait_gradient_brms</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, ou_alpha <span class="op">=</span> <span class="va">a</span>, chains <span class="op">=</span> <span class="fl">4</span>, cores <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="co"># cross-validation one response at a time, since the two are fitted to different rows</span></span>
-<span><span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo_compare.html" class="external-link">loo_compare</a></span><span class="op">(</span><span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo</a></span><span class="op">(</span><span class="va">bayes</span><span class="op">$</span><span class="va">fit</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span>, <span class="fu">brms</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo.html" class="external-link">loo</a></span><span class="op">(</span><span class="va">ou</span><span class="op">$</span><span class="va">fit</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, ou_alpha <span class="op">=</span> <span class="va">a</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="co"># cross-validation one response at a time, since the two are fitted to different populations</span></span>
+<span><span class="fu">loo</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo_compare.html" class="external-link">loo_compare</a></span><span class="op">(</span><span class="va">bayes</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik_p"</span><span class="op">)</span>, <span class="va">ou</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik_p"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

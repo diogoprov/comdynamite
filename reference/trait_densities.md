@@ -110,7 +110,7 @@ Other trait variation among individuals:
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
 [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
-[`trait_gradient_brms()`](https://provetelab.org/comdynamite/reference/trait_gradient_brms.md),
+[`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md),
 [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md),
 [`trait_gradient_test()`](https://provetelab.org/comdynamite/reference/trait_gradient_test.md),
 [`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md),
