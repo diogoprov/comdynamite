@@ -1,5 +1,15 @@
 # comdynamite (development version)
 
+- `nested_variance()` has a `crossed` argument for a second hierarchy crossed with `factors`,
+  such as genus > species crossed with region > site, with a level for the interaction of the
+  finest levels (the population, species by site; `interaction = TRUE`). When species occur at
+  several sites, a nested `factors = c("region", "site", "species")` makes `species` the
+  population and mixes differences among species with differences among populations; in a
+  simulation with 82% of the variance among species and 9% among populations, the nested model
+  gave 88% to `species`, the crossed one 78% and 11%. The crossed-factors warning now points to
+  `crossed`. Crossed models, and nested ones that `nlme::lme()` fails to fit, are fitted with
+  `lme4::lmer()` (new in Suggests); singular fits warn, and the attributes `singular` and
+  `engine` record them.
 - `trait_gradient_test()` has two nulls for conserved niches: `null = "phylo"`, the
   phylogenetic permutations of Lapointe & Garland (2001), in which species means move
   preferably among relatives, and `null = "bm"`, means simulated by Brownian motion. In

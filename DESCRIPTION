@@ -38,6 +38,7 @@ Suggests:
     ggplot2 (>= 3.5.0),
     gifski,
     knitr,
+    lme4,
     nlme,
     phytools,
     picante,

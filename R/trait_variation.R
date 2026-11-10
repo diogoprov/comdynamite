@@ -330,28 +330,59 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
     ggplot2::theme(panel.grid.major.x = ggplot2::element_blank(), legend.position = "top")
 }
 
-#' Variance components of traits across nested levels
+#' Variance components of traits across nested or crossed levels
 #'
-#' Splits the variance of each trait among nested levels, such as regions, sites, species and
-#' populations, with a linear mixed model of random intercepts nested from the broadest level
-#' to the finest, fitted by restricted maximum likelihood (Messier et al. 2010).
+#' Splits the variance of each trait among levels, such as regions, sites, genera, species and
+#' populations, with a linear mixed model of random intercepts fitted by restricted maximum
+#' likelihood (Messier et al. 2010). The levels can form one nested hierarchy (`factors`) or
+#' two hierarchies crossed with each other (`factors` and `crossed`), such as a spatial one
+#' (region > site) and a taxonomic one (genus > species).
 #'
-#' The levels must be nested: each level of a factor must lie within a single level of the
-#' factor before it. Two checks guard against the common mistakes. A factor that does not split
-#' any group of the factors before it (for instance species after populations, since each
-#' population holds a single species) adds no level of variation, and the function stops,
-#' because the order of the factors is then most likely reversed. A factor whose levels occur
-#' under several groups of the factors before it (for instance genera, found at several sites,
-#' after sites) is crossed with them rather than nested; the model then treats each combination
-#' as a separate group, which is rarely what is meant, and the function warns.
+#' **Nested or crossed.** In a nested design each level of a factor lies within a single level
+#' of the factor before it, as sites within regions or individuals' populations within sites.
+#' Species are rarely nested within sites: the same species occurs at several sites. Put after
+#' `site` in `factors`, `species` then stands for each species at each site, that is, the
+#' population, and its share mixes two things: how much species differ from one another and
+#' how much populations of a species differ among sites. When species occur at several sites,
+#' give the spatial levels in `factors` and the taxonomic ones in `crossed`. The model then has
+#' a term for each level of both hierarchies and, by default, one for their interaction (the
+#' finest spatial level by the finest taxonomic level, for instance `site:species`, the
+#' population), which separates differences among species from differences among populations
+#' of the same species. The variance left (`within`) is among individuals of a population.
+#' A rule of thumb: if a column of `factors` has labels that recur under several levels of the
+#' factors before it and these labels are the same units (the same species), the design is
+#' crossed; if they are only reused names (site 1, 2, ... in each region), it is nested.
+#'
+#' **Checks.** Within each hierarchy, a factor that does not split any group of the factors
+#' before it (for instance species after populations, since each population holds a single
+#' species) adds no level of variation, and the function stops, because the order of the
+#' factors is then most likely reversed. A factor of `factors` whose labels recur under several
+#' groups of the factors before it gets a warning that points to `crossed`.
+#'
+#' **Fitting.** Nested models are fitted with `nlme::lme()`. Crossed models, and nested models
+#' for which `nlme::lme()` fails to converge, are fitted with `lme4::lmer()`, which needs the
+#' package lme4. When a level cannot be told apart from the others (for instance genera that
+#' hold a single species at most sites), `lme4::lmer()` sets its variance to zero (a singular
+#' fit) instead of failing; the function then warns, and the attribute `singular` says which
+#' traits were affected. A zero share in a singular fit means that the data do not separate
+#' that level, not that it does not vary. With few levels of a factor (two regions, say), the
+#' variance of that factor is estimated with very few degrees of freedom and is very uncertain.
 #'
 #' @param data Data frame with the traits and the factors.
 #' @param traits Names of the columns with trait values.
 #' @param factors Names of the columns with the nested factors, from the broadest level to the
 #'   finest.
-#' @return A data frame with one row per factor and one for the variance within the finest
-#'   level (`within`), and one column per trait with the share of variance of each level. The
-#'   attribute `variance` holds the variances. It has class `nested_variance`, with a
+#' @param crossed Names of the columns of a second hierarchy of nested factors, from the
+#'   broadest level to the finest, crossed with `factors` (for instance
+#'   `c("genus", "species")` when `factors` are spatial), or `NULL` (the default) for a single
+#'   nested hierarchy.
+#' @param interaction With `crossed`, whether to add a level for the combination of the finest
+#'   level of `factors` and the finest level of `crossed` (for instance the population, species
+#'   by site). Without it, differences among populations of a species go to `within`.
+#' @return A data frame with one row per level and one for the variance within the finest level
+#'   (`within`), and one column per trait with the share of variance of each level. The
+#'   attribute `variance` holds the variances, `singular` whether each fit was singular and
+#'   `engine` the package used. It has class `nested_variance`, with a
 #'   [plot()][plot.nested_variance] method.
 #' @references Messier, J., McGill, B. J., & Lechowicz, M. J. (2010). How do traits vary across
 #'   ecological scales? A case for trait-based ecology. *Ecology Letters*, 13, 838--848.
@@ -368,23 +399,77 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #' res <- nested_variance(d, "trait", c("region", "site", "population"))
 #' res
 #' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
+#' @examplesIf requireNamespace("lme4", quietly = TRUE)
+#' # the same species at every site: species crossed with sites, and populations differ
+#' d <- expand.grid(individual = 1:5, species = paste0("sp", 1:8), site = paste0("s", 1:12))
+#' d$region <- ifelse(d$site %in% paste0("s", 1:6), "north", "south")
+#' species_effect <- rnorm(8, 0, 3)
+#' population_effect <- rnorm(8 * 12)
+#' d$trait <- species_effect[d$species] +
+#'   population_effect[interaction(d$species, d$site)] + rnorm(nrow(d))
+#' nested_variance(d, "trait", c("region", "site"), crossed = "species")
 #' @export
-nested_variance <- function(data, traits, factors) {
-  if (!requireNamespace("nlme", quietly = TRUE)) {
-    stop("nested_variance() needs the package nlme", call. = FALSE) # nocov
-  }
+nested_variance <- function(data, traits, factors, crossed = NULL, interaction = TRUE) {
   stopifnot(is.data.frame(data), is.character(traits), is.character(factors),
-            length(factors) >= 1)
-  missing_columns <- setdiff(c(traits, factors), names(data))
+            length(factors) >= 1, is.null(crossed) || is.character(crossed),
+            is.logical(interaction), length(interaction) == 1)
+  missing_columns <- setdiff(c(traits, factors, crossed), names(data))
   if (length(missing_columns) > 0) {
     stop("`data` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
-  single <- factors[vapply(factors, function(f) length(unique(stats::na.omit(data[[f]]))) < 2,
-                           logical(1))]
+  if (length(intersect(factors, crossed)) > 0) {
+    stop("`factors` and `crossed` share ", paste(intersect(factors, crossed), collapse = ", "),
+         call. = FALSE)
+  }
+  all_factors <- c(factors, crossed)
+  single <- all_factors[vapply(all_factors,
+                               function(f) length(unique(stats::na.omit(data[[f]]))) < 2,
+                               logical(1))]
   if (length(single) > 0) {
     stop("factor ", paste0("`", single, "`", collapse = ", "), " has a single level",
          call. = FALSE)
   }
+  groups <- nested_groups(data, factors, warn_crossed = is.null(crossed))
+  if (!is.null(crossed)) groups <- c(groups, nested_groups(data, crossed, warn_crossed = FALSE))
+  levels <- all_factors
+  if (!is.null(crossed) && interaction) {
+    groups[[length(groups) + 1]] <- paste(groups[[length(factors)]], groups[[length(groups)]],
+                                          sep = "\r\r")
+    levels <- c(levels, paste(factors[length(factors)], crossed[length(crossed)], sep = ":"))
+  }
+  engine <- if (is.null(crossed)) "nlme" else "lme4"
+  if (engine == "lme4") need_lme4("crossed factors")
+  fits <- lapply(traits, function(trait) {
+    y <- data[[trait]]
+    if (engine == "nlme") {
+      fit <- nested_variance_nlme(y, data, factors)
+      if (!is.null(fit)) return(fit)
+      need_lme4(paste0("the nested model of `", trait, "`, which nlme failed to fit"))
+      message("nlme::lme() failed to converge for `", trait, "`; fitted with lme4::lmer()")
+    }
+    nested_variance_lme4(y, groups, levels)
+  })
+  variances <- vapply(fits, function(f) f$variance, numeric(length(levels) + 1))
+  variances <- matrix(variances, ncol = length(traits),
+                      dimnames = list(c(levels, "within"), traits))
+  singular <- stats::setNames(vapply(fits, function(f) f$singular, logical(1)), traits)
+  if (any(singular)) {
+    warning("singular fit for ", paste0("`", traits[singular], "`", collapse = ", "),
+            ": the variance of at least one level is estimated at zero because the data do ",
+            "not separate it from the others", call. = FALSE)
+  }
+  out <- as.data.frame(sweep(variances, 2, colSums(variances), "/"))
+  out <- data.frame(level = rownames(out), out, row.names = NULL, check.names = FALSE)
+  attr(out, "variance") <- variances
+  attr(out, "singular") <- singular
+  attr(out, "engine") <- vapply(fits, function(f) f$engine, character(1))
+  class(out) <- c("nested_variance", class(out))
+  out
+}
+
+# group labels of each level of a nested hierarchy (each level pasted with the ones above),
+# after checking that each factor splits the one before it
+nested_groups <- function(data, factors, warn_crossed) {
   groups <- lapply(seq_along(factors), function(k) {
     do.call(paste, c(lapply(factors[seq_len(k)], function(f) as.character(data[[f]])),
                      sep = "\r"))
@@ -392,34 +477,53 @@ nested_variance <- function(data, traits, factors) {
   for (k in seq_along(factors)[-1]) {
     if (length(unique(groups[[k]])) == length(unique(groups[[k - 1]]))) {
       stop("`", factors[k], "` does not split any level of `", factors[k - 1],
-           "`; order `factors` from the broadest level to the finest", call. = FALSE)
+           "`; order the factors from the broadest level to the finest", call. = FALSE)
     }
     parents <- tapply(groups[[k - 1]], as.character(data[[factors[k]]]),
                       function(v) length(unique(v)))
-    if (any(parents > 1)) {
+    if (warn_crossed && any(parents > 1)) {
       warning("labels of `", factors[k], "` recur under several levels of `",
-              paste(factors[seq_len(k - 1)], collapse = "/"), "`. If they are the same units, ",
-              "the factors are crossed and the nested model treats each combination as a ",
-              "separate group; if the labels are only reused (site 1, 2, ... in each region), ",
-              "the results are right and this warning can be ignored", call. = FALSE)
+              paste(factors[seq_len(k - 1)], collapse = "/"), "`. If they are the same units ",
+              "(the same species at several sites), the factors are crossed: give them in ",
+              "`crossed`, since the nested model treats each combination as a separate group; ",
+              "if the labels are only reused (site 1, 2, ... in each region), the results are ",
+              "right and this warning can be ignored", call. = FALSE)
     }
   }
+  groups
+}
+
+need_lme4 <- function(what) {
+  if (!requireNamespace("lme4", quietly = TRUE)) {
+    stop("nested_variance() needs the package lme4 for ", what, call. = FALSE) # nocov
+  }
+}
+
+# nested random intercepts with nlme; NULL when the fit fails
+nested_variance_nlme <- function(y, data, factors) {
+  if (!requireNamespace("nlme", quietly = TRUE)) return(NULL) # nocov
   model_data <- data.frame(lapply(data[factors], function(f) factor(as.character(f))))
+  model_data$.y <- y
   random <- stats::as.formula(paste("~ 1 |", paste(factors, collapse = "/")))
-  variances <- sapply(traits, function(trait) {
-    model_data$.y <- data[[trait]]
-    fit <- nlme::lme(.y ~ 1, random = random, data = model_data, na.action = stats::na.omit,
-                     method = "REML")
-    v <- ape::varcomp(fit, scale = FALSE)
-    stats::setNames(as.vector(v), c(factors, "within"))
-  })
-  variances <- matrix(variances, ncol = length(traits),
-                      dimnames = list(c(factors, "within"), traits))
-  out <- as.data.frame(sweep(variances, 2, colSums(variances), "/"))
-  out <- data.frame(level = rownames(out), out, row.names = NULL, check.names = FALSE)
-  attr(out, "variance") <- variances
-  class(out) <- c("nested_variance", class(out))
-  out
+  fit <- tryCatch(nlme::lme(.y ~ 1, random = random, data = model_data,
+                            na.action = stats::na.omit, method = "REML"),
+                  error = function(e) NULL)
+  if (is.null(fit)) return(NULL)
+  v <- as.vector(ape::varcomp(fit, scale = FALSE))
+  list(variance = v, singular = FALSE, engine = "nlme")
+}
+
+# random intercepts for each grouping (nested or crossed) with lme4
+nested_variance_lme4 <- function(y, groups, levels) {
+  terms <- paste0("g", seq_along(groups))
+  model_data <- data.frame(stats::setNames(lapply(groups, factor), terms))
+  model_data$.y <- y
+  formula <- stats::as.formula(paste(".y ~ 1 +", paste0("(1 | ", terms, ")", collapse = " + ")))
+  fit <- suppressMessages(lme4::lmer(formula, data = model_data, REML = TRUE,
+                                     na.action = stats::na.omit))
+  vc <- as.data.frame(lme4::VarCorr(fit))
+  v <- c(vc$vcov[match(terms, vc$grp)], vc$vcov[vc$grp == "Residual"])
+  list(variance = v, singular = lme4::isSingular(fit), engine = "lme4")
 }
 
 #' Plot the shares of variance across nested levels
