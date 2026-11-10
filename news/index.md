@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.7.0
 
 - New article “Does metacommunity assembly leave a trace in branch
   rates?”, a recovery study with planted signals. Branch rates are
