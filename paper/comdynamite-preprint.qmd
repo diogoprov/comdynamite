@@ -197,9 +197,9 @@ Future development will add a module for speciation, and further tools for simul
 
 comdynamite is written in R [@rcoreteam2026r] and is distributed under the MIT license. The source code is at <https://github.com/diogoprov/comdynamite>, binaries for Linux, macOS and Windows are built by r-universe and installed with `install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev", "https://cloud.r-project.org"))`, and documentation, articles and the function reference are at <https://provetelab.org/comdynamite/>. Each release is archived on Zenodo, and the concept DOI <https://doi.org/10.5281/zenodo.23993533> points to the latest version [@Provete_2026]; this article describes version 0.7.0. The scripts that produced every validation result and the figures of this article are in the `data-raw/` and `paper/` folders of the repository.
 
-# Acknowledgements
+# Funding
 
-[ACKNOWLEDGEMENTS AND FUNDING]
+This study was supported by the Fundação de Apoio ao Desenvolvimento do Ensino, Ciência e Tecnologia do Estado de Mato Grosso do Sul (FUNDECT; grant 83/027.032/2024) and financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior – Brasil (CAPES) – Finance Code 001.
 
 # Use of generative AI
 
