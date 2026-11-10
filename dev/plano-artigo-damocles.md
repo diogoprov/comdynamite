@@ -152,6 +152,22 @@ Os tempos abaixo são **estimativas grosseiras**, a medir num piloto antes de ca
   Meta: 5%.
 - Estimativa: 1–2 dias de CPU com 6 núcleos, sem BAMM.
 
+**Resultado S1, testes de razão de verossimilhança (10/11/2026; `data-raw/s1_type1_shifts.R`,
+AWS spot, 9000 réplicas em 38 min numa m7i.48xlarge, após duas tentativas interrompidas):**
+
+- Desenho executado: `sim_shift_tree()` com 112 ou 250 pontas, 1 ou 3 mudanças de λ, razão 2
+  ou 4, mais controle com razão 1; comunidades com γ = 5 e μ = 1 em todos os ramos; 14 ou 40
+  comunidades; 500 réplicas por cenário (18 cenários).
+- Regimes verdadeiros, γ e μ livres (`vary = "both"`): rejeição a 5% entre 0,020 e 0,060.
+- Regimes verdadeiros, só γ: entre 0,034 e 0,068.
+- DR por ramo como covariável de γ: entre 0,036 e 0,066.
+- Nenhum IC de Clopper–Pearson fica inteiramente acima de 5%; o teste não é liberal com
+  mudanças de taxa na árvore. Com 250 pontas e 3 mudanças, `both` é conservador (0,020 [0,010,
+  0,036] e 0,024 [0,012, 0,042] com 14 comunidades).
+- Sem convergência: 21 de 9000 réplicas (todas com 3 mudanças); nenhum erro.
+- Pendente: teste contra partições aleatórias (MODE=partition, 50 réplicas por cenário) e
+  regimes estimados (ClaDS, BAMM).
+
 ### S2. Poder
 
 - Grade:
