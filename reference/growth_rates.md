@@ -46,6 +46,7 @@ with `species_traits(rmax_range = c(1, 1))`.
 ## See also
 
 Other simulate metacommunities:
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),

@@ -20,7 +20,10 @@ sample_individuals(
   step = NULL,
   env = NULL,
   cover = NULL,
-  min_n = 1
+  min_n = 1,
+  founder_sd = 0,
+  monopolization = 0,
+  gene_flow = 1
 )
 ```
 
@@ -96,14 +99,39 @@ sample_individuals(
   as when populations with a single individual are removed before
   computing T-statistics.
 
+- founder_sd:
+
+  Standard deviation of the founder deviation of a population founded by
+  a single individual (\\s_f\\ in the section Founder effects and
+  monopolization); the deviation of a population founded by \\n\\
+  individuals has standard deviation `founder_sd / sqrt(n)`. One value
+  or one per species; 0 (the default) for none.
+
+- monopolization:
+
+  Rate per time step (\\\rho\\) at which a population closes the gap
+  between the optimum of its species and the environment of its site
+  after it arrives, so that early colonists end up better adapted than
+  late ones. One value or one per species; 0 (the default) for none.
+
+- gene_flow:
+
+  Rate (\\\gamma\\) at which immigration erodes founder deviations and
+  adaptation since arrival, per unit of migrant load: 1 (the default)
+  when every newcomer mixes fully with the residents, 0 for no erosion.
+  One value or one per species. Has no effect without `founder_sd` or
+  `monopolization`.
+
 ## Value
 
 Data frame with one row per individual and the columns `site`,
 `species`, `individual` (its number within the population), `abundance`
 (of the population), `env` (of the site), `optimum` (of the species),
 `population_mean` (the expected value of the population, \\m\_{ij}\\
-above, after character displacement) and `trait`. Populations with no
-individual measured are absent.
+above, after character displacement) and `trait`, and with `founder_sd`
+or `monopolization` also `arrival` (the step at which the population was
+founded), before `trait`. Populations with no individual measured are
+absent.
 
 ## Details
 
@@ -157,6 +185,95 @@ back on the dynamics: abundances are those of the species means. The
 function describes the pattern that local adaptation would leave in
 samples of individuals, not its demographic consequences.
 
+## Founder effects and monopolization
+
+`population_sd` and `local_adaptation` treat every population of a
+species alike, whatever its history. Two further mechanisms make the
+mean of a population depend on when and how it was founded, from the
+colonisation history recorded by
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+(see
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)).
+Both need the last step (`step = NULL`). For a population founded at
+step \\a\_{ij}\\ by \\n\_{ij}\\ individuals, with migrant load
+\\L\_{ij}\\ since then and \\T\\ steps in the simulation:
+
+- **Founder effects** (`founder_sd`, \\s_f\\): the population starts
+  from the mean of its founders, a deviation \\f\_{ij} \sim N(0, s_f^2 /
+  n\_{ij})\\ from the species mean, so few founders deviate more.
+  `founder_sd` is thus the deviation of a population founded by a single
+  individual. The deviation persists, and gene flow erodes it toward the
+  species mean: it is multiplied by \\g\_{ij} = \exp(-\gamma L\_{ij})\\,
+  where \\\gamma\\ is `gene_flow`.
+
+- **Monopolization** (`monopolization`, a rate \\\rho\\ per step): after
+  arrival the population adapts to its site, closing a share \\u\_{ij}\\
+  of the gap between the optimum of the species and the environment.
+  Without gene flow, \\u\_{ij} = 1 - \exp(-\rho t\_{ij})\\, where
+  \\t\_{ij} = T - a\_{ij}\\ is the age of the population. Newcomers pull
+  it back toward the species mean, so \\du/dt = \rho (1 - u) - \gamma
+  \bar m u\\, with \\\bar m = L\_{ij} / t\_{ij}\\ the mean migrant load
+  per step since arrival, whose solution is \\u\_{ij} = \rho / (\rho +
+  \gamma \bar m) \[1 - \exp(-\rho t\_{ij} - \gamma L\_{ij})\]\\:
+  adaptation tends to a balance between selection and migration instead
+  of reaching the environment. Early colonists have had longer to adapt
+  and end up closer to the environment of their site than late arrivals,
+  which is the evolution-mediated priority effect of the monopolization
+  hypothesis (Urban & De Meester 2009; De Meester et al. 2016). The gap
+  between early and late colonists is largest when \\1 / \rho\\ is close
+  to the spread of arrival times; much faster adaptation brings every
+  population to the balance and erases it. It combines with
+  `local_adaptation` (\\h_j\\) so that the share of the gap closed is
+  \\h_j + (1 - h_j) u\_{ij}\\.
+
+The mean of the population is then \\\theta_j + \[h_j + (1 - h_j)
+u\_{ij}\] (E_i - \theta_j) + d\_{ij} + g\_{ij} f\_{ij}\\, before
+character displacement. Use `population_sd` for deviations unrelated to
+history (drift at equilibrium, unmeasured microhabitat),
+`local_adaptation` for adaptation that every population reaches whatever
+its age, `founder_sd` for random deviations set at colonisation and kept
+by isolation, and `monopolization` for adaptation that depends on
+arrival order. The two arrival-dependent mechanisms leave different
+signatures: founder deviations are random in direction and largest in
+populations founded by few individuals and receiving few immigrants,
+while monopolization moves populations toward the environment of their
+site, more so the earlier they arrived. With `gene_flow = 0` neither is
+eroded. Erosion of founder deviations multiplies them by the product of
+the shares of residents over the steps, approximated by \\\exp(-L)\\;
+monopolization assumes newcomers arrived at a constant rate since
+arrival, \\\bar m\\, rather than following the steps in which they
+actually came.
+
+Limits of the two mechanisms:
+
+- They need the last step (`step = NULL`): the colonisation history is
+  recorded at the end of the simulation only, so a recorded `step` other
+  than the last gives an error.
+
+- They need arrivals spread over time. Without extirpation and with
+  little dispersal, every population is founded at the start or during
+  `seed_steps`, all have about the same age, and monopolization cannot
+  separate early from late colonists. Use `extirpation > 0` and some
+  `dispersal`, so that populations are lost and founded again throughout
+  the simulation, and check the spread of arrival times with
+  [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md).
+
+- The gap between early and late colonists does not grow without bound
+  with `monopolization`: it is largest when \\1 / \rho\\ is close to the
+  spread of arrival times, and much faster adaptation brings every
+  population to the balance with migration and erases it. In a
+  simulation of 200 steps, the difference in the share of the gap closed
+  between colonists that arrived before and after the median rose from
+  0.14 at \\\rho = 0.002\\ to 0.40 at 0.02 and fell to 0.11 at 0.2.
+  Choose the range of `monopolization` (for instance, a prior in
+  approximate Bayesian computation) from the arrival times of the
+  simulation.
+
+- Like the other trait deviations, they do not feed back on the
+  dynamics: early colonists are better matched to their site but do not
+  grow faster or compete better, so the demographic part of the
+  monopolization hypothesis is not simulated.
+
 ## References
 
 Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H.,
@@ -170,8 +287,21 @@ traits: what proportion of the species need to be measured? *Applied
 Vegetation Science*, 10, 91–96.
 [doi:10.1111/j.1654-109x.2007.tb00507.x](https://doi.org/10.1111/j.1654-109x.2007.tb00507.x)
 
+Urban, M. C., & De Meester, L. (2009). Community monopolization: local
+adaptation enhances priority effects in an evolving metacommunity.
+*Proceedings of the Royal Society B: Biological Sciences*, 276,
+4129–4138.
+[doi:10.1098/rspb.2009.1382](https://doi.org/10.1098/rspb.2009.1382)
+
+De Meester, L., Vanoverbeke, J., Kilsdonk, L. J., & Urban, M. C. (2016).
+Evolving perspectives on monopolization and priority effects. *Trends in
+Ecology & Evolution*, 31, 136–146.
+[doi:10.1016/j.tree.2015.12.009](https://doi.org/10.1016/j.tree.2015.12.009)
+
 ## See also
 
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
+for the arrival history;
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) for
 the T-statistics;
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md)
@@ -220,4 +350,18 @@ head(ind)
 #> 4 site1      t2          4        79 47.76196 46.10733        46.93465 47.59176
 #> 5 site1      t2          5        79 47.76196 46.10733        46.93465 43.93408
 #> 6 site1      t2          6        79 47.76196 46.10733        46.93465 44.05996
+# arrival-dependent deviations need colonisation after the start: extirpation and dispersal
+sim2 <- simulate_metacommunity(landscape_implicit(20), species_traits(tree),
+                               competition_matrix(tree, "phylo"), n_steps = 200,
+                               dispersal = 0.005, extirpation = 0.01)
+# founder effects: deviations set at colonisation, larger with few founders, eroded by
+# immigration
+founders <- sample_individuals(sim2, founder_sd = 2, intraspecific_sd = 0.5)
+# monopolization: early colonists close more of the gap to the environment of their site
+mono <- sample_individuals(sim2, monopolization = 0.02, intraspecific_sd = 0)
+closed <- (mono$population_mean - mono$optimum) / (mono$env - mono$optimum)
+early <- mono$arrival <= stats::median(mono$arrival)
+c(early = mean(closed[early]), late = mean(closed[!early]))
+#>     early      late 
+#> 0.7385448 0.3317174 
 ```

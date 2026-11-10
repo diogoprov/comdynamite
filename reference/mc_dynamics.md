@@ -94,13 +94,15 @@ mc_dynamics(
 
 ## Value
 
-List with `abundance` and `history`, as in
+List with `abundance`, `history`, the colonisation history (`arrival`,
+`propagule`, `immigrants`, `migrant_load`) and `n_steps`, as in
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 and `pool` as a logical matrix, or `NULL` without it.
 
 ## See also
 
 Other simulate metacommunities:
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),

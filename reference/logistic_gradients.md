@@ -60,6 +60,7 @@ metacommunity phylogenetics. *Ecology*, 93, S14–S30.
 ## See also
 
 Other simulate metacommunities:
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),

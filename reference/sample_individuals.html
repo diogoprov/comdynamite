@@ -78,7 +78,10 @@ T-statistics of Violle et al. (2012) (<code><a href="tstats.html">tstats()</a></
 <span>  step <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cover <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  min_n <span class="op">=</span> <span class="fl">1</span></span>
+<span>  min_n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  founder_sd <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  monopolization <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  gene_flow <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -150,6 +153,27 @@ abundance (Pakeman &amp; Quested 2007). <code>NULL</code> (the default) measures
 <dd><p>Populations with fewer individuals measured than <code>min_n</code> are left out, as when
 populations with a single individual are removed before computing T-statistics.</p></dd>
 
+
+<dt id="arg-founder-sd">founder_sd<a class="anchor" aria-label="anchor" href="#arg-founder-sd"></a></dt>
+<dd><p>Standard deviation of the founder deviation of a population founded by a
+single individual (\(s_f\) in the section Founder effects and monopolization); the
+deviation of a population founded by \(n\) individuals has standard deviation
+<code>founder_sd / sqrt(n)</code>. One value or one per species; 0 (the default) for none.</p></dd>
+
+
+<dt id="arg-monopolization">monopolization<a class="anchor" aria-label="anchor" href="#arg-monopolization"></a></dt>
+<dd><p>Rate per time step (\(\rho\)) at which a population closes the
+gap between the optimum of its species and the environment of its site after it arrives,
+so that early colonists end up better adapted than late ones. One value or one per
+species; 0 (the default) for none.</p></dd>
+
+
+<dt id="arg-gene-flow">gene_flow<a class="anchor" aria-label="anchor" href="#arg-gene-flow"></a></dt>
+<dd><p>Rate (\(\gamma\)) at which immigration erodes founder deviations
+and adaptation since arrival, per unit of migrant load: 1 (the default) when every
+newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
+Has no effect without <code>founder_sd</code> or <code>monopolization</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -157,8 +181,9 @@ populations with a single individual are removed before computing T-statistics.<
 <code>individual</code> (its number within the population), <code>abundance</code> (of the population), <code>env</code>
 (of the site), <code>optimum</code> (of the species), <code>population_mean</code> (the expected value of the
 population, \(m_{ij}\) above, after character displacement) and
-<code>trait</code>. Populations with no
-individual measured are absent.</p>
+<code>trait</code>, and with <code>founder_sd</code> or <code>monopolization</code> also <code>arrival</code> (the step at which the
+population was founded), before <code>trait</code>. Populations with no individual measured are
+absent.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -200,6 +225,68 @@ that local adaptation would leave in samples of individuals, not its demographic
 consequences.</p>
     </div>
     <div class="section level2">
+    <h2 id="founder-effects-and-monopolization">Founder effects and monopolization<a class="anchor" aria-label="anchor" href="#founder-effects-and-monopolization"></a></h2>
+
+
+<p><code>population_sd</code> and <code>local_adaptation</code> treat every population of a species alike, whatever
+its history. Two further mechanisms make the mean of a population depend on when and how it
+was founded, from the colonisation history recorded by <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> (see
+<code><a href="colonisation_history.html">colonisation_history()</a></code>). Both need the last step (<code>step = NULL</code>). For a population founded
+at step \(a_{ij}\) by \(n_{ij}\) individuals, with migrant load
+\(L_{ij}\) since then and \(T\) steps in the simulation:</p><ul><li><p><strong>Founder effects</strong> (<code>founder_sd</code>, \(s_f\)): the population starts from the mean of
+its founders, a deviation \(f_{ij} \sim N(0, s_f^2 / n_{ij})\)
+from the species mean, so few founders deviate more. <code>founder_sd</code> is thus the deviation
+of a population founded by a single individual. The deviation persists, and gene flow
+erodes it toward the species mean: it is multiplied by \(g_{ij} = \exp(-\gamma
+  L_{ij})\), where \(\gamma\) is <code>gene_flow</code>.</p></li>
+<li><p><strong>Monopolization</strong> (<code>monopolization</code>, a rate \(\rho\) per step): after arrival the
+population adapts to its site, closing a share \(u_{ij}\) of the gap between the
+optimum of the species and the environment. Without gene flow, \(u_{ij} = 1 -
+  \exp(-\rho t_{ij})\), where \(t_{ij} = T - a_{ij}\) is the age of the population. Newcomers pull it back toward the species mean, so
+\(du/dt = \rho (1 - u) - \gamma \bar m u\), with
+\(\bar m = L_{ij} / t_{ij}\) the mean migrant load per step since
+arrival, whose solution is \(u_{ij} = \rho / (\rho + \gamma \bar m) [1 - \exp(-\rho
+  t_{ij} - \gamma L_{ij})]\): adaptation tends to a balance between selection and migration instead of
+reaching the environment. Early colonists have had longer to adapt and end up closer to
+the environment of their site than late arrivals, which is the evolution-mediated
+priority effect of the monopolization hypothesis (Urban &amp; De Meester 2009; De Meester et
+al. 2016). The gap between early and late colonists is largest when \(1 / \rho\) is close to the spread of arrival times; much faster adaptation brings every
+population to the balance and erases it. It combines with
+<code>local_adaptation</code> (\(h_j\)) so that the share of the gap closed is
+\(h_j + (1 - h_j) u_{ij}\).</p></li>
+</ul><p>The mean of the population is then \(\theta_j + [h_j + (1 - h_j) u_{ij}] (E_i -
+\theta_j) + d_{ij} + g_{ij} f_{ij}\), before character displacement. Use <code>population_sd</code> for deviations unrelated to
+history (drift at equilibrium, unmeasured microhabitat), <code>local_adaptation</code> for adaptation
+that every population reaches whatever its age, <code>founder_sd</code> for random deviations set at
+colonisation and kept by isolation, and <code>monopolization</code> for adaptation that depends on
+arrival order. The two arrival-dependent mechanisms leave different signatures: founder
+deviations are random in direction and largest in populations founded by few individuals
+and receiving few immigrants, while monopolization moves populations toward the environment
+of their site, more so the earlier they arrived. With <code>gene_flow = 0</code> neither is eroded.
+Erosion of founder deviations multiplies them by the product of the shares of residents over
+the steps, approximated by \(\exp(-L)\); monopolization assumes newcomers arrived
+at a constant rate since arrival, \(\bar m\), rather than following the steps in
+which they actually came.</p>
+<p>Limits of the two mechanisms:</p><ul><li><p>They need the last step (<code>step = NULL</code>): the colonisation history is recorded at the end
+of the simulation only, so a recorded <code>step</code> other than the last gives an error.</p></li>
+<li><p>They need arrivals spread over time. Without extirpation and with little dispersal, every
+population is founded at the start or during <code>seed_steps</code>, all have about the same age,
+and monopolization cannot separate early from late colonists. Use <code>extirpation &gt; 0</code> and
+some <code>dispersal</code>, so that populations are lost and founded again throughout the
+simulation, and check the spread of arrival times with <code><a href="colonisation_history.html">colonisation_history()</a></code>.</p></li>
+<li><p>The gap between early and late colonists does not grow without bound with
+<code>monopolization</code>: it is largest when \(1 / \rho\) is close to the spread of
+arrival times, and much faster adaptation brings every population to the balance with
+migration and erases it. In a simulation of 200 steps, the difference in the share of the
+gap closed between colonists that arrived before and after the median rose from 0.14 at
+\(\rho = 0.002\) to 0.40 at 0.02 and fell to 0.11 at 0.2. Choose the range
+of <code>monopolization</code> (for instance, a prior in approximate Bayesian computation) from the
+arrival times of the simulation.</p></li>
+<li><p>Like the other trait deviations, they do not feed back on the dynamics: early colonists
+are better matched to their site but do not grow faster or compete better, so the
+demographic part of the monopolization hypothesis is not simulated.</p></li>
+</ul></div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof,
 C., Jung, V., &amp; Messier, J. (2012). The return of the variance: intraspecific variability
@@ -208,10 +295,16 @@ in community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
 <p>Pakeman, R. J., &amp; Quested, H. M. (2007). Sampling plant functional traits: what proportion
 of the species need to be measured? <em>Applied Vegetation Science</em>, 10, 91–96.
 <a href="https://doi.org/10.1111/j.1654-109x.2007.tb00507.x" class="external-link">doi:10.1111/j.1654-109x.2007.tb00507.x</a></p>
+<p>Urban, M. C., &amp; De Meester, L. (2009). Community monopolization: local adaptation enhances
+priority effects in an evolving metacommunity. <em>Proceedings of the Royal Society B:
+Biological Sciences</em>, 276, 4129–4138. <a href="https://doi.org/10.1098/rspb.2009.1382" class="external-link">doi:10.1098/rspb.2009.1382</a></p>
+<p>De Meester, L., Vanoverbeke, J., Kilsdonk, L. J., &amp; Urban, M. C. (2016). Evolving
+perspectives on monopolization and priority effects. <em>Trends in Ecology &amp; Evolution</em>, 31,
+136–146. <a href="https://doi.org/10.1016/j.tree.2015.12.009" class="external-link">doi:10.1016/j.tree.2015.12.009</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="tstats.html">tstats()</a></code> for the T-statistics; <code><a href="subsample_individuals.html">subsample_individuals()</a></code> and
+    <div class="dont-index"><p><code><a href="colonisation_history.html">colonisation_history()</a></code> for the arrival history; <code><a href="tstats.html">tstats()</a></code> for the T-statistics; <code><a href="subsample_individuals.html">subsample_individuals()</a></code> and
 <code><a href="trait_rarefaction.html">trait_rarefaction()</a></code> for the same sampling schemes on real data.</p>
 <p>Other trait variation among individuals:
 <code><a href="community_index.html">community_index()</a></code>,
@@ -254,6 +347,20 @@ of the species need to be measured? <em>Applied Vegetation Science</em>, 10, 91�
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 site1      t2          4        79 47.76196 46.10733        46.93465 47.59176</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5 site1      t2          5        79 47.76196 46.10733        46.93465 43.93408</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6 site1      t2          6        79 47.76196 46.10733        46.93465 44.05996</span>
+<span class="r-in"><span><span class="co"># arrival-dependent deviations need colonisation after the start: extirpation and dispersal</span></span></span>
+<span class="r-in"><span><span class="va">sim2</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">20</span><span class="op">)</span>, <span class="fu"><a href="species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                               <span class="fu"><a href="competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"phylo"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">200</span>,</span></span>
+<span class="r-in"><span>                               dispersal <span class="op">=</span> <span class="fl">0.005</span>, extirpation <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># founder effects: deviations set at colonisation, larger with few founders, eroded by</span></span></span>
+<span class="r-in"><span><span class="co"># immigration</span></span></span>
+<span class="r-in"><span><span class="va">founders</span> <span class="op">&lt;-</span> <span class="fu">sample_individuals</span><span class="op">(</span><span class="va">sim2</span>, founder_sd <span class="op">=</span> <span class="fl">2</span>, intraspecific_sd <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># monopolization: early colonists close more of the gap to the environment of their site</span></span></span>
+<span class="r-in"><span><span class="va">mono</span> <span class="op">&lt;-</span> <span class="fu">sample_individuals</span><span class="op">(</span><span class="va">sim2</span>, monopolization <span class="op">=</span> <span class="fl">0.02</span>, intraspecific_sd <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">closed</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">mono</span><span class="op">$</span><span class="va">population_mean</span> <span class="op">-</span> <span class="va">mono</span><span class="op">$</span><span class="va">optimum</span><span class="op">)</span> <span class="op">/</span> <span class="op">(</span><span class="va">mono</span><span class="op">$</span><span class="va">env</span> <span class="op">-</span> <span class="va">mono</span><span class="op">$</span><span class="va">optimum</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">early</span> <span class="op">&lt;-</span> <span class="va">mono</span><span class="op">$</span><span class="va">arrival</span> <span class="op">&lt;=</span> <span class="fu">stats</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/stats/median.html" class="external-link">median</a></span><span class="op">(</span><span class="va">mono</span><span class="op">$</span><span class="va">arrival</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>early <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">closed</span><span class="op">[</span><span class="va">early</span><span class="op">]</span><span class="op">)</span>, late <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">closed</span><span class="op">[</span><span class="op">!</span><span class="va">early</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     early      late </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.7385448 0.3317174 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

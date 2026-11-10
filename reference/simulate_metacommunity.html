@@ -177,7 +177,8 @@ available with <code>env_time</code>. Columns without names take the names of <c
 at the last step), <code>history</code> (sites x species x recorded steps array, or
 <code>NULL</code>), and the <code>landscape</code>, <code>traits</code>, <code>alpha</code>, <code>dispersal</code>, <code>extirpation</code> and <code>pool</code>
 used, <code>env</code> when given, and <code>tree</code> when the traits came from <code><a href="species_traits.html">species_traits()</a></code> with a
-tree. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
+tree, the colonisation history (<code>arrival</code>, <code>propagule</code>, <code>immigrants</code>, <code>migrant_load</code>;
+see the section Colonisation history) and <code>n_steps</code>. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
 <code>optimum_</code> column of traits per axis), while <code><a href="summary_stats.html">summary_stats()</a></code> uses the first axis unless
 given <code>trait</code> and <code>env</code>, and <code><a href="sample_individuals.html">sample_individuals()</a></code> needs a single axis.</p>
     </div>
@@ -220,6 +221,30 @@ one simulated with gen3sis or a model of state-dependent diversification, enters
 <code><a href="species_traits.html">species_traits()</a></code>; drop extinct lineages first, since they have no distribution.</p>
     </div>
     <div class="section level2">
+    <h2 id="colonisation-history">Colonisation history<a class="anchor" aria-label="anchor" href="#colonisation-history"></a></h2>
+
+
+<p>The simulation records, for every population (a species at a site) present at the last step,
+when and how it was founded, for arrival-dependent trait deviations in
+<code><a href="sample_individuals.html">sample_individuals()</a></code> (founder effects and monopolization):</p><ul><li><p><code>arrival</code>, the step at which the population was last founded: the first step at whose end
+it is present after being absent at the end of the previous one. Populations present at
+the end of step 1, from <code>initial</code> or the first draw of seeds, have arrival 1; a population
+lost to extirpation or competition and founded again gets the step of the new arrival.</p></li>
+<li><p><code>propagule</code>, the number of founders: the seeds (or <code>initial</code> individuals) and immigrants
+that reached the site at the step of arrival.</p></li>
+<li><p><code>immigrants</code>, the number of immigrants and seeds that reached the population after its
+arrival.</p></li>
+<li><p><code>migrant_load</code>, the sum over the steps since arrival of the share of the population made
+up of newcomers: immigrants over the abundance after dispersal, plus seeds over the
+abundance before reproduction. Each newcomer carries the species mean, so under complete
+mixing a deviation of the population shrinks by a factor \(1 - m_t \approx
+  e^{-m_t}\) at a step where newcomers make up a share \(m_t\),
+and by about \(e^{-L}\) over the steps with migrant load \(L\).</p></li>
+</ul><p>Each is a sites x species matrix, <code>NA</code> for populations absent at the last step. Recording
+them takes no random draws, so abundances are the same as without them for the same seed.
+<code><a href="colonisation_history.html">colonisation_history()</a></code> returns them as a table.</p>
+    </div>
+    <div class="section level2">
     <h2 id="article-and-archived-code">Article and archived code<a class="anchor" aria-label="anchor" href="#article-and-archived-code"></a></h2>
 
 
@@ -245,6 +270,7 @@ community ecology. <em>Ecology Letters</em>, 23, 1314–1329.
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other simulate metacommunities:
+<code><a href="colonisation_history.html">colonisation_history()</a></code>,
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
 <code><a href="mc_dynamics.html">mc_dynamics()</a></code>,

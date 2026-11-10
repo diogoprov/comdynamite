@@ -119,7 +119,9 @@ the last step), `history` (sites x species x recorded steps array, or
 `extirpation` and `pool` used, `env` when given, and `tree` when the
 traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
-with a tree. With a niche of several axes,
+with a tree, the colonisation history (`arrival`, `propagule`,
+`immigrants`, `migrant_load`; see the section Colonisation history) and
+`n_steps`. With a niche of several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while
@@ -180,6 +182,42 @@ state-dependent diversification, enters through
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md);
 drop extinct lineages first, since they have no distribution.
 
+## Colonisation history
+
+The simulation records, for every population (a species at a site)
+present at the last step, when and how it was founded, for
+arrival-dependent trait deviations in
+[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+(founder effects and monopolization):
+
+- `arrival`, the step at which the population was last founded: the
+  first step at whose end it is present after being absent at the end of
+  the previous one. Populations present at the end of step 1, from
+  `initial` or the first draw of seeds, have arrival 1; a population
+  lost to extirpation or competition and founded again gets the step of
+  the new arrival.
+
+- `propagule`, the number of founders: the seeds (or `initial`
+  individuals) and immigrants that reached the site at the step of
+  arrival.
+
+- `immigrants`, the number of immigrants and seeds that reached the
+  population after its arrival.
+
+- `migrant_load`, the sum over the steps since arrival of the share of
+  the population made up of newcomers: immigrants over the abundance
+  after dispersal, plus seeds over the abundance before reproduction.
+  Each newcomer carries the species mean, so under complete mixing a
+  deviation of the population shrinks by a factor \\1 - m_t \approx
+  e^{-m_t}\\ at a step where newcomers make up a share \\m_t\\, and by
+  about \\e^{-L}\\ over the steps with migrant load \\L\\.
+
+Each is a sites x species matrix, `NA` for populations absent at the
+last step. Recording them takes no random draws, so abundances are the
+same as without them for the same seed.
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
+returns them as a table.
+
 ## Article and archived code
 
 The article of Thompson et al. (2020) and the code archived with it
@@ -204,6 +242,7 @@ community ecology. *Ecology Letters*, 23, 1314–1329.
 ## See also
 
 Other simulate metacommunities:
+[`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
