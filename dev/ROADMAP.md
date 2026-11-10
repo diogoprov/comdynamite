@@ -509,13 +509,14 @@ levantamento podem não informar a dispersão.
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
 
-## v0.7.0: evolução de traits e modelos nulos
+## v0.7.0: evolução de traits e modelos nulos (concluída em 2026-11-10)
 
-Estado em 2026-11-09: itens de código concluídos e mergeados (PRs 30–65), incluindo o PR B do
-DAMOCLES (PR 56), as opções novas de `population_shifts()` (PR 53), o modelo Stan de
-`trait_gradient_bayes()` (PR 64) e os efeitos de fundador (PR 65). O artigo de taxas por ramo
-(`vignettes/articles/rates-assembly.Rmd`) fecha a versão como estudo de recuperação; o teste
-causal (montagem → taxas de evolução de traits) fica para o bloco eco-evolutivo.
+Publicada como 0.7.0 em 2026-11-10 (PR 69, tag `v0.7.0`), com todos os itens concluídos e
+mergeados (PRs 30–67). Entre eles estão o PR B do DAMOCLES (PR 56), as opções novas de
+`population_shifts()` (PR 53), o modelo Stan de `trait_gradient_bayes()` (PR 64), os efeitos
+de fundador (PR 65) e o artigo de taxas por ramo (`vignettes/articles/rates-assembly.Rmd`,
+PR 67), escrito como estudo de recuperação. O teste causal (montagem → taxas de evolução de
+traits) fica para o bloco eco-evolutivo. DOI da versão: `10.5281/zenodo.24097553`.
 
 Objetivo: ampliar os modelos de traits e os nulos com dinâmica histórica, chamando os
 pacotes de referência em vez de reimplementá-los.
