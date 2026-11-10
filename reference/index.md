@@ -215,7 +215,7 @@ analysis, community trait indices and decompositions of trait variation.
 - [`plot(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md)
   : Plot the decomposition of community trait means
 - [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md)
-  : Variance components of traits across nested levels
+  : Variance components of traits across nested or crossed levels
 - [`plot(`*`<nested_variance>`*`)`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md)
   : Plot the shares of variance across nested levels
 - [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md)
