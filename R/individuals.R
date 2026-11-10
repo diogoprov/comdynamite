@@ -98,6 +98,27 @@
 #' at a constant rate since arrival, \eqn{\bar m}{mbar}, rather than following the steps in
 #' which they actually came.
 #'
+#' Limits of the two mechanisms:
+#'
+#' * They need the last step (`step = NULL`): the colonisation history is recorded at the end
+#'   of the simulation only, so a recorded `step` other than the last gives an error.
+#' * They need arrivals spread over time. Without extirpation and with little dispersal, every
+#'   population is founded at the start or during `seed_steps`, all have about the same age,
+#'   and monopolization cannot separate early from late colonists. Use `extirpation > 0` and
+#'   some `dispersal`, so that populations are lost and founded again throughout the
+#'   simulation, and check the spread of arrival times with [colonisation_history()].
+#' * The gap between early and late colonists does not grow without bound with
+#'   `monopolization`: it is largest when \eqn{1 / \rho}{1 / rho} is close to the spread of
+#'   arrival times, and much faster adaptation brings every population to the balance with
+#'   migration and erases it. In a simulation of 200 steps, the difference in the share of the
+#'   gap closed between colonists that arrived before and after the median rose from 0.14 at
+#'   \eqn{\rho = 0.002}{rho = 0.002} to 0.40 at 0.02 and fell to 0.11 at 0.2. Choose the range
+#'   of `monopolization` (for instance, a prior in approximate Bayesian computation) from the
+#'   arrival times of the simulation.
+#' * Like the other trait deviations, they do not feed back on the dynamics: early colonists
+#'   are better matched to their site but do not grow faster or compete better, so the
+#'   demographic part of the monopolization hypothesis is not simulated.
+#'
 #' @param x An `mc_sim` object from [simulate_metacommunity()].
 #' @param n Number of individuals measured in each population, or all of them when the
 #'   population is smaller. Ignored when `fraction` is given.
