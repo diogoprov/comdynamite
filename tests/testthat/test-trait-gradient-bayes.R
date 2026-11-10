@@ -153,3 +153,29 @@ test_that("trait_gradient_bayes() samples and builds the result", {
 test_that("pp_check refuses an unknown response", {
   expect_error(pp_check.mc_trait_gradient_bayes(list(), resp = "x"))
 })
+
+test_that("every variable read back is declared in the Stan model", {
+  code <- readLines(system.file("stan", "trait_gradient.stan", package = "comdynamite"))
+  lines <- grep("^\\s*(real|vector|matrix|cholesky_factor_corr)", code, value = TRUE)
+  lines <- gsub("<[^>]*>", "", lines) # drop bounds
+  declared <- sub("^\\s*\\S+\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*(=|;).*", "\\1", lines)
+  expect_true(all(setdiff(tg_bayes_variables(), "lp__") %in% declared))
+})
+
+test_that("pp_check overlays replicated data for either response", {
+  skip_if_not_installed("bayesplot")
+  skip_if_not_installed("posterior")
+  d <- tgb_sim()
+  p <- d$tg$populations
+  n_p <- sum(!is.na(p$site_mean))
+  n_t <- sum(p$measured)
+  fit <- list(draws = function(variables) {
+    n <- if (variables == "y_rep_p") n_p else n_t
+    arr <- array(rnorm(20 * 2 * n), c(20, 2, n),
+                 dimnames = list(NULL, NULL, paste0(variables, "[", seq_len(n), "]")))
+    posterior::as_draws_array(arr)
+  })
+  obj <- structure(list(fit = fit, data = p), class = "mc_trait_gradient_bayes")
+  expect_s3_class(pp_check.mc_trait_gradient_bayes(obj, ndraws = 10), "ggplot")
+  expect_s3_class(pp_check.mc_trait_gradient_bayes(obj, resp = "trait"), "ggplot")
+})

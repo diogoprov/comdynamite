@@ -355,7 +355,7 @@ pp_check.mc_trait_gradient_bayes <- function(object, resp = c("sitemean", "trait
     y <- p$trait[p$measured]
     variable <- "y_rep_t"
   }
-  yrep <- posterior::as_draws_matrix(object$fit$draws(variables = variable)) # nocov start
+  yrep <- posterior::as_draws_matrix(object$fit$draws(variables = variable))
   rows <- sample.int(nrow(yrep), min(ndraws, nrow(yrep)))
-  bayesplot::ppc_dens_overlay(y, unclass(yrep)[rows, , drop = FALSE], ...) # nocov end
+  bayesplot::ppc_dens_overlay(y, unclass(yrep)[rows, , drop = FALSE], ...)
 }
