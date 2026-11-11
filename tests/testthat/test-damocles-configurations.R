@@ -108,6 +108,7 @@ test_that("random partitions that split the tree as the original are excluded", 
   expect_equal(adjusted_rand(reg, reg), 1)
   swapped <- factor(ifelse(reg == "A", "0", "A"))
   expect_equal(adjusted_rand(reg, swapped), 1)
+  expect_equal(adjusted_rand(rep("a", 4), rep("b", 4)), 1)  # one block each: same partition
   expect_error(random_regimes(tree, reg), "matching `regimes`")
   set.seed(4)
   comm <- simulate_damocles(tree, 1, 1, n = 4)
