@@ -8,6 +8,8 @@
 - The article "Testing the whole tree" cites the origin of the principal coordinates of
   phylogenetic structure and explains why the curve of phylogenetic signal of the package PCPS
   (`pcps.curve()`) is not implemented.
+- The article "Rates and assembly" rejects ES-sim at p ≤ 0.05, the rule of the preprint, instead
+  of p < 0.05. With 999 null draws this changes three cells by one replicate each.
 
 # comdynamite 0.7.0
 
