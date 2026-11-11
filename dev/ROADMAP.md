@@ -499,15 +499,32 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 - O que o comdynamite acrescenta: espaço com muitos sítios, pacote em R (o código deles
   é MATLAB), cobertura dos posteriores e checagem do modelo, que o caso de estudo não faz.
 
-- [ ] Tabela de referência: sortear parâmetros dos priors e simular, com a árvore, o
-      ambiente e as coordenadas observados e com detecção imperfeita.
-- [ ] Estimação e escolha de modelos com `abc` (Csilléry et al. 2012) e `abcrf` (Pudlo
-      et al. 2015), em `Suggests`. Random forests lidam bem com muitas estatísticas
+- [x] Tabela de referência: `abc_table()` (2026-11-11) sorteia parâmetros de priors uniformes
+      e simula com a árvore, o ambiente e as coordenadas observados.
+- [ ] Detecção imperfeita na tabela de referência.
+- [x] Estimação com `abcrf` (Raynal et al. 2019), em `Suggests`: `abc_fit()`, `predict()` e
+      `abc_importance()` (2026-11-11). Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.
+- [ ] Escolha de modelos com `abcrf::abcrf()` (Pudlo et al. 2015) e erro de classificação
+      out-of-bag; `abc` (Csilléry et al. 2012) só se a comparação com rejeição for útil.
 - [x] Custo, medido em `data-raw/benchmark_dynamics.R`: 0,7 s para 50 espécies, 100 sítios
       e 2200 passos, como em Guzman et al. (2022), ou cerca de 19 h por 100 mil simulações em
       um núcleo; a grade 5 x 5 do piloto levou 1,1 min por 5200 simulações em 6 núcleos.
-- [ ] Recuperação em dados simulados com parâmetros conhecidos: viés e cobertura.
+- [x] Recuperação em dados simulados com parâmetros conhecidos: viés e cobertura
+      (`abc_recovery()`, 2026-11-11). `data-raw/abc_recovery.R` repete o desenho do piloto
+      grande (50 mil simulações, 200 pseudo-observações, 500 árvores; 102 min de simulação
+      em 6 núcleos, 5 min de florestas; a tabela fica no rds). Com a série, R2 de 0,985
+      (`log_dispersal`), 0,89 (`inter_max`), 0,92 (`sigma_mean`) e 0,55 (`lambda`), quase o
+      mesmo da rejeição com tolerância 0,01 (0,98; 0,90; 0,93; 0,53). A cobertura do
+      intervalo de 90% foi de 0,90–0,975: calibrada para `inter_max` e `lambda`, que passam
+      no critério, e conservadora para `log_dispersal` (0,955) e `sigma_mean` (0,975), que
+      falham só por cobrir demais, com intervalos mais largos que os da rejeição (0,16 contra
+      0,11 e 0,31 contra 0,23 da amplitude). A rejeição com tolerância 0,01 cobriu 0,88–0,905.
+      Conclusão: o ABCrf não estima melhor que a rejeição bem ajustada neste desenho; a
+      vantagem é dispensar a escolha da tolerância, que no piloto mudava a cobertura de 0,64
+      (0,002) para 0,90 (0,01), e nunca dar intervalos estreitos demais. `lambda` continua no
+      limite (R2 0,55) e vem quase só do K de Blomberg dos ótimos (importância 0,54), com a
+      mesma ressalva do piloto.
 
 Avaliação do modelo, sempre em conjunto com a inferência:
 
@@ -1024,6 +1041,7 @@ Conferidas no Crossref em 2026-11-05.
 - Pontarp, M., et al. (2019). *Methods in Ecology and Evolution*, 10, 450–460. https://doi.org/10.1111/2041-210x.13129
 - Prangle, D., et al. (2014). *Statistical Applications in Genetics and Molecular Biology*, 13, 67–82. https://doi.org/10.1515/sagmb-2013-0012
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
+- Raynal, L., et al. (2019). *Bioinformatics*, 35, 1720–1728. https://doi.org/10.1093/bioinformatics/bty867 (verificada no Crossref em 2026-11-11)
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - McArdle, B. H., & Anderson, M. J. (2001). *Ecology*, 82, 290–297. https://doi.org/10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2

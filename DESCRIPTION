@@ -29,6 +29,7 @@ Imports:
     stats,
     utils
 Suggests:
+    abcrf,
     adespatial,
     bayesplot,
     cati,

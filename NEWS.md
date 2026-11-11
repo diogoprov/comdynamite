@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- Inference by approximate Bayesian computation with random forests (Raynal et al. 2019), with
+  abcrf in Suggests. `abc_table()` draws parameters from uniform priors and simulates a
+  reference table, `abc_fit()` fits one regression forest per parameter, `predict()` gives the
+  posterior median and a credible interval for observed statistics, `abc_importance()` ranks
+  the statistics, and `abc_recovery()` measures R2, bias and coverage in pseudo-observations
+  left out of the table. `data-raw/abc_recovery.R` repeats the design of the ABC pilot: the forests recovered
+  the parameters about as well as rejection ABC at its best tolerance, without having to choose
+  one, with calibrated or conservative intervals.
 - `plot()` of `pcps_test()` has a `clades` argument. It takes either the number of the
   deepest clades of the tree or a vector of clade names, such as families, named by species,
   and draws the species as stars coloured by clade, each clade with its convex hull and name,
