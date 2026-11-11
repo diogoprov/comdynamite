@@ -191,11 +191,20 @@ print.summary.mc_damocles_samples <- function(x, ...) {
 #' those of its replacement (shared edges over edges in either) must not exceed it. With
 #' `max_overlap = 1` any edge of the right size can be drawn.
 #'
+#' A clade can also be replaced by its complement: when the clade of a regime is one of the two
+#' clades at the root, the other one has no edge in common with it but splits the tree in the
+#' same way, and the random partition is the original one with the regimes swapped (in trees with
+#' a shift in the rate of speciation, the faster clade often holds most of the tree). So
+#' `max_overlap` also bounds the agreement between the whole partitions, measured by the
+#' adjusted Rand index between the regimes of the edges (1 for the same partition, whatever the
+#' labels; about 0 for unrelated ones); draws above it are discarded.
+#'
 #' @param tree A rooted `phylo` tree.
 #' @param regimes Regime of each edge, in the order of `tree$edge`.
 #' @param tolerance Largest ratio between the sizes of a clade and its random replacement.
 #' @param max_overlap Largest Jaccard index between the edges of a clade and those of its
-#'   random replacement, between 0 and 1.
+#'   random replacement, and largest adjusted Rand index between `regimes` and the random
+#'   partition, between 0 and 1.
 #' @return A factor with one regime per edge, with the levels of `regimes`.
 #' @seealso [damocles_partition_test()], [clade_regimes()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -248,12 +257,27 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
       used[pick] <- TRUE
       out[subtree[, pick]] <- labels[start]
     }
-    if (setequal(unique(out), levels(regimes))) return(factor(out, levels = levels(regimes)))
+    if (setequal(unique(out), levels(regimes)) &&
+        adjusted_rand(out, labels) <= max_overlap + 1e-12) {
+      return(factor(out, levels = levels(regimes)))
+    }
   }
-  # nocov start: needs 100 draws in a row in which a clade covers another
-  stop("could not place every regime without one covering another; increase `tolerance`",
-       call. = FALSE)
-  # nocov end
+  stop("could not place every regime without one covering another or the partition matching ",
+       "`regimes`; increase `tolerance` or `max_overlap`", call. = FALSE)
+}
+
+# adjusted Rand index (Hubert & Arabie 1985, J. Classif. 2: 193-218, doi:10.1007/BF01908075)
+# between two partitions of the same items
+adjusted_rand <- function(a, b) {
+  pairs <- function(x) sum(x * (x - 1) / 2)
+  counts <- table(a, b)
+  index <- pairs(counts)
+  rows <- pairs(rowSums(counts))
+  cols <- pairs(colSums(counts))
+  expected <- rows * cols / pairs(length(a))
+  top <- (rows + cols) / 2
+  if (top == expected) return(1)
+  (index - expected) / (top - expected)
 }
 
 #' Test a partition of the tree against random partitions
@@ -288,6 +312,16 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
 #' edges) and colonisation three times faster in it, both tests rejected constant rates (p =
 #' 0.007 and 0.01; `data-raw/damocles_bamm.R`).
 #'
+#' The test needs room on the tree for clades like those of `regimes` elsewhere. When the
+#' partition tested is one of the clades at the root, or a clade holding most of the tree, the
+#' only placements allowed may split the tree as `regimes` does (its complement) or be few, and
+#' the random statistics then repeat a handful of values: the p-value falls at its smallest or
+#' at one depending on numerical noise. In simulations with one shift in the rate of speciation
+#' and no effect on local rates (`data-raw/s1_type1_shifts.R`), this made the test reject in 12%
+#' to 40% of replicates before random partitions matching `regimes` were excluded
+#' ([random_regimes()]). Random partitions are therefore counted (`n_distinct`), and with fewer
+#' than `min_distinct` distinct ones `p_random` is `NA`.
+#'
 #' @inheritParams damocles_fit
 #' @param regimes Regime of each edge of `tree`, in the order of `tree$edge`, with two or more
 #'   regimes.
@@ -295,12 +329,16 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
 #' @param tolerance,max_overlap Passed to [random_regimes()]: random clades hold between
 #'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes` and share
 #'   at most `max_overlap` of their edges with them (Jaccard index).
+#' @param min_distinct Fewest distinct random partitions for a p-value; with fewer, `p_random`
+#'   is `NA` with a warning.
 #' @param cores Number of cores, with random partitions fitted in parallel. Not available on
-#'   Windows, where one core is used. For reproducible p-values with more than one core, call
-#'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`.
+#'   Windows, where one core is used. The random partitions are drawn before the fits, so the
+#'   p-value does not depend on the number of cores.
 #' @return A list of class `mc_damocles_partition` with the observed `statistic`, its degrees
 #'   of freedom `df`, the chi-squared p-value `p_chisq`, the p-value against random partitions
-#'   `p_random`, the statistics of the random partitions `null`, and `fit`, the fit with
+#'   `p_random` (`NA` with fewer than `min_distinct` distinct random partitions), the statistics
+#'   of the random partitions `null`, the number of distinct random partitions `n_distinct`, and
+#'   `fit`, the fit with
 #'   `regimes`.
 #' @seealso [random_regimes()], [damocles_samples()], [damocles_lrt()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -313,11 +351,16 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
 damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
                                     vary = c("both", "gamma", "mu"),
                                     root = c("both", "absent", "present"), sympatry = 0,
-                                    tolerance = 2, max_overlap = 0.25, cores = 1) {
+                                    tolerance = 2, max_overlap = 0.25,
+                                    min_distinct = min(10, ceiling(n_rand / 2)),
+                                    cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
   if (length(n_rand) != 1 || !is.finite(n_rand) || n_rand < 1 || n_rand != round(n_rand)) {
     stop("`n_rand` must be one whole number, 1 or more", call. = FALSE)
+  }
+  if (length(min_distinct) != 1 || !is.finite(min_distinct) || min_distinct < 1) {
+    stop("`min_distinct` must be one number, 1 or more", call. = FALSE)
   }
   check_damocles_tree(tree)
   if (nlevels(droplevels(factor(regimes))) < 2) {
@@ -331,14 +374,35 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
   }
   fit <- fit_with(regimes)
   observed <- damocles_lrt(constant, fit)
-  null <- unlist(damocles_apply(seq_len(n_rand), function(i) {
-    reg <- random_regimes(tree, regimes, tolerance, max_overlap)
-    damocles_lrt(constant, fit_with(reg))$statistic[2]
+  # Draw the random partitions first, then fit each distinct one once: the p-value does not
+  # depend on the number of cores.
+  draws <- tryCatch(lapply(seq_len(n_rand), function(i) {
+    random_regimes(tree, regimes, tolerance, max_overlap)
+  }), error = function(e) e)
+  if (inherits(draws, "error")) {
+    warning("no random partition could be drawn (", conditionMessage(draws), "); `p_random` ",
+            "is NA", call. = FALSE)
+    draws <- list()
+  }
+  keys <- vapply(draws, function(r) paste(as.integer(r), collapse = ""), character(1))
+  distinct <- unique(keys)
+  stats <- unlist(damocles_apply(match(distinct, keys), function(i) {
+    damocles_lrt(constant, fit_with(draws[[i]]))$statistic[2]
   }, cores))
+  null <- if (length(draws)) unname(stats[match(keys, distinct)]) else numeric(0)
+  p_random <- if (length(distinct) >= min_distinct) {
+    (sum(null >= observed$statistic[2] - 1e-8) + 1) / (n_rand + 1)
+  } else {
+    if (length(draws)) {
+      warning("only ", length(distinct), " distinct random partitions in ", n_rand,
+              " draws (fewer than `min_distinct` = ", min_distinct, "): the tree has too few ",
+              "places for clades like those of `regimes`; `p_random` is NA", call. = FALSE)
+    }
+    NA_real_
+  }
   structure(list(statistic = observed$statistic[2], df = observed$df[2],
-                 p_chisq = observed$p_value[2],
-                 p_random = (sum(null >= observed$statistic[2] - 1e-8) + 1) / (n_rand + 1),
-                 null = null, fit = fit),
+                 p_chisq = observed$p_value[2], p_random = p_random, null = null,
+                 n_distinct = length(distinct), fit = fit),
             class = "mc_damocles_partition")
 }
 
@@ -348,7 +412,8 @@ print.mc_damocles_partition <- function(x, ...) {
   cat("Likelihood ratio against constant rates:", format(x$statistic, digits = 4), "on",
       x$df, "df\n")
   cat("p (chi-squared):", format(x$p_chisq, digits = 3), "\n")
-  cat("p (random partitions):", format(x$p_random, digits = 3), "\n")
+  cat("p (random partitions):", format(x$p_random, digits = 3), "(", x$n_distinct,
+      "distinct of", length(x$null), ")\n")
   invisible(x)
 }
 

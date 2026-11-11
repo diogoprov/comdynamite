@@ -14,6 +14,7 @@ damocles_partition_test(
   sympatry = 0,
   tolerance = 2,
   max_overlap = 0.25,
+  min_distinct = min(10, ceiling(n_rand/2)),
   cores = 1
 )
 }
@@ -44,14 +45,19 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \code{1 / tolerance} and \code{tolerance} times as many edges as the clades of \code{regimes} and share
 at most \code{max_overlap} of their edges with them (Jaccard index).}
 
+\item{min_distinct}{Fewest distinct random partitions for a p-value; with fewer, \code{p_random}
+is \code{NA} with a warning.}
+
 \item{cores}{Number of cores, with random partitions fitted in parallel. Not available on
-Windows, where one core is used. For reproducible p-values with more than one core, call
-\code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}.}
+Windows, where one core is used. The random partitions are drawn before the fits, so the
+p-value does not depend on the number of cores.}
 }
 \value{
 A list of class \code{mc_damocles_partition} with the observed \code{statistic}, its degrees
 of freedom \code{df}, the chi-squared p-value \code{p_chisq}, the p-value against random partitions
-\code{p_random}, the statistics of the random partitions \code{null}, and \code{fit}, the fit with
+\code{p_random} (\code{NA} with fewer than \code{min_distinct} distinct random partitions), the statistics
+of the random partitions \code{null}, the number of distinct random partitions \code{n_distinct}, and
+\code{fit}, the fit with
 \code{regimes}.
 }
 \description{
@@ -85,6 +91,16 @@ test asks whether the partition beats partitions of the same complexity placed s
 else. With the whales and the best BAMM configuration of BAMMtools (a regime on 69 of 172
 edges) and colonisation three times faster in it, both tests rejected constant rates (p =
 0.007 and 0.01; \code{data-raw/damocles_bamm.R}).
+
+The test needs room on the tree for clades like those of \code{regimes} elsewhere. When the
+partition tested is one of the clades at the root, or a clade holding most of the tree, the
+only placements allowed may split the tree as \code{regimes} does (its complement) or be few, and
+the random statistics then repeat a handful of values: the p-value falls at its smallest or
+at one depending on numerical noise. In simulations with one shift in the rate of speciation
+and no effect on local rates (\code{data-raw/s1_type1_shifts.R}), this made the test reject in 12\%
+to 40\% of replicates before random partitions matching \code{regimes} were excluded
+(\code{\link[=random_regimes]{random_regimes()}}). Random partitions are therefore counted (\code{n_distinct}), and with fewer
+than \code{min_distinct} distinct ones \code{p_random} is \code{NA}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

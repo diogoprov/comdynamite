@@ -12,7 +12,8 @@ test_that("random_regimes keeps the regimes and the sizes of the clades", {
   size <- damocles_subtree_size(tree)
   expect_identical(size[tree$edge[, 2] <= ape::Ntip(tree)], rep(1, ape::Ntip(tree)))
   expect_equal(sum(size[tree$edge[, 1] == ape::Ntip(tree) + 1]), nrow(tree$edge))
-  nodes <- ape::Ntip(tree) + c(2, 5)
+  # not a clade at the root, whose only random placements may split the tree in the same way
+  nodes <- ape::Ntip(tree) + c(3, 6)
   reg <- clade_regimes(tree, list(A = nodes[1], B = nodes[2]), stem = TRUE)
   for (i in 1:5) {
     r <- random_regimes(tree, reg)
@@ -86,6 +87,38 @@ test_that("damocles_partition_test compares a partition with random ones", {
   expect_output(print(res), "random partitions")
   expect_error(damocles_partition_test(comm, tree, rep("x", length(reg))), "two or more")
   expect_error(damocles_partition_test(comm, tree, reg, n_rand = 0), "n_rand")
+  expect_error(damocles_partition_test(comm, tree, reg, n_rand = 9, min_distinct = 0),
+               "min_distinct")
+  # Distinct partitions are fitted once; the p-value does not depend on the cores.
+  set.seed(3)
+  one <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma")
+  set.seed(3)
+  two <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma", cores = 2)
+  expect_identical(one$null, two$null)
+  expect_lte(one$n_distinct, 9)
+})
+
+test_that("random partitions that split the tree as the original are excluded", {
+  # A balanced tree: the clade of one daughter of the root has the other as its complement.
+  tree <- ape::read.tree(text = paste0("(((a:1,b:1):1,(c:1,d:1):1):1,((e:1,f:1):1,",
+                                       "(g:1,h:1):1):1);"))
+  # Regime A on the clade of node 10 and its stem, as a shift on that edge.
+  reg <- factor(ifelse(seq_len(nrow(tree$edge)) %in% 1:7, "A", "0"))
+  expect_equal(adjusted_rand(reg, reg), 1)
+  swapped <- factor(ifelse(reg == "A", "0", "A"))
+  expect_equal(adjusted_rand(reg, swapped), 1)
+  expect_error(random_regimes(tree, reg), "matching `regimes`")
+  set.seed(4)
+  comm <- simulate_damocles(tree, 1, 1, n = 4)
+  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma"),
+                 "no random partition")
+  expect_true(is.na(res$p_random))
+  expect_length(res$null, 0)
+  # With max_overlap = 1 the complement is allowed but gives a single distinct partition.
+  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma",
+                                                max_overlap = 1, min_distinct = 3),
+                 "distinct random partitions")
+  expect_true(is.na(res$p_random))
 })
 
 test_that("dr_rates follows the equal-splits definition", {
