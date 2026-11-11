@@ -8,6 +8,14 @@
 - The article "Testing the whole tree" cites the origin of the principal coordinates of
   phylogenetic structure and explains why the curve of phylogenetic signal of the package PCPS
   (`pcps.curve()`) is not implemented.
+- `random_regimes()` no longer draws partitions that split the tree as the original one, such
+  as the complement of a clade at the root: `max_overlap` now also bounds the adjusted Rand
+  index between the random and the original partition. In simulations with one shift in the
+  rate of speciation and no effect on local rates, such draws made `damocles_partition_test()`
+  reject in 12% to 40% of replicates. `damocles_partition_test()` draws the random partitions
+  before fitting them, so its p-value no longer depends on `cores`; fits each distinct
+  partition once; returns the number of distinct random partitions (`n_distinct`); and gives
+  `p_random = NA` with a warning when there are fewer than `min_distinct` of them.
 
 # comdynamite 0.7.0
 

@@ -19,7 +19,10 @@
 #    regimes (vary = "both", 49 random partitions) in the first PARTITION replicates of each
 #    setting, on the same tree and communities as the likelihood-ratio tests of that replicate
 #    (same seed); random clades within a factor 2 of the size of the true ones (tolerance = 2)
-#    with one shift and 3 with three, as nested regimes often find no placement within 2.
+#    with one shift and 3 with three, as nested regimes often find no placement within 2;
+#    random partitions that split the tree as the true one are excluded (random_regimes()), and
+#    replicates with fewer than 10 distinct random partitions have no p-value (`no_p` in the
+#    summary; left out of the rejection rate).
 # Settings: n_tips 112 or 250, n_shifts 1 or 3, ratio 2 or 4, n_comm 14 or 40, plus a control
 # with ratio 1 (shifts with no change in rate). REPS replicates per setting (default 500),
 # PARTITION replicates with the partition test (default 50), WORKERS processes (default 6).
@@ -79,7 +82,7 @@ one_partition <- function(setting) {
                                         tolerance = if (setting$n_shifts > 1) 3 else 2,
                                         cores = partition_cores))
   data.frame(p_partition = test$p_random, p_partition_chisq = test$p_chisq,
-             shifted_tips = mean(d$sim$tip_regime > 0))
+             n_distinct = test$n_distinct, shifted_tips = mean(d$sim$tip_regime > 0))
 }
 failed <- function(e, columns) {
   r <- as.data.frame(as.list(stats::setNames(rep(NA_real_, length(columns)), columns)))
@@ -106,7 +109,7 @@ cat("S1 (", mode, "): ", length(todo), " of ", nrow(jobs), " replicates to run o
 columns <- if (mode == "lrt") {
   c("p_both", "p_gamma", "p_dr", "shifted_tips", "shifted_edges", "convergence")
 } else {
-  c("p_partition", "p_partition_chisq", "shifted_tips")
+  c("p_partition", "p_partition_chisq", "n_distinct", "shifted_tips")
 }
 invisible(parallel::mclapply(todo, function(j) {
   s <- settings[jobs$setting[j], ]
@@ -140,6 +143,10 @@ summary <- do.call(rbind, lapply(split(results, results[, names(settings)], drop
     extra <- data.frame(shifted_tips = round(mean(d$shifted_tips, na.rm = TRUE), 2),
                         errors = sum(!is.na(d$error)))
     if (mode == "lrt") extra$not_converged <- sum(d$convergence != 0, na.rm = TRUE)
+    if (mode == "partition") {
+      extra$no_p <- sum(is.na(d$p_partition))
+      extra$distinct <- stats::median(d$n_distinct, na.rm = TRUE)
+    }
     cbind(d[1, names(settings)], rates, extra)
   }))
 summary <- summary[order(summary$ratio, summary$n_tips, summary$n_shifts, summary$n_comm), ]
