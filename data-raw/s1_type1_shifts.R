@@ -20,9 +20,9 @@
 #    setting, on the same tree and communities as the likelihood-ratio tests of that replicate
 #    (same seed); random clades within a factor 2 of the size of the true ones (tolerance = 2)
 #    with one shift and 3 with three, as nested regimes often find no placement within 2;
-#    random partitions that split the tree as the true one are excluded (random_regimes()), and
-#    replicates with fewer than 10 distinct random partitions have no p-value (`no_p` in the
-#    summary; left out of the rejection rate).
+#    random partitions that split the tree as the true one are excluded (random_regimes()) and
+#    each distinct random partition counts once in the p-value; `distinct` in the summary is
+#    the median number of distinct random partitions and `no_p` the replicates without any.
 # Settings: n_tips 112 or 250, n_shifts 1 or 3, ratio 2 or 4, n_comm 14 or 40, plus a control
 # with ratio 1 (shifts with no change in rate). REPS replicates per setting (default 500),
 # PARTITION replicates with the partition test (default 50), WORKERS processes (default 6).

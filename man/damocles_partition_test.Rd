@@ -14,7 +14,6 @@ damocles_partition_test(
   sympatry = 0,
   tolerance = 2,
   max_overlap = 0.25,
-  min_distinct = min(10, ceiling(n_rand/2)),
   cores = 1
 )
 }
@@ -29,7 +28,7 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{regimes}{Regime of each edge of \code{tree}, in the order of \code{tree$edge}, with two or more
 regimes.}
 
-\item{n_rand}{Number of random partitions.}
+\item{n_rand}{Number of random partitions drawn; each distinct one is fitted once.}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -45,9 +44,6 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \code{1 / tolerance} and \code{tolerance} times as many edges as the clades of \code{regimes} and share
 at most \code{max_overlap} of their edges with them (Jaccard index).}
 
-\item{min_distinct}{Fewest distinct random partitions for a p-value; with fewer, \code{p_random}
-is \code{NA} with a warning.}
-
 \item{cores}{Number of cores, with random partitions fitted in parallel. Not available on
 Windows, where one core is used. The random partitions are drawn before the fits, so the
 p-value does not depend on the number of cores.}
@@ -55,9 +51,8 @@ p-value does not depend on the number of cores.}
 \value{
 A list of class \code{mc_damocles_partition} with the observed \code{statistic}, its degrees
 of freedom \code{df}, the chi-squared p-value \code{p_chisq}, the p-value against random partitions
-\code{p_random} (\code{NA} with fewer than \code{min_distinct} distinct random partitions), the statistics
-of the random partitions \code{null}, the number of distinct random partitions \code{n_distinct}, and
-\code{fit}, the fit with
+\code{p_random} (\code{NA} when no random partition could be drawn), the statistics of the distinct
+random partitions \code{null}, their number \code{n_distinct}, and \code{fit}, the fit with
 \code{regimes}.
 }
 \description{
@@ -99,8 +94,12 @@ the random statistics then repeat a handful of values: the p-value falls at its 
 at one depending on numerical noise. In simulations with one shift in the rate of speciation
 and no effect on local rates (\code{data-raw/s1_type1_shifts.R}), this made the test reject in 12\%
 to 40\% of replicates before random partitions matching \code{regimes} were excluded
-(\code{\link[=random_regimes]{random_regimes()}}). Random partitions are therefore counted (\code{n_distinct}), and with fewer
-than \code{min_distinct} distinct ones \code{p_random} is \code{NA}.
+(\code{\link[=random_regimes]{random_regimes()}}) and before the p-value counted each distinct partition once. The
+\code{n_rand} draws are a way to find distinct placements: the p-value is the proportion of the
+distinct random partitions, plus the one tested, with a statistic as large or larger, so with
+fewer than 19 distinct ones it cannot fall below 0.05 (a warning says so). Trees with a strong
+shift in diversification often leave that little room; then only the chi-squared test of
+\code{\link[=damocles_lrt]{damocles_lrt()}} is available.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

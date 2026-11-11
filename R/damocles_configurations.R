@@ -319,26 +319,27 @@ adjusted_rand <- function(a, b) {
 #' at one depending on numerical noise. In simulations with one shift in the rate of speciation
 #' and no effect on local rates (`data-raw/s1_type1_shifts.R`), this made the test reject in 12%
 #' to 40% of replicates before random partitions matching `regimes` were excluded
-#' ([random_regimes()]). Random partitions are therefore counted (`n_distinct`), and with fewer
-#' than `min_distinct` distinct ones `p_random` is `NA`.
+#' ([random_regimes()]) and before the p-value counted each distinct partition once. The
+#' `n_rand` draws are a way to find distinct placements: the p-value is the proportion of the
+#' distinct random partitions, plus the one tested, with a statistic as large or larger, so with
+#' fewer than 19 distinct ones it cannot fall below 0.05 (a warning says so). Trees with a strong
+#' shift in diversification often leave that little room; then only the chi-squared test of
+#' [damocles_lrt()] is available.
 #'
 #' @inheritParams damocles_fit
 #' @param regimes Regime of each edge of `tree`, in the order of `tree$edge`, with two or more
 #'   regimes.
-#' @param n_rand Number of random partitions.
+#' @param n_rand Number of random partitions drawn; each distinct one is fitted once.
 #' @param tolerance,max_overlap Passed to [random_regimes()]: random clades hold between
 #'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes` and share
 #'   at most `max_overlap` of their edges with them (Jaccard index).
-#' @param min_distinct Fewest distinct random partitions for a p-value; with fewer, `p_random`
-#'   is `NA` with a warning.
 #' @param cores Number of cores, with random partitions fitted in parallel. Not available on
 #'   Windows, where one core is used. The random partitions are drawn before the fits, so the
 #'   p-value does not depend on the number of cores.
 #' @return A list of class `mc_damocles_partition` with the observed `statistic`, its degrees
 #'   of freedom `df`, the chi-squared p-value `p_chisq`, the p-value against random partitions
-#'   `p_random` (`NA` with fewer than `min_distinct` distinct random partitions), the statistics
-#'   of the random partitions `null`, the number of distinct random partitions `n_distinct`, and
-#'   `fit`, the fit with
+#'   `p_random` (`NA` when no random partition could be drawn), the statistics of the distinct
+#'   random partitions `null`, their number `n_distinct`, and `fit`, the fit with
 #'   `regimes`.
 #' @seealso [random_regimes()], [damocles_samples()], [damocles_lrt()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -351,16 +352,11 @@ adjusted_rand <- function(a, b) {
 damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
                                     vary = c("both", "gamma", "mu"),
                                     root = c("both", "absent", "present"), sympatry = 0,
-                                    tolerance = 2, max_overlap = 0.25,
-                                    min_distinct = min(10, ceiling(n_rand / 2)),
-                                    cores = 1) {
+                                    tolerance = 2, max_overlap = 0.25, cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
   if (length(n_rand) != 1 || !is.finite(n_rand) || n_rand < 1 || n_rand != round(n_rand)) {
     stop("`n_rand` must be one whole number, 1 or more", call. = FALSE)
-  }
-  if (length(min_distinct) != 1 || !is.finite(min_distinct) || min_distinct < 1) {
-    stop("`min_distinct` must be one number, 1 or more", call. = FALSE)
   }
   check_damocles_tree(tree)
   if (nlevels(droplevels(factor(regimes))) < 2) {
@@ -389,20 +385,22 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
   stats <- unlist(damocles_apply(match(distinct, keys), function(i) {
     damocles_lrt(constant, fit_with(draws[[i]]))$statistic[2]
   }, cores))
-  null <- if (length(draws)) unname(stats[match(keys, distinct)]) else numeric(0)
-  p_random <- if (length(distinct) >= min_distinct) {
-    (sum(null >= observed$statistic[2] - 1e-8) + 1) / (n_rand + 1)
+  null <- if (length(draws)) unname(stats) else numeric(0)
+  # Each distinct partition counts once: repeated draws of a few partitions would otherwise let
+  # the p-value fall below what the number of distinct alternatives allows.
+  p_random <- if (length(null)) {
+    (sum(null >= observed$statistic[2] - 1e-8) + 1) / (length(null) + 1)
   } else {
-    if (length(draws)) {
-      warning("only ", length(distinct), " distinct random partitions in ", n_rand,
-              " draws (fewer than `min_distinct` = ", min_distinct, "): the tree has too few ",
-              "places for clades like those of `regimes`; `p_random` is NA", call. = FALSE)
-    }
     NA_real_
+  }
+  if (length(null) && length(null) < 19) {
+    warning("only ", length(null), " distinct random partitions in ", n_rand, " draws: the ",
+            "tree has few places for clades like those of `regimes`, and `p_random` cannot be ",
+            "below ", format(1 / (length(null) + 1), digits = 2), call. = FALSE)
   }
   structure(list(statistic = observed$statistic[2], df = observed$df[2],
                  p_chisq = observed$p_value[2], p_random = p_random, null = null,
-                 n_distinct = length(distinct), fit = fit),
+                 n_distinct = length(null), fit = fit),
             class = "mc_damocles_partition")
 }
 
@@ -413,7 +411,7 @@ print.mc_damocles_partition <- function(x, ...) {
       x$df, "df\n")
   cat("p (chi-squared):", format(x$p_chisq, digits = 3), "\n")
   cat("p (random partitions):", format(x$p_random, digits = 3), "(", x$n_distinct,
-      "distinct of", length(x$null), ")\n")
+      "distinct random partitions )\n")
   invisible(x)
 }
 

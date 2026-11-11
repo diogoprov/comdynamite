@@ -13,9 +13,11 @@
   index between the random and the original partition. In simulations with one shift in the
   rate of speciation and no effect on local rates, such draws made `damocles_partition_test()`
   reject in 12% to 40% of replicates. `damocles_partition_test()` draws the random partitions
-  before fitting them, so its p-value no longer depends on `cores`; fits each distinct
-  partition once; returns the number of distinct random partitions (`n_distinct`); and gives
-  `p_random = NA` with a warning when there are fewer than `min_distinct` of them.
+  before fitting them, so its p-value no longer depends on `cores`, and counts each distinct
+  random partition once in the p-value (repeated draws of a few placements made it too small);
+  it returns their number (`n_distinct`) and warns when there are fewer than 19, as the p-value
+  then cannot fall below 0.05. Trees with a strong shift in diversification often leave that
+  little room.
 
 # comdynamite 0.7.0
 

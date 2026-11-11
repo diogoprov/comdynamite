@@ -79,23 +79,24 @@ test_that("damocles_partition_test compares a partition with random ones", {
   tree <- treeshapesim::sim_tree_shape(30)
   reg <- clade_regimes(tree, list(A = ape::Ntip(tree) + 2))
   comm <- simulate_damocles(tree, ifelse(reg == "A", 3, 0.5), 1, n = 5)
-  res <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma")
+  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma"),
+                 "cannot be below")
   expect_s3_class(res, "mc_damocles_partition")
-  expect_length(res$null, 9)
-  expect_true(res$p_random > 0 && res$p_random <= 1)
+  expect_length(res$null, res$n_distinct)
+  expect_lte(res$n_distinct, 9)
+  # each distinct partition counts once
+  expect_equal(res$p_random, (sum(res$null >= res$statistic - 1e-8) + 1) / (res$n_distinct + 1))
   expect_identical(res$df, 1)
   expect_output(print(res), "random partitions")
   expect_error(damocles_partition_test(comm, tree, rep("x", length(reg))), "two or more")
   expect_error(damocles_partition_test(comm, tree, reg, n_rand = 0), "n_rand")
-  expect_error(damocles_partition_test(comm, tree, reg, n_rand = 9, min_distinct = 0),
-               "min_distinct")
-  # Distinct partitions are fitted once; the p-value does not depend on the cores.
+  # The partitions are drawn before the fits: the p-value does not depend on the cores.
   set.seed(3)
-  one <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma")
+  one <- suppressWarnings(damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma"))
   set.seed(3)
-  two <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma", cores = 2)
+  two <- suppressWarnings(damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma",
+                                                  cores = 2))
   expect_identical(one$null, two$null)
-  expect_lte(one$n_distinct, 9)
 })
 
 test_that("random partitions that split the tree as the original are excluded", {
@@ -114,11 +115,11 @@ test_that("random partitions that split the tree as the original are excluded", 
                  "no random partition")
   expect_true(is.na(res$p_random))
   expect_length(res$null, 0)
-  # With max_overlap = 1 the complement is allowed but gives a single distinct partition.
+  # With max_overlap = 1 the complement and the clade itself are allowed: two partitions.
   expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma",
-                                                max_overlap = 1, min_distinct = 3),
+                                                max_overlap = 1),
                  "distinct random partitions")
-  expect_true(is.na(res$p_random))
+  expect_gte(res$p_random, 1 / 3)
 })
 
 test_that("dr_rates follows the equal-splits definition", {
