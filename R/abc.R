@@ -100,7 +100,7 @@ check_prior <- function(prior) {
 #' @export
 abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1) {
   if (!requireNamespace("abcrf", quietly = TRUE)) {
-    stop("abc_fit() needs the package abcrf.", call. = FALSE)
+    stop("abc_fit() needs the package abcrf.", call. = FALSE) # nocov
   }
   stopifnot(is.data.frame(table))
   parameters <- parameters %||% attr(table, "parameters")

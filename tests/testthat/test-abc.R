@@ -65,6 +65,8 @@ test_that("abc_fit checks its input", {
   expect_error(abc_fit(table), "parameters")
   expect_error(abc_fit(table, "a", "nope"), "Not in")
   expect_error(abc_fit(table, "a", "flat"), "No statistic")
+  expect_error(abc_fit(table[1:8, ], "a", "s1"), "Fewer than 10")
+  expect_error(abc_recovery(table, n_test = 5), "parameters")
 })
 
 test_that("abc_recovery separates a recoverable from an unrecoverable parameter", {
