@@ -261,23 +261,23 @@ weaker when tips are sparsely sampled, as in Januario et al. (2025).
 We then applied ES-sim (Harvey & Rabosky 2018) to new replicates of the
 same design. ES-sim tests the Pearson correlation between log tip rates
 and a trait against 999 traits simulated by Brownian motion on the tree,
-here two-sided. We report it for \tau, the component of persistence that
-followed the latent trait, a choice made after seeing the estimates.
-ES-sim on \tau detected the link in 117 of 200, 178 of 200 and 195 of
-200 replicates for b = 0.25, 0.5 and 1, and rejected in 3 of 200 without
-a link, so it was conservative rather than liberal. Testing \varepsilon
-and \tau together, with a Bonferroni correction, detected the link in 82
-of 200, 154 of 200 and 184 of 200 replicates. On \varepsilon alone it
-had no power, because equilibrium occupancy followed the latent trait
-poorly (Spearman correlation 0.33–0.37). In a negative control, where
-the trait set extirpation instead of dispersal and the link to
-persistence is drowned by demographic turnover, neither test detected
-anything. As a result, with a fully sampled clade the absence of a
-relationship in a PGLS of DR on persistence is the expected outcome
-under this model even with a strong causal link, and a test with a
-simulation null on the better estimated component of persistence detects
-a moderate link. Whether this holds for sparsely sampled tips was not
-tested.
+here two-sided and rejecting at p \le 0.05. We report it for \tau, the
+component of persistence that followed the latent trait, a choice made
+after seeing the estimates. ES-sim on \tau detected the link in 117 of
+200, 178 of 200 and 195 of 200 replicates for b = 0.25, 0.5 and 1, and
+rejected in 4 of 200 without a link, so it was conservative rather than
+liberal. Testing \varepsilon and \tau together, with a Bonferroni
+correction, detected the link in 83 of 200, 156 of 200 and 185 of 200
+replicates. On \varepsilon alone it had no power, because equilibrium
+occupancy followed the latent trait poorly (Spearman correlation
+0.33–0.37). In a negative control, where the trait set extirpation
+instead of dispersal and the link to persistence is drowned by
+demographic turnover, neither test detected anything. As a result, with
+a fully sampled clade the absence of a relationship in a PGLS of DR on
+persistence is the expected outcome under this model even with a strong
+causal link, and a test with a simulation null on the better estimated
+component of persistence detects a moderate link. Whether this holds for
+sparsely sampled tips was not tested.
 
 ![Fig. 3. Rejection rate at 5% of three tests of the link between
 persistence and speciation, against the strength of the causal link b
@@ -338,7 +338,7 @@ state-dependent process on a continuous trait, dispersal is the only
 route from the trait to persistence, detection is perfect, clades are
 fully sampled, and tip rates are DR rather than BAMM estimates. ES-sim
 was implemented here from its published description, and its size for
-\tau was 3 of 200 replicates; we did not check whether a null that also
+\tau was 4 of 200 replicates; we did not check whether a null that also
 accounts for the uncertainty in \tau would change this. In the BAMM
 validation, one of the 20 runs had a low effective sample size of the
 log-likelihood (62; 215 or more in the others). Finally, all results

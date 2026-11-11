@@ -435,13 +435,14 @@ Januario et al. (2025).</p>
 <p>We then applied ES-sim (Harvey &amp; Rabosky 2018) to new replicates
 of the same design. ES-sim tests the Pearson correlation between log tip
 rates and a trait against 999 traits simulated by Brownian motion on the
-tree, here two-sided. We report it for <span class="math inline">\tau</span>, the component of persistence that
-followed the latent trait, a choice made after seeing the estimates.
-ES-sim on <span class="math inline">\tau</span> detected the link in 117
-of 200, 178 of 200 and 195 of 200 replicates for <span class="math inline">b</span> = 0.25, 0.5 and 1, and rejected in 3 of 200
-without a link, so it was conservative rather than liberal. Testing
-<span class="math inline">\varepsilon</span> and <span class="math inline">\tau</span> together, with a Bonferroni correction,
-detected the link in 82 of 200, 154 of 200 and 184 of 200 replicates. On
+tree, here two-sided and rejecting at <span class="math inline">p \le
+0.05</span>. We report it for <span class="math inline">\tau</span>, the
+component of persistence that followed the latent trait, a choice made
+after seeing the estimates. ES-sim on <span class="math inline">\tau</span> detected the link in 117 of 200, 178 of
+200 and 195 of 200 replicates for <span class="math inline">b</span> =
+0.25, 0.5 and 1, and rejected in 4 of 200 without a link, so it was
+conservative rather than liberal. Testing <span class="math inline">\varepsilon</span> and <span class="math inline">\tau</span> together, with a Bonferroni correction,
+detected the link in 83 of 200, 156 of 200 and 185 of 200 replicates. On
 <span class="math inline">\varepsilon</span> alone it had no power,
 because equilibrium occupancy followed the latent trait poorly (Spearman
 correlation 0.33–0.37). In a negative control, where the trait set
@@ -507,7 +508,7 @@ latent trait to speciation is imposed as a state-dependent process on a
 continuous trait, dispersal is the only route from the trait to
 persistence, detection is perfect, clades are fully sampled, and tip
 rates are DR rather than BAMM estimates. ES-sim was implemented here
-from its published description, and its size for <span class="math inline">\tau</span> was 3 of 200 replicates; we did not
+from its published description, and its size for <span class="math inline">\tau</span> was 4 of 200 replicates; we did not
 check whether a null that also accounts for the uncertainty in <span class="math inline">\tau</span> would change this. In the BAMM
 validation, one of the 20 runs had a low effective sample size of the
 log-likelihood (62; 215 or more in the others). Finally, all results
