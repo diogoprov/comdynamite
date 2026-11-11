@@ -95,6 +95,12 @@ reference:
   - summary_stats
   - equilibrium_check
   - as.data.frame.mc_sim
+- title: Inference by ABC
+  desc: Reference tables, estimation with random forests and recovery of known parameters.
+  contents:
+  - abc_table
+  - abc_fit
+  - abc_recovery
 - title: Trait variation among individuals
   desc: Individuals sampled from simulations, T-statistics, trait-gradient analysis, community
     trait indices and decompositions of trait variation.
