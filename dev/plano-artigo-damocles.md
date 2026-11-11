@@ -152,6 +152,46 @@ Os tempos abaixo são **estimativas grosseiras**, a medir num piloto antes de ca
   Meta: 5%.
 - Estimativa: 1–2 dias de CPU com 6 núcleos, sem BAMM.
 
+**Resultado S1, testes de razão de verossimilhança (10/11/2026; `data-raw/s1_type1_shifts.R`,
+AWS spot, 9000 réplicas em 38 min numa m7i.48xlarge, após duas tentativas interrompidas):**
+
+- Desenho executado: `sim_shift_tree()` com 112 ou 250 pontas, 1 ou 3 mudanças de λ, razão 2
+  ou 4, mais controle com razão 1; comunidades com γ = 5 e μ = 1 em todos os ramos; 14 ou 40
+  comunidades; 500 réplicas por cenário (18 cenários).
+- Regimes verdadeiros, γ e μ livres (`vary = "both"`): rejeição a 5% entre 0,020 e 0,060.
+- Regimes verdadeiros, só γ: entre 0,034 e 0,068.
+- DR por ramo como covariável de γ: entre 0,036 e 0,066.
+- Nenhum IC de Clopper–Pearson fica inteiramente acima de 5%; o teste não é liberal com
+  mudanças de taxa na árvore. Com 250 pontas e 3 mudanças, `both` é conservador (0,020 [0,010,
+  0,036] e 0,024 [0,012, 0,042] com 14 comunidades).
+- Sem convergência: 21 de 9000 réplicas (todas com 3 mudanças); nenhum erro.
+- Pendente: regimes estimados (ClaDS, BAMM).
+
+**Resultado S1, teste contra partições aleatórias (10/11/2026; MODE=partition, 50 réplicas por
+cenário, 49 partições aleatórias, `vary = "both"`; `data-raw/s1_partition.rds`):**
+
+- **Liberal com 1 mudança de λ.** Rejeição a 5%: 0,12–0,40 nos cenários com 1 mudança
+  (média 0,285 com razão 2 ou 4); mesmo nos controles com razão 1 (mudança sem efeito em λ):
+  0,12 [0,045, 0,243] com 112 pontas e 0,22 [0,115, 0,360] com 250. Cresce com a razão
+  (razão 4: 0,30–0,40).
+- Com 3 mudanças: 0,000–0,120 (média 0,055), sem excesso claro.
+- O χ² do mesmo ajuste (dentro de `damocles_partition_test()`, 4 inícios) fica em 0,000–0,120
+  (média 0,048 com efeito em λ): o problema é a distribuição nula das partições aleatórias,
+  não o ajuste.
+- Interpretação (inferência, não testada): as partições aleatórias são pareadas pelo número de
+  ramos (tolerance 2) e afastadas da verdadeira (max_overlap 0,25), mas o clado com mudança de λ
+  tem outra estrutura temporal (ramos curtos, coroa profunda, nasce cedo pelo limiar de
+  3 a n/4 linhagens); o LR do clado verdadeiro não é permutável com o de clados aleatórios do
+  mesmo tamanho. É justamente o uso pretendido (regimes de BAMM/ClaDS), então o teste, como
+  está, não serve para S1–S2 com clados de mudança de λ.
+- Caminhos: (a) parear clados aleatórios também por comprimento total de ramos ou idade da
+  coroa; (b) trocar o nulo por bootstrap paramétrico (simular comunidades com as taxas
+  constantes estimadas e reajustar com a partição verdadeira), permutável por construção;
+  (c) reportar só o χ², que está calibrado.
+- Custo: o teste de partição levou ~2,5 vezes o extrapolado e sofreu interrupções spot a cada
+  10–30 min (23 relançamentos); custo total do S1 estimado em ~US$ 40 (sem acesso ao Cost
+  Explorer para confirmar).
+
 ### S2. Poder
 
 - Grade:
