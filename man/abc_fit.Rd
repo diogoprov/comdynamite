@@ -82,6 +82,8 @@ random forests for Bayesian parameter inference. \emph{Bioinformatics}, 35, 1720
 }
 \seealso{
 Other inference:
+\code{\link[=abc_choose]{abc_choose()}},
+\code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}}
 }

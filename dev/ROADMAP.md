@@ -505,8 +505,15 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 - [x] Estimação com `abcrf` (Raynal et al. 2019), em `Suggests`: `abc_fit()`, `predict()` e
       `abc_importance()` (2026-11-11). Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.
-- [ ] Escolha de modelos com `abcrf::abcrf()` (Pudlo et al. 2015) e erro de classificação
-      out-of-bag; `abc` (Csilléry et al. 2012) só se a comparação com rejeição for útil.
+- [x] Escolha de modelos com `abcrf::abcrf()` (Pudlo et al. 2015) e erro de classificação
+      out-of-bag: `abc_choose()` (2026-11-11). `abc` (Csilléry et al. 2012) só se a
+      comparação com rejeição for útil. Em `data-raw/abc_model_choice.R`,
+      competição filogenética contra nenhuma competição (10 mil simulações por modelo, mesmo
+      desenho da recuperação): erro out-of-bag de 0,037 com a série e 0,039 só com o
+      levantamento; em 100 pseudo-observações por modelo, acerto de 95% (competição) e 99–100%
+      (sem competição), probabilidade posterior média de 0,95–0,98. O erro se concentra em
+      competição tomada por neutra; nossa interpretação, não testada, é que vem dos sorteios
+      com `inter_max` perto de 0, onde os modelos coincidem.
 - [x] Custo, medido em `data-raw/benchmark_dynamics.R`: 0,7 s para 50 espécies, 100 sítios
       e 2200 passos, como em Guzman et al. (2022), ou cerca de 19 h por 100 mil simulações em
       um núcleo; a grade 5 x 5 do piloto levou 1,1 min por 5200 simulações em 6 núcleos.
@@ -528,7 +535,13 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 
 Avaliação do modelo, sempre em conjunto com a inferência:
 
-- [ ] Posterior predictive checks, com estatísticas que não entraram no ajuste.
+- [x] Posterior predictive checks, com estatísticas que não entraram no ajuste: `abc_ppc()`
+      (2026-11-11). No mesmo script, o modelo de competição ajustado ao levantamento
+      e checado nas quatro estatísticas temporais quase não detectou o modelo errado:
+      pseudo-observações sem competição foram marcadas em 5% (Bonferroni) e as com competição
+      em 0%. O teste foi fraco por desenho: o modelo de competição contém o neutro
+      (`inter_max` = 0), então não estava mal especificado. Falta um caso de especificação
+      errada de fato, como dados com filtragem ambiental forte ajustados sem ela.
 - [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
       simulação como pseudo-observação; `gfit()` para adequação global.
 - [ ] K-fold por sítios ou blocos espaciais: ajustar com parte dos sítios e prever as

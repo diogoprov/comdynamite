@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `abc_choose()` chooses among models with a classification random forest (Pudlo et al. 2016)
+  and reports the out-of-bag error and confusion matrix; `predict()` gives the chosen model,
+  the votes and its posterior probability. `abc_ppc()` runs posterior predictive checks after
+  `abc_fit()`, from the reference table or with new simulations, and gives a two-sided
+  posterior predictive p-value per statistic. `data-raw/abc_model_choice.R` tests both on
+  phylogenetic competition against no competition: the models were told apart with an
+  out-of-bag error of 0.04, while the check on temporal statistics had little power, since the
+  competition model contains the neutral one.
 - Inference by approximate Bayesian computation with random forests (Raynal et al. 2019), with
   abcrf in Suggests. `abc_table()` draws parameters from uniform priors and simulates a
   reference table, `abc_fit()` fits one regression forest per parameter, `predict()` gives the
