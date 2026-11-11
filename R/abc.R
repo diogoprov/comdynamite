@@ -140,16 +140,7 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #' @export
 predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
   stopifnot(length(level) == 1, level > 0, level < 1)
-  if (!is.data.frame(newdata)) newdata <- as.data.frame(as.list(newdata))
-  missing <- setdiff(object$statistics, names(newdata))
-  if (length(missing)) {
-    stop("Statistics missing from `newdata`: ", paste(missing, collapse = ", "), ".",
-         call. = FALSE)
-  }
-  observed <- newdata[, object$statistics, drop = FALSE]
-  if (any(!is.finite(as.matrix(observed)))) {
-    stop("`newdata` has missing or infinite statistics.", call. = FALSE)
-  }
+  observed <- observed_statistics(newdata, object$statistics)
   probs <- c((1 - level) / 2, (1 + level) / 2)
   out <- lapply(object$parameters, function(p) {
     training <- data.frame(.parameter = object$training[[p]], object$training[object$statistics])
@@ -248,5 +239,210 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
                width = mean(d$high - d$low) / range)
   }))
   attr(out, "estimates") <- estimates
+  out
+}
+
+#' Choose among models by ABC with random forests
+#'
+#' Fits a classification random forest that predicts which model produced a simulation from its
+#' statistics (Pudlo et al. 2016), with the linear discriminant axes of the statistics added as
+#' predictors. The out-of-bag error and the confusion matrix measure, before looking at the data,
+#' how often the models can be told apart. [predict()] gives the chosen model for observed
+#' statistics, the votes of the trees and the posterior probability of the chosen model, which
+#' is more reliable than the proportion of votes.
+#'
+#' @param tables Named list of reference tables, one per model, as from [abc_table()], or a data
+#'   frame with a column `model`. Only the statistics shared by all models are used.
+#' @param statistics Names of the statistics. By default all statistics shared by the models.
+#' @param ntree Number of trees.
+#' @param lda Add the linear discriminant axes as predictors?
+#' @param ncores Number of threads.
+#' @return An `mc_abc_choice`, a list with `forest`, `training`, `statistics`, `models`,
+#'   `error` (out-of-bag error) and `confusion` (rows: true model; columns: chosen model).
+#' @references
+#' Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., & Robert, C. P. (2016).
+#' Reliable ABC model choice via random forests. *Bioinformatics*, 32, 859–866.
+#' \doi{10.1093/bioinformatics/btv684}
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE)
+#' set.seed(1)
+#' a <- data.frame(s1 = rnorm(200, 0), s2 = rnorm(200))
+#' b <- data.frame(s1 = rnorm(200, 1.5), s2 = rnorm(200))
+#' choice <- abc_choose(list(neutral = a, niche = b), ntree = 100)
+#' choice$confusion
+#' predict(choice, c(s1 = 1.2, s2 = 0))
+#' @export
+abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncores = 1) {
+  if (!requireNamespace("abcrf", quietly = TRUE)) {
+    stop("abc_choose() needs the package abcrf.", call. = FALSE) # nocov
+  }
+  if (is.data.frame(tables)) {
+    if (!"model" %in% names(tables)) stop("A data frame needs a column `model`.", call. = FALSE)
+    model <- as.character(tables$model)
+    tables <- split(as.data.frame(tables)[setdiff(names(tables), "model")], model)
+  }
+  if (!is.list(tables) || length(tables) < 2 || is.null(names(tables)) ||
+      !all(nzchar(names(tables))) || anyDuplicated(names(tables))) {
+    stop("`tables` must be a named list of at least two reference tables.", call. = FALSE)
+  }
+  shared <- Reduce(intersect, lapply(tables, function(t) {
+    attr(t, "statistics") %||% setdiff(names(t), attr(t, "parameters"))
+  }))
+  statistics <- statistics %||% shared
+  missing <- setdiff(statistics, shared)
+  if (length(missing)) {
+    stop("Not in every table: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+  }
+  training <- do.call(rbind, lapply(names(tables), function(m) {
+    data.frame(model = m, as.data.frame(tables[[m]])[, statistics, drop = FALSE])
+  }))
+  values <- as.matrix(training[statistics])
+  usable <- colMeans(is.finite(values)) > 0.95 &
+    apply(values, 2, function(v) isTRUE(stats::sd(v[is.finite(v)]) > 0))
+  if (!any(usable)) stop("No statistic varies among the simulations.", call. = FALSE)
+  statistics <- statistics[usable]
+  training <- training[c("model", statistics)]
+  training <- training[rowSums(!is.finite(as.matrix(training[statistics]))) == 0, , drop = FALSE]
+  training$model <- factor(training$model, levels = names(tables))
+  counts <- table(training$model)
+  if (any(counts < 10)) stop("Fewer than 10 complete simulations in a model.", call. = FALSE)
+  forest <- abcrf::abcrf(model ~ ., training, lda = lda, ntree = ntree, paral = ncores > 1,
+                         ncores = ncores)
+  confusion <- forest$model.rf$confusion.matrix
+  confusion <- confusion[, colnames(confusion) != "class.error", drop = FALSE]
+  structure(list(forest = forest, training = training, statistics = statistics,
+                 models = names(tables), error = forest$prior.err,
+                 confusion = confusion),
+            class = "mc_abc_choice")
+}
+
+#' @describeIn abc_choose Chosen model, votes and posterior probability of the chosen model.
+#' @param object An `mc_abc_choice`.
+#' @param newdata Named numeric vector of observed statistics or a data frame with one
+#'   observation per row.
+#' @param ... Not used.
+#' @return For `predict()`, a data frame with `observation`, `model`, `probability` and one
+#'   column of votes per model.
+#' @export
+predict.mc_abc_choice <- function(object, newdata, ntree = 500, ncores = 1, ...) {
+  observed <- observed_statistics(newdata, object$statistics)
+  post <- stats::predict(object$forest, observed, object$training, ntree = ntree,
+                         paral = ncores > 1, ncores = ncores)
+  votes <- as.data.frame(unclass(post$vote))
+  names(votes) <- paste0("votes_", names(votes))
+  data.frame(observation = seq_len(nrow(observed)), model = as.character(post$allocation),
+             probability = as.numeric(post$post.prob), votes)
+}
+
+#' @export
+print.mc_abc_choice <- function(x, ...) {
+  cat("ABC model choice among", length(x$models), "models (",
+      paste(x$models, collapse = ", "), ")\n")
+  cat(nrow(x$training), "simulations,", length(x$statistics), "statistics, out-of-bag error",
+      format(round(x$error, 3)), "\n")
+  print(x$confusion)
+  invisible(x)
+}
+
+observed_statistics <- function(newdata, statistics) {
+  if (!is.data.frame(newdata)) newdata <- as.data.frame(as.list(newdata))
+  missing <- setdiff(statistics, names(newdata))
+  if (length(missing)) {
+    stop("Statistics missing from `newdata`: ", paste(missing, collapse = ", "), ".",
+         call. = FALSE)
+  }
+  observed <- newdata[, statistics, drop = FALSE]
+  if (any(!is.finite(as.matrix(observed)))) {
+    stop("`newdata` has missing or infinite statistics.", call. = FALSE)
+  }
+  observed
+}
+
+#' Posterior predictive check after ABC
+#'
+#' Draws parameter sets from the approximate posterior of an [abc_fit()] and compares the
+#' observed statistics with those of the data the model predicts. Statistics that did not enter
+#' the fit make the check stronger, since the fit was tuned to reproduce the others (Gelman et
+#' al. 2013). A model can give good estimates and still fail this check (Pontarp et al. 2019).
+#'
+#' Random forests give one set of weights over the reference table per parameter, not a joint
+#' posterior. Whole rows of the table are drawn with the mean of these weights, which keeps the
+#' correlation among parameters within a row but is an approximation of the joint posterior.
+#' Without `simulate`, the statistics of the drawn rows are used, which costs nothing; with
+#' `simulate`, new data are simulated from the drawn parameters.
+#'
+#' @param fit An `mc_abc_fit`.
+#' @param observed Named numeric vector of observed statistics, with those of `fit` and those to
+#'   check.
+#' @param table The reference table `fit` was fitted on, needed without `simulate` and to draw
+#'   the parameters.
+#' @param statistics Names of the statistics to check. By default those of `table` that did not
+#'   enter `fit`, or all if every statistic did.
+#' @param n Number of draws from the posterior.
+#' @param simulate,setup,summarise Optional functions to simulate new data, as in
+#'   [abc_table()].
+#' @param seed Integer that sets all the seeds.
+#' @return A data frame with one row per statistic: `observed`, the median and the 5% and 95%
+#'   quantiles of the predicted statistic, and `p`, the two-sided posterior predictive p-value
+#'   (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
+#'   The attribute `draws` holds the drawn parameters and predicted statistics.
+#' @references
+#' Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2013).
+#' *Bayesian data analysis* (3rd ed.). Chapman & Hall/CRC.
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE)
+#' set.seed(1)
+#' table <- data.frame(a = runif(400))
+#' table$s1 <- table$a + rnorm(400, 0, 0.05)
+#' table$s2 <- table$a^2 + rnorm(400, 0, 0.05)
+#' fit <- abc_fit(table, "a", "s1", ntree = 100)
+#' abc_ppc(fit, c(s1 = 0.5, s2 = 0.25), table, n = 100)
+#' @export
+abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate = NULL,
+                    setup = NULL,
+                    summarise = function(sim, shared) summary_stats(sim, shared$tree),
+                    seed = 1) {
+  stopifnot(inherits(fit, "mc_abc_fit"), is.data.frame(table), length(n) == 1, n >= 2)
+  others <- setdiff(attr(table, "statistics") %||% setdiff(names(table), fit$parameters),
+                    c(fit$statistics, fit$parameters))
+  statistics <- statistics %||% (if (length(others)) others else fit$statistics)
+  if (is.null(simulate)) {
+    missing <- setdiff(statistics, names(table))
+    if (length(missing)) {
+      stop("Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+    }
+  }
+  values <- observed_statistics(observed, unique(c(fit$statistics, statistics)))
+  rows <- match(rownames(fit$training), rownames(table))
+  if (anyNA(rows)) stop("`table` is not the table `fit` was fitted on.", call. = FALSE)
+  weights <- Reduce(`+`, lapply(fit$parameters, function(p) {
+    training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
+    w <- stats::predict(fit$forests[[p]], values[fit$statistics], training,
+                        rf.weights = TRUE)$weights[, 1]
+    w / sum(w)
+  })) / length(fit$parameters)
+  old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
+  on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
+    assign(".Random.seed", old, envir = globalenv()))
+  cell_seed(seed)
+  drawn <- rows[sample.int(length(rows), n, replace = TRUE, prob = weights)]
+  parameters <- as.data.frame(table)[drawn, fit$parameters, drop = FALSE]
+  rownames(parameters) <- NULL
+  if (is.null(simulate)) {
+    predicted <- as.data.frame(table)[drawn, statistics, drop = FALSE]
+  } else {
+    predicted <- run_scenarios(parameters, simulate, setup, summarise, n_rep = 1,
+                               seed = seed + 1)[, statistics, drop = FALSE]
+  }
+  rownames(predicted) <- NULL
+  out <- do.call(rbind, lapply(statistics, function(s) {
+    v <- predicted[[s]]
+    v <- v[is.finite(v)]
+    obs <- values[[s]]
+    data.frame(statistic = s, observed = obs, median = stats::median(v),
+               low = unname(stats::quantile(v, 0.05)), high = unname(stats::quantile(v, 0.95)),
+               p = min(1, 2 * min(mean(v >= obs), mean(v <= obs))), n = length(v))
+  }))
+  attr(out, "draws") <- cbind(parameters, predicted)
   out
 }
