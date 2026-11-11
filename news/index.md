@@ -2,6 +2,22 @@
 
 ## comdynamite (development version)
 
+- Inference by approximate Bayesian computation with random forests
+  (Raynal et al. 2019), with abcrf in Suggests.
+  [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
+  draws parameters from uniform priors and simulates a reference table,
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  fits one regression forest per parameter,
+  [`predict()`](https://rdrr.io/r/stats/predict.html) gives the
+  posterior median and a credible interval for observed statistics,
+  [`abc_importance()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  ranks the statistics, and
+  [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+  measures R2, bias and coverage in pseudo-observations left out of the
+  table. `data-raw/abc_recovery.R` repeats the design of the ABC pilot:
+  the forests recovered the parameters about as well as rejection ABC at
+  its best tolerance, without having to choose one, with calibrated or
+  conservative intervals.
 - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
   [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
   has a `clades` argument. It takes either the number of the deepest

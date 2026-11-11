@@ -346,6 +346,20 @@ Grids of scenarios, summaries and checks.
 - [`as.data.frame(`*`<mc_sim>`*`)`](https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.md)
   : Simulation results as a long table
 
+## Inference by ABC
+
+Reference tables, estimation with random forests and recovery of known
+parameters.
+
+- [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
+  : Reference table for approximate Bayesian computation
+- [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  [`predict(`*`<mc_abc_fit>`*`)`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  [`abc_importance()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  : Estimate parameters by ABC with random forests
+- [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+  : Can the parameters be recovered by ABC?
+
 ## Trait variation among individuals
 
 Individuals sampled from simulations, T-statistics, trait-gradient
