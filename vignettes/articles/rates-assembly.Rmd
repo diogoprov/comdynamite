@@ -240,7 +240,7 @@ This mechanism should be weaker when tips are sparsely sampled, as in Januario e
 
 We then applied ES-sim (Harvey & Rabosky 2018) to new replicates of the same design. ES-sim
 tests the Pearson correlation between log tip rates and a trait against 999 traits simulated
-by Brownian motion on the tree, here two-sided. We report it for $\tau$, the component of
+by Brownian motion on the tree, here two-sided and rejecting at $p \le 0.05$. We report it for $\tau$, the component of
 persistence that followed the latent trait, a choice made after seeing the estimates. ES-sim
 on $\tau$ detected the link in `r kn(es_d(0.25), n_d)`, `r kn(es_d(0.5), n_d)` and
 `r kn(es_d(1), n_d)` replicates for $b$ = 0.25, 0.5 and 1, and rejected in

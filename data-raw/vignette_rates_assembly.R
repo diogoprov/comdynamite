@@ -72,9 +72,9 @@ januario <- aggregate(cbind(pgls_dr = p_dr_any < 0.05, pgls_true = p_true_any < 
                             cor_dr_lambda, cor_tau_z, cor_eps_z) ~ link + b + window, j,
                       function(x) mean(x, na.rm = TRUE), na.action = na.pass)
 es <- readRDS("data-raw/januario_essim.rds")$main
-es$es_any <- pmin(1, 2 * pmin(es$p_es_tau, es$p_es_eps)) < 0.05
+es$es_any <- pmin(1, 2 * pmin(es$p_es_tau, es$p_es_eps)) <= 0.05
 essim <- aggregate(cbind(pgls_dr = p_dr_any < 0.05, pgls_true = p_true_any < 0.05,
-                         es_tau = p_es_tau < 0.05, es_eps = p_es_eps < 0.05, es_any,
+                         es_tau = p_es_tau <= 0.05, es_eps = p_es_eps <= 0.05, es_any,
                          r_es_tau) ~ link + b, es, function(x) mean(x, na.rm = TRUE),
                    na.action = na.pass)
 essim$n <- as.vector(table(es$link, es$b)[cbind(essim$link, as.character(essim$b))])

@@ -55,6 +55,6 @@ results <- list(main = do.call(rbind, out[ok]), errors = do.call(rbind, out[!ok]
 saveRDS(results, "data-raw/januario_essim.rds")
 cat("done in", format(results$elapsed), "with", sum(!ok), "errors\n")
 m <- results$main
-m$es_any <- pmin(1, 2 * pmin(m$p_es_tau, m$p_es_eps)) < 0.05 # Bonferroni over the two traits
-print(aggregate(cbind(pgls = p_dr_any < 0.05, es_tau = p_es_tau < 0.05, es_eps = p_es_eps < 0.05,
+m$es_any <- pmin(1, 2 * pmin(m$p_es_tau, m$p_es_eps)) <= 0.05 # Bonferroni over the two traits
+print(aggregate(cbind(pgls = p_dr_any < 0.05, es_tau = p_es_tau <= 0.05, es_eps = p_es_eps <= 0.05,
                       es_any, r_es_tau) ~ link + b, m, mean))
