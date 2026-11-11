@@ -16,7 +16,8 @@
 #    the alternatives start from the estimates of the constant model (one start instead of
 #    four; same optimum in a check on a tree of 250 tips, half the time);
 #    and, as a separate set of jobs (MODE=partition), damocles_partition_test() with the true
-#    regimes (vary = "both", 49 random partitions) in the first PARTITION replicates of each
+#    regimes (vary = "both", N_RAND random draws, default 199, each distinct partition fitted
+#    once) in the first PARTITION replicates of each
 #    setting, on the same tree and communities as the likelihood-ratio tests of that replicate
 #    (same seed); random clades within a factor 2 of the size of the true ones (tolerance = 2)
 #    with one shift and 3 with three, as nested regimes often find no placement within 2;
@@ -42,6 +43,7 @@ suppressMessages(pkgload::load_all(".", quiet = TRUE, export_all = TRUE))
 workers <- as.integer(Sys.getenv("WORKERS", Sys.getenv("CORES", "6")))
 reps <- as.integer(Sys.getenv("REPS", "500"))
 n_partition <- as.integer(Sys.getenv("PARTITION", "50"))
+n_rand <- as.integer(Sys.getenv("N_RAND", "199"))
 jobs_dir <- Sys.getenv("JOBS", "data-raw/s1_jobs")
 mode <- match.arg(Sys.getenv("MODE", "lrt"), c("lrt", "partition"))
 out <- Sys.getenv("OUT", if (mode == "lrt") "data-raw/s1_type1_shifts.rds" else
@@ -77,7 +79,7 @@ one_lrt <- function(setting) {
 partition_cores <- 24
 one_partition <- function(setting) {
   d <- simulate(setting)
-  test <- quiet(damocles_partition_test(d$comm, d$sim$tree, d$sim$regimes, n_rand = 49,
+  test <- quiet(damocles_partition_test(d$comm, d$sim$tree, d$sim$regimes, n_rand = n_rand,
                                         vary = "both",
                                         tolerance = if (setting$n_shifts > 1) 3 else 2,
                                         cores = partition_cores))
