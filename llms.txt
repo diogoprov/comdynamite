@@ -359,6 +359,11 @@ parameters.
   : Estimate parameters by ABC with random forests
 - [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
   : Can the parameters be recovered by ABC?
+- [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
+  [`predict(`*`<mc_abc_choice>`*`)`](https://provetelab.org/comdynamite/reference/abc_choose.md)
+  : Choose among models by ABC with random forests
+- [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md)
+  : Posterior predictive check after ABC
 
 ## Trait variation among individuals
 
