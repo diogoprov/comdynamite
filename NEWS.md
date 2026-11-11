@@ -18,6 +18,9 @@
   it returns their number (`n_distinct`) and warns when there are fewer than 19, as the p-value
   then cannot fall below 0.05. Trees with a strong shift in diversification often leave that
   little room.
+- The article "Rates and assembly" rejects ES-sim at p ≤ 0.05, the rule of the preprint, instead
+  of p < 0.05. With 999 null draws five cells change by one replicate
+  each and no conclusion changes.
 
 # comdynamite 0.7.0
 
