@@ -41,8 +41,9 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
 \item{tolerance, max_overlap}{Passed to \code{\link[=random_regimes]{random_regimes()}}: random clades hold between
-\code{1 / tolerance} and \code{tolerance} times as many edges as the clades of \code{regimes} and share
-at most \code{max_overlap} of their edges with them (Jaccard index).}
+\code{1 / tolerance} and \code{tolerance} times as many edges as the clades of \code{regimes}, share
+at most \code{max_overlap} of their edges with them (Jaccard index), and the whole random
+partition agrees with \code{regimes} at most as much (adjusted Rand index).}
 
 \item{cores}{Number of cores, with random partitions fitted in parallel. Not available on
 Windows, where one core is used. The random partitions are drawn before the fits, so the

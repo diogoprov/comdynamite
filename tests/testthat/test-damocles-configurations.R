@@ -87,7 +87,8 @@ test_that("damocles_partition_test compares a partition with random ones", {
   # each distinct partition counts once
   expect_equal(res$p_random, (sum(res$null >= res$statistic - 1e-8) + 1) / (res$n_distinct + 1))
   expect_identical(res$df, 1)
-  expect_output(print(res), "random partitions")
+  expect_output(print(res), paste0("(", res$n_distinct, " distinct random partitions)"),
+                fixed = TRUE)
   expect_error(damocles_partition_test(comm, tree, rep("x", length(reg))), "two or more")
   expect_error(damocles_partition_test(comm, tree, reg, n_rand = 0), "n_rand")
   # The partitions are drawn before the fits: the p-value does not depend on the cores.

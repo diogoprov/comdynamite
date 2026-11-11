@@ -331,8 +331,9 @@ adjusted_rand <- function(a, b) {
 #'   regimes.
 #' @param n_rand Number of random partitions drawn; each distinct one is fitted once.
 #' @param tolerance,max_overlap Passed to [random_regimes()]: random clades hold between
-#'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes` and share
-#'   at most `max_overlap` of their edges with them (Jaccard index).
+#'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes`, share
+#'   at most `max_overlap` of their edges with them (Jaccard index), and the whole random
+#'   partition agrees with `regimes` at most as much (adjusted Rand index).
 #' @param cores Number of cores, with random partitions fitted in parallel. Not available on
 #'   Windows, where one core is used. The random partitions are drawn before the fits, so the
 #'   p-value does not depend on the number of cores.
@@ -372,15 +373,16 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
   observed <- damocles_lrt(constant, fit)
   # Draw the random partitions first, then fit each distinct one once: the p-value does not
   # depend on the number of cores.
-  draws <- tryCatch(lapply(seq_len(n_rand), function(i) {
-    random_regimes(tree, regimes, tolerance, max_overlap)
-  }), error = function(e) e)
-  if (inherits(draws, "error")) {
-    warning("no random partition could be drawn (", conditionMessage(draws), "); `p_random` ",
-            "is NA", call. = FALSE)
-    draws <- list()
+  draws <- lapply(seq_len(n_rand), function(i) {
+    tryCatch(random_regimes(tree, regimes, tolerance, max_overlap), error = function(e) e)
+  })
+  failed <- vapply(draws, inherits, logical(1), what = "error")
+  if (all(failed)) {
+    warning("no random partition could be drawn (", conditionMessage(draws[[1]]), "); ",
+            "`p_random` is NA", call. = FALSE)
   }
-  keys <- vapply(draws, function(r) paste(as.integer(r), collapse = ""), character(1))
+  draws <- draws[!failed]
+  keys <- vapply(draws, function(r) paste(as.integer(r), collapse = ","), character(1))
   distinct <- unique(keys)
   stats <- unlist(damocles_apply(match(distinct, keys), function(i) {
     damocles_lrt(constant, fit_with(draws[[i]]))$statistic[2]
@@ -410,8 +412,8 @@ print.mc_damocles_partition <- function(x, ...) {
   cat("Likelihood ratio against constant rates:", format(x$statistic, digits = 4), "on",
       x$df, "df\n")
   cat("p (chi-squared):", format(x$p_chisq, digits = 3), "\n")
-  cat("p (random partitions):", format(x$p_random, digits = 3), "(", x$n_distinct,
-      "distinct random partitions )\n")
+  cat("p (random partitions): ", format(x$p_random, digits = 3), " (", x$n_distinct,
+      " distinct random partitions)\n", sep = "")
   invisible(x)
 }
 
