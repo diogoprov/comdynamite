@@ -9,7 +9,8 @@
 #' species. The survey lists *D. longiremis* and not the *D. longispina* of Figure 3a of the
 #' article, which we took to be the same taxon.
 #'
-#' The tree has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
+#' `tree_leibold` is the topology of Figure 3a, without branch lengths, for analyses that
+#' reproduce the article. `tree` has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
 #' dates nine of the 13 species, mostly from mitochondrial genomes (Xu et al. 2021). Its
 #' topology differs from that of Figure 3a: *D. laevis* and *D. dubia* are the sister of
 #' *D. galeata mendotae* and *D. rosea* rather than of all other *Daphnia*. The four species
@@ -29,7 +30,8 @@
 #' @format List with `comm`, a matrix of lakes by species; `env`, a matrix with colour,
 #'   conductivity, dissolved organic carbon, total nitrogen, pH, total phosphorus, mean
 #'   depth, elevation and the ratio of nitrogen to phosphorus; `biogeography`, a matrix of
-#'   contrasts with values of 1, -1 and 0; `tree`, a `phylo` object; and `coords`, a matrix with
+#'   contrasts with values of 1, -1 and 0; `tree`, the dated `phylo` object;
+#'   `tree_leibold`, the topology of Figure 3a; and `coords`, a matrix with
 #'   the longitude and latitude of each lake in decimal degrees.
 #' @source \url{https://archive.epa.gov/emap/archive-emap/web/html/nelakes.html}
 #' @references
@@ -66,8 +68,8 @@
 #'
 #' The hydrology score is the first principal component of log(x + 1) area, depth, floating
 #' vegetation and water temperature, standardised across the 40 ponds and rescaled to 0–100,
-#' with larger and deeper ponds at higher scores. The tree is a TreePL-dated tree of anurans
-#' pruned to these species, with branch lengths in millions of years. The tip of
+#' with larger and deeper ponds at higher scores. The tree is the TreePL-dated tree of anurans
+#' of Portik et al. (2023) pruned to these species, with branch lengths in millions of years. The tip of
 #' *Leptodactylus latrans* stands for *L. luctator*, split from it by Magalhães et al. (2020),
 #' and *Phyllomedusa azurea* is *Pithecopus azureus* (Duellman et al. 2016).
 #'
@@ -86,4 +88,8 @@
 #' review of South American butter frogs: phylogeny, geographic patterns, and species
 #' delimitation in the *Leptodactylus latrans* species group (Anura: Leptodactylidae).
 #' *Herpetological Monographs*, 34, 131–177. \doi{10.1655/0733-1347-31.4.131}
+#'
+#' Portik, D. M., Streicher, J. W., Blackburn, D. C., Moen, D. S., Hutter, C. R., & Wiens,
+#' J. J. (2023). Redefining possible: combining phylogenomic and supersparse data in frogs.
+#' *Molecular Biology and Evolution*, 40, msad109. \doi{10.1093/molbev/msad109}
 "anurans"

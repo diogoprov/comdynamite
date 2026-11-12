@@ -144,6 +144,7 @@ reference:
   - result-methods
 - title: Example data
   contents:
+  - anurans
   - daphniids
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
@@ -172,6 +173,7 @@ articles:
   - articles/analysing-clades
   - articles/whole-tree
   - articles/trait-gradient
+  - abc
 - title: Simulating data
   navbar: Simulating data
   contents:
