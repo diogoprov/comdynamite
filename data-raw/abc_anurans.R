@@ -1,14 +1,18 @@
 # ABC with random forests for the anurans of urban ponds (data/anurans.rda), the worked example of
 # vignette("abc"). The ponds keep their coordinates (landscape_points()), the environment is the
-# hydrology score, and each city has its own pool of species, so that the two cities, about 900 km
-# apart, are separate metacommunities with shared parameters. The observed data are survey counts,
-# whose totals depend on effort and detection, so the statistics use incidence only.
+# hydrology score, and each city has its own regional pool (anurans$pool: lentic breeders of its
+# ecoregion recorded within 200 km), so that the two cities, about 900 km apart, are separate
+# metacommunities with shared parameters. Urban cover filters the pool of each pond: a share
+# q_tol of species tolerates any cover, and each other species occurs only in ponds whose cover is
+# below a threshold drawn from U(0, 100)%, waived for a species excluded from every pond of its
+# pool. The observed data are survey counts, whose totals depend on effort and detection, so the
+# statistics use incidence only.
 # Steps: (i) recovery of the parameters of the model with phylogenetic competition from
 # pseudo-observations; (ii) choice between that model and one without competition; (iii) the
 # posterior given the observed data, with abc_diagnose(); (iv) a posterior predictive check of the
 # phylogenetic statistics, left out of a fit on the others; (v) cross-validation with spatial
 # blocks, two in each city; (vi) model choice and posterior without total richness and beta
-# diversity, since the observed total richness of each city equals its pool by construction.
+# diversity, the statistics most tied to the size of the pool.
 # Run from the root of the package. N_REF, N_TEST, CORES and NTREE change the size; OUTPUT the file.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "10000"))
@@ -19,13 +23,20 @@ output <- Sys.getenv("OUTPUT", "data-raw/abc_anurans.rds")
 
 load("data/anurans.rda")
 city <- c("Campo Grande" = "cg", "São José dos Campos" = "sjc")[as.character(anurans$city)]
-pool <- t(vapply(city, function(k) colSums(anurans$comm[city == k, , drop = FALSE]) > 0,
-                 logical(ncol(anurans$comm)))) * 1L
+pool <- anurans$pool
 rownames(pool) <- paste0("site", seq_len(nrow(pool)))
 fixed <- list(tree = anurans$tree, coords = anurans$coords, env = anurans$env[, "hydrology"],
-              pool = pool, city = unname(city))
+              urban = anurans$env[, "urban_cover"], pool = pool, city = unname(city))
 prior <- list(log_dispersal = c(-4, log10(0.3)), log_kernel = log10(c(0.5, 20)),
-              inter_max = c(0, 1), sigma_mean = c(5, 100), lambda = c(0, 1))
+              inter_max = c(0, 1), sigma_mean = c(5, 100), lambda = c(0, 1), q_tol = c(0, 1))
+urban_pool <- function(pool, urban, q_tol) {
+  k <- ncol(pool)
+  threshold <- ifelse(stats::runif(k) < q_tol, Inf, stats::runif(k, 0, 100))
+  filtered <- pool * outer(urban, threshold, "<=")
+  lost <- colSums(filtered) == 0
+  filtered[, lost] <- pool[, lost]
+  filtered
+}
 simulate <- function(scenario, shared) {
   landscape <- landscape_points(shared$coords, shared$env, 10^scenario$log_kernel, lonlat = TRUE)
   alpha <- if (is.null(scenario$inter_max)) competition_matrix(shared$tree, "none") else
@@ -35,7 +46,7 @@ simulate <- function(scenario, shared) {
                                         sigma_mean = scenario$sigma_mean,
                                         sigma_sd = scenario$sigma_mean / 2),
                          alpha, dispersal = 10^scenario$log_dispersal, n_steps = 500,
-                         pool = shared$pool)
+                         pool = urban_pool(shared$pool, shared$urban, scenario$q_tol))
 }
 
 # incidence statistics of a set of sites: those of summary_stats() that need no abundances,
@@ -63,9 +74,15 @@ incidence_stats <- function(data, tree) {
   }
   c(s, richness_env = link(richness, env), composition_env = composition)
 }
+# statistics by city, over the species of its regional pool, which is also the pool of the null
+# model of ses_mpd and ses_mntd
 by_city <- function(data, shared) {
   unlist(lapply(c("cg", "sjc"), function(k) {
-    s <- incidence_stats(data[shared$city == k, ], shared$tree)
+    sites <- shared$city == k
+    species <- colnames(shared$pool)[colSums(shared$pool[sites, , drop = FALSE]) > 0]
+    d <- data[sites, ]
+    d$comm <- d$comm[, species, drop = FALSE]
+    s <- incidence_stats(d, shared$tree)
     stats::setNames(s, paste0(k, "_", names(s)))
   }))
 }
@@ -81,7 +98,9 @@ summarise <- function(sim, shared) {
   data <- as_mc_data(sim)
   c(by_city(data, shared), by_fold(data, shared))
 }
-observed_data <- mc_data(anurans$comm, tree = anurans$tree,
+padded <- matrix(0L, nrow(pool), ncol(pool), dimnames = list(rownames(anurans$comm), colnames(pool)))
+padded[, colnames(anurans$comm)] <- anurans$comm
+observed_data <- mc_data(padded, tree = anurans$tree,
                          env = data.frame(env = fixed$env), coords = anurans$coords)
 observed <- summarise(observed_data, fixed)
 city_stats <- grep("^(cg|sjc)_", names(observed), value = TRUE)
@@ -144,7 +163,8 @@ saveRDS(list(observed = observed, folds = folds, prior = prior, recovery = recov
              ppc_phylo = ppc_phylo,
              reduced = list(statistics = reduced, recovery = recovery_reduced,
                             choice = choice_reduced[c("error", "confusion")],
-                            chosen = chosen_reduced, posterior = posterior_reduced), ppc_all = ppc_all, cv = cv, cv_summary = summary(cv),
+                            chosen = chosen_reduced, posterior = posterior_reduced),
+             ppc_all = ppc_all, cv = cv, cv_summary = summary(cv),
              minutes = c(simulation = minutes_sim, forests = minutes_fit),
              settings = list(n_ref = n_ref, n_test = n_test, ntree = ntree)), output)
 print(recovery, digits = 3)

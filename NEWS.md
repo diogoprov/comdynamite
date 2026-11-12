@@ -1,8 +1,8 @@
 # comdynamite (development version)
 
 - `vignette("abc")` goes through inference by ABC with random forests with the anurans of 40
-  urban ponds in two Brazilian cities (`anurans`, new data set, with a dated tree pruned from
-  Portik et al. 2023): simulator, reference table, recovery, model choice, posterior,
+  urban ponds in two Brazilian cities (`anurans`, new data set, with regional pools from GBIF
+  occurrences and a dated tree pruned from Portik et al. 2023): simulator, reference table, recovery, model choice, posterior,
   diagnostics, posterior predictive checks and cross-validation over spatial blocks
   (`data-raw/abc_anurans.R`).
 - `landscape_points()` builds a landscape from the coordinates of real sites, with

@@ -1,0 +1,11 @@
+Access date: 2026-11-11 23:18 -04
+Endpoint: POST https://api.gbif.org/v1/occurrence/search/predicate (Content-Type: application/json)
+Bodies: out/gbif_queries/query_eco<eco_id>.json
+Reproduce: curl -X POST -H 'Content-Type: application/json' -d @query_eco567.json https://api.gbif.org/v1/occurrence/search/predicate
+Total records: Cerrado 47634; Alto Paraná Atlantic forests 19707; Serra do Mar coastal forests 47682
+
+Local 200-km buffer queries (GET), access 2026-11-11 23:41 -04
+## Campo Grande
+https://api.gbif.org/v1/occurrence/search?taxonKey=952&hasCoordinate=true&hasGeospatialIssue=false&occurrenceStatus=PRESENT&basisOfRecord=PRESERVED_SPECIMEN&basisOfRecord=HUMAN_OBSERVATION&basisOfRecord=MATERIAL_SAMPLE&facet=speciesKey&facetLimit=1000&limit=0&geometry=POLYGON%28%28-52.7%20-20.452%2C-52.769%20-19.985%2C-52.963%20-19.551%2C-53.268%20-19.178%2C-53.662%20-18.892%2C-54.12%20-18.712%2C-54.61%20-18.649%2C-55.101%20-18.709%2C-55.56%20-18.886%2C-55.957%20-19.169%2C-56.264%20-19.54%2C-56.461%20-19.973%2C-56.534%20-20.439%2C-56.476%20-20.907%2C-56.291%20-21.345%2C-55.989%20-21.723%2C-55.592%20-22.014%2C-55.126%20-22.198%2C-54.625%20-22.262%2C-54.122%20-22.202%2C-53.655%20-22.021%2C-53.255%20-21.733%2C-52.951%20-21.357%2C-52.762%20-20.92%2C-52.7%20-20.452%29%29
+## São José dos Campos
+https://api.gbif.org/v1/occurrence/search?taxonKey=952&hasCoordinate=true&hasGeospatialIssue=false&occurrenceStatus=PRESENT&basisOfRecord=PRESERVED_SPECIMEN&basisOfRecord=HUMAN_OBSERVATION&basisOfRecord=MATERIAL_SAMPLE&facet=speciesKey&facetLimit=1000&limit=0&geometry=POLYGON%28%28-43.915%20-23.073%2C-44.015%20-22.616%2C-44.24%20-22.199%2C-44.572%20-21.848%2C-44.99%20-21.586%2C-45.465%20-21.432%2C-45.968%20-21.396%2C-46.463%20-21.48%2C-46.919%20-21.679%2C-47.306%20-21.981%2C-47.596%20-22.365%2C-47.771%20-22.805%2C-47.816%20-23.272%2C-47.727%20-23.734%2C-47.51%20-24.159%2C-47.177%20-24.517%2C-46.753%20-24.783%2C-46.265%20-24.938%2C-45.75%20-24.971%2C-45.242%20-24.882%2C-44.779%20-24.675%2C-44.393%20-24.367%2C-44.109%20-23.979%2C-43.947%20-23.537%2C-43.915%20-23.073%29%29
