@@ -313,3 +313,144 @@ test_that("competition falls with the difference of phenotypes in each site", {
   expect_lt(apart[1, 1], same[1, 1])
   expect_equal(apart[1, 1], 0.05 * 10 + 0.05 * 10 * exp(-30^2 / 400))
 })
+
+test_that("point mutation starts new species from single individuals", {
+  set.seed(1)
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  run <- function(rate) {
+    set.seed(12)
+    simulate_evolving_metacommunity(ls, ancestor(), speciation_control("point", rate = rate),
+                                    dispersal = 0.05, n_steps = 200, max_species = 2000)
+  }
+  # rate 0 draws nothing: the same as no speciation
+  set.seed(12)
+  none <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("geographic", Inf),
+                                          dispersal = 0.05, n_steps = 200)
+  expect_identical(run(0)$abundance, none$abundance)
+  sim <- run(5e-4)
+  expect_gt(nrow(sim$events), 0)
+  expect_equal(nrow(sim$species) - 1, sum(lengths(strsplit(sim$events$new, ","))))
+  expect_true(ape::is.ultrametric(sim$tree))
+  expect_setequal(sim$tree$tip.label, colnames(sim$abundance))
+  # a mutant takes one individual from its mother
+  st <- new.env()
+  st$m <- 2
+  st$k <- 1
+  st$k_all <- 1
+  st$alive <- 1
+  st$species <- "sp1"
+  st$n <- matrix(c(5L, 3L), 2, 1)
+  for (nm in c("arrival", "propagule")) assign(nm, matrix(1L, 2, 1), st)
+  for (nm in c("immigrants", "load")) assign(nm, matrix(0, 2, 1), st)
+  st$present <- matrix(TRUE, 2, 1)
+  st$z <- st$ph <- st$pool_mean <- matrix(50, 2, 1)
+  st$history <- st$z_history <- NULL
+  st$dispersal <- st$extirpation <- 0.1
+  st$ev <- list(g = 1, b = 0, ve = 0, optimum = 50, sigma = 10, r_max = 5)
+  st$fixed_z <- FALSE
+  evolving_split(st, 1, list(2L, 2L), c("sp2", "sp3"), list(1L, 1L))
+  expect_equal(st$n, matrix(c(5L, 1L, 0L, 1L, 0L, 1L), 2, 3))
+  expect_equal(st$z[2, ], c(50, 50, 50))
+  expect_true(all(is.na(st$z[1, 2:3])))
+})
+
+test_that("new species can shift their genetic means", {
+  st <- new.env()
+  st$m <- 2
+  st$k <- 1
+  st$k_all <- 1
+  st$alive <- 1
+  st$species <- "sp1"
+  st$n <- matrix(c(5L, 3L), 2, 1)
+  for (nm in c("arrival", "propagule")) assign(nm, matrix(1L, 2, 1), st)
+  for (nm in c("immigrants", "load")) assign(nm, matrix(0, 2, 1), st)
+  st$present <- matrix(TRUE, 2, 1)
+  st$z <- st$ph <- st$pool_mean <- matrix(c(40, 60), 2, 1)
+  st$history <- st$z_history <- NULL
+  st$dispersal <- st$extirpation <- 0.1
+  st$ev <- list(g = 1, b = 0, ve = 0, optimum = 50, sigma = 10, r_max = 5)
+  st$fixed_z <- FALSE
+  set.seed(13)
+  evolving_split(st, 1, list(1:2), "sp2", jump_var = 100)
+  shift <- st$z[1, 2] - 40
+  expect_gt(abs(shift), 0)
+  expect_equal(st$z[2, 2] - 60, shift)
+  expect_equal(st$ev$optimum[2] - 50, shift)
+  expect_equal(st$n[, 1], c(0L, 0L))
+})
+
+test_that("fission splits species into spatial or random groups", {
+  # a chain of sites: the spatial group is a run of neighbours
+  xy <- cbind(seq(0, 0.09, by = 0.01), 0)
+  ls <- landscape_points(xy, env = rep(50, 10), disp_scale = 0.01)
+  for (seed in 1:20) {
+    set.seed(seed)
+    g <- evolving_partition(1:10, "spatial", ls$dispersal)
+    expect_equal(sort(c(g[[1]], g[[2]])), 1:10)
+    expect_true(length(g[[1]]) > 0 && length(g[[2]]) > 0)
+    expect_true(all(diff(g[[2]]) == 1))
+    r <- evolving_partition(c(2, 5, 7), "random", NULL)
+    expect_setequal(c(r[[1]], r[[2]]), c(2, 5, 7))
+    expect_true(length(r[[1]]) > 0 && length(r[[2]]) > 0)
+  }
+  set.seed(14)
+  sim <- simulate_evolving_metacommunity(landscape_grid(4, disp_scale = 0.5), ancestor(),
+                                         speciation_control("fission", rate = 0.05),
+                                         dispersal = 0.05, n_steps = 100, max_species = 2000)
+  expect_gt(nrow(sim$events), 0)
+  expect_true(ape::is.binary(sim$tree))
+  expect_true(ape::is.ultrametric(sim$tree))
+})
+
+test_that("incipient lineages belong to the nearest good species", {
+  set.seed(1)
+  sp <- data.frame(species = paste0("sp", 1:5), parent = c(NA, "sp1", "sp2", "sp1", "sp4"),
+                   birth = c(0, 10, 20, 30, 40), end = c(50, 50, 50, 45, 50),
+                   fate = c("extant", "extant", "extant", "extinct", "extant"),
+                   status = c("good", "incipient", "good", "good", "incipient"),
+                   stringsAsFactors = FALSE)
+  obs <- evolving_observed(sp)
+  expect_equal(unname(obs$group[c("sp1", "sp2", "sp3", "sp5")]), c("sp1", "sp1", "sp3", "sp4"))
+  # sp4 is extinct, so its incipient daughter sp5 represents it
+  expect_equal(obs$rep, c(sp1 = "sp1", sp3 = "sp3", sp4 = "sp5"))
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  run <- function(completion, dist = "fixed") {
+    set.seed(15)
+    simulate_evolving_metacommunity(ls, ancestor(),
+                                    speciation_control("point", rate = 5e-4,
+                                                       completion = completion,
+                                                       completion_dist = dist),
+                                    dispersal = 0.05, n_steps = 200, max_species = 2000)
+  }
+  inst <- run(0)
+  never <- run(1000)
+  expect_identical(nrow(never$species), nrow(inst$species))
+  expect_equal(colnames(never$abundance), "sp1")
+  expect_equal(unname(never$abundance[, 1]), unname(rowSums(inst$abundance)))
+  expect_null(never$tree)
+  expect_true(all(never$richness_good == 1))
+  some <- run(30, "exponential")
+  expect_output(print(some), "good species")
+  expect_true(all(some$lineage_species %in% colnames(some$abundance)))
+  expect_equal(sum(some$abundance), sum(some$lineages))
+  if (!is.null(some$tree)) expect_setequal(some$tree$tip.label, colnames(some$abundance))
+  expect_s3_class(as_mc_data(as_metacommunity(some)), "mc_data")
+})
+
+test_that("trees with many buds on one lineage are built", {
+  q <- 3000
+  sp <- data.frame(species = paste0("sp", seq_len(q + 1)), parent = c(NA, rep("sp1", q)),
+                   birth = c(0, seq_len(q) / 10), end = q / 10 + 1,
+                   fate = "extant", order = c(0L, rep(1L, q)), stringsAsFactors = FALSE)
+  tr <- evolving_tree(sp, NULL)
+  expect_equal(ape::Ntip(tr), q + 1)
+  expect_true(ape::is.ultrametric(tr))
+})
+
+test_that("settings of the new modes are checked", {
+  expect_error(speciation_control("point"), "rate")
+  expect_error(speciation_control("point", rate = 2))
+  expect_output(print(speciation_control("point", rate = 1e-3, jump_var = 4, completion = 10)),
+                "completion")
+  expect_output(print(speciation_control("fission", rate = 0.1)), "spatial")
+})
