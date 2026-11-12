@@ -436,14 +436,14 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
           }
         }
       }
-      # mothers whose last individuals became new species are gone
+      # mothers whose last individuals became point mutants are gone (no other mode empties
+      # a mother, and point mutation keeps no divergence)
       lost <- evolving_prune(st)
       if (length(lost)) {
         sp_table$end[lost] <- gen
         sp_table$fate[lost] <- "extinct"
         keep <- !rownames(split_time) %in% sp_table$species[lost]
         split_time <- split_time[keep, keep, drop = FALSE]
-        if (uses_div) divergence[lost] <- together[lost] <- flow[lost] <- list(NULL)
       }
     }
     if (uses_div) flow <- lapply(flow, function(x) if (!is.null(x)) x * 0)
@@ -594,7 +594,6 @@ niche_crowding <- function(st) {
 # (one per new species) at generation `gen`: a new species shares the history of its mother up
 # to `gen`, and new species of the same mother split from each other at `gen`
 evolving_split_time <- function(split_time, mothers, names_new, gen) {
-  if (length(mothers) == 1 && length(names_new) > 1) mothers <- rep(mothers, length(names_new))
   k <- nrow(split_time)
   anchor <- c(seq_len(k), match(mothers, rownames(split_time)))
   out <- split_time[anchor, anchor, drop = FALSE]

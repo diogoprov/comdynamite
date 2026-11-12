@@ -457,6 +457,15 @@ test_that("incipient lineages belong to the nearest good species", {
                     stringsAsFactors = FALSE)
   expect_equal(unname(evolving_observed(sp2)$group["sp3"]), "sp1")
   expect_s3_class(as_mc_data(as_metacommunity(some)), "mc_data")
+  # records sum the lineages of each species
+  set.seed(15)
+  rec <- simulate_evolving_metacommunity(ls, ancestor(),
+                                         speciation_control("point", rate = 5e-4,
+                                                            completion = 1000),
+                                         dispersal = 0.05, n_steps = 200, record_steps = 200,
+                                         max_species = 2000)
+  expect_gt(ncol(rec$lineages), 1)
+  expect_equal(unname(rec$history[, 1, 1]), unname(rowSums(rec$lineages)))
 })
 
 test_that("trees with many buds on one lineage are built", {
