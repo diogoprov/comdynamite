@@ -2,6 +2,15 @@
 
 ## comdynamite (development version)
 
+- [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
+  gives, for each observation and parameter of an
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
+  the effective sample size and the Pareto k-hat of the forest weights,
+  with posterior in Suggests, and the statistics of the observation
+  outside the central 99% of the reference table. In
+  `data-raw/abc_diagnose.R` k-hat did not predict wrong estimates, while
+  a low effective sample size and statistics outside the table flagged
+  data from another model.
 - Cross-validation of ABC across sites.
   [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
   splits the sites into spatial blocks (k-means on the coordinates) or

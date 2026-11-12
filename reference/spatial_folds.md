@@ -51,6 +51,7 @@ spatial, hierarchical, or phylogenetic structure. *Ecography*, 40,
 Other inference:
 [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md),
 [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md),
+[`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md),
 [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),

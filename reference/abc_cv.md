@@ -89,6 +89,7 @@ the root mean square of `z` and the fraction of p-values below 0.05.
 
 Other inference:
 [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md),
+[`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md),
 [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),

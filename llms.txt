@@ -364,6 +364,8 @@ parameters.
   : Choose among models by ABC with random forests
 - [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md)
   : Posterior predictive check after ABC
+- [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
+  : How many simulations does an ABC posterior rest on?
 - [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
   : Folds of sites for cross-validation
 - [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md)
