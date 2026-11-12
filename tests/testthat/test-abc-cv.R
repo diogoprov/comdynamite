@@ -68,6 +68,14 @@ test_that("abc_cv predicts left-out statistics and flags those the model misses"
                              as.data.frame(as.list(observed))), "a", n = 300, ntree = 100)
   expect_equal(nrow(two), 12)
   expect_equal(two$inside[two$observation == 2], cv$inside)
+  gap <- observed
+  gap["f2_test_t"] <- NA
+  holes <- abc_cv(table, gap, "a", n = 100, ntree = 50)
+  expect_equal(nrow(holes), 5)
+  expect_false(any(holes$fold == 2 & holes$statistic == "t"))
+  flat <- table
+  flat$f1_test_t <- 0
+  expect_true(is.na(abc_cv(flat, observed, "a", n = 100, ntree = 50)$z[2]))
   only_s <- abc_cv(table, observed, parameters = "a", statistics = "s", n = 100, ntree = 50)
   expect_setequal(only_s$statistic, "s")
 })
