@@ -103,6 +103,7 @@ reference:
   - abc_recovery
   - abc_choose
   - abc_ppc
+  - abc_diagnose
   - spatial_folds
   - fold_summarise
   - abc_cv

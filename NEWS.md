@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- `abc_diagnose()` gives, for each observation and parameter of an `abc_fit()`, the effective
+  sample size and the Pareto k-hat of the forest weights, with posterior in Suggests, and the
+  statistics of the observation outside the central 99% of the reference table. In
+  `data-raw/abc_diagnose.R` k-hat did not predict wrong estimates, while a low effective sample
+  size and statistics outside the table flagged data from another model.
 - Cross-validation of ABC across sites. `spatial_folds()` splits the sites into spatial blocks
   (k-means on the coordinates) or random folds, `fold_summarise()` turns a summary function
   into one that gives the statistics of the sites kept and left out in every fold, for use in

@@ -558,8 +558,20 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       a vantagem esperada dos blocos não apareceu; uma explicação possível, não testada, é
       que a grade de 25 sítios é um toro e os blocos de 5 sítios ficam vizinhos de todos os
       lados. Falta repetir com paisagem maior e sem toro antes de recomendar blocos.
-- [ ] Diagnóstico de Pareto k dos pesos de importância, com `loo::psis()`, para saber
-      quando a posterior ponderada depende de poucas simulações.
+- [x] Diagnóstico de Pareto k dos pesos de importância, para saber quando a posterior
+      ponderada depende de poucas simulações: `abc_diagnose()` (2026-11-11), com
+      `posterior::pareto_diags()` em vez de `loo::psis()`, o tamanho efetivo de amostra dos
+      pesos e as estatísticas fora dos 99% centrais da tabela. Em `data-raw/abc_diagnose.R`
+      (tabela da recuperação, 200 pseudo-observações do modelo certo e 100 do modelo sem
+      competição; 5 min): no modelo certo, o tamanho efetivo foi de 141–245 e o k-hat passou
+      do limiar em 0–4% dos casos, sem relação com o erro (Spearman de -0,11 a 0,24 para o
+      k-hat e de 0,02 a 0,15 para o tamanho efetivo) nem com a cobertura. Com dados do outro
+      modelo, o tamanho efetivo caiu para 75–153 e as estatísticas fora da tabela subiram de
+      0,17 para 1,27 por observação. Conclusão: os pesos das florestas não são razões de
+      importância, e o k-hat não serve como medida de confiança das estimativas; tamanho
+      efetivo baixo e estatísticas fora da tabela servem como aviso de que a observação não
+      se parece com as simulações. A cobertura zero de `inter_max` nos dados sem competição
+      vem do verdadeiro valor estar no limite do prior (0), não de erro de ajuste.
 - [ ] PSIS-LOO padrão (Vehtari et al. 2017) precisa de log-verossimilhança por observação,
       que o ABC não dá. Avaliar likelihood sintética (Wood 2010) por sítio ou por
       estatística, que daria esse termo de forma aproximada.
