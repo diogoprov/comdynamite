@@ -4,8 +4,9 @@ Runs the model of
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 with the evolution of the niche optimum within populations of
 [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
-on species that bud as their populations diverge
-([`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md))
+on species that bud as their populations diverge, by point mutation or
+by fission
+([`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)),
 and die out when their last population is lost. The tree is not given:
 it grows out of the dynamics. The community starts from the species of
 `traits` (usually one ancestor) and is closed: there is no immigration
@@ -58,7 +59,7 @@ simulate_evolving_metacommunity(
   Settings from
   [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md);
   `NULL` keeps the optimum of each species fixed (`genetic_var = 0`),
-  which allows only geographic speciation.
+  which rules out ecological speciation.
 
 - dispersal:
 
@@ -119,20 +120,51 @@ simulate_evolving_metacommunity(
 
 ## Value
 
-An `mc_evolving` object: a list with `abundance` (sites x extant
-species), `tree` (the reconstructed tree of the extant species, branch
-lengths in generations, or `NULL` with fewer than two), `tree_full`
-(with extinct species), `species` (a table with the parent, birth, end
-and fate of every species), `events` (one row per budding, with the new
-species), `richness` (extant species at each generation), `genetic`
-(genetic means of the populations of the extant species), `traits` (of
-the extant species, with the mean genetic optimum over their populations
-as `optimum`), `alpha` (among the extant species at the end, without the
-niche overlap, which varies among sites), the records and colonisation
-history of
-[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
-for the extant species, and the `landscape`, `dispersal`, `extirpation`,
-`speciation`, `evolution` and `n_steps` used.
+An `mc_evolving` object, a list with:
+
+- `abundance`: sites x extant species. With protracted speciation
+  (`completion` of
+  [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)),
+  the species are the good species, each with the individuals of its
+  extant lineages; otherwise every lineage is a species.
+
+- `tree`: the reconstructed tree of those species, with branch lengths
+  in generations, nodes at times of initiation and a root edge from the
+  start to the crown, or `NULL` with fewer than two.
+
+- `tree_full`: the tree of all lineages, extinct ones included.
+
+- `species`: a table with the parent, birth (initiation), end, fate,
+  order of budding, time of completion and status (`"good"` or
+  `"incipient"` at its end) of every lineage.
+
+- `events`: one row per budding, with the new lineages.
+
+- `lineages` and `lineage_species`: abundances of the extant lineages
+  and the species each belongs to.
+
+- `richness` and `richness_good`: extant lineages, and extant lineages
+  that have completed, at each generation (the second can be below the
+  number of good species, some of which survive only in incipient
+  lineages).
+
+- `genetic`: genetic means of the populations of the extant lineages.
+
+- `traits`: of the extant species, with the mean genetic optimum over
+  the populations of their lineages as `optimum`.
+
+- `alpha`: among the extant species at the end, without the niche
+  overlap, which varies among sites.
+
+- The records and colonisation history of
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  for the extant species: records summed over their extant lineages
+  (lineages extinct by the end are left out); colonisation, in each
+  site, of the most abundant lineage.
+
+- The `landscape`, `dispersal`, `extirpation`, `speciation`, `evolution`
+  and `n_steps` used.
+
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
 turns it into an `mc_sim` for the other functions of the package.
 
@@ -200,6 +232,6 @@ sim <- simulate_evolving_metacommunity(
   evolution = evolution_control(genetic_var = 20, ne_ratio = 0.5))
 sim
 #> <mc_evolving> 36 sites, 400 generations
-#>   species ever: 247 | extant: 233 | extinct: 14 | buddings: 237 
-#>   speciation: geographic with threshold 100 
+#>   lineages ever: 247 | extant: 233 | extinct: 14 | buddings: 237 
+#>   speciation: geographic 
 ```
