@@ -93,7 +93,8 @@ flow, keeps drift and founder sampling in small populations from splitting speci
 uniform environment.
 \item \code{"point"}: point mutation, the mode of neutral theory and of MESS (Overcast et al. 2021).
 Each individual becomes, with probability \code{rate} per generation, the first individual of a
-new species in its site. The mother keeps all its populations.
+new species in its site. The mother keeps its populations, except where a mutant takes its
+last individual. Mutants arrive in the generation of their birth.
 \item \code{"fission"}: random fission. Each species with two or more populations splits with
 probability \eqn{1 - e^{-\lambda}}{1 - exp(-lambda)} per generation (\eqn{\lambda}{lambda}
 = \code{rate}). With \code{partition = "spatial"}, the populations of the new group are those nearest
@@ -117,9 +118,12 @@ completes, after \code{completion} generations (\code{completion_dist = "fixed"}
 exponential time with that mean (\code{"exponential"}, the rate \eqn{\lambda_2}{lambda2} of the
 protracted birth-death model; Etienne & Rosindell 2012). Completion only changes what is
 recognised as a species: incipient lineages are separate lineages in the dynamics. At the
-end, each extant lineage belongs to the nearest lineage, itself or an ancestor, that has
-completed (a good species), and the reconstructed tree has one tip per good species with
-extant lineages, with nodes at the times of initiation.
+end, a lineage that has completed is a good species, and an incipient lineage belongs to the
+species its parent belonged to at its birth, as in the labels of the PBD. The reconstructed
+tree has one tip per good species with extant lineages, represented by the good lineage
+itself or, if it is extinct, by its earliest extant member. Its nodes are times of
+initiation of lineages, which for a species whose lineages are not monophyletic may predate
+the initiation of the species itself.
 }
 \examples{
 speciation_control("geographic", threshold = 50)

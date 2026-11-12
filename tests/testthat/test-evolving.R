@@ -308,7 +308,7 @@ test_that("competition falls with the difference of phenotypes in each site", {
   hook <- niche_crowding(st)
   n <- matrix(c(10, 0, 10, 5), 2, 2)
   same <- hook(n, matrix(50, 2, 2))
-  expect_equal(same, n %*% st$at)
+  expect_equal(same[n > 0], (n %*% st$at)[n > 0])
   apart <- hook(n, matrix(c(50, 50, 80, 80), 2, 2))
   expect_lt(apart[1, 1], same[1, 1])
   expect_equal(apart[1, 1], 0.05 * 10 + 0.05 * 10 * exp(-30^2 / 400))
@@ -332,6 +332,14 @@ test_that("point mutation starts new species from single individuals", {
   expect_equal(nrow(sim$species) - 1, sum(lengths(strsplit(sim$events$new, ","))))
   expect_true(ape::is.ultrametric(sim$tree))
   expect_setequal(sim$tree$tip.label, colnames(sim$abundance))
+  expect_true(all(colSums(sim$abundance) > 0))
+  expect_equal(max(ape::node.depth.edgelength(sim$tree)) + sim$tree$root.edge, 200)
+  # mothers emptied by mutants go extinct
+  set.seed(1)
+  hot <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("point", rate = 0.003),
+                                         dispersal = 0.05, n_steps = 200, max_species = 5000)
+  expect_true(all(colSums(hot$abundance) > 0))
+  expect_equal(tail(hot$richness, 1), ncol(hot$abundance))
   # a mutant takes one individual from its mother
   st <- new.env()
   st$m <- 2
@@ -350,7 +358,13 @@ test_that("point mutation starts new species from single individuals", {
   st$fixed_z <- FALSE
   evolving_split(st, 1, list(2L, 2L), c("sp2", "sp3"), list(1L, 1L))
   expect_equal(st$n, matrix(c(5L, 1L, 0L, 1L, 0L, 1L), 2, 3))
-  expect_equal(st$z[2, ], c(50, 50, 50))
+  st$step <- 7
+  evolving_split(st, 1, list(2L), "sp4", list(1L), mutants = TRUE)
+  expect_equal(st$arrival[2, 4], 7L)
+  expect_equal(st$propagule[2, 4], 1L)
+  expect_equal(st$n[2, 1], 0L)
+  expect_false(st$present[2, 1])
+  expect_equal(st$z[2, 2:4], c(50, 50, 50))
   expect_true(all(is.na(st$z[1, 2:3])))
 })
 
@@ -407,6 +421,7 @@ test_that("incipient lineages belong to the nearest good species", {
   sp <- data.frame(species = paste0("sp", 1:5), parent = c(NA, "sp1", "sp2", "sp1", "sp4"),
                    birth = c(0, 10, 20, 30, 40), end = c(50, 50, 50, 45, 50),
                    fate = c("extant", "extant", "extant", "extinct", "extant"),
+                   completion = c(0, 60, 25, 35, 70),
                    status = c("good", "incipient", "good", "good", "incipient"),
                    stringsAsFactors = FALSE)
   obs <- evolving_observed(sp)
@@ -434,6 +449,13 @@ test_that("incipient lineages belong to the nearest good species", {
   expect_true(all(some$lineage_species %in% colnames(some$abundance)))
   expect_equal(sum(some$abundance), sum(some$lineages))
   if (!is.null(some$tree)) expect_setequal(some$tree$tip.label, colnames(some$abundance))
+  # an incipient lineage keeps the species of its parent at its birth, even if the parent
+  # completes later
+  sp2 <- data.frame(species = c("sp1", "sp2", "sp3"), parent = c(NA, "sp1", "sp2"),
+                    birth = c(0, 10, 20), end = 50, fate = "extant",
+                    completion = c(0, 30, 80), status = c("good", "good", "incipient"),
+                    stringsAsFactors = FALSE)
+  expect_equal(unname(evolving_observed(sp2)$group["sp3"]), "sp1")
   expect_s3_class(as_mc_data(as_metacommunity(some)), "mc_data")
 })
 
@@ -453,4 +475,16 @@ test_that("settings of the new modes are checked", {
   expect_output(print(speciation_control("point", rate = 1e-3, jump_var = 4, completion = 10)),
                 "completion")
   expect_output(print(speciation_control("fission", rate = 0.1)), "spatial")
+})
+
+test_that("split times of several buddings at once agree with one at a time", {
+  st0 <- matrix(c(0, -5, -5, 0), 2, 2, dimnames = list(c("a", "b"), c("a", "b")))
+  many <- evolving_split_time(st0, c("a", "a", "b"), c("c", "d", "e"), 10)
+  expect_equal(many["c", "a"], 10)
+  expect_equal(many["c", "d"], 10)
+  expect_equal(many["c", "b"], -5)
+  expect_equal(many["c", "e"], -5)
+  expect_equal(many["e", "b"], 10)
+  expect_equal(many, t(many))
+  expect_equal(unname(diag(many)), rep(0, 5))
 })

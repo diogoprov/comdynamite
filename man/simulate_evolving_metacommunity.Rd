@@ -75,24 +75,26 @@ An \code{mc_evolving} object, a list with:
 \item \code{abundance}: sites x extant species. With protracted speciation (\code{completion} of
 \code{\link[=speciation_control]{speciation_control()}}), the species are the good species, each with the individuals
 of its extant lineages; otherwise every lineage is a species.
-\item \code{tree}: the reconstructed tree of those species, with branch lengths in generations and
-nodes at the times of initiation, or \code{NULL} with fewer than two.
+\item \code{tree}: the reconstructed tree of those species, with branch lengths in generations,
+nodes at times of initiation and a root edge from the start to the crown, or \code{NULL}
+with fewer than two.
 \item \code{tree_full}: the tree of all lineages, extinct ones included.
 \item \code{species}: a table with the parent, birth (initiation), end, fate, order of budding,
 time of completion and status (\code{"good"} or \code{"incipient"} at its end) of every lineage.
 \item \code{events}: one row per budding, with the new lineages.
 \item \code{lineages} and \code{lineage_species}: abundances of the extant lineages and the species
 each belongs to.
-\item \code{richness} and \code{richness_good}: extant lineages, and those that have completed, at each
-generation.
+\item \code{richness} and \code{richness_good}: extant lineages, and extant lineages that have
+completed, at each generation (the second can be below the number of good species, some
+of which survive only in incipient lineages).
 \item \code{genetic}: genetic means of the populations of the extant lineages.
 \item \code{traits}: of the extant species, with the mean genetic optimum over the populations of
 their lineages as \code{optimum}.
 \item \code{alpha}: among the extant species at the end, without the niche overlap, which varies
 among sites.
 \item The records and colonisation history of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant
-species: records summed over lineages; colonisation, in each site, of the most abundant
-lineage.
+species: records summed over their extant lineages (lineages extinct by the end are
+left out); colonisation, in each site, of the most abundant lineage.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps}
 used.
 }

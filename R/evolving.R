@@ -30,7 +30,8 @@
 #'   uniform environment.
 #' * `"point"`: point mutation, the mode of neutral theory and of MESS (Overcast et al. 2021).
 #'   Each individual becomes, with probability `rate` per generation, the first individual of a
-#'   new species in its site. The mother keeps all its populations.
+#'   new species in its site. The mother keeps its populations, except where a mutant takes its
+#'   last individual. Mutants arrive in the generation of their birth.
 #' * `"fission"`: random fission. Each species with two or more populations splits with
 #'   probability \eqn{1 - e^{-\lambda}}{1 - exp(-lambda)} per generation (\eqn{\lambda}{lambda}
 #'   = `rate`). With `partition = "spatial"`, the populations of the new group are those nearest
@@ -53,9 +54,12 @@
 #' exponential time with that mean (`"exponential"`, the rate \eqn{\lambda_2}{lambda2} of the
 #' protracted birth-death model; Etienne & Rosindell 2012). Completion only changes what is
 #' recognised as a species: incipient lineages are separate lineages in the dynamics. At the
-#' end, each extant lineage belongs to the nearest lineage, itself or an ancestor, that has
-#' completed (a good species), and the reconstructed tree has one tip per good species with
-#' extant lineages, with nodes at the times of initiation.
+#' end, a lineage that has completed is a good species, and an incipient lineage belongs to the
+#' species its parent belonged to at its birth, as in the labels of the PBD. The reconstructed
+#' tree has one tip per good species with extant lineages, represented by the good lineage
+#' itself or, if it is extinct, by its earliest extant member. Its nodes are times of
+#' initiation of lineages, which for a species whose lineages are not monophyletic may predate
+#' the initiation of the species itself.
 #'
 #' @param mode `"geographic"`, `"ecological"`, `"point"` or `"fission"`.
 #' @param threshold For `"geographic"` and `"ecological"`: divergence in generations, or
@@ -219,24 +223,26 @@ print.mc_speciation <- function(x, ...) {
 #'   * `abundance`: sites x extant species. With protracted speciation (`completion` of
 #'     [speciation_control()]), the species are the good species, each with the individuals
 #'     of its extant lineages; otherwise every lineage is a species.
-#'   * `tree`: the reconstructed tree of those species, with branch lengths in generations and
-#'     nodes at the times of initiation, or `NULL` with fewer than two.
+#'   * `tree`: the reconstructed tree of those species, with branch lengths in generations,
+#'     nodes at times of initiation and a root edge from the start to the crown, or `NULL`
+#'     with fewer than two.
 #'   * `tree_full`: the tree of all lineages, extinct ones included.
 #'   * `species`: a table with the parent, birth (initiation), end, fate, order of budding,
 #'     time of completion and status (`"good"` or `"incipient"` at its end) of every lineage.
 #'   * `events`: one row per budding, with the new lineages.
 #'   * `lineages` and `lineage_species`: abundances of the extant lineages and the species
 #'     each belongs to.
-#'   * `richness` and `richness_good`: extant lineages, and those that have completed, at each
-#'     generation.
+#'   * `richness` and `richness_good`: extant lineages, and extant lineages that have
+#'     completed, at each generation (the second can be below the number of good species, some
+#'     of which survive only in incipient lineages).
 #'   * `genetic`: genetic means of the populations of the extant lineages.
 #'   * `traits`: of the extant species, with the mean genetic optimum over the populations of
 #'     their lineages as `optimum`.
 #'   * `alpha`: among the extant species at the end, without the niche overlap, which varies
 #'     among sites.
 #'   * The records and colonisation history of [simulate_metacommunity()] for the extant
-#'     species: records summed over lineages; colonisation, in each site, of the most abundant
-#'     lineage.
+#'     species: records summed over their extant lineages (lineages extinct by the end are
+#'     left out); colonisation, in each site, of the most abundant lineage.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation`, `evolution` and `n_steps`
 #'     used.
 #'
@@ -381,44 +387,63 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       together <- upd$together
     }
     buds <- evolving_initiate(st, divergence, speciation, landscape$dispersal)
-    for (b in buds) {
-      j <- b$j
-      q <- length(b$sites)
-      if (st$k_all + q > max_species) {
+    if (length(buds)) {
+      qs <- vapply(buds, function(b) length(b$sites), numeric(1))
+      if (st$k_all + sum(qs) > max_species) {
         stop("more than `max_species` (", max_species, ") species; raise it or lower the ",
              "rate of speciation", call. = FALSE)
       }
-      names_new <- evolving_names(st$species, q)
-      new_ids <- st$k_all + seq_len(q)
-      evolving_split(st, j, b$sites, names_new, b$amounts, speciation$jump_var)
-      done <- gen + if (speciation$completion == 0) rep(0, q) else
-        if (speciation$completion_dist == "fixed") rep(speciation$completion, q) else
-          stats::rexp(q, 1 / speciation$completion)
-      sp_table <- rbind(sp_table, data.frame(species = names_new,
-                                             parent = sp_table$species[j], birth = gen,
+      all_names <- evolving_names(st$species, sum(qs))
+      last <- cumsum(qs)
+      for (i in seq_along(buds)) {
+        pos <- (last[i] - qs[i] + 1):last[i]
+        buds[[i]]$names <- all_names[pos]
+        buds[[i]]$ids <- st$k_all + pos
+      }
+      # every per-species structure grows once for all the buddings of the generation
+      evolving_split_many(st, buds, speciation$jump_var, mutants = speciation$mode == "point")
+      mothers <- sp_table$species[vapply(buds, function(b) b$j, numeric(1))]
+      done <- gen + if (speciation$completion == 0) rep(0, sum(qs)) else
+        if (speciation$completion_dist == "fixed") rep(speciation$completion, sum(qs)) else
+          stats::rexp(sum(qs), 1 / speciation$completion)
+      sp_table <- rbind(sp_table, data.frame(species = all_names,
+                                             parent = rep(mothers, qs), birth = gen,
                                              end = NA_real_, fate = "extant",
-                                             order = seq_len(q), completion = done,
+                                             order = sequence(qs), completion = done,
                                              stringsAsFactors = FALSE))
-      events <- rbind(events, data.frame(time = gen, parent = sp_table$species[j],
-                                         new = paste(names_new, collapse = ","),
-                                         stringsAsFactors = FALSE))
-      split_time <- evolving_split_time(split_time, sp_table$species[j], names_new, gen)
-      if (uses_div) {
-        d <- divergence[[j]]
-        tg <- together[[j]]
-        for (g in seq_along(b$groups)) {
-          id <- if (g == 1) j else new_ids[g - 1]
-          out <- !(seq_len(st$m) %in% b$groups[[g]])
-          dg <- d
-          dg[out, ] <- NA_real_
-          dg[, out] <- NA_real_
-          tgg <- tg
-          tgg[out, ] <- 0
-          tgg[, out] <- 0
-          divergence[[id]] <- dg
-          together[[id]] <- tgg
-          flow[[id]] <- matrix(0, st$m, st$m)
+      events <- rbind(events, data.frame(
+        time = gen, parent = mothers,
+        new = vapply(buds, function(b) paste(b$names, collapse = ","), character(1)),
+        stringsAsFactors = FALSE))
+      split_time <- evolving_split_time(split_time, rep(mothers, qs), all_names, gen)
+      for (b in buds) {
+        j <- b$j
+        if (uses_div) {
+          d <- divergence[[j]]
+          tg <- together[[j]]
+          for (g in seq_along(b$groups)) {
+            id <- if (g == 1) j else b$ids[g - 1]
+            out <- !(seq_len(st$m) %in% b$groups[[g]])
+            dg <- d
+            dg[out, ] <- NA_real_
+            dg[, out] <- NA_real_
+            tgg <- tg
+            tgg[out, ] <- 0
+            tgg[, out] <- 0
+            divergence[[id]] <- dg
+            together[[id]] <- tgg
+            flow[[id]] <- matrix(0, st$m, st$m)
+          }
         }
+      }
+      # mothers whose last individuals became new species are gone
+      lost <- evolving_prune(st)
+      if (length(lost)) {
+        sp_table$end[lost] <- gen
+        sp_table$fate[lost] <- "extinct"
+        keep <- !rownames(split_time) %in% sp_table$species[lost]
+        split_time <- split_time[keep, keep, drop = FALSE]
+        if (uses_div) divergence[lost] <- together[lost] <- flow[lost] <- list(NULL)
       }
     }
     if (uses_div) flow <- lapply(flow, function(x) if (!is.null(x)) x * 0)
@@ -448,6 +473,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   tree <- if (length(species) >= 2) {
     tr <- ape::keep.tip(tree_full, unname(obs$rep))
     tr$tip.label <- species[match(tr$tip.label, obs$rep)]
+    # the stem of the reconstructed tree runs from the start to its crown
+    if (is.null(tree0)) tr$root.edge <- generations - max(ape::node.depth.edgelength(tr))
     tr
   } else {
     NULL
@@ -551,29 +578,31 @@ evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, s
 niche_crowding <- function(st) {
   function(n, p) {
     sigma2 <- st$ev$sigma[st$alive]^2
-    width <- 2 * outer(sigma2, sigma2, "+")
     out <- matrix(0, nrow(n), ncol(n))
+    # only species present in a site need its crowding (the others have no one to grow)
     for (s in which(rowSums(n) > 0)) {
-      overlap <- exp(-outer(p[s, ], p[s, ], "-")^2 / width)
-      out[s, ] <- n[s, ] %*% (st$at * overlap)
+      here <- which(n[s, ] > 0)
+      overlap <- exp(-outer(p[s, here], p[s, here], "-")^2 /
+                       (2 * outer(sigma2[here], sigma2[here], "+")))
+      out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * overlap)
     }
     out
   }
 }
 
-# split times (by name, among alive species) after the species `names_new` bud from `mother`
-# at generation `gen`: the new species share the history of the mother up to `gen`
-evolving_split_time <- function(split_time, mother, names_new, gen) {
+# split times (by name, among alive species) after the species `names_new` bud from `mothers`
+# (one per new species) at generation `gen`: a new species shares the history of its mother up
+# to `gen`, and new species of the same mother split from each other at `gen`
+evolving_split_time <- function(split_time, mothers, names_new, gen) {
+  if (length(mothers) == 1 && length(names_new) > 1) mothers <- rep(mothers, length(names_new))
   k <- nrow(split_time)
-  q <- length(names_new)
-  j <- match(mother, rownames(split_time))
-  out <- matrix(0, k + q, k + q)
-  out[seq_len(k), seq_len(k)] <- split_time
-  new <- k + seq_len(q)
-  out[new, seq_len(k)] <- matrix(split_time[j, ], q, k, byrow = TRUE)
-  out[new, j] <- gen
-  out[seq_len(k), new] <- t(out[new, seq_len(k)])
-  out[new, new] <- gen
+  anchor <- c(seq_len(k), match(mothers, rownames(split_time)))
+  out <- split_time[anchor, anchor, drop = FALSE]
+  new <- k + seq_along(names_new)
+  out[cbind(new, anchor[new])] <- gen
+  out[cbind(anchor[new], new)] <- gen
+  same <- outer(anchor[new], anchor[new], "==")
+  out[new, new][same] <- gen
   diag(out) <- 0
   dimnames(out) <- list(c(rownames(split_time), names_new), c(rownames(split_time), names_new))
   out
@@ -789,14 +818,27 @@ evolving_partition <- function(idx, partition, disp_matrix) {
 }
 
 # species j (index over all species ever) buds: new species g takes `amounts[[g]]` individuals
-# (all, when NULL) in the sites `sites[[g]]`, and every per-species structure of the state
-# grows; new species take the genetic means and history of the mother in their sites, shifted
-# by one Gaussian draw of variance `jump_var` each
-evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0) {
-  q <- length(sites)
+# (all, when NULL) in the sites `sites[[g]]`; see evolving_split_many()
+evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0,
+                           mutants = FALSE) {
+  evolving_split_many(st, list(list(j = j, sites = sites, amounts = amounts, names = names_new,
+                                    ids = st$k_all + seq_along(sites))), jump_var, mutants)
+}
+
+# several mothers bud at once: each element of `buds` has the mother `j` (index over all
+# species ever), the `sites` and `amounts` of each new species (amounts NULL for whole
+# populations), and their `names` and `ids`. Every per-species structure of the state grows once;
+# new species take the genetic means and history of the mother in their sites, shifted by one
+# Gaussian draw of variance `jump_var` each. Point mutants (`mutants = TRUE`) arrive now, from a
+# propagule of their own individuals.
+evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE) {
+  q <- sum(vapply(buds, function(b) length(b$sites), numeric(1)))
   m <- st$m
+  mothers <- rep(vapply(buds, function(b) b$j, numeric(1)),
+                 vapply(buds, function(b) length(b$sites), numeric(1)))
+  names_new <- unlist(lapply(buds, function(b) b$names))
   grow_cols <- function(x, fill) cbind(x, matrix(fill, nrow(x), q))
-  grow_vec <- function(x) c(x, rep(x[j], q))
+  grow_vec <- function(x) c(x, x[mothers])
   grow_hist <- function(x, fill) {
     if (is.null(x)) return(NULL)
     d <- dim(x)
@@ -805,15 +847,13 @@ evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0
     dimnames(out) <- list(dimnames(x)[[1]], c(dimnames(x)[[2]], names_new), dimnames(x)[[3]])
     out
   }
-  c_j <- match(j, st$alive)
-  new_ids <- st$k_all + seq_len(q)
+  cols_j <- match(vapply(buds, function(b) b$j, numeric(1)), st$alive)
   for (nm in c("arrival", "propagule")) assign(nm, grow_cols(get(nm, st), NA_integer_), st)
   for (nm in c("immigrants", "load")) assign(nm, grow_cols(get(nm, st), 0), st)
   st$present <- grow_cols(st$present, FALSE)
   st$z <- grow_cols(st$z, NA_real_)
   st$ph <- grow_cols(st$ph, NA_real_)
   st$pool_mean <- grow_cols(st$pool_mean, NA_real_)
-  st$pool_mean[, new_ids] <- st$pool_mean[, j]
   st$history <- grow_hist(st$history, 0L)
   st$z_history <- grow_hist(st$z_history, NA_real_)
   st$dispersal <- grow_vec(st$dispersal)
@@ -822,41 +862,56 @@ evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0
   st$fixed_z <- grow_vec(st$fixed_z)
   st$species <- c(st$species, names_new)
   new_n <- matrix(0L, m, q)
-  taken <- integer(m)
-  for (g in seq_len(q)) {
-    s <- sites[[g]]
-    id <- new_ids[g]
-    a <- if (is.null(amounts)) st$n[s, c_j] else amounts[[g]]
-    new_n[s, g] <- a
-    taken[s] <- taken[s] + a
-    for (nm in c("arrival", "propagule", "immigrants", "load", "present", "z", "ph")) {
-      x <- get(nm, st)
-      x[s, id] <- x[s, j]
-      assign(nm, x, st)
+  # local copies, modified in place and written back once
+  fields <- c("arrival", "propagule", "immigrants", "load", "present", "z", "ph", "pool_mean")
+  x <- mget(fields, envir = st)
+  optimum <- st$ev$optimum
+  n <- st$n
+  col <- 0
+  for (bi in seq_along(buds)) {
+    b <- buds[[bi]]
+    j <- b$j
+    c_j <- cols_j[bi]
+    taken <- integer(m)
+    for (g in seq_along(b$sites)) {
+      s <- b$sites[[g]]
+      id <- b$ids[g]
+      col <- col + 1
+      a <- if (is.null(b$amounts)) n[s, c_j] else b$amounts[[g]]
+      new_n[s, col] <- a
+      taken[s] <- taken[s] + a
+      x$pool_mean[, id] <- x$pool_mean[, j]
+      for (nm in c("arrival", "propagule", "immigrants", "load", "present", "z", "ph")) {
+        x[[nm]][s, id] <- x[[nm]][s, j]
+      }
+      if (mutants) {
+        x$arrival[s, id] <- as.integer(st$step)
+        x$propagule[s, id] <- as.integer(a)
+        x$immigrants[s, id] <- 0
+        x$load[s, id] <- 0
+      }
+      if (jump_var > 0) {
+        shift <- stats::rnorm(1, 0, sqrt(jump_var))
+        x$z[s, id] <- x$z[s, id] + shift
+        x$ph[s, id] <- x$ph[s, id] + shift
+        x$pool_mean[, id] <- x$pool_mean[, id] + shift
+        optimum[id] <- optimum[id] + shift
+      }
     }
-    if (jump_var > 0) {
-      shift <- stats::rnorm(1, 0, sqrt(jump_var))
-      st$z[s, id] <- st$z[s, id] + shift
-      st$ph[s, id] <- st$ph[s, id] + shift
-      st$pool_mean[, id] <- st$pool_mean[, id] + shift
-      st$ev$optimum[id] <- st$ev$optimum[id] + shift
-    }
+    # the mother keeps what is left; where nothing is left, its population is gone
+    n[, c_j] <- n[, c_j] - as.integer(taken)
+    emptied <- which(taken > 0 & n[, c_j] == 0)
+    for (nm in c("arrival", "propagule", "z", "ph")) x[[nm]][emptied, j] <- NA
+    for (nm in c("immigrants", "load")) x[[nm]][emptied, j] <- 0
+    x$present[emptied, j] <- FALSE
   }
-  # the mother keeps what is left; where nothing is left, its population is gone
-  st$n[, c_j] <- st$n[, c_j] - as.integer(taken)
-  emptied <- which(taken > 0 & st$n[, c_j] == 0)
-  for (nm in c("arrival", "propagule", "z", "ph")) {
-    x <- get(nm, st)
-    x[emptied, j] <- NA
-    assign(nm, x, st)
-  }
-  for (nm in c("immigrants", "load")) {
-    x <- get(nm, st)
-    x[emptied, j] <- 0
-    assign(nm, x, st)
-  }
-  st$present[emptied, j] <- FALSE
+  for (nm in fields) assign(nm, x[[nm]], envir = st)
+  st$ev$optimum <- optimum
+  st$n <- n
+  new_ids <- unlist(lapply(buds, function(b) b$ids))
   st$n <- cbind(st$n, new_n)
+  # emigrants of this step stay aligned with the alive species (none for the new ones)
+  if (!is.null(st$em)) st$em <- cbind(st$em, matrix(0, m, q))
   st$alive <- c(st$alive, new_ids)
   st$k_all <- st$k_all + q
   st$k <- length(st$alive)
@@ -908,16 +963,24 @@ evolving_tree <- function(sp, tree0) {
   ape::read.tree(text = paste0(text, ";"))
 }
 
-# extant lineages grouped into good species: each belongs to the nearest lineage, itself or an
-# ancestor, that completed by its end (`status` "good"); `group` maps lineages to species and
+# extant lineages grouped into good species: a lineage that completed by its end (`status`
+# "good") is its own species; an incipient one belongs to the species its parent belonged to at
+# its birth, as in the labels of the PBD; `group` maps lineages to species and
 # `rep` names, for each species (in the order of the table), the lineage that represents it:
 # itself if extant, otherwise its earliest extant member
 evolving_observed <- function(sp) {
   good <- sp$status == "good"
   extant <- which(sp$fate == "extant")
   owner <- vapply(extant, function(i) {
-    while (!good[i]) i <- match(sp$parent[i], sp$species)
-    i
+    if (good[i]) return(i)
+    # as in the PBD: the species of the parent at the birth of the lineage
+    t <- sp$birth[i]
+    p <- match(sp$parent[i], sp$species)
+    while (sp$completion[p] > t) {
+      t <- sp$birth[p]
+      p <- match(sp$parent[p], sp$species)
+    }
+    p
   }, numeric(1))
   group <- stats::setNames(sp$species[owner], sp$species[extant])
   ids <- sort(unique(owner))
