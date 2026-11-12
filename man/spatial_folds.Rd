@@ -45,6 +45,7 @@ Other inference:
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}},
-\code{\link[=fold_summarise]{fold_summarise()}}
+\code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=observe_detection]{observe_detection()}}
 }
 \concept{inference}

@@ -99,6 +99,7 @@ reference:
   desc: Reference tables, estimation with random forests and recovery of known parameters.
   contents:
   - abc_table
+  - observe_detection
   - abc_fit
   - abc_recovery
   - abc_choose

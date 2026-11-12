@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `observe_detection()` turns the true abundances of a simulation into survey records: each
+  individual is detected with a given probability in each of several visits (binomial counts,
+  as in N-mixture models), keeping the largest count or presence, for the final community and
+  for each step of the series. Inside `simulate` of `abc_table()` it puts observation error in
+  the reference table. In `data-raw/abc_detection.R` detection was recovered and the other
+  parameters mostly kept their recovery, while ignoring detection biased the niche breadth.
 - `abc_diagnose()` gives, for each observation and parameter of an `abc_fit()`, the effective
   sample size and the Pareto k-hat of the forest weights, with posterior in Suggests, and the
   statistics of the observation outside the central 99% of the reference table. In
