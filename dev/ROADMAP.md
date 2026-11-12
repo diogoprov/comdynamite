@@ -876,6 +876,10 @@ as fases, em `dev/plano-especiacao.md`.
 - [x] Interface: função nova (decidido em 2026-11-08), com `as_metacommunity()` para os
       métodos atuais; nome provisório `simulate_diversification()`.
 - [ ] Decidir: nome final, modos da primeira versão e número da versão.
+- [ ] Avaliar as oito sugestões do ECY25-0086 para a Fase 1 (deriva explícita, G
+      multivariada, plasticidade separada da genética, fundador mecanístico, ótimo variável no
+      tempo, passos por geração, amostragem alocrônica e testes analíticos), registradas em
+      `dev/plano-especiacao.md` em 2026-11-11 e ainda não aprovadas.
 
 **Concluído quando:** as fases 1 a 4 tiverem testes, validação em `data-raw` e uma vignette.
 
