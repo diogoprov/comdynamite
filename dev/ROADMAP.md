@@ -515,8 +515,22 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
       com R2 negativo e cobertura de 0,60, e `log_dispersal` caiu para R2 0,49 com viés de
       -0,11; `inter_max` e `lambda` pouco mudaram. As coberturas com a detecção na tabela
       ficaram de 0,93 a 0,985, conservadoras como antes.
-- [ ] Capacidade de suporte como parâmetro, para saber se a detecção continua identificável
-      quando a escala da abundância é desconhecida.
+- [x] Capacidade de suporte como parâmetro, para saber se a detecção continua identificável
+      quando a escala da abundância é desconhecida (2026-11-11). Em
+      `data-raw/abc_capacity.R` (como `abc_detection.R`, mais `log_capacity` entre -1 e 1, que
+      divide os coeficientes de competição e multiplica as abundâncias de equilíbrio por 0,1 a
+      10; 20 mil simulações; 8 min de simulação e 1 de florestas): o produto detecção ×
+      capacidade foi recuperado com R2 0,985 e intervalo de 0,12 da amplitude, mas cada um
+      separadamente só em parte: detecção com R2 0,60 (0,98 com capacidade fixa) e intervalo
+      de 0,66 da amplitude, capacidade com R2 0,79, e correlação de -0,92 entre os erros das
+      duas. Ambas ainda passam no critério (coberturas de 0,92 e 0,915). Os outros parâmetros
+      perderam um pouco: R2 de 0,95 (`log_dispersal`), 0,76 (`inter_max`), 0,81
+      (`sigma_mean`) e 0,57 (`lambda`). Conclusão: o que separa as duas, em parte, parece vir
+      das estatísticas temporais e da equitabilidade (`turnover`, `cv_site`, `evenness` entre
+      as mais importantes), já que a estocasticidade demográfica depende da escala da
+      abundância; com um levantamento só, a separação deve piorar (não testado). Em dados
+      reais, informação externa sobre a detecção (visitas repetidas com contagens por visita,
+      ou um prior informativo) deve ajudar mais que o próprio ABC.
 - [x] Estimação com `abcrf` (Raynal et al. 2019), em `Suggests`: `abc_fit()`, `predict()` e
       `abc_importance()` (2026-11-11). Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.
