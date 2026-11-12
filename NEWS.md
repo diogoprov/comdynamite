@@ -1,3 +1,15 @@
+# comdynamite (development version)
+
+- `evolution_control()` and the argument `evolution` of `simulate_metacommunity()` and
+  `mc_dynamics()` let the niche optimum evolve within each population (phase 1 of the block on
+  speciation, with no speciation yet): selection by the local environment as the response to
+  Gaussian selection of Lande (1976), drift with an effective size proportional to abundance,
+  gene flow by the mean of residents and immigrants weighted by their numbers, sampling of
+  founders in new populations, a linear reaction norm for plasticity whose part is reported
+  apart, and steps per generation. Without genetic variance the abundances are the same as
+  without evolution for the same seed. The tests check drift against Lande (1976) and the
+  divergence of two populations against migration-selection balance.
+
 # comdynamite 0.8.0
 
 - `vignette("abc")` goes through inference by ABC with random forests with the anurans of 40

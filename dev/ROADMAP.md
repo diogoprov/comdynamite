@@ -938,9 +938,12 @@ Objetivo: fechar o limite da ponte Leibold–Januario. Hoje a árvore é dada e 
 depende da metacomunidade. Plano completo, com o modelo, os modos de especiação, a validação e
 as fases, em `dev/plano-especiacao.md`.
 
-- [ ] Fase 1: traits por população (espécie × sítio) com seleção local e fluxo gênico em
-      `mc_dynamics()`, sem especiação; reproduzir qualitativamente a neutralidade regional de
-      Leibold et al. (2019).
+- [x] Fase 1: traits por população (espécie × sítio) com seleção local e fluxo gênico em
+      `mc_dynamics()`, sem especiação (2026-11-12): `evolution_control()`, com deriva,
+      fundadores, plasticidade e passos por geração; testes contra Lande (1976) e o equilíbrio
+      migração–seleção. Neutralidade regional reproduzida qualitativamente em
+      `data-raw/evolution_leibold.R`: só com extirpação, dispersão baixa e adaptação rápida
+      (sorting de 0,99 para 0,04 com G = 50, contra 0,90 no controle sem resposta).
 - [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
       `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
       2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético

@@ -33,6 +33,7 @@ head(colonisation_history(sim))
 \code{\link[=sample_individuals]{sample_individuals()}}, whose \code{founder_sd} and \code{monopolization} use this history.
 
 Other simulate metacommunities:
+\code{\link[=evolution_control]{evolution_control()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},

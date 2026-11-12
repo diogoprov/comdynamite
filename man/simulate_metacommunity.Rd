@@ -18,7 +18,8 @@ simulate_metacommunity(
   pool = NULL,
   initial = NULL,
   immigration = c("poisson", "multinomial"),
-  env = NULL
+  env = NULL,
+  evolution = NULL
 )
 }
 \arguments{
@@ -64,6 +65,11 @@ site and one column per element of \code{traits} (such as the \code{env} of seve
 the same grid). Needed when \code{traits} is a list; replaces the \code{env} of \code{landscape}. Not
 available with \code{env_time}. Columns without names take the names of \code{traits}, or \code{axis1},
 \code{axis2}, ...}
+
+\item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
+optimum within each population: selection by the local environment, drift, gene flow,
+founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of each species in
+all its populations, as before. Needs a single environmental axis.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
@@ -71,7 +77,11 @@ at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
 used, \code{env} when given, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a
 tree, the colonisation history (\code{arrival}, \code{propagule}, \code{immigrants}, \code{migrant_load};
-see the section Colonisation history) and \code{n_steps}. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
+see the section Colonisation history) and \code{n_steps}. With \code{evolution}, also \code{evolution}, a
+list with the genetic mean of the optimum in each population (\code{genetic}), the plastic part
+of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
+which mixes residents and immigrants), the genetic means at \code{record_steps} (\code{history}), the
+reference environment and the settings; \code{NA} where a population is absent. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
 \code{optimum_} column of traits per axis), while \code{\link[=summary_stats]{summary_stats()}} uses the first axis unless
 given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis.
 }
@@ -192,6 +202,7 @@ community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 \seealso{
 Other simulate metacommunities:
 \code{\link[=colonisation_history]{colonisation_history()}},
+\code{\link[=evolution_control]{evolution_control()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},

@@ -41,7 +41,7 @@ conhecida em cada etapa.
 - Variância genética V fixa por espécie na primeira versão; genética explícita (locos, como no
   modelo baseado em indivíduos de Leibold et al. 2019) fica como extensão.
 
-#### Sugestões vindas do ECY25-0086 (2026-11-11, ainda não aprovadas para implementação)
+#### Sugestões vindas do ECY25-0086 (2026-11-11; 1, 3, 4, 6 e 8 aprovadas para a Fase 1 em 2026-11-12)
 
 O planejamento de um ABC para separar deriva, seleção e plasticidade na morfologia de
 *Dendropsophus nanus* (21 lagoas de Campo Grande) concluiu que o comdynamite atual não serve:
@@ -81,6 +81,21 @@ mesmo ótimo ficaram quase inidentificáveis (urbanização atual e acumulada co
 esse caso, o valor do bloco está em simular também dados temporais (itens 5 e 7). Avaliação
 nossa: os itens 1, 3, 4 e 8 cabem na Fase 1; 5 e 7 tornam o bloco útil para o ABC; 2 e 6 são
 extensões.
+
+#### Decisões da Fase 1 (Diogo, 2026-11-12)
+
+- A evolução entra como argumento `evolution` de `mc_dynamics()` e `simulate_metacommunity()`,
+  com as opções em `evolution_control()`; `NULL` por padrão, e com `genetic_var = 0` as
+  abundâncias são as mesmas de antes para a mesma semente. A função nova da Fase 2 reaproveita
+  esse motor.
+- Entram as sugestões 1 (deriva, `ne_ratio`), 3 (plasticidade como norma de reação linear em
+  torno do ambiente médio, com a parte plástica separada na saída), 4 (amostragem de
+  fundadores), 6 (`steps_per_generation`) e 8 (testes analíticos: deriva contra Lande 1976 e
+  equilíbrio migração–seleção de duas populações). A 2 (G multivariada), a 5 (ótimo variável
+  por sítio, já possível com `env_time`, sem o registro do tempo desde a mudança) e a 7
+  (amostragem alocrônica) ficam para depois.
+- O crescimento usa o fenótipo médio e ignora a carga da variância em torno dele, para que
+  `genetic_var = 0` reproduza o modelo sem evolução.
 
 ### 2. Divergência e especiação
 

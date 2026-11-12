@@ -18,7 +18,8 @@ mc_dynamics(
   extirpation = 0,
   pool = NULL,
   initial = NULL,
-  immigration = c("poisson", "multinomial")
+  immigration = c("poisson", "multinomial"),
+  evolution = NULL
 )
 }
 \arguments{
@@ -56,6 +57,11 @@ only where \code{pool} allows.}
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
 which conserves them. Spatially implicit landscapes are always multinomial.}
+
+\item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
+optimum within each population: selection by the local environment, drift, gene flow,
+founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of each species in
+all its populations, as before. Needs a single environmental axis.}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},
@@ -75,6 +81,7 @@ mean(out$abundance)
 \seealso{
 Other simulate metacommunities:
 \code{\link[=colonisation_history]{colonisation_history()}},
+\code{\link[=evolution_control]{evolution_control()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
