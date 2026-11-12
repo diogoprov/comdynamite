@@ -41,6 +41,47 @@ conhecida em cada etapa.
 - Variância genética V fixa por espécie na primeira versão; genética explícita (locos, como no
   modelo baseado em indivíduos de Leibold et al. 2019) fica como extensão.
 
+#### Sugestões vindas do ECY25-0086 (2026-11-11, ainda não aprovadas para implementação)
+
+O planejamento de um ABC para separar deriva, seleção e plasticidade na morfologia de
+*Dendropsophus nanus* (21 lagoas de Campo Grande) concluiu que o comdynamite atual não serve:
+`local_adaptation`, `founder_sd` e `monopolization` são desvios fenomenológicos aplicados em
+`sample_individuals()`, sem h², G nem gerações, e plasticidade e adaptação são o mesmo
+parâmetro. Plano completo do projeto, fora deste repositório:
+`[2023] Cap 1 Marcos/docs/ibm_simulation_plan.md`, seções 2 e 4.3. O que tornaria a seção 1
+útil para esse tipo de pergunta:
+
+1. Deriva explícita: z_is recebe N(0, V/Ne_is) por geração, com Ne_is ligado a N_is por um
+   parâmetro Ne/N. Sem isso não há nulo neutro dentro do modelo, só seleção e fluxo gênico.
+2. Versão multivariada: G por espécie (aproveitando as covariâncias de `traits_mv`), resposta
+   de Lande Δz̄ = G (P + Ω)⁻¹ (θ − z̄) com aptidão gaussiana e P = G + E, com E não
+   proporcional a G. Permite avaliar o teste B ∝ W (Ackermann & Cheverud 2004) quando W ≠ G,
+   cujo erro tipo I Prôa et al. (2013) mediram por simulação. É o item mais caro; pode vir
+   depois.
+3. Plasticidade separada da genética: fenótipo = média genética + b·E_natal + ruído. A parte
+   plástica não é herdada e os migrantes carregam o fenótipo da origem (desenvolvimento
+   larval). A saída separa a média genética e a plástica por população, a única forma de ter
+   verdade conhecida para seleção contra plasticidade.
+4. Fundador mecanístico: população nova começa com média sorteada de N(z̄_fonte, V/k), com k
+   fundadores ponderados pela dispersão. É a versão de processo do `founder_sd`, depois
+   erodida pelo fluxo gênico.
+5. Ótimo que segue um ambiente variável no tempo por sítio (por exemplo, séries anuais de
+   cobertura urbana), com registro do tempo desde a mudança. A defasagem da resposta (seleção)
+   contra a resposta imediata (plasticidade) é a principal assinatura que separa os dois.
+6. Parâmetro explícito de passos por geração (1–2 anos em anuros), para converter a mudança
+   em haldanes.
+7. Amostragem alocrônica: `sample_individuals()` em vários `record_steps`, para simular séries
+   de museu além do retrato espacial.
+8. Testes com verdade analítica: (a) população isolada e neutra, Var(Δz̄) = h²t/Ne em
+   unidades de desvio padrão (Lande 1976); (b) equilíbrio migração–seleção, divergência da
+   ordem de s/(s + m); (c) B ∝ W com inclinação esperada 1 quando G ∝ P.
+
+Ressalva do próprio projeto: com um único retrato espacial, seleção e plasticidade para o
+mesmo ótimo ficaram quase inidentificáveis (urbanização atual e acumulada com r = 0,985). Para
+esse caso, o valor do bloco está em simular também dados temporais (itens 5 e 7). Avaliação
+nossa: os itens 1, 3, 4 e 8 cabem na Fase 1; 5 e 7 tornam o bloco útil para o ABC; 2 e 6 são
+extensões.
+
 ### 2. Divergência e especiação
 
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
@@ -188,6 +229,7 @@ o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
 
 ## Referências
 
+- Ackermann, R. R., & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human evolution. *PNAS*, 101, 17946–17951. https://doi.org/10.1073/pnas.0405919102
 - Desjardins-Proulx, P., & Gravel, D. (2012a). *The American Naturalist*, 179, 137–144.
   https://doi.org/10.1086/663196
 - Desjardins-Proulx, P., & Gravel, D. (2012b). *Ecology and Evolution*, 2, 1781–1790.
@@ -203,6 +245,7 @@ o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
   864–881. https://doi.org/10.1111/ele.12458
 - Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O. (2012). *Nature*, 491,
   444–448. https://doi.org/10.1038/nature11631
+- Lande, R. (1976). Natural selection and random genetic drift in phenotypic evolution. *Evolution*, 30, 314–334. https://doi.org/10.1111/j.1558-5646.1976.tb00911.x
 - Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J. (2019).
   *PNAS*, 116, 2612–2617. https://doi.org/10.1073/pnas.1808615116
 - Leibold, M. A., Govaert, L., Loeuille, N., De Meester, L., & Urban, M. C. (2022). *Annual
@@ -214,5 +257,6 @@ o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
   Resources*, 21, 2782–2800. https://doi.org/10.1111/1755-0998.13514
 - Pontarp, M., et al. (2019). *Trends in Ecology & Evolution*, 34, 211–223.
   https://doi.org/10.1016/j.tree.2018.11.009
+- Prôa, M., O'Higgins, P., & Monteiro, L. R. (2013). Type I error rates for testing genetic drift with phenotypic covariance matrices: a simulation study. *Evolution*, 67, 185–195. https://doi.org/10.1111/j.1558-5646.2012.01746.x
 - Rosindell, J., Cornell, S. J., Hubbell, S. P., & Etienne, R. S. (2010). *Ecology Letters*,
   13, 716–727. https://doi.org/10.1111/j.1461-0248.2010.01463.x
