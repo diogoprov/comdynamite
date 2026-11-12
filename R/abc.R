@@ -415,12 +415,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
   values <- observed_statistics(observed, unique(c(fit$statistics, statistics)))
   rows <- match(rownames(fit$training), rownames(table))
   if (anyNA(rows)) stop("`table` is not the table `fit` was fitted on.", call. = FALSE)
-  weights <- Reduce(`+`, lapply(fit$parameters, function(p) {
-    training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
-    w <- stats::predict(fit$forests[[p]], values[fit$statistics], training,
-                        rf.weights = TRUE)$weights[, 1]
-    w / sum(w)
-  })) / length(fit$parameters)
+  weights <- forest_weights(fit, values[fit$statistics])[, 1]
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()))

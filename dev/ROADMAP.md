@@ -544,7 +544,8 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       errada de fato, como dados com filtragem ambiental forte ajustados sem ela.
 - [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
       simulação como pseudo-observação; `gfit()` para adequação global.
-- [ ] K-fold por sítios ou blocos espaciais: ajustar com parte dos sítios e prever as
+- [x] K-fold por sítios ou blocos espaciais (`spatial_folds()`, `fold_summarise()`, `abc_cv()`,
+      2026-11-11; RESULTADO_CV): ajustar com parte dos sítios e prever as
       estatísticas dos demais. Blocos evitam que a autocorrelação espacial infle o acerto.
 - [ ] Diagnóstico de Pareto k dos pesos de importância, com `loo::psis()`, para saber
       quando a posterior ponderada depende de poucas simulações.
@@ -1055,6 +1056,7 @@ Conferidas no Crossref em 2026-11-05.
 - Prangle, D., et al. (2014). *Statistical Applications in Genetics and Molecular Biology*, 13, 67–82. https://doi.org/10.1515/sagmb-2013-0012
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Raynal, L., et al. (2019). *Bioinformatics*, 35, 1720–1728. https://doi.org/10.1093/bioinformatics/bty867 (verificada no Crossref em 2026-11-11)
+- Roberts, D. R., et al. (2017). *Ecography*, 40, 913–929. https://doi.org/10.1111/ecog.02881 (verificada no Crossref em 2026-11-11)
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - McArdle, B. H., & Anderson, M. J. (2001). *Ecology*, 82, 290–297. https://doi.org/10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2

@@ -64,8 +64,11 @@ Computation (ABC). \emph{Methods in Ecology and Evolution}, 10, 450–460.
 \seealso{
 Other inference:
 \code{\link[=abc_choose]{abc_choose()}},
+\code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_fit]{abc_fit()}},
 \code{\link[=abc_ppc]{abc_ppc()}},
-\code{\link[=abc_table]{abc_table()}}
+\code{\link[=abc_table]{abc_table()}},
+\code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}

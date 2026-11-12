@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- Cross-validation of ABC across sites. `spatial_folds()` splits the sites into spatial blocks
+  (k-means on the coordinates) or random folds, `fold_summarise()` turns a summary function
+  into one that gives the statistics of the sites kept and left out in every fold, for use in
+  `abc_table()`, and `abc_cv()` fits `abc_fit()` on the sites kept and predicts the statistics
+  of the sites left out, with coverage, posterior predictive p-values and standardised errors.
+  `data-raw/abc_cv.R` compares spatial blocks with random folds.
 - `abc_choose()` chooses among models with a classification random forest (Pudlo et al. 2016)
   and reports the out-of-bag error and confusion matrix; `predict()` gives the chosen model,
   the votes and its posterior probability. `abc_ppc()` runs posterior predictive checks after
