@@ -48,7 +48,7 @@ damocles_partition_test(
 
 - n_rand:
 
-  Number of random partitions.
+  Number of random partitions drawn; each distinct one is fitted once.
 
 - vary:
 
@@ -78,22 +78,25 @@ damocles_partition_test(
   Passed to
   [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md):
   random clades hold between `1 / tolerance` and `tolerance` times as
-  many edges as the clades of `regimes` and share at most `max_overlap`
-  of their edges with them (Jaccard index).
+  many edges as the clades of `regimes`, share at most `max_overlap` of
+  their edges with them (Jaccard index), and the whole random partition
+  agrees with `regimes` at most as much (adjusted Rand index).
 
 - cores:
 
   Number of cores, with random partitions fitted in parallel. Not
-  available on Windows, where one core is used. For reproducible
-  p-values with more than one core, call `RNGkind("L'Ecuyer-CMRG")`
-  before [`set.seed()`](https://rdrr.io/r/base/Random.html).
+  available on Windows, where one core is used. The random partitions
+  are drawn before the fits, so the p-value does not depend on the
+  number of cores.
 
 ## Value
 
 A list of class `mc_damocles_partition` with the observed `statistic`,
 its degrees of freedom `df`, the chi-squared p-value `p_chisq`, the
-p-value against random partitions `p_random`, the statistics of the
-random partitions `null`, and `fit`, the fit with `regimes`.
+p-value against random partitions `p_random` (`NA` when no random
+partition could be drawn), the statistics of the distinct random
+partitions `null`, their number `n_distinct`, and `fit`, the fit with
+`regimes`.
 
 ## Details
 
@@ -128,6 +131,26 @@ configuration of BAMMtools (a regime on 69 of 172 edges) and
 colonisation three times faster in it, both tests rejected constant
 rates (p = 0.007 and 0.01; `data-raw/damocles_bamm.R`).
 
+The test needs room on the tree for clades like those of `regimes`
+elsewhere. When the partition tested is one of the clades at the root,
+or a clade holding most of the tree, the only placements allowed may
+split the tree as `regimes` does (its complement) or be few, and the
+random statistics then repeat a handful of values: the p-value falls at
+its smallest or at one depending on numerical noise. In simulations with
+one shift in the rate of speciation and no effect on local rates
+(`data-raw/s1_type1_shifts.R`), this made the test reject in 12% to 40%
+of replicates before random partitions matching `regimes` were excluded
+([`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md))
+and before the p-value counted each distinct partition once. The
+`n_rand` draws are a way to find distinct placements: the p-value is the
+proportion of the distinct random partitions, plus the one tested, with
+a statistic as large or larger, so with fewer than 19 distinct ones it
+cannot fall below 0.05 (a warning says so). Trees with a strong shift in
+diversification often leave that little room; then only the chi-squared
+test of
+[`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md)
+is available.
+
 ## See also
 
 [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md),
@@ -142,8 +165,9 @@ tr <- treeshapesim::sim_tree_shape(30)
 reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
 damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
-#> Partition of the tree against 19 random partitions (DAMOCLES)
+#> Warning: only 18 distinct random partitions in 19 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.053
+#> Partition of the tree against 18 random partitions (DAMOCLES)
 #> Likelihood ratio against constant rates: 28.07 on 1 df
 #> p (chi-squared): 1.17e-07 
-#> p (random partitions): 0.05 
+#> p (random partitions): 0.0526 (18 distinct random partitions)
 ```

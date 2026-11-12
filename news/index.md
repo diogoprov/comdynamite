@@ -85,6 +85,21 @@
   coordinates of phylogenetic structure and explains why the curve of
   phylogenetic signal of the package PCPS (`pcps.curve()`) is not
   implemented.
+- [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md)
+  no longer draws partitions that split the tree as the original one,
+  such as the complement of a clade at the root: `max_overlap` now also
+  bounds the adjusted Rand index between the random and the original
+  partition. In simulations with one shift in the rate of speciation and
+  no effect on local rates, such draws made
+  [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
+  reject in 12% to 40% of replicates.
+  [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
+  draws the random partitions before fitting them, so its p-value no
+  longer depends on `cores`, and counts each distinct random partition
+  once in the p-value (repeated draws of a few placements made it too
+  small); it returns their number (`n_distinct`) and warns when there
+  are fewer than 19, as the p-value then cannot fall below 0.05. Trees
+  with a strong shift in diversification often leave that little room.
 - The article “Rates and assembly” rejects ES-sim at p ≤ 0.05, the rule
   of the preprint, instead of p \< 0.05. With 999 null draws five cells
   change by one replicate each and no conclusion changes.
