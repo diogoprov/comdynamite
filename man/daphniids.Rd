@@ -8,7 +8,8 @@
 List with \code{comm}, a matrix of lakes by species; \code{env}, a matrix with colour,
 conductivity, dissolved organic carbon, total nitrogen, pH, total phosphorus, mean
 depth, elevation and the ratio of nitrogen to phosphorus; \code{biogeography}, a matrix of
-contrasts with values of 1, -1 and 0; and \code{tree}, a \code{phylo} object.
+contrasts with values of 1, -1 and 0; \code{tree}, a \code{phylo} object; and \code{coords}, a matrix with
+the longitude and latitude of each lake in decimal degrees.
 }
 \source{
 \url{https://archive.epa.gov/emap/archive-emap/web/html/nelakes.html}

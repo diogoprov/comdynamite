@@ -22,6 +22,7 @@ reference:
 - title: Landscapes
   desc: Spatially implicit and grid landscapes, dispersal and environment.
   contents:
+  - landscape_points
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel

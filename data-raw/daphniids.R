@@ -69,5 +69,8 @@ biogeography <- cbind(
 rownames(biogeography) <- lakes$LAKE_ID
 
 env <- as.matrix(lakes[, c(variables, "TN_TP")])
-daphniids <- list(comm = comm, env = env, biogeography = biogeography, tree = tree)
+coords <- as.matrix(lakes[, c("LON_DD", "LAT_DD")])
+colnames(coords) <- c("lon", "lat")
+daphniids <- list(comm = comm, env = env, biogeography = biogeography, tree = tree,
+                  coords = coords)
 usethis::use_data(daphniids, overwrite = TRUE, compress = "xz")

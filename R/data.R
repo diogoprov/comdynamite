@@ -18,7 +18,8 @@
 #' @format List with `comm`, a matrix of lakes by species; `env`, a matrix with colour,
 #'   conductivity, dissolved organic carbon, total nitrogen, pH, total phosphorus, mean
 #'   depth, elevation and the ratio of nitrogen to phosphorus; `biogeography`, a matrix of
-#'   contrasts with values of 1, -1 and 0; and `tree`, a `phylo` object.
+#'   contrasts with values of 1, -1 and 0; `tree`, a `phylo` object; and `coords`, a matrix with
+#'   the longitude and latitude of each lake in decimal degrees.
 #' @source \url{https://archive.epa.gov/emap/archive-emap/web/html/nelakes.html}
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics:
