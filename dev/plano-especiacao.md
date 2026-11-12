@@ -112,8 +112,8 @@ extensões.
   zera dentro) e gradual (cresce 1 por geração e cai `homogenization` por migrante).
 - Competição que decai com a distância patrística, com piso `inter_min` (sem ele, espécies
   distantes não competem e a riqueza explode).
-- Estado da 2a (2026-11-12): implementada e testada; validação 3 com apoio fraco
-  (`data-raw/evolving_peripheral.R`).
+- Estado da 2a (2026-11-12): implementada e testada; validação 3 sem apoio (ρ ≈ 0 entre
+  conectividade e endemismo; `data-raw/evolving_peripheral.R`).
 
 
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:

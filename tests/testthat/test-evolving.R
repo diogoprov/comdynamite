@@ -132,3 +132,61 @@ test_that("settings are checked", {
                                                dispersal = 0.001, n_steps = 50,
                                                max_species = 3), "max_species")
 })
+
+test_that("edge cases of names, extinction, records and trees are handled", {
+  ls <- two_islands()
+  start <- function(nm) matrix(50L, 8, 1, dimnames = list(NULL, nm))
+  # a species at the start named like a daughter would be
+  anc2 <- ancestor()
+  rownames(anc2) <- "sp2"
+  set.seed(8)
+  sim <- simulate_evolving_metacommunity(ls, anc2, speciation_control("geographic", 30),
+                                         dispersal = 0.05, n_steps = 60, initial = start("sp2"))
+  expect_equal(anyDuplicated(sim$species$species), 0)
+  expect_equal(nrow(sim$events), 1)
+  # heavy extirpation: every extant species has individuals, richness has one value per
+  # generation, and the table agrees with it
+  for (seed in 1:10) {
+    set.seed(seed)
+    s <- simulate_evolving_metacommunity(landscape_grid(4, disp_scale = 0.3), ancestor(),
+                                         speciation_control("geographic", 5),
+                                         dispersal = 0.001, extirpation = 0.15, n_steps = 30)
+    expect_true(all(colSums(s$abundance) > 0))
+    expect_length(s$richness, 30)
+    expect_equal(s$richness[30], ncol(s$abundance))
+    expect_false(anyNA(s$traits$optimum))
+  }
+  # records reach the output and the colonisation history
+  set.seed(9)
+  s <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("geographic", 30),
+                                       dispersal = 0.05, n_steps = 60, record_steps = c(20, 60),
+                                       initial = start("sp1"))
+  expect_equal(dim(s$history), c(8, ncol(s$abundance), 2))
+  expect_s3_class(colonisation_history(as_metacommunity(s)), "data.frame")
+  expect_error(simulate_evolving_metacommunity(ls, ancestor(),
+                                               speciation_control("geographic", 30),
+                                               evolution = evolution_control(
+                                                 0, steps_per_generation = 4),
+                                               n_steps = 50), "multiple")
+  traits <- data.frame(optimum = c(45, 55), sigma = 20, r_max = 5, row.names = c("a", "b"))
+  attr(traits, "tree") <- ape::read.tree(text = "(a:100,b:50);")
+  expect_error(simulate_evolving_metacommunity(ls, traits, speciation_control("geographic", 30),
+                                               n_steps = 5), "ultrametric")
+  attr(traits, "tree") <- ape::read.tree(text = "(a,b);")
+  expect_error(simulate_evolving_metacommunity(ls, traits, speciation_control("geographic", 30),
+                                               n_steps = 5), "branch lengths")
+  attr(traits, "tree") <- ape::read.tree(text = "(a:1,c:1);")
+  expect_error(simulate_evolving_metacommunity(ls, traits, speciation_control("geographic", 30),
+                                               n_steps = 5), "tips")
+})
+
+test_that("migrants between sites of implicit landscapes are e / (m - 1)", {
+  st <- new.env()
+  st$em <- matrix(c(10, 10, 0, 0, 0), 5, 1)
+  st$k <- 1
+  st$alive <- 1
+  flow <- evolving_flow(st, list(matrix(0, 5, 5)), NULL)[[1]]
+  expect_equal(flow[1, 2], 10 / 4 + 10 / 4)
+  expect_equal(flow[1, 3], 10 / 4)
+  expect_equal(unname(diag(flow)), rep(0, 5))
+})

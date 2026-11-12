@@ -21,6 +21,9 @@
 #' * `"ecological"`: populations are grouped by single linkage on their genetic means
 #'   (`evolution`, with genetic variance): two are in the same group when a chain of pairs whose
 #'   means differ by less than `threshold` links them, whatever the gene flow between them.
+#'   Drift and founder sampling also move the means, so small populations can cross a low
+#'   threshold without any environmental difference; choose `threshold` well above the spread
+#'   that drift produces.
 #'
 #' @param mode `"geographic"` or `"ecological"`.
 #' @param threshold Divergence (in generations, for `"geographic"`) or difference of genetic
@@ -164,6 +167,20 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     stop("several species at the start need a tree in `traits` (from `species_traits()`)",
          call. = FALSE)
   }
+  if (k0 > 1) {
+    if (is.null(tree0$edge.length) || anyNA(tree0$edge.length)) {
+      stop("the tree in `traits` needs branch lengths, in generations", call. = FALSE)
+    }
+    if (!setequal(tree0$tip.label, rownames(traits))) {
+      stop("the tips of the tree in `traits` must be its species", call. = FALSE)
+    }
+    if (!ape::is.ultrametric(tree0, tol = 1e-6)) {
+      stop("the tree in `traits` must be ultrametric", call. = FALSE)
+    }
+  }
+  if (n_steps %% evolution$steps_per_generation != 0) {
+    stop("`n_steps` must be a multiple of `steps_per_generation`", call. = FALSE)
+  }
   sites <- paste0("site", seq_along(landscape$env))
   species0 <- rownames(traits)
   evolution$traits <- traits
@@ -196,17 +213,28 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   flow <- lapply(seq_len(k0), function(j) matrix(0, st$m, st$m))
   richness <- integer(0)
   for (step in seq_len(n_steps)) {
-    alive_before <- st$alive
     mc_step(st, step)
     gen <- step / per
-    lost <- setdiff(alive_before, st$alive)
+    # species lost at this step leave now (mc_step() would drop them at the next one, with no
+    # random draws either way), so that the table, richness and output agree
+    lost <- evolving_prune(st)
     if (length(lost)) {
-      sp_table$end[lost] <- (step - 1) / per
+      sp_table$end[lost] <- gen
       sp_table$fate[lost] <- "extinct"
     }
     if (speciation$mode == "geographic" && st$k > 0) {
       flow <- evolving_flow(st, flow, landscape$dispersal)
+      # a population lost at any step of the generation founds anew
+      for (c in seq_len(st$k)) {
+        gone <- st$n[, c] == 0
+        if (any(gone)) {
+          j <- st$alive[c]
+          divergence[[j]][gone, ] <- NA_real_
+          divergence[[j]][, gone] <- NA_real_
+        }
+      }
     }
+    if (step %% per == 0 && st$k == 0) richness <- c(richness, 0L)
     if (step %% per == 0 && st$k > 0) {
       if (speciation$mode == "geographic") {
         divergence <- evolving_divergence(st, divergence, flow, speciation)
@@ -220,7 +248,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
           stop("more than `max_species` (", max_species, ") species; raise it or the ",
                "threshold of speciation", call. = FALSE)
         }
-        names_new <- paste0("sp", new_ids)
+        names_new <- evolving_names(st$species, length(groups))
         evolving_split(st, j, groups, names_new)
         sp_table$end[j] <- gen
         sp_table$fate[j] <- "split"
@@ -261,7 +289,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   traits_out <- data.frame(optimum = colMeans(genetic, na.rm = TRUE),
                            sigma = st$ev$sigma[ext_idx], r_max = st$ev$r_max[ext_idx],
                            row.names = extant)
-  alpha <- evolving_alpha(split_time[extant, extant, drop = FALSE], generations, competition,
+  alpha <- evolving_alpha(split_time[extant, extant, drop = FALSE], n_steps / per, competition,
                           inter_max, inter_min, scale, distance_scale)
   structure(list(abundance = out$abundance[, extant, drop = FALSE], tree = tree,
                  tree_full = tree_full, species = sp_table, events = events,
@@ -269,7 +297,12 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  landscape = landscape, dispersal = st$dispersal[ext_idx],
                  extirpation = st$extirpation[ext_idx], speciation = speciation,
                  evolution = out$evolution$settings, n_steps = n_steps,
-                 generations = generations),
+                 generations = generations,
+                 history = if (!is.null(out$history)) out$history[, extant, , drop = FALSE],
+                 arrival = out$arrival[, extant, drop = FALSE],
+                 propagule = out$propagule[, extant, drop = FALSE],
+                 immigrants = out$immigrants[, extant, drop = FALSE],
+                 migrant_load = out$migrant_load[, extant, drop = FALSE]),
             class = "mc_evolving")
 }
 
@@ -310,9 +343,15 @@ as_metacommunity.mc_evolving <- function(x, ...) {
   traits <- x$traits
   attr(traits, "tree") <- x$tree
   rownames(x$abundance) <- paste0("site", seq_len(nrow(x$abundance)))
-  structure(list(abundance = x$abundance, history = NULL, landscape = x$landscape,
+  fix <- function(y) {
+    if (!is.null(y)) rownames(y) <- rownames(x$abundance)
+    y
+  }
+  structure(list(abundance = x$abundance, history = x$history, landscape = x$landscape,
                  env = NULL, traits = traits, alpha = x$alpha, dispersal = x$dispersal,
                  extirpation = x$extirpation, pool = NULL, tree = x$tree,
+                 arrival = fix(x$arrival), propagule = fix(x$propagule),
+                 immigrants = fix(x$immigrants), migrant_load = fix(x$migrant_load),
                  n_steps = x$n_steps), class = "mc_sim")
 }
 
@@ -351,9 +390,12 @@ evolving_flow <- function(st, flow, disp_matrix) {
     j <- st$alive[c]
     e <- em[, c]
     if (!any(e > 0)) next
+    # implicit landscapes: emigrants are pooled and reach each other site with weight equal
+    # to the emigrants of the others, so a site sends e / (m - 1) to each other site
     f <- if (!is.null(disp_matrix)) e * disp_matrix else {
-      w <- sum(e) - e
-      if (sum(w) > 0) outer(e, w / sum(w)) else matrix(0, length(e), length(e))
+      out <- matrix(e / (length(e) - 1), length(e), length(e))
+      diag(out) <- 0
+      out
     }
     flow[[j]] <- flow[[j]] + f + t(f)
   }
@@ -372,7 +414,14 @@ evolving_divergence <- function(st, divergence, flow, speciation) {
     for (a in which(here & !known)) {
       src <- which(known & here)
       if (length(src)) {
-        b <- src[which.max(M[src, a])]
+        # the source that sent most migrants; without recorded flow, the largest population
+        # weighted by the dispersal kernel toward the new one
+        weight <- M[src, a]
+        if (!any(weight > 0)) {
+          weight <- st$n[src, c] *
+            (if (!is.null(st$disp_matrix)) st$disp_matrix[src, a] else 1)
+        }
+        b <- src[which.max(weight)]
         d[a, ] <- d[b, ]
         d[, a] <- d[, b]
         d[a, b] <- d[b, a] <- 0
@@ -546,3 +595,33 @@ body(mc_state) <- quote({
   mc_setup(environment())
   environment()
 })
+
+# names for q daughters that no species has used
+evolving_names <- function(used, q) {
+  out <- character(0)
+  i <- length(used)
+  while (length(out) < q) {
+    i <- i + 1
+    nm <- paste0("sp", i)
+    if (!nm %in% c(used, out)) out <- c(out, nm)
+  }
+  out
+}
+
+# drops from the state the alive species with no individual left, as mc_step() does at the
+# start of the next step; returns their indices over all species ever
+evolving_prune <- function(st) {
+  if (st$k == 0) return(integer(0))
+  empty <- colSums(st$n) == 0
+  if (!any(empty)) return(integer(0))
+  lost <- st$alive[empty]
+  keep <- !empty
+  st$alive <- st$alive[keep]
+  st$n <- st$n[, keep, drop = FALSE]
+  st$at <- st$at[keep, keep, drop = FALSE]
+  st$k <- length(st$alive)
+  st$p_em <- rep(st$dispersal[st$alive], each = st$m)
+  st$p_ex <- rep(st$extirpation[st$alive], each = st$m)
+  if (!is.null(st$inside)) st$inside <- st$pool[, st$alive, drop = FALSE]
+  lost
+}

@@ -946,7 +946,7 @@ as fases, em `dev/plano-especiacao.md`.
       (sorting de 0,99 para 0,04 com G = 50, contra 0,90 no controle sem resposta).
 - [ ] Fase 2a (feita em 2026-11-12): `simulate_evolving_metacommunity()`, `speciation_control()`
       (`"geographic"` com regras de clusters e gradual; `"ecological"`), árvore completa e
-      reconstruída, extinção global, `as_metacommunity()`; validação 3 com apoio fraco. Falta a
+      reconstruída, extinção global, `as_metacommunity()`; validação 3 sem apoio (ρ ≈ 0). Falta a
       2b: conclusão prolongada, `"point"` e `"fission"`, validações 1 e 2.
 - [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
       `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
