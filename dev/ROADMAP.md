@@ -515,8 +515,22 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
       com R2 negativo e cobertura de 0,60, e `log_dispersal` caiu para R2 0,49 com viés de
       -0,11; `inter_max` e `lambda` pouco mudaram. As coberturas com a detecção na tabela
       ficaram de 0,93 a 0,985, conservadoras como antes.
-- [ ] Capacidade de suporte como parâmetro, para saber se a detecção continua identificável
-      quando a escala da abundância é desconhecida.
+- [x] Capacidade de suporte como parâmetro, para saber se a detecção continua identificável
+      quando a escala da abundância é desconhecida (2026-11-11). Em
+      `data-raw/abc_capacity.R` (como `abc_detection.R`, mais `log_capacity` entre -1 e 1, que
+      divide os coeficientes de competição e multiplica as abundâncias de equilíbrio por 0,1 a
+      10; 20 mil simulações; 8 min de simulação e 1 de florestas): o produto detecção ×
+      capacidade foi recuperado com R2 0,985 e intervalo de 0,12 da amplitude, mas cada um
+      separadamente só em parte: detecção com R2 0,60 (0,98 com capacidade fixa) e intervalo
+      de 0,66 da amplitude, capacidade com R2 0,79, e correlação de -0,92 entre os erros das
+      duas. Ambas ainda passam no critério (coberturas de 0,92 e 0,915). Os outros parâmetros
+      perderam um pouco: R2 de 0,95 (`log_dispersal`), 0,76 (`inter_max`), 0,81
+      (`sigma_mean`) e 0,57 (`lambda`). Conclusão: o que separa as duas, em parte, parece vir
+      das estatísticas temporais e da equitabilidade (`turnover`, `cv_site`, `evenness` entre
+      as mais importantes), já que a estocasticidade demográfica depende da escala da
+      abundância; com um levantamento só, a separação deve piorar (não testado). Em dados
+      reais, informação externa sobre a detecção (visitas repetidas com contagens por visita,
+      ou um prior informativo) deve ajudar mais que o próprio ABC.
 - [x] Estimação com `abcrf` (Raynal et al. 2019), em `Suggests`: `abc_fit()`, `predict()` e
       `abc_importance()` (2026-11-11). Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.
@@ -557,8 +571,10 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       em 0%. O teste foi fraco por desenho: o modelo de competição contém o neutro
       (`inter_max` = 0), então não estava mal especificado. Falta um caso de especificação
       errada de fato, como dados com filtragem ambiental forte ajustados sem ela.
-- [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
-      simulação como pseudo-observação; `gfit()` para adequação global.
+- [x] LOO sobre a tabela de referência: substituído por `abc_recovery()`, que deixa
+      pseudo-observações fora e mede R2, viés e cobertura, e pelo erro out-of-bag de
+      `abc_choose()`; `cv4abc()`, `cv4postpr()` e `gfit()` do `abc` não acrescentam ao que as
+      florestas já dão (decidido em 2026-11-11).
 - [x] K-fold por sítios ou blocos espaciais (`spatial_folds()`, `fold_summarise()`, `abc_cv()`,
       2026-11-11): ajustar com parte dos sítios e prever as estatísticas dos demais. Blocos
       deveriam evitar que a autocorrelação espacial infle o acerto. Em `data-raw/abc_cv.R`
@@ -593,6 +609,18 @@ Avaliação do modelo, sempre em conjunto com a inferência:
 
 Limites a deixar claros: um bom ajuste não prova o mecanismo, e dados de um único
 levantamento podem não informar a dispersão.
+
+Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82): `abc_table()`,
+`observe_detection()`, `abc_fit()`, `predict()`, `abc_importance()`, `abc_recovery()`,
+`abc_choose()`, `abc_ppc()`, `spatial_folds()`, `fold_summarise()`, `abc_cv()` e
+`abc_diagnose()`. Falta, para fechar o bloco:
+
+- [ ] Vignette com dados reais, do ajuste à avaliação (critério de conclusão abaixo).
+      Candidato: um conjunto de anuros com árvore e coordenadas já usado no pacote.
+- [ ] PPC com um modelo de fato mal especificado (por exemplo, filtragem ambiental forte
+      nos dados e ajuste sem ela), já que o teste com o modelo neutro foi fraco por desenho.
+- [ ] Repetir a validação cruzada por blocos numa paisagem maior e sem toro.
+- [ ] Desempenho com árvore e paisagem variando entre simulações (hoje são fixas).
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
