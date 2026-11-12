@@ -7,13 +7,14 @@
 # Endemism of a site: the share of the species present in it that occur in no other site. The
 # check is the Spearman correlation between connectivity and endemism across sites, in each
 # replicate. Run from the root of the package; REPS changes the size.
-# Result (20 replicates, 2026-11-12, after the fixes of the audit): no support. Spearman rho
-# between connectivity and endemism averaged -0.030 with the cluster rule (negative in 55% of
-# replicates) and -0.001 with the gradual rule (35%), with about 365 extant species and 1100
-# splits per run (before the fixes: -0.076 and -0.068). With threshold 300 and dispersal 0.05
-# the cluster rule gave almost no speciation and the gradual rule a mean rho of +0.04. The
-# prediction is not reproduced; endemism may be a poor proxy for the species formed in situ,
-# which the simulation does not yet record by site, and the design differs from theirs.
+# Result (20 replicates, 2026-11-12, after the revision of phase 2a: budding, links by
+# migration rate with persistence): no support. With the default migration_min = 0.001 the
+# cluster rule links all populations and gives no speciation; the gradual rule gave a mean
+# Spearman rho between connectivity and endemism of -0.069 (negative in 70% of replicates),
+# with about 363 extant species and 1100 buddings per run. Before the revision: -0.030
+# (cluster) and -0.001 (gradual); before the fixes of the first audit, -0.076 and -0.068.
+# The prediction is not reproduced; endemism may be a poor proxy for the species formed in
+# situ, which the simulation does not yet record by site, and the design differs from theirs.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 reps <- as.integer(Sys.getenv("REPS", "20"))
 ancestor <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
