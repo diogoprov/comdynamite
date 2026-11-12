@@ -7,14 +7,16 @@
 # Endemism of a site: the share of the species present in it that occur in no other site. The
 # check is the Spearman correlation between connectivity and endemism across sites, in each
 # replicate. Run from the root of the package; REPS changes the size.
-# Result (20 replicates, 2026-11-12, after the revision of phase 2a: budding, links by
-# migration rate with persistence): no support. With the default migration_min = 0.001 the
-# cluster rule links all populations and gives no speciation; the gradual rule gave a mean
-# Spearman rho between connectivity and endemism of -0.069 (negative in 70% of replicates),
-# with about 363 extant species and 1100 buddings per run. Before the revision: -0.030
-# (cluster) and -0.001 (gradual); before the fixes of the first audit, -0.076 and -0.068.
-# The prediction is not reproduced; endemism may be a poor proxy for the species formed in
-# situ, which the simulation does not yet record by site, and the design differs from theirs.
+# Result (20 replicates, 2026-11-12, after the revision of phase 2a and the calibration of
+# migration_min in data-raw/evolving_migration_min.R, default 0.005): weak support at most.
+# Spearman rho between connectivity and endemism averaged -0.121 with the cluster rule
+# (negative in 81% of replicates with a defined rho; about 69 extant species and 80 buddings per
+# run) and -0.069 with the gradual rule (70%; about 363 species and 1100 buddings). The sign
+# is the predicted one (less connected sites hold more endemics), but the correlation is weak.
+# Earlier versions: with migration_min 0.001 the cluster rule did not speciate in this
+# design; before the revision, -0.030 (cluster) and -0.001 (gradual). Endemism may be a poor
+# proxy for the species formed in situ, which the simulation does not yet record by site, and
+# the design differs from theirs.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 reps <- as.integer(Sys.getenv("REPS", "20"))
 ancestor <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")

@@ -123,7 +123,7 @@ extensões.
    amostragem de fundadores em populações pequenas especiavam num ambiente uniforme.
 2. Regra de clusters: ligação pela taxa de migração (migrantes esperados na geração sobre o
    tamanho da população receptora, o maior dos dois sentidos) ≥ `migration_min` (padrão
-   0,001). Dentro de um cluster a divergência fica congelada e só zera depois de
+   0,005, calibrado em `data-raw/evolving_migration_min.R`: nada especia com 0,002 ou menos, e com 0,02 ou mais quase nenhuma ligação se mantém). Dentro de um cluster a divergência fica congelada e só zera depois de
    `reset_generations` (padrão 10) gerações seguidas no mesmo cluster.
 3. Brotamento: o maior grupo (mais sítios, depois mais indivíduos) mantém a identidade e a
    idade da mãe; os outros viram espécies novas. Vários de uma vez saem em bifurcações

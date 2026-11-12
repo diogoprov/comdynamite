@@ -40,7 +40,10 @@
 #'   off.
 #' @param divergence For `"geographic"`: `"cluster"` or `"gradual"`.
 #' @param migration_min For `divergence = "cluster"`: migration rate per generation that links
-#'   two populations.
+#'   two populations. Where clusters form depends on dispersal, the kernel and abundances: the
+#'   rate of the strongest link of each population should straddle it. In the design of
+#'   `data-raw/evolving_migration_min.R` (strongest links with median 0.006), species did not
+#'   split at all at 0.002 or below and split almost as with no links at 0.02 or above.
 #' @param reset_generations For `divergence = "cluster"`: generations in a row in the same
 #'   cluster after which divergence returns to 0.
 #' @param homogenization For `divergence = "gradual"`: reduction of divergence per migrant.
@@ -60,7 +63,7 @@
 #' speciation_control("ecological", threshold = 20, min_generations = 30)
 #' @export
 speciation_control <- function(mode = c("geographic", "ecological"), threshold,
-                               divergence = c("cluster", "gradual"), migration_min = 0.001,
+                               divergence = c("cluster", "gradual"), migration_min = 0.005,
                                reset_generations = 10, homogenization = 1,
                                min_generations = 20, migration_max = 0.001) {
   mode <- match.arg(mode)

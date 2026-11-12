@@ -8,7 +8,7 @@ speciation_control(
   mode = c("geographic", "ecological"),
   threshold,
   divergence = c("cluster", "gradual"),
-  migration_min = 0.001,
+  migration_min = 0.005,
   reset_generations = 10,
   homogenization = 1,
   min_generations = 20,
@@ -25,7 +25,10 @@ off.}
 \item{divergence}{For \code{"geographic"}: \code{"cluster"} or \code{"gradual"}.}
 
 \item{migration_min}{For \code{divergence = "cluster"}: migration rate per generation that links
-two populations.}
+two populations. Where clusters form depends on dispersal, the kernel and abundances: the
+rate of the strongest link of each population should straddle it. In the design of
+\code{data-raw/evolving_migration_min.R} (strongest links with median 0.006), species did not
+split at all at 0.002 or below and split almost as with no links at 0.02 or above.}
 
 \item{reset_generations}{For \code{divergence = "cluster"}: generations in a row in the same
 cluster after which divergence returns to 0.}
