@@ -32,13 +32,16 @@ ordered by site and species.
 whose `founder_sd` and `monopolization` use this history.
 
 Other simulate metacommunities:
+[`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
 [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
-[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md),
+[`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
 
 ## Examples
 

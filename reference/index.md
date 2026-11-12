@@ -28,6 +28,12 @@ The process-based model, from landscape and traits to abundances.
   : Metacommunity dynamics from growth rates
 - [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
   : Evolution of local populations
+- [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  : Simulate a metacommunity with speciation
+- [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
+  : Speciation settings
+- [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
+  : Convert to a simulated metacommunity
 - [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
   : Colonisation history of a simulated metacommunity
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)

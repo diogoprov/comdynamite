@@ -33,6 +33,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/arrival_ages.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/as.data.frame.mc_sim.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/as_herodotools.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/as_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/assemble_community.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/biogeography_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/clade_regimes.html</loc></url>
@@ -108,10 +109,12 @@
 <url><loc>https://provetelab.org/comdynamite/reference/run_scenarios.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/sample_individuals.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_damocles.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_logistic.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_static.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/spatial_folds.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/speciation_control.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/species_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/subsample_individuals.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/summary_stats.html</loc></url>

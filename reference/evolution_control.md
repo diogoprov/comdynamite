@@ -157,13 +157,16 @@ phenotypic evolution. *Evolution*, 30, 314–334.
 ## See also
 
 Other simulate metacommunities:
+[`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
-[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md)
+[`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md),
+[`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
 
 ## Examples
 
