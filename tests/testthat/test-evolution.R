@@ -150,3 +150,15 @@ test_that("evolution follows env_time and checks its settings", {
                                                          traits = evo_traits())),
                "one value or one per species")
 })
+
+test_that("simulate_metacommunity() checks alpha and dispersal", {
+  ls <- landscape_implicit(3)
+  tr <- ape::rcoal(2)
+  traits <- species_traits(tr)
+  expect_error(simulate_metacommunity(ls, traits, diag(3), n_steps = 2), "one row and one column")
+  a <- diag(2)
+  dimnames(a) <- list(c("x", "y"), c("x", "y"))
+  expect_error(simulate_metacommunity(ls, traits, a, n_steps = 2), "names of species")
+  expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0.1, n_steps = 2),
+               "at least two sites")
+})

@@ -99,6 +99,40 @@ extensões.
 
 ### 2. Divergência e especiação
 
+#### Decisões da Fase 2 (Diogo, 2026-11-12)
+
+- Nome: `simulate_evolving_metacommunity()`. Modos na primeira versão: `"geographic"`,
+  `"ecological"`, `"point"`, `"fission"` e a camada de conclusão prolongada.
+- Dois PRs: 2a (função, registro filogenético, extinção global, `"geographic"` e
+  `"ecological"`, testes de consistência e validação 3) e 2b (conclusão prolongada, `"point"`,
+  `"fission"` e as validações 1 e 2).
+- `mc_dynamics()` refatorada em preparo, passo e fechamento sobre um mesmo estado, que a função
+  nova usa; sem especiação, ela reproduz `simulate_metacommunity()` com a mesma semente.
+- Divergência geográfica com duas regras: clusters de fluxo (padrão; diverge entre clusters,
+  zera dentro) e gradual (cresce 1 por geração e cai `homogenization` por migrante).
+- Competição que decai com a distância patrística, com piso `inter_min` (sem ele, espécies
+  distantes não competem e a riqueza explode).
+- Estado da 2a (2026-11-12): implementada e testada; validação 3 sem apoio (ρ ≈ 0 entre
+  conectividade e endemismo; `data-raw/evolving_peripheral.R`).
+
+#### Revisão da 2a antes da 2b (Diogo, 2026-11-12)
+
+1. Modo ecológico: persistência mais fluxo reduzido. Um par de populações conta as gerações
+   seguidas com |Δz̄| ≥ limiar e taxa de migração < `migration_max` (padrão 0,001); os grupos
+   se separam quando a contagem chega a `min_generations` (padrão 20). Sem isso, deriva e
+   amostragem de fundadores em populações pequenas especiavam num ambiente uniforme.
+2. Regra de clusters: ligação pela taxa de migração (migrantes esperados na geração sobre o
+   tamanho da população receptora, o maior dos dois sentidos) ≥ `migration_min` (padrão
+   0,005, calibrado em `data-raw/evolving_migration_min.R`: nada especia com 0,002 ou menos, e com 0,02 ou mais quase nenhuma ligação se mantém). Dentro de um cluster a divergência fica congelada e só zera depois de
+   `reset_generations` (padrão 10) gerações seguidas no mesmo cluster.
+3. Brotamento: o maior grupo (mais sítios, depois mais indivíduos) mantém a identidade e a
+   idade da mãe; os outros viram espécies novas. Vários de uma vez saem em bifurcações
+   sucessivas, a mais divergente primeiro, com ramos internos de comprimento zero.
+4. Competição pelo nicho: α_ij(s) também cai com a sobreposição dos nichos gaussianos dos
+   fenótipos no sítio, exp(−(p_is − p_js)²/(2(σ_i² + σ_j²))) (`niche_overlap = TRUE`).
+5. `inter_min = 0,25` mantido; sem fusão em contato secundário.
+
+
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
 especiação geográfica (limitação de dispersão e estocasticidade), especiação ecológica
 baseada em nicho (adaptação com fluxo gênico em paisagens heterogêneas) e especiação

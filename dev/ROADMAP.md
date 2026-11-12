@@ -944,6 +944,13 @@ as fases, em `dev/plano-especiacao.md`.
       migração–seleção. Neutralidade regional reproduzida qualitativamente em
       `data-raw/evolution_leibold.R`: só com extirpação, dispersão baixa e adaptação rápida
       (sorting de 0,99 para 0,04 com G = 50, contra 0,90 no controle sem resposta).
+- [ ] Fase 2a (feita em 2026-11-12): `simulate_evolving_metacommunity()`, `speciation_control()`
+      (`"geographic"` com regras de clusters e gradual; `"ecological"`), árvore completa e
+      reconstruída, extinção global, `as_metacommunity()`; validação 3 sem apoio (ρ ≈ 0).
+      Revisada antes da 2b: brotamento, ligação por taxa de migração com persistência
+      (`migration_min`, `reset_generations`), modo ecológico com persistência e fluxo reduzido
+      (`min_generations`, `migration_max`) e competição pela sobreposição de nicho. Falta a
+      2b: conclusão prolongada, `"point"` e `"fission"`, validações 1 e 2.
 - [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
       `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
       2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético
