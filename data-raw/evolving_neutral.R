@@ -13,8 +13,9 @@
 # records of the output keep only the species extant at the end). Run from the root of the
 # package; REPS changes the size.
 # Result (20 replicates, 2026-11-12): richness matched the Ewens expectation within 1-4% for
-# theta from 1 to 10 and J of 250 and 500 (ratio 0.99 to 1.04, standard errors 0.2 to 0.3
-# species). The excess grows with theta (41.3 against 39.7 with theta = 10 and J = 500, about
+# theta from 1 to 10 and J of 250 and 500 (ratio 0.99 to 1.04, after the fix of mothers emptied
+# by mutants, standard errors 0.2 to 0.3
+# species). The excess grows with theta (41.2 against 39.7 with theta = 10 and J = 500, about
 # six standard errors), perhaps because the census size fluctuates or offspring numbers are
 # not exactly those of Wright-Fisher; we did not pin it down. Singletons at the end, one snapshot
 # per replicate, were 10% fewer than expected with theta = 1 and 15-38% more with theta of 2 or

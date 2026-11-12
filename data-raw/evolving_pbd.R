@@ -15,8 +15,8 @@
 # fits converged in 3 of 10 trees with tau = 0 (the completion rate runs to infinity) and in all
 # with tau > 0. With tau = 25 the estimated completion rate (0.045) was close to 1 / tau (0.04)
 # and the initiation rate (0.0077) close to the realised rate of fission per lineage (0.0099).
-# With tau = 100 the completion rate was underestimated (0.0018 against 0.01) and initiation and
-# extinction inflated (0.050 and 0.040), with two fits far off (b near 28 and 82): with long
+# With tau = 100 the completion rate was underestimated (0.0020 against 0.01) and initiation and
+# extinction inflated (0.036 and 0.030), with some fits far off: with long
 # completion times few completed nodes are left to inform the fit. The ordering of the
 # completion rates follows tau.
 # Etienne, R. S., & Rosindell, J. (2012). Systematic Biology, 61, 204-213.
