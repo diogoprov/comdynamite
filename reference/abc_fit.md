@@ -106,9 +106,12 @@ Estoup, A. (2019). ABC random forests for Bayesian parameter inference.
 
 Other inference:
 [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md),
+[`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md),
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
-[`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
+[`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
+[`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md),
+[`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
 
 ## Examples
 

@@ -197,6 +197,12 @@ parameters.
   : Choose among models by ABC with random forests
 - [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md)
   : Posterior predictive check after ABC
+- [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
+  : Folds of sites for cross-validation
+- [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md)
+  : Statistics by fold of sites
+- [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md) :
+  Cross-validation of an ABC model across sites
 
 ## Trait variation among individuals
 

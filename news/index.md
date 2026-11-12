@@ -2,6 +2,23 @@
 
 ## comdynamite (development version)
 
+- Cross-validation of ABC across sites.
+  [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
+  splits the sites into spatial blocks (k-means on the coordinates) or
+  random folds,
+  [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md)
+  turns a summary function into one that gives the statistics of the
+  sites kept and left out in every fold, for use in
+  [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
+  and
+  [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md)
+  fits
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  on the sites kept and predicts the statistics of the sites left out,
+  with coverage, posterior predictive p-values and standardised errors.
+  `data-raw/abc_cv.R` compares spatial blocks with random folds: both
+  were calibrated under the right model, and blocks did not flag a wrong
+  model more often on a 5 x 5 torus.
 - [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   chooses among models with a classification random forest (Pudlo et
   al. 2016) and reports the out-of-bag error and confusion matrix;

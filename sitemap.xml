@@ -21,6 +21,7 @@
 <url><loc>https://provetelab.org/comdynamite/index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/news/index.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/abc_choose.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/abc_cv.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/abc_fit.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/abc_ppc.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/abc_recovery.html</loc></url>
@@ -48,6 +49,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/dr_rates.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/env_over_time.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/equilibrium_check.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/fold_summarise.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/food_web_dynamics.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/food_web_params.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/food_web_rates.html</loc></url>
@@ -103,6 +105,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_logistic.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_metacommunity.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/simulate_static.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/spatial_folds.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/species_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/subsample_individuals.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/summary_stats.html</loc></url>
