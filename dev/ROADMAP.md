@@ -624,6 +624,16 @@ Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82)
       nos dados e ajuste sem ela), já que o teste com o modelo neutro foi fraco por desenho.
 - [ ] Repetir a validação cruzada por blocos numa paisagem maior e sem toro.
 - [ ] Desempenho com árvore e paisagem variando entre simulações (hoje são fixas).
+- [ ] Filtro urbano conservado na filogenia nos anuros: tolerância como trait evoluído na
+      árvore (por exemplo, `lambda` próprio) em vez de limiares sorteados ao acaso. Na
+      `vignette("abc")`, o modelo escolhido (competição filogenética, 0,994) não reproduz o MPD
+      observado, que fica entre aleatório e agrupado (PPC p = 0,004 e 0,028; cobertura 0,25 na
+      validação por blocos). Comparar os três modelos (competição, filtro conservado, os dois)
+      e ver se a falha some; serve também como o PPC com modelo mal especificado acima.
+- [ ] Colonização limitada a partir do pool regional (a maioria das espécies rara), a outra
+      explicação da riqueza baixa que hoje só a competição consegue gerar.
+- [ ] DOI de download do GBIF para os pools de `anurans` (exige a conta do usuário; hoje há
+      só as consultas e a data de acesso em `data-raw/anurans_pool/`).
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
