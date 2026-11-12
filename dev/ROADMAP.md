@@ -545,8 +545,19 @@ Avaliação do modelo, sempre em conjunto com a inferência:
 - [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
       simulação como pseudo-observação; `gfit()` para adequação global.
 - [x] K-fold por sítios ou blocos espaciais (`spatial_folds()`, `fold_summarise()`, `abc_cv()`,
-      2026-11-11; RESULTADO_CV): ajustar com parte dos sítios e prever as
-      estatísticas dos demais. Blocos evitam que a autocorrelação espacial infle o acerto.
+      2026-11-11): ajustar com parte dos sítios e prever as estatísticas dos demais. Blocos
+      deveriam evitar que a autocorrelação espacial infle o acerto. Em `data-raw/abc_cv.R`
+      (desenho da recuperação, 10 mil simulações, 5 folds de 5 sítios, 100 conjuntos por
+      caso; 11 min de simulação e 7 de florestas): com o modelo certo, cobertura do intervalo
+      preditivo de 90% de 0,96 com blocos e com folds aleatórios, conservadora como na
+      recuperação, e 1,7% de p < 0,05. Com o modelo errado (espécies seguindo um ambiente
+      escondido e autocorrelacionado), a rejeição média foi quase igual (10,4% com blocos,
+      10,2% aleatórios). Blocos detectaram mais em `evenness_regional` (17% contra 8%),
+      `decay` (45% contra 40%) e `sad_sd` (11% contra 7%), e menos em `trait_env` (70%
+      contra 87%), que detecta o erro já pelo ambiente medido. Conclusão: neste desenho
+      a vantagem esperada dos blocos não apareceu; uma explicação possível, não testada, é
+      que a grade de 25 sítios é um toro e os blocos de 5 sítios ficam vizinhos de todos os
+      lados. Falta repetir com paisagem maior e sem toro antes de recomendar blocos.
 - [ ] Diagnóstico de Pareto k dos pesos de importância, com `loo::psis()`, para saber
       quando a posterior ponderada depende de poucas simulações.
 - [ ] PSIS-LOO padrão (Vehtari et al. 2017) precisa de log-verossimilhança por observação,
