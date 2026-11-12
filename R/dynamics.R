@@ -239,85 +239,102 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         sites = NULL, species = NULL, extirpation = 0, pool = NULL,
                         initial = NULL, immigration = c("poisson", "multinomial"),
                         evolution = NULL) {
-  immigration <- match.arg(immigration)
-  r_fun <- if (is.function(r)) r else function(step) r
-  r1 <- r_fun(1)
-  m <- nrow(r1)
-  k_all <- ncol(r1)
-  stopifnot(all(dim(alpha) == k_all), n_steps >= 1)
-  if (!is.null(disp_matrix)) stopifnot(all(dim(disp_matrix) == m))
-  dispersal <- rep_len(dispersal, k_all)
-  extirpation <- rep_len(extirpation, k_all)
-  stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
-  if (m == 1 && any(dispersal > 0)) {
-    stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
-  }
-  sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
-  species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
-  if (!is.null(pool)) {
-    pool <- site_species(pool, sites, species, "`pool`")
-    if (!all(pool %in% c(0, 1))) stop("`pool` must be logical or 0/1", call. = FALSE)
-    pool <- pool == 1
-  }
-  if (!is.null(initial)) {
-    initial <- site_species(initial, sites, species, "`initial`")
-    if (any(initial < 0) || any(initial != round(initial))) {
-      stop("`initial` must hold whole numbers of individuals, zero or more", call. = FALSE)
-    }
-    if (!is.null(pool) && any(initial[!pool] > 0)) {
-      stop("`initial` has individuals outside `pool`", call. = FALSE)
-    }
-    storage.mode(initial) <- "integer"
-  }
-  record_steps <- sort(unique(record_steps[record_steps >= 1 & record_steps <= n_steps]))
-  history <- if (length(record_steps))
-    array(0L, c(m, k_all, length(record_steps)),
-          dimnames = list(sites, species, paste0("step", record_steps))) else NULL
+  # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
+  # that simulate_evolving_metacommunity() can run the same steps and change species in between
+  mc_setup(environment())
+  for (step in seq_len(n_steps)) mc_step(environment(), step)
+  mc_finish(environment())
+}
 
-  alive <- seq_len(k_all)
-  k <- k_all
-  p_em <- rep(dispersal, each = m)
-  p_ex <- rep(extirpation, each = m)
-  at <- t(alpha)
-  inside <- pool
-  n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
-  if (!is.null(pool)) n[!pool] <- 0L
-  last_seed <- max(c(0, seed_steps))
-  ev <- if (!is.null(evolution)) evolution_state(evolution, m, k_all, species)
-  if (!is.null(ev)) {
-    # genetic mean and phenotype (after dispersal) of every population; NA where absent
-    z <- matrix(NA_real_, m, k_all)
-    ph <- matrix(NA_real_, m, k_all)
-    z_history <- if (length(record_steps))
-      array(NA_real_, c(m, k_all, length(record_steps)),
-            dimnames = list(sites, species, paste0("step", record_steps))) else NULL
-    # mean of k founders drawn from sources with mean `from` and, when they come from several
-    # sources, variance `between` among their means, for the populations in `cells`
-    found <- function(from, k, cells, cols, between = 0) {
-      g <- matrix(ev$g[cols], m, length(cols), byrow = TRUE)[cells]
-      v <- g + (between + 0 * from)[cells]
-      out <- from[cells]
-      if (ev$founder && any(g > 0)) {
-        draw <- g > 0
-        out[draw] <- out[draw] + stats::rnorm(sum(draw), 0, sqrt(v[draw] / k[cells][draw]))
-      }
-      out
+# preparation of mc_dynamics(), evaluated in the frame that holds its arguments
+mc_setup <- function(st) {
+  evalq({
+    immigration <- match.arg(immigration)
+    r_fun <- if (is.function(r)) r else function(step) r
+    r1 <- r_fun(1)
+    m <- nrow(r1)
+    k_all <- ncol(r1)
+    stopifnot(all(dim(alpha) == k_all), n_steps >= 1)
+    if (!is.null(disp_matrix)) stopifnot(all(dim(disp_matrix) == m))
+    dispersal <- rep_len(dispersal, k_all)
+    extirpation <- rep_len(extirpation, k_all)
+    stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
+    if (m == 1 && any(dispersal > 0)) {
+      stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
     }
-    # species without genetic variance keep the optimum of the pool exactly
-    fixed_z <- ev$g == 0
-    pool_mean <- matrix(ev$optimum, m, k_all, byrow = TRUE)
-    start_pop <- n > 0
-    if (any(start_pop)) z[start_pop] <- found(pool_mean, n, start_pop, seq_len(k_all))
-  }
-  # colonisation history of every population (sites x all species): step of the last arrival,
-  # number of founders, and immigrants and migrant load since then; no random draws, so seeds
-  # give the same abundances as before
-  arrival <- matrix(NA_integer_, m, k_all)
-  propagule <- matrix(NA_integer_, m, k_all)
-  immigrants <- matrix(0, m, k_all)
-  load <- matrix(0, m, k_all)
-  present <- matrix(FALSE, m, k_all)
-  for (step in seq_len(n_steps)) {
+    sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
+    species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
+    if (!is.null(pool)) {
+      pool <- site_species(pool, sites, species, "`pool`")
+      if (!all(pool %in% c(0, 1))) stop("`pool` must be logical or 0/1", call. = FALSE)
+      pool <- pool == 1
+    }
+    if (!is.null(initial)) {
+      initial <- site_species(initial, sites, species, "`initial`")
+      if (any(initial < 0) || any(initial != round(initial))) {
+        stop("`initial` must hold whole numbers of individuals, zero or more", call. = FALSE)
+      }
+      if (!is.null(pool) && any(initial[!pool] > 0)) {
+        stop("`initial` has individuals outside `pool`", call. = FALSE)
+      }
+      storage.mode(initial) <- "integer"
+    }
+    record_steps <- sort(unique(record_steps[record_steps >= 1 & record_steps <= n_steps]))
+    history <- if (length(record_steps))
+      array(0L, c(m, k_all, length(record_steps)),
+            dimnames = list(sites, species, paste0("step", record_steps))) else NULL
+
+    alive <- seq_len(k_all)
+    k <- k_all
+    p_em <- rep(dispersal, each = m)
+    p_ex <- rep(extirpation, each = m)
+    at <- t(alpha)
+    inside <- pool
+    n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
+    if (!is.null(pool)) n[!pool] <- 0L
+    last_seed <- max(c(0, seed_steps))
+    ev <- if (!is.null(evolution)) evolution_state(evolution, m, k_all, species)
+    if (!is.null(ev)) {
+      # genetic mean and phenotype (after dispersal) of every population; NA where absent
+      z <- matrix(NA_real_, m, k_all)
+      ph <- matrix(NA_real_, m, k_all)
+      z_history <- if (length(record_steps))
+        array(NA_real_, c(m, k_all, length(record_steps)),
+              dimnames = list(sites, species, paste0("step", record_steps))) else NULL
+      # mean of k founders drawn from sources with mean `from` and, when they come from several
+      # sources, variance `between` among their means, for the populations in `cells`
+      found <- function(from, k, cells, cols, between = 0) {
+        g <- matrix(ev$g[cols], m, length(cols), byrow = TRUE)[cells]
+        v <- g + (between + 0 * from)[cells]
+        out <- from[cells]
+        if (ev$founder && any(g > 0)) {
+          draw <- g > 0
+          out[draw] <- out[draw] + stats::rnorm(sum(draw), 0, sqrt(v[draw] / k[cells][draw]))
+        }
+        out
+      }
+      # species without genetic variance keep the optimum of the pool exactly
+      fixed_z <- ev$g == 0
+      pool_mean <- matrix(ev$optimum, m, k_all, byrow = TRUE)
+      start_pop <- n > 0
+      if (any(start_pop)) z[start_pop] <- found(pool_mean, n, start_pop, seq_len(k_all))
+    }
+    # colonisation history of every population (sites x all species): step of the last arrival,
+    # number of founders, and immigrants and migrant load since then; no random draws, so seeds
+    # give the same abundances as before
+    arrival <- matrix(NA_integer_, m, k_all)
+    propagule <- matrix(NA_integer_, m, k_all)
+    immigrants <- matrix(0, m, k_all)
+    load <- matrix(0, m, k_all)
+    present <- matrix(FALSE, m, k_all)
+  }, st)
+  invisible(st)
+}
+
+# one time step of mc_dynamics(), evaluated in the state `st`
+mc_step <- function(st, step) {
+  assign("step", step, envir = st)
+  evalq({
     added <- 0L
     if (step %in% seed_steps) {
       seeds <- stats::rpois(m * k, seed_mean)
@@ -469,32 +486,39 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
       history[, alive, match(step, record_steps)] <- n
       if (!is.null(ev)) z_history[, alive, match(step, record_steps)] <- z[, alive]
     }
-  }
-  abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
-  abundance[, alive] <- n
-  absent <- abundance == 0
-  arrival[absent] <- NA_integer_
-  propagule[absent] <- NA_integer_
-  immigrants[absent] <- NA
-  load[absent] <- NA
-  labels <- list(sites, species)
-  dimnames(arrival) <- dimnames(propagule) <- dimnames(immigrants) <- dimnames(load) <- labels
-  out <- list(abundance = abundance, history = history, pool = pool, arrival = arrival,
-              propagule = propagule, immigrants = immigrants, migrant_load = load,
-              n_steps = n_steps)
-  if (!is.null(ev)) {
-    z[absent] <- NA_real_
-    ph[absent] <- NA_real_
-    plastic <- sweep(matrix(ev$env(n_steps) - ev$ref, m, k_all), 2, ev$b, "*")
-    plastic[absent] <- NA_real_
-    dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- labels
-    out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
-                          reference = ev$ref,
-                          settings = structure(evolution[setdiff(names(evolution),
-                                                                 c("env", "traits"))],
-                                               class = "mc_evolution"))
-  }
-  out
+  }, st)
+  invisible(st)
+}
+
+# the output of mc_dynamics() from the state `st`
+mc_finish <- function(st) {
+  evalq({
+    abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
+    abundance[, alive] <- n
+    absent <- abundance == 0
+    arrival[absent] <- NA_integer_
+    propagule[absent] <- NA_integer_
+    immigrants[absent] <- NA
+    load[absent] <- NA
+    labels <- list(sites, species)
+    dimnames(arrival) <- dimnames(propagule) <- dimnames(immigrants) <- dimnames(load) <- labels
+    out <- list(abundance = abundance, history = history, pool = pool, arrival = arrival,
+                propagule = propagule, immigrants = immigrants, migrant_load = load,
+                n_steps = n_steps)
+    if (!is.null(ev)) {
+      z[absent] <- NA_real_
+      ph[absent] <- NA_real_
+      plastic <- sweep(matrix(ev$env(n_steps) - ev$ref, m, k_all), 2, ev$b, "*")
+      plastic[absent] <- NA_real_
+      dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- labels
+      out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
+                            reference = ev$ref,
+                            settings = structure(evolution[setdiff(names(evolution),
+                                                                   c("env", "traits"))],
+                                                 class = "mc_evolution"))
+    }
+    out
+  }, st)
 }
 
 # immigrants when the emigrants of each species at each site go to the other sites
