@@ -20,11 +20,12 @@ library(comdynamite)
 `daphniids` rebuilds the data of Leibold et al. (2010) from the public survey: presences of
 13 species in lakes of the northeastern United States, nine predictors and six biogeographic
 contrasts. `node_contrasts()` codes each node of the tree as a contrast between its two
-clades. This tree has no branch lengths; with them, `branch_lengths = TRUE` gives the coding
-of the supplement of the article.
+clades. `tree_leibold` is the topology of Figure 3a, without branch lengths; with them,
+`branch_lengths = TRUE` gives the coding of the supplement of the article. (`daphniids$tree`
+is a dated tree from TimeTree with a different topology.)
 
 ```{r}
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 dim(nodes)
 ```
 
@@ -49,7 +50,7 @@ article, and should be read with that limit in mind.
 `plot_node_test()` places the results on the tree, as in Figure 3 of the article.
 
 ```{r, fig.alt = "Phylogeny of daphniids with blue circles for predictors and red triangles for biogeographic events at the nodes, labelled with the names of the variables."}
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 ```
 
 A tree of this size reads best as a phylogram. For very large trees, `type = "fan"` draws the

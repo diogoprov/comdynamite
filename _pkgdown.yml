@@ -22,6 +22,7 @@ reference:
 - title: Landscapes
   desc: Spatially implicit and grid landscapes, dispersal and environment.
   contents:
+  - landscape_points
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel
@@ -143,6 +144,7 @@ reference:
   - result-methods
 - title: Example data
   contents:
+  - anurans
   - daphniids
 - title: Rule-based assembly
   desc: Community assembly without population dynamics.
@@ -171,6 +173,7 @@ articles:
   - articles/analysing-clades
   - articles/whole-tree
   - articles/trait-gradient
+  - abc
 - title: Simulating data
   navbar: Simulating data
   contents:

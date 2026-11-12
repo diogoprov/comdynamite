@@ -141,12 +141,12 @@ Leibold et al. (2010), with the differences listed in Details.
 }
 \examples{
 # daphniids of Leibold et al. (2010)
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
 round(out$semipartial, 2)
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 }
 \references{
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity

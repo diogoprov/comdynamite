@@ -65,6 +65,51 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
                 dispersal = dispersal_kernel(d, disp_scale), torus = torus)
 }
 
+#' Landscape from site coordinates
+#'
+#' Builds a spatially explicit landscape from the coordinates and environment of real sites,
+#' such as surveyed lakes, so that simulations share their spatial layout. Emigrants reach the
+#' other sites with probabilities from [dispersal_kernel()].
+#'
+#' @param coords Matrix or data frame with one row per site and two columns of coordinates.
+#'   With `lonlat = TRUE`, longitude and latitude in decimal degrees.
+#' @param env Numeric vector with the environment of each site.
+#' @param disp_scale Scale of the exponential dispersal kernel, in the units of the distances
+#'   (kilometres with `lonlat = TRUE`).
+#' @param lonlat Are the coordinates longitude and latitude? Distances are then great-circle
+#'   distances in kilometres, with a spherical Earth of radius 6371 km; otherwise Euclidean.
+#' @return An `mc_landscape` object, as from [landscape_grid()], without a torus.
+#' @family landscapes
+#' @examples
+#' xy <- cbind(lon = c(-73, -72.5, -71), lat = c(43, 43.2, 44))
+#' ls <- landscape_points(xy, env = c(10, 20, 80), disp_scale = 50, lonlat = TRUE)
+#' round(ls$dist)
+#' @export
+landscape_points <- function(coords, env, disp_scale, lonlat = FALSE) {
+  coords <- as.matrix(coords)
+  stopifnot(is.numeric(coords), ncol(coords) == 2, nrow(coords) >= 2, all(is.finite(coords)),
+            is.numeric(env), length(env) == nrow(coords), all(is.finite(env)),
+            length(disp_scale) == 1, disp_scale > 0)
+  if (lonlat) {
+    radians <- coords * pi / 180
+    lon <- radians[, 1]
+    lat <- radians[, 2]
+    h <- sin(outer(lat, lat, "-") / 2)^2 +
+      outer(cos(lat), cos(lat)) * sin(outer(lon, lon, "-") / 2)^2
+    d <- 2 * 6371 * asin(sqrt(pmin(h, 1)))
+    d <- matrix(d, nrow(coords))
+  } else {
+    d <- as.matrix(stats::dist(coords))
+  }
+  dimnames(d) <- NULL
+  coords <- as.data.frame(coords)
+  rownames(coords) <- NULL
+  out <- new_landscape(env = unname(env), coords = coords, dist = d,
+                       dispersal = dispersal_kernel(d, disp_scale), torus = FALSE)
+  out$points <- TRUE
+  out
+}
+
 #' Exponential dispersal kernel
 #'
 #' The probability that an emigrant from site s reaches site t is proportional
@@ -178,7 +223,8 @@ new_landscape <- function(env, coords, dist, dispersal, torus = NA) {
 #' @export
 print.mc_landscape <- function(x, ...) {
   type <- if (is.null(x$dispersal)) "spatially implicit, uniform dispersal" else
-    paste0("grid", if (isTRUE(x$torus)) " (torus)" else "", ", exponential dispersal kernel")
+    paste0(if (isTRUE(x$points)) "points" else "grid", if (isTRUE(x$torus)) " (torus)" else "",
+           ", exponential dispersal kernel")
   cat("<mc_landscape>", length(x$env), "sites;", type, "\n")
   cat("environment: ", paste(format(range(x$env), digits = 3), collapse = " to "), "\n")
   invisible(x)

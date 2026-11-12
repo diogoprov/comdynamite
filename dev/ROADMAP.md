@@ -461,7 +461,10 @@ padronizados. Substitui a `v0.6.0` para citação: a tag `v0.6.0` traz as taxas 
 `patch_permutations()` e não teve release. O nulo restrito para `c` fechou depois, na
 versão em desenvolvimento (item da v0.6.0).
 
-## Inferência por ABC (planejada como v0.6.0, número a definir)
+## Inferência por ABC (concluída em 2026-11-12)
+
+Publicada como 0.8.0 em 2026-11-12 (PR 84, tag `v0.8.0`), ao fechar o critério de conclusão com
+`vignette("abc")`. Os itens em aberto abaixo seguem como trabalho futuro do bloco.
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
@@ -615,12 +618,22 @@ Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82)
 `abc_choose()`, `abc_ppc()`, `spatial_folds()`, `fold_summarise()`, `abc_cv()` e
 `abc_diagnose()`. Falta, para fechar o bloco:
 
-- [ ] Vignette com dados reais, do ajuste à avaliação (critério de conclusão abaixo).
-      Candidato: um conjunto de anuros com árvore e coordenadas já usado no pacote.
+- [x] Vignette com dados reais, do ajuste à avaliação: `vignette("abc")`, com os anuros de 40
+      poças urbanas em duas cidades (`anurans`), pools regionais do GBIF e filtro urbano (PR 84).
 - [ ] PPC com um modelo de fato mal especificado (por exemplo, filtragem ambiental forte
       nos dados e ajuste sem ela), já que o teste com o modelo neutro foi fraco por desenho.
 - [ ] Repetir a validação cruzada por blocos numa paisagem maior e sem toro.
 - [ ] Desempenho com árvore e paisagem variando entre simulações (hoje são fixas).
+- [ ] Filtro urbano conservado na filogenia nos anuros: tolerância como trait evoluído na
+      árvore (por exemplo, `lambda` próprio) em vez de limiares sorteados ao acaso. Na
+      `vignette("abc")`, o modelo escolhido (competição filogenética, 0,994) não reproduz o MPD
+      observado, que fica entre aleatório e agrupado (PPC p = 0,004 e 0,028; cobertura 0,25 na
+      validação por blocos). Comparar os três modelos (competição, filtro conservado, os dois)
+      e ver se a falha some; serve também como o PPC com modelo mal especificado acima.
+- [ ] Colonização limitada a partir do pool regional (a maioria das espécies rara), a outra
+      explicação da riqueza baixa que hoje só a competição consegue gerar.
+- [ ] DOI de download do GBIF para os pools de `anurans` (exige a conta do usuário; hoje há
+      só as consultas e a data de acesso em `data-raw/anurans_pool/`).
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.

@@ -210,12 +210,12 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @family clades and biogeography
 #' @examples
 #' # daphniids of Leibold et al. (2010)
-#' nodes <- node_contrasts(daphniids$tree)
+#' nodes <- node_contrasts(daphniids$tree_leibold)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 #' out
 #' round(out$semipartial, 2)
-#' plot_node_test(out, daphniids$tree, test = "site")
+#' plot_node_test(out, daphniids$tree_leibold, test = "site")
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores = 1,
                       site_permutations = NULL, area_permutations = NULL) {

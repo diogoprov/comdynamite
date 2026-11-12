@@ -28,6 +28,7 @@ round(dispersal_kernel(d, scale = 1), 2)
 Other landscapes:
 \code{\link[=env_over_time]{env_over_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
-\code{\link[=landscape_implicit]{landscape_implicit()}}
+\code{\link[=landscape_implicit]{landscape_implicit()}},
+\code{\link[=landscape_points]{landscape_points()}}
 }
 \concept{landscapes}

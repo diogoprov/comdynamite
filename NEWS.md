@@ -1,4 +1,15 @@
-# comdynamite (development version)
+# comdynamite 0.8.0
+
+- `vignette("abc")` goes through inference by ABC with random forests with the anurans of 40
+  urban ponds in two Brazilian cities (`anurans`, new data set, with regional pools from GBIF
+  occurrences and a dated tree pruned from Portik et al. 2023): simulator, reference table, recovery, model choice, posterior,
+  diagnostics, posterior predictive checks and cross-validation over spatial blocks
+  (`data-raw/abc_anurans.R`).
+- `landscape_points()` builds a landscape from the coordinates of real sites, with
+  great-circle distances for longitude and latitude. `daphniids` gains `coords`, the position
+  of each lake, and its `tree` now has branch lengths from TimeTree 5 (with the topology of
+  TimeTree; four species placed at arbitrary ages), while `tree_leibold` keeps the topology of
+  Figure 3a of Leibold et al. (2010) for analyses that reproduce the article.
 
 - `observe_detection()` turns the true abundances of a simulation into survey records: each
   individual is detected with a given probability in each of several visits (binomial counts,

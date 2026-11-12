@@ -1,0 +1,330 @@
+---
+title: "Inference by ABC with random forests"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Inference by ABC with random forests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4.5,
+                      eval = requireNamespace("ggplot2", quietly = TRUE))
+```
+
+The simulations of comdynamite can be turned around: instead of asking what patterns a set of
+processes produces, we can ask which values of the parameters of a process make simulated
+metacommunities look like an observed one. Approximate Bayesian computation (ABC) does this by
+simulating many data sets with parameters drawn from a prior, describing each with summary
+statistics, and keeping the parameters whose statistics resemble the observed ones. With random
+forests (Pudlo et al. 2016; Raynal et al. 2019), there is no tolerance or distance to choose: a
+forest learns how the parameters relate to the statistics in the reference table and weighs its
+rows by their similarity to the observed data.
+
+This vignette goes through the whole workflow with the anurans of 40 urban ponds in two
+Brazilian cities (`anurans`):
+
+1. build a landscape from the coordinates of the ponds and write the simulator;
+2. simulate a reference table with `abc_table()`;
+3. check that the parameters can be recovered at all, with `abc_recovery()`;
+4. choose between models with `abc_choose()`;
+5. estimate the parameters for the observed data with `abc_fit()`, and check the fit with
+   `abc_diagnose()`, `abc_ppc()` and cross-validation over spatial blocks with `abc_cv()`.
+
+The reference tables (about 20,000 simulations) take about a quarter of an hour on six cores,
+and they and the forests were computed in advance with
+[`data-raw/abc_anurans.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_anurans.R);
+the rest runs here.
+
+```{r setup}
+library(comdynamite)
+library(ggplot2)
+res <- readRDS("abc.rds")
+```
+
+## The data and the simulator
+
+The ponds of each city are a few kilometres apart, and the two cities are about 900 km from each
+other, so we treat them as two metacommunities that share the values of the parameters. Each pond
+has a hydrology score, from small, shallow and warm ponds (0) to large and deep ones (100), and
+the urban cover within 1 km. Each city has its own regional pool: the anurans that breed in
+lentic water and were recorded by GBIF in its ecoregion and within 200 km of its ponds (see
+`?anurans`). The pools are much larger than the sets of species found in the ponds, so the
+simulations must explain which species of the region reach and persist in the ponds.
+
+```{r data}
+table(anurans$city)
+c(recorded = ncol(anurans$comm), pool = ncol(anurans$pool))
+tapply(rowSums(anurans$pool), anurans$city, max)
+city <- ifelse(anurans$city == "Campo Grande", "cg", "sjc")
+pool <- anurans$pool
+rownames(pool) <- paste0("site", seq_along(city))
+```
+
+`landscape_points()` keeps the real layout of the ponds. With `lonlat = TRUE`, distances are
+great-circle distances in kilometres, and `disp_scale` is the scale of the exponential dispersal
+kernel in kilometres.
+
+```{r landscape}
+ponds <- landscape_points(anurans$coords, anurans$env[, "hydrology"], disp_scale = 2,
+                          lonlat = TRUE)
+ponds
+```
+
+The model has six parameters: the fraction of individuals that emigrate at each step
+(`log_dispersal`, on a log10 scale), the scale of the dispersal kernel (`log_kernel`, log10 km),
+the strength of competition between the most closely related species (`inter_max`, with
+competition decreasing with phylogenetic distance), the mean niche breadth along the hydrology
+axis (`sigma_mean`), the phylogenetic signal of the niche optima (`lambda`, Pagel's lambda), and
+the share of species that tolerate any urban cover (`q_tol`). Following the chapter from which
+the data come, each of the other species gets a threshold drawn from U(0, 100)% and is kept out
+of ponds whose urban cover exceeds it; the filter acts on the pool of each pond, before the
+dynamics. The simulator takes one draw of the parameters (`scenario`) and the objects shared by
+all simulations (`shared`):
+
+```{r simulator}
+shared <- list(tree = anurans$tree, coords = anurans$coords, env = anurans$env[, "hydrology"],
+               urban = anurans$env[, "urban_cover"], pool = pool, city = city)
+prior <- list(log_dispersal = c(-4, log10(0.3)), log_kernel = log10(c(0.5, 20)),
+              inter_max = c(0, 1), sigma_mean = c(5, 100), lambda = c(0, 1), q_tol = c(0, 1))
+urban_pool <- function(pool, urban, q_tol) {
+  threshold <- ifelse(runif(ncol(pool)) < q_tol, Inf, runif(ncol(pool), 0, 100))
+  filtered <- pool * outer(urban, threshold, "<=")
+  lost <- colSums(filtered) == 0  # a species excluded everywhere keeps its pool
+  filtered[, lost] <- pool[, lost]
+  filtered
+}
+simulate <- function(scenario, shared) {
+  landscape <- landscape_points(shared$coords, shared$env, 10^scenario$log_kernel, lonlat = TRUE)
+  simulate_metacommunity(landscape,
+                         species_traits(shared$tree, scenario$lambda,
+                                        sigma_mean = scenario$sigma_mean,
+                                        sigma_sd = scenario$sigma_mean / 2),
+                         competition_matrix(shared$tree, "phylo",
+                                            inter_max = scenario$inter_max),
+                         dispersal = 10^scenario$log_dispersal, n_steps = 500,
+                         pool = urban_pool(shared$pool, shared$urban, scenario$q_tol))
+}
+set.seed(1)
+sim <- simulate(list(log_dispersal = -2, log_kernel = 0.3, inter_max = 0.5, sigma_mean = 20,
+                     lambda = 0.5, q_tol = 0.3), shared)
+rowSums(sim$abundance > 0)[1:10]
+```
+
+## Summary statistics
+
+The observed data are counts from surveys, whose totals depend on effort and on how easily each
+species is detected, so we describe both the observed and the simulated metacommunities by
+incidence alone: the statistics of `summary_stats()` that need no abundances (mean and total
+richness, beta diversity, occupancy, the standardised effect sizes of MPD and MNTD, and distance
+decay), plus the correlations of richness and of compositional dissimilarity with hydrology.
+They are computed separately for each city, with the prefixes `cg_` and `sjc_`, over the
+species of its regional pool, which is also the pool of the null model of the standardised
+effect sizes. See `data-raw/abc_anurans.R` for the function; the observed statistics are
+
+```{r observed}
+round(res$observed[grepl("^(cg|sjc)_", names(res$observed))], 3)
+```
+
+With the simulator and the statistics in hand, `abc_table()` draws parameters uniformly from the
+prior and runs one simulation per draw, in parallel with future:
+
+```{r table, eval = FALSE}
+future::plan(future::multicore, workers = 6)
+table <- abc_table(prior, simulate, n = 10200, setup = function() shared,
+                   summarise = summarise, seed = 2040)
+```
+
+## Can the parameters be recovered?
+
+Before looking at the observed data, we ask whether the statistics carry information about
+each parameter. `abc_recovery()` leaves `r res$settings$n_test` simulations out of the
+reference table, treats each as if it were observed, and compares the estimates with the true
+values. A parameter is worth estimating when the estimates follow the truth (R² well above
+zero) and the 90% intervals contain the truth about 90% of the time.
+
+```{r recovery}
+print(res$recovery, digits = 2)
+```
+
+```{r recovery-plot, fig.alt = "Estimated against true values of the five parameters for the pseudo-observations, with the line of equality."}
+ggplot(res$estimates, aes(truth, estimate)) +
+  geom_abline(colour = "grey60") +
+  geom_point(size = 0.8, alpha = 0.6) +
+  facet_wrap(~parameter, scales = "free") +
+  labs(x = "True value", y = "Posterior median") +
+  theme_minimal()
+```
+
+Competition (`inter_max`) and emigration are well recovered, and niche breadth and tolerance to
+urban cover reasonably so, while the scale of the kernel is only weakly identified and the
+phylogenetic signal of the niche (`lambda`) not at all: with incidence in 40 ponds, its
+posterior will be its prior. The intervals have about the right coverage for all six, so the
+posterior of `lambda` is honest about this, just uninformative.
+
+## Which model?
+
+The same statistics may come from metacommunities without competition. We simulated a second
+table with `inter_max` fixed at zero (the other five parameters from the same priors) and let
+`abc_choose()` tell the two models apart:
+
+```{r choice}
+res$choice$error
+res$choice$confusion
+print(res$chosen, digits = 2)
+```
+
+The out-of-bag error shows that the two models are easy to tell apart when one of them is true.
+For the observed data, `r res$chosen$votes_phylogenetic` of the 500 trees vote for the model
+with phylogenetic competition, and the posterior probability of that model is
+`r round(res$chosen$probability, 2)`.
+
+## The posterior
+
+`abc_fit()` grows one regression forest per parameter, and `predict()` gives the posterior
+median and a 90% interval for the observed statistics:
+
+```{r posterior}
+print(res$posterior, digits = 2)
+```
+
+The rows of the reference table that the forests weigh give an approximate sample from the
+posterior, which we can set against the uniform prior:
+
+```{r posterior-plot, fig.alt = "Histograms of posterior draws of the five parameters, with the prior range shown by the horizontal extent of each panel."}
+draws <- stack(res$draws[names(res$prior)])
+limits <- data.frame(ind = names(res$prior), low = sapply(res$prior, `[`, 1),
+                     high = sapply(res$prior, `[`, 2))
+ggplot(draws, aes(values)) +
+  geom_histogram(bins = 25, fill = "grey40") +
+  geom_blank(aes(x = low), limits) + geom_blank(aes(x = high), limits) +
+  facet_wrap(~ind, scales = "free") +
+  labs(x = "Value (panel width = prior range)", y = "Draws") +
+  theme_minimal()
+```
+
+These draws use the mean of the weights of the six forests, so they are broader than the
+intervals of each parameter.
+
+## Checking the fit
+
+A posterior is only as good as the model behind it. `abc_diagnose()` asks whether the observed
+statistics lie within the range of the reference table and how many rows carry the weight
+(effective sample size, ESS):
+
+```{r diagnose}
+print(res$diagnose, digits = 2)
+```
+
+A posterior predictive check compares the observed statistics with those of the simulations
+drawn from the posterior. It is most telling for statistics left out of the fit, so we fitted a
+second set of forests without the phylogenetic statistics and checked those:
+
+```{r ppc}
+print(res$ppc_phylo, digits = 2)
+```
+
+```{r ppc-values, include = FALSE}
+pp <- function(x, stat) round(x$p[x$statistic == stat], 3)
+im <- function(p) p[p$parameter == "inter_max", ]
+```
+
+The model chosen with a posterior probability of `r round(res$chosen$probability, 2)` fails
+here. With competition among close relatives, the simulated ponds hold species more distantly
+related than expected from the regional pool (standardised MPD above zero), whereas in the
+observed ponds the species are as related as, or more related than, random draws from the pool.
+The observed MPD is in the lower tail in both cities (p = `r pp(res$ppc_phylo, "cg_ses_mpd")` in
+Campo Grande and `r pp(res$ppc_phylo, "sjc_ses_mpd")` in São José dos Campos). With all the
+statistics in the fit, the forests pull the posterior towards the observed MPD and the misfit
+is milder:
+
+```{r ppc-all}
+print(res$ppc_all[c("statistic", "observed", "median", "low", "high", "p")], digits = 2)
+```
+
+Why, then, does model choice favour competition so strongly? The statistics that weigh most in
+the forest of `inter_max` are the mean and total richness of each city:
+
+```{r importance}
+head(res$importance[res$importance$parameter == "inter_max", ], 4)
+```
+
+With pools of 50 to 150 species, the observed ponds hold few of them, and among the processes in
+the simulator, competition is the one that can keep richness that low. Any process that limits
+richness but is missing from the model, such as colonisation from a region where most species
+are rare, may therefore be read as competition. The phylogenetic statistics, which measure who
+coexists rather than how many, seem to point instead to a filter that favours some clades, for
+instance a tolerance to urban cover shared by related species, whereas the filter of the
+simulator acts at random with respect to phylogeny. These are hypotheses for a better model,
+not conclusions: the check says what the model misses, not why.
+
+Leaving out total richness and beta diversity (total over mean richness) changes little, so the
+choice does not rest on them alone:
+
+```{r reduced}
+print(res$reduced$chosen, digits = 2)
+print(res$reduced$posterior, digits = 2)
+```
+
+## Cross-validation over space
+
+The last check asks whether the model fitted to some ponds predicts the others. With spatial
+blocks, the ponds left out are not neighbours of those kept (Roberts et al. 2017). We split each
+city into two blocks with `spatial_folds()`, so that each of the four folds leaves out half of
+one city, and `fold_summarise()` computed the statistics of the ponds kept and of those left out
+in every simulation:
+
+```{r folds, fig.alt = "Ponds of the two cities coloured by fold."}
+ggplot(data.frame(anurans$coords, fold = factor(res$folds), city = anurans$city),
+       aes(lon, lat, colour = fold)) +
+  geom_point() +
+  facet_wrap(~city, scales = "free") +
+  theme_minimal()
+```
+
+`abc_cv()` fits the forests on the statistics of the ponds kept and predicts those of the ponds
+left out. `summary()` gives, for each statistic, the fraction of folds in which the observed
+value fell inside the 90% predictive interval:
+
+```{r cv}
+print(res$cv_summary, digits = 2)
+```
+
+With only four folds, these fractions are coarse, but most statistics of the ponds left out are
+predicted. The exceptions repeat the posterior predictive check: the standardised MPD of the
+ponds left out falls below the prediction in most folds, so the misfit is not confined to a part
+of either city. Distance decay misses in two folds, once above and once below the prediction;
+it rests on few pairs of ponds within half a city, so these misses may be noise, but they may
+also mean that a single exponential kernel for both cities is too simple a description of
+space.
+
+## What this example shows
+
+The workflow ran from a simulator to checks of the fit, and each step said something the
+previous one could not. Recovery showed, before we looked at the data, that `lambda` cannot be
+learned from them. Model choice preferred competition among close relatives with a probability
+near one, and the posterior predictive checks and cross-validation then showed that this model
+does not reproduce the phylogenetic structure of the ponds, and suggested where to look next: a
+filter conserved in the phylogeny, or limits to colonisation from the region. An earlier
+version of this analysis, with the pool of each city restricted to the species recorded there,
+made the observed total richness the largest value a simulation could reach, and that bound
+alone pushed the estimate of competition towards zero; the choice of the regional pool matters
+as much as the choice of the model. The analysis is meant to illustrate the functions, not to
+test hypotheses about these frogs, which would also need a model of detection if abundances were
+used (see `observe_detection()`).
+
+## References
+
+Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., & Robert, C. P. (2016).
+Reliable ABC model choice via random forests. *Bioinformatics*, 32, 859–866.
+https://doi.org/10.1093/bioinformatics/btv684
+
+Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC random
+forests for Bayesian parameter inference. *Bioinformatics*, 35, 1720–1728.
+https://doi.org/10.1093/bioinformatics/bty867
+
+Roberts, D. R., Bahn, V., Ciuti, S., Boyce, M. S., Elith, J., Guillera-Arroita, G., Hauenstein,
+S., Lahoz-Monfort, J. J., Schröder, B., Thuiller, W., Warton, D. I., Wintle, B. A., Hartig, F.,
+& Dormann, C. F. (2017). Cross-validation strategies for data with temporal, spatial,
+hierarchical, or phylogenetic structure. *Ecography*, 40, 913–929.
+https://doi.org/10.1111/ecog.02881
