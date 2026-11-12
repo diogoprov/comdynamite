@@ -71,6 +71,7 @@ summary(cv)
 \seealso{
 Other inference:
 \code{\link[=abc_choose]{abc_choose()}},
+\code{\link[=abc_diagnose]{abc_diagnose()}},
 \code{\link[=abc_fit]{abc_fit()}},
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},

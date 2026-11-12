@@ -191,12 +191,16 @@ summary.mc_abc_cv <- function(object, ...) {
   out
 }
 
+# weights that the forest of parameter `p` gives to the rows of the reference table, one column
+# per observation, each summing to one
+parameter_weights <- function(fit, p, observed) {
+  training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
+  w <- as.matrix(stats::predict(fit$forests[[p]], observed, training, rf.weights = TRUE)$weights)
+  sweep(w, 2, colSums(w), "/")
+}
+
 # mean over parameters of the weights that the forests give to the rows of the reference table
 forest_weights <- function(fit, observed) {
-  Reduce(`+`, lapply(fit$parameters, function(p) {
-    training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
-    w <- as.matrix(stats::predict(fit$forests[[p]], observed, training,
-                                  rf.weights = TRUE)$weights)
-    sweep(w, 2, colSums(w), "/")
-  })) / length(fit$parameters)
+  Reduce(`+`, lapply(fit$parameters, function(p) parameter_weights(fit, p, observed))) /
+    length(fit$parameters)
 }

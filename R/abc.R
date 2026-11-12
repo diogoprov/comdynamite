@@ -441,3 +441,75 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
   attr(out, "draws") <- cbind(parameters, predicted)
   out
 }
+
+#' How many simulations does an ABC posterior rest on?
+#'
+#' The posterior of [abc_fit()] for an observation is a weighted sample of the reference table,
+#' with weights from each random forest. For each observation and parameter this gives the
+#' effective sample size of the weights (Kish) and the Pareto k-hat of their upper tail
+#' (Vehtari et al. 2024), computed by [posterior::pareto_khat()] on the positive weights, and
+#' for each observation the statistics that fall outside the central `coverage` of the
+#' reference table.
+#'
+#' The weights of random forests are not importance ratios, so the thresholds of k-hat, derived
+#' for importance sampling, do not carry over. In our checks (`data-raw/abc_diagnose.R`), k-hat
+#' and the effective sample size did not predict which estimates were wrong within the model,
+#' while data from another model had about half the effective sample size and more statistics
+#' outside the table. Read them as warnings that the observation is unlike the simulations, not
+#' as measures of the precision of an estimate. An observation outside the range of the
+#' simulated statistics is the clearer warning, since the forests then extrapolate from the
+#' edge of the table without saying so.
+#'
+#' @param fit An `mc_abc_fit`.
+#' @param newdata Named numeric vector of observed statistics or a data frame with one
+#'   observation per row.
+#' @param coverage Central probability of the reference table within which a statistic counts
+#'   as inside.
+#' @return A data frame with `observation`, `parameter`, `n_positive` (simulations with positive
+#'   weight), `ess`, `khat`, `khat_threshold`, `n_outside` (statistics of the observation outside
+#'   the central `coverage` of the table) and `outside` (their names).
+#' @references
+#' Vehtari, A., Simpson, D., Gelman, A., Yao, Y., & Gabry, J. (2024). Pareto smoothed importance
+#' sampling. *Journal of Machine Learning Research*, 25(72), 1–58.
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE) && requireNamespace("posterior", quietly = TRUE)
+#' set.seed(1)
+#' table <- data.frame(a = runif(500))
+#' table$s1 <- table$a + rnorm(500, 0, 0.05)
+#' fit <- abc_fit(table, "a", "s1", ntree = 100)
+#' abc_diagnose(fit, data.frame(s1 = c(0.5, 3)))
+#' @export
+abc_diagnose <- function(fit, newdata, coverage = 0.99) {
+  stopifnot(inherits(fit, "mc_abc_fit"), length(coverage) == 1, coverage > 0, coverage < 1)
+  if (!requireNamespace("posterior", quietly = TRUE)) {
+    stop("abc_diagnose() needs the package posterior.", call. = FALSE) # nocov
+  }
+  observed <- observed_statistics(newdata, fit$statistics)
+  limits <- vapply(fit$statistics, function(s) {
+    stats::quantile(fit$training[[s]], c((1 - coverage) / 2, (1 + coverage) / 2))
+  }, numeric(2))
+  outside <- lapply(seq_len(nrow(observed)), function(o) {
+    v <- unlist(observed[o, ])
+    fit$statistics[v < limits[1, ] | v > limits[2, ]]
+  })
+  out <- lapply(fit$parameters, function(p) {
+    w <- parameter_weights(fit, p, observed)
+    do.call(rbind, lapply(seq_len(ncol(w)), function(o) {
+      positive <- w[w[, o] > 0, o]
+      diags <- if (length(positive) >= 10) {
+        posterior::pareto_diags(log(positive), tail = "right", are_log_weights = TRUE,
+                                r_eff = 1)
+      } else {
+        list(khat = NA_real_, khat_threshold = NA_real_)
+      }
+      data.frame(observation = o, parameter = p, n_positive = length(positive),
+                 ess = 1 / sum(positive^2), khat = diags$khat,
+                 khat_threshold = diags$khat_threshold, n_outside = length(outside[[o]]),
+                 outside = paste(outside[[o]], collapse = ", "))
+    }))
+  })
+  out <- do.call(rbind, out)
+  out <- out[order(out$observation), , drop = FALSE]
+  rownames(out) <- NULL
+  out
+}
