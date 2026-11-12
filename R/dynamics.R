@@ -293,6 +293,7 @@ mc_setup <- function(st) {
     n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
     if (!is.null(pool)) n[!pool] <- 0L
     last_seed <- max(c(0, seed_steps))
+    competition_hook <- NULL
     ev <- if (!is.null(evolution)) evolution_state(evolution, m, k_all, species)
     if (!is.null(ev)) {
       # genetic mean and phenotype (after dispersal) of every population; NA where absent
@@ -376,7 +377,10 @@ mc_step <- function(st, step) {
                                   ev$g[alive] + ev$ve[alive])
       }
       start <- n
-      lam <- r_now * n / (1 + n %*% at)
+      # crowding; simulate_evolving_metacommunity() may replace it with competition that
+      # depends on the phenotypes in each site
+      crowding <- if (is.null(competition_hook)) n %*% at else competition_hook(n, pa)
+      lam <- r_now * n / (1 + crowding)
       n <- matrix(stats::rpois(m * k, lam), m, k)
       if (!is.null(ev)) {
         # selection toward the local environment and drift, in populations present after

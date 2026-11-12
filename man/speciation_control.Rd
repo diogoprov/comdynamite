@@ -8,23 +8,35 @@ speciation_control(
   mode = c("geographic", "ecological"),
   threshold,
   divergence = c("cluster", "gradual"),
-  flow_min = 1,
-  homogenization = 1
+  migration_min = 0.001,
+  reset_generations = 10,
+  homogenization = 1,
+  min_generations = 20,
+  migration_max = 0.001
 )
 }
 \arguments{
 \item{mode}{\code{"geographic"} or \code{"ecological"}.}
 
-\item{threshold}{Divergence (in generations, for \code{"geographic"}) or difference of genetic
-means (in units of the environment, for \code{"ecological"}) that separates groups; \code{Inf} turns
-speciation off.}
+\item{threshold}{Divergence in generations (\code{"geographic"}) or difference of genetic means in
+units of the environment (\code{"ecological"}) that separates groups; \code{Inf} turns speciation
+off.}
 
 \item{divergence}{For \code{"geographic"}: \code{"cluster"} or \code{"gradual"}.}
 
-\item{flow_min}{For \code{divergence = "cluster"}: expected migrants per generation that link two
-populations.}
+\item{migration_min}{For \code{divergence = "cluster"}: migration rate per generation that links
+two populations.}
+
+\item{reset_generations}{For \code{divergence = "cluster"}: generations in a row in the same
+cluster after which divergence returns to 0.}
 
 \item{homogenization}{For \code{divergence = "gradual"}: reduction of divergence per migrant.}
+
+\item{min_generations}{For \code{"ecological"}: generations in a row of difference and reduced
+gene flow before groups split.}
+
+\item{migration_max}{For \code{"ecological"}: migration rate per generation below which gene flow
+counts as reduced.}
 }
 \value{
 An \code{mc_speciation} object.
@@ -32,33 +44,44 @@ An \code{mc_speciation} object.
 \description{
 Settings for speciation in \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}. Speciation is checked once
 per generation (\code{steps_per_generation} of \code{\link[=evolution_control]{evolution_control()}}) among the populations of
-each species, and a species whose populations fall into two or more groups splits: it ends,
-and each group becomes a daughter species with its populations, abundances and genetic
-means.
+each species. When they fall into two or more groups, the species buds: the largest group
+(most sites, then most individuals) keeps the identity and age of the species, and each other
+group becomes a new species with its populations, abundances and genetic means. Several new
+species at once branch off one after another, the most divergent first, at the same time
+(internal branches of length zero), so that the tree stays binary.
 }
 \details{
+Gene flow between two populations \eqn{a}{a} and \eqn{b}{b} is measured by the migration
+rate, the larger of the expected migrants from one to the other in the generation over the
+size of the receiving population, so that it does not depend on abundance.
 \itemize{
 \item \code{"geographic"}: each pair of populations of a species has a divergence \eqn{d}{d}, in
 generations. With \code{divergence = "cluster"} (the default, close to gen3sis; Hagen et al.
-2021), populations linked by an expected flow of at least \code{flow_min} migrants per
-generation (in either direction) form clusters; \eqn{d}{d} grows by 1 per generation
-between populations of different clusters and returns to 0 within a cluster. With
-\code{divergence = "gradual"}, \eqn{d}{d} grows by 1 per generation and gene flow lowers it in
-proportion to the migrants exchanged: \eqn{d \leftarrow \max(0, d + 1 - h M)}{d <- max(0, d
-  + 1 - h M)}, with \eqn{M}{M} the expected migrants between the two populations in the
-generation and \eqn{h}{h} = \code{homogenization}. Populations are grouped by single linkage:
-two populations are in the same group when a chain of pairs with \eqn{d <}{d <}
-\code{threshold} links them. A new population takes the divergences of the population that
-sent it most migrants.
-\item \code{"ecological"}: populations are grouped by single linkage on their genetic means
-(\code{evolution}, with genetic variance): two are in the same group when a chain of pairs whose
-means differ by less than \code{threshold} links them, whatever the gene flow between them.
+2021), populations linked by a migration rate of at least \code{migration_min} form clusters
+(chains of links). \eqn{d}{d} grows by 1 per generation between populations of different
+clusters; within a cluster it stays as it is, and returns to 0 only after
+\code{reset_generations} generations in a row in the same cluster, so that a single generation
+of contact does not erase a long isolation. With \code{divergence = "gradual"}, \eqn{d}{d} grows
+by 1 per generation and gene flow lowers it in proportion to the migrants exchanged: \eqn{d
+  \leftarrow \max(0, d + 1 - h M)}{d <- max(0, d + 1 - h M)}, with \eqn{M}{M} the expected
+migrants between the two populations in the generation and \eqn{h}{h} = \code{homogenization}.
+Populations are grouped by single linkage: two are in the same group when a chain of pairs
+with \eqn{d <}{d <} \code{threshold} links them.
+\item \code{"ecological"}: each pair of populations counts the generations in a row in which their
+genetic means (\code{evolution}, with genetic variance) differ by at least \code{threshold} and their
+migration rate is below \code{migration_max}. Populations are grouped by single linkage on pairs
+whose count is below \code{min_generations}. Requiring the difference to last, with reduced gene
+flow, keeps drift and founder sampling in small populations from splitting species in a
+uniform environment.
 }
+
+A new population takes the divergences (or counts) of the population that sent it most
+migrants, and a population lost at any step of a generation founds anew.
 }
 \examples{
 speciation_control("geographic", threshold = 50)
 speciation_control("geographic", threshold = 50, divergence = "gradual", homogenization = 0.5)
-speciation_control("ecological", threshold = 20)
+speciation_control("ecological", threshold = 20, min_generations = 30)
 }
 \references{
 Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,

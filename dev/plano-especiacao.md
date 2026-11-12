@@ -115,6 +115,23 @@ extensões.
 - Estado da 2a (2026-11-12): implementada e testada; validação 3 sem apoio (ρ ≈ 0 entre
   conectividade e endemismo; `data-raw/evolving_peripheral.R`).
 
+#### Revisão da 2a antes da 2b (Diogo, 2026-11-12)
+
+1. Modo ecológico: persistência mais fluxo reduzido. Um par de populações conta as gerações
+   seguidas com |Δz̄| ≥ limiar e taxa de migração < `migration_max` (padrão 0,001); os grupos
+   se separam quando a contagem chega a `min_generations` (padrão 20). Sem isso, deriva e
+   amostragem de fundadores em populações pequenas especiavam num ambiente uniforme.
+2. Regra de clusters: ligação pela taxa de migração (migrantes esperados na geração sobre o
+   tamanho da população receptora, o maior dos dois sentidos) ≥ `migration_min` (padrão
+   0,001). Dentro de um cluster a divergência fica congelada e só zera depois de
+   `reset_generations` (padrão 10) gerações seguidas no mesmo cluster.
+3. Brotamento: o maior grupo (mais sítios, depois mais indivíduos) mantém a identidade e a
+   idade da mãe; os outros viram espécies novas. Vários de uma vez saem em bifurcações
+   sucessivas, a mais divergente primeiro, com ramos internos de comprimento zero.
+4. Competição pelo nicho: α_ij(s) também cai com a sobreposição dos nichos gaussianos dos
+   fenótipos no sítio, exp(−(p_is − p_js)²/(2(σ_i² + σ_j²))) (`niche_overlap = TRUE`).
+5. `inter_min = 0,25` mantido; sem fusão em contato secundário.
+
 
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
 especiação geográfica (limitação de dispersão e estocasticidade), especiação ecológica

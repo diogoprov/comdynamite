@@ -17,6 +17,7 @@ simulate_evolving_metacommunity(
   inter_min = 0.25,
   scale = 0.05,
   distance_scale = 100,
+  niche_overlap = TRUE,
   initial = NULL,
   seed_mean = 0.5,
   record_steps = NULL,
@@ -50,6 +51,9 @@ distant species (\code{inter_min}); the overall scale (competition within a spec
 distance in generations over which the excess over \code{inter_min} decays by a factor of
 \eqn{e}{e}.}
 
+\item{niche_overlap}{Should competition between species also fall with the difference of
+their phenotypes in each site?}
+
 \item{initial}{Optional matrix (sites x species) of abundances at the start; by default
 Poisson(\code{seed_mean}) individuals of each species in every site.}
 
@@ -69,36 +73,42 @@ stops with an error beyond it.}
 An \code{mc_evolving} object: a list with \code{abundance} (sites x extant species), \code{tree}
 (the reconstructed tree of the extant species, branch lengths in generations, or \code{NULL}
 with fewer than two), \code{tree_full} (with extinct species), \code{species} (a table with the
-parent, birth, end and fate of every species), \code{events} (one row per split), \code{richness}
-(extant species at each generation), \code{genetic} (genetic means of the populations of the
-extant species), \code{traits} (of the extant species, with the mean genetic optimum over their
-populations as \code{optimum}), \code{alpha} (among the extant species at the end) and the
-\code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps} used.
-\code{\link[=as_metacommunity]{as_metacommunity()}} turns it into an \code{mc_sim} for the other functions of the package.
+parent, birth, end and fate of every species), \code{events} (one row per budding, with the new
+species), \code{richness} (extant species at each generation), \code{genetic} (genetic means of the
+populations of the extant species), \code{traits} (of the extant species, with the mean genetic
+optimum over their populations as \code{optimum}), \code{alpha} (among the extant species at the end,
+without the niche overlap, which varies among sites), the records and colonisation history
+of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant species, and the \code{landscape}, \code{dispersal},
+\code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps} used. \code{\link[=as_metacommunity]{as_metacommunity()}} turns it
+into an \code{mc_sim} for the other functions of the package.
 }
 \description{
 Runs the model of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, with the evolution of the niche optimum within
-populations of \code{\link[=evolution_control]{evolution_control()}}, on species that split as their populations diverge
+populations of \code{\link[=evolution_control]{evolution_control()}}, on species that bud as their populations diverge
 (\code{\link[=speciation_control]{speciation_control()}}) and die out when their last population is lost. The tree is not
 given: it grows out of the dynamics. The community starts from the species of \code{traits}
 (usually one ancestor) and is closed: there is no immigration from outside the landscape.
 }
 \details{
-Competition follows the tree as it grows: \eqn{\alpha_{ii}}{alpha_ii} = \code{scale} and
-\eqn{\alpha_{ij} = s \, (q_0 + (q_1 - q_0) e^{-d_{ij} / \delta})}{alpha_ij = s (q0 + (q1 -
-q0) exp(-d_ij / delta))} between species, with \eqn{s}{s} = \code{scale}, \eqn{q_1}{q1} =
-\code{inter_max}, \eqn{q_0}{q0} = \code{inter_min}, \eqn{d_{ij}}{d_ij} the patristic distance in
-generations and \eqn{\delta}{delta} = \code{distance_scale}: with \code{inter_max = 1}, sisters just
-split compete as members of one species, and distant species keep \code{inter_min}. With
-\code{inter_min = 0}, distant species do not compete at all, and richness is limited only by
-speciation and extinction. With \code{competition = "none"}, species do not compete with each
-other.
+Competition follows the tree as it grows and, with \code{niche_overlap = TRUE}, the phenotypes in
+each site: \eqn{\alpha_{ii}}{alpha_ii} = \code{scale} and, between species in site \eqn{s}{s},
+\deqn{\alpha_{ij}(s) = c \, (q_0 + (q_1 - q_0) e^{-d_{ij} / \delta}) \,
+\exp\left(-\frac{(p_{is} - p_{js})^2}{2(\sigma_i^2 + \sigma_j^2)}\right),}{alpha_ij(s) = c
+(q0 + (q1 - q0) exp(-d_ij / delta)) exp(-(p_is - p_js)^2 / (2 (sigma_i^2 + sigma_j^2))),}
+with \eqn{c}{c} = \code{scale}, \eqn{q_1}{q1} = \code{inter_max}, \eqn{q_0}{q0} = \code{inter_min},
+\eqn{d_{ij}}{d_ij} the patristic distance in generations, \eqn{\delta}{delta} =
+\code{distance_scale}, \eqn{p}{p} the phenotypes (genetic mean and plastic part) and
+\eqn{\sigma}{sigma} the niche breadths. The last factor is the overlap of two Gaussian
+niches, 1 for equal phenotypes, so that species that have diverged in niche compete less.
+With \code{inter_max = 1}, sisters just split with the same phenotype compete as members of one
+species. With \code{inter_min = 0} and no niche divergence, distant species do not compete at all,
+and richness is limited only by speciation and extinction. With \code{competition = "none"},
+species do not compete with each other.
 
-Daughter species inherit the traits of their mother (\code{sigma}, \code{r_max}, \code{dispersal},
+New species inherit the traits of their mother (\code{sigma}, \code{r_max}, \code{dispersal},
 \code{extirpation}, the settings of evolution) and, in each of their sites, its abundance and
-genetic mean; the optimum of a species, used only for the founders of its first populations,
-is that of its mother. Several species at the start need a tree in \code{traits} (from
-\code{\link[=species_traits]{species_traits()}}) with branch lengths in generations, so that their distances are known.
+genetic mean. Several species at the start need a tree in \code{traits} (from \code{\link[=species_traits]{species_traits()}})
+with branch lengths in generations, so that their distances are known.
 
 Without a split, the simulation is the same as \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} with the same
 \code{evolution} and the same seed (with one species, or several with \code{competition = "none"}).
