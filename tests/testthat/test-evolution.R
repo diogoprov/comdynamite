@@ -123,3 +123,30 @@ test_that("founders from divergent sources carry the variance among them", {
   expect_equal(mean_in[3], 5)
   expect_equal(between[3], 25)
 })
+
+test_that("evolution follows env_time and checks its settings", {
+  set.seed(9)
+  ls <- landscape_implicit(5)
+  tr <- ape::rcoal(3)
+  traits <- species_traits(tr)
+  a <- competition_matrix(tr, "phylo")
+  env_time <- matrix(rep(seq(0, 50, length.out = 40), each = 5), 5, 40)
+  sim <- simulate_metacommunity(ls, traits, a, n_steps = 40, env_time = env_time,
+                                evolution = evolution_control(1, plasticity = 1))
+  present <- sim$abundance > 0
+  expect_equal(sim$evolution$plastic[present],
+               (50 - mean(env_time[, 1])) * rep(1, sum(present)))
+  ev <- function(...) evolution_control(1, ...)
+  r <- matrix(5, 2, 1)
+  expect_error(mc_dynamics(r, matrix(0.05), 0, n_steps = 2, evolution = list(1)),
+               "evolution_control")
+  expect_error(mc_dynamics(r, matrix(0.05), 0, n_steps = 2,
+                           evolution = ev(env = 1:3, traits = evo_traits())), "one value per site")
+  expect_error(mc_dynamics(r, matrix(0.05), 0, n_steps = 2,
+                           evolution = ev(env = 1:2, traits = rbind(evo_traits(), evo_traits()))),
+               "one row per species")
+  expect_error(mc_dynamics(r, matrix(0.05), 0, n_steps = 2,
+                           evolution = evolution_control(c(1, 2), env = 1:2,
+                                                         traits = evo_traits())),
+               "one value or one per species")
+})
