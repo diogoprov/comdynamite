@@ -17,6 +17,7 @@ reference:
   - simulate_logistic
   - logistic_gradients
   - mc_dynamics
+  - evolution_control
   - colonisation_history
   - growth_rates
 - title: Landscapes
