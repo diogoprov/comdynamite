@@ -544,8 +544,20 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       errada de fato, como dados com filtragem ambiental forte ajustados sem ela.
 - [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
       simulação como pseudo-observação; `gfit()` para adequação global.
-- [ ] K-fold por sítios ou blocos espaciais: ajustar com parte dos sítios e prever as
-      estatísticas dos demais. Blocos evitam que a autocorrelação espacial infle o acerto.
+- [x] K-fold por sítios ou blocos espaciais (`spatial_folds()`, `fold_summarise()`, `abc_cv()`,
+      2026-11-11): ajustar com parte dos sítios e prever as estatísticas dos demais. Blocos
+      deveriam evitar que a autocorrelação espacial infle o acerto. Em `data-raw/abc_cv.R`
+      (desenho da recuperação, 10 mil simulações, 5 folds de 5 sítios, 100 conjuntos por
+      caso; 11 min de simulação e 7 de florestas): com o modelo certo, cobertura do intervalo
+      preditivo de 90% de 0,96 com blocos e com folds aleatórios, conservadora como na
+      recuperação, e 1,7% de p < 0,05. Com o modelo errado (espécies seguindo um ambiente
+      escondido e autocorrelacionado), a rejeição média foi quase igual (10,4% com blocos,
+      10,2% aleatórios). Blocos detectaram mais em `evenness_regional` (17% contra 8%),
+      `decay` (45% contra 40%) e `sad_sd` (11% contra 7%), e menos em `trait_env` (70%
+      contra 87%), que detecta o erro já pelo ambiente medido. Conclusão: neste desenho
+      a vantagem esperada dos blocos não apareceu; uma explicação possível, não testada, é
+      que a grade de 25 sítios é um toro e os blocos de 5 sítios ficam vizinhos de todos os
+      lados. Falta repetir com paisagem maior e sem toro antes de recomendar blocos.
 - [ ] Diagnóstico de Pareto k dos pesos de importância, com `loo::psis()`, para saber
       quando a posterior ponderada depende de poucas simulações.
 - [ ] PSIS-LOO padrão (Vehtari et al. 2017) precisa de log-verossimilhança por observação,
@@ -1059,6 +1071,7 @@ Conferidas no Crossref em 2026-11-05.
 - Prangle, D., et al. (2014). *Statistical Applications in Genetics and Molecular Biology*, 13, 67–82. https://doi.org/10.1515/sagmb-2013-0012
 - Pudlo, P., et al. (2015). *Bioinformatics*, 32, 859–866. https://doi.org/10.1093/bioinformatics/btv684
 - Raynal, L., et al. (2019). *Bioinformatics*, 35, 1720–1728. https://doi.org/10.1093/bioinformatics/bty867 (verificada no Crossref em 2026-11-11)
+- Roberts, D. R., et al. (2017). *Ecography*, 40, 913–929. https://doi.org/10.1111/ecog.02881 (verificada no Crossref em 2026-11-11)
 - Rabosky, D. L., & Goldberg, E. E. (2015). *Systematic Biology*, 64, 340–355. https://doi.org/10.1093/sysbio/syu131
 - Rabosky, D. L., & Goldberg, E. E. (2017). *Evolution*, 71, 1432–1442. https://doi.org/10.1111/evo.13227
 - McArdle, B. H., & Anderson, M. J. (2001). *Ecology*, 82, 290–297. https://doi.org/10.1890/0012-9658(2001)082[0290:FMMTCD]2.0.CO;2

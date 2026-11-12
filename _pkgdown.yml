@@ -103,6 +103,9 @@ reference:
   - abc_recovery
   - abc_choose
   - abc_ppc
+  - spatial_folds
+  - fold_summarise
+  - abc_cv
 - title: Trait variation among individuals
   desc: Individuals sampled from simulations, T-statistics, trait-gradient analysis, community
     trait indices and decompositions of trait variation.
