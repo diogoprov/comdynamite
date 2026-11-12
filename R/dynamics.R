@@ -291,16 +291,20 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
     z_history <- if (length(record_steps))
       array(NA_real_, c(m, k_all, length(record_steps)),
             dimnames = list(sites, species, paste0("step", record_steps))) else NULL
-    # mean of k founders drawn from sources with mean `from`, for the populations in `cells`
-    found <- function(from, k, cells, cols) {
+    # mean of k founders drawn from sources with mean `from` and, when they come from several
+    # sources, variance `between` among their means, for the populations in `cells`
+    found <- function(from, k, cells, cols, between = 0) {
       g <- matrix(ev$g[cols], m, length(cols), byrow = TRUE)[cells]
+      v <- g + (between + 0 * from)[cells]
       out <- from[cells]
       if (ev$founder && any(g > 0)) {
         draw <- g > 0
-        out[draw] <- out[draw] + stats::rnorm(sum(draw), 0, sqrt(g[draw] / k[cells][draw]))
+        out[draw] <- out[draw] + stats::rnorm(sum(draw), 0, sqrt(v[draw] / k[cells][draw]))
       }
       out
     }
+    # species without genetic variance keep the optimum of the pool exactly
+    fixed_z <- ev$g == 0
     pool_mean <- matrix(ev$optimum, m, k_all, byrow = TRUE)
     start_pop <- n > 0
     if (any(start_pop)) z[start_pop] <- found(pool_mean, n, start_pop, seq_len(k_all))
@@ -349,8 +353,10 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
         e_now <- ev$env(step)
         za <- z[, alive, drop = FALSE]
         za[is.na(za)] <- pool_mean[, alive, drop = FALSE][is.na(za)]
+        if (any(fixed_z[alive])) za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
-        r_now <- evolution_growth(pa, e_now, ev$sigma[alive], ev$r_max[alive])
+        r_now <- evolution_growth(pa, e_now, ev$sigma[alive], ev$r_max[alive],
+                                  ev$g[alive] + ev$ve[alive])
       }
       start <- n
       lam <- r_now * n / (1 + n %*% at)
@@ -391,6 +397,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
           imm_m <- imm + matrix(0L, m, k)
           res <- n - em
           zi <- immigrant_mean(em, za, disp_matrix, za)
+          between <- pmax(immigrant_mean(em, za^2, disp_matrix, za^2) - zi^2, 0)
           p_imm <- immigrant_mean(em, pa, disp_matrix, pa)
           pa_now <- pa
           both <- res > 0 & imm_m > 0
@@ -399,7 +406,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
             (res[both] + imm_m[both])
           founded <- res == 0 & imm_m > 0
           if (any(founded)) {
-            za[founded] <- found(zi, imm_m, founded, alive)
+            za[founded] <- found(zi, imm_m, founded, alive, between)
             pa_now[founded] <- p_imm[founded]
           }
           pa <- pa_now
@@ -410,6 +417,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
       if (!is.null(inside)) n[!inside] <- 0L
       if (!is.null(ev)) {
+        if (any(fixed_z[alive])) za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
         za[n == 0] <- NA_real_
         pa[n == 0] <- NA_real_
         z[, alive] <- za

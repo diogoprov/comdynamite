@@ -105,6 +105,7 @@ test_that("evolution is recorded and checked", {
   expect_s3_class(sim$evolution$settings, "mc_evolution")
   expect_output(print(evolution_control(1)), "mc_evolution")
   expect_error(evolution_control(), "genetic_var")
+  expect_error(evolution_control(1, steps_per_generation = 0.5))
   expect_error(simulate_metacommunity(ls, traits, a, n_steps = 5, evolution = list(1)),
                "evolution_control")
   expect_error(simulate_metacommunity(ls, list(traits, traits), a, n_steps = 5,
@@ -112,4 +113,13 @@ test_that("evolution is recorded and checked", {
                                       evolution = evolution_control(1)), "single")
   expect_error(mc_dynamics(matrix(5, 2, 1), matrix(0.05), 0, n_steps = 5,
                            evolution = evolution_control(1)), "env")
+})
+
+test_that("founders from divergent sources carry the variance among them", {
+  em <- matrix(c(1, 1, 0))
+  z <- matrix(c(0, 10, NA))
+  mean_in <- immigrant_mean(em, z, NULL, z)
+  between <- immigrant_mean(em, z^2, NULL, z^2) - mean_in^2
+  expect_equal(mean_in[3], 5)
+  expect_equal(between[3], 25)
 })

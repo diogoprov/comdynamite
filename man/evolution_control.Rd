@@ -29,7 +29,7 @@ phenotype, 1 for a phenotype that tracks the environment fully around \eqn{E_0}{
 value or one per species.}
 
 \item{steps_per_generation}{Time steps per generation \eqn{g}{g}; selection and drift per
-step are divided by it.}
+step are divided by it (at least 1); dispersal and demography are per step.}
 
 \item{founder}{Should populations founded at a step start from the sampled mean of their
 founders (\code{TRUE}) or from the mean of their source (\code{FALSE})?}
@@ -56,9 +56,14 @@ does not evolve. They mix with residents in proportion to their numbers; a popul
 founded by seeds alone starts as below.
 \item \strong{Phenotype and growth.} The phenotype is \eqn{p = \bar z + b (E - E_0)}{p = zbar + b
    (E - E0)}, a linear reaction norm with slope \code{plasticity} (b) around the reference
-environment \eqn{E_0}{E0}, the mean environment of the sites at the first step. Growth
-rates follow \code{\link[=growth_rates]{growth_rates()}} with \eqn{p} in place of the optimum: \eqn{r = r_{max}
-   \exp(-(E - p)^2 / (2\sigma^2))}{r = r_max exp(-(E - p)^2 / (2 sigma^2))}.
+environment \eqn{E_0}{E0}, the mean environment of the sites at the first step. The
+plastic part is immediate and reversible: every individual, migrants included, grows
+with the phenotype of the site where it is. Growth is the mean fitness of a population
+whose phenotypes are normal around \eqn{p}{p} with variance \eqn{P = G + V_E}{P = G +
+   VE}, under the Gaussian response of \code{\link[=growth_rates]{growth_rates()}}: \eqn{r = r_{max} \sqrt{\sigma^2 /
+   (\sigma^2 + P)} \exp(-(E - p)^2 / (2(\sigma^2 + P)))}{r = r_max sqrt(sigma^2 / (sigma^2
+   + P)) exp(-(E - p)^2 / (2 (sigma^2 + P)))}. The variance widens the response and lowers its
+peak (the load); with \eqn{P = 0}{P = 0} it is the response of \code{\link[=growth_rates]{growth_rates()}}.
 \item \strong{Selection and drift}, in each population present after reproduction (\eqn{N > 0}):
 \deqn{\Delta \bar z = \frac{1}{g} \frac{G}{\sigma^2 + P} (E - p) + \epsilon, \quad
    \epsilon \sim N\left(0, \frac{G}{g N_e}\right), \quad N_e = \nu N,}{Delta zbar = (1/g)
@@ -67,24 +72,30 @@ the response to Gaussian stabilising selection of Lande (1976), with additive ge
 variance \eqn{G}{G} (\code{genetic_var}), phenotypic variance \eqn{P = G + V_E}{P = G + VE}
 (\code{env_var}), the niche breadth \eqn{\sigma}{sigma} of the species as the width of the
 fitness function, \eqn{g}{g} steps per generation (\code{steps_per_generation}) and the ratio
-\eqn{\nu}{nu} of effective to census size (\code{ne_ratio}). Growth uses the mean phenotype and
-ignores the load of the variance around it, so that with \eqn{G = 0}{G = 0} the model is
-the one without evolution.
+\eqn{\nu}{nu} of effective to census size (\code{ne_ratio}), the same fitness function as in
+growth. \eqn{G}{G} is constant: it does not erode with drift nor grow when divergent
+populations mix.
 \item \strong{Gene flow.} After dispersal, the genetic mean of a population is the mean of residents
 and immigrants weighted by their numbers. Immigrants carry the mean of the populations
 they come from, weighted by the emigrants each sends through the dispersal kernel (or, on
-spatially implicit landscapes, by the emigrants of all other sites). A population founded
-at this step (absent at the end of the last one) starts from its founders: with \code{founder = TRUE}, the mean of the \eqn{k}{k} founders is drawn from \eqn{N(\bar z_{source},
-   G/k)}{N(zbar_source, G / k)}, the sampling of a few individuals from the source.
-Migrants keep the phenotype of their site of origin until they reproduce, so the
-phenotype recorded after dispersal mixes plastic responses to different sites; their
-offspring develop in the new site.
+spatially implicit landscapes, by the emigrants of all other sites). A population with no
+residents after reproduction and emigration (absent, or lost all its members) is founded
+by its \eqn{k}{k} immigrants: with \code{founder = TRUE}, their mean is drawn from
+\eqn{N(\bar z_{in}, (G + V_B)/k)}{N(zbar_in, (G + VB) / k)}, the sampling of a few
+individuals, where \eqn{V_B}{VB} is the variance among the means of their sources,
+weighted as above. Populations present at the start and those founded by seeds alone are
+drawn in the same way around the optimum of the species. Immigrants into a population
+with residents carry the expected mean of their sources, without sampling noise. The
+phenotype recorded after dispersal (\code{phenotype} in the output) mixes residents and
+immigrants still carrying the plastic response to their site of origin, as when
+individuals are sampled right after dispersal; it does not enter the dynamics.
 \item Populations lost to extirpation, competition or the \code{pool} lose their mean.
 }
 
-Selection and drift draw no random numbers when \eqn{G = 0}{G = 0} or \code{ne_ratio = Inf}, so
-with \code{genetic_var = 0} and \code{plasticity = 0} the abundances are the same as without
-evolution for the same seed.
+Species with \eqn{G = 0}{G = 0} keep the optimum of the species exactly and draw no random
+numbers, so with \code{genetic_var = 0}, \code{env_var = 0} and \code{plasticity = 0} the abundances are the
+same as without evolution for the same seed. With \code{\link[=mc_dynamics]{mc_dynamics()}}, growth rates come from
+\code{env} and \code{traits} of \code{evolution}, and \code{r} only sets the numbers of sites and species.
 
 Two cases have known answers, checked in the tests of the package. A population alone,
 without selection (very wide niche) and of constant size \eqn{N}{N}, accumulates a variance
