@@ -9,7 +9,7 @@ their own growth rates (e.g. responses to several environmental variables)."><me
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ their own growth rates (e.g. responses to several environmental variables)."><me
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Metacommunity dynamics from growth rates</h1>
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.8.0/R/dynamics.R" class="external-link"><code>R/dynamics.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/R/dynamics.R" class="external-link"><code>R/dynamics.R</code></a></small>
       <div class="d-none name"><code>mc_dynamics.Rd</code></div>
     </div>
 
@@ -79,7 +79,8 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  extirpation <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  pool <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span></span>
+<span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
+<span>  evolution <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -147,6 +148,13 @@ only where <code>pool</code> allows.</p></dd>
 <code>"poisson"</code> (the default, as in the code of Thompson et al. 2020) or <code>"multinomial"</code>,
 which conserves them. Spatially implicit landscapes are always multinomial.</p></dd>
 
+
+<dt id="arg-evolution">evolution<a class="anchor" aria-label="anchor" href="#arg-evolution"></a></dt>
+<dd><p>Optional settings from <code><a href="evolution_control.html">evolution_control()</a></code> for the evolution of the niche
+optimum within each population: selection by the local environment, drift, gene flow,
+founder sampling and plasticity. <code>NULL</code> (the default) keeps the optimum of each species in
+all its populations, as before. Needs a single environmental axis.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -158,6 +166,7 @@ which conserves them. Spatially implicit landscapes are always multinomial.</p><
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other simulate metacommunities:
 <code><a href="colonisation_history.html">colonisation_history()</a></code>,
+<code><a href="evolution_control.html">evolution_control()</a></code>,
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
 <code><a href="simulate_logistic.html">simulate_logistic()</a></code>,

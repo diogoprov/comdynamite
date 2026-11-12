@@ -26,6 +26,8 @@ The process-based model, from landscape and traits to abundances.
   : Gradients of the seven scenarios of Peres-Neto et al. (2012)
 - [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
   : Metacommunity dynamics from growth rates
+- [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  : Evolution of local populations
 - [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
   : Colonisation history of a simulated metacommunity
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)

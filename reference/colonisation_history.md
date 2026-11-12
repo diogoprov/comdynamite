@@ -32,6 +32,7 @@ ordered by site and species.
 whose `founder_sd` and `monopolization` use this history.
 
 Other simulate metacommunities:
+[`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),

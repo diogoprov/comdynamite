@@ -27,7 +27,8 @@ simulate_metacommunity(
   pool = NULL,
   initial = NULL,
   immigration = c("poisson", "multinomial"),
-  env = NULL
+  env = NULL,
+  evolution = NULL
 )
 ```
 
@@ -111,6 +112,15 @@ simulate_metacommunity(
   `env_time`. Columns without names take the names of `traits`, or
   `axis1`, `axis2`, ...
 
+- evolution:
+
+  Optional settings from
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  for the evolution of the niche optimum within each population:
+  selection by the local environment, drift, gene flow, founder sampling
+  and plasticity. `NULL` (the default) keeps the optimum of each species
+  in all its populations, as before. Needs a single environmental axis.
+
 ## Value
 
 An `mc_sim` object: a list with `abundance` (sites x species matrix at
@@ -121,7 +131,13 @@ traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
 with a tree, the colonisation history (`arrival`, `propagule`,
 `immigrants`, `migrant_load`; see the section Colonisation history) and
-`n_steps`. With a niche of several axes,
+`n_steps`. With `evolution`, also `evolution`, a list with the genetic
+mean of the optimum in each population (`genetic`), the plastic part of
+its phenotype at the last step (`plastic`), the phenotype after
+dispersal (`phenotype`, which mixes residents and immigrants), the
+genetic means at `record_steps` (`history`), the reference environment
+and the settings; `NA` where a population is absent. With a niche of
+several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while
@@ -243,6 +259,7 @@ community ecology. *Ecology Letters*, 23, 1314–1329.
 
 Other simulate metacommunities:
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
+[`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),

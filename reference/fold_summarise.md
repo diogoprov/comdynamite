@@ -59,9 +59,9 @@ by_fold <- fold_summarise(spatial_folds(grid$coords, k = 2),
                           function(x, shared) summary_stats(x, n_null = 9)[1:3])
 by_fold(sim, list())
 #> f1_train_alpha f1_train_gamma  f1_train_beta  f1_test_alpha  f1_test_gamma 
-#>       5.000000       7.000000       1.400000       3.375000       6.000000 
+#>       4.500000       8.000000       1.777778       4.875000       8.000000 
 #>   f1_test_beta f2_train_alpha f2_train_gamma  f2_train_beta  f2_test_alpha 
-#>       1.777778       3.375000       6.000000       1.777778       5.000000 
+#>       1.641026       4.875000       8.000000       1.641026       4.500000 
 #>  f2_test_gamma   f2_test_beta 
-#>       7.000000       1.400000 
+#>       8.000000       1.777778 
 ```

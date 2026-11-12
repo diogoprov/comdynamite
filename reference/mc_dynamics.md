@@ -22,7 +22,8 @@ mc_dynamics(
   extirpation = 0,
   pool = NULL,
   initial = NULL,
-  immigration = c("poisson", "multinomial")
+  immigration = c("poisson", "multinomial"),
+  evolution = NULL
 )
 ```
 
@@ -92,6 +93,15 @@ mc_dynamics(
   `"multinomial"`, which conserves them. Spatially implicit landscapes
   are always multinomial.
 
+- evolution:
+
+  Optional settings from
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  for the evolution of the niche optimum within each population:
+  selection by the local environment, drift, gene flow, founder sampling
+  and plasticity. `NULL` (the default) keeps the optimum of each species
+  in all its populations, as before. Needs a single environmental axis.
+
 ## Value
 
 List with `abundance`, `history`, the colonisation history (`arrival`,
@@ -103,6 +113,7 @@ and `pool` as a logical matrix, or `NULL` without it.
 
 Other simulate metacommunities:
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
+[`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),

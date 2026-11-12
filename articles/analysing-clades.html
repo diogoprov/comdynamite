@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0.9000</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,7 +83,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Analysing clades and traits in a metacommunity</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/v0.8.0/vignettes/articles/analysing-clades.Rmd" class="external-link"><code>vignettes/articles/analysing-clades.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/diogoprov/comdynamite/blob/main/vignettes/articles/analysing-clades.Rmd" class="external-link"><code>vignettes/articles/analysing-clades.Rmd</code></a></small>
       <div class="d-none name"><code>analysing-clades.Rmd</code></div>
     </div>
 
@@ -123,7 +123,7 @@ in parallel on two cores.</p>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 12 nodes, 11 tested</span></span>
 <span><span class="co">#&gt; permutations: 999 free of sites, 999 of species; smallest possible p: 0.001</span></span>
-<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span></span>
+<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 1 before correction, 0 after</span></span>
 <span><span class="co">#&gt; nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span></span></code></pre></div>
 <p>The p-values answer different questions, so this choice comes first.
 <code>p_max</code> tests the association between predictors and
@@ -319,20 +319,20 @@ this step only makes sense after a significant global test.</p>
 <code class="sourceCode R"><span><span class="va">vectors</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">first</span><span class="op">$</span><span class="va">pev_brown</span>, <span class="va">second</span><span class="op">$</span><span class="va">pev_brown</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_partition.html">trait_partition</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">vectors</span>, <span class="va">x</span>, <span class="va">y</span>, n_perm <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="va">partition</span></span>
-<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.559 of the total variation</span></span>
+<span><span class="co">#&gt; &lt;mc_trait_partition&gt; mean component, 0.476 of the total variation</span></span>
 <span><span class="co">#&gt; permutations: 199 free of sites, 199 of species; smallest possible p: 0.005</span></span>
 <span><span class="co">#&gt;   fraction     r2 r2_adjusted r2_component statistic p_site p_species p_max</span></span>
-<span><span class="co">#&gt; 1      abc 0.4392      0.3991        0.785    0.4392  0.005     0.005 0.005</span></span>
-<span><span class="co">#&gt; 2       ab 0.2613      0.2358        0.467    0.2613  0.005     0.005 0.005</span></span>
-<span><span class="co">#&gt; 3       bc 0.2607      0.2352        0.466    0.2607  0.005     0.005 0.005</span></span>
-<span><span class="co">#&gt; 4        a 0.1784      0.1639        0.319    0.5975  0.005     0.005 0.005</span></span>
-<span><span class="co">#&gt; 5        b 0.0828      0.0719        0.148    0.0828     NA        NA    NA</span></span>
-<span><span class="co">#&gt; 6        c 0.1779      0.1633        0.318    0.5967  0.005     0.005 0.005</span></span>
-<span><span class="co">#&gt; 7        d 0.5608      0.6009        0.215        NA     NA        NA    NA</span></span>
+<span><span class="co">#&gt; 1      abc 0.3754       0.331        0.789    0.3754  0.005     0.005 0.005</span></span>
+<span><span class="co">#&gt; 2       ab 0.2076       0.180        0.436    0.2076  0.005     0.005 0.005</span></span>
+<span><span class="co">#&gt; 3       bc 0.2348       0.208        0.493    0.2348  0.005     0.005 0.005</span></span>
+<span><span class="co">#&gt; 4        a 0.1405       0.122        0.295    0.5828  0.005     0.005 0.005</span></span>
+<span><span class="co">#&gt; 5        b 0.0671       0.058        0.141    0.0671     NA        NA    NA</span></span>
+<span><span class="co">#&gt; 6        c 0.1678       0.150        0.352    0.6251  0.005     0.005 0.005</span></span>
+<span><span class="co">#&gt; 7        d 0.6246       0.669        0.211        NA     NA        NA    NA</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">partition</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        trait1 trait2</span></span>
-<span><span class="co">#&gt; env1     0.52  -0.29</span></span>
-<span><span class="co">#&gt; space1  -0.24   0.55</span></span></code></pre></div>
+<span><span class="co">#&gt; env1     0.50  -0.17</span></span>
+<span><span class="co">#&gt; space1  -0.27   0.51</span></span></code></pre></div>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_trait_partition.html">plot_trait_partition</a></span><span class="op">(</span><span class="va">partition</span>, labels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Gradient x"</span>, <span class="st">"Gradient y"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="analysing-clades_files/figure-html/unnamed-chunk-14-1.png" class="r-plt" alt="Two overlapping bars along the total variation, for environment and space, sharing the fraction b, followed by the unexplained fraction." width="672"></p>
