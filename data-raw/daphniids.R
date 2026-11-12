@@ -1,6 +1,6 @@
 # Daphniids of the EMAP Northeastern Lakes Survey, as in Leibold et al. (2010). The tables
-# are public data of the US Environmental Protection Agency. The tree is the topology of
-# Figure 3a. The biogeographic contrasts follow the text, with rivers approximated by
+# are public data of the US Environmental Protection Agency. The tree is dated with TimeTree
+# (see below). The biogeographic contrasts follow the text, with rivers approximated by
 # longitude because the article does not give the assignment of each lake.
 base <- "https://archive.epa.gov/emap/archive-emap/web/txt/"
 read_emap <- function(file) {
@@ -44,11 +44,29 @@ found <- merge(counts, lakes[, c("LAKE_ID", "YEAR", "VISIT_NO")])
 found <- found[found$TAXACODE %in% names(taxa) & number(found$COUNT) > 0, ]
 comm[cbind(found$LAKE_ID, taxa[found$TAXACODE])] <- 1L
 
-tree <- ape::read.tree(text = paste0(
-  "(((((((Daphnia_retrocurva,Daphnia_parvula),Daphnia_catawba),",
-  "(Daphnia_pulicaria,Daphnia_pulex)),Daphnia_ambigua),",
-  "(Daphnia_longispina,(Daphnia_galeata_mendotae,Daphnia_rosea))),",
-  "(Daphnia_laevis,Daphnia_dubia)),(Simocephalus_serrulatus,Simocephalus_vetulus));"))
+# The tree: divergence times from TimeTree 5 (Kumar et al. 2022; API version 20260820, accessed
+# 2026-11-11), whose Daphniidae tree, pruned to the nine species it dates, is
+#   (((Daphnia_longiremis:101,(Daphnia_galeata:90,(Daphnia_dubia:20,Daphnia_laevis:20):70):11):14,
+#   (Daphnia_ambigua:81,(Daphnia_retrocurva:38,(Daphnia_pulex:1,Daphnia_pulicaria:1):37):43):34)
+#   :54.40747,Simocephalus_vetulus:169.40747);
+# with D. longiremis for D. longispina and D. galeata for D. galeata mendotae. Most of these ages
+# come from mitochondrial genomes (Xu et al. 2021) and D. laevis-D. dubia from Taylor et al.
+# (1998). The topology is that of TimeTree, which places D. laevis and D. dubia as the sister of
+# D. galeata rather than of all other Daphnia as in Figure 3a. The four species without dates
+# follow Figure 3a: D. catawba and D. parvula split the branch of D. retrocurva into equal parts
+# (nodes at 38 * 2/3 and 38 / 3 Ma), D. rosea joins D. galeata mendotae halfway along its branch
+# (45 Ma), and S. serrulatus joins S. vetulus at the crown age of Simocephalus in TimeTree
+# (S. vetulus-S. himalayensis, 32 Ma). These four ages are arbitrary.
+x <- 38 * 2 / 3
+y <- 38 / 3
+tree <- ape::read.tree(text = sprintf(paste0(
+  "(((Daphnia_longispina:101,((Daphnia_galeata_mendotae:45,Daphnia_rosea:45):45,",
+  "(Daphnia_laevis:20,Daphnia_dubia:20):70):11):14,",
+  "(Daphnia_ambigua:81,((Daphnia_catawba:%.6f,(Daphnia_retrocurva:%.6f,Daphnia_parvula:%.6f):%.6f):%.6f,",
+  "(Daphnia_pulicaria:1,Daphnia_pulex:1):37):43):34):54.40747,",
+  "(Simocephalus_serrulatus:32,Simocephalus_vetulus:32):137.40747);"),
+  x, y, y, x - y, 38 - x))
+stopifnot(ape::is.ultrametric(tree), ape::is.binary(tree), setequal(tree$tip.label, taxa))
 
 east_hudson <- lakes$STATE %in% c("CT", "MA", "ME", "NH", "RI", "VT") |
   (lakes$STATE == "NY" & lakes$LON_DD > -73.8)

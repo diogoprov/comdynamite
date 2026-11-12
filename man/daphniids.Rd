@@ -25,9 +25,20 @@ are public data of the US Environmental Protection Agency, and the script is
 }
 \details{
 The article gives 327 lakes and this rebuilt set has 314, of which 239 have some
-species. The tree is the topology of Figure 3a of the article, without branch lengths.
-The survey lists \emph{D. longiremis} and not the \emph{D. longispina} of the figure, which we
-took to be the same taxon. The article does not give the area of each lake, so rivers
+species. The survey lists \emph{D. longiremis} and not the \emph{D. longispina} of Figure 3a of the
+article, which we took to be the same taxon.
+
+The tree has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
+dates nine of the 13 species, mostly from mitochondrial genomes (Xu et al. 2021). Its
+topology differs from that of Figure 3a: \emph{D. laevis} and \emph{D. dubia} are the sister of
+\emph{D. galeata mendotae} and \emph{D. rosea} rather than of all other \emph{Daphnia}. The four species
+without dates were placed as in Figure 3a, at arbitrary ages: \emph{D. catawba} and
+\emph{D. parvula} split the branch of \emph{D. retrocurva} into thirds, \emph{D. rosea} joins
+\emph{D. galeata mendotae} halfway along its branch, and \emph{S. serrulatus} joins \emph{S. vetulus} at
+the crown age of \emph{Simocephalus} in TimeTree. The absolute ages are uncertain: for the
+ancestor of the \emph{D. longispina} and \emph{D. pulex} groups, Cornetti et al. (2019) found
+105 Ma with mitochondrial genes and 31.5 Ma with nuclear genes, so relative ages are more
+reliable than absolute ones. The article does not give the area of each lake, so rivers
 in \code{biogeography} are approximated by longitude and these contrasts differ from the
 original ones: S1, east and west of the Hudson; S2, Adirondacks and other lakes to the
 west of the Hudson; S3, east and west of the Connecticut River, east of the Hudson; S4,
@@ -35,8 +46,26 @@ Maine and other lakes east of the Hudson; S5, New Hampshire and lakes to its wes
 east of the Hudson; S6, New Hampshire and lakes in Rhode Island and Massachusetts.
 }
 \references{
+Cornetti, L., Fields, P. D., Van Damme, K., & Ebert, D. (2019). A fossil-calibrated
+phylogenomic analysis of \emph{Daphnia} and the Daphniidae. \emph{Molecular Phylogenetics and
+Evolution}, 137, 250--262. \doi{10.1016/j.ympev.2019.05.018}
+
+Kumar, S., Suleski, M., Craig, J. M., Kasprowicz, A. E., Sanderford, M., Li, M., Stecher, G.,
+& Hedges, S. B. (2022). TimeTree 5: an expanded resource for species divergence times.
+\emph{Molecular Biology and Evolution}, 39, msac174. \doi{10.1093/molbev/msac174}
+
 Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics:
 separating the roles of environmental filters and historical biogeography. \emph{Ecology
 Letters}, 13, 1290--1299. \doi{10.1111/j.1461-0248.2010.01523.x}
+
+Taylor, D. J., Finston, T. L., & Hebert, P. D. N. (1998). Biogeography of a widespread
+freshwater crustacean: pseudocongruence and cryptic endemism in the North American
+\emph{Daphnia laevis} complex. \emph{Evolution}, 52, 1648--1670.
+\doi{10.1111/j.1558-5646.1998.tb02245.x}
+
+Xu, S.-L., Han, B.-P., Martínez, A., Schwentner, M., Fontaneto, D., Dumont, H. J., & Kotov,
+A. A. (2021). Mitogenomics of Cladocera (Branchiopoda): marked gene order rearrangements and
+independent predation roots. \emph{Molecular Phylogenetics and Evolution}, 164, 107275.
+\doi{10.1016/j.ympev.2021.107275}
 }
 \keyword{datasets}
