@@ -461,7 +461,10 @@ padronizados. Substitui a `v0.6.0` para citação: a tag `v0.6.0` traz as taxas 
 `patch_permutations()` e não teve release. O nulo restrito para `c` fechou depois, na
 versão em desenvolvimento (item da v0.6.0).
 
-## Inferência por ABC (planejada como v0.6.0, número a definir)
+## Inferência por ABC (concluída em 2026-11-12)
+
+Publicada como 0.8.0 em 2026-11-12 (PR 84, tag `v0.8.0`), ao fechar o critério de conclusão com
+`vignette("abc")`. Os itens em aberto abaixo seguem como trabalho futuro do bloco.
 
 Objetivo: estimar parâmetros e comparar modelos a partir de dados observados. Depende do
 piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
@@ -615,8 +618,8 @@ Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82)
 `abc_choose()`, `abc_ppc()`, `spatial_folds()`, `fold_summarise()`, `abc_cv()` e
 `abc_diagnose()`. Falta, para fechar o bloco:
 
-- [ ] Vignette com dados reais, do ajuste à avaliação (critério de conclusão abaixo).
-      Candidato: um conjunto de anuros com árvore e coordenadas já usado no pacote.
+- [x] Vignette com dados reais, do ajuste à avaliação: `vignette("abc")`, com os anuros de 40
+      poças urbanas em duas cidades (`anurans`), pools regionais do GBIF e filtro urbano (PR 84).
 - [ ] PPC com um modelo de fato mal especificado (por exemplo, filtragem ambiental forte
       nos dados e ajuste sem ela), já que o teste com o modelo neutro foi fraco por desenho.
 - [ ] Repetir a validação cruzada por blocos numa paisagem maior e sem toro.

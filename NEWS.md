@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.8.0
 
 - `vignette("abc")` goes through inference by ABC with random forests with the anurans of 40
   urban ponds in two Brazilian cities (`anurans`, new data set, with regional pools from GBIF

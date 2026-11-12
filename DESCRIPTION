@@ -1,6 +1,6 @@
 Package: comdynamite
 Title: Linking Traits, Phylogenies and Biogeography in Metacommunities
-Version: 0.7.0.9000
+Version: 0.8.0
 Authors@R: person("Diogo B.", "Provete", email = "dbprovete@gmail.com",
     role = c("aut", "cre"))
 Description: Methods that link traits, phylogenies, biogeography and
