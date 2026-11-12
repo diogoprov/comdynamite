@@ -168,8 +168,9 @@ print.mc_speciation <- function(x, ...) {
 #' Simulate a metacommunity with speciation
 #'
 #' Runs the model of [simulate_metacommunity()], with the evolution of the niche optimum within
-#' populations of [evolution_control()], on species that bud as their populations diverge
-#' ([speciation_control()]) and die out when their last population is lost. The tree is not
+#' populations of [evolution_control()], on species that bud as their populations diverge, by
+#' point mutation or by fission ([speciation_control()]), and die out when their last
+#' population is lost. The tree is not
 #' given: it grows out of the dynamics. The community starts from the species of `traits`
 #' (usually one ancestor) and is closed: there is no immigration from outside the landscape.
 #'
@@ -201,7 +202,7 @@ print.mc_speciation <- function(x, ...) {
 #'   species).
 #' @param speciation Settings from [speciation_control()].
 #' @param evolution Settings from [evolution_control()]; `NULL` keeps the optimum of each
-#'   species fixed (`genetic_var = 0`), which allows only geographic speciation.
+#'   species fixed (`genetic_var = 0`), which rules out ecological speciation.
 #' @param competition `"phylo"` or `"none"`.
 #' @param inter_max,inter_min,scale,distance_scale Competition between species, relative to
 #'   competition within a species: between sisters just split (`inter_max`) and between
@@ -214,17 +215,32 @@ print.mc_speciation <- function(x, ...) {
 #'   Poisson(`seed_mean`) individuals of each species in every site.
 #' @param max_species Maximum number of species ever, including extinct ones; the simulation
 #'   stops with an error beyond it.
-#' @return An `mc_evolving` object: a list with `abundance` (sites x extant species), `tree`
-#'   (the reconstructed tree of the extant species, branch lengths in generations, or `NULL`
-#'   with fewer than two), `tree_full` (with extinct species), `species` (a table with the
-#'   parent, birth, end and fate of every species), `events` (one row per budding, with the new
-#'   species), `richness` (extant species at each generation), `genetic` (genetic means of the
-#'   populations of the extant species), `traits` (of the extant species, with the mean genetic
-#'   optimum over their populations as `optimum`), `alpha` (among the extant species at the end,
-#'   without the niche overlap, which varies among sites), the records and colonisation history
-#'   of [simulate_metacommunity()] for the extant species, and the `landscape`, `dispersal`,
-#'   `extirpation`, `speciation`, `evolution` and `n_steps` used. [as_metacommunity()] turns it
-#'   into an `mc_sim` for the other functions of the package.
+#' @return An `mc_evolving` object, a list with:
+#'   * `abundance`: sites x extant species. With protracted speciation (`completion` of
+#'     [speciation_control()]), the species are the good species, each with the individuals
+#'     of its extant lineages; otherwise every lineage is a species.
+#'   * `tree`: the reconstructed tree of those species, with branch lengths in generations and
+#'     nodes at the times of initiation, or `NULL` with fewer than two.
+#'   * `tree_full`: the tree of all lineages, extinct ones included.
+#'   * `species`: a table with the parent, birth (initiation), end, fate, order of budding,
+#'     time of completion and status (`"good"` or `"incipient"` at its end) of every lineage.
+#'   * `events`: one row per budding, with the new lineages.
+#'   * `lineages` and `lineage_species`: abundances of the extant lineages and the species
+#'     each belongs to.
+#'   * `richness` and `richness_good`: extant lineages, and those that have completed, at each
+#'     generation.
+#'   * `genetic`: genetic means of the populations of the extant lineages.
+#'   * `traits`: of the extant species, with the mean genetic optimum over the populations of
+#'     their lineages as `optimum`.
+#'   * `alpha`: among the extant species at the end, without the niche overlap, which varies
+#'     among sites.
+#'   * The records and colonisation history of [simulate_metacommunity()] for the extant
+#'     species: records summed over lineages; colonisation, in each site, of the most abundant
+#'     lineage.
+#'   * The `landscape`, `dispersal`, `extirpation`, `speciation`, `evolution` and `n_steps`
+#'     used.
+#'
+#'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
 #' @references Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
 #'   T. F., & Pellissier, L. (2021). gen3sis: A general engine for eco-evolutionary simulations
 #'   of the processes that shape Earth's biodiversity. *PLOS Biology*, 19, e3001340.

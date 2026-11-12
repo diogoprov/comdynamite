@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- `speciation_control()` gains the modes `"point"` (each individual starts a new species with
+  probability `rate` per generation, the neutral limit) and `"fission"` (species split at
+  `rate` per generation into the populations nearest a random site, `partition = "spatial"`,
+  or a random partition), a Gaussian shift of the genetic mean of new species (`jump_var`), and
+  protracted speciation (`completion`, fixed or exponential, as in the protracted birth-death
+  model). Incipient lineages are separate in the dynamics; at the end, the extant lineages are
+  grouped into good species, which `simulate_evolving_metacommunity()` returns as `abundance`,
+  `tree` and `traits`, with the lineages in `lineages` and the times of initiation and
+  completion in `species` (phase 2b of the block on speciation). The full tree is now built
+  without recursion and the split times are kept only among alive lineages, so runs with
+  thousands of lineages are fast. Validations in `data-raw/evolving_neutral.R` (point mutation
+  against the Ewens sampling formula) and `data-raw/evolving_pbd.R` (protracted fission against
+  the gamma statistic and fits of the PBD).
 - `simulate_evolving_metacommunity()` runs the metacommunity with speciation (phase 2a of the
   block on speciation): species bud when their populations diverge, and die out with their
   last population. The largest group of populations keeps the identity and age of the
