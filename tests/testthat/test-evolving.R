@@ -63,6 +63,26 @@ test_that("several groups at once bud in order, with internal branches of length
   expect_true(ape::is.binary(sim$tree))
   expect_equal(sort(unname(ape::branching.times(sim$tree))), c(20, 20))
   expect_true(any(sim$tree$edge.length == 0))
+  # a record at the step of the budding shows the new species
+  set.seed(10)
+  rec <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("geographic", 20),
+                                         dispersal = 0.05, n_steps = 20, record_steps = 20,
+                                         initial = matrix(50L, 9, 1,
+                                                          dimnames = list(NULL, "sp1")))
+  expect_equal(unname(rec$history[, , 1]), unname(rec$abundance))
+})
+
+test_that("pruning keeps the emigrants aligned with the alive species", {
+  st <- new.env()
+  st$k <- 2
+  st$m <- 2
+  st$alive <- 1:2
+  st$n <- matrix(c(0L, 0L, 5L, 5L), 2, 2)
+  st$at <- diag(2)
+  st$em <- matrix(c(0, 0, 3, 4), 2, 2)
+  st$dispersal <- st$extirpation <- c(0.1, 0.1)
+  expect_equal(evolving_prune(st), 1L)
+  expect_equal(st$em, matrix(c(3, 4), 2, 1))
 })
 
 test_that("gradual divergence lets strong gene flow hold a species together", {

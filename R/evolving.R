@@ -322,6 +322,13 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       }
     }
     flow <- lapply(flow, function(x) x * 0)
+    # records of this step, taken by mc_step() before the buddings, follow them
+    if (nrow(events) && events$time[nrow(events)] == gen && !is.null(st$history) &&
+        step %in% st$record_steps) {
+      i <- match(step, st$record_steps)
+      st$history[, st$alive, i] <- st$n
+      if (!is.null(st$z_history)) st$z_history[, st$alive, i] <- st$z[, st$alive]
+    }
     if (competition == "phylo" || nrow(events)) {
       a <- evolving_alpha(split_time[st$alive, st$alive, drop = FALSE], gen, competition,
                           inter_max, inter_min, scale, distance_scale)
@@ -503,6 +510,7 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
         d[a, b] <- d[b, a] <- 0
         tg[a, ] <- tg[b, ]
         tg[, a] <- tg[, b]
+        tg[a, b] <- tg[b, a] <- 0
       } else {
         d[a, ] <- d[, a] <- NA_real_
         d[a, here & !is.na(diag(d))] <- 0
@@ -732,6 +740,7 @@ evolving_prune <- function(st) {
   st$alive <- st$alive[keep]
   st$n <- st$n[, keep, drop = FALSE]
   st$at <- st$at[keep, keep, drop = FALSE]
+  if (!is.null(st$em)) st$em <- st$em[, keep, drop = FALSE]
   st$k <- length(st$alive)
   st$p_em <- rep(st$dispersal[st$alive], each = st$m)
   st$p_ex <- rep(st$extirpation[st$alive], each = st$m)
