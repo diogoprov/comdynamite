@@ -1045,9 +1045,9 @@ evolving_series_rows <- function(st, before, buds, sp_table, gen) {
   now <- n > 0
   was <- before[, ids, drop = FALSE]
   skip <- matrix(FALSE, st$m, length(ids))
+  # a mother was alive at the start of the generation, so it is among `ids`
   for (b in buds) {
     c_j <- match(b$j, ids)
-    if (is.na(c_j)) next
     given <- unique(unlist(b$sites))
     given <- given[!now[given, c_j]]
     skip[given, c_j] <- TRUE
