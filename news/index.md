@@ -12,7 +12,9 @@
   it puts observation error in the reference table. In
   `data-raw/abc_detection.R` detection was recovered and the other
   parameters mostly kept their recovery, while ignoring detection biased
-  the niche breadth.
+  the niche breadth. `data-raw/abc_capacity.R` adds the carrying
+  capacity as a parameter: detection times capacity was recovered well,
+  each of them only in part.
 - [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
   gives, for each observation and parameter of an
   [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
