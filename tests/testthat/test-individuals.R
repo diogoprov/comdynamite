@@ -336,3 +336,47 @@ test_that("tstats() returns NA for a trait without values", {
   expect_true(all(is.na(res$T_IP.IC[res$trait == "empty"])))
   expect_false(all(is.na(res$T_IP.IC[res$trait == "trait"])))
 })
+
+test_that("sample_individuals() draws individuals from the evolutionary state", {
+  set.seed(4)
+  ls <- landscape_implicit(12)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  ev <- evolution_control(genetic_var = 4, env_var = 1, plasticity = 0.5,
+                          env = ls$env, traits = tr)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 80, dispersal = 0.01, evolution = ev)
+  ind <- sample_individuals(sim, n = 2000, source = "evolution")
+  pop <- sim$evolution$genetic + sim$evolution$plastic
+  site <- as.integer(factor(ind$site, rownames(sim$abundance)))
+  expect_equal(ind$population_mean, unname(pop[cbind(site, 1)]))
+  # individuals vary around their population mean with variance G + VE
+  expect_gt(nrow(ind), 2000)
+  expect_equal(stats::var(ind$trait - ind$population_mean), 5, tolerance = 0.1)
+  more <- sample_individuals(sim, n = 2000, source = "evolution", intraspecific_sd = 2)
+  expect_equal(stats::var(more$trait - more$population_mean), 9, tolerance = 0.1)
+  expect_error(sample_individuals(sim, source = "evolution", local_adaptation = 0.5),
+               "must stay 0")
+  expect_error(sample_individuals(sim, source = "evolution", step = 10), "last step")
+  plain <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                  n_steps = 20)
+  expect_error(sample_individuals(plain, source = "evolution"), "needs a simulation")
+})
+
+test_that("sample_individuals() takes evolving metacommunities and feeds tstats()", {
+  set.seed(5)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  sim <- simulate_evolving_metacommunity(ls, anc, speciation_control("fission", rate = 0.02),
+                                         evolution = evolution_control(genetic_var = 10,
+                                                                       env_var = 2),
+                                         dispersal = 0.01, extirpation = 0.02, n_steps = 150)
+  ev <- sim$evolution
+  expect_equal(dim(ev$genetic), dim(sim$abundance))
+  expect_identical(is.na(ev$genetic), sim$abundance == 0)
+  expect_equal(unname(ev$genetic_var), rep(10, ncol(sim$abundance)))
+  ind <- sample_individuals(sim, n = 5, source = "evolution")
+  expect_setequal(unique(ind$species), colnames(sim$abundance))
+  expect_equal(nrow(ind), sum(pmin(sim$abundance, 5)))
+  ts <- tstats(ind, n_perm = 0)
+  expect_true(is.list(ts) || is.data.frame(ts))
+})

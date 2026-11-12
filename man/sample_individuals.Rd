@@ -19,11 +19,13 @@ sample_individuals(
   min_n = 1,
   founder_sd = 0,
   monopolization = 0,
-  gene_flow = 1
+  gene_flow = 1,
+  source = c("traits", "evolution")
 )
 }
 \arguments{
-\item{x}{An \code{mc_sim} object from \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}.}
+\item{x}{An \code{mc_sim} object from \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} (or an \code{mc_evolving} one from
+\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}).}
 
 \item{n}{Number of individuals measured in each population, or all of them when the
 population is smaller. Ignored when \code{fraction} is given.}
@@ -78,6 +80,17 @@ species; 0 (the default) for none.}
 and adaptation since arrival, per unit of migrant load: 1 (the default) when every
 newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
 Has no effect without \code{founder_sd} or \code{monopolization}.}
+
+\item{source}{Where population means come from: \code{"traits"} (the default) builds them from
+the optimum of each species with the arguments above; \code{"evolution"} takes them from a
+simulation run with \code{evolution} (\code{\link[=evolution_control]{evolution_control()}}), as the genetic mean plus the
+plastic part of each population at the last step, and draws individuals around them with
+the genetic plus environmental variance of each species (\code{genetic_var + env_var}), so that
+the T-statistics of \code{\link[=tstats]{tstats()}} reflect the variation that evolved. \code{intraspecific_sd},
+when given, then adds variation such as measurement error, and \code{local_adaptation},
+\code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization} and \code{step} must keep their
+defaults. Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
+too.}
 }
 \value{
 Data frame with one row per individual and the columns \code{site}, \code{species},

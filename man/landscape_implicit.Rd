@@ -31,6 +31,7 @@ Other landscapes:
 \code{\link[=dispersal_kernel]{dispersal_kernel()}},
 \code{\link[=env_over_time]{env_over_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
+\code{\link[=landscape_matrix]{landscape_matrix()}},
 \code{\link[=landscape_points]{landscape_points()}}
 }
 \concept{landscapes}

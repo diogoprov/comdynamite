@@ -110,6 +110,61 @@ landscape_points <- function(coords, env, disp_scale, lonlat = FALSE) {
   out
 }
 
+#' Landscape from a dispersal matrix
+#'
+#' Builds a spatially explicit landscape from a given matrix of movement among sites, for
+#' connectivity that distances alone do not describe: a kernel of resistance (least-cost or
+#' circuit) distances, estimated movement rates, or a network of ponds linked by corridors.
+#' Rows are rescaled to sum to 1 and the diagonal is ignored, so the matrix may hold relative
+#' weights.
+#'
+#' @param dispersal Square, non-negative matrix: row s gives the relative probabilities that an
+#'   emigrant from site s reaches each other site. Every site needs at least one destination.
+#'   For resistance distances `r`, `dispersal_kernel(r, scale)` gives an exponential kernel.
+#' @param env Numeric vector with the environment of each site.
+#' @param coords Optional matrix or data frame with two columns of site coordinates, kept for
+#'   plotting and for functions that need them.
+#' @param dist Optional matrix of distances among sites (for instance, the resistance distances
+#'   behind `dispersal`), kept with the landscape.
+#' @return An `mc_landscape` object, as from [landscape_points()].
+#' @family landscapes
+#' @examples
+#' # four ponds in a row, where a road cuts the movement between ponds 2 and 3
+#' resistance <- as.matrix(dist(1:4))
+#' resistance[1:2, 3:4] <- resistance[1:2, 3:4] + 10
+#' resistance[3:4, 1:2] <- resistance[3:4, 1:2] + 10
+#' ls <- landscape_matrix(dispersal_kernel(resistance, scale = 1), env = c(10, 20, 60, 70),
+#'                        dist = resistance)
+#' round(ls$dispersal, 3)
+#' @export
+landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
+  dispersal <- as.matrix(dispersal)
+  m <- nrow(dispersal)
+  stopifnot(is.numeric(dispersal), m >= 2, ncol(dispersal) == m, all(is.finite(dispersal)),
+            all(dispersal >= 0), is.numeric(env), length(env) == m, all(is.finite(env)))
+  diag(dispersal) <- 0
+  if (any(rowSums(dispersal) == 0)) {
+    stop("every site needs at least one destination in `dispersal` (rows ",
+         paste(which(rowSums(dispersal) == 0), collapse = ", "), " are empty)", call. = FALSE)
+  }
+  dispersal <- dispersal / rowSums(dispersal)
+  dimnames(dispersal) <- NULL
+  if (!is.null(coords)) {
+    coords <- as.data.frame(coords)
+    stopifnot(nrow(coords) == m, ncol(coords) == 2)
+    rownames(coords) <- NULL
+  }
+  if (!is.null(dist)) {
+    dist <- as.matrix(dist)
+    stopifnot(is.numeric(dist), nrow(dist) == m, ncol(dist) == m)
+    dimnames(dist) <- NULL
+  }
+  out <- new_landscape(env = unname(as.numeric(env)), coords = coords, dist = dist,
+                       dispersal = dispersal, torus = FALSE)
+  out$matrix <- TRUE
+  out
+}
+
 #' Exponential dispersal kernel
 #'
 #' The probability that an emigrant from site s reaches site t is proportional
@@ -223,6 +278,7 @@ new_landscape <- function(env, coords, dist, dispersal, torus = NA) {
 #' @export
 print.mc_landscape <- function(x, ...) {
   type <- if (is.null(x$dispersal)) "spatially implicit, uniform dispersal" else
+    if (isTRUE(x$matrix)) "dispersal matrix" else
     paste0(if (isTRUE(x$points)) "points" else "grid", if (isTRUE(x$torus)) " (torus)" else "",
            ", exponential dispersal kernel")
   cat("<mc_landscape>", length(x$env), "sites;", type, "\n")

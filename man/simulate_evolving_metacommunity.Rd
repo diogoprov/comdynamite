@@ -95,8 +95,20 @@ among sites.
 \item The records and colonisation history of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant
 species: records summed over their extant lineages (lineages extinct by the end are
 left out); colonisation, in each site, of the most abundant lineage.
-\item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps}
-used.
+\item \code{series}: one row per lineage alive in each generation, with its \code{occupancy} (sites),
+regional \code{abundance}, \code{genetic} mean (weighted by abundance), and the sites it
+\code{colonised} and lost (\code{extirpated}) since the previous generation, out of those where it
+was absent (\code{absent_before}) and present (\code{present_before}). Sites that a lineage passed
+to a new one are not counted as lost, and the transitions are \code{NA} in the generation of
+birth. \code{\link[=persistence]{persistence()}} turns them into rates of colonisation and extirpation.
+\item \code{evolution}: with \code{evolution}, the state of the extant species at the end, for
+\code{\link[=sample_individuals]{sample_individuals()}} with \code{source = "evolution"}: genetic means in each site
+(\code{genetic}, weighted over their lineages by abundance; \code{NA} where absent), the plastic
+part of the phenotype (\code{plastic}), the reference environment of plasticity
+(\code{reference}), the genetic and environmental variances and the slope of plasticity of
+each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \code{settings}; otherwise
+\code{NULL}.
+\item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used.
 }
 
 \code{\link[=as_metacommunity]{as_metacommunity()}} turns it into an \code{mc_sim} for the other functions of the package.
@@ -157,6 +169,7 @@ Other simulate metacommunities:
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=persistence]{persistence()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
 \code{\link[=simulate_static]{simulate_static()}},

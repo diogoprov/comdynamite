@@ -119,7 +119,8 @@
 #'   are better matched to their site but do not grow faster or compete better, so the
 #'   demographic part of the monopolization hypothesis is not simulated.
 #'
-#' @param x An `mc_sim` object from [simulate_metacommunity()].
+#' @param x An `mc_sim` object from [simulate_metacommunity()] (or an `mc_evolving` one from
+#'   [simulate_evolving_metacommunity()]).
 #' @param n Number of individuals measured in each population, or all of them when the
 #'   population is smaller. Ignored when `fraction` is given.
 #' @param fraction Optional probability that each individual is measured, so that the number
@@ -160,6 +161,16 @@
 #'   and adaptation since arrival, per unit of migrant load: 1 (the default) when every
 #'   newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
 #'   Has no effect without `founder_sd` or `monopolization`.
+#' @param source Where population means come from: `"traits"` (the default) builds them from
+#'   the optimum of each species with the arguments above; `"evolution"` takes them from a
+#'   simulation run with `evolution` ([evolution_control()]), as the genetic mean plus the
+#'   plastic part of each population at the last step, and draws individuals around them with
+#'   the genetic plus environmental variance of each species (`genetic_var + env_var`), so that
+#'   the T-statistics of [tstats()] reflect the variation that evolved. `intraspecific_sd`,
+#'   when given, then adds variation such as measurement error, and `local_adaptation`,
+#'   `population_sd`, `displacement`, `founder_sd`, `monopolization` and `step` must keep their
+#'   defaults. Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
+#'   too.
 #' @return Data frame with one row per individual and the columns `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
 #'   (of the site), `optimum` (of the species), `population_mean` (the expected value of the
@@ -211,9 +222,27 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
                                cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
-                               gene_flow = 1) {
+                               gene_flow = 1, source = c("traits", "evolution")) {
+  if (inherits(x, "mc_evolving")) x <- as_metacommunity(x)
   if (!inherits(x, "mc_sim")) {
     stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+  }
+  source <- match.arg(source)
+  if (source == "evolution") {
+    if (is.null(x$evolution$genetic)) {
+      stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
+    }
+    if (!is.null(step)) {
+      stop("the evolutionary state is kept only for the last step: leave `step` as NULL",
+           call. = FALSE)
+    }
+    if (any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
+        any(founder_sd != 0) || any(monopolization != 0)) {
+      stop("with `source = \"evolution\"`, population means come from the simulation: ",
+           "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
+           "`monopolization` must stay 0", call. = FALSE)
+    }
+    extra_sd <- if (missing(intraspecific_sd)) 0 else intraspecific_sd
   }
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
@@ -260,6 +289,14 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
   measured[measured < min_n] <- 0
   theta <- niche$traits[species, "optimum"]
+  if (source == "evolution") {
+    state <- evolved_populations(x, sites, species)
+    pop_mean <- state$mean
+    extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
+    if (any(extra_sd < 0)) stop("`intraspecific_sd` must not be negative", call. = FALSE)
+    ind_sd <- sqrt(state$var + extra_sd^2)
+    measured[is.na(pop_mean)] <- 0
+  } else {
   closed <- if (historical) {
     matrix(h, length(sites), k, byrow = TRUE) + sweep(history$adapted, 2, 1 - h, "*")
   } else {
@@ -283,6 +320,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
       pop_mean[i, present] <- displace(pop_mean[i, present], abundance[i, present],
                                        displacement, width)
     }
+  }
   }
   occupied <- which(measured > 0)
   site_of <- (occupied - 1) %% length(sites) + 1
@@ -685,6 +723,27 @@ arrival_terms <- function(x, step, sites, species, rate, flow) {
   adapted[is.na(adapted)] <- 0
   list(arrival = arrival, propagule = x$propagule[sites, species, drop = FALSE],
        erosion = erosion, adapted = adapted)
+}
+
+# population means (genetic mean plus plastic part, NA where absent) and the variance among
+# individuals (genetic plus environmental) of each species at the last step of a simulation
+# with evolution
+evolved_populations <- function(x, sites, species) {
+  ev <- x$evolution
+  pick <- function(y) {
+    y <- as.matrix(y)
+    dimnames(y) <- list(rownames(x$abundance), colnames(x$abundance))
+    y[sites, species, drop = FALSE]
+  }
+  mean <- pick(ev$genetic) + pick(ev$plastic)
+  each <- function(v, name) {
+    v <- v %||% 0
+    if (!is.null(names(v))) return(unname(v[species]))
+    rep_len(v, ncol(x$abundance))[match(species, colnames(x$abundance))]
+  }
+  g <- each(ev$genetic_var %||% ev$settings$genetic_var)
+  ve <- each(ev$env_var %||% ev$settings$env_var)
+  list(mean = mean, var = g + ve)
 }
 
 sampled_abundance <- function(x, step) {
