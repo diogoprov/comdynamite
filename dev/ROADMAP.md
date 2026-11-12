@@ -571,8 +571,10 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       em 0%. O teste foi fraco por desenho: o modelo de competição contém o neutro
       (`inter_max` = 0), então não estava mal especificado. Falta um caso de especificação
       errada de fato, como dados com filtragem ambiental forte ajustados sem ela.
-- [ ] LOO sobre a tabela de referência: `cv4abc()` e `cv4postpr()` do `abc`, com cada
-      simulação como pseudo-observação; `gfit()` para adequação global.
+- [x] LOO sobre a tabela de referência: substituído por `abc_recovery()`, que deixa
+      pseudo-observações fora e mede R2, viés e cobertura, e pelo erro out-of-bag de
+      `abc_choose()`; `cv4abc()`, `cv4postpr()` e `gfit()` do `abc` não acrescentam ao que as
+      florestas já dão (decidido em 2026-11-11).
 - [x] K-fold por sítios ou blocos espaciais (`spatial_folds()`, `fold_summarise()`, `abc_cv()`,
       2026-11-11): ajustar com parte dos sítios e prever as estatísticas dos demais. Blocos
       deveriam evitar que a autocorrelação espacial infle o acerto. Em `data-raw/abc_cv.R`
@@ -607,6 +609,18 @@ Avaliação do modelo, sempre em conjunto com a inferência:
 
 Limites a deixar claros: um bom ajuste não prova o mecanismo, e dados de um único
 levantamento podem não informar a dispersão.
+
+Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82): `abc_table()`,
+`observe_detection()`, `abc_fit()`, `predict()`, `abc_importance()`, `abc_recovery()`,
+`abc_choose()`, `abc_ppc()`, `spatial_folds()`, `fold_summarise()`, `abc_cv()` e
+`abc_diagnose()`. Falta, para fechar o bloco:
+
+- [ ] Vignette com dados reais, do ajuste à avaliação (critério de conclusão abaixo).
+      Candidato: um conjunto de anuros com árvore e coordenadas já usado no pacote.
+- [ ] PPC com um modelo de fato mal especificado (por exemplo, filtragem ambiental forte
+      nos dados e ajuste sem ela), já que o teste com o modelo neutro foi fraco por desenho.
+- [ ] Repetir a validação cruzada por blocos numa paisagem maior e sem toro.
+- [ ] Desempenho com árvore e paisagem variando entre simulações (hoje são fixas).
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.
