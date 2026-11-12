@@ -294,8 +294,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (source == "evolution") {
     state <- evolved_populations(x, sites, species)
     pop_mean <- state$mean
+    # negative values were refused with `intraspecific_sd` above
     extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
-    if (any(extra_sd < 0)) stop("`intraspecific_sd` must not be negative", call. = FALSE)
     ind_var <- sweep(state$var, 2, extra_sd^2, "+")
     measured[is.na(pop_mean)] <- 0
   } else {
