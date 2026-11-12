@@ -248,7 +248,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
 
 # preparation of mc_dynamics(), evaluated in the frame that holds its arguments
 mc_setup <- function(st) {
-  evalq({
+  eval(quote({
     immigration <- match.arg(immigration)
     r_fun <- if (is.function(r)) r else function(step) r
     r1 <- r_fun(1)
@@ -327,14 +327,14 @@ mc_setup <- function(st) {
     immigrants <- matrix(0, m, k_all)
     load <- matrix(0, m, k_all)
     present <- matrix(FALSE, m, k_all)
-  }, st)
+  }), st)
   invisible(st)
 }
 
 # one time step of mc_dynamics(), evaluated in the state `st`
 mc_step <- function(st, step) {
   assign("step", step, envir = st)
-  evalq({
+  eval(quote({
     added <- 0L
     if (step %in% seed_steps) {
       seeds <- stats::rpois(m * k, seed_mean)
@@ -486,13 +486,13 @@ mc_step <- function(st, step) {
       history[, alive, match(step, record_steps)] <- n
       if (!is.null(ev)) z_history[, alive, match(step, record_steps)] <- z[, alive]
     }
-  }, st)
+  }), st)
   invisible(st)
 }
 
 # the output of mc_dynamics() from the state `st`
 mc_finish <- function(st) {
-  evalq({
+  eval(quote({
     abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
     abundance[, alive] <- n
     absent <- abundance == 0
@@ -518,7 +518,7 @@ mc_finish <- function(st) {
                                                  class = "mc_evolution"))
     }
     out
-  }, st)
+  }), st)
 }
 
 # immigrants when the emigrants of each species at each site go to the other sites
