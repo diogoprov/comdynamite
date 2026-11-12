@@ -35,10 +35,11 @@ lost.
 }
 \details{
 For \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}, transitions come from its \code{series}, between
-consecutive generations, for every lineage (extinct ones included); a site that a mother
-passed to a new species is not an extirpation. For \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, they come from
+consecutive generations, for every lineage (extinct ones included, with the sites lost in
+the generation they died out); a site that a mother passed to a new species counts neither
+as an extirpation nor as exposure. For \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, they come from
 the abundances at \code{record_steps} (\code{history}), between consecutive records, which should be
-evenly spaced. An array of sites x species x times can be given directly.
+evenly spaced (seeding from the pool, \code{seed_steps}, counts as colonisation). An array of sites x species x times can be given directly.
 }
 \examples{
 set.seed(1)

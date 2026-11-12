@@ -85,11 +85,12 @@ Has no effect without \code{founder_sd} or \code{monopolization}.}
 the optimum of each species with the arguments above; \code{"evolution"} takes them from a
 simulation run with \code{evolution} (\code{\link[=evolution_control]{evolution_control()}}), as the genetic mean plus the
 plastic part of each population at the last step, and draws individuals around them with
-the genetic plus environmental variance of each species (\code{genetic_var + env_var}), so that
+the genetic plus environmental variance of each species (\code{genetic_var + env_var}, plus,
+for a species of several lineages, the variance among them in the site), so that
 the T-statistics of \code{\link[=tstats]{tstats()}} reflect the variation that evolved. \code{intraspecific_sd},
 when given, then adds variation such as measurement error, and \code{local_adaptation},
-\code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization} and \code{step} must keep their
-defaults. Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
+\code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization}, \code{step} and \code{env} must keep
+their defaults (\code{env} is the environment at the last step). Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
 too.}
 }
 \value{

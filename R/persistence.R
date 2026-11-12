@@ -10,10 +10,11 @@
 #' lost.
 #'
 #' For [simulate_evolving_metacommunity()], transitions come from its `series`, between
-#' consecutive generations, for every lineage (extinct ones included); a site that a mother
-#' passed to a new species is not an extirpation. For [simulate_metacommunity()], they come from
+#' consecutive generations, for every lineage (extinct ones included, with the sites lost in
+#' the generation they died out); a site that a mother passed to a new species counts neither
+#' as an extirpation nor as exposure. For [simulate_metacommunity()], they come from
 #' the abundances at `record_steps` (`history`), between consecutive records, which should be
-#' evenly spaced. An array of sites x species x times can be given directly.
+#' evenly spaced (seeding from the pool, `seed_steps`, counts as colonisation). An array of sites x species x times can be given directly.
 #'
 #' @param x An `mc_evolving` or `mc_sim` object, or an array (sites x species x times) of
 #'   abundances or presences.
@@ -44,6 +45,9 @@ persistence <- function(x, window = NULL, ...) UseMethod("persistence")
 #' @export
 persistence.mc_evolving <- function(x, window = NULL, ...) {
   s <- x$series
+  if (is.null(s)) {
+    stop("`x` has no `series`: rerun it with this version of the package", call. = FALSE)
+  }
   if (!is.null(window)) {
     stopifnot(length(window) == 1, window >= 1)
     s <- s[s$generation > x$generations - window, , drop = FALSE]

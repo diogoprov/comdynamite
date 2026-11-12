@@ -380,3 +380,36 @@ test_that("sample_individuals() takes evolving metacommunities and feeds tstats(
   ts <- tstats(ind, n_perm = 0)
   expect_true(is.list(ts) || is.data.frame(ts))
 })
+
+test_that("the evolutionary state is NULL without evolution and keeps names and lineages", {
+  set.seed(6)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  plain <- simulate_evolving_metacommunity(ls, anc, speciation_control("fission", rate = 0.02),
+                                           dispersal = 0.01, n_steps = 60)
+  expect_null(plain$evolution)
+  expect_error(sample_individuals(plain, source = "evolution"), "needs a simulation")
+  # incipient lineages of one good species add their spread to the variance within sites
+  set.seed(7)
+  sim <- simulate_evolving_metacommunity(
+    ls, anc, speciation_control("fission", rate = 0.05, jump_var = 25, completion = 1000),
+    evolution = evolution_control(genetic_var = 1), dispersal = 0.05, n_steps = 100)
+  w <- sim$evolution$within_var
+  several <- table(sim$lineage_species) > 1
+  expect_true(any(several))
+  expect_true(any(w[, names(several)[several]] > 0, na.rm = TRUE))
+  if (any(!several)) expect_true(all(w[, names(several)[!several]] == 0, na.rm = TRUE))
+  # columns are matched by name, not position
+  mc <- as_metacommunity(sim)
+  set.seed(8)
+  a <- sample_individuals(mc, n = 3, source = "evolution")
+  mc2 <- mc
+  mc2$abundance <- mc2$abundance[, rev(colnames(mc2$abundance)), drop = FALSE]
+  set.seed(8)
+  b <- sample_individuals(mc2, n = 3, source = "evolution")
+  key <- function(d) d[order(d$site, d$species, d$individual), c("site", "species",
+                                                                   "population_mean")]
+  expect_equal(key(a), key(b), ignore_attr = TRUE)
+  expect_error(sample_individuals(mc, source = "evolution", env = ls$env), "env")
+  expect_equal(unique(a$env[a$site == "site1"]), sim$evolution$environment[1])
+})

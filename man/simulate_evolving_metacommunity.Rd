@@ -104,8 +104,9 @@ birth. \code{\link[=persistence]{persistence()}} turns them into rates of coloni
 \item \code{evolution}: with \code{evolution}, the state of the extant species at the end, for
 \code{\link[=sample_individuals]{sample_individuals()}} with \code{source = "evolution"}: genetic means in each site
 (\code{genetic}, weighted over their lineages by abundance; \code{NA} where absent), the plastic
-part of the phenotype (\code{plastic}), the reference environment of plasticity
-(\code{reference}), the genetic and environmental variances and the slope of plasticity of
+part of the phenotype (\code{plastic}), the variance among the lineages of a species in
+each site (\code{within_var}, 0 for species of one lineage), the environment of each site
+at the end (\code{environment}), the reference environment of plasticity (\code{reference}), the genetic and environmental variances and the slope of plasticity of
 each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \code{settings}; otherwise
 \code{NULL}.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used.

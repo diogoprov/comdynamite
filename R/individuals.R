@@ -165,11 +165,12 @@
 #'   the optimum of each species with the arguments above; `"evolution"` takes them from a
 #'   simulation run with `evolution` ([evolution_control()]), as the genetic mean plus the
 #'   plastic part of each population at the last step, and draws individuals around them with
-#'   the genetic plus environmental variance of each species (`genetic_var + env_var`), so that
+#'   the genetic plus environmental variance of each species (`genetic_var + env_var`, plus,
+#'   for a species of several lineages, the variance among them in the site), so that
 #'   the T-statistics of [tstats()] reflect the variation that evolved. `intraspecific_sd`,
 #'   when given, then adds variation such as measurement error, and `local_adaptation`,
-#'   `population_sd`, `displacement`, `founder_sd`, `monopolization` and `step` must keep their
-#'   defaults. Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
+#'   `population_sd`, `displacement`, `founder_sd`, `monopolization`, `step` and `env` must keep
+#'   their defaults (`env` is the environment at the last step). Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
 #'   too.
 #' @return Data frame with one row per individual and the columns `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
@@ -232,10 +233,11 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     if (is.null(x$evolution$genetic)) {
       stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
     }
-    if (!is.null(step)) {
-      stop("the evolutionary state is kept only for the last step: leave `step` as NULL",
-           call. = FALSE)
+    if (!is.null(step) || !is.null(env)) {
+      stop("the evolutionary state is kept only for the last step: leave `step` and `env` ",
+           "as NULL", call. = FALSE)
     }
+    env <- x$evolution$environment
     if (any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
         any(founder_sd != 0) || any(monopolization != 0)) {
       stop("with `source = \"evolution\"`, population means come from the simulation: ",
@@ -294,7 +296,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     pop_mean <- state$mean
     extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
     if (any(extra_sd < 0)) stop("`intraspecific_sd` must not be negative", call. = FALSE)
-    ind_sd <- sqrt(state$var + extra_sd^2)
+    ind_var <- sweep(state$var, 2, extra_sd^2, "+")
     measured[is.na(pop_mean)] <- 0
   } else {
   closed <- if (historical) {
@@ -337,7 +339,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                     env = env[site_of][rows], optimum = theta[species_of][rows],
                     population_mean = pop_mean[occupied][rows], stringsAsFactors = FALSE)
   if (historical) out$arrival <- history$arrival[occupied][rows]
-  out$trait <- out$population_mean + stats::rnorm(nrow(out)) * ind_sd[species_of][rows]
+  spread <- if (source == "evolution") sqrt(ind_var[occupied][rows]) else ind_sd[species_of][rows]
+  out$trait <- out$population_mean + stats::rnorm(nrow(out)) * spread
   out
 }
 
@@ -732,18 +735,32 @@ evolved_populations <- function(x, sites, species) {
   ev <- x$evolution
   pick <- function(y) {
     y <- as.matrix(y)
-    dimnames(y) <- list(rownames(x$abundance), colnames(x$abundance))
-    y[sites, species, drop = FALSE]
+    if (is.null(rownames(y)) || is.null(colnames(y))) {
+      stop("the evolutionary state of `x` has no site or species names", call. = FALSE)
+    }
+    if (!all(species %in% colnames(y))) {
+      stop("the evolutionary state of `x` lacks ",
+           species_list(setdiff(species, colnames(y))), call. = FALSE)
+    }
+    rows <- if (all(sites %in% rownames(y))) sites else {
+      if (nrow(y) != length(sites)) {
+        stop("the evolutionary state of `x` does not match its sites", call. = FALSE)
+      }
+      seq_along(sites)
+    }
+    y[rows, species, drop = FALSE]
   }
   mean <- pick(ev$genetic) + pick(ev$plastic)
-  each <- function(v, name) {
+  within <- if (is.null(ev$within_var)) 0 else pick(ev$within_var)
+  each <- function(v) {
     v <- v %||% 0
     if (!is.null(names(v))) return(unname(v[species]))
-    rep_len(v, ncol(x$abundance))[match(species, colnames(x$abundance))]
+    rep_len(v, ncol(ev$genetic))[match(species, colnames(ev$genetic))]
   }
   g <- each(ev$genetic_var %||% ev$settings$genetic_var)
   ve <- each(ev$env_var %||% ev$settings$env_var)
-  list(mean = mean, var = g + ve)
+  var <- sweep(within + matrix(0, length(sites), length(species)), 2, g + ve, "+")
+  list(mean = mean, var = var)
 }
 
 sampled_abundance <- function(x, step) {
