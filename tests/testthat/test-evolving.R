@@ -190,3 +190,9 @@ test_that("migrants between sites of implicit landscapes are e / (m - 1)", {
   expect_equal(flow[1, 3], 10 / 4)
   expect_equal(unname(diag(flow)), rep(0, 5))
 })
+
+test_that("flow without emigrants is unchanged", {
+  st <- new.env()
+  st$em <- NULL
+  expect_identical(evolving_flow(st, list(1), NULL), list(1))
+})

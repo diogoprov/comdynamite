@@ -504,7 +504,6 @@ evolving_split <- function(st, j, groups, names_new) {
   q <- length(groups)
   m <- st$m
   grow_cols <- function(x, fill) {
-    if (is.null(x)) return(NULL)
     cbind(x, matrix(fill, nrow(x), q))
   }
   grow_vec <- function(x) c(x, rep(x[j], q))
@@ -622,6 +621,5 @@ evolving_prune <- function(st) {
   st$k <- length(st$alive)
   st$p_em <- rep(st$dispersal[st$alive], each = st$m)
   st$p_ex <- rep(st$extirpation[st$alive], each = st$m)
-  if (!is.null(st$inside)) st$inside <- st$pool[, st$alive, drop = FALSE]
   lost
 }
