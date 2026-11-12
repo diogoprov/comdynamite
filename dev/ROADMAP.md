@@ -501,7 +501,22 @@ Fig. 5, 3 e 5 no apêndice). O que levar para cá:
 
 - [x] Tabela de referência: `abc_table()` (2026-11-11) sorteia parâmetros de priors uniformes
       e simula com a árvore, o ambiente e as coordenadas observados.
-- [ ] Detecção imperfeita na tabela de referência.
+- [x] Detecção imperfeita na tabela de referência: `observe_detection()` (2026-11-11), com
+      contagens binomiais por indivíduo e visita (Royle & Nichols 2003; Royle 2004). Em
+      `data-raw/abc_detection.R` (desenho da recuperação, 20 mil simulações, três visitas,
+      detecção log-uniforme entre 0,02 e 0,5, maior contagem; 9 min de simulação e 3 de
+      florestas): com a detecção na tabela, R2 de 0,97 (`log_dispersal`), 0,84 (`inter_max`),
+      0,91 (`sigma_mean`) e 0,45 (`lambda`), contra 0,985; 0,89; 0,92 e 0,55 com detecção
+      perfeita, e `lambda` cai abaixo do critério. A própria detecção foi recuperada (R2 0,98),
+      sobretudo pela abundância total; ressalva: no modelo a capacidade de suporte é fixa, então
+      a abundância registrada informa a detecção diretamente; com capacidade desconhecida as
+      duas se confundem (não testado). Ignorando a detecção (tabela de detecção perfeita
+      aplicada aos mesmos dados), `sigma_mean` ficou enviesado em -0,36 da amplitude do prior,
+      com R2 negativo e cobertura de 0,60, e `log_dispersal` caiu para R2 0,49 com viés de
+      -0,11; `inter_max` e `lambda` pouco mudaram. As coberturas com a detecção na tabela
+      ficaram de 0,93 a 0,985, conservadoras como antes.
+- [ ] Capacidade de suporte como parâmetro, para saber se a detecção continua identificável
+      quando a escala da abundância é desconhecida.
 - [x] Estimação com `abcrf` (Raynal et al. 2019), em `Suggests`: `abc_fit()`, `predict()` e
       `abc_importance()` (2026-11-11). Random forests lidam bem com muitas estatísticas
       correlacionadas e ordenam a importância delas.

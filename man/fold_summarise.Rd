@@ -42,6 +42,7 @@ Other inference:
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}},
+\code{\link[=observe_detection]{observe_detection()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}
