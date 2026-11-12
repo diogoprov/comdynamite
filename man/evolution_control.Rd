@@ -123,12 +123,15 @@ evolution. \emph{Evolution}, 30, 314--334. \doi{10.1111/j.1558-5646.1976.tb00911
 }
 \seealso{
 Other simulate metacommunities:
+\code{\link[=as_metacommunity]{as_metacommunity()}},
 \code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
+\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
-\code{\link[=simulate_static]{simulate_static()}}
+\code{\link[=simulate_static]{simulate_static()}},
+\code{\link[=speciation_control]{speciation_control()}}
 }
 \concept{simulate metacommunities}

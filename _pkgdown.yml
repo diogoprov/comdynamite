@@ -18,6 +18,9 @@ reference:
   - logistic_gradients
   - mc_dynamics
   - evolution_control
+  - simulate_evolving_metacommunity
+  - speciation_control
+  - as_metacommunity
   - colonisation_history
   - growth_rates
 - title: Landscapes

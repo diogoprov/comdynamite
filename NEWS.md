@@ -1,5 +1,14 @@
 # comdynamite (development version)
 
+- `simulate_evolving_metacommunity()` runs the metacommunity with speciation (phase 2a of the
+  block on speciation): species split when their populations diverge, by geographic isolation
+  (`speciation_control("geographic")`, with divergence reset within clusters linked by gene flow
+  or lowered in proportion to the migrants exchanged) or by divergence of their genetic optima
+  (`"ecological"`), and die out with their last population. The tree grows out of the dynamics
+  (full and reconstructed), competition decays with the patristic distance, and
+  `as_metacommunity()` turns the output into an `mc_sim`. Without a split the simulation is
+  that of `simulate_metacommunity()` with the same seed. `mc_dynamics()` now runs its
+  preparation, steps and end as internal functions on one state, with the same results.
 - `evolution_control()` and the argument `evolution` of `simulate_metacommunity()` and
   `mc_dynamics()` let the niche optimum evolve within each population (phase 1 of the block on
   speciation, with no speciation yet): selection by the local environment as the response to

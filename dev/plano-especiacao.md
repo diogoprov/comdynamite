@@ -99,6 +99,23 @@ extensões.
 
 ### 2. Divergência e especiação
 
+#### Decisões da Fase 2 (Diogo, 2026-11-12)
+
+- Nome: `simulate_evolving_metacommunity()`. Modos na primeira versão: `"geographic"`,
+  `"ecological"`, `"point"`, `"fission"` e a camada de conclusão prolongada.
+- Dois PRs: 2a (função, registro filogenético, extinção global, `"geographic"` e
+  `"ecological"`, testes de consistência e validação 3) e 2b (conclusão prolongada, `"point"`,
+  `"fission"` e as validações 1 e 2).
+- `mc_dynamics()` refatorada em preparo, passo e fechamento sobre um mesmo estado, que a função
+  nova usa; sem especiação, ela reproduz `simulate_metacommunity()` com a mesma semente.
+- Divergência geográfica com duas regras: clusters de fluxo (padrão; diverge entre clusters,
+  zera dentro) e gradual (cresce 1 por geração e cai `homogenization` por migrante).
+- Competição que decai com a distância patrística, com piso `inter_min` (sem ele, espécies
+  distantes não competem e a riqueza explode).
+- Estado da 2a (2026-11-12): implementada e testada; validação 3 com apoio fraco
+  (`data-raw/evolving_peripheral.R`).
+
+
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
 especiação geográfica (limitação de dispersão e estocasticidade), especiação ecológica
 baseada em nicho (adaptação com fluxo gênico em paisagens heterogêneas) e especiação
