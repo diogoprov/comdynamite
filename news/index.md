@@ -2,6 +2,17 @@
 
 ## comdynamite (development version)
 
+- [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)
+  turns the true abundances of a simulation into survey records: each
+  individual is detected with a given probability in each of several
+  visits (binomial counts, as in N-mixture models), keeping the largest
+  count or presence, for the final community and for each step of the
+  series. Inside `simulate` of
+  [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
+  it puts observation error in the reference table. In
+  `data-raw/abc_detection.R` detection was recovered and the other
+  parameters mostly kept their recovery, while ignoring detection biased
+  the niche breadth.
 - [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
   gives, for each observation and parameter of an
   [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),

@@ -186,6 +186,8 @@ parameters.
 
 - [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
   : Reference table for approximate Bayesian computation
+- [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)
+  : Imperfect detection of a community
 - [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   [`predict(`*`<mc_abc_fit>`*`)`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   [`abc_importance()`](https://provetelab.org/comdynamite/reference/abc_fit.md)

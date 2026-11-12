@@ -56,7 +56,8 @@ Other inference:
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
 [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
-[`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md)
+[`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md),
+[`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)
 
 ## Examples
 
