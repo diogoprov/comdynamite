@@ -41,7 +41,8 @@ Matrix with one row per site and one column per time step, for the
 Other landscapes:
 [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md),
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
-[`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
+[`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md),
+[`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
 
 ## Examples
 

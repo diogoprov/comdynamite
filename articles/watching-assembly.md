@@ -32,8 +32,9 @@ dim(sim$history) # sites x species x recorded steps
 
 Each slice of `sim$history` is a sites x species matrix. Join it to the
 site coordinates, stack the slices in a long data frame with a `step`
-column, and draw it with `geom_raster()`, adding
-`gganimate::transition_manual(step)`.
+column, and draw it with
+[`geom_raster()`](https://ggplot2.tidyverse.org/reference/geom_tile.html),
+adding `gganimate::transition_manual(step)`.
 
 ## Assembly in a constant environment
 

@@ -17,13 +17,15 @@ library(comdynamite)
 survey: presences of 13 species in lakes of the northeastern United
 States, nine predictors and six biogeographic contrasts.
 [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md)
-codes each node of the tree as a contrast between its two clades. This
-tree has no branch lengths; with them, `branch_lengths = TRUE` gives the
-coding of the supplement of the article.
+codes each node of the tree as a contrast between its two clades.
+`tree_leibold` is the topology of Figure 3a, without branch lengths;
+with them, `branch_lengths = TRUE` gives the coding of the supplement of
+the article. (`daphniids$tree` is a dated tree from TimeTree with a
+different topology.)
 
 ``` r
 
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 dim(nodes)
 #> [1] 13 12
 ```
@@ -41,7 +43,7 @@ out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography, n
 out
 #> <mc_node_test> 12 nodes, 11 tested
 #> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001
-#> nodes with p (max) <= 0.05: 0 before correction, 0 after
+#> nodes with p (max) <= 0.05: 1 before correction, 0 after
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 ```
 
@@ -59,7 +61,7 @@ places the results on the tree, as in Figure 3 of the article.
 
 ``` r
 
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 ```
 
 ![Phylogeny of daphniids with blue circles for predictors and red

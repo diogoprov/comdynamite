@@ -35,6 +35,8 @@ The process-based model, from landscape and traits to abundances.
 
 Spatially implicit and grid landscapes, dispersal and environment.
 
+- [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
+  : Landscape from site coordinates
 - [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
   : Spatially implicit landscape
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
@@ -302,6 +304,8 @@ Tables, summaries and plots of results.
 
 ## Example data
 
+- [`anurans`](https://provetelab.org/comdynamite/reference/anurans.md) :
+  Anurans of urban ponds in two Brazilian cities
 - [`daphniids`](https://provetelab.org/comdynamite/reference/daphniids.md)
   : Daphniids of the northeastern United States
 

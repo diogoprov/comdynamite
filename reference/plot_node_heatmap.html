@@ -13,7 +13,7 @@ significant only as isolated tests. Blank cells could not be calculated."><meta 
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ significant only as isolated tests. Blank cells could not be calculated."><meta 
     <li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
     <li><a class="dropdown-item" href="../articles/whole-tree.html">Testing the whole tree</a></li>
     <li><a class="dropdown-item" href="../articles/trait-gradient.html">Trait-gradient analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/abc.html">Inference by ABC with random forests</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
@@ -146,7 +147,7 @@ biogeography. <em>Ecology Letters</em>, 13, 1290–1299.
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">tree</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">tree_leibold</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="node_test.html">node_test</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">env</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">biogeography</span>,</span></span>
 <span class="r-in"><span>                 n_perm <span class="op">=</span> <span class="fl">49</span><span class="op">)</span></span></span>

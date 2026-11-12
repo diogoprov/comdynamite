@@ -13,7 +13,7 @@ data-raw/daphniids.R."><meta property="og:image" content="https://provetelab.org
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,7 @@ data-raw/daphniids.R."><meta property="og:image" content="https://provetelab.org
     <li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
     <li><a class="dropdown-item" href="../articles/whole-tree.html">Testing the whole tree</a></li>
     <li><a class="dropdown-item" href="../articles/trait-gradient.html">Trait-gradient analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/abc.html">Inference by ABC with random forests</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
@@ -78,7 +79,9 @@ are public data of the US Environmental Protection Agency, and the script is
     <p>List with <code>comm</code>, a matrix of lakes by species; <code>env</code>, a matrix with colour,
 conductivity, dissolved organic carbon, total nitrogen, pH, total phosphorus, mean
 depth, elevation and the ratio of nitrogen to phosphorus; <code>biogeography</code>, a matrix of
-contrasts with values of 1, -1 and 0; and <code>tree</code>, a <code>phylo</code> object.</p>
+contrasts with values of 1, -1 and 0; <code>tree</code>, the dated <code>phylo</code> object;
+<code>tree_leibold</code>, the topology of Figure 3a; and <code>coords</code>, a matrix with
+the longitude and latitude of each lake in decimal degrees.</p>
     </div>
     <div class="section level2">
     <h2 id="source">Source<a class="anchor" aria-label="anchor" href="#source"></a></h2>
@@ -87,9 +90,20 @@ contrasts with values of 1, -1 and 0; and <code>tree</code>, a <code>phylo</code
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>The article gives 327 lakes and this rebuilt set has 314, of which 239 have some
-species. The tree is the topology of Figure 3a of the article, without branch lengths.
-The survey lists <em>D. longiremis</em> and not the <em>D. longispina</em> of the figure, which we
-took to be the same taxon. The article does not give the area of each lake, so rivers
+species. The survey lists <em>D. longiremis</em> and not the <em>D. longispina</em> of Figure 3a of the
+article, which we took to be the same taxon.</p>
+<p><code>tree_leibold</code> is the topology of Figure 3a, without branch lengths, for analyses that
+reproduce the article. <code>tree</code> has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
+dates nine of the 13 species, mostly from mitochondrial genomes (Xu et al. 2021). Its
+topology differs from that of Figure 3a: <em>D. laevis</em> and <em>D. dubia</em> are the sister of
+<em>D. galeata mendotae</em> and <em>D. rosea</em> rather than of all other <em>Daphnia</em>. The four species
+without dates were placed as in Figure 3a, at arbitrary ages: <em>D. catawba</em> and
+<em>D. parvula</em> split the branch of <em>D. retrocurva</em> into thirds, <em>D. rosea</em> joins
+<em>D. galeata mendotae</em> halfway along its branch, and <em>S. serrulatus</em> joins <em>S. vetulus</em> at
+the crown age of <em>Simocephalus</em> in TimeTree. The absolute ages are uncertain: for the
+ancestor of the <em>D. longispina</em> and <em>D. pulex</em> groups, Cornetti et al. (2019) found
+105 Ma with mitochondrial genes and 31.5 Ma with nuclear genes, so relative ages are more
+reliable than absolute ones. The article does not give the area of each lake, so rivers
 in <code>biogeography</code> are approximated by longitude and these contrasts differ from the
 original ones: S1, east and west of the Hudson; S2, Adirondacks and other lakes to the
 west of the Hudson; S3, east and west of the Connecticut River, east of the Hudson; S4,
@@ -98,9 +112,23 @@ east of the Hudson; S6, New Hampshire and lakes in Rhode Island and Massachusett
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010). Metacommunity phylogenetics:
+    <p>Cornetti, L., Fields, P. D., Van Damme, K., &amp; Ebert, D. (2019). A fossil-calibrated
+phylogenomic analysis of <em>Daphnia</em> and the Daphniidae. <em>Molecular Phylogenetics and
+Evolution</em>, 137, 250–262. <a href="https://doi.org/10.1016/j.ympev.2019.05.018" class="external-link">doi:10.1016/j.ympev.2019.05.018</a></p>
+<p>Kumar, S., Suleski, M., Craig, J. M., Kasprowicz, A. E., Sanderford, M., Li, M., Stecher, G.,
+&amp; Hedges, S. B. (2022). TimeTree 5: an expanded resource for species divergence times.
+<em>Molecular Biology and Evolution</em>, 39, msac174. <a href="https://doi.org/10.1093/molbev/msac174" class="external-link">doi:10.1093/molbev/msac174</a></p>
+<p>Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010). Metacommunity phylogenetics:
 separating the roles of environmental filters and historical biogeography. <em>Ecology
 Letters</em>, 13, 1290–1299. <a href="https://doi.org/10.1111/j.1461-0248.2010.01523.x" class="external-link">doi:10.1111/j.1461-0248.2010.01523.x</a></p>
+<p>Taylor, D. J., Finston, T. L., &amp; Hebert, P. D. N. (1998). Biogeography of a widespread
+freshwater crustacean: pseudocongruence and cryptic endemism in the North American
+<em>Daphnia laevis</em> complex. <em>Evolution</em>, 52, 1648–1670.
+<a href="https://doi.org/10.1111/j.1558-5646.1998.tb02245.x" class="external-link">doi:10.1111/j.1558-5646.1998.tb02245.x</a></p>
+<p>Xu, S.-L., Han, B.-P., Martínez, A., Schwentner, M., Fontaneto, D., Dumont, H. J., &amp; Kotov,
+A. A. (2021). Mitogenomics of Cladocera (Branchiopoda): marked gene order rearrangements and
+independent predation roots. <em>Molecular Phylogenetics and Evolution</em>, 164, 107275.
+<a href="https://doi.org/10.1016/j.ympev.2021.107275" class="external-link">doi:10.1016/j.ympev.2021.107275</a></p>
     </div>
 
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.7.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,6 +45,7 @@
     <li><a class="dropdown-item" href="../articles/analysing-clades.html">Analysing clades and traits in a metacommunity</a></li>
     <li><a class="dropdown-item" href="../articles/whole-tree.html">Testing the whole tree</a></li>
     <li><a class="dropdown-item" href="../articles/trait-gradient.html">Trait-gradient analysis</a></li>
+    <li><a class="dropdown-item" href="../articles/abc.html">Inference by ABC with random forests</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Simulating data</h6></li>
     <li><a class="dropdown-item" href="../articles/phylogenetic-structure.html">Dispersal, niche conservatism and phylogenetic community structure</a></li>
@@ -102,11 +103,13 @@ checked in the article on validation.</p>
 from the public survey: presences of 13 species in lakes of the
 northeastern United States, nine predictors and six biogeographic
 contrasts. <code><a href="../reference/node_contrasts.html">node_contrasts()</a></code> codes each node of the tree as
-a contrast between its two clades. This tree has no branch lengths; with
-them, <code>branch_lengths = TRUE</code> gives the coding of the
-supplement of the article.</p>
+a contrast between its two clades. <code>tree_leibold</code> is the
+topology of Figure 3a, without branch lengths; with them,
+<code>branch_lengths = TRUE</code> gives the coding of the supplement of
+the article. (<code>daphniids$tree</code> is a dated tree from TimeTree
+with a different topology.)</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">tree</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">daphniids</span><span class="op">$</span><span class="va">tree_leibold</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">nodes</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 13 12</span></span></code></pre></div>
 <p><code><a href="../reference/node_test.html">node_test()</a></code> regresses each contrast on the predictors.
@@ -120,7 +123,7 @@ in parallel on two cores.</p>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 12 nodes, 11 tested</span></span>
 <span><span class="co">#&gt; permutations: 999 free of sites, 999 of species; smallest possible p: 0.001</span></span>
-<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 0 before correction, 0 after</span></span>
+<span><span class="co">#&gt; nodes with p (max) &lt;= 0.05: 1 before correction, 0 after</span></span>
 <span><span class="co">#&gt; nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span></span></code></pre></div>
 <p>The p-values answer different questions, so this choice comes first.
 <code>p_max</code> tests the association between predictors and
@@ -133,7 +136,7 @@ should be read with that limit in mind.</p>
 <p><code><a href="../reference/plot_node_test.html">plot_node_test()</a></code> places the results on the tree, as in
 Figure 3 of the article.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_node_test.html">plot_node_test</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">tree</span>, test <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/plot_node_test.html">plot_node_test</a></span><span class="op">(</span><span class="va">out</span>, <span class="va">daphniids</span><span class="op">$</span><span class="va">tree_leibold</span>, test <span class="op">=</span> <span class="st">"site"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="analysing-clades_files/figure-html/unnamed-chunk-5-1.png" class="r-plt" alt="Phylogeny of daphniids with blue circles for predictors and red triangles for biogeographic events at the nodes, labelled with the names of the variables." width="672"></p>
 <p>A tree of this size reads best as a phylogram. For very large trees,
 <code>type = "fan"</code> draws the same plot in less space.</p>

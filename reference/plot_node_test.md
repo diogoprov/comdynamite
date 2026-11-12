@@ -121,17 +121,17 @@ Other clades and biogeography:
 ## Examples
 
 ``` r
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 49)
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 
 # \donttest{
 # solid symbols need more permutations
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
                  n_perm = 999)
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 
 # }
 ```

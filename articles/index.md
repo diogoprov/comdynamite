@@ -10,6 +10,8 @@
   tree](https://provetelab.org/comdynamite/articles/whole-tree.md):
 - [Trait-gradient
   analysis](https://provetelab.org/comdynamite/articles/trait-gradient.md):
+- [Inference by ABC with random
+  forests](https://provetelab.org/comdynamite/articles/abc.md):
 
 ### Simulating data
 

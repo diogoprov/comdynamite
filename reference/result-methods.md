@@ -100,7 +100,7 @@ the plot function.
 ## Examples
 
 ``` r
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 9)
 head(as.data.frame(out), 3)
@@ -121,5 +121,5 @@ head(summary(out), 3)
 #> 1       0.1   0.1     0.1       9       0.99
 #> 2       0.2   0.2     0.1       9       0.99
 #> 3       0.3   0.3     0.1       9       0.99
-plot(out, daphniids$tree, test = "site")
+plot(out, daphniids$tree_leibold, test = "site")
 ```

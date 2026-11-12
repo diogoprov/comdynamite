@@ -228,7 +228,7 @@ Other clades and biogeography:
 
 ``` r
 # daphniids of Leibold et al. (2010)
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 49)
 out
@@ -250,5 +250,5 @@ round(out$semipartial, 2)
 #> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02
 #> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25
 #> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA
-plot_node_test(out, daphniids$tree, test = "site")
+plot_node_test(out, daphniids$tree_leibold, test = "site")
 ```

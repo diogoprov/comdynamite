@@ -1,6 +1,23 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.8.0
+
+- [`vignette("abc")`](https://provetelab.org/comdynamite/articles/abc.md)
+  goes through inference by ABC with random forests with the anurans of
+  40 urban ponds in two Brazilian cities (`anurans`, new data set, with
+  regional pools from GBIF occurrences and a dated tree pruned from
+  Portik et al. 2023): simulator, reference table, recovery, model
+  choice, posterior, diagnostics, posterior predictive checks and
+  cross-validation over spatial blocks (`data-raw/abc_anurans.R`).
+
+- [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
+  builds a landscape from the coordinates of real sites, with
+  great-circle distances for longitude and latitude. `daphniids` gains
+  `coords`, the position of each lake, and its `tree` now has branch
+  lengths from TimeTree 5 (with the topology of TimeTree; four species
+  placed at arbitrary ages), while `tree_leibold` keeps the topology of
+  Figure 3a of Leibold et al. (2010) for analyses that reproduce the
+  article.
 
 - [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)
   turns the true abundances of a simulation into survey records: each
@@ -15,6 +32,7 @@
   the niche breadth. `data-raw/abc_capacity.R` adds the carrying
   capacity as a parameter: detection times capacity was recovered well,
   each of them only in part.
+
 - [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
   gives, for each observation and parameter of an
   [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
@@ -24,6 +42,7 @@
   `data-raw/abc_diagnose.R` k-hat did not predict wrong estimates, while
   a low effective sample size and statistics outside the table flagged
   data from another model.
+
 - Cross-validation of ABC across sites.
   [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
   splits the sites into spatial blocks (k-means on the coordinates) or
@@ -41,6 +60,7 @@
   `data-raw/abc_cv.R` compares spatial blocks with random folds: both
   were calibrated under the right model, and blocks did not flag a wrong
   model more often on a 5 x 5 torus.
+
 - [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   chooses among models with a classification random forest (Pudlo et
   al. 2016) and reports the out-of-bag error and confusion matrix;
@@ -55,6 +75,7 @@
   against no competition: the models were told apart with an out-of-bag
   error of 0.04, while the check on temporal statistics had little
   power, since the competition model contains the neutral one.
+
 - Inference by approximate Bayesian computation with random forests
   (Raynal et al. 2019), with abcrf in Suggests.
   [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
@@ -71,6 +92,7 @@
   the forests recovered the parameters about as well as rejection ABC at
   its best tolerance, without having to choose one, with calibrated or
   conservative intervals.
+
 - [`plot()`](https://rdrr.io/r/graphics/plot.default.html) of
   [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
   has a `clades` argument. It takes either the number of the deepest
@@ -81,10 +103,12 @@
   now drawn below the species.
   [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
   keeps the pruned tree as `tree`.
+
 - The article “Testing the whole tree” cites the origin of the principal
   coordinates of phylogenetic structure and explains why the curve of
   phylogenetic signal of the package PCPS (`pcps.curve()`) is not
   implemented.
+
 - [`random_regimes()`](https://provetelab.org/comdynamite/reference/random_regimes.md)
   no longer draws partitions that split the tree as the original one,
   such as the complement of a clade at the root: `max_overlap` now also
@@ -100,6 +124,7 @@
   small); it returns their number (`n_distinct`) and warns when there
   are fewer than 19, as the p-value then cannot fall below 0.05. Trees
   with a strong shift in diversification often leave that little room.
+
 - The article “Rates and assembly” rejects ES-sim at p ≤ 0.05, the rule
   of the preprint, instead of p \< 0.05. With 999 null draws five cells
   change by one replicate each and no conclusion changes.
