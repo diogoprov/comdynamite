@@ -17,6 +17,8 @@
 #   (space-separated NAME=value pairs).
 # AZ (environment, optional): availability zone, e.g. us-east-1c, to pick the
 #   cheapest spot price; otherwise EC2 chooses.
+# MARKET (environment, optional): "ondemand" for an on-demand instance, which is not
+#   interrupted (for jobs longer than the usual time between spot interruptions); default spot.
 set -euo pipefail
 BUCKET=$1; RUN=$2; SCRIPT=$3; TYPE=$4; WORKERS=$5; ROLE=$6; MAX_HOURS=${7:-12}; REPS=${8:-}
 cd "$(git rev-parse --show-toplevel)"
@@ -33,13 +35,15 @@ sed -e "s|__BUCKET__|${BUCKET}|" -e "s|__RUN__|${RUN}|" -e "s|__SCRIPT__|${SCRIP
 AMI=$(aws ec2 describe-images --owners amazon \
   --filters "Name=name,Values=al2023-ami-2023.*-kernel-*-x86_64" "Name=state,Values=available" \
   --query 'sort_by(Images, &CreationDate)[-1].ImageId' --output text)
-echo "AMI ${AMI}; job folder ${JOBS}" >&2
+echo "AMI ${AMI}; job folder ${JOBS}; market ${MARKET:-spot}" >&2
+SPOT='{"MarketType":"spot","SpotOptions":{"SpotInstanceType":"one-time","InstanceInterruptionBehavior":"terminate"}}'
+if [ "${MARKET:-spot}" = "ondemand" ]; then SPOT=""; fi
 
 aws ec2 run-instances \
   --image-id "${AMI}" \
   --instance-type "${TYPE}" \
   ${AZ:+--placement AvailabilityZone=${AZ}} \
-  --instance-market-options '{"MarketType":"spot","SpotOptions":{"SpotInstanceType":"one-time","InstanceInterruptionBehavior":"terminate"}}' \
+  ${SPOT:+--instance-market-options "${SPOT}"} \
   --instance-initiated-shutdown-behavior terminate \
   --iam-instance-profile Name="${ROLE}" \
   --block-device-mappings '[{"DeviceName":"/dev/xvda","Ebs":{"VolumeSize":40,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
