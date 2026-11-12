@@ -949,8 +949,10 @@ as fases, em `dev/plano-especiacao.md`.
       reconstruída, extinção global, `as_metacommunity()`; validação 3 sem apoio (ρ ≈ 0).
       Revisada antes da 2b: brotamento, ligação por taxa de migração com persistência
       (`migration_min`, `reset_generations`), modo ecológico com persistência e fluxo reduzido
-      (`min_generations`, `migration_max`) e competição pela sobreposição de nicho. Falta a
-      2b: conclusão prolongada, `"point"` e `"fission"`, validações 1 e 2.
+      (`min_generations`, `migration_max`) e competição pela sobreposição de nicho.
+- [ ] Fase 2b (em 2026-11-12): `"point"`, `"fission"` (partição espacial ou aleatória),
+      `jump_var`, conclusão prolongada (fixa ou exponencial) com agrupamento das linhagens em
+      espécies boas; validações 1 (Ewens) e 2 (γ e PBD).
 - [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
       `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
       2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético

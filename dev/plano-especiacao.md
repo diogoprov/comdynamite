@@ -132,6 +132,20 @@ extensões.
    fenótipos no sítio, exp(−(p_is − p_js)²/(2(σ_i² + σ_j²))) (`niche_overlap = TRUE`).
 5. `inter_min = 0,25` mantido; sem fusão em contato secundário.
 
+#### Decisões da Fase 2b (Diogo, 2026-11-12)
+
+- `"fission"`: as duas partições, por argumento (`partition = "spatial"`, padrão: as populações
+  mais próximas, pelo kernel, de um sítio sorteado, em número sorteado; `"random"`: cada
+  população com probabilidade 1/2). Taxa por espécie por geração.
+- `"point"`: probabilidade por indivíduo por geração; a espécie nova começa com 1 indivíduo no
+  sítio e herda a média genética local, com salto gaussiano opcional (`jump_var`, padrão 0),
+  que vale para todos os modos.
+- Conclusão prolongada: as incipientes são linhagens independentes na dinâmica (como no PBD);
+  a conclusão é só registro. No fim, cada linhagem viva entra na espécie boa mais próxima
+  (ela mesma ou um ancestral), representada na árvore pela própria espécie boa ou, se extinta,
+  pela incipiente mais antiga.
+- Validações 1 (point contra Ewens, θ = 2Jν) e 2 (γ e ajuste do PBD, GPL, só em data-raw).
+
 
 Hubert et al. (2015) organizam os modelos de especiação em metacomunidades em três quadros:
 especiação geográfica (limitação de dispersão e estocasticidade), especiação ecológica

@@ -34,7 +34,7 @@ species).}
 \item{speciation}{Settings from \code{\link[=speciation_control]{speciation_control()}}.}
 
 \item{evolution}{Settings from \code{\link[=evolution_control]{evolution_control()}}; \code{NULL} keeps the optimum of each
-species fixed (\code{genetic_var = 0}), which allows only geographic speciation.}
+species fixed (\code{genetic_var = 0}), which rules out ecological speciation.}
 
 \item{dispersal}{Emigration probability, one value or one per species.}
 
@@ -70,22 +70,42 @@ which conserves them. Spatially implicit landscapes are always multinomial.}
 stops with an error beyond it.}
 }
 \value{
-An \code{mc_evolving} object: a list with \code{abundance} (sites x extant species), \code{tree}
-(the reconstructed tree of the extant species, branch lengths in generations, or \code{NULL}
-with fewer than two), \code{tree_full} (with extinct species), \code{species} (a table with the
-parent, birth, end and fate of every species), \code{events} (one row per budding, with the new
-species), \code{richness} (extant species at each generation), \code{genetic} (genetic means of the
-populations of the extant species), \code{traits} (of the extant species, with the mean genetic
-optimum over their populations as \code{optimum}), \code{alpha} (among the extant species at the end,
-without the niche overlap, which varies among sites), the records and colonisation history
-of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant species, and the \code{landscape}, \code{dispersal},
-\code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps} used. \code{\link[=as_metacommunity]{as_metacommunity()}} turns it
-into an \code{mc_sim} for the other functions of the package.
+An \code{mc_evolving} object, a list with:
+\itemize{
+\item \code{abundance}: sites x extant species. With protracted speciation (\code{completion} of
+\code{\link[=speciation_control]{speciation_control()}}), the species are the good species, each with the individuals
+of its extant lineages; otherwise every lineage is a species.
+\item \code{tree}: the reconstructed tree of those species, with branch lengths in generations,
+nodes at times of initiation and a root edge from the start to the crown, or \code{NULL}
+with fewer than two.
+\item \code{tree_full}: the tree of all lineages, extinct ones included.
+\item \code{species}: a table with the parent, birth (initiation), end, fate, order of budding,
+time of completion and status (\code{"good"} or \code{"incipient"} at its end) of every lineage.
+\item \code{events}: one row per budding, with the new lineages.
+\item \code{lineages} and \code{lineage_species}: abundances of the extant lineages and the species
+each belongs to.
+\item \code{richness} and \code{richness_good}: extant lineages, and extant lineages that have
+completed, at each generation (the second can be below the number of good species, some
+of which survive only in incipient lineages).
+\item \code{genetic}: genetic means of the populations of the extant lineages.
+\item \code{traits}: of the extant species, with the mean genetic optimum over the populations of
+their lineages as \code{optimum}.
+\item \code{alpha}: among the extant species at the end, without the niche overlap, which varies
+among sites.
+\item The records and colonisation history of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant
+species: records summed over their extant lineages (lineages extinct by the end are
+left out); colonisation, in each site, of the most abundant lineage.
+\item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation}, \code{evolution} and \code{n_steps}
+used.
+}
+
+\code{\link[=as_metacommunity]{as_metacommunity()}} turns it into an \code{mc_sim} for the other functions of the package.
 }
 \description{
 Runs the model of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, with the evolution of the niche optimum within
-populations of \code{\link[=evolution_control]{evolution_control()}}, on species that bud as their populations diverge
-(\code{\link[=speciation_control]{speciation_control()}}) and die out when their last population is lost. The tree is not
+populations of \code{\link[=evolution_control]{evolution_control()}}, on species that bud as their populations diverge, by
+point mutation or by fission (\code{\link[=speciation_control]{speciation_control()}}), and die out when their last
+population is lost. The tree is not
 given: it grows out of the dynamics. The community starts from the species of \code{traits}
 (usually one ancestor) and is closed: there is no immigration from outside the landscape.
 }
