@@ -70,10 +70,10 @@ the tests of \code{\link[=node_test]{node_test()}} in order of \code{p_adjusted}
 \code{\link[=plot_trait_partition]{plot_trait_partition()}} or \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}.
 }
 \examples{
-nodes <- node_contrasts(daphniids$tree)
+nodes <- node_contrasts(daphniids$tree_leibold)
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 9)
 head(as.data.frame(out), 3)
 head(summary(out), 3)
-plot(out, daphniids$tree, test = "site")
+plot(out, daphniids$tree_leibold, test = "site")
 }

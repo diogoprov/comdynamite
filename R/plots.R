@@ -41,16 +41,16 @@
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
 #' @family clades and biogeography
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
-#' nodes <- node_contrasts(daphniids$tree)
+#' nodes <- node_contrasts(daphniids$tree_leibold)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
 #'                  n_perm = 49)
-#' plot_node_test(out, daphniids$tree, test = "site")
+#' plot_node_test(out, daphniids$tree_leibold, test = "site")
 #' \donttest{
 #' # solid symbols need more permutations
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
 #'                  n_perm = 999)
-#' plot_node_test(out, daphniids$tree, test = "site")
+#' plot_node_test(out, daphniids$tree_leibold, test = "site")
 #' }
 #' @export
 plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
@@ -183,7 +183,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #' \doi{10.1111/j.1461-0248.2010.01523.x}
 #' @family clades and biogeography
 #' @examplesIf requireNamespace("ggplot2", quietly = TRUE)
-#' nodes <- node_contrasts(daphniids$tree)
+#' nodes <- node_contrasts(daphniids$tree_leibold)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography,
 #'                  n_perm = 49)

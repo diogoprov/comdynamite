@@ -8,7 +8,8 @@
 List with \code{comm}, a matrix of lakes by species; \code{env}, a matrix with colour,
 conductivity, dissolved organic carbon, total nitrogen, pH, total phosphorus, mean
 depth, elevation and the ratio of nitrogen to phosphorus; \code{biogeography}, a matrix of
-contrasts with values of 1, -1 and 0; \code{tree}, a \code{phylo} object; and \code{coords}, a matrix with
+contrasts with values of 1, -1 and 0; \code{tree}, the dated \code{phylo} object;
+\code{tree_leibold}, the topology of Figure 3a; and \code{coords}, a matrix with
 the longitude and latitude of each lake in decimal degrees.
 }
 \source{
@@ -28,7 +29,8 @@ The article gives 327 lakes and this rebuilt set has 314, of which 239 have some
 species. The survey lists \emph{D. longiremis} and not the \emph{D. longispina} of Figure 3a of the
 article, which we took to be the same taxon.
 
-The tree has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
+\code{tree_leibold} is the topology of Figure 3a, without branch lengths, for analyses that
+reproduce the article. \code{tree} has branch lengths in millions of years from TimeTree 5 (Kumar et al. 2022), which
 dates nine of the 13 species, mostly from mitochondrial genomes (Xu et al. 2021). Its
 topology differs from that of Figure 3a: \emph{D. laevis} and \emph{D. dubia} are the sister of
 \emph{D. galeata mendotae} and \emph{D. rosea} rather than of all other \emph{Daphnia}. The four species

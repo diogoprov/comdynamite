@@ -44,6 +44,13 @@ found <- merge(counts, lakes[, c("LAKE_ID", "YEAR", "VISIT_NO")])
 found <- found[found$TAXACODE %in% names(taxa) & number(found$COUNT) > 0, ]
 comm[cbind(found$LAKE_ID, taxa[found$TAXACODE])] <- 1L
 
+# The topology of Figure 3a of the article, without branch lengths, for analyses that reproduce it
+tree_leibold <- ape::read.tree(text = paste0(
+  "(((((((Daphnia_retrocurva,Daphnia_parvula),Daphnia_catawba),",
+  "(Daphnia_pulicaria,Daphnia_pulex)),Daphnia_ambigua),",
+  "(Daphnia_longispina,(Daphnia_galeata_mendotae,Daphnia_rosea))),",
+  "(Daphnia_laevis,Daphnia_dubia)),(Simocephalus_serrulatus,Simocephalus_vetulus));"))
+
 # The tree: divergence times from TimeTree 5 (Kumar et al. 2022; API version 20260820, accessed
 # 2026-11-11), whose Daphniidae tree, pruned to the nine species it dates, is
 #   (((Daphnia_longiremis:101,(Daphnia_galeata:90,(Daphnia_dubia:20,Daphnia_laevis:20):70):11):14,
@@ -90,5 +97,6 @@ env <- as.matrix(lakes[, c(variables, "TN_TP")])
 coords <- as.matrix(lakes[, c("LON_DD", "LAT_DD")])
 colnames(coords) <- c("lon", "lat")
 daphniids <- list(comm = comm, env = env, biogeography = biogeography, tree = tree,
+                  tree_leibold = tree_leibold,
                   coords = coords)
 usethis::use_data(daphniids, overwrite = TRUE, compress = "xz")

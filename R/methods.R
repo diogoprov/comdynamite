@@ -12,12 +12,12 @@
 #' @param ... Passed to the plot function, and not used otherwise.
 #' @return A data frame, or for `plot()` the value of the plot function.
 #' @examples
-#' nodes <- node_contrasts(daphniids$tree)
+#' nodes <- node_contrasts(daphniids$tree_leibold)
 #' set.seed(1)
 #' out <- node_test(daphniids$comm, nodes, daphniids$env, n_perm = 9)
 #' head(as.data.frame(out), 3)
 #' head(summary(out), 3)
-#' plot(out, daphniids$tree, test = "site")
+#' plot(out, daphniids$tree_leibold, test = "site")
 #' @name result-methods
 NULL
 
