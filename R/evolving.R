@@ -1041,12 +1041,6 @@ evolving_tree <- function(sp, tree0) {
 evolving_series_rows <- function(st, before, buds, sp_table, gen) {
   dead <- setdiff(which(colSums(before) > 0), st$alive)
   ids <- c(st$alive, dead)
-  if (!length(ids)) {
-    return(data.frame(generation = numeric(0), lineage = character(0), occupancy = integer(0),
-                      abundance = numeric(0), genetic = numeric(0), colonised = integer(0),
-                      extirpated = integer(0), present_before = integer(0),
-                      absent_before = integer(0), stringsAsFactors = FALSE))
-  }
   n <- cbind(st$n, matrix(0, st$m, length(dead)))
   now <- n > 0
   was <- before[, ids, drop = FALSE]
@@ -1063,7 +1057,7 @@ evolving_series_rows <- function(st, before, buds, sp_table, gen) {
   zz[!now] <- 0
   abundance <- colSums(n)
   keep <- !skip
-  out <- data.frame(generation = gen, lineage = st$species[ids],
+  out <- data.frame(generation = rep(gen, length(ids)), lineage = st$species[ids],
                     occupancy = colSums(now), abundance = abundance,
                     genetic = ifelse(abundance > 0, colSums(n * zz) / abundance, NA_real_),
                     colonised = colSums(now & !was & keep),

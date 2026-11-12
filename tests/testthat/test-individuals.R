@@ -413,3 +413,28 @@ test_that("the evolutionary state is NULL without evolution and keeps names and 
   expect_error(sample_individuals(mc, source = "evolution", env = ls$env), "env")
   expect_equal(unique(a$env[a$site == "site1"]), sim$evolution$environment[1])
 })
+
+test_that("evolved_populations() checks the names of the evolutionary state", {
+  ab <- matrix(1, 2, 2, dimnames = list(c("s1", "s2"), c("a", "b")))
+  ev <- list(genetic = ab, plastic = ab * 0, genetic_var = 1, env_var = c(a = 1, b = 2))
+  x <- list(abundance = ab, evolution = ev)
+  st <- evolved_populations(x, c("s1", "s2"), c("b", "a"))
+  expect_equal(unname(st$var[1, ]), c(3, 2))
+  # sites matched by position when the state has other site names
+  x2 <- x
+  rownames(x2$evolution$genetic) <- rownames(x2$evolution$plastic) <- c("p", "q")
+  expect_equal(dim(evolved_populations(x2, c("s1", "s2"), "a")$mean), c(2, 1))
+  expect_error(evolved_populations(x2, c("s1", "s2", "s3"), "a"), "does not match")
+  expect_error(evolved_populations(x, "s1", "z"), "lacks")
+  x3 <- x
+  x3$evolution$genetic <- unname(ab)
+  expect_error(evolved_populations(x3, "s1", "a"), "no site or species names")
+  set.seed(4)
+  ls <- landscape_implicit(6)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 20, evolution = evolution_control(1, env = ls$env,
+                                                                            traits = tr))
+  expect_error(sample_individuals(sim, source = "evolution", intraspecific_sd = -1),
+               "negative")
+})
