@@ -8,6 +8,7 @@
 #   e.g. data-raw/aws/supervise.sh my-bucket dyn data-raw/s1_type1_shifts.R 190 pcps-sim-ec2 12 i-0abc c7a.48xlarge c7i.48xlarge m7a.48xlarge
 # MAXR (environment, default 5): number of relaunches before giving up.
 # MAXWAIT (environment, default 24): attempts in a row without capacity before giving up.
+# MARKET (environment): "ondemand" launches on-demand instances (see launch_spot.sh).
 set -uo pipefail
 BUCKET=$1; RUN=$2; SCRIPT=$3; WORKERS=$4; ROLE=$5; HOURS=$6; ID=$7; shift 7; TYPES=("$@")
 MAXR=${MAXR:-5}
@@ -37,7 +38,7 @@ while true; do
     echo "${RUN}: instance ended (${s}); relaunch ${n} on ${launched} ${ID} ($(date))"
   else
     wait_n=$((wait_n + 1))
-    echo "${RUN}: no spot capacity for ${TYPES[*]} (${wait_n}/${MAXWAIT}): ${out} ($(date))"
+    echo "${RUN}: no ${MARKET:-spot} capacity for ${TYPES[*]} (${wait_n}/${MAXWAIT}): ${out} ($(date))"
     [ "$wait_n" -ge "$MAXWAIT" ] && { echo "${RUN}: gave up waiting for capacity ($(date))"; exit 1; }
   fi
   sleep 300
