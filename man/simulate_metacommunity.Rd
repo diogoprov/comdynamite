@@ -38,7 +38,8 @@ rows of \code{traits} by name, or by position if \code{alpha} has no names.}
 
 \item{env_time}{Optional matrix (sites x \code{n_steps}) with the environment at
 each step, e.g. from \code{\link[=env_over_time]{env_over_time()}}. If \code{NULL}, the environment of the
-landscape is constant.}
+landscape is constant. With \code{env} (several axes), a list with one such matrix per column
+of \code{env} (matched by name when named), or an array of sites x steps x axes.}
 
 \item{seed_steps}{Steps at which individuals are added during colonisation.}
 
@@ -62,9 +63,10 @@ which conserves them. Spatially implicit landscapes are always multinomial.}
 
 \item{env}{Optional environmental axes of each site, a matrix or data frame with one row per
 site and one column per element of \code{traits} (such as the \code{env} of several landscapes on
-the same grid). Needed when \code{traits} is a list; replaces the \code{env} of \code{landscape}. Not
-available with \code{env_time}. Columns without names take the names of \code{traits}, or \code{axis1},
-\code{axis2}, ...}
+the same grid). Needed when \code{traits} is a list; replaces the \code{env} of \code{landscape}. With
+\code{env_time}, it gives the axes (names and number), and the environment of each step comes
+from \code{env_time}. Columns without names take the names of \code{traits}, or \code{axis1}, \code{axis2},
+...}
 
 \item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,

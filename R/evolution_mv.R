@@ -64,7 +64,11 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     stop("`traits` of `evolution` need one row per species (", k_all, ") on every axis",
          call. = FALSE)
   }
-  env <- as.matrix(evolution$env)
+  env_fun <- if (is.function(evolution$env)) evolution$env else {
+    fixed_env <- evolution$env
+    function(step) fixed_env
+  }
+  env <- as.matrix(env_fun(1))
   if (!is.numeric(env) || nrow(env) != m || ncol(env) != q || anyNA(env)) {
     stop("`env` of `evolution` needs one row per site (", m, ") and one column per trait (", q,
          ")", call. = FALSE)
@@ -111,7 +115,16 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
          diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ])
   })
-  list(mv = TRUE, q = q, axes = axes, env = function(step) env, ref = colMeans(env),
+  env_now <- if (is.function(evolution$env)) {
+    function(step) {
+      e <- as.matrix(env_fun(step))
+      dimnames(e) <- NULL
+      e
+    }
+  } else {
+    function(step) env
+  }
+  list(mv = TRUE, q = q, axes = axes, env = env_now, ref = colMeans(env),
        optimum = optimum, sigma = sigma, r_max = r_max, G = G, E = E, b = b, sel = sel,
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,

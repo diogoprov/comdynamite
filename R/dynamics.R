@@ -87,9 +87,10 @@
 #'   [growth_rates()].
 #' @param env Optional environmental axes of each site, a matrix or data frame with one row per
 #'   site and one column per element of `traits` (such as the `env` of several landscapes on
-#'   the same grid). Needed when `traits` is a list; replaces the `env` of `landscape`. Not
-#'   available with `env_time`. Columns without names take the names of `traits`, or `axis1`,
-#'   `axis2`, ...
+#'   the same grid). Needed when `traits` is a list; replaces the `env` of `landscape`. With
+#'   `env_time`, it gives the axes (names and number), and the environment of each step comes
+#'   from `env_time`. Columns without names take the names of `traits`, or `axis1`, `axis2`,
+#'   ...
 #' @param alpha Competition matrix from [competition_matrix()]. Species are matched to the
 #'   rows of `traits` by name, or by position if `alpha` has no names.
 #' @param dispersal Emigration probability, one value or one per species.
@@ -98,7 +99,8 @@
 #' @param n_steps Number of time steps.
 #' @param env_time Optional matrix (sites x `n_steps`) with the environment at
 #'   each step, e.g. from [env_over_time()]. If `NULL`, the environment of the
-#'   landscape is constant.
+#'   landscape is constant. With `env` (several axes), a list with one such matrix per column
+#'   of `env` (matched by name when named), or an array of sites x steps x axes.
 #' @param seed_steps Steps at which individuals are added during colonisation.
 #' @param seed_mean Mean number of individuals of each species added to each
 #'   site at each seeding step (and at the start).
@@ -164,7 +166,6 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   immigration <- match.arg(immigration)
   several <- is.list(traits) && !is.data.frame(traits)
   if (several || !is.null(env)) {
-    if (!is.null(env_time)) stop("`env_time` is not available with `env`", call. = FALSE)
     trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
     if (is.null(env)) stop("a list of traits needs `env`, one column per element", call. = FALSE)
     unnamed <- is.null(colnames(env)) && !is.data.frame(env)
@@ -177,6 +178,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
            "set of traits (", length(trait_list), ")", call. = FALSE)
     }
     traits <- trait_list[[1]]
+    if (!is.null(env_time)) env_time <- env_time_axes(env_time, env, n_steps)
   }
   if (!identical(dim(alpha), rep(nrow(traits), 2L))) {
     stop("`alpha` needs one row and one column per species (", nrow(traits), ")", call. = FALSE)
@@ -189,7 +191,13 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
     alpha <- alpha[species, species]
   }
   sites <- paste0("site", seq_along(landscape$env))
-  r <- if (!is.null(env)) {
+  r <- if (!is.null(env) && !is.null(env_time)) {
+    rownames(env) <- sites
+    function(step) {
+      now <- as.data.frame(lapply(env_time, function(x) x[, step]), row.names = sites)
+      growth_rates(now, if (several) trait_list else traits)
+    }
+  } else if (!is.null(env)) {
     rownames(env) <- sites
     growth_rates(env, if (several) trait_list else traits)
   } else if (is.null(env_time)) {
@@ -210,10 +218,14 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
              "`traits` and `env`), one trait per axis", call. = FALSE)
       }
       evolution$traits <- stats::setNames(trait_list, names(env))
-      evolution$env <- as.matrix(env)
+      evolution$env <- if (is.null(env_time)) as.matrix(env) else {
+        function(step) vapply(env_time, function(x) x[, step], numeric(nrow(env)))
+      }
     } else {
     evolution$traits <- traits
-    evolution$env <- if (!is.null(env)) env[[1]] else if (is.null(env_time)) landscape$env else
+    evolution$env <- if (!is.null(env) && !is.null(env_time)) {
+      function(step) env_time[[1]][, step]
+    } else if (!is.null(env)) env[[1]] else if (is.null(env_time)) landscape$env else
       function(step) env_time[, step]
     }
   }
@@ -227,6 +239,31 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
                         pool = out$pool, tree = tree)), class = "mc_sim")
+}
+
+# the environment through time on several axes: a list of matrices (sites x steps), one per
+# column of `env` (matched by name when named), or an array of sites x steps x axes
+env_time_axes <- function(env_time, env, n_steps) {
+  if (is.array(env_time) && length(dim(env_time)) == 3) {
+    env_time <- lapply(seq_len(dim(env_time)[3]), function(a) env_time[, , a])
+  } else if (is.matrix(env_time) && ncol(env) == 1) {
+    env_time <- list(env_time)
+  }
+  if (!is.list(env_time) || length(env_time) != ncol(env)) {
+    stop("with `env`, `env_time` needs one matrix (sites x steps) per column of `env` (",
+         ncol(env), "), as a list or an array of sites x steps x axes", call. = FALSE)
+  }
+  if (!is.null(names(env_time)) && all(names(env) %in% names(env_time))) {
+    env_time <- env_time[names(env)]
+  }
+  ok <- vapply(env_time, function(x) {
+    is.numeric(x) && is.matrix(x) && nrow(x) == nrow(env) && ncol(x) >= n_steps && !anyNA(x)
+  }, logical(1))
+  if (!all(ok)) {
+    stop("each matrix of `env_time` needs one row per site (", nrow(env), ") and at least ",
+         "`n_steps` (", n_steps, ") columns, without NA", call. = FALSE)
+  }
+  stats::setNames(lapply(env_time, unname), names(env))
 }
 
 #' Metacommunity dynamics from growth rates
@@ -591,7 +628,8 @@ mc_finish <- function(st) {
       plastic[gone] <- NA_real_
       dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- list(sites, species, ev$axes)
       env_history <- if (length(record_steps)) {
-        array(e_end, c(m, ev$q, length(record_steps)),
+        array(vapply(record_steps, function(s) as.vector(ev$env(s)), numeric(m * ev$q)),
+              c(m, ev$q, length(record_steps)),
               dimnames = list(sites, ev$axes, step_label(record_steps)))
       }
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,

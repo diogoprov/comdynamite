@@ -229,4 +229,38 @@ test_that("the multivariate state checks traits and env, and axes without select
                                 n_steps = 10, evolution = evolution_control(diag(2)))
   m <- maladaptation(sim)
   expect_true(all(m$distance == 0 & m$load == 0))
+
+test_that("env_time changes every axis of a niche, with and without evolution", {
+  set.seed(6)
+  s <- mv_setup()
+  tr <- s$tr
+  tr$head$sigma <- 5
+  n_steps <- 30
+  warm <- list(svl = sapply(1:n_steps, function(t) s$env[, "svl"] + t),
+               head = sapply(1:n_steps, function(t) s$env[, "head"] - 0.1 * t))
+  run <- function(env_time, ev = NULL, seed = 1) {
+    set.seed(seed)
+    simulate_metacommunity(s$ls, tr, s$alpha, env = s$env, env_time = env_time,
+                           dispersal = 0.02, n_steps = n_steps, record_steps = c(10, 30),
+                           evolution = ev)
+  }
+  # constant env_time equals no env_time
+  same <- lapply(s$env |> as.data.frame(), function(x) matrix(x, length(x), n_steps))
+  expect_identical(run(same)$abundance, run(NULL)$abundance)
+  # as an array, in a different order of the list
+  arr <- array(c(warm$svl, warm$head), c(25, n_steps, 2))
+  expect_identical(run(warm[c("head", "svl")])$abundance, run(arr)$abundance)
+  ev <- evolution_control(diag(c(4, 1)), env_var = diag(2))
+  sim <- run(warm, ev)
+  eh <- sim$evolution$environment_history
+  expect_equal(unname(eh[, "svl", "step10"]), s$env[, "svl"] + 10)
+  expect_equal(unname(eh[, "head", "step30"]), s$env[, "head"] - 3)
+  expect_equal(unname(sim$evolution$environment[, "svl"]), s$env[, "svl"] + 30)
+  m <- maladaptation(sim, step = 10)
+  expect_equal(m$env_svl, unname(s$env[match(m$site, rownames(sim$abundance)), "svl"] + 10))
+  # G = 0 with env_time gives the abundances without evolution
+  expect_identical(run(warm, evolution_control(matrix(0, 2, 2)))$abundance,
+                   run(warm)$abundance)
+  expect_error(run(list(warm$svl)), "one matrix")
+  expect_error(run(list(svl = warm$svl, head = warm$head[, 1:5])), "columns")
 })
