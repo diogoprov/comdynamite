@@ -34,7 +34,8 @@ simulate_evolving_metacommunity(
   record_steps = NULL,
   immigration = c("poisson", "multinomial"),
   max_species = 500,
-  env = NULL
+  env = NULL,
+  disturbance = 0
 )
 ```
 
@@ -130,6 +131,11 @@ simulate_evolving_metacommunity(
   [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md));
   competition falls with the overlap of the niches on all axes, and new
   species inherit the matrices of their mother.
+
+- disturbance:
+
+  Probability that a site loses all its populations at each time step
+  (one value; 0, the default, for none).
 
 ## Value
 

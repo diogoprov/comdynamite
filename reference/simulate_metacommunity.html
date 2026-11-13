@@ -51,6 +51,7 @@ probability dispersal, and emigrants are redistributed among sites:"><meta prope
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
+    <li><a class="dropdown-item" href="../articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
     <li><a class="dropdown-item" href="../articles/herodotools.html">Known biogeographic histories for Herodotools</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -96,7 +97,8 @@ probability <code>dispersal</code>, and emigrants are redistributed among sites:
 <span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  evolution <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  evolution <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  disturbance <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -185,6 +187,11 @@ all its populations, as before. With a niche of several axes, one trait evolves 
 with covariance matrices \(G\) and \(E\) (see the section Several traits of
 <code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>).</p></dd>
 
+
+<dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
+<dd><p>Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -198,7 +205,8 @@ list with the genetic mean of the optimum in each population (<code>genetic</cod
 of its phenotype at the last step (<code>plastic</code>), the phenotype after dispersal (<code>phenotype</code>,
 which mixes residents and immigrants), the genetic means and the environment at
 <code>record_steps</code> (<code>history</code>, <code>environment_history</code>), the reference environment and the
-settings; <code>NA</code> where a population is absent. With several evolving traits, <code>genetic</code>,
+settings, and, with <code>mutation_var</code>, the genetic variance of each population at the last
+step (<code>genetic_variance</code>); <code>NA</code> where a population is absent. With several evolving traits, <code>genetic</code>,
 <code>plastic</code> and <code>phenotype</code> are arrays of sites x species x traits, <code>history</code> has the
 recorded steps as a fourth dimension, and <code>genetic_var</code>, <code>env_var</code> (one matrix per species)
 and <code>plasticity</code> (species x traits) are kept. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
@@ -227,7 +235,9 @@ costs about as much as the Poisson draw at low dispersal and up to 20 times more
 dispersal, where the two give nearly the same results.</p></li>
 </ul><p>After dispersal, each population is lost with probability <code>extirpation</code>,
 independently of its size. Thompson et al. (2020) used 0.002 in their
-competition-colonisation scenario and no extirpation in the others.</p>
+competition-colonisation scenario and no extirpation in the others. With <code>disturbance</code>,
+each site then loses all its populations at once with that probability, as the patch
+extinctions of Leibold et al. (2019); the site is recolonised by dispersal.</p>
 <p>During colonisation, Poisson(<code>seed_mean</code>) individuals of every species are
 added to every site at each of the <code>seed_steps</code>. After the last of these,
 species absent from all sites can never return and are no longer computed.</p>
@@ -290,6 +300,10 @@ Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., &amp; Chase, J. M. (2020). A
 process-based metacommunity framework linking local and regional scale
 community ecology. <em>Ecology Letters</em>, 23, 1314–1329.
 <a href="https://doi.org/10.1111/ele.13568" class="external-link">doi:10.1111/ele.13568</a></p>
+<p>Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., &amp; Vanoverbeke, J.
+(2019). Regional neutrality evolves through local adaptive niche evolution.
+<em>Proceedings of the National Academy of Sciences</em>, 116, 2612–2617.
+<a href="https://doi.org/10.1073/pnas.1808615116" class="external-link">doi:10.1073/pnas.1808615116</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

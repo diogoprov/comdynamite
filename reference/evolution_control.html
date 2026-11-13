@@ -47,6 +47,7 @@ with immigrants and starts from a sample of its founders."><meta property="og:im
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
+    <li><a class="dropdown-item" href="../articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
     <li><a class="dropdown-item" href="../articles/herodotools.html">Known biogeographic histories for Herodotools</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -83,7 +84,9 @@ with immigrants and starts from a sample of its founders.</p>
 <span>  steps_per_generation <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  founder <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  traits <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  traits <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  immigrant_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  mutation_var <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -130,6 +133,34 @@ founders (<code>TRUE</code>) or from the mean of their source (<code>FALSE</code
 <dd><p>The environment of each site (a vector, or a function of the step that
 returns one) and the traits of the species (from <code><a href="species_traits.html">species_traits()</a></code>). Filled in by
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>; needed only with <code><a href="mc_dynamics.html">mc_dynamics()</a></code>.</p></dd>
+
+
+<dt id="arg-immigrant-selection">immigrant_selection<a class="anchor" aria-label="anchor" href="#arg-immigrant-selection"></a></dt>
+<dd><p>Should immigrants face viability selection in the site they reach
+before they mix with residents? With <code>FALSE</code> (the default), the immigrants from all sources
+join the population and the mean of the merged population is selected. With <code>TRUE</code>, the
+immigrants from each source arrive in proportion to the mean fitness of their source
+phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
+as the growth rate, with the variance of the phenotypes), so that maladapted immigrants
+are filtered source by source, as individuals are in an individual-based model, and the
+mean and variance of the immigrants are those of the survivors. One trait only, on a
+spatially explicit landscape with <code>immigration = "poisson"</code>; used in the article
+"Replicating Leibold et al. (2019)".</p></dd>
+
+
+<dt id="arg-mutation-var">mutation_var<a class="anchor" aria-label="anchor" href="#arg-mutation-var"></a></dt>
+<dd><p><code>NULL</code> (the default) for a constant genetic variance, or the mutational
+variance \(V_m\) added per generation, one value or one per species. Each population
+then carries its own genetic variance, which loses a fraction \(1 / (2 N_e)\)
+and gains \(V_m\) each generation (neutral mutation and drift, Lynch &amp; Hill 1986),
+so that it approaches \(2 N_e V_m\) in a population of constant size and stays
+low in small ones. Founders keep the variance of their sources times
+\(1 - 1 / (2k)\) for \(k\) founders, and gene flow averages the
+variances of residents and immigrants by their numbers. The variance between the means of
+residents and immigrants (or of sources) is not added, as if selection removed it, since
+selection does not otherwise act on the variance; without this choice, gene flow between
+diverged populations inflates the variance without bound. <code>genetic_var</code> is then the
+variance of the populations at the start and of seeds. Needs a finite <code>ne_ratio</code>; one trait only.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -216,6 +247,8 @@ evolution. <em>Evolution</em>, 30, 314–334. <a href="https://doi.org/10.1111/j
 <p>Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
 brain:body size allometry. <em>Evolution</em>, 33, 402–416.
 <a href="https://doi.org/10.1111/j.1558-5646.1979.tb04694.x" class="external-link">doi:10.1111/j.1558-5646.1979.tb04694.x</a></p>
+<p>Lynch, M. &amp; Hill, W. G. (1986). Phenotypic evolution by neutral mutation. <em>Evolution</em>, 40,
+915–935. <a href="https://doi.org/10.1111/j.1558-5646.1986.tb00561.x" class="external-link">doi:10.1111/j.1558-5646.1986.tb00561.x</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

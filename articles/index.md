@@ -38,5 +38,7 @@
   (2020)](https://provetelab.org/comdynamite/articles/validation.md):
 - [Validating the methods of Leibold et al. (2010) and Peres-Neto et al.
   (2012)](https://provetelab.org/comdynamite/articles/validation-gradient.md):
+- [Replicating Leibold et al.
+  (2019)](https://provetelab.org/comdynamite/articles/replication-leibold.md):
 - [Known biogeographic histories for
   Herodotools](https://provetelab.org/comdynamite/articles/herodotools.md):

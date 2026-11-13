@@ -278,7 +278,10 @@ optima of the species fell from 27.7 to an average of 18 over the last
 replaced, so the species remained regionally distinct. The run moves in
 the direction described by Leibold et al. (2019), but we did not measure
 neutrality, and we did not try to match the structure or the parameters
-of their model. These are single runs.
+of their model. These are single runs. The article [Replicating Leibold
+et
+al. (2019)](https://provetelab.org/comdynamite/articles/replication-leibold.md)
+follows their model and measures regional neutrality.
 
 ## Potential and realised ranges
 

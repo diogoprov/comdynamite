@@ -23,7 +23,8 @@ mc_dynamics(
   pool = NULL,
   initial = NULL,
   immigration = c("poisson", "multinomial"),
-  evolution = NULL
+  evolution = NULL,
+  disturbance = 0
 )
 ```
 
@@ -106,6 +107,11 @@ mc_dynamics(
   [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
   and
   [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)).
+
+- disturbance:
+
+  Probability that a site loses all its populations at each time step
+  (one value; 0, the default, for none).
 
 ## Value
 

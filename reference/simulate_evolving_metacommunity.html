@@ -49,6 +49,7 @@ given: it grows out of the dynamics. The community starts from the species of tr
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
+    <li><a class="dropdown-item" href="../articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
     <li><a class="dropdown-item" href="../articles/herodotools.html">Known biogeographic histories for Herodotools</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -97,7 +98,8 @@ given: it grows out of the dynamics. The community starts from the species of <c
 <span>  record_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
 <span>  max_species <span class="op">=</span> <span class="fl">500</span>,</span>
-<span>  env <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  disturbance <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -186,6 +188,11 @@ frame with one row per site and one column per element of <code>traits</code>. T
 and <code>env_var</code> of <code>evolution</code> are then covariance matrices (see the section Several traits
 of <code><a href="evolution_control.html">evolution_control()</a></code>); competition falls with the overlap of the niches on all axes,
 and new species inherit the matrices of their mother.</p></dd>
+
+
+<dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
+<dd><p>Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).</p></dd>
 
 </dl></div>
     <div class="section level2">

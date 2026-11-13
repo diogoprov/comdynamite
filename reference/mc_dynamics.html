@@ -41,6 +41,7 @@ their own growth rates (e.g. responses to several environmental variables)."><me
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
+    <li><a class="dropdown-item" href="../articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
     <li><a class="dropdown-item" href="../articles/herodotools.html">Known biogeographic histories for Herodotools</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -81,7 +82,8 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  pool <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
-<span>  evolution <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  evolution <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  disturbance <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -157,6 +159,11 @@ founder sampling and plasticity. <code>NULL</code> (the default) keeps the optim
 all its populations, as before. With a niche of several axes, one trait evolves per axis,
 with covariance matrices \(G\) and \(E\) (see the section Several traits of
 <code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>).</p></dd>
+
+
+<dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
+<dd><p>Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).</p></dd>
 
 </dl></div>
     <div class="section level2">
