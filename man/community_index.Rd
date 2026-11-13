@@ -103,6 +103,7 @@ to detect and quantify multi-level community assembly processes. \emph{Ecography
 \code{\link[=tstats]{tstats()}}.
 
 Other trait variation among individuals:
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},

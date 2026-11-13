@@ -39,6 +39,7 @@ head(null_intervals(tstats(ind, n_perm = 99)))
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},

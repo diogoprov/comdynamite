@@ -25,7 +25,10 @@ speciation_control(
 
 \item{threshold}{For \code{"geographic"} and \code{"ecological"}: divergence in generations, or
 difference of genetic means in units of the environment, that separates groups; \code{Inf}
-turns speciation off.}
+turns speciation off. With several traits (one per niche axis), the difference of two
+populations in \code{"ecological"} is the Mahalanobis distance of their genetic means under
+the phenotypic matrix of the species, \eqn{\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
+z}}{sqrt(dz' P^-1 dz)}, so \code{threshold} is in units of phenotypic standard deviations.}
 
 \item{rate}{For \code{"point"}: probability per individual per generation; for \code{"fission"}: rate
 per species per generation.}
@@ -51,7 +54,9 @@ counts as reduced.}
 
 \item{partition}{For \code{"fission"}: \code{"spatial"} or \code{"random"}.}
 
-\item{jump_var}{Variance of the shift of the genetic mean of each new species.}
+\item{jump_var}{Variance of the shift of the genetic mean of each new species. With several
+traits, one value (independent shifts of that variance on every trait) or a covariance
+matrix with one row and column per trait (for instance proportional to \eqn{G}{G}).}
 
 \item{completion}{Time to complete speciation, in generations (fixed or mean); 0 for
 instantaneous speciation.}

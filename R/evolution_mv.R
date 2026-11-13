@@ -40,6 +40,19 @@ evolution_matrices <- function(x, q, species, name) {
   rep(list(as_one(x)), length(species))
 }
 
+# a matrix W with W' P W = I on the range of P, so that distances between rows of z %*% W are
+# Mahalanobis distances under P (directions without variance are left out)
+evolution_whiten <- function(p) {
+  e <- eigen(p, symmetric = TRUE)
+  keep <- e$values > 1e-10 * e$values[1]
+  e$vectors[, keep, drop = FALSE] %*% diag(1 / sqrt(e$values[keep]), sum(keep))
+}
+
+# Mahalanobis distances under the P of species j between the rows of z (populations x traits)
+mv_distance <- function(ev, j, z) {
+  as.matrix(stats::dist(z %*% ev$whiten[[j]]))
+}
+
 # any matrix with L %*% t(L) = v, also for singular v
 evolution_root <- function(v) {
   e <- eigen(v, symmetric = TRUE)
@@ -64,7 +77,11 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     stop("`traits` of `evolution` need one row per species (", k_all, ") on every axis",
          call. = FALSE)
   }
-  env <- as.matrix(evolution$env)
+  env_fun <- if (is.function(evolution$env)) evolution$env else {
+    fixed_env <- evolution$env
+    function(step) fixed_env
+  }
+  env <- as.matrix(env_fun(1))
   if (!is.numeric(env) || nrow(env) != m || ncol(env) != q || anyNA(env)) {
     stop("`env` of `evolution` needs one row per site (", m, ") and one column per trait (", q,
          ")", call. = FALSE)
@@ -111,8 +128,18 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
          diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ])
   })
-  list(mv = TRUE, q = q, axes = axes, env = function(step) env, ref = colMeans(env),
-       optimum = optimum, sigma = sigma, r_max = r_max, G = G, E = E, b = b, sel = sel,
+  env_now <- if (is.function(evolution$env)) {
+    function(step) {
+      e <- as.matrix(env_fun(step))
+      dimnames(e) <- NULL
+      e
+    }
+  } else {
+    function(step) env
+  }
+  list(mv = TRUE, q = q, axes = axes, env = env_now, ref = colMeans(env),
+       optimum = optimum, sigma = sigma, r_max = r_max, r_axis = r_axis, G = G, E = E, b = b,
+       sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,
        founder = evolution$founder)

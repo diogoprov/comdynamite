@@ -977,8 +977,21 @@ as fases, em `dev/plano-especiacao.md`.
         e artigo "Quantitative genetics in the metacommunity" com GIFs (carga de migração,
         resgate evolutivo, orientação da G, prioridade evolutiva; Leibold et al. 2019, Urban &
         De Meester 2009, Cabral e colaboradores).
-  - [ ] Parte 2: especiação com vários traits em `simulate_evolving_metacommunity()`;
-        validação B ∝ W em `data-raw`; ambientes que mudam no tempo com vários eixos.
+  - [x] Parte 2: especiação com vários traits em `simulate_evolving_metacommunity()`
+        (especiação ecológica pela distância de Mahalanobis sob P, salto MVN com `jump_var`
+        matricial, sobreposição de nicho produto dos eixos); `env_time` com vários eixos;
+        `drift_test()` (Ackermann & Cheverud 2004) e validação B ∝ W em
+        `data-raw/validation_drift.R` (deriva contra seleção divergente no eixo menor da G).
+- [ ] Mapa de aninhamento e replicações (decidido em 2026-11-12; antes da Fase 4): tabela de
+      quais configurações recuperam cada modelo publicado e quais mecanismos ficam de fora
+      (genética individual de Urban & De Meester 2009, distúrbio de Leibold et al. 2019,
+      restrições metabólicas, estágios e dinâmica geoclimática de Cabral e colaboradores/BioGEEM,
+      tempo profundo do gen3sis). Replicar, nesta ordem: (i) a convergência de nicho regional de
+      Leibold et al. 2019 (o artigo de genética quantitativa só mostra a monopolização); (ii) o
+      efeito do atraso de colonização de Urban & De Meester 2009. Prioridade sobre o gen3sis,
+      que é bom para tempo profundo e menos para tempo ecológico. O posicionamento (populações e
+      genética quantitativa em tempo ecológico, módulos testáveis com a verdade conhecida;
+      Cabral, Valente & Hartig 2017) vai para o README e para o preprint.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;

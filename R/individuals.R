@@ -901,9 +901,13 @@ mv_populations <- function(x, step = NULL) {
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
   species <- colnames(abundance)
+  # variance among the lineages of a species in a site, trait by trait (evolving
+  # metacommunities)
+  within <- NULL
   if (is.null(step)) {
     z <- ev$genetic
     e <- ev$environment
+    within <- ev$within_var
   } else {
     label <- step_label(step)
     if (is.null(ev$history) || !label %in% dimnames(ev$history)[[4]]) {
@@ -912,6 +916,13 @@ mv_populations <- function(x, step = NULL) {
     z <- ev$history[, , , label, drop = FALSE]
     z <- array(z, dim(z)[1:3], dimnames(ev$genetic))
     e <- matrix(ev$environment_history[, , label], length(sites))
+    if (!is.null(ev$within_history)) {
+      within <- array(ev$within_history[, , , label], dim(z), dimnames(ev$genetic))
+    }
+  }
+  if (!is.null(within)) {
+    within <- within[sites, species, , drop = FALSE]
+    within[is.na(within)] <- 0
   }
   z <- z[sites, species, , drop = FALSE]
   b <- ev$plasticity[species, , drop = FALSE]
@@ -920,7 +931,7 @@ mv_populations <- function(x, step = NULL) {
     pop[, , a] <- z[, , a] + outer(e[, a] - ev$reference[a], b[, a])
   }
   e <- matrix(e, length(sites), q, dimnames = list(sites, axes))
-  list(mean = pop, env = e, abundance = abundance, axes = axes)
+  list(mean = pop, env = e, abundance = abundance, axes = axes, within = within)
 }
 
 # individuals of a simulation with several evolving traits (one per environmental axis): the
@@ -987,6 +998,11 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
     v <- ev$genetic_var[[k]] + ev$env_var[[k]] + diag(extra^2, q)
     values[pick, ] <- values[pick, , drop = FALSE] +
       matrix(stats::rnorm(length(pick) * q), length(pick)) %*% t(evolution_root(v))
+  }
+  # plus the variance among the lineages of the species in the site, trait by trait
+  if (!is.null(state$within)) {
+    w <- matrix(state$within, ncol = q)[occupied, , drop = FALSE][rows, , drop = FALSE]
+    values <- values + matrix(stats::rnorm(length(w)), nrow(w)) * sqrt(w)
   }
   for (a in seq_len(q)) {
     out[[paste0("env_", axes[a])]] <- e[site_of, a][rows]
