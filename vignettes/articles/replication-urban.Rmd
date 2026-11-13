@@ -135,6 +135,63 @@ at the start when dispersal is low.
 
 ![Share of the winner of the new site in its own source site, and mean genetic optimum of the winner in its source, over 2000 generations; means of 40 runs for each dispersal.](urban_source.png)
 
+## Three missing mechanisms
+
+Three features of their individual-based model are absent from the engine: recruitment into
+the microsites vacated by mortality, generations that overlap (their baseline mortality is
+0.1 per time step), and a genetic variance that is built by mutation and eroded by selection
+under clonal inheritance. We added them as options and crossed them in a reduced version of
+the three experiments (`data-raw/mechanisms_urban2009.R`). `recruitment = "lottery"` replaces
+Beverton-Holt growth: adults survive with probability `1 - mortality`, offspring are
+produced in proportion to fitness, and the vacant microsites (1000 per site) are filled by a
+multivariate hypergeometric draw from the offspring present after dispersal. With
+`mortality = 0.1` one generation is 10 steps, and delays and run lengths were converted
+accordingly. `variance_selection = TRUE` removes, every generation, the Bulmer (1971)
+reduction of the variance by stabilising selection, \(G^2/(\sigma^2 + G + V_E)\), and keeps
+it, as under clonal inheritance. Each of the three recruitment settings (Beverton-Holt,
+lottery with discrete generations, lottery with overlapping generations) was run with and
+without this erosion: 100 runs per delay for the colonisation delay, 50 runs over a
+\(6 \times 6\) sub-grid of dispersal rates, and 20 runs of 2000 generations for the gene flow
+into the sources.
+
+![Mean share of the new site held by species 1 against the delay between the introductions, over 100 runs, when both species evolve. Dotted grey lines: no evolution, for each recruitment setting. Notice that with standing variation the priority effect appears only when selection erodes the variance (dashed lines), whatever the recruitment.](mechanisms_urban_delay.png)
+
+The erosion of the variance by selection was the only mechanism that changed the colonisation
+experiment. With standing variation in both species and the variance left to mutation and
+drift, the first arrival won 24--38% of the runs with Beverton-Holt growth or a discrete
+lottery (the reversal described above) and 60--68% with overlapping generations. With the
+variance eroded by selection, it won 72--96% under every recruitment setting, against 64--84%
+without evolution, so the priority effect of standing variation in their Fig. 2 is
+reproduced. This seems to happen because selection removes the variance of the late arrival
+while it is still maladapted, so it no longer carries the variance load that let it catch up.
+With mutation in both species, the first arrival won 58--77% of the runs in every setting,
+close to the runs without evolution, although overlapping generations raised the share of
+monopolised runs (more than 90% of the site held by one species) from 28--30% to 46--49%. A
+species that evolved by mutation against one that did not won about 90% of the new site in
+every setting.
+
+![Relative dominance of species 1 in the new site after 500 generations over a sub-grid of dispersal rates, mean of 50 runs, for each recruitment setting (rows) and genetic setting (columns). Notice that with mutation the better disperser wins only with overlapping generations.](mechanisms_urban_dispersal.png)
+
+Overlapping generations changed the dispersal experiment. Without evolution the better
+disperser dominated the new site in every recruitment setting, more so under the lottery
+(mean relative dominance off the diagonal 0.33 with Beverton-Holt growth, 0.48 and 0.54 under
+the lottery). With mutation and discrete generations this advantage disappeared (-0.11 and
+-0.05), and erosion by selection restored little of it (0.07 and 0.11). With overlapping
+generations the better disperser kept most of it (0.32, and 0.35 with erosion), so the grid
+gained the region favouring the better disperser that was missing above.
+Adults that survive several steps seem to buffer the population against the maladapted
+immigrants of each step, so the demographic gain of dispersal outweighs its genetic cost.
+The gene flow into the sources was not changed: at a dispersal of 0.01 the winner of the new
+site kept only 3--22% of its own source after 2000 generations in every setting, and at 0.10
+it kept 71--95%.
+
+Taken together, two of the departures seem to be explained by missing mechanisms: the reversed
+priority effect of standing variation by the absence of erosion of the variance by
+selection, and the missing advantage of the better disperser by the absence of overlapping
+generations. Lottery recruitment with discrete generations changed none of the results. The
+weak priority effect with mutation and the loss of the source at low rather than high
+dispersal remain unexplained.
+
 ## Summary
 
 The quantitative-genetic engine reproduces two results of Urban & De Meester (2009): a
@@ -146,13 +203,16 @@ effect is reproduced only with a constant \(G\), since the size-dependent varian
 `mutation_var` carries a variance load that reverses it; and over the dispersal grid,
 evolution makes the poorer disperser win, as in their region of gene-flow-induced
 maladaptation, but no region favours the better disperser. Gene flow from the new site
-replaced a source population, as in their Fig. 3, but at low dispersal. Lottery recruitment
-into vacated microsites, overlapping generations and a genetic variance built from new
-mutations and eroded by selection are the missing mechanisms that seem most likely to close
-these gaps. One step was taken as 10 of their time steps, and the speed of adaptation was
+replaced a source population, as in their Fig. 3, but at low dispersal. Of three
+mechanisms missing from the engine, erosion of the variance by selection restored the
+priority effect of standing variation, and overlapping generations restored the advantage of
+the better disperser; lottery recruitment changed nothing. One step was taken as 10 of their time steps, and the speed of adaptation was
 set by \(V_m\) and the variance rather than matched to their loci.
 
 ## References
+
+Bulmer, M. G. (1971). The effect of selection on genetic variability. *The American
+Naturalist*, 105, 201--211. https://doi.org/10.1086/282718
 
 Lynch, M., & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
 915--935. https://doi.org/10.1111/j.1558-5646.1986.tb00561.x

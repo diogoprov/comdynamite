@@ -280,3 +280,83 @@ test_that("a site closed by pool_from is not a sink for emigrants", {
   expect_true(all(sim$abundance[1:2, 1] > 800))
   expect_equal(sim$abundance[3, 1], 0L)
 })
+
+test_that("lottery recruitment fills the microsites and emigration does not empty the source", {
+  tr <- data.frame(optimum = 40, sigma = 35, r_max = 5, row.names = "sp1")
+  ls <- landscape_matrix(matrix(1, 2, 2), env = c(40, 40))
+  init <- cbind(sp1 = c(300L, 0L))
+  set.seed(1)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 30,
+                                seed_steps = integer(0), initial = init,
+                                pool = cbind(sp1 = c(1, 0)), recruitment = "lottery",
+                                microsites = 500, record_steps = 1:30)
+  # half of the offspring are lost to the closed site, but they still outnumber the vacancies
+  expect_true(all(sim$history[1, 1, 2:30] == 500))
+  expect_equal(sim$recruitment, "lottery")
+  # Beverton-Holt with the same loss stays well below (5 * 0.5 - 1) / 0.004 = 375
+  set.seed(1)
+  bh <- simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 30,
+                               seed_steps = integer(0), initial = init,
+                               pool = cbind(sp1 = c(1, 0)))
+  expect_lt(bh$abundance[1, 1], 450)
+  # two equivalent species share the microsites; overlapping generations keep survivors
+  tr2 <- data.frame(optimum = c(40, 40), sigma = 35, r_max = 5, row.names = c("a", "b"))
+  set.seed(2)
+  sim <- simulate_metacommunity(landscape_matrix(matrix(1, 3, 3), env = c(40, 40, 60)), tr2,
+                                matrix(0.004, 2, 2), dispersal = c(0.05, 0.2), n_steps = 50,
+                                seed_steps = integer(0), initial = cbind(a = c(100L, 0L, 0L),
+                                                                         b = c(0L, 100L, 0L)),
+                                recruitment = "lottery", microsites = c(200, 300, 400),
+                                mortality = 0.2, immigration = "multinomial")
+  expect_equal(unname(rowSums(sim$abundance)), c(200, 300, 400))
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), recruitment = "lottery"),
+               "microsites")
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), recruitment = "lottery",
+                                      microsites = 10, mortality = 0), "mortality")
+})
+
+test_that("lottery_draw fills vacancies without exceeding the offspring", {
+  set.seed(3)
+  pool <- matrix(c(5L, 0L, 30L, 2L, 0L, 10L, 1L, 0L, 50L), 3, 3)
+  out <- lottery_draw(pool, c(4, 3, 100))
+  expect_true(all(out <= pool))
+  expect_equal(rowSums(out), c(4, 0, 90))
+  expect_equal(out[3, ], pool[3, ])
+})
+
+test_that("lottery keeps the microsites, counts immigrant recruits and checks its settings", {
+  tr <- data.frame(optimum = c(40, 40), sigma = 35, r_max = 5, row.names = c("a", "b"))
+  ls <- landscape_points(cbind(1:12, 0), env = rep(40, 12), disp_scale = 2)
+  set.seed(5)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), dispersal = 0.5, n_steps = 40,
+                                seed_mean = 3, recruitment = "lottery", microsites = 10,
+                                mortality = 0.1, record_steps = 1:40, disturbance = 0.05,
+                                extirpation = 0.01,
+                                evolution = evolution_control(genetic_var = 4, ne_ratio = 0.5))
+  expect_true(all(apply(sim$history, c(1, 3), sum) <= 10))
+  expect_true(all(sim$migrant_load <= 40, na.rm = TRUE))
+  expect_true(all(sim$propagule <= 10, na.rm = TRUE))
+  expect_true(is.integer(sim$abundance))
+  expect_equal(sim$microsites, 10)
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), recruitment = "lottery",
+                                      microsites = 5, seed_steps = integer(0),
+                                      initial = cbind(a = rep(4L, 12), b = rep(4L, 12))),
+               "more individuals")
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), recruitment = "lottery",
+                                      microsites = 5,
+                                      evolution = evolution_control(genetic_var = 4,
+                                                                    steps_per_generation = 2)),
+               "steps_per_generation")
+  # pool_from with a lottery: the closed site stays empty, then fills
+  set.seed(6)
+  sim <- simulate_metacommunity(landscape_matrix(matrix(1, 3, 3), env = c(40, 40, 60)), tr,
+                                matrix(0.004, 2, 2), dispersal = 0.1, n_steps = 30,
+                                seed_steps = integer(0),
+                                initial = cbind(a = c(50L, 0L, 0L), b = c(0L, 50L, 0L)),
+                                pool_from = cbind(a = c(1, 1, 10), b = c(1, 1, 10)),
+                                recruitment = "lottery", microsites = 50, record_steps = 1:30,
+                                evolution = evolution_control(genetic_var = 4, ne_ratio = 0.5,
+                                                              founder = FALSE))
+  expect_true(all(sim$history[3, , 1:9] == 0))
+  expect_equal(sum(sim$abundance[3, ]), 50)
+})

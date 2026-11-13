@@ -1006,10 +1006,17 @@ as fases, em `dev/plano-especiacao.md`.
       (90-99% de manchas compartilhadas com Nm = 10); a dominância local com G constante vem da
       deriva das médias. A do modelo deles fica sem explicação (candidatos não testados:
       recrutamento em loteria, gerações sobrepostas, variância a partir de mutações novas).
-- [ ] Para depois (pedido em 2026-11-13): investigar, como explicações da dominância local do
-      modelo de Leibold et al. 2019 que o motor não reproduz, (i) recrutamento em loteria nos
-      microssítios que vagam, (ii) gerações sobrepostas e (iii) variância genética construída a
-      partir de mutações novas (sem variância inicial).
+- [x] Três mecanismos (pedido em 2026-11-13): (i) recrutamento em loteria nos microssítios que
+      vagam (`recruitment = "lottery"`, `microsites`), (ii) gerações sobrepostas (`mortality`
+      < 1) e (iii) variância construída por mutação e erodida pela seleção (`variance_selection`
+      em `evolution_control()`, redução de Bulmer permanente). Testados em fatoriais
+      (`data-raw/mechanisms_urban2009.R`, `data-raw/mechanisms_leibold2019_recruitment.R`,
+      `data-raw/figures_mechanisms.R`) e seções nos dois artigos. Urban: a erosão pela seleção
+      restaura o efeito de prioridade da variação permanente; gerações sobrepostas restauram a
+      vantagem do melhor dispersor com mutação; loteria com gerações discretas não muda nada.
+      Leibold: nenhum dos três produz dominância local; o resultado depende do regime de
+      variância (G constante: perda de espécie; mutação a partir de G: manchas compartilhadas;
+      a partir de zero ou erodida: species sorting). Em aberto: V_m maior que 0,5.
 - [x] Replicação (ii), Urban & De Meester 2009 (`pool_from`, `data-raw/replication_urban2009.R`,
       artigo `replication-urban`): a espécie que evolui por mutação vence o sítio novo em
       qualquer ordem de chegada e a evolução nas duas torna o sítio mais monopolizado, mas
