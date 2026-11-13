@@ -229,6 +229,7 @@ test_that("the multivariate state checks traits and env, and axes without select
                                 n_steps = 10, evolution = evolution_control(diag(2)))
   m <- maladaptation(sim)
   expect_true(all(m$distance == 0 & m$load == 0))
+})
 
 test_that("env_time changes every axis of a niche, with and without evolution", {
   set.seed(6)
