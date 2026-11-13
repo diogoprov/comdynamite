@@ -25,7 +25,9 @@ path from the tip towards the root, until the first period in another region, pl
 from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
 region since the root gets the age of the root. With ranges of several regions (\code{"A+B"}, from
 \code{\link[=range_history]{range_history()}}), the age in each region is the time since the range last came to include
-it. These are the true values of what
+it. For an evolving metacommunity with protracted speciation, the tips of \code{\link[=range_history]{range_history()}}
+have the range of the lineage that represents each species, so cells occupied only by its
+incipient lineages, elsewhere, get \code{NA}. These are the true values of what
 \code{Herodotools::calc_age_arrival()} estimates from the areas of the nodes, which can only see
 arrivals at nodes and so gives younger ages.
 }

@@ -125,3 +125,89 @@ test_that("range_history() follows the representative lineages with protracted s
   expect_equal(unname(history_states(h)$tips[names(rep)]),
                unname(history_states(full)$tips[rep]))
 })
+
+test_that("nodes have the range of the mother before the split", {
+  r <- range_sim("geographic")
+  sim <- r$sim
+  h <- range_history(sim, r$areas, tree = "full")
+  st <- history_states(h)
+  tl <- range_timelines(sim$ranges, factor(r$areas, c("W", "E")))
+  depth <- round(ape::node.depth.edgelength(h) -
+                   stats::median(ape::node.depth.edgelength(h)[seq_along(h$tip.label)] -
+                                   sim$species$end[match(h$tip.label, sim$species$species)]), 6)
+  # every budding: the node is the range of the mother just before it
+  for (i in which(!is.na(sim$species$parent))) {
+    mother <- sim$species$parent[i]
+    g <- sim$species$birth[i]
+    nodes <- which(abs(depth - g) < 1e-6)
+    nodes <- nodes[nodes > ape::Ntip(h)]
+    expect_true(range_before(tl[[mother]], g) %in% st$nodes[nodes - ape::Ntip(h)])
+  }
+  expect_equal(st$nodes[1], range_before(tl$sp1, min(sim$species$birth[-1])))
+  # inner pieces of the reconstructed maps all have a duration
+  hr <- range_history(sim, r$areas)
+  inner <- unlist(lapply(hr$maps, function(m) m[-length(m)]))
+  expect_true(all(inner > 0))
+})
+
+test_that("range_history() handles one lineage, starting trees and named factors", {
+  set.seed(1)
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  areas <- ifelse(ls$coords$x < 1.5, "W", "E")
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  one <- simulate_evolving_metacommunity(ls, anc, speciation_control("geographic", Inf),
+                                         dispersal = 0.01, n_steps = 30)
+  expect_null(range_history(one, areas))
+  h1 <- range_history(one, areas, tree = "full")
+  expect_length(h1$maps, 1)
+  expect_equal(sum(h1$maps[[1]]), h1$edge.length)
+  # a starting tree of four species
+  set.seed(2)
+  tr <- ape::rcoal(4)
+  tr$edge.length <- tr$edge.length * 10
+  traits <- species_traits(tr)
+  sim <- simulate_evolving_metacommunity(ls, traits, speciation_control("fission", rate = 0.02),
+                                         dispersal = 0.01, extirpation = 0.02, n_steps = 150)
+  full <- range_history(sim, areas, tree = "full")
+  expect_equal(unname(rowSums(full$mapped.edge)), full$edge.length)
+  extant <- colnames(sim$lineages)
+  final <- vapply(extant, function(l) {
+    paste(intersect(c("W", "E"), unique(areas[sim$lineages[, l] > 0])), collapse = "+")
+  }, character(1))
+  expect_equal(unname(history_states(full)$tips[extant]), unname(final))
+  pieces <- unlist(lapply(full$maps, function(m) m[-length(m)]))
+  expect_true(all(pieces > 1e-6))
+  # names reorder factors too
+  f <- factor(areas, c("E", "W"))
+  named <- stats::setNames(rev(f), rev(seq_along(f)))
+  expect_equal(range_history(sim, named, "full")$maps, range_history(sim, f, "full")$maps)
+})
+
+test_that("overlap in history_rates() counts lineages that share an area", {
+  r <- range_sim("point")
+  h <- range_history(r$sim, r$areas, tree = "full")
+  brute <- function(history, r) {
+    edge <- history$edge
+    depth <- ape::node.depth.edgelength(history)
+    pieces <- do.call(rbind, lapply(seq_len(nrow(edge)), function(e) {
+      m <- history$maps[[e]]
+      end <- depth[edge[e, 1]] + cumsum(unname(m))
+      data.frame(edge = e, state = names(m), from = c(depth[edge[e, 1]], end[-length(end)]),
+                 to = end, stringsAsFactors = FALSE)
+    }))
+    pieces <- pieces[pieces$to > pieces$from, ]
+    breaks <- sort(unique(c(pieces$from, pieces$to)))
+    integral <- numeric(nrow(edge))
+    for (i in seq_len(length(breaks) - 1)) {
+      alive <- which(pieces$from <= breaks[i] & pieces$to >= breaks[i + 1])
+      parts <- strsplit(pieces$state[alive], "+", fixed = TRUE)
+      n <- vapply(parts, function(p) sum(vapply(parts, function(q) any(p %in% q), TRUE)), 1)
+      for (k in seq_along(alive)) {
+        integral[pieces$edge[alive[k]]] <- integral[pieces$edge[alive[k]]] +
+          exp(r * n[k]) * (breaks[i + 1] - breaks[i])
+      }
+    }
+    integral
+  }
+  expect_equal(sympatry_integral(h, -0.1, overlap = TRUE), brute(h, -0.1))
+})

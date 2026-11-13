@@ -342,12 +342,20 @@ sympatry_integral <- function(history, r, overlap = FALSE) {
   pieces <- pieces[pieces$to > pieces$from, , drop = FALSE]
   breaks <- sort(unique(c(pieces$from, pieces$to)))
   integral <- numeric(nrow(edge))
+  if (overlap) {
+    # which states share an area (states such as "A+B" split at "+")
+    states <- unique(pieces$state)
+    parts <- strsplit(states, "+", fixed = TRUE)
+    areas <- unique(unlist(parts))
+    member <- t(vapply(parts, function(p) areas %in% p, logical(length(areas))))
+    member <- matrix(member, length(states))
+    shares <- (member %*% t(member)) > 0
+  }
   for (i in seq_len(length(breaks) - 1)) {
     alive <- which(pieces$from <= breaks[i] & pieces$to >= breaks[i + 1])
     n <- if (overlap) {
-      parts <- strsplit(pieces$state[alive], "+", fixed = TRUE)
-      vapply(parts, function(p) sum(vapply(parts, function(q) any(p %in% q), logical(1))),
-             numeric(1))
+      counts <- tabulate(match(pieces$state[alive], states), length(states))
+      (shares %*% counts)[match(pieces$state[alive], states)]
     } else {
       table(pieces$state[alive])[pieces$state[alive]]
     }

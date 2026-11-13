@@ -53,7 +53,8 @@
 #' @export
 as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
   if (inherits(x, "mc_evolving")) {
-    if (is.null(history)) history <- range_history(x, regions)
+    sites <- paste0("site", seq_len(nrow(x$abundance)))
+    if (is.null(history)) history <- range_history(x, site_rows(regions, sites, "`regions`"))
     x <- as_metacommunity(x)
   }
   d <- if (inherits(x, c("mc_sim", "mc_data"))) as_mc_data(x) else mc_data(x)
@@ -113,7 +114,9 @@ region_pool <- function(history, regions) {
 #' from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
 #' region since the root gets the age of the root. With ranges of several regions (`"A+B"`, from
 #' [range_history()]), the age in each region is the time since the range last came to include
-#' it. These are the true values of what
+#' it. For an evolving metacommunity with protracted speciation, the tips of [range_history()]
+#' have the range of the lineage that represents each species, so cells occupied only by its
+#' incipient lineages, elsewhere, get `NA`. These are the true values of what
 #' `Herodotools::calc_age_arrival()` estimates from the areas of the nodes, which can only see
 #' arrivals at nodes and so gives younger ages.
 #'
@@ -171,6 +174,7 @@ history_states <- function(history) {
   states[history$edge[, 1]] <- vapply(history$maps, function(m) names(m)[1], character(1))
   ends <- vapply(history$maps, function(m) names(m)[length(m)], character(1))
   states[history$edge[, 2]] <- ends
+  if (!is.null(history$root_range)) states[n_tip + 1] <- history$root_range
   list(nodes = states[n_tip + seq_len(history$Nnode)],
        tips = stats::setNames(states[seq_len(n_tip)], history$tip.label))
 }

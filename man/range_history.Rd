@@ -17,8 +17,9 @@ gives the order of the areas in the names of the ranges. Area names may not cont
 }
 \value{
 A tree of class \code{c("simmap", "phylo")} with \code{maps} (for each edge, the time spent in
-each range, from its start) and \code{mapped.edge} (edges x ranges, the total time), or \code{NULL}
-when the tree is \code{NULL}.
+each range, from its start; a change in the last generation of a tip is kept as a piece
+without duration, so that the tip has the final range), \code{mapped.edge} (edges x ranges, the
+total time) and \code{root_range}, or \code{NULL} when the tree is \code{NULL}.
 }
 \description{
 Maps, along the tree of \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}, the range of each lineage at
@@ -36,8 +37,14 @@ a budding is the mother, and the stem of a new lineage is the new lineage. In th
 reconstructed tree a branch may join several lineages of the full tree (an extinct mother and
 the descendant that survived), and its map joins their ranges in order. Each tip of the
 reconstructed tree has the range of the lineage that represents its species (with protracted
-speciation, not the union of the incipient lineages of the species). Time before the start
-of the simulation (branches of a starting tree, or a stem) takes the range at the start.
+speciation, not the union of the incipient lineages of the species).
+
+A node has the range of the mother just before the split (the union of the ranges that the
+mother and the new lineage start with, apart from changes in the same generation), and the
+tree keeps the range at the root, which no edge shows, as \code{root_range}. The stem from the
+start of the simulation to the first split (\code{root.edge}) is not mapped. Nodes of a starting
+tree, before the simulation, take the union of the ranges at the start of the species below
+them, and the parts of edges before the start take the range at the start.
 }
 \examples{
 set.seed(1)
