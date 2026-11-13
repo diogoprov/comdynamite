@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `sample_individuals()` simulates collections on several dates: `step` takes several
+  recorded steps, each sampled on its own, with a column `step` in the result, `env` takes a
+  matrix with one column per step, and `session_sd` adds an error shared by all individuals
+  measured on the same date. With `source = "evolution"`, any recorded step can be sampled:
+  `simulate_metacommunity()` keeps the environment at `record_steps`
+  (`evolution$environment_history`), and `simulate_evolving_metacommunity()` keeps the genetic
+  means, the variance among lineages and the environment of the extant species at
+  `record_steps` (`evolution$history`, `within_history`, `environment_history`).
 - Phase 3b of the block on speciation. `simulate_evolving_metacommunity()` logs every change
   of presence of every lineage in every site (`ranges`), and the new `range_history()` maps
   them on the full or reconstructed tree as a stochastic map (class `simmap`) whose states are

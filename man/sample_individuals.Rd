@@ -20,7 +20,8 @@ sample_individuals(
   founder_sd = 0,
   monopolization = 0,
   gene_flow = 1,
-  source = c("traits", "evolution")
+  source = c("traits", "evolution"),
+  session_sd = 0
 )
 }
 \arguments{
@@ -53,10 +54,14 @@ displacement, in units of the trait. The default is the mean niche breadth (\cod
 the species.}
 
 \item{step}{Recorded step to sample, as in \code{record_steps}; \code{NULL} (the default) uses the
-abundances at the last step.}
+abundances at the last step. Several steps simulate collections on several dates: each
+date is sampled on its own (new individuals, drawn from the populations then), and the
+result gets a column \code{step}.}
 
-\item{env}{Optional environment of each site at the sampled step. The default is the
-environment of the landscape; give it for simulations with \code{env_time}.}
+\item{env}{Optional environment of each site at the sampled step, or, with several steps, a
+matrix with one column per step. The default is the environment of the landscape; give it
+for simulations with \code{env_time}. With \code{source = "evolution"} the environment comes from the
+simulation.}
 
 \item{cover}{Optional share (0 to 1) of the abundance of each site covered by the species
 measured: species are taken from the most abundant down until they reach \code{cover}, and the
@@ -89,12 +94,19 @@ the genetic plus environmental variance of each species (\code{genetic_var + env
 for a species of several lineages, the variance among them in the site), so that
 the T-statistics of \code{\link[=tstats]{tstats()}} reflect the variation that evolved. \code{intraspecific_sd},
 when given, then adds variation such as measurement error, and \code{local_adaptation},
-\code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization}, \code{step} and \code{env} must keep
-their defaults (\code{env} is the environment at the last step). Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
+\code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization} and \code{env} must keep their
+defaults (\code{env} is the environment at the sampled step). At a \code{step} before the last, the
+simulation needs \code{record_steps} with that step, which keep the genetic means (and, for
+evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
 too.}
+
+\item{session_sd}{Standard deviation of an error shared by all individuals measured on the
+same date (\code{step}), such as a difference between measurers or calibrations; it is added to
+\code{trait}, not to \code{population_mean}. 0 (the default) for none.}
 }
 \value{
-Data frame with one row per individual and the columns \code{site}, \code{species},
+Data frame with one row per individual and the columns \code{step} (with several steps),
+\code{site}, \code{species},
 \code{individual} (its number within the population), \code{abundance} (of the population), \code{env}
 (of the site), \code{optimum} (of the species), \code{population_mean} (the expected value of the
 population, \eqn{m_{ij}}{m_ij} above, after character displacement) and

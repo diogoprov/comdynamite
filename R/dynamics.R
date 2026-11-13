@@ -122,8 +122,9 @@
 #'   see the section Colonisation history) and `n_steps`. With `evolution`, also `evolution`, a
 #'   list with the genetic mean of the optimum in each population (`genetic`), the plastic part
 #'   of its phenotype at the last step (`plastic`), the phenotype after dispersal (`phenotype`,
-#'   which mixes residents and immigrants), the genetic means at `record_steps` (`history`), the
-#'   reference environment and the settings; `NA` where a population is absent. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
+#'   which mixes residents and immigrants), the genetic means and the environment at
+#'   `record_steps` (`history`, `environment_history`), the reference environment and the
+#'   settings; `NA` where a population is absent. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
 #'   `optimum_` column of traits per axis), while [summary_stats()] uses the first axis unless
 #'   given `trait` and `env`, and [sample_individuals()] needs a single axis.
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
@@ -515,8 +516,13 @@ mc_finish <- function(st) {
       plastic <- sweep(matrix(ev$env(n_steps) - ev$ref, m, k_all), 2, ev$b, "*")
       plastic[absent] <- NA_real_
       dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- labels
+      env_history <- if (length(record_steps)) {
+        matrix(vapply(record_steps, ev$env, numeric(m)), m,
+               dimnames = list(sites, paste0("step", record_steps)))
+      }
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
-                            environment = ev$env(n_steps), reference = ev$ref,
+                            environment = ev$env(n_steps), environment_history = env_history,
+                            reference = ev$ref,
                             settings = structure(evolution[setdiff(names(evolution),
                                                                    c("env", "traits"))],
                                                  class = "mc_evolution"))

@@ -258,7 +258,10 @@ print.mc_speciation <- function(x, ...) {
 #'     (`genetic`, weighted over their lineages by abundance; `NA` where absent), the plastic
 #'     part of the phenotype (`plastic`), the variance among the lineages of a species in
 #'     each site (`within_var`, 0 for species of one lineage), the environment of each site
-#'     at the end (`environment`), the reference environment of plasticity (`reference`), the genetic and environmental variances and the slope of plasticity of
+#'     at the end (`environment`), the same genetic means, variance among lineages and
+#'     environment at `record_steps` for the lineages extant at the end (`history`,
+#'     `within_history`, `environment_history`), the reference environment of plasticity
+#'     (`reference`), the genetic and environmental variances and the slope of plasticity of
 #'     each species (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
 #'     `NULL`.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used.
@@ -555,28 +558,33 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   # abundance of the lineages, the plastic part and the variances among individuals
   ev_out <- NULL
   if (has_evolution) {
-    wmean <- vapply(members, function(l) {
-      w <- lineage_ab[, l, drop = FALSE]
-      zz <- genetic[, l, drop = FALSE]
-      zz[w == 0] <- 0
-      ifelse(rowSums(w) > 0, rowSums(w * zz) / rowSums(w), NA_real_)
-    }, numeric(st$m))
-    wmean <- matrix(wmean, st$m, length(species), dimnames = list(rownames(lineage_ab), species))
-    # variance among the lineages of a species within each site (weighted by abundance), 0 for
-    # species of one lineage
-    within <- vapply(seq_along(members), function(i) {
-      l <- members[[i]]
-      w <- lineage_ab[, l, drop = FALSE]
-      dev <- sweep(genetic[, l, drop = FALSE], 1, wmean[, i])
-      dev[w == 0] <- 0
-      ifelse(rowSums(w) > 0, rowSums(w * dev^2) / rowSums(w), NA_real_)
-    }, numeric(st$m))
-    within <- matrix(within, st$m, length(species), dimnames = dimnames(wmean))
+    now <- evolving_species_state(lineage_ab, genetic, members, species)
+    wmean <- now$genetic
+    within <- now$within
     plastic <- outer(st$ev$env(n_steps) - st$ev$ref, st$ev$b[sp_idx])
     plastic[is.na(wmean)] <- NA_real_
     dimnames(plastic) <- dimnames(wmean)
+    # the same at the recorded steps, for the lineages extant at the end
+    z_hist <- within_hist <- env_hist <- NULL
+    if (!is.null(out$history) && !is.null(out$evolution$history)) {
+      dims <- c(st$m, length(species), dim(out$history)[3])
+      names3 <- list(rownames(lineage_ab), species, dimnames(out$history)[[3]])
+      z_hist <- within_hist <- array(NA_real_, dims, dimnames = names3)
+      for (i in seq_len(dims[3])) {
+        slice <- function(a) {
+          matrix(a[, extant, i], st$m, dimnames = list(rownames(lineage_ab), extant))
+        }
+        at <- evolving_species_state(slice(out$history), slice(out$evolution$history),
+                                     members, species)
+        z_hist[, , i] <- at$genetic
+        within_hist[, , i] <- at$within
+      }
+      env_hist <- out$evolution$environment_history
+    }
     ev_out <- list(genetic = wmean, plastic = plastic, within_var = within,
-                   environment = st$ev$env(n_steps), reference = out$evolution$reference,
+                   history = z_hist, within_history = within_hist,
+                   environment = st$ev$env(n_steps), environment_history = env_hist,
+                   reference = out$evolution$reference,
                    genetic_var = stats::setNames(st$ev$g[sp_idx], species),
                    env_var = stats::setNames(st$ev$ve[sp_idx], species),
                    plasticity = stats::setNames(st$ev$b[sp_idx], species),
@@ -1044,6 +1052,28 @@ evolving_tree <- function(sp, tree0) {
   }
   text <- sub(":0$", "", node_newick(ntip + 1L, 0))
   ape::read.tree(text = paste0(text, ";"))
+}
+
+# genetic means of species (weighted by the abundance of their lineages) and the variance among
+# their lineages within each site (0 for species of one lineage), from lineage abundances and
+# genetic means (sites x extant lineages)
+evolving_species_state <- function(ab, z, members, species) {
+  wmean <- vapply(members, function(l) {
+    w <- ab[, l, drop = FALSE]
+    zz <- z[, l, drop = FALSE]
+    zz[w == 0 | is.na(zz)] <- 0
+    ifelse(rowSums(w) > 0, rowSums(w * zz) / rowSums(w), NA_real_)
+  }, numeric(nrow(z)))
+  wmean <- matrix(wmean, nrow(z), length(species), dimnames = list(rownames(ab), species))
+  within <- vapply(seq_along(members), function(i) {
+    l <- members[[i]]
+    w <- ab[, l, drop = FALSE]
+    dev <- sweep(z[, l, drop = FALSE], 1, wmean[, i])
+    dev[w == 0 | is.na(dev)] <- 0
+    ifelse(rowSums(w) > 0, rowSums(w * dev^2) / rowSums(w), NA_real_)
+  }, numeric(nrow(z)))
+  list(genetic = wmean,
+       within = matrix(within, nrow(z), length(species), dimnames = dimnames(wmean)))
 }
 
 # changes of presence between two matrices of sites x lineages (all lineages ever), as rows of
