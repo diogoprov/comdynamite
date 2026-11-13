@@ -1012,10 +1012,13 @@ as fases, em `dev/plano-especiacao.md`.
       partir de mutações novas (sem variância inicial).
 - [x] Replicação (ii), Urban & De Meester 2009 (`pool_from`, `data-raw/replication_urban2009.R`,
       artigo `replication-urban`): a espécie que evolui por mutação vence o sítio novo em
-      qualquer ordem de chegada e a evolução nas duas reforça a prioridade (mais fraca que a
-      deles); variação permanente só reproduz com G constante (carga de variância no
-      `mutation_var`); na grade de dispersão o pior dispersor vence quase sempre (custo
-      demográfico da emigração depois do crescimento, sem a região de monopolização); a perda
+      qualquer ordem de chegada e a evolução nas duas torna o sítio mais monopolizado, mas
+      sem favorecer quem chega primeiro; variação permanente só reproduz com G constante (carga
+      de variância no `mutation_var`); na grade de dispersão a evolução faz o pior dispersor
+      vencer (região de maladaptação por fluxo gênico), sem a região de monopolização (sem
+      evolução, o melhor dispersor vence). Correção no caminho: sítio fechado por `pool_from`
+      não é mais sumidouro de emigrantes (eles ficam em casa); a primeira versão atribuía o
+      resultado da dispersão ao custo da emigração, por engano. A perda
       da fonte por fluxo gênico ocorre com dispersão baixa, não alta. Os três mecanismos da
       lista para depois são também os candidatos aqui. Em aberto: o mapa como artigo.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em

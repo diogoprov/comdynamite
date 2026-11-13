@@ -73,8 +73,9 @@ with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several trai
 \item{pool_from}{Optional matrix (sites x species) with the first step at which each species
 can occur in each site (1 for the start), for example to open a new site to two species at
 different times, as in the colonisation-time experiments of Urban & De Meester (2009).
-Combined with \code{pool}; until then, immigrants and seeds of that species do not establish
-there.}
+Combined with \code{pool}. Until then, seeds of that species do not establish there and the site
+is not a destination of its emigrants: those that would go there stay in their site, so
+that a closed site is not a sink (sites outside \code{pool} are).}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},

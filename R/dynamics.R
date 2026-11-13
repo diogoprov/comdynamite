@@ -117,8 +117,9 @@
 #' @param pool_from Optional matrix (sites x species) with the first step at which each species
 #'   can occur in each site (1 for the start), for example to open a new site to two species at
 #'   different times, as in the colonisation-time experiments of Urban & De Meester (2009).
-#'   Combined with `pool`; until then, immigrants and seeds of that species do not establish
-#'   there.
+#'   Combined with `pool`. Until then, seeds of that species do not establish there and the site
+#'   is not a destination of its emigrants: those that would go there stay in their site, so
+#'   that a closed site is not a sink (sites outside `pool` are).
 #' @param initial Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 #'   only where `pool` allows.
 #' @param evolution Optional settings from [evolution_control()] for the evolution of the niche
@@ -567,30 +568,43 @@ mc_step <- function(st, step) {
         # phenotype of the offspring, which develop in their site
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
       }
-      em <- matrix(stats::rbinom(m * k, n, p_em), m, k)
+      if (is.null(pool_from)) {
+        em <- em_to <- matrix(stats::rbinom(m * k, n, p_em), m, k)
+        open_to <- NULL
+      } else {
+        # sites not yet open through `pool_from` are not destinations: the emigrants that would
+        # go there stay home, and the flows into open sites are unchanged
+        open_to <- pool_from[, alive, drop = FALSE] <= step
+        share <- if (is.null(disp_matrix)) {
+          (matrix(colSums(open_to), m, k, byrow = TRUE) - open_to) / (m - 1)
+        } else disp_matrix %*% open_to
+        em <- matrix(stats::rbinom(m * k, n, p_em * share), m, k)
+        em_to <- ifelse(share > 0, em / share, 0)
+      }
       tot <- colSums(em)
       imm <- 0L
       if (any(tot > 0)) {
         if (!is.null(disp_matrix) && immigration == "multinomial") {
-          imm <- place_emigrants(em, disp_matrix)
+          imm <- place_emigrants(em, disp_matrix, open_to)
         } else if (!is.null(disp_matrix) && isTRUE(ev$imm_sel)) {
           # immigrants filtered by their fitness in the site they reach
           g_src <- if (isTRUE(ev$dyn)) ifelse(is.na(ga), 0, ga) else
             matrix(ev$g[alive], m, k, byrow = TRUE)
-          sel <- immigrants_selected(em, ifelse(is.na(za), 0, za), ifelse(is.na(pa), 0, pa),
+          sel <- immigrants_selected(em_to, ifelse(is.na(za), 0, za), ifelse(is.na(pa), 0, pa),
                                      e_now, g_src + matrix(ev$sigma[alive]^2 + ev$ve[alive], m,
                                                            k, byrow = TRUE),
                                      disp_matrix, g_src)
           imm <- matrix(stats::rpois(m * k, sel$lambda), m, k)
         } else if (!is.null(disp_matrix)) {
-          imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
+          imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em_to)), m, k)
         } else {
           w <- sweep(-em, 2, tot, "+")
+          if (!is.null(open_to)) w[!open_to] <- 0
           imm <- matrix(0L, m, k)
           for (j in which(tot > 0)) imm[, j] <- stats::rmultinom(1, tot[j], w[, j])
         }
         if (isTRUE(ev$mv)) {
-          flowed <- mv_flow(ev, za, pa, n, em, imm, disp_matrix, alive)
+          flowed <- mv_flow(ev, za, pa, n - em + em_to, em_to, imm, disp_matrix, alive)
           za <- flowed$za
           pa <- flowed$pa
         } else if (!is.null(ev)) {
@@ -605,12 +619,12 @@ mc_step <- function(st, step) {
             p_imm <- sel$phenotype
             vi <- sel$variance
           } else {
-            zi <- immigrant_mean(em, za, disp_matrix, za)
-            between <- pmax(immigrant_mean(em, za^2, disp_matrix, za^2) - zi^2, 0)
-            p_imm <- immigrant_mean(em, pa, disp_matrix, pa)
+            zi <- immigrant_mean(em_to, za, disp_matrix, za)
+            between <- pmax(immigrant_mean(em_to, za^2, disp_matrix, za^2) - zi^2, 0)
+            p_imm <- immigrant_mean(em_to, pa, disp_matrix, pa)
             if (isTRUE(ev$dyn)) {
               g0 <- ifelse(is.na(ga), 0, ga)
-              vi <- immigrant_mean(em, g0, disp_matrix, g0)
+              vi <- immigrant_mean(em_to, g0, disp_matrix, g0)
             }
           }
           pa_now <- pa
@@ -787,14 +801,15 @@ mc_finish <- function(st) {
 
 # immigrants when the emigrants of each species at each site go to the other sites
 # multinomially, with the probabilities of the rows of `disp_matrix`
-place_emigrants <- function(em, disp_matrix) {
+place_emigrants <- function(em, disp_matrix, open_to = NULL) {
   m <- nrow(em)
   immigrants <- matrix(0L, m, ncol(em))
   for (cell in which(em > 0)) {
     from <- (cell - 1L) %% m + 1L
     species <- (cell - 1L) %/% m + 1L
     immigrants[, species] <- immigrants[, species] +
-      drop(stats::rmultinom(1, em[cell], disp_matrix[from, ]))
+      drop(stats::rmultinom(1, em[cell], if (is.null(open_to)) disp_matrix[from, ] else
+        disp_matrix[from, ] * open_to[, species]))
   }
   immigrants
 }

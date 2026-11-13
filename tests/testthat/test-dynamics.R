@@ -247,3 +247,28 @@ test_that("pool_from opens a site to a species at a given step", {
   expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), n_steps = 5,
                                       initial = init, pool_from = bad), "opens after")
 })
+
+test_that("a site closed by pool_from is not a sink for emigrants", {
+  tr <- data.frame(optimum = 40, sigma = 35, r_max = 5, row.names = "sp1")
+  init <- cbind(sp1 = c(1000L, 0L, 0L))
+  closed <- cbind(sp1 = c(1, 100, 100))
+  for (ls in list(landscape_matrix(matrix(1, 3, 3), env = c(40, 40, 60)),
+                  landscape_implicit(3, env_range = c(39, 41)))) {
+    for (how in c("poisson", "multinomial")) {
+      set.seed(3)
+      sim <- simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 20,
+                                    seed_steps = integer(0), initial = init, pool_from = closed,
+                                    immigration = how, record_steps = 1:20)
+      # no emigration: the population stays near (5 - 1) / 0.004 = 1000
+      expect_true(all(sim$history[1, 1, ] > 900))
+      expect_true(all(sim$history[2:3, 1, ] == 0))
+    }
+  }
+  # one site open: half of the emigrants go there, none are lost to the closed one
+  set.seed(4)
+  sim <- simulate_metacommunity(landscape_matrix(matrix(1, 3, 3), env = c(40, 40, 60)), tr,
+                                matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 30,
+                                seed_steps = integer(0), initial = init,
+                                pool_from = cbind(sp1 = c(1, 1, 100)))
+  expect_true(all(sim$abundance[1:2, 1] > 800))
+})
