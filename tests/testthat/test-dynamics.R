@@ -225,3 +225,25 @@ test_that("disturbance empties whole sites and is validated", {
   sim <- simulate_metacommunity(ls, tr, matrix(0.05, 2, 2), n_steps = 20, disturbance = 0.1)
   expect_equal(sim$disturbance, 0.1)
 })
+
+test_that("pool_from opens a site to a species at a given step", {
+  ls <- landscape_matrix(matrix(1, 3, 3), env = c(40, 40, 60))
+  tr <- data.frame(optimum = c(40, 40), sigma = 35, r_max = 5, row.names = c("sp1", "sp2"))
+  init <- cbind(sp1 = c(500L, 0L, 0L), sp2 = c(0L, 500L, 0L))
+  from <- cbind(sp1 = c(1, 1, 10), sp2 = c(1, 1, 30))
+  set.seed(8)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), dispersal = 0.05, n_steps = 40,
+                                seed_steps = integer(0), initial = init, pool_from = from,
+                                record_steps = 1:40)
+  expect_true(all(sim$history[3, "sp1", 1:9] == 0))
+  expect_true(any(sim$history[3, "sp1", 10:15] > 0))
+  expect_true(all(sim$history[3, "sp2", 1:29] == 0))
+  expect_true(any(sim$history[3, "sp2", 30:40] > 0))
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), n_steps = 5,
+                                      initial = init, pool_from = from * 0),
+               "pool_from")
+  bad <- from
+  bad[1, 1] <- 5
+  expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), n_steps = 5,
+                                      initial = init, pool_from = bad), "opens after")
+})

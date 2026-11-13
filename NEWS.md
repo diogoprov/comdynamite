@@ -1,5 +1,14 @@
 # comdynamite (development version)
 
+- `pool_from` in `simulate_metacommunity()` and `mc_dynamics()`: a sites x species matrix of
+  the first step at which each species can occur in each site, for species introduced at
+  different times.
+- New article "Replicating Urban & De Meester (2009)" (`data-raw/replication_urban2009.R`):
+  a species that evolves by mutation wins a new site whatever the order of arrival, and
+  evolution in both species strengthens the priority effect, as in their model, though less;
+  standing variation reproduces their result only with a constant genetic variance, since
+  `mutation_var` carries a variance load; over the dispersal grid the poorer disperser wins
+  almost everywhere, because emigration after growth is a demographic cost.
 - `disturbance` in `simulate_metacommunity()`, `mc_dynamics()` and
   `simulate_evolving_metacommunity()`: the probability that a site loses all its populations
   at each step, as the patch extinctions of Leibold et al. (2019).

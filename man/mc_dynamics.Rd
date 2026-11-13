@@ -20,7 +20,8 @@ mc_dynamics(
   initial = NULL,
   immigration = c("poisson", "multinomial"),
   evolution = NULL,
-  disturbance = 0
+  disturbance = 0,
+  pool_from = NULL
 )
 }
 \arguments{
@@ -68,6 +69,12 @@ with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several trai
 
 \item{disturbance}{Probability that a site loses all its populations at each time step
 (one value; 0, the default, for none).}
+
+\item{pool_from}{Optional matrix (sites x species) with the first step at which each species
+can occur in each site (1 for the start), for example to open a new site to two species at
+different times, as in the colonisation-time experiments of Urban & De Meester (2009).
+Combined with \code{pool}; until then, immigrants and seeds of that species do not establish
+there.}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},

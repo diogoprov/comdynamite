@@ -1005,8 +1005,19 @@ as fases, em `dev/plano-especiacao.md`.
       nenhuma espécie se perde, a neutralidade regional surge, mas a dominância local some
       (90-99% de manchas compartilhadas com Nm = 10); a dominância local com G constante vem da
       deriva das médias. A do modelo deles fica sem explicação (candidatos não testados:
-      recrutamento em loteria, gerações sobrepostas, variância a partir de mutações novas). Em aberto: (ii)
-      Urban & De Meester 2009 e o mapa como artigo.
+      recrutamento em loteria, gerações sobrepostas, variância a partir de mutações novas).
+- [ ] Para depois (pedido em 2026-11-13): investigar, como explicações da dominância local do
+      modelo de Leibold et al. 2019 que o motor não reproduz, (i) recrutamento em loteria nos
+      microssítios que vagam, (ii) gerações sobrepostas e (iii) variância genética construída a
+      partir de mutações novas (sem variância inicial).
+- [x] Replicação (ii), Urban & De Meester 2009 (`pool_from`, `data-raw/replication_urban2009.R`,
+      artigo `replication-urban`): a espécie que evolui por mutação vence o sítio novo em
+      qualquer ordem de chegada e a evolução nas duas reforça a prioridade (mais fraca que a
+      deles); variação permanente só reproduz com G constante (carga de variância no
+      `mutation_var`); na grade de dispersão o pior dispersor vence quase sempre (custo
+      demográfico da emigração depois do crescimento, sem a região de monopolização); a perda
+      da fonte por fluxo gênico ocorre com dispersão baixa, não alta. Os três mecanismos da
+      lista para depois são também os candidatos aqui. Em aberto: o mapa como artigo.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;

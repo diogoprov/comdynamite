@@ -20,7 +20,8 @@ simulate_metacommunity(
   immigration = c("poisson", "multinomial"),
   env = NULL,
   evolution = NULL,
-  disturbance = 0
+  disturbance = 0,
+  pool_from = NULL
 )
 }
 \arguments{
@@ -78,6 +79,12 @@ with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several trai
 
 \item{disturbance}{Probability that a site loses all its populations at each time step
 (one value; 0, the default, for none).}
+
+\item{pool_from}{Optional matrix (sites x species) with the first step at which each species
+can occur in each site (1 for the start), for example to open a new site to two species at
+different times, as in the colonisation-time experiments of Urban & De Meester (2009).
+Combined with \code{pool}; until then, immigrants and seeds of that species do not establish
+there.}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
@@ -214,6 +221,10 @@ Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 process-based metacommunity framework linking local and regional scale
 community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 \doi{10.1111/ele.13568}
+
+Urban, M. C., & De Meester, L. (2009). Community monopolization: local adaptation enhances
+priority effects in an evolving metacommunity. \emph{Proceedings of the Royal Society B}, 276,
+4129--4138. \doi{10.1098/rspb.2009.1382}
 
 Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J.
 (2019). Regional neutrality evolves through local adaptive niche evolution.

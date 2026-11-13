@@ -114,6 +114,11 @@
 #'   which conserves them. Spatially implicit landscapes are always multinomial.
 #' @param pool Optional matrix (sites x species), logical or 0/1, with the sites where each
 #'   species can occur.
+#' @param pool_from Optional matrix (sites x species) with the first step at which each species
+#'   can occur in each site (1 for the start), for example to open a new site to two species at
+#'   different times, as in the colonisation-time experiments of Urban & De Meester (2009).
+#'   Combined with `pool`; until then, immigrants and seeds of that species do not establish
+#'   there.
 #' @param initial Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 #'   only where `pool` allows.
 #' @param evolution Optional settings from [evolution_control()] for the evolution of the niche
@@ -146,6 +151,10 @@
 #'   community ecology. *Ecology Letters*, 23, 1314--1329.
 #'   \doi{10.1111/ele.13568}
 #'
+#'   Urban, M. C., & De Meester, L. (2009). Community monopolization: local adaptation enhances
+#'   priority effects in an evolving metacommunity. *Proceedings of the Royal Society B*, 276,
+#'   4129--4138. \doi{10.1098/rspb.2009.1382}
+#'
 #'   Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J.
 #'   (2019). Regional neutrality evolves through local adaptive niche evolution.
 #'   *Proceedings of the National Academy of Sciences*, 116, 2612--2617.
@@ -171,7 +180,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0, pool = NULL,
                                    initial = NULL, immigration = c("poisson", "multinomial"),
-                                   env = NULL, evolution = NULL, disturbance = 0) {
+                                   env = NULL, evolution = NULL, disturbance = 0,
+                                   pool_from = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
   several <- is.list(traits) && !is.data.frame(traits)
@@ -244,7 +254,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation, pool = pool, initial = initial,
                      immigration = immigration, evolution = evolution,
-                     disturbance = disturbance)
+                     disturbance = disturbance, pool_from = pool_from)
   tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
@@ -304,7 +314,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         disp_matrix = NULL, record_steps = NULL,
                         sites = NULL, species = NULL, extirpation = 0, pool = NULL,
                         initial = NULL, immigration = c("poisson", "multinomial"),
-                        evolution = NULL, disturbance = 0) {
+                        evolution = NULL, disturbance = 0, pool_from = NULL) {
   # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
   # that simulate_evolving_metacommunity() can run the same steps and change species in between
   mc_setup(environment())
@@ -359,9 +369,24 @@ mc_setup <- function(st) {
     p_em <- rep(dispersal, each = m)
     p_ex <- rep(extirpation, each = m)
     at <- t(alpha)
-    inside <- pool
+    if (!is.null(pool_from)) {
+      pool_from <- site_species(pool_from, sites, species, "`pool_from`")
+      if (any(is.na(pool_from)) || any(pool_from < 1)) {
+        stop("`pool_from` must hold steps of 1 or more", call. = FALSE)
+      }
+      if (!is.null(initial) && any(initial[pool_from > 1] > 0)) {
+        stop("`initial` has individuals where `pool_from` opens after the start", call. = FALSE)
+      }
+    }
+    # sites open to each species at a step: `pool` and, with `pool_from`, from that step on
+    inside_at <- function(step, cols) {
+      x <- if (is.null(pool)) matrix(TRUE, m, length(cols)) else pool[, cols, drop = FALSE]
+      if (!is.null(pool_from)) x <- x & pool_from[, cols, drop = FALSE] <= step
+      x
+    }
+    inside <- if (is.null(pool) && is.null(pool_from)) NULL else inside_at(1, seq_len(k_all))
     n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
-    if (!is.null(pool)) n[!pool] <- 0L
+    if (!is.null(inside)) n[!inside] <- 0L
     last_seed <- max(c(0, seed_steps))
     competition_hook <- NULL
     ev <- if (!is.null(evolution)) {
@@ -435,6 +460,7 @@ mc_step <- function(st, step) {
   assign("step", step, envir = st)
   eval(quote({
     added <- 0L
+    if (!is.null(pool_from)) inside <- inside_at(step, alive)
     if (step %in% seed_steps) {
       seeds <- stats::rpois(m * k, seed_mean)
       added <- if (is.null(inside)) seeds else seeds * inside
@@ -478,7 +504,7 @@ mc_step <- function(st, step) {
       k <- length(alive)
       p_em <- rep(dispersal[alive], each = m)
       p_ex <- rep(extirpation[alive], each = m)
-      if (!is.null(inside)) inside <- pool[, alive, drop = FALSE]
+      if (!is.null(inside)) inside <- inside_at(step, alive)
     }
     if (k > 0) {
       if (is.null(ev)) {
