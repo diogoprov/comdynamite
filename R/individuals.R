@@ -146,9 +146,16 @@
 #'   displacement, in units of the trait. The default is the mean niche breadth (`sigma`) of
 #'   the species.
 #' @param step Recorded step to sample, as in `record_steps`; `NULL` (the default) uses the
-#'   abundances at the last step.
-#' @param env Optional environment of each site at the sampled step. The default is the
-#'   environment of the landscape; give it for simulations with `env_time`.
+#'   abundances at the last step. Several steps simulate collections on several dates: each
+#'   date is sampled on its own (new individuals, drawn from the populations then), and the
+#'   result gets a column `step`. The deviations of each population from `population_sd` (and
+#'   `founder_sd`) are kept across dates, so populations change between dates only through
+#'   the simulation. For evolving metacommunities, the records keep only the lineages extant at
+#'   the end, so an earlier date misses species that died out later.
+#' @param env Optional environment of each site at the sampled step, or, with several steps, a
+#'   matrix with one column per step (a vector is used for every date). The default is the
+#'   environment of the landscape for every date; give it for simulations with `env_time`. With `source = "evolution"` the environment comes from the
+#'   simulation.
 #' @param founder_sd Standard deviation of the founder deviation of a population founded by a
 #'   single individual (\eqn{s_f}{s_f} in the section Founder effects and monopolization); the
 #'   deviation of a population founded by \eqn{n} individuals has standard deviation
@@ -161,18 +168,24 @@
 #'   and adaptation since arrival, per unit of migrant load: 1 (the default) when every
 #'   newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
 #'   Has no effect without `founder_sd` or `monopolization`.
+#' @param session_sd Standard deviation of an error shared by all individuals measured on the
+#'   same date (`step`), such as a difference between measurers or calibrations; it is added to
+#'   `trait`, not to `population_mean`. 0 (the default) for none.
 #' @param source Where population means come from: `"traits"` (the default) builds them from
 #'   the optimum of each species with the arguments above; `"evolution"` takes them from a
 #'   simulation run with `evolution` ([evolution_control()]), as the genetic mean plus the
-#'   plastic part of each population at the last step, and draws individuals around them with
+#'   plastic part of each population at the sampled step, and draws individuals around them with
 #'   the genetic plus environmental variance of each species (`genetic_var + env_var`, plus,
 #'   for a species of several lineages, the variance among them in the site), so that
 #'   the T-statistics of [tstats()] reflect the variation that evolved. `intraspecific_sd`,
 #'   when given, then adds variation such as measurement error, and `local_adaptation`,
-#'   `population_sd`, `displacement`, `founder_sd`, `monopolization`, `step` and `env` must keep
-#'   their defaults (`env` is the environment at the last step). Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
+#'   `population_sd`, `displacement`, `founder_sd`, `monopolization` and `env` must keep their
+#'   defaults (`env` is the environment at the sampled step). At a `step` before the last, the
+#'   simulation needs `record_steps` with that step, which keep the genetic means (and, for
+#'   evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
 #'   too.
-#' @return Data frame with one row per individual and the columns `site`, `species`,
+#' @return Data frame with one row per individual and the columns `step` (with several steps),
+#'   `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
 #'   (of the site), `optimum` (of the species), `population_mean` (the expected value of the
 #'   population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
@@ -223,21 +236,67 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                population_sd = 0, intraspecific_sd = 1, displacement = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
                                cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
-                               gene_flow = 1, source = c("traits", "evolution")) {
+                               gene_flow = 1, source = c("traits", "evolution"),
+                               session_sd = 0) {
   if (inherits(x, "mc_evolving")) x <- as_metacommunity(x)
   if (!inherits(x, "mc_sim")) {
     stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
   }
   source <- match.arg(source)
+  stopifnot(is.numeric(session_sd), length(session_sd) == 1, session_sd >= 0)
+  stopifnot(length(n) == 1, n >= 1, n == round(n), length(min_n) == 1, min_n >= 1,
+            min_n == round(min_n))
+  if (is.matrix(env) && ncol(env) == 1 && length(step) <= 1) env <- env[, 1]
+  if (is.matrix(env) && ncol(env) != max(1, length(step))) {
+    stop("`env` as a matrix needs one column per step (", max(1, length(step)), ")",
+         call. = FALSE)
+  }
+  args <- mget(setdiff(names(formals(sample_individuals)), c("x", "session_sd")))
+  if (missing(intraspecific_sd)) args$intraspecific_sd <- NULL
+  if (length(step) <= 1) {
+    out <- do.call(individuals_at, c(list(x = quote(x)), args))
+    if (session_sd > 0) out$trait <- out$trait + stats::rnorm(1, 0, session_sd)
+    return(out)
+  }
+  # several dates: each is sampled on its own, with the deviations of each population (of
+  # `population_sd` and `founder_sd`) kept across dates, and a shift shared by the individuals
+  # of each date
+  dims <- dim(x$abundance)
+  args$draws <- list(population = matrix(stats::rnorm(prod(dims)), dims[1]),
+                     founder = matrix(stats::rnorm(prod(dims)), dims[1]))
+  dates <- lapply(seq_along(step), function(i) {
+    args$step <- step[i]
+    if (is.matrix(env)) args$env <- env[, i]
+    d <- do.call(individuals_at, c(list(x = quote(x)), args))
+    cbind(step = rep(step[i], nrow(d)), d)
+  })
+  shift <- stats::rnorm(length(step), 0, session_sd)
+  for (i in seq_along(dates)) dates[[i]]$trait <- dates[[i]]$trait + shift[i]
+  out <- do.call(rbind, dates)
+  rownames(out) <- NULL
+  out
+}
+
+# the individuals of one date; `draws` gives standard normal deviations of each population
+# (sites x species of `x$abundance`) to share among dates
+individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
+                           population_sd = 0, intraspecific_sd = 1, displacement = 0,
+                           displacement_width = NULL, step = NULL, env = NULL,
+                           cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
+                           gene_flow = 1, source = "traits", draws = NULL) {
+  if (source == "evolution" && !is.null(step) && step == x$n_steps &&
+      !step_label(step) %in% dimnames(x$evolution$history)[[3]]) {
+    step <- NULL
+  }
   if (source == "evolution") {
     if (is.null(x$evolution$genetic)) {
       stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
     }
-    if (!is.null(step) || !is.null(env)) {
-      stop("the evolutionary state is kept only for the last step: leave `step` and `env` ",
-           "as NULL", call. = FALSE)
+    if (!is.null(env)) {
+      stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
+           "leave `env` as NULL", call. = FALSE)
     }
-    env <- x$evolution$environment
+    env <- evolved_environment(x, step)
     if (any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
         any(founder_sd != 0) || any(monopolization != 0)) {
       stop("with `source = \"evolution\"`, population means come from the simulation: ",
@@ -292,7 +351,7 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   measured[measured < min_n] <- 0
   theta <- niche$traits[species, "optimum"]
   if (source == "evolution") {
-    state <- evolved_populations(x, sites, species)
+    state <- evolved_populations(x, sites, species, step)
     pop_mean <- state$mean
     # negative values were refused with `intraspecific_sd` above
     extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
@@ -304,10 +363,12 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   } else {
     matrix(h, length(sites), k, byrow = TRUE)
   }
+  z_pop <- draws$population %||% matrix(stats::rnorm(length(sites) * k), length(sites), k)
   pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) + closed * outer(env, theta, "-") +
-    sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, pop_sd, "*")
+    sweep(z_pop, 2, pop_sd, "*")
   if (any(found_sd > 0)) {
-    founder <- sweep(matrix(stats::rnorm(length(sites) * k), length(sites), k), 2, found_sd, "*")
+    z_found <- draws$founder %||% matrix(stats::rnorm(length(sites) * k), length(sites), k)
+    founder <- sweep(z_found, 2, found_sd, "*")
     founder <- founder * history$erosion / sqrt(history$propagule)
     founder[is.na(founder)] <- 0
     pop_mean <- pop_mean + founder
@@ -729,10 +790,11 @@ arrival_terms <- function(x, step, sites, species, rate, flow) {
 }
 
 # population means (genetic mean plus plastic part, NA where absent) and the variance among
-# individuals (genetic plus environmental) of each species at the last step of a simulation
-# with evolution
-evolved_populations <- function(x, sites, species) {
+# individuals (genetic plus environmental, plus that among lineages) of each species at the last
+# step of a simulation with evolution, or at a recorded `step`
+evolved_populations <- function(x, sites, species, step = NULL) {
   ev <- x$evolution
+  if (!is.null(step)) ev <- evolved_at(ev, step)
   pick <- function(y) {
     y <- as.matrix(y)
     if (is.null(rownames(y)) || is.null(colnames(y))) {
@@ -763,11 +825,53 @@ evolved_populations <- function(x, sites, species) {
   list(mean = mean, var = var)
 }
 
+# the evolutionary state at a recorded step: genetic means from the history, the plastic part
+# from the environment then, and the variance among lineages when it was recorded
+evolved_at <- function(ev, step) {
+  label <- step_label(step)
+  if (is.null(ev$history) || !label %in% dimnames(ev$history)[[3]] ||
+      is.null(ev$environment_history)) {
+    stop("the evolutionary state was not recorded at step ", step,
+         ": use `record_steps` (with this version of the package)", call. = FALSE)
+  }
+  z <- ev$history[, , label]
+  z <- matrix(z, dim(ev$history)[1], dimnames = dimnames(ev$history)[1:2])
+  b <- ev$plasticity %||% ev$settings$plasticity %||% 0
+  b <- if (!is.null(names(b))) b[colnames(z)] else rep_len(b, ncol(z))
+  plastic <- outer(ev$environment_history[, label] - ev$reference, b)
+  plastic[is.na(z)] <- NA_real_
+  dimnames(plastic) <- dimnames(z)
+  within <- if (!is.null(ev$within_history)) {
+    w <- ev$within_history[, , label]
+    matrix(w, dim(ev$within_history)[1], dimnames = dimnames(z))
+  }
+  ev$genetic <- z
+  ev$plastic <- plastic
+  ev$within_var <- within
+  ev
+}
+
+# the environment of each site at the sampled step (the last one by default) of a simulation
+# with evolution; at the last step, NULL for objects that did not keep it (the environment of
+# the landscape is then used)
+evolved_environment <- function(x, step) {
+  ev <- x$evolution
+  if (is.null(step)) return(ev$environment)
+  label <- step_label(step)
+  if (is.null(ev$environment_history) || !label %in% colnames(ev$environment_history)) {
+    stop("the evolutionary state was not recorded at step ", step,
+         ": use `record_steps` (with this version of the package)", call. = FALSE)
+  }
+  unname(ev$environment_history[, label])
+}
+
+step_label <- function(step) paste0("step", format(step, scientific = FALSE, trim = TRUE))
+
 sampled_abundance <- function(x, step) {
   if (is.null(step)) return(x$abundance)
   stopifnot(length(step) == 1)
   if (is.null(x$history)) stop("`x` has no recorded steps: use `record_steps`", call. = FALSE)
-  label <- paste0("step", step)
+  label <- step_label(step)
   if (!label %in% dimnames(x$history)[[3]]) {
     stop("step ", step, " was not recorded", call. = FALSE)
   }

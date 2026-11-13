@@ -356,7 +356,7 @@ test_that("sample_individuals() draws individuals from the evolutionary state", 
   expect_equal(stats::var(more$trait - more$population_mean), 9, tolerance = 0.1)
   expect_error(sample_individuals(sim, source = "evolution", local_adaptation = 0.5),
                "must stay 0")
-  expect_error(sample_individuals(sim, source = "evolution", step = 10), "last step")
+  expect_error(sample_individuals(sim, source = "evolution", step = 10), "not recorded")
   plain <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
                                   n_steps = 20)
   expect_error(sample_individuals(plain, source = "evolution"), "needs a simulation")
@@ -437,4 +437,108 @@ test_that("evolved_populations() checks the names of the evolutionary state", {
                                                                             traits = tr))
   expect_error(sample_individuals(sim, source = "evolution", intraspecific_sd = -1),
                "negative")
+})
+
+test_that("sample_individuals() samples several dates with a session error", {
+  set.seed(4)
+  ls <- landscape_implicit(12)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  envt <- env_over_time(ls$env, 80)
+  ev <- evolution_control(genetic_var = 4, env_var = 1, plasticity = 0.5)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 80, dispersal = 0.01, evolution = ev,
+                                env_time = envt, record_steps = c(40, 60, 80))
+  expect_equal(sim$evolution$environment_history[, "step60"], envt[, 60],
+               ignore_attr = TRUE)
+  d <- sample_individuals(sim, n = 50, step = c(40, 60, 80), source = "evolution")
+  expect_equal(names(d)[1], "step")
+  expect_setequal(unique(d$step), c(40, 60, 80))
+  # each date is drawn from the genetic means and plastic part of its step
+  at40 <- d[d$step == 40, ]
+  z <- sim$evolution$history[, 1, "step40"]
+  expected <- z + 0.5 * (envt[, 40] - sim$evolution$reference)
+  expect_equal(at40$population_mean, unname(expected[at40$site]))
+
+  site40 <- match(at40$site, rownames(sim$abundance))
+  expect_equal(at40$env, envt[site40, 40])
+  # the last step equals the default
+  set.seed(9)
+  a <- sample_individuals(sim, n = 3, step = 80, source = "evolution")
+  set.seed(9)
+  b <- sample_individuals(sim, n = 3, source = "evolution")
+  expect_equal(a$population_mean, b$population_mean)
+  # a session error shifts every individual of a date by the same amount
+  set.seed(2)
+  plain <- sample_individuals(sim, n = 50, step = c(40, 80), source = "evolution")
+  set.seed(2)
+  shifted <- sample_individuals(sim, n = 50, step = c(40, 80), source = "evolution",
+                                session_sd = 10)
+  shift <- tapply(shifted$trait - shifted$population_mean, shifted$step, mean) -
+    tapply(plain$trait - plain$population_mean, plain$step, mean)
+  expect_gt(max(abs(shift)), 1)
+  expect_equal(shifted$population_mean, plain$population_mean)
+  # traits as the source, with the environment of each date
+  e2 <- sample_individuals(sim, n = 5, step = c(40, 80), env = envt[, c(40, 80)])
+  expect_equal(e2$env[e2$step == 80],
+               envt[match(e2$site[e2$step == 80], rownames(sim$abundance)), 80])
+  expect_error(sample_individuals(sim, step = c(40, 80), env = envt[, 1:3]), "one column")
+  expect_error(sample_individuals(sim, step = 10, source = "evolution"), "not recorded")
+  expect_error(sample_individuals(sim, source = "evolution", env = ls$env), "env")
+  # a session error alone, on one date, keeps the columns
+  one <- sample_individuals(sim, n = 2, session_sd = 1)
+  expect_false("step" %in% names(one))
+})
+
+test_that("evolving metacommunities keep the evolutionary state at recorded steps", {
+  set.seed(5)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  es <- simulate_evolving_metacommunity(
+    ls, anc, speciation_control("fission", rate = 0.03, completion = 40),
+    evolution = evolution_control(genetic_var = 10, env_var = 2), dispersal = 0.01,
+    extirpation = 0.02, n_steps = 150, record_steps = c(100, 150))
+  h <- es$evolution$history
+  expect_equal(dim(h), c(25, ncol(es$abundance), 2))
+  # the last record is the final state
+  expect_equal(h[, , "step150"], es$evolution$genetic)
+  expect_equal(es$evolution$within_history[, , "step150"], es$evolution$within_var)
+  # absent populations have no genetic mean
+  expect_identical(is.na(h[, , "step100"]), es$history[, , "step100"] == 0)
+  d <- sample_individuals(es, n = 3, step = c(100, 150), source = "evolution")
+  expect_setequal(unique(d$step), c(100, 150))
+})
+
+test_that("dates share the deviations of populations and draw sessions apart", {
+  set.seed(6)
+  ls <- landscape_implicit(10)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 60, record_steps = c(50, 60))
+  set.seed(1)
+  a <- sample_individuals(sim, n = 3, step = c(50, 60), population_sd = 5)
+  key <- function(d) tapply(d$population_mean, d$site, unique)
+  expect_equal(key(a[a$step == 50, ]), key(a[a$step == 60, ]))
+  set.seed(1)
+  b <- sample_individuals(sim, n = 3, step = c(50, 60), population_sd = 5, session_sd = 3)
+  expect_equal(b$population_mean, a$population_mean)
+  shift <- tapply(b$trait - a$trait, b$step, stats::sd)
+  expect_true(all(shift < 1e-10))
+  # an environment as a one-column matrix, and the last step without a record
+  e1 <- sample_individuals(sim, n = 2, step = 60, env = matrix(ls$env))
+  expect_equal(nrow(e1), sum(pmin(sim$history[, , "step60"], 2)))
+  evo <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 30, evolution = evolution_control(1))
+  set.seed(2)
+  last <- sample_individuals(evo, n = 2, step = 30, source = "evolution")
+  set.seed(2)
+  expect_equal(last, sample_individuals(evo, n = 2, source = "evolution"))
+  expect_equal(step_label(1e5), "step100000")
+})
+
+test_that("evolved_at() refuses steps without a record of the evolutionary state", {
+  ev <- list(history = NULL, environment_history = NULL)
+  expect_error(evolved_at(ev, 5), "not recorded at step 5")
+  ev <- list(history = array(0, c(2, 1, 1), list(NULL, "sp1", "step10")),
+             environment_history = NULL)
+  expect_error(evolved_at(ev, 10), "record_steps")
 })

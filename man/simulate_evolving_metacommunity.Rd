@@ -110,7 +110,10 @@ them on the tree as ranges of areas.
 (\code{genetic}, weighted over their lineages by abundance; \code{NA} where absent), the plastic
 part of the phenotype (\code{plastic}), the variance among the lineages of a species in
 each site (\code{within_var}, 0 for species of one lineage), the environment of each site
-at the end (\code{environment}), the reference environment of plasticity (\code{reference}), the genetic and environmental variances and the slope of plasticity of
+at the end (\code{environment}), the same genetic means, variance among lineages and
+environment at \code{record_steps} for the lineages extant at the end (\code{history},
+\code{within_history}, \code{environment_history}), the reference environment of plasticity
+(\code{reference}), the genetic and environmental variances and the slope of plasticity of
 each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \code{settings}; otherwise
 \code{NULL}.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used.

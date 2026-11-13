@@ -80,8 +80,9 @@ tree, the colonisation history (\code{arrival}, \code{propagule}, \code{immigran
 see the section Colonisation history) and \code{n_steps}. With \code{evolution}, also \code{evolution}, a
 list with the genetic mean of the optimum in each population (\code{genetic}), the plastic part
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
-which mixes residents and immigrants), the genetic means at \code{record_steps} (\code{history}), the
-reference environment and the settings; \code{NA} where a population is absent. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
+which mixes residents and immigrants), the genetic means and the environment at
+\code{record_steps} (\code{history}, \code{environment_history}), the reference environment and the
+settings; \code{NA} where a population is absent. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
 \code{optimum_} column of traits per axis), while \code{\link[=summary_stats]{summary_stats()}} uses the first axis unless
 given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis.
 }
