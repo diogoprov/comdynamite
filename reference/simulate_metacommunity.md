@@ -135,9 +135,9 @@ with a tree, the colonisation history (`arrival`, `propagule`,
 mean of the optimum in each population (`genetic`), the plastic part of
 its phenotype at the last step (`plastic`), the phenotype after
 dispersal (`phenotype`, which mixes residents and immigrants), the
-genetic means at `record_steps` (`history`), the reference environment
-and the settings; `NA` where a population is absent. With a niche of
-several axes,
+genetic means and the environment at `record_steps` (`history`,
+`environment_history`), the reference environment and the settings; `NA`
+where a population is absent. With a niche of several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while

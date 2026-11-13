@@ -84,7 +84,8 @@ T-statistics of Violle et al. (2012) (<code><a href="tstats.html">tstats()</a></
 <span>  founder_sd <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  monopolization <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  gene_flow <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traits"</span>, <span class="st">"evolution"</span><span class="op">)</span></span>
+<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traits"</span>, <span class="st">"evolution"</span><span class="op">)</span>,</span>
+<span>  session_sd <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -138,12 +139,19 @@ the species.</p></dd>
 
 <dt id="arg-step">step<a class="anchor" aria-label="anchor" href="#arg-step"></a></dt>
 <dd><p>Recorded step to sample, as in <code>record_steps</code>; <code>NULL</code> (the default) uses the
-abundances at the last step.</p></dd>
+abundances at the last step. Several steps simulate collections on several dates: each
+date is sampled on its own (new individuals, drawn from the populations then), and the
+result gets a column <code>step</code>. The deviations of each population from <code>population_sd</code> (and
+<code>founder_sd</code>) are kept across dates, so populations change between dates only through
+the simulation. For evolving metacommunities, the records keep only the lineages extant at
+the end, so an earlier date misses species that died out later.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Optional environment of each site at the sampled step. The default is the
-environment of the landscape; give it for simulations with <code>env_time</code>.</p></dd>
+<dd><p>Optional environment of each site at the sampled step, or, with several steps, a
+matrix with one column per step (a vector is used for every date). The default is the
+environment of the landscape for every date; give it for simulations with <code>env_time</code>. With <code>source = "evolution"</code> the environment comes from the
+simulation.</p></dd>
 
 
 <dt id="arg-cover">cover<a class="anchor" aria-label="anchor" href="#arg-cover"></a></dt>
@@ -183,19 +191,28 @@ Has no effect without <code>founder_sd</code> or <code>monopolization</code>.</p
 <dd><p>Where population means come from: <code>"traits"</code> (the default) builds them from
 the optimum of each species with the arguments above; <code>"evolution"</code> takes them from a
 simulation run with <code>evolution</code> (<code><a href="evolution_control.html">evolution_control()</a></code>), as the genetic mean plus the
-plastic part of each population at the last step, and draws individuals around them with
+plastic part of each population at the sampled step, and draws individuals around them with
 the genetic plus environmental variance of each species (<code>genetic_var + env_var</code>, plus,
 for a species of several lineages, the variance among them in the site), so that
 the T-statistics of <code><a href="tstats.html">tstats()</a></code> reflect the variation that evolved. <code>intraspecific_sd</code>,
 when given, then adds variation such as measurement error, and <code>local_adaptation</code>,
-<code>population_sd</code>, <code>displacement</code>, <code>founder_sd</code>, <code>monopolization</code>, <code>step</code> and <code>env</code> must keep
-their defaults (<code>env</code> is the environment at the last step). Evolving metacommunities from <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> are accepted
+<code>population_sd</code>, <code>displacement</code>, <code>founder_sd</code>, <code>monopolization</code> and <code>env</code> must keep their
+defaults (<code>env</code> is the environment at the sampled step). At a <code>step</code> before the last, the
+simulation needs <code>record_steps</code> with that step, which keep the genetic means (and, for
+evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> are accepted
 too.</p></dd>
+
+
+<dt id="arg-session-sd">session_sd<a class="anchor" aria-label="anchor" href="#arg-session-sd"></a></dt>
+<dd><p>Standard deviation of an error shared by all individuals measured on the
+same date (<code>step</code>), such as a difference between measurers or calibrations; it is added to
+<code>trait</code>, not to <code>population_mean</code>. 0 (the default) for none.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>Data frame with one row per individual and the columns <code>site</code>, <code>species</code>,
+    <p>Data frame with one row per individual and the columns <code>step</code> (with several steps),
+<code>site</code>, <code>species</code>,
 <code>individual</code> (its number within the population), <code>abundance</code> (of the population), <code>env</code>
 (of the site), <code>optimum</code> (of the species), <code>population_mean</code> (the expected value of the
 population, \(m_{ij}\) above, after character displacement) and

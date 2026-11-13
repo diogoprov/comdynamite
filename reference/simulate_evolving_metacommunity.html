@@ -216,7 +216,10 @@ them on the tree as ranges of areas.</p></li>
 (<code>genetic</code>, weighted over their lineages by abundance; <code>NA</code> where absent), the plastic
 part of the phenotype (<code>plastic</code>), the variance among the lineages of a species in
 each site (<code>within_var</code>, 0 for species of one lineage), the environment of each site
-at the end (<code>environment</code>), the reference environment of plasticity (<code>reference</code>), the genetic and environmental variances and the slope of plasticity of
+at the end (<code>environment</code>), the same genetic means, variance among lineages and
+environment at <code>record_steps</code> for the lineages extant at the end (<code>history</code>,
+<code>within_history</code>, <code>environment_history</code>), the reference environment of plasticity
+(<code>reference</code>), the genetic and environmental variances and the slope of plasticity of
 each species (<code>genetic_var</code>, <code>env_var</code>, <code>plasticity</code>) and the <code>settings</code>; otherwise
 <code>NULL</code>.</p></li>
 <li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used.</p></li>

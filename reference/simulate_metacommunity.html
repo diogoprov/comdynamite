@@ -191,8 +191,9 @@ tree, the colonisation history (<code>arrival</code>, <code>propagule</code>, <c
 see the section Colonisation history) and <code>n_steps</code>. With <code>evolution</code>, also <code>evolution</code>, a
 list with the genetic mean of the optimum in each population (<code>genetic</code>), the plastic part
 of its phenotype at the last step (<code>plastic</code>), the phenotype after dispersal (<code>phenotype</code>,
-which mixes residents and immigrants), the genetic means at <code>record_steps</code> (<code>history</code>), the
-reference environment and the settings; <code>NA</code> where a population is absent. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
+which mixes residents and immigrants), the genetic means and the environment at
+<code>record_steps</code> (<code>history</code>, <code>environment_history</code>), the reference environment and the
+settings; <code>NA</code> where a population is absent. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
 <code>optimum_</code> column of traits per axis), while <code><a href="summary_stats.html">summary_stats()</a></code> uses the first axis unless
 given <code>trait</code> and <code>env</code>, and <code><a href="sample_individuals.html">sample_individuals()</a></code> needs a single axis.</p>
     </div>

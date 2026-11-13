@@ -187,10 +187,12 @@ An `mc_evolving` object, a list with:
   plastic part of the phenotype (`plastic`), the variance among the
   lineages of a species in each site (`within_var`, 0 for species of one
   lineage), the environment of each site at the end (`environment`), the
-  reference environment of plasticity (`reference`), the genetic and
-  environmental variances and the slope of plasticity of each species
-  (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
-  `NULL`.
+  same genetic means, variance among lineages and environment at
+  `record_steps` for the lineages extant at the end (`history`,
+  `within_history`, `environment_history`), the reference environment of
+  plasticity (`reference`), the genetic and environmental variances and
+  the slope of plasticity of each species (`genetic_var`, `env_var`,
+  `plasticity`) and the `settings`; otherwise `NULL`.
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
   `n_steps` used.
