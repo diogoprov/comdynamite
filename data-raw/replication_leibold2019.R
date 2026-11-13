@@ -32,7 +32,9 @@
 #   individuals of species 1 minus that of species 2;
 # * variation partitioning (vegan::varpart) of Hellinger-transformed composition, and of
 #   the community mean optimum, into patch type and space (PCNM, vegan::pcnm), with the
-#   edge patches left out as in their analysis;
+#   edge patches left out as in their analysis; we keep the adjusted R2 of patch type and of
+#   space each alone ([a + b] and [b + c]), since the pure fractions exceed 1 when the
+#   adjusted R2 of space is negative;
 # * classes of patches at generation 5000: dominated (>= 90% of individuals) by the
 #   pre-adapted species, dominated by the other species ("switched"), or shared.
 
@@ -102,14 +104,14 @@ summarise_leibold <- function(run, var_total = 400 + run$G + 4) {
       comp <- vegan::decostand(n[inner, ], "hellinger")
       env_f <- data.frame(type = factor(run$env[inner]))
       sp <- pcnm_space[inner[!edge], , drop = FALSE]
-      vp <- vegan::varpart(comp, env_f, sp)$part$indfract$Adj.R.squared
+      vp <- vegan::varpart(comp, env_f, sp)$part$fract$Adj.R.squared
       out$env_comp <- vp[1]
-      out$space_comp <- vp[3]
+      out$space_comp <- vp[2]
       cwm <- rowSums(n[inner, ] * ifelse(is.na(z[inner, ]), 0, z[inner, ])) /
         rowSums(n[inner, ])
-      vt <- vegan::varpart(cwm, env_f, sp)$part$indfract$Adj.R.squared
+      vt <- vegan::varpart(cwm, env_f, sp)$part$fract$Adj.R.squared
       out$env_trait <- vt[1]
-      out$space_trait <- vt[3]
+      out$space_trait <- vt[2]
     }
     out
   })
@@ -131,24 +133,31 @@ if (sys.nframe() == 0) {
   args <- commandArgs(trailingOnly = TRUE)
   n_steps <- if (length(args)) as.integer(args[1]) else 10000
   n_rep <- if (length(args) > 1) as.integer(args[2]) else 10
-  design <- rbind(expand.grid(G = c(0, 0.4, 4), landscape_type = "two",
-                              rep = seq_len(n_rep), stringsAsFactors = FALSE),
-                  expand.grid(G = c(0, 4), landscape_type = "one",
+  # G sets the speed of adaptation (G / (sigma^2 + G + VE) of the mismatch per generation:
+  # 0, 5%, 11%, 20%, 33% and 50%); Nm as in their Table S2. The same seed (landscape) for a
+  # replicate across settings. Control with one patch type and identical species (Fig. S2).
+  design <- rbind(expand.grid(G = c(0, 20, 50, 100, 200, 400), nm = c(1, 10, 100),
+                              landscape_type = "two", rep = seq_len(n_rep),
+                              stringsAsFactors = FALSE),
+                  expand.grid(G = c(0, 200), nm = 10, landscape_type = "one",
                               rep = seq_len(n_rep), stringsAsFactors = FALSE))
   t0 <- Sys.time()
-  results <- lapply(seq_len(nrow(design)), function(i) {
+  results <- parallel::mclapply(seq_len(nrow(design)), function(i) {
     d <- design[i, ]
-    run <- run_leibold(d$G, d$landscape_type, seed = 1000 + d$rep, n_steps = n_steps)
-    list(G = d$G, landscape_type = d$landscape_type, rep = d$rep,
+    run <- run_leibold(d$G, d$landscape_type, seed = 1000 + d$rep, n_steps = n_steps,
+                       nm = d$nm)
+    list(G = d$G, nm = d$nm, landscape_type = d$landscape_type, rep = d$rep,
          summary = summarise_leibold(run),
          classes = if (n_steps >= 5000) classify_leibold(run) else NULL)
-  })
+  }, mc.cores = max(1, parallel::detectCores() - 2), mc.preschedule = FALSE)
   message("time: ", format(Sys.time() - t0))
   out_file <- if (n_steps == 10000 && n_rep == 10) {
     "data-raw/replication_leibold2019.rds"
   } else {
     file.path(tempdir(), "replication_leibold2019_pilot.rds")
   }
+  bad <- vapply(results, inherits, logical(1), "try-error")
+  if (any(bad)) stop("runs failed: ", results[[which(bad)[1]]])
   saveRDS(results, out_file)
   message("saved ", out_file)
 }

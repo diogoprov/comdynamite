@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `disturbance` in `simulate_metacommunity()`, `mc_dynamics()` and
+  `simulate_evolving_metacommunity()`: the probability that a site loses all its populations
+  at each step, as the patch extinctions of Leibold et al. (2019).
+- New article "Replicating Leibold et al. (2019)" (`data-raw/replication_leibold2019.R`):
+  with fast enough adaptation, both species adapt to both patch types, fitness differences
+  vanish and patch type stops predicting composition while it still predicts traits, as in
+  their model; local dominance is weaker and regional drift removes one species faster.
 - Speciation with several traits. With a list of `traits` and an `env` matrix (one column
   per niche axis), `simulate_evolving_metacommunity()` evolves one trait per axis in every
   lineage, with \(G\) and \(E\) as covariance matrices in `evolution_control()`, as in
