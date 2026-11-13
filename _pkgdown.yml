@@ -200,4 +200,5 @@ articles:
   contents:
   - articles/validation
   - articles/validation-gradient
+  - articles/replication-leibold
   - articles/herodotools

@@ -280,3 +280,19 @@ test_that("env_time as a matrix works with a single column of env and one evolvi
   expect_equal(a$evolution$genetic, b$evolution$genetic)
   expect_equal(unname(a$evolution$environment_history[, "step10"]), warm[, 10])
 })
+
+test_that("immigrant_selection is refused with several traits and in evolving simulations", {
+  s <- mv_setup()
+  ev <- evolution_control(genetic_var = diag(2), immigrant_selection = TRUE)
+  expect_error(simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, n_steps = 5,
+                                      evolution = ev), "several traits")
+  expect_error(simulate_evolving_metacommunity(s$ls, s$tr$svl,
+                                               speciation_control("geographic", Inf),
+                                               evolution = evolution_control(
+                                                 10, immigrant_selection = TRUE),
+                                               n_steps = 5), "not yet available")
+  expect_error(simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, n_steps = 5,
+                                      evolution = evolution_control(diag(2), ne_ratio = 0.5,
+                                                                    mutation_var = 0.1)),
+               "several traits")
+})

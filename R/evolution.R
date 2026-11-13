@@ -101,6 +101,28 @@
 #'   step are divided by it (at least 1); dispersal and demography are per step.
 #' @param founder Should populations founded at a step start from the sampled mean of their
 #'   founders (`TRUE`) or from the mean of their source (`FALSE`)?
+#' @param immigrant_selection Should immigrants face viability selection in the site they reach
+#'   before they mix with residents? With `FALSE` (the default), the immigrants from all sources
+#'   join the population and the mean of the merged population is selected. With `TRUE`, the
+#'   immigrants from each source arrive in proportion to the mean fitness of their source
+#'   phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
+#'   as the growth rate, with the variance of the phenotypes), so that maladapted immigrants
+#'   are filtered source by source, as individuals are in an individual-based model, and the
+#'   mean and variance of the immigrants are those of the survivors. One trait only, on a
+#'   spatially explicit landscape with `immigration = "poisson"`; used in the article
+#'   "Replicating Leibold et al. (2019)".
+#' @param mutation_var `NULL` (the default) for a constant genetic variance, or the mutational
+#'   variance \eqn{V_m}{Vm} added per generation, one value or one per species. Each population
+#'   then carries its own genetic variance, which loses a fraction \eqn{1 / (2 N_e)}{1 / (2 Ne)}
+#'   and gains \eqn{V_m}{Vm} each generation (neutral mutation and drift, Lynch & Hill 1986),
+#'   so that it approaches \eqn{2 N_e V_m}{2 Ne Vm} in a population of constant size and stays
+#'   low in small ones. Founders keep the variance of their sources times
+#'   \eqn{1 - 1 / (2k)}{1 - 1 / (2k)} for \eqn{k}{k} founders, and gene flow averages the
+#'   variances of residents and immigrants by their numbers. The variance between the means of
+#'   residents and immigrants (or of sources) is not added, as if selection removed it, since
+#'   selection does not otherwise act on the variance; without this choice, gene flow between
+#'   diverged populations inflates the variance without bound. `genetic_var` is then the
+#'   variance of the populations at the start and of seeds. Needs a finite `ne_ratio`; one trait only.
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -111,6 +133,9 @@
 #'   Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
 #'   brain:body size allometry. *Evolution*, 33, 402--416.
 #'   \doi{10.1111/j.1558-5646.1979.tb04694.x}
+#'
+#'   Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
+#'   915--935. \doi{10.1111/j.1558-5646.1986.tb00561.x}
 #' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
@@ -125,7 +150,7 @@
 #' @export
 evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var = 0,
                               steps_per_generation = 1, founder = TRUE, env = NULL,
-                              traits = NULL) {
+                              traits = NULL, immigrant_selection = FALSE, mutation_var = NULL) {
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
   # several traits: covariance matrices (checked when the simulation starts)
   covariance <- function(v) is.matrix(v) || is.list(v)
@@ -134,10 +159,22 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
             is.numeric(ne_ratio), length(ne_ratio) == 1, ne_ratio > 0,
             is.numeric(plasticity),
             is.numeric(steps_per_generation), length(steps_per_generation) == 1,
-            steps_per_generation >= 1, is.logical(founder), length(founder) == 1)
+            steps_per_generation >= 1, is.logical(founder), length(founder) == 1,
+            is.logical(immigrant_selection), length(immigrant_selection) == 1,
+            !is.na(immigrant_selection))
+  if (!is.null(mutation_var)) {
+    if (!is.numeric(mutation_var) || any(is.na(mutation_var)) || any(mutation_var < 0)) {
+      stop("`mutation_var` must be one or more non-negative numbers", call. = FALSE)
+    }
+    if (!is.finite(ne_ratio)) {
+      stop("`mutation_var` needs drift: a finite `ne_ratio`", call. = FALSE)
+    }
+  }
   structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
                  env_var = env_var, steps_per_generation = steps_per_generation,
-                 founder = founder, env = env, traits = traits), class = "mc_evolution")
+                 founder = founder, env = env, traits = traits,
+                 immigrant_selection = immigrant_selection, mutation_var = mutation_var),
+            class = "mc_evolution")
 }
 
 #' @export
@@ -188,11 +225,56 @@ evolution_state <- function(evolution, m, k_all, species) {
        optimum = traits$optimum, sigma = traits$sigma, r_max = traits$r_max,
        g = each(evolution$genetic_var), b = each(evolution$plasticity),
        ve = each(evolution$env_var), nu = evolution$ne_ratio,
-       per = evolution$steps_per_generation, founder = evolution$founder)
+       per = evolution$steps_per_generation, founder = evolution$founder,
+       imm_sel = isTRUE(evolution$immigrant_selection),
+       dyn = !is.null(evolution$mutation_var),
+       vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var))
+}
+
+# immigrants filtered by viability selection in the site they reach (immigrant_selection =
+# TRUE): the expected number from each source is weighted by the fitness of the source
+# phenotype in the destination; returns the expected numbers and the mean and variance of the
+# genetic means, and the mean phenotype, of the immigrants that arrive (sites x species)
+immigrants_selected <- function(em, za, pa, e, width, disp_matrix, vg = NULL) {
+  m <- nrow(em)
+  k <- ncol(em)
+  if (!is.matrix(width)) width <- matrix(width, m, k, byrow = TRUE)
+  if (is.null(vg)) vg <- matrix(0, m, k)
+  lam <- zi <- z2 <- pi <- vi <- matrix(0, m, k)
+  for (s in seq_len(k)) {
+    src <- em[, s] > 0
+    if (!any(src)) next
+    # w[j, i]: fitness of the phenotype of source j in site i, relative to the optimum
+    w <- exp(-outer(pa[src, s], e, "-")^2 / (2 * width[src, s]))
+    flow <- disp_matrix[src, , drop = FALSE] * w * em[src, s]
+    lam[, s] <- colSums(flow)
+    zi[, s] <- colSums(flow * za[src, s])
+    z2[, s] <- colSums(flow * za[src, s]^2)
+    pi[, s] <- colSums(flow * pa[src, s])
+    vi[, s] <- colSums(flow * vg[src, s])
+  }
+  has <- lam > 0
+  zi[has] <- zi[has] / lam[has]
+  pi[has] <- pi[has] / lam[has]
+  vi[has] <- vi[has] / lam[has]
+  z2[has] <- pmax(z2[has] / lam[has] - zi[has]^2, 0)
+  zi[!has] <- za[!has]
+  pi[!has] <- pa[!has]
+  vi[!has] <- vg[!has]
+  list(lambda = lam, mean = zi, between = z2, phenotype = pi, variance = vi)
 }
 
 # growth rates of the phenotypes p (sites x species) in environment e: the mean fitness under
 # the response of growth_rates() of phenotypes with variance v around p (v = 0 gives it exactly)
+# the same with the variance v as a matrix (sites x species), one value per population
+evolution_growth_cells <- function(p, e, sigma, r_max, v) {
+  width <- sweep(v, 2, sigma^2, "+")
+  r <- exp(-(e - p)^2 / (2 * width))
+  shrink <- sqrt(sweep(1 / width, 2, sigma^2, "*"))
+  shrink[, !is.finite(sigma)] <- 1
+  sweep(r * shrink, 2, r_max, "*")
+}
+
 evolution_growth <- function(p, e, sigma, r_max, v = 0) {
   width <- sigma^2 + v
   r <- exp(-sweep((e - p)^2, 2, 2 * width, "/"))

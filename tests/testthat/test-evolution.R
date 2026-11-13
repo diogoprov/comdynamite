@@ -163,3 +163,95 @@ test_that("simulate_metacommunity() checks alpha and dispersal", {
   expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0.1, n_steps = 2),
                "at least two sites")
 })
+
+test_that("immigrant_selection filters maladapted immigrants source by source", {
+  xy <- expand.grid(x = 0:4, y = 0:3)
+  env <- rep(c(40, 60), 10)
+  ls <- landscape_points(xy, env, disp_scale = 1)
+  tr <- data.frame(optimum = c(40, 60), sigma = 5, r_max = 5, row.names = c("sp1", "sp2"))
+  init <- cbind(sp1 = (env == 40) * 100L, sp2 = (env == 60) * 100L)
+  run <- function(sel) {
+    set.seed(4)
+    simulate_metacommunity(ls, tr, matrix(0.04, 2, 2), dispersal = 0.2, n_steps = 30,
+                           seed_steps = integer(0), initial = init,
+                           evolution = evolution_control(genetic_var = 1, ne_ratio = Inf,
+                                                         immigrant_selection = sel))
+  }
+  plain <- run(FALSE)
+  filtered <- run(TRUE)
+  # maladapted immigrants are mostly filtered: fewer individuals of each species in the
+  # patch type of the other, and their populations closer to the local environment
+  wrong <- function(s) sum(s$abundance[env == 60, "sp1"]) + sum(s$abundance[env == 40, "sp2"])
+  expect_lt(wrong(filtered), wrong(plain))
+  # the helper weights each source by its fitness in the destination
+  disp <- matrix(c(0, 1, 1, 0), 2)
+  sel <- immigrants_selected(matrix(c(10, 0), 2, 1), matrix(c(40, 0), 2, 1),
+                             matrix(c(40, 0), 2, 1), c(40, 60), 25, disp)
+  expect_equal(sel$lambda[2, 1], 10 * exp(-400 / 50))
+  expect_equal(sel$mean[2, 1], 40)
+  # a species without emigrants sends no one and keeps its own mean
+  none <- immigrants_selected(matrix(0, 2, 1), matrix(c(40, 45), 2, 1), matrix(c(40, 45), 2, 1),
+                              c(40, 60), 25, disp)
+  expect_equal(none$lambda, matrix(0, 2, 1))
+  expect_equal(none$mean, matrix(c(40, 45), 2, 1))
+  expect_error(evolution_control(1, immigrant_selection = NA))
+  expect_error(simulate_metacommunity(landscape_implicit(5), tr, matrix(0.04, 2, 2),
+                                      n_steps = 5,
+                                      evolution = evolution_control(1, immigrant_selection = TRUE)),
+               "spatially explicit")
+})
+
+test_that("mutation_var gives each population a genetic variance with mutation-drift dynamics", {
+  ls <- landscape_points(expand.grid(x = 1:3, y = 1:2), rep(50, 6), disp_scale = 1)
+  tr <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  a <- matrix(0.01, dimnames = list("sp1", "sp1"))
+  init <- cbind(sp1 = rep(400L, 6))
+  run <- function(vm, g = 10, n_steps = 300, nu = 0.5) {
+    set.seed(5)
+    simulate_metacommunity(ls, tr, a, dispersal = 0, n_steps = n_steps,
+                           seed_steps = integer(0), initial = init,
+                           evolution = evolution_control(genetic_var = g, ne_ratio = nu,
+                                                         mutation_var = vm))
+  }
+  # equilibrium 2 Ne Vm: Ne = 0.5 x N (N about 395), so Vm = 0.025 keeps G near 10
+  eq <- run(0.025, n_steps = 1000)
+  expect_equal(mean(eq$evolution$genetic_variance), 0.025 * mean(eq$abundance), tolerance = 0.1)
+  # no mutation: the variance decays by about 1 / (2 Ne) per generation
+  dec <- run(0, n_steps = 100)
+  expected <- 10 * (1 - 1 / mean(dec$abundance))^100
+  expect_equal(mean(dec$evolution$genetic_variance), expected, tolerance = 0.03)
+  # constant G has no genetic_variance
+  expect_null(run(NULL)$evolution$genetic_variance)
+  expect_error(evolution_control(1, mutation_var = -1), "mutation_var")
+  expect_error(evolution_control(1, ne_ratio = Inf, mutation_var = 0.1), "finite")
+  # founders: a population founded by few immigrants starts with less variance
+  xy <- expand.grid(x = 0:3, y = 0:1)
+  ls2 <- landscape_points(xy, rep(50, 8), disp_scale = 0.5)
+  init2 <- cbind(sp1 = c(400L, rep(0L, 7)))
+  set.seed(6)
+  sim <- simulate_metacommunity(ls2, tr, a, dispersal = 0.01, n_steps = 40,
+                                seed_steps = integer(0), initial = init2,
+                                evolution = evolution_control(genetic_var = 10, ne_ratio = 0.5,
+                                                              mutation_var = 0.025,
+                                                              immigrant_selection = TRUE))
+  v <- sim$evolution$genetic_variance
+  expect_true(any(v[-1] < v[1], na.rm = TRUE))
+  # growth with one variance per population matches the vector version
+  p <- matrix(c(40, 55), 2, 1)
+  expect_equal(evolution_growth_cells(p, c(50, 50), 20, 5, matrix(3, 2, 1)),
+               evolution_growth(p, c(50, 50), 20, 5, 3))
+})
+
+test_that("mutation_var works with seeding and with gene flow without immigrant selection", {
+  ls <- landscape_points(expand.grid(x = 1:4, y = 1:3), rep(c(40, 60), 6), disp_scale = 1)
+  tr <- data.frame(optimum = c(45, 55), sigma = 20, r_max = 5, row.names = c("sp1", "sp2"))
+  set.seed(7)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 150,
+                                evolution = evolution_control(genetic_var = 10, ne_ratio = 0.5,
+                                                              mutation_var = 0.025))
+  v <- sim$evolution$genetic_variance
+  present <- sim$abundance > 0
+  expect_true(any(present))
+  expect_true(all(is.finite(v[present]) & v[present] > 0))
+  expect_true(all(is.na(v[!present])))
+})

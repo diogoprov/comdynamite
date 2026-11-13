@@ -23,7 +23,8 @@ simulate_evolving_metacommunity(
   record_steps = NULL,
   immigration = c("poisson", "multinomial"),
   max_species = 500,
-  env = NULL
+  env = NULL,
+  disturbance = 0
 )
 }
 \arguments{
@@ -77,6 +78,9 @@ frame with one row per site and one column per element of \code{traits}. The \co
 and \code{env_var} of \code{evolution} are then covariance matrices (see the section Several traits
 of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
 and new species inherit the matrices of their mother.}
+
+\item{disturbance}{Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).}
 }
 \value{
 An \code{mc_evolving} object, a list with:

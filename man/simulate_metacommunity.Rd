@@ -19,7 +19,8 @@ simulate_metacommunity(
   initial = NULL,
   immigration = c("poisson", "multinomial"),
   env = NULL,
-  evolution = NULL
+  evolution = NULL,
+  disturbance = 0
 )
 }
 \arguments{
@@ -74,6 +75,9 @@ founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of 
 all its populations, as before. With a niche of several axes, one trait evolves per axis,
 with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
 \code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
+
+\item{disturbance}{Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
@@ -86,7 +90,8 @@ list with the genetic mean of the optimum in each population (\code{genetic}), t
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
 which mixes residents and immigrants), the genetic means and the environment at
 \code{record_steps} (\code{history}, \code{environment_history}), the reference environment and the
-settings; \code{NA} where a population is absent. With several evolving traits, \code{genetic},
+settings, and, with \code{mutation_var}, the genetic variance of each population at the last
+step (\code{genetic_variance}); \code{NA} where a population is absent. With several evolving traits, \code{genetic},
 \code{plastic} and \code{phenotype} are arrays of sites x species x traits, \code{history} has the
 recorded steps as a fourth dimension, and \code{genetic_var}, \code{env_var} (one matrix per species)
 and \code{plasticity} (species x traits) are kept. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
@@ -125,7 +130,9 @@ dispersal, where the two give nearly the same results.
 
 After dispersal, each population is lost with probability \code{extirpation},
 independently of its size. Thompson et al. (2020) used 0.002 in their
-competition-colonisation scenario and no extirpation in the others.
+competition-colonisation scenario and no extirpation in the others. With \code{disturbance},
+each site then loses all its populations at once with that probability, as the patch
+extinctions of Leibold et al. (2019); the site is recolonised by dispersal.
 
 During colonisation, Poisson(\code{seed_mean}) individuals of every species are
 added to every site at each of the \code{seed_steps}. After the last of these,
@@ -207,6 +214,11 @@ Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 process-based metacommunity framework linking local and regional scale
 community ecology. \emph{Ecology Letters}, 23, 1314--1329.
 \doi{10.1111/ele.13568}
+
+Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J.
+(2019). Regional neutrality evolves through local adaptive niche evolution.
+\emph{Proceedings of the National Academy of Sciences}, 116, 2612--2617.
+\doi{10.1073/pnas.1808615116}
 }
 \seealso{
 Other simulate metacommunities:

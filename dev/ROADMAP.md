@@ -992,6 +992,21 @@ as fases, em `dev/plano-especiacao.md`.
       que é bom para tempo profundo e menos para tempo ecológico. O posicionamento (populações e
       genética quantitativa em tempo ecológico, módulos testáveis com a verdade conhecida;
       Cabral, Valente & Hartig 2017) vai para o README e para o preprint.
+      Feito (2026-11-13): rascunho do mapa em `dev/nesting-map.md` (seis modelos, fontes por
+      item; BioGEEM só pelo preprint, Tabela S1 de Urban & De Meester 2009 não lida);
+      `disturbance` no motor; replicação (i) em `data-raw/replication_leibold2019.R` e no
+      artigo "Replicating Leibold et al. (2019)": neutralidade regional reproduzida com G ≥ 100;
+      dominância local mais fraca e deriva regional mais rápida que no modelo deles (hipótese:
+      imigrantes misturados à média). Testado (`immigrant_selection`, `data-raw/mechanism_leibold2019.R`):
+      a seleção dos imigrantes não explica nenhuma das diferenças; deriva e amostragem de
+      fundador das médias explicam a maior parte da deriva regional mais rápida; a dominância
+      local fraca parece vir do G que não depende do tamanho da população (a testar com G
+      dependente de N). Testado (`mutation_var`, variância por população com mutação e deriva):
+      nenhuma espécie se perde, a neutralidade regional surge, mas a dominância local some
+      (90-99% de manchas compartilhadas com Nm = 10); a dominância local com G constante vem da
+      deriva das médias. A do modelo deles fica sem explicação (candidatos não testados:
+      recrutamento em loteria, gerações sobrepostas, variância a partir de mutações novas). Em aberto: (ii)
+      Urban & De Meester 2009 e o mapa como artigo.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;

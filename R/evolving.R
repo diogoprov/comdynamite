@@ -314,12 +314,16 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             initial = NULL, seed_mean = 0.5,
                                             record_steps = NULL,
                                             immigration = c("poisson", "multinomial"),
-                                            max_species = 500, env = NULL) {
+                                            max_species = 500, env = NULL, disturbance = 0) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
   }
   competition <- match.arg(competition)
+  if (isTRUE(evolution$immigrant_selection) || !is.null(evolution$mutation_var)) {
+    stop("`immigrant_selection` and `mutation_var` are not yet available in ",
+         "`simulate_evolving_metacommunity()`", call. = FALSE)
+  }
   immigration <- match.arg(immigration)
   stopifnot(inter_max >= 0, inter_min >= 0, inter_min <= inter_max, scale > 0,
             distance_scale > 0, max_species >= 1, is.logical(niche_overlap))
@@ -415,7 +419,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                seed_steps = numeric(0), seed_mean = seed_mean,
                disp_matrix = landscape$dispersal, record_steps = record_steps, sites = sites,
                species = species0, extirpation = extirpation, pool = NULL, initial = initial,
-               immigration = immigration, evolution = evolution)
+               immigration = immigration, evolution = evolution, disturbance = disturbance)
   st <- do.call(mc_state, args)
   if (niche_overlap && competition == "phylo") st$competition_hook <- niche_crowding(st)
 
@@ -690,7 +694,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  lineage_species = obs$group[extant], richness = richness,
                  richness_good = richness_good, genetic = genetic, traits = traits_out,
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
-                 extirpation = st$extirpation[sp_idx], speciation = speciation,
+                 extirpation = st$extirpation[sp_idx], disturbance = disturbance,
+                 speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  env = if (several) as.data.frame(env) else NULL,
                  generations = generations, history = history,
