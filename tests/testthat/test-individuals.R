@@ -534,3 +534,11 @@ test_that("dates share the deviations of populations and draw sessions apart", {
   expect_equal(last, sample_individuals(evo, n = 2, source = "evolution"))
   expect_equal(step_label(1e5), "step100000")
 })
+
+test_that("evolved_at() refuses steps without a record of the evolutionary state", {
+  ev <- list(history = NULL, environment_history = NULL)
+  expect_error(evolved_at(ev, 5), "not recorded at step 5")
+  ev <- list(history = array(0, c(2, 1, 1), list(NULL, "sp1", "step10")),
+             environment_history = NULL)
+  expect_error(evolved_at(ev, 10), "record_steps")
+})
