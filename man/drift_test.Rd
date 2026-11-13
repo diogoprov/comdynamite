@@ -53,7 +53,10 @@ By default \eqn{W}{W} is the pooled phenotypic covariance within groups, which s
 proportional; Prôa et al. (2013) found acceptable type I error rates with it only when the
 matrices are similar and heritabilities are high, or when \eqn{t / N_e}{t / Ne} is small. A
 known \eqn{G}{G} (for example, from \code{\link[=genetic_matrices]{genetic_matrices()}} or the \code{genetic_var} of a simulation)
-can be given in \code{W} instead.
+can be given in \code{W} instead. Individuals should be grouped by population when \code{W} is
+estimated from them: a \code{W} pooled within species whose populations diverged (for example by
+local adaptation along a gradient) carries that divergence and can hide selection among
+species.
 
 The variance of the observed means includes their sampling error, \eqn{P / n}{P / n} for groups
 of \eqn{n}{n} individuals. Unless \eqn{P}{P} is proportional to \code{W}, this error flattens the

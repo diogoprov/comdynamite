@@ -16,9 +16,13 @@
 - New `drift_test()` tests whether divergence among groups is proportional to the variation
   within them, as expected under drift (Lande 1979), by regressing the log variance among
   group means on the log eigenvalues of \(W\) (Ackermann & Cheverud 2004), with \(W\) the
-  pooled covariance within groups or a known \(G\). A validation in `data-raw` applies it to
-  clades simulated by `simulate_evolving_metacommunity()` under drift and under divergent
-  selection.
+  pooled covariance within groups or a known \(G\), after subtracting the sampling variance
+  of the means. In a validation in `data-raw` with clades simulated by
+  `simulate_evolving_metacommunity()`, the test with a known \(G\) kept its size under drift
+  (3.6% at 5%) and gave slopes below 1 in every run under divergent selection along the minor
+  axis of \(G\), but rejected drift in only 36% of those runs with eight traits; with \(W\)
+  estimated from phenotypes and low heritability on the minor axes, it rejected true drift in
+  57% of runs (Prôa et al. 2013).
 
 - New `maladaptation()` gives, for every population of a simulation run with `evolution`,
   the deviation of its mean phenotype (genetic mean plus plastic response) from the
