@@ -892,20 +892,9 @@ evolved_environment <- function(x, step) {
   unname(ev$environment_history[, label])
 }
 
-# individuals of a simulation with several evolving traits (one per environmental axis): the
-# phenotype of each individual is drawn from N(population mean, G + E), with the population
-# mean the genetic mean plus the plastic response at the sampled step; one column per trait
-individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecific_sd, fixed) {
-  if (!is.null(env)) {
-    stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
-         "leave `env` as NULL", call. = FALSE)
-  }
-  if (any(fixed != 0)) {
-    stop("with `source = \"evolution\"`, population means come from the simulation: ",
-         "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
-         "`monopolization` must stay 0 (and `displacement_width` and `gene_flow` unset)",
-         call. = FALSE)
-  }
+# population means (genetic plus plastic, NA where absent), environment (sites x traits) and
+# abundances of a simulation with several evolving traits, at the last step or a recorded one
+mv_populations <- function(x, step = NULL) {
   ev <- x$evolution
   axes <- dimnames(ev$genetic)[[3]]
   q <- length(axes)
@@ -930,6 +919,33 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
   for (a in seq_len(q)) {
     pop[, , a] <- z[, , a] + outer(e[, a] - ev$reference[a], b[, a])
   }
+  e <- matrix(e, length(sites), q, dimnames = list(sites, axes))
+  list(mean = pop, env = e, abundance = abundance, axes = axes)
+}
+
+# individuals of a simulation with several evolving traits (one per environmental axis): the
+# phenotype of each individual is drawn from N(population mean, G + E), with the population
+# mean the genetic mean plus the plastic response at the sampled step; one column per trait
+individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecific_sd, fixed) {
+  if (!is.null(env)) {
+    stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
+         "leave `env` as NULL", call. = FALSE)
+  }
+  if (any(fixed != 0)) {
+    stop("with `source = \"evolution\"`, population means come from the simulation: ",
+         "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
+         "`monopolization` must stay 0 (and `displacement_width` and `gene_flow` unset)",
+         call. = FALSE)
+  }
+  ev <- x$evolution
+  state <- mv_populations(x, step)
+  axes <- state$axes
+  q <- length(axes)
+  abundance <- state$abundance
+  sites <- rownames(abundance)
+  species <- colnames(abundance)
+  e <- state$env
+  pop <- state$mean
   extra <- intraspecific_sd
   if (length(extra) == 1) extra <- rep(extra, q)
   if (!is.numeric(extra) || length(extra) != q || any(extra < 0)) {

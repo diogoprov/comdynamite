@@ -63,6 +63,7 @@ Other simulate metacommunities:
 \code{\link[=genetic_matrices]{genetic_matrices()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=maladaptation]{maladaptation()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
 \code{\link[=range_history]{range_history()}},
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},

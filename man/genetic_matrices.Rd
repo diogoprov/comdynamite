@@ -86,6 +86,7 @@ Other simulate metacommunities:
 \code{\link[=evolution_control]{evolution_control()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=maladaptation]{maladaptation()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
 \code{\link[=persistence]{persistence()}},
 \code{\link[=range_history]{range_history()}},

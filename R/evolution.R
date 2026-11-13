@@ -196,7 +196,9 @@ evolution_state <- function(evolution, m, k_all, species) {
 evolution_growth <- function(p, e, sigma, r_max, v = 0) {
   width <- sigma^2 + v
   r <- exp(-sweep((e - p)^2, 2, 2 * width, "/"))
-  sweep(r, 2, r_max * sqrt(sigma^2 / width), "*")
+  # a niche of infinite breadth: no selection and no cost of the variance
+  shrink <- ifelse(is.finite(sigma), sqrt(sigma^2 / width), 1)
+  sweep(r, 2, r_max * shrink, "*")
 }
 
 # mean trait of the immigrants into each site, from the emigrants em and their trait x

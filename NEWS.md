@@ -1,5 +1,16 @@
 # comdynamite (development version)
 
+- New `maladaptation()` gives, for every population of a simulation run with `evolution`,
+  the deviation of its mean phenotype (genetic mean plus plastic response) from the
+  environment of its site and the lag load, the share of growth lost to it; with several
+  traits, through the Mahalanobis distance under \(\Omega + P\). It takes recorded steps and
+  evolving metacommunities. A new article, "Quantitative genetics in the metacommunity",
+  animates migration load along a gradient, evolutionary rescue under warming, genetic
+  constraints set by the orientation of \(G\), and evolving priority effects that obscure the
+  relationship between species and the environment (Urban & De Meester 2009; Leibold et al.
+  2019), and relates the model to the mechanistic models of Cabral and colleagues.
+- Bug fix: `simulate_metacommunity()` with `evolution` and a niche of infinite breadth
+  (`sigma = Inf`) gave growth rates of `NaN`.
 - Evolution of several traits at once. With a niche of several axes, `simulate_metacommunity()`
   evolves one trait per axis (its optimum), with `genetic_var` and `env_var` of
   `evolution_control()` as covariance matrices \(G\) and \(E\), one for all species or one

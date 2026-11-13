@@ -973,6 +973,10 @@ as fases, em `dev/plano-especiacao.md`.
         eixos com `sigma = Inf`; `genetic_matrices()` (proporcional, independente, PCs
         compartilhados); `sample_individuals()` com um traço por coluna. Testes: G = 0,
         deriva Var(Δz) = G Σ 1/Nₑ, resposta em um passo, razão G21/G11.
+  - [x] `maladaptation()` (desvio e lag load por população; Mahalanobis com vários traits)
+        e artigo "Quantitative genetics in the metacommunity" com GIFs (carga de migração,
+        resgate evolutivo, orientação da G, prioridade evolutiva; Leibold et al. 2019, Urban &
+        De Meester 2009, Cabral e colaboradores).
   - [ ] Parte 2: especiação com vários traits em `simulate_evolving_metacommunity()`;
         validação B ∝ W em `data-raw`; ambientes que mudam no tempo com vários eixos.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
