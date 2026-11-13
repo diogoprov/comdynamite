@@ -127,6 +127,7 @@ morphological dispersion, and the coexistence of plant species. \emph{Oikos}, 81
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},

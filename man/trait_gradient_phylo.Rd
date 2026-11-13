@@ -92,6 +92,7 @@ components. \emph{Ecology Letters}, 10, 135--145. \doi{10.1111/j.1461-0248.2006.
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},

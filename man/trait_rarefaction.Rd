@@ -76,6 +76,7 @@ trait_rarefaction(ind, cover = c(0.5, 0.8, 1))
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},

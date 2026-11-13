@@ -218,6 +218,7 @@ an environmental gradient. \emph{Evolution}, 60, 1344--1357. \doi{10.1554/05-696
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},

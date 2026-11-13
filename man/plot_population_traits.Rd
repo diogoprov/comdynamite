@@ -92,6 +92,7 @@ plot_population_traits(ind, "size", weighted = FALSE, alpha = 0.2, sites = c("s1
 
 Other trait variation among individuals:
 \code{\link[=community_index]{community_index()}},
+\code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
