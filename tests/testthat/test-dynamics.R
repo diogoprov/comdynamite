@@ -197,3 +197,31 @@ test_that("summary_stats() and sample_individuals() use the env that set growth"
   ind <- sample_individuals(sim, n = 2)
   expect_equal(ind$env, e[match(ind$site, rownames(sim$abundance))])
 })
+
+test_that("disturbance empties whole sites and is validated", {
+  r <- matrix(5, 30, 2)
+  a <- matrix(0.05, 2, 2)
+  # every site disturbed at the last step: nothing left
+  all_gone <- mc_dynamics(r, a, dispersal = 0, n_steps = 20, seed_steps = integer(0),
+                          initial = matrix(10L, 30, 2, dimnames = list(NULL, c("sp1", "sp2"))), disturbance = 1)
+  expect_true(all(all_gone$abundance == 0))
+  # without dispersal, a disturbed site stays empty
+  set.seed(2)
+  out <- mc_dynamics(r, a, dispersal = 0, n_steps = 50, seed_steps = integer(0),
+                     initial = matrix(10L, 30, 2, dimnames = list(NULL, c("sp1", "sp2"))), disturbance = 0.02)
+  empty <- rowSums(out$abundance) == 0
+  expect_true(any(empty) && !all(empty))
+  # no draws with disturbance = 0
+  set.seed(3)
+  a0 <- mc_dynamics(r, a, dispersal = 0.05, n_steps = 30)
+  set.seed(3)
+  b0 <- mc_dynamics(r, a, dispersal = 0.05, n_steps = 30, disturbance = 0)
+  expect_identical(a0$abundance, b0$abundance)
+  expect_error(mc_dynamics(r, a, dispersal = 0, disturbance = c(0.1, 0.2)), "disturbance")
+  expect_error(mc_dynamics(r, a, dispersal = 0, disturbance = 2), "disturbance")
+  ls <- landscape_implicit(10)
+  tr <- data.frame(optimum = c(30, 70), sigma = 20, r_max = 5,
+                   row.names = c("sp1", "sp2"))
+  sim <- simulate_metacommunity(ls, tr, matrix(0.05, 2, 2), n_steps = 20, disturbance = 0.1)
+  expect_equal(sim$disturbance, 0.1)
+})

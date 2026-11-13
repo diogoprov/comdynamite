@@ -19,7 +19,8 @@ mc_dynamics(
   pool = NULL,
   initial = NULL,
   immigration = c("poisson", "multinomial"),
-  evolution = NULL
+  evolution = NULL,
+  disturbance = 0
 )
 }
 \arguments{
@@ -64,6 +65,9 @@ founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of 
 all its populations, as before. With a niche of several axes, one trait evolves per axis,
 with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
 \code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
+
+\item{disturbance}{Probability that a site loses all its populations at each time step
+(one value; 0, the default, for none).}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},

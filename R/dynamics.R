@@ -27,7 +27,9 @@
 #'
 #' After dispersal, each population is lost with probability `extirpation`,
 #' independently of its size. Thompson et al. (2020) used 0.002 in their
-#' competition-colonisation scenario and no extirpation in the others.
+#' competition-colonisation scenario and no extirpation in the others. With `disturbance`,
+#' each site then loses all its populations at once with that probability, as the patch
+#' extinctions of Leibold et al. (2019); the site is recolonised by dispersal.
 #'
 #' During colonisation, Poisson(`seed_mean`) individuals of every species are
 #' added to every site at each of the `seed_steps`. After the last of these,
@@ -96,6 +98,8 @@
 #' @param dispersal Emigration probability, one value or one per species.
 #' @param extirpation Probability that a population is lost at each time step,
 #'   one value or one per species.
+#' @param disturbance Probability that a site loses all its populations at each time step
+#'   (one value; 0, the default, for none).
 #' @param n_steps Number of time steps.
 #' @param env_time Optional matrix (sites x `n_steps`) with the environment at
 #'   each step, e.g. from [env_over_time()]. If `NULL`, the environment of the
@@ -140,6 +144,11 @@
 #'   process-based metacommunity framework linking local and regional scale
 #'   community ecology. *Ecology Letters*, 23, 1314--1329.
 #'   \doi{10.1111/ele.13568}
+#'
+#'   Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J.
+#'   (2019). Regional neutrality evolves through local adaptive niche evolution.
+#'   *Proceedings of the National Academy of Sciences*, 116, 2612--2617.
+#'   \doi{10.1073/pnas.1808615116}
 #' @family simulate metacommunities
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(1)
@@ -161,7 +170,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    seed_steps = seq(10, 100, 10), seed_mean = 0.5,
                                    record_steps = NULL, extirpation = 0, pool = NULL,
                                    initial = NULL, immigration = c("poisson", "multinomial"),
-                                   env = NULL, evolution = NULL) {
+                                   env = NULL, evolution = NULL, disturbance = 0) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
   several <- is.list(traits) && !is.data.frame(traits)
@@ -233,12 +242,14 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      seed_mean = seed_mean, disp_matrix = landscape$dispersal,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation, pool = pool, initial = initial,
-                     immigration = immigration, evolution = evolution)
+                     immigration = immigration, evolution = evolution,
+                     disturbance = disturbance)
   tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
-                        pool = out$pool, tree = tree)), class = "mc_sim")
+                        disturbance = disturbance, pool = out$pool, tree = tree)),
+            class = "mc_sim")
 }
 
 # the environment through time on several axes: a list of matrices (sites x steps), one per
@@ -292,7 +303,7 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         disp_matrix = NULL, record_steps = NULL,
                         sites = NULL, species = NULL, extirpation = 0, pool = NULL,
                         initial = NULL, immigration = c("poisson", "multinomial"),
-                        evolution = NULL) {
+                        evolution = NULL, disturbance = 0) {
   # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
   # that simulate_evolving_metacommunity() can run the same steps and change species in between
   mc_setup(environment())
@@ -313,6 +324,10 @@ mc_setup <- function(st) {
     dispersal <- rep_len(dispersal, k_all)
     extirpation <- rep_len(extirpation, k_all)
     stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
+    if (!is.numeric(disturbance) || length(disturbance) != 1 || is.na(disturbance) ||
+        disturbance < 0 || disturbance > 1) {
+      stop("`disturbance` must be one probability between 0 and 1", call. = FALSE)
+    }
     if (m == 1 && any(dispersal > 0)) {
       stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
     }
@@ -531,6 +546,7 @@ mc_step <- function(st, step) {
       }
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
+      if (disturbance > 0) n[stats::runif(m) < disturbance, ] <- 0L
       if (!is.null(inside)) n[!inside] <- 0L
       if (isTRUE(ev$mv)) {
         if (any(fixed_z[alive])) {
