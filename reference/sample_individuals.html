@@ -38,6 +38,7 @@ T-statistics of Violle et al. (2012) (tstats())."><meta property="og:image" cont
     <li><a class="dropdown-item" href="../articles/rates-assembly.html">Does metacommunity assembly leave a trace in branch rates?</a></li>
     <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><a class="dropdown-item" href="../articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -200,7 +201,12 @@ when given, then adds variation such as measurement error, and <code>local_adapt
 defaults (<code>env</code> is the environment at the sampled step). At a <code>step</code> before the last, the
 simulation needs <code>record_steps</code> with that step, which keep the genetic means (and, for
 evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> are accepted
-too.</p></dd>
+too. With several evolving traits (one per niche axis), individuals are drawn from a
+multivariate normal with covariance \(G + E\) of their species, and
+<code>intraspecific_sd</code> takes one value or one per trait; the output then has, for each trait,
+the columns <code>env_&lt;trait&gt;</code> and <code>mean_&lt;trait&gt;</code> and the trait itself (named after its axis)
+instead of <code>env</code>, <code>optimum</code>, <code>population_mean</code> and <code>trait</code>, with the trait names in the
+attribute <code>"traits"</code>. <code>session_sd</code> shifts each trait on its own.</p></dd>
 
 
 <dt id="arg-session-sd">session_sd<a class="anchor" aria-label="anchor" href="#arg-session-sd"></a></dt>

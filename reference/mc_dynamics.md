@@ -100,7 +100,12 @@ mc_dynamics(
   for the evolution of the niche optimum within each population:
   selection by the local environment, drift, gene flow, founder sampling
   and plasticity. `NULL` (the default) keeps the optimum of each species
-  in all its populations, as before. Needs a single environmental axis.
+  in all its populations, as before. With a niche of several axes, one
+  trait evolves per axis, with covariance matrices \\G\\ and \\E\\ (see
+  the section Several traits of
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  and
+  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)).
 
 ## Value
 
@@ -115,8 +120,10 @@ Other simulate metacommunities:
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
+[`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
 [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),
 [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),

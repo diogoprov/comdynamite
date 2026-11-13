@@ -29,6 +29,8 @@
   space](https://provetelab.org/comdynamite/articles/correlated-traits.md):
 - [Watching a metacommunity
   assemble](https://provetelab.org/comdynamite/articles/watching-assembly.md):
+- [Quantitative genetics in the
+  metacommunity](https://provetelab.org/comdynamite/articles/quantitative-genetics.md):
 
 ### Validation
 

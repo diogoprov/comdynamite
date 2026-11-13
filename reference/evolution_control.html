@@ -42,6 +42,7 @@ with immigrants and starts from a sample of its founders."><meta property="og:im
     <li><a class="dropdown-item" href="../articles/rates-assembly.html">Does metacommunity assembly leave a trace in branch rates?</a></li>
     <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><a class="dropdown-item" href="../articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -92,7 +93,9 @@ with immigrants and starts from a sample of its founders.</p>
 
 <dl><dt id="arg-genetic-var">genetic_var<a class="anchor" aria-label="anchor" href="#arg-genetic-var"></a></dt>
 <dd><p>Additive genetic variance of the optimum \(G\), in squared units of
-the environment, one value or one per species.</p></dd>
+the environment, one value or one per species. For several traits (see the section
+Several traits), a covariance matrix with one row and column per trait, or a list with
+one per species, such as from <code><a href="genetic_matrices.html">genetic_matrices()</a></code>.</p></dd>
 
 
 <dt id="arg-ne-ratio">ne_ratio<a class="anchor" aria-label="anchor" href="#arg-ne-ratio"></a></dt>
@@ -102,12 +105,15 @@ off.</p></dd>
 
 <dt id="arg-plasticity">plasticity<a class="anchor" aria-label="anchor" href="#arg-plasticity"></a></dt>
 <dd><p>Slope of the reaction norm b, one value or one per species: 0 for a fixed
-phenotype, 1 for a phenotype that tracks the environment fully around \(E_0\).</p></dd>
+phenotype, 1 for a phenotype that tracks the environment fully around \(E_0\). For
+several traits, one value, one per trait or a matrix of species x traits; the plastic
+response of each trait is to its own axis.</p></dd>
 
 
 <dt id="arg-env-var">env_var<a class="anchor" aria-label="anchor" href="#arg-env-var"></a></dt>
 <dd><p>Environmental (non-heritable) variance of the phenotype \(V_E\), one
-value or one per species.</p></dd>
+value or one per species; for several traits, a covariance matrix (or one per species),
+which need not be proportional to <code>genetic_var</code>.</p></dd>
 
 
 <dt id="arg-steps-per-generation">steps_per_generation<a class="anchor" aria-label="anchor" href="#arg-steps-per-generation"></a></dt>
@@ -181,17 +187,45 @@ E_2) / (1 - (1 - 2m)(1 - a))\), which
 follows from the recursion of the steps above.</p>
     </div>
     <div class="section level2">
+    <h2 id="several-traits">Several traits<a class="anchor" aria-label="anchor" href="#several-traits"></a></h2>
+
+
+<p>With a niche of several environmental axes (a list of <code>traits</code> and an <code>env</code> with one column
+per axis in <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>), each population has a vector of genetic means, one
+trait per axis: the optimum on that axis. <code>genetic_var</code> and <code>env_var</code> are then covariance
+matrices \(G\) and \(E\), with \(P = G + E\). The niche breadths
+make the diagonal matrix \(\Omega\) of Gaussian selection, and growth and the
+response to selection are the multivariate versions of the steps above (Lande 1979):
+$$r = r_{max} \sqrt{\frac{|\Omega|}{|\Omega + P|}} \exp\left(-\frac{1}{2} d^\top
+(\Omega + P)^{-1} d\right), \quad \Delta \bar z = \frac{1}{g} G (\Omega + P)^{-1} d +
+\epsilon, \quad \epsilon \sim N\left(0, \frac{G}{g N_e}\right),$$
+with \(d\) the difference between the environment and the phenotype on each axis and
+\(r_{max}\) the product over axes. An axis with an infinite niche breadth
+(<code>sigma = Inf</code>) exerts no selection: its trait, such as a shape that does not affect
+growth, changes only through its genetic covariance with the selected traits and through
+drift, the correlated response of Lande (1979). Founders draw their means from
+\(N(\bar z_{in}, G / k)\) plus the variance among their sources trait by
+trait. Environments are static (<code>env_time</code> is not available with several axes), and
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> takes a single trait. With \(G = 0\) the
+abundances are those without evolution for the same seed.</p>
+    </div>
+    <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
     <p>Lande, R. (1976). Natural selection and random genetic drift in phenotypic
 evolution. <em>Evolution</em>, 30, 314–334. <a href="https://doi.org/10.1111/j.1558-5646.1976.tb00911.x" class="external-link">doi:10.1111/j.1558-5646.1976.tb00911.x</a></p>
+<p>Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
+brain:body size allometry. <em>Evolution</em>, 33, 402–416.
+<a href="https://doi.org/10.1111/j.1558-5646.1979.tb04694.x" class="external-link">doi:10.1111/j.1558-5646.1979.tb04694.x</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other simulate metacommunities:
 <code><a href="as_metacommunity.html">as_metacommunity()</a></code>,
 <code><a href="colonisation_history.html">colonisation_history()</a></code>,
+<code><a href="genetic_matrices.html">genetic_matrices()</a></code>,
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
+<code><a href="maladaptation.html">maladaptation()</a></code>,
 <code><a href="mc_dynamics.html">mc_dynamics()</a></code>,
 <code><a href="persistence.html">persistence()</a></code>,
 <code><a href="range_history.html">range_history()</a></code>,

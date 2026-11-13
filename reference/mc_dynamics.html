@@ -36,6 +36,7 @@ their own growth rates (e.g. responses to several environmental variables)."><me
     <li><a class="dropdown-item" href="../articles/rates-assembly.html">Does metacommunity assembly leave a trace in branch rates?</a></li>
     <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><a class="dropdown-item" href="../articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -153,7 +154,9 @@ which conserves them. Spatially implicit landscapes are always multinomial.</p><
 <dd><p>Optional settings from <code><a href="evolution_control.html">evolution_control()</a></code> for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,
 founder sampling and plasticity. <code>NULL</code> (the default) keeps the optimum of each species in
-all its populations, as before. Needs a single environmental axis.</p></dd>
+all its populations, as before. With a niche of several axes, one trait evolves per axis,
+with covariance matrices \(G\) and \(E\) (see the section Several traits of
+<code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -168,8 +171,10 @@ all its populations, as before. Needs a single environmental axis.</p></dd>
 <code><a href="as_metacommunity.html">as_metacommunity()</a></code>,
 <code><a href="colonisation_history.html">colonisation_history()</a></code>,
 <code><a href="evolution_control.html">evolution_control()</a></code>,
+<code><a href="genetic_matrices.html">genetic_matrices()</a></code>,
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
+<code><a href="maladaptation.html">maladaptation()</a></code>,
 <code><a href="persistence.html">persistence()</a></code>,
 <code><a href="range_history.html">range_history()</a></code>,
 <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>,

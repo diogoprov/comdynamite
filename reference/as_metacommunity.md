@@ -35,8 +35,10 @@ An `mc_sim` object.
 Other simulate metacommunities:
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
+[`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
 [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),

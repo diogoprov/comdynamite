@@ -119,7 +119,12 @@ simulate_metacommunity(
   for the evolution of the niche optimum within each population:
   selection by the local environment, drift, gene flow, founder sampling
   and plasticity. `NULL` (the default) keeps the optimum of each species
-  in all its populations, as before. Needs a single environmental axis.
+  in all its populations, as before. With a niche of several axes, one
+  trait evolves per axis, with covariance matrices \\G\\ and \\E\\ (see
+  the section Several traits of
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  and
+  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)).
 
 ## Value
 
@@ -137,14 +142,19 @@ its phenotype at the last step (`plastic`), the phenotype after
 dispersal (`phenotype`, which mixes residents and immigrants), the
 genetic means and the environment at `record_steps` (`history`,
 `environment_history`), the reference environment and the settings; `NA`
-where a population is absent. With a niche of several axes,
+where a population is absent. With several evolving traits, `genetic`,
+`plastic` and `phenotype` are arrays of sites x species x traits,
+`history` has the recorded steps as a fourth dimension, and
+`genetic_var`, `env_var` (one matrix per species) and `plasticity`
+(species x traits) are kept. With a niche of several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while
 [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
 uses the first axis unless given `trait` and `env`, and
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
-needs a single axis.
+needs a single axis unless the traits evolved (`source = "evolution"`,
+one column per trait).
 
 ## Details
 
@@ -261,8 +271,10 @@ Other simulate metacommunities:
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
 [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
+[`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
 [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),

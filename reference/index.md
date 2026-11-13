@@ -28,6 +28,10 @@ The process-based model, from landscape and traits to abundances.
   : Metacommunity dynamics from growth rates
 - [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
   : Evolution of local populations
+- [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)
+  : Genetic and environmental covariance matrices for several traits
+- [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md)
+  : Maladaptation of populations in a simulation with evolution
 - [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   : Simulate a metacommunity with speciation
 - [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)

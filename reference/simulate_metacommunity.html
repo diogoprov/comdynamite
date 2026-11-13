@@ -46,6 +46,7 @@ probability dispersal, and emigrants are redistributed among sites:"><meta prope
     <li><a class="dropdown-item" href="../articles/rates-assembly.html">Does metacommunity assembly leave a trace in branch rates?</a></li>
     <li><a class="dropdown-item" href="../articles/correlated-traits.html">Correlated traits and assembly in trait space</a></li>
     <li><a class="dropdown-item" href="../articles/watching-assembly.html">Watching a metacommunity assemble</a></li>
+    <li><a class="dropdown-item" href="../articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
@@ -178,7 +179,9 @@ available with <code>env_time</code>. Columns without names take the names of <c
 <dd><p>Optional settings from <code><a href="evolution_control.html">evolution_control()</a></code> for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,
 founder sampling and plasticity. <code>NULL</code> (the default) keeps the optimum of each species in
-all its populations, as before. Needs a single environmental axis.</p></dd>
+all its populations, as before. With a niche of several axes, one trait evolves per axis,
+with covariance matrices \(G\) and \(E\) (see the section Several traits of
+<code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -193,9 +196,13 @@ list with the genetic mean of the optimum in each population (<code>genetic</cod
 of its phenotype at the last step (<code>plastic</code>), the phenotype after dispersal (<code>phenotype</code>,
 which mixes residents and immigrants), the genetic means and the environment at
 <code>record_steps</code> (<code>history</code>, <code>environment_history</code>), the reference environment and the
-settings; <code>NA</code> where a population is absent. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
+settings; <code>NA</code> where a population is absent. With several evolving traits, <code>genetic</code>,
+<code>plastic</code> and <code>phenotype</code> are arrays of sites x species x traits, <code>history</code> has the
+recorded steps as a fourth dimension, and <code>genetic_var</code>, <code>env_var</code> (one matrix per species)
+and <code>plasticity</code> (species x traits) are kept. With a niche of several axes, <code><a href="mc_data.html">as_mc_data()</a></code> keeps every axis (<code>env</code> and one
 <code>optimum_</code> column of traits per axis), while <code><a href="summary_stats.html">summary_stats()</a></code> uses the first axis unless
-given <code>trait</code> and <code>env</code>, and <code><a href="sample_individuals.html">sample_individuals()</a></code> needs a single axis.</p>
+given <code>trait</code> and <code>env</code>, and <code><a href="sample_individuals.html">sample_individuals()</a></code> needs a single axis unless the traits
+evolved (<code>source = "evolution"</code>, one column per trait).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -288,8 +295,10 @@ community ecology. <em>Ecology Letters</em>, 23, 1314–1329.
 <code><a href="as_metacommunity.html">as_metacommunity()</a></code>,
 <code><a href="colonisation_history.html">colonisation_history()</a></code>,
 <code><a href="evolution_control.html">evolution_control()</a></code>,
+<code><a href="genetic_matrices.html">genetic_matrices()</a></code>,
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
+<code><a href="maladaptation.html">maladaptation()</a></code>,
 <code><a href="mc_dynamics.html">mc_dynamics()</a></code>,
 <code><a href="persistence.html">persistence()</a></code>,
 <code><a href="range_history.html">range_history()</a></code>,

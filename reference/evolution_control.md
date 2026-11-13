@@ -30,7 +30,10 @@ evolution_control(
 - genetic_var:
 
   Additive genetic variance of the optimum \\G\\, in squared units of
-  the environment, one value or one per species.
+  the environment, one value or one per species. For several traits (see
+  the section Several traits), a covariance matrix with one row and
+  column per trait, or a list with one per species, such as from
+  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md).
 
 - ne_ratio:
 
@@ -41,12 +44,15 @@ evolution_control(
 
   Slope of the reaction norm b, one value or one per species: 0 for a
   fixed phenotype, 1 for a phenotype that tracks the environment fully
-  around \\E_0\\.
+  around \\E_0\\. For several traits, one value, one per trait or a
+  matrix of species x traits; the plastic response of each trait is to
+  its own axis.
 
 - env_var:
 
   Environmental (non-heritable) variance of the phenotype \\V_E\\, one
-  value or one per species.
+  value or one per species; for several traits, a covariance matrix (or
+  one per species), which need not be proportional to `genetic_var`.
 
 - steps_per_generation:
 
@@ -148,19 +154,52 @@ and no drift, reach the divergence \\d^\* = (1 - 2m) a (E_1 - E_2) /
 (1 - (1 - 2m)(1 - a))\\, which follows from the recursion of the steps
 above.
 
+## Several traits
+
+With a niche of several environmental axes (a list of `traits` and an
+`env` with one column per axis in
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)),
+each population has a vector of genetic means, one trait per axis: the
+optimum on that axis. `genetic_var` and `env_var` are then covariance
+matrices \\G\\ and \\E\\, with \\P = G + E\\. The niche breadths make
+the diagonal matrix \\\Omega\\ of Gaussian selection, and growth and the
+response to selection are the multivariate versions of the steps above
+(Lande 1979): \$\$r = r\_{max} \sqrt{\frac{\|\Omega\|}{\|\Omega + P\|}}
+\exp\left(-\frac{1}{2} d^\top (\Omega + P)^{-1} d\right), \quad \Delta
+\bar z = \frac{1}{g} G (\Omega + P)^{-1} d + \epsilon, \quad \epsilon
+\sim N\left(0, \frac{G}{g N_e}\right),\$\$ with \\d\\ the difference
+between the environment and the phenotype on each axis and \\r\_{max}\\
+the product over axes. An axis with an infinite niche breadth
+(`sigma = Inf`) exerts no selection: its trait, such as a shape that
+does not affect growth, changes only through its genetic covariance with
+the selected traits and through drift, the correlated response of Lande
+(1979). Founders draw their means from \\N(\bar z\_{in}, G / k)\\ plus
+the variance among their sources trait by trait. Environments are static
+(`env_time` is not available with several axes), and
+[`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+takes a single trait. With \\G = 0\\ the abundances are those without
+evolution for the same seed.
+
 ## References
 
 Lande, R. (1976). Natural selection and random genetic drift in
 phenotypic evolution. *Evolution*, 30, 314–334.
 [doi:10.1111/j.1558-5646.1976.tb00911.x](https://doi.org/10.1111/j.1558-5646.1976.tb00911.x)
 
+Lande, R. (1979). Quantitative genetic analysis of multivariate
+evolution, applied to brain:body size allometry. *Evolution*, 33,
+402–416.
+[doi:10.1111/j.1558-5646.1979.tb04694.x](https://doi.org/10.1111/j.1558-5646.1979.tb04694.x)
+
 ## See also
 
 Other simulate metacommunities:
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
 [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md),
+[`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md),
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
+[`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
 [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),

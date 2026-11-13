@@ -156,7 +156,14 @@ sample_individuals(
   evolving metacommunities, of the lineages extant at the end). Evolving
   metacommunities from
   [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
-  are accepted too.
+  are accepted too. With several evolving traits (one per niche axis),
+  individuals are drawn from a multivariate normal with covariance \\G +
+  E\\ of their species, and `intraspecific_sd` takes one value or one
+  per trait; the output then has, for each trait, the columns
+  `env_<trait>` and `mean_<trait>` and the trait itself (named after its
+  axis) instead of `env`, `optimum`, `population_mean` and `trait`, with
+  the trait names in the attribute `"traits"`. `session_sd` shifts each
+  trait on its own.
 
 - session_sd:
 

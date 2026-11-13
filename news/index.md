@@ -2,6 +2,43 @@
 
 ## comdynamite (development version)
 
+- New
+  [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md)
+  gives, for every population of a simulation run with `evolution`, the
+  deviation of its mean phenotype (genetic mean plus plastic response)
+  from the environment of its site and the lag load, the share of growth
+  lost to it; with several traits, through the Mahalanobis distance
+  under (+ P). It takes recorded steps and evolving metacommunities. A
+  new article, “Quantitative genetics in the metacommunity”, animates
+  migration load along a gradient, evolutionary rescue under warming,
+  genetic constraints set by the orientation of (G), and evolving
+  priority effects that obscure the relationship between species and the
+  environment (Urban & De Meester 2009; Leibold et al. 2019), and
+  relates the model to the mechanistic models of Cabral and colleagues.
+- Bug fix:
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  with `evolution` and a niche of infinite breadth (`sigma = Inf`) gave
+  growth rates of `NaN`.
+- Evolution of several traits at once. With a niche of several axes,
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  evolves one trait per axis (its optimum), with `genetic_var` and
+  `env_var` of
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  as covariance matrices (G) and (E), one for all species or one per
+  species: growth falls with the Mahalanobis distance of the phenotype
+  to the environment under (+ P), the response to selection is (G (+
+  P)^{-1} d) (Lande 1979), drift is multivariate normal with covariance
+  (G / N_e), and an axis with `sigma = Inf` carries a trait under no
+  selection that changes only by its genetic covariance with the
+  selected ones (correlated response) and by drift. The new
+  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)
+  builds (G) and (E) for each species in three families (proportional to
+  a common (P), with no common structure, or with shared principal
+  components), and `sample_individuals(source = "evolution")` draws
+  individuals from (N(z, G + E)), one column per trait. Speciation with
+  several traits is not yet available. Behaviour change: `evolution`
+  with a niche of several axes used to stop with an error; with a single
+  variance it now evolves one trait per axis with (G = vI).
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   simulates collections on several dates: `step` takes several recorded
   steps, each sampled on its own, with a column `step` in the result,
