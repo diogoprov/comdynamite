@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- Evolution of several traits at once. With a niche of several axes, `simulate_metacommunity()`
+  evolves one trait per axis (its optimum), with `genetic_var` and `env_var` of
+  `evolution_control()` as covariance matrices \(G\) and \(E\), one for all species or one
+  per species: growth falls with the Mahalanobis distance of the phenotype to the environment
+  under \(\Omega + P\), the response to selection is \(G (\Omega + P)^{-1} d\) (Lande 1979), drift
+  is multivariate normal with covariance \(G / N_e\), and an axis with `sigma = Inf` carries a
+  trait under no selection that changes only by its genetic covariance with the selected ones
+  (correlated response) and by drift. The new `genetic_matrices()` builds \(G\) and \(E\) for each
+  species in three families (proportional to a common \(P\), with no common structure, or with
+  shared principal components), and `sample_individuals(source = "evolution")` draws
+  individuals from \(N(\bar z, G + E)\), one column per trait. Speciation with several traits is
+  not yet available.
 - `sample_individuals()` simulates collections on several dates: `step` takes several
   recorded steps, each sampled on its own, with a column `step` in the result, `env` takes a
   matrix with one column per step, and `session_sd` adds an error shared by all individuals

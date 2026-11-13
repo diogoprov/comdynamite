@@ -18,6 +18,7 @@ reference:
   - logistic_gradients
   - mc_dynamics
   - evolution_control
+  - genetic_matrices
   - simulate_evolving_metacommunity
   - speciation_control
   - as_metacommunity

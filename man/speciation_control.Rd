@@ -158,6 +158,7 @@ Other simulate metacommunities:
 \code{\link[=as_metacommunity]{as_metacommunity()}},
 \code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=evolution_control]{evolution_control()}},
+\code{\link[=genetic_matrices]{genetic_matrices()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},

@@ -183,7 +183,12 @@
 #'   defaults (`env` is the environment at the sampled step). At a `step` before the last, the
 #'   simulation needs `record_steps` with that step, which keep the genetic means (and, for
 #'   evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from [simulate_evolving_metacommunity()] are accepted
-#'   too.
+#'   too. With several evolving traits (one per niche axis), individuals are drawn from a
+#'   multivariate normal with covariance \eqn{G + E}{G + E} of their species, and
+#'   `intraspecific_sd` takes one value or one per trait; the output then has, for each trait,
+#'   the columns `env_<trait>` and `mean_<trait>` and the trait itself (named after its axis)
+#'   instead of `env`, `optimum`, `population_mean` and `trait`, with the trait names in the
+#'   attribute `"traits"`. `session_sd` shifts each trait on its own.
 #' @return Data frame with one row per individual and the columns `step` (with several steps),
 #'   `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
@@ -255,7 +260,11 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (missing(intraspecific_sd)) args$intraspecific_sd <- NULL
   if (length(step) <= 1) {
     out <- do.call(individuals_at, c(list(x = quote(x)), args))
-    if (session_sd > 0) out$trait <- out$trait + stats::rnorm(1, 0, session_sd)
+    if (session_sd > 0) {
+      for (a in attr(out, "traits") %||% "trait") {
+        out[[a]] <- out[[a]] + stats::rnorm(1, 0, session_sd)
+      }
+    }
     return(out)
   }
   # several dates: each is sampled on its own, with the deviations of each population (of
@@ -268,11 +277,19 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     args$step <- step[i]
     if (is.matrix(env)) args$env <- env[, i]
     d <- do.call(individuals_at, c(list(x = quote(x)), args))
-    cbind(step = rep(step[i], nrow(d)), d)
+    out <- cbind(step = rep(step[i], nrow(d)), d)
+    attr(out, "traits") <- attr(d, "traits")
+    out
   })
-  shift <- stats::rnorm(length(step), 0, session_sd)
-  for (i in seq_along(dates)) dates[[i]]$trait <- dates[[i]]$trait + shift[i]
+  traits <- attr(dates[[1]], "traits") %||% "trait"
+  shift <- matrix(stats::rnorm(length(step) * length(traits), 0, session_sd), length(step))
+  for (i in seq_along(dates)) {
+    for (a in seq_along(traits)) {
+      dates[[i]][[traits[a]]] <- dates[[i]][[traits[a]]] + shift[i, a]
+    }
+  }
   out <- do.call(rbind, dates)
+  attr(out, "traits") <- attr(dates[[1]], "traits")
   rownames(out) <- NULL
   out
 }
@@ -287,6 +304,14 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (source == "evolution" && !is.null(step) && step == x$n_steps &&
       !step_label(step) %in% dimnames(x$evolution$history)[[3]]) {
     step <- NULL
+  }
+  if (source == "evolution" && length(dim(x$evolution$genetic)) == 3) {
+    return(individuals_mv(x, n = n, fraction = fraction, step = step, env = env,
+                          cover = cover, min_n = min_n,
+                          intraspecific_sd = if (missing(intraspecific_sd)) 0 else
+                            intraspecific_sd,
+                          fixed = c(local_adaptation, population_sd, displacement,
+                                    founder_sd, monopolization)))
   }
   if (source == "evolution") {
     if (is.null(x$evolution$genetic)) {
@@ -863,6 +888,95 @@ evolved_environment <- function(x, step) {
          ": use `record_steps` (with this version of the package)", call. = FALSE)
   }
   unname(ev$environment_history[, label])
+}
+
+# individuals of a simulation with several evolving traits (one per environmental axis): the
+# phenotype of each individual is drawn from N(population mean, G + E), with the population
+# mean the genetic mean plus the plastic response at the sampled step; one column per trait
+individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecific_sd, fixed) {
+  if (!is.null(env)) {
+    stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
+         "leave `env` as NULL", call. = FALSE)
+  }
+  if (any(fixed != 0)) {
+    stop("with `source = \"evolution\"`, population means come from the simulation: ",
+         "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
+         "`monopolization` must stay 0", call. = FALSE)
+  }
+  ev <- x$evolution
+  axes <- dimnames(ev$genetic)[[3]]
+  q <- length(axes)
+  abundance <- sampled_abundance(x, step)
+  sites <- rownames(abundance)
+  species <- colnames(abundance)
+  if (is.null(step)) {
+    z <- ev$genetic
+    e <- ev$environment
+  } else {
+    label <- step_label(step)
+    if (is.null(ev$history) || !label %in% dimnames(ev$history)[[4]]) {
+      stop("the evolutionary state was not recorded at step ", step, call. = FALSE)
+    }
+    z <- ev$history[, , , label, drop = FALSE]
+    z <- array(z, dim(z)[1:3], dimnames(ev$genetic))
+    e <- matrix(ev$environment_history[, , label], length(sites))
+  }
+  z <- z[sites, species, , drop = FALSE]
+  b <- ev$plasticity[species, , drop = FALSE]
+  pop <- z
+  for (a in seq_len(q)) {
+    pop[, , a] <- z[, , a] + outer(e[, a] - ev$reference[a], b[, a])
+  }
+  extra <- intraspecific_sd
+  if (length(extra) == 1) extra <- rep(extra, q)
+  if (!is.numeric(extra) || length(extra) != q || any(extra < 0)) {
+    stop("`intraspecific_sd` needs one value or one per trait (", q, "), not negative",
+         call. = FALSE)
+  }
+  if (is.null(fraction)) {
+    measured <- pmin(abundance, n)
+  } else {
+    stopifnot(length(fraction) == 1, fraction > 0, fraction <= 1)
+    measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
+                       nrow(abundance), dimnames = dimnames(abundance))
+  }
+  if (!is.null(cover)) {
+    dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), length(species)),
+                                 cover)
+    measured[!dominant] <- 0
+  }
+  measured[measured < min_n | is.na(pop[, , 1])] <- 0
+  occupied <- which(measured > 0)
+  site_of <- (occupied - 1) %% length(sites) + 1
+  species_of <- (occupied - 1) %/% length(sites) + 1
+  by_site <- order(site_of, species_of)
+  occupied <- occupied[by_site]
+  site_of <- site_of[by_site]
+  species_of <- species_of[by_site]
+  counts <- as.vector(measured)[occupied]
+  rows <- rep(seq_along(occupied), counts)
+  out <- data.frame(site = sites[site_of][rows], species = species[species_of][rows],
+                    individual = sequence(counts),
+                    abundance = as.vector(abundance)[occupied][rows],
+                    stringsAsFactors = FALSE)
+  means <- matrix(pop, ncol = q)[occupied, , drop = FALSE]
+  values <- means[rows, , drop = FALSE]
+  # the deviation of each individual: N(0, G + E + extra), species by species
+  for (j in unique(species_of)) {
+    pick <- which(species_of[rows] == j)
+    if (!length(pick)) next
+    k <- match(species[j], names(ev$genetic_var))
+    v <- ev$genetic_var[[k]] + ev$env_var[[k]] + diag(extra^2, q)
+    values[pick, ] <- values[pick, , drop = FALSE] +
+      matrix(stats::rnorm(length(pick) * q), length(pick)) %*% t(evolution_root(v))
+  }
+  for (a in seq_len(q)) {
+    out[[paste0("env_", axes[a])]] <- e[site_of, a][rows]
+    out[[paste0("mean_", axes[a])]] <- means[rows, a]
+  }
+  for (a in seq_len(q)) out[[axes[a]]] <- values[, a]
+  attr(out, "traits") <- axes
+  out
 }
 
 step_label <- function(step) paste0("step", format(step, scientific = FALSE, trim = TRUE))

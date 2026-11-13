@@ -62,14 +62,41 @@
 #' E_2) / (1 - (1 - 2m)(1 - a))}{d* = (1 - 2m) a (E1 - E2) / (1 - (1 - 2m)(1 - a))}, which
 #' follows from the recursion of the steps above.
 #'
+#' @section Several traits:
+#' With a niche of several environmental axes (a list of `traits` and an `env` with one column
+#' per axis in [simulate_metacommunity()]), each population has a vector of genetic means, one
+#' trait per axis: the optimum on that axis. `genetic_var` and `env_var` are then covariance
+#' matrices \eqn{G}{G} and \eqn{E}{E}, with \eqn{P = G + E}{P = G + E}. The niche breadths
+#' make the diagonal matrix \eqn{\Omega}{Omega} of Gaussian selection, and growth and the
+#' response to selection are the multivariate versions of the steps above (Lande 1979):
+#' \deqn{r = r_{max} \sqrt{\frac{|\Omega|}{|\Omega + P|}} \exp\left(-\frac{1}{2} d^\top
+#' (\Omega + P)^{-1} d\right), \quad \Delta \bar z = \frac{1}{g} G (\Omega + P)^{-1} d +
+#' \epsilon, \quad \epsilon \sim N\left(0, \frac{G}{g N_e}\right),}{r = r_max sqrt(|Omega| /
+#' |Omega + P|) exp(-d' (Omega + P)^-1 d / 2), Delta zbar = G (Omega + P)^-1 d / g + e, e ~
+#' N(0, G / (g Ne)),}
+#' with \eqn{d}{d} the difference between the environment and the phenotype on each axis and
+#' \eqn{r_{max}}{r_max} the product over axes. An axis with an infinite niche breadth
+#' (`sigma = Inf`) exerts no selection: its trait, such as a shape that does not affect
+#' growth, changes only through its genetic covariance with the selected traits and through
+#' drift, the correlated response of Lande (1979). Founders draw their means from
+#' \eqn{N(\bar z_{in}, G / k)}{N(zbar_in, G / k)} plus the variance among their sources trait by
+#' trait. Environments are static (`env_time` is not available with several axes), and
+#' [simulate_evolving_metacommunity()] takes a single trait. With \eqn{G = 0}{G = 0} the
+#' abundances are those without evolution for the same seed.
+#'
 #' @param genetic_var Additive genetic variance of the optimum \eqn{G}{G}, in squared units of
-#'   the environment, one value or one per species.
+#'   the environment, one value or one per species. For several traits (see the section
+#'   Several traits), a covariance matrix with one row and column per trait, or a list with
+#'   one per species, such as from [genetic_matrices()].
 #' @param ne_ratio Ratio of effective to census population size \eqn{\nu}{nu}; `Inf` turns drift
 #'   off.
 #' @param plasticity Slope of the reaction norm b, one value or one per species: 0 for a fixed
-#'   phenotype, 1 for a phenotype that tracks the environment fully around \eqn{E_0}{E0}.
+#'   phenotype, 1 for a phenotype that tracks the environment fully around \eqn{E_0}{E0}. For
+#'   several traits, one value, one per trait or a matrix of species x traits; the plastic
+#'   response of each trait is to its own axis.
 #' @param env_var Environmental (non-heritable) variance of the phenotype \eqn{V_E}{VE}, one
-#'   value or one per species.
+#'   value or one per species; for several traits, a covariance matrix (or one per species),
+#'   which need not be proportional to `genetic_var`.
 #' @param steps_per_generation Time steps per generation \eqn{g}{g}; selection and drift per
 #'   step are divided by it (at least 1); dispersal and demography are per step.
 #' @param founder Should populations founded at a step start from the sampled mean of their
@@ -80,6 +107,10 @@
 #' @return An `mc_evolution` object, to pass as `evolution`.
 #' @references Lande, R. (1976). Natural selection and random genetic drift in phenotypic
 #'   evolution. *Evolution*, 30, 314--334. \doi{10.1111/j.1558-5646.1976.tb00911.x}
+#'
+#'   Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
+#'   brain:body size allometry. *Evolution*, 33, 402--416.
+#'   \doi{10.1111/j.1558-5646.1979.tb04694.x}
 #' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
@@ -96,9 +127,12 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
                               steps_per_generation = 1, founder = TRUE, env = NULL,
                               traits = NULL) {
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
-  stopifnot(is.numeric(genetic_var), all(genetic_var >= 0),
+  # several traits: covariance matrices (checked when the simulation starts)
+  covariance <- function(v) is.matrix(v) || is.list(v)
+  stopifnot(covariance(genetic_var) || (is.numeric(genetic_var) && all(genetic_var >= 0)),
+            covariance(env_var) || (is.numeric(env_var) && all(env_var >= 0)),
             is.numeric(ne_ratio), length(ne_ratio) == 1, ne_ratio > 0,
-            is.numeric(plasticity), is.numeric(env_var), all(env_var >= 0),
+            is.numeric(plasticity),
             is.numeric(steps_per_generation), length(steps_per_generation) == 1,
             steps_per_generation >= 1, is.logical(founder), length(founder) == 1)
   structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
@@ -108,8 +142,13 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
 
 #' @export
 print.mc_evolution <- function(x, ...) {
-  cat("<mc_evolution> G =", format(x$genetic_var), "| Ne/N =", format(x$ne_ratio),
-      "| plasticity =", format(x$plasticity), "| VE =", format(x$env_var),
+  show <- function(v) {
+    if (is.list(v)) return(paste(length(v), "matrices"))
+    if (is.matrix(v)) return(paste0(nrow(v), " x ", ncol(v), " matrix"))
+    format(v)
+  }
+  cat("<mc_evolution> G =", show(x$genetic_var), "| Ne/N =", format(x$ne_ratio),
+      "| plasticity =", show(x$plasticity), "| VE =", show(x$env_var),
       "| steps per generation =", format(x$steps_per_generation),
       "| founder sampling:", x$founder, "\n")
   invisible(x)

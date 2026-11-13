@@ -69,7 +69,9 @@ available with \code{env_time}. Columns without names take the names of \code{tr
 \item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,
 founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of each species in
-all its populations, as before. Needs a single environmental axis.}
+all its populations, as before. With a niche of several axes, one trait evolves per axis,
+with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
+\code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
 }
 \value{
 An \code{mc_sim} object: a list with \code{abundance} (sites x species matrix
@@ -82,9 +84,13 @@ list with the genetic mean of the optimum in each population (\code{genetic}), t
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
 which mixes residents and immigrants), the genetic means and the environment at
 \code{record_steps} (\code{history}, \code{environment_history}), the reference environment and the
-settings; \code{NA} where a population is absent. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
+settings; \code{NA} where a population is absent. With several evolving traits, \code{genetic},
+\code{plastic} and \code{phenotype} are arrays of sites x species x traits, \code{history} has the
+recorded steps as a fourth dimension, and \code{genetic_var}, \code{env_var} (one matrix per species)
+and \code{plasticity} (species x traits) are kept. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one
 \code{optimum_} column of traits per axis), while \code{\link[=summary_stats]{summary_stats()}} uses the first axis unless
-given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis.
+given \code{trait} and \code{env}, and \code{\link[=sample_individuals]{sample_individuals()}} needs a single axis unless the traits
+evolved (\code{source = "evolution"}, one column per trait).
 }
 \description{
 Runs the process-based model of Thompson et al. (2020) on a landscape. At
@@ -205,6 +211,7 @@ Other simulate metacommunities:
 \code{\link[=as_metacommunity]{as_metacommunity()}},
 \code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=evolution_control]{evolution_control()}},
+\code{\link[=genetic_matrices]{genetic_matrices()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},

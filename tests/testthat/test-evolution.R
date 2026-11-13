@@ -108,9 +108,10 @@ test_that("evolution is recorded and checked", {
   expect_error(evolution_control(1, steps_per_generation = 0.5))
   expect_error(simulate_metacommunity(ls, traits, a, n_steps = 5, evolution = list(1)),
                "evolution_control")
-  expect_error(simulate_metacommunity(ls, list(traits, traits), a, n_steps = 5,
-                                      env = cbind(ls$env, ls$env),
-                                      evolution = evolution_control(1)), "single")
+  # several axes: one trait per axis, with G = diag(1)
+  two <- simulate_metacommunity(ls, list(traits, traits), a, n_steps = 5,
+                                env = cbind(ls$env, ls$env), evolution = evolution_control(1))
+  expect_equal(dim(two$evolution$genetic), c(16, 4, 2))
   expect_error(mc_dynamics(matrix(5, 2, 1), matrix(0.05), 0, n_steps = 5,
                            evolution = evolution_control(1)), "env")
 })

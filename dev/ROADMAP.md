@@ -968,6 +968,13 @@ as fases, em `dev/plano-especiacao.md`.
 - [ ] Bloco próprio, depois da Fase 3: G multivariada (vários traits com covariância
       genética, B ∝ W), pedida para simular os dados do Marcos (ECY25-0086; decidido em
       2026-11-12).
+  - [x] Parte 1 (sem especiação): um trait por eixo de nicho, G e E como matrizes em
+        `evolution_control()`, seleção G(Ω+P)⁻¹d, deriva MVN, resposta correlacionada nos
+        eixos com `sigma = Inf`; `genetic_matrices()` (proporcional, independente, PCs
+        compartilhados); `sample_individuals()` com um traço por coluna. Testes: G = 0,
+        deriva Var(Δz) = G Σ 1/Nₑ, resposta em um passo, razão G21/G11.
+  - [ ] Parte 2: especiação com vários traits em `simulate_evolving_metacommunity()`;
+        validação B ∝ W em `data-raw`; ambientes que mudam no tempo com vários eixos.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;
