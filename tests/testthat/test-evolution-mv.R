@@ -213,3 +213,20 @@ test_that("the engine refuses inconsistent multivariate settings", {
                                       n_steps = 2, evolution = evolution_control(0)),
                "sigma")
 })
+
+test_that("the multivariate state checks traits and env, and axes without selection have no load", {
+  s <- mv_setup()
+  ev <- evolution_control(diag(2))
+  ev$traits <- s$tr
+  ev$env <- s$env
+  expect_error(evolution_state_mv(ev, 25, 2, NULL), "one row per species")
+  ev$env <- s$env[1:5, ]
+  expect_error(evolution_state_mv(ev, 25, 1, NULL), "one row per site")
+  free <- s$tr
+  free$svl$sigma <- Inf
+  set.seed(1)
+  sim <- simulate_metacommunity(s$ls, free, s$alpha, env = s$env, dispersal = 0.01,
+                                n_steps = 10, evolution = evolution_control(diag(2)))
+  m <- maladaptation(sim)
+  expect_true(all(m$distance == 0 & m$load == 0))
+})

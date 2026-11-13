@@ -907,7 +907,7 @@ mv_populations <- function(x, step = NULL) {
   } else {
     label <- step_label(step)
     if (is.null(ev$history) || !label %in% dimnames(ev$history)[[4]]) {
-      stop("the evolutionary state was not recorded at step ", step, call. = FALSE)
+      stop("the evolutionary state was not recorded at step ", step, call. = FALSE) # nocov
     }
     z <- ev$history[, , , label, drop = FALSE]
     z <- array(z, dim(z)[1:3], dimnames(ev$genetic))
@@ -983,7 +983,6 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
   # the deviation of each individual: N(0, G + E + extra), species by species
   for (j in unique(species_of)) {
     pick <- which(species_of[rows] == j)
-    if (!length(pick)) next
     k <- match(species[j], names(ev$genetic_var))
     v <- ev$genetic_var[[k]] + ev$env_var[[k]] + diag(extra^2, q)
     values[pick, ] <- values[pick, , drop = FALSE] +
