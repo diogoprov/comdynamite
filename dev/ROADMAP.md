@@ -997,7 +997,11 @@ as fases, em `dev/plano-especiacao.md`.
       `disturbance` no motor; replicação (i) em `data-raw/replication_leibold2019.R` e no
       artigo "Replicating Leibold et al. (2019)": neutralidade regional reproduzida com G ≥ 100;
       dominância local mais fraca e deriva regional mais rápida que no modelo deles (hipótese:
-      imigrantes misturados à média; testar imigrantes com fenótipo próprio). Em aberto: (ii)
+      imigrantes misturados à média). Testado (`immigrant_selection`, `data-raw/mechanism_leibold2019.R`):
+      a seleção dos imigrantes não explica nenhuma das diferenças; deriva e amostragem de
+      fundador das médias explicam a maior parte da deriva regional mais rápida; a dominância
+      local fraca parece vir do G que não depende do tamanho da população (a testar com G
+      dependente de N). Em aberto: (ii)
       Urban & De Meester 2009 e o mapa como artigo.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.

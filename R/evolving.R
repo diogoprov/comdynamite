@@ -320,6 +320,10 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
   }
   competition <- match.arg(competition)
+  if (isTRUE(evolution$immigrant_selection)) {
+    stop("`immigrant_selection` is not yet available in `simulate_evolving_metacommunity()`",
+         call. = FALSE)
+  }
   immigration <- match.arg(immigration)
   stopifnot(inter_max >= 0, inter_min >= 0, inter_min <= inter_max, scale > 0,
             distance_scale > 0, max_species >= 1, is.logical(niche_overlap))

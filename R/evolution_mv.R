@@ -61,6 +61,9 @@ evolution_root <- function(v) {
 
 # the state of multivariate evolution inside mc_dynamics()
 evolution_state_mv <- function(evolution, m, k_all, species) {
+  if (isTRUE(evolution$immigrant_selection)) {
+    stop("`immigrant_selection` is not yet available with several traits", call. = FALSE)
+  }
   traits <- lapply(evolution$traits, as_traits)
   q <- length(traits)
   axes <- names(evolution$traits) %||% paste0("axis", seq_len(q))

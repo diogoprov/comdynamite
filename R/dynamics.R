@@ -370,6 +370,10 @@ mc_setup <- function(st) {
       if (evolution_is_mv(evolution)) evolution_state_mv(evolution, m, k_all, species) else
         evolution_state(evolution, m, k_all, species)
     }
+    if (isTRUE(ev$imm_sel) && (is.null(disp_matrix) || immigration != "poisson")) {
+      stop("`immigrant_selection` needs a spatially explicit landscape and ",
+           "`immigration = \"poisson\"`", call. = FALSE)
+    }
     if (isTRUE(ev$mv)) {
       # several traits: genetic means and phenotypes as sites x species x traits
       z <- ph <- array(NA_real_, c(m, k_all, ev$q))
@@ -510,6 +514,12 @@ mc_step <- function(st, step) {
       if (any(tot > 0)) {
         if (!is.null(disp_matrix) && immigration == "multinomial") {
           imm <- place_emigrants(em, disp_matrix)
+        } else if (!is.null(disp_matrix) && isTRUE(ev$imm_sel)) {
+          # immigrants filtered by their fitness in the site they reach
+          sel <- immigrants_selected(em, ifelse(is.na(za), 0, za), ifelse(is.na(pa), 0, pa),
+                                     e_now, ev$sigma[alive]^2 + ev$g[alive] + ev$ve[alive],
+                                     disp_matrix)
+          imm <- matrix(stats::rpois(m * k, sel$lambda), m, k)
         } else if (!is.null(disp_matrix)) {
           imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
         } else {
@@ -527,9 +537,15 @@ mc_step <- function(st, step) {
           # their founders
           imm_m <- imm + matrix(0L, m, k)
           res <- n - em
-          zi <- immigrant_mean(em, za, disp_matrix, za)
-          between <- pmax(immigrant_mean(em, za^2, disp_matrix, za^2) - zi^2, 0)
-          p_imm <- immigrant_mean(em, pa, disp_matrix, pa)
+          if (isTRUE(ev$imm_sel)) {
+            zi <- sel$mean
+            between <- sel$between
+            p_imm <- sel$phenotype
+          } else {
+            zi <- immigrant_mean(em, za, disp_matrix, za)
+            between <- pmax(immigrant_mean(em, za^2, disp_matrix, za^2) - zi^2, 0)
+            p_imm <- immigrant_mean(em, pa, disp_matrix, pa)
+          }
           pa_now <- pa
           both <- res > 0 & imm_m > 0
           za[both] <- (res[both] * za[both] + imm_m[both] * zi[both]) / (res[both] + imm_m[both])

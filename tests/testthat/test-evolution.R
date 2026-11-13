@@ -163,3 +163,35 @@ test_that("simulate_metacommunity() checks alpha and dispersal", {
   expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0.1, n_steps = 2),
                "at least two sites")
 })
+
+test_that("immigrant_selection filters maladapted immigrants source by source", {
+  xy <- expand.grid(x = 0:4, y = 0:3)
+  env <- rep(c(40, 60), 10)
+  ls <- landscape_points(xy, env, disp_scale = 1)
+  tr <- data.frame(optimum = c(40, 60), sigma = 5, r_max = 5, row.names = c("sp1", "sp2"))
+  init <- cbind(sp1 = (env == 40) * 100L, sp2 = (env == 60) * 100L)
+  run <- function(sel) {
+    set.seed(4)
+    simulate_metacommunity(ls, tr, matrix(0.04, 2, 2), dispersal = 0.2, n_steps = 30,
+                           seed_steps = integer(0), initial = init,
+                           evolution = evolution_control(genetic_var = 1, ne_ratio = Inf,
+                                                         immigrant_selection = sel))
+  }
+  plain <- run(FALSE)
+  filtered <- run(TRUE)
+  # maladapted immigrants are mostly filtered: fewer individuals of each species in the
+  # patch type of the other, and their populations closer to the local environment
+  wrong <- function(s) sum(s$abundance[env == 60, "sp1"]) + sum(s$abundance[env == 40, "sp2"])
+  expect_lt(wrong(filtered), wrong(plain))
+  # the helper weights each source by its fitness in the destination
+  disp <- matrix(c(0, 1, 1, 0), 2)
+  sel <- immigrants_selected(matrix(c(10, 0), 2, 1), matrix(c(40, 0), 2, 1),
+                             matrix(c(40, 0), 2, 1), c(40, 60), 25, disp)
+  expect_equal(sel$lambda[2, 1], 10 * exp(-400 / 50))
+  expect_equal(sel$mean[2, 1], 40)
+  expect_error(evolution_control(1, immigrant_selection = NA))
+  expect_error(simulate_metacommunity(landscape_implicit(5), tr, matrix(0.04, 2, 2),
+                                      n_steps = 5,
+                                      evolution = evolution_control(1, immigrant_selection = TRUE)),
+               "spatially explicit")
+})

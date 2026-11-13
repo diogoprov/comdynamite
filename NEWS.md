@@ -7,6 +7,11 @@
   with fast enough adaptation, both species adapt to both patch types, fitness differences
   vanish and patch type stops predicting composition while it still predicts traits, as in
   their model; local dominance is weaker and regional drift removes one species faster.
+  A factorial test (`data-raw/mechanism_leibold2019.R`) traced the faster drift mainly to
+  drift and founder sampling of the population means, not to the merging of immigrants.
+- `immigrant_selection` in `evolution_control()`: immigrants from each source arrive in
+  proportion to the fitness of their phenotype in the site they reach, before they mix with
+  residents (one trait, spatially explicit landscapes).
 - Speciation with several traits. With a list of `traits` and an `env` matrix (one column
   per niche axis), `simulate_evolving_metacommunity()` evolves one trait per axis in every
   lineage, with \(G\) and \(E\) as covariance matrices in `evolution_control()`, as in

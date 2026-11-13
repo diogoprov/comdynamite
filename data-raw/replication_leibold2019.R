@@ -48,7 +48,8 @@ alpha <- matrix(0.01, 2, 2, dimnames = list(species, species))
 pcnm_space <- vegan::scores(vegan::pcnm(dist(xy[!edge, ])))
 
 run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 10000,
-                        every = 100, nm = 10) {
+                        every = 100, nm = 10, immigrant_selection = FALSE,
+                        ne_ratio = 0.5, founder = TRUE) {
   landscape_type <- match.arg(landscape_type)
   set.seed(seed)
   env <- if (landscape_type == "two") sample(rep(c(40, 60), side^2 / 2)) else rep(50, side^2)
@@ -65,8 +66,10 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
   sim <- simulate_metacommunity(ls, traits, alpha, dispersal = nm / 400, n_steps = n_steps,
                                 seed_steps = integer(0), initial = initial,
                                 record_steps = steps, disturbance = 0.01,
-                                evolution = evolution_control(genetic_var = G, env_var = 4,
-                                                              ne_ratio = 0.5))
+                                evolution = evolution_control(
+                                  genetic_var = G, env_var = 4, ne_ratio = ne_ratio,
+                                  immigrant_selection = immigrant_selection,
+                                  founder = founder))
   list(env = env, preadapted = ifelse(initial[, 1] > 0, 1L, 2L), steps = steps,
        abundance = sim$history, genetic = sim$evolution$history, G = G,
        landscape_type = landscape_type, seed = seed)

@@ -12,7 +12,8 @@ evolution_control(
   steps_per_generation = 1,
   founder = TRUE,
   env = NULL,
-  traits = NULL
+  traits = NULL,
+  immigrant_selection = FALSE
 )
 }
 \arguments{
@@ -42,6 +43,17 @@ founders (\code{TRUE}) or from the mean of their source (\code{FALSE})?}
 \item{env, traits}{The environment of each site (a vector, or a function of the step that
 returns one) and the traits of the species (from \code{\link[=species_traits]{species_traits()}}). Filled in by
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}; needed only with \code{\link[=mc_dynamics]{mc_dynamics()}}.}
+
+\item{immigrant_selection}{Should immigrants face viability selection in the site they reach
+before they mix with residents? With \code{FALSE} (the default), the immigrants from all sources
+join the population and the mean of the merged population is selected. With \code{TRUE}, the
+immigrants from each source arrive in proportion to the mean fitness of their source
+phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
+as the growth rate, with the variance of the phenotypes), so that maladapted immigrants
+are filtered source by source, as individuals are in an individual-based model, and the
+mean and variance of the immigrants are those of the survivors. One trait only, on a
+spatially explicit landscape with \code{immigration = "poisson"}; used in the article
+"Replicating Leibold et al. (2019)".}
 }
 \value{
 An \code{mc_evolution} object, to pass as \code{evolution}.

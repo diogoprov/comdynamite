@@ -83,12 +83,9 @@ with \(N_m = 1\), and only 6 to 20% of the patches were shared, so most patches 
 by one species, half of them by the species that was not pre-adapted. Interestingly, at this
 low dispersal even \(G = 20\), which left the species distinct at \(N_m = 10\), gave 40% of
 switched patches. With \(N_m = 10\), shared patches made up 29 to 38% with \(G\) of 200 and
-400 (only 4 and 2 runs still had both species), and with \(N_m = 100\) nearly all patches were shared, with and without evolution, so mass
-effects replaced local dominance. Local dominance was thus weaker than in their model, in which
-local co-occurrence was rare at \(N_m = 10\). A probable cause is that comdynamite follows
-populations rather than individuals: immigrants are merged into the mean of the resident
-population, so maladapted immigrants are not selected out one by one, as they are in an
-individual-based model. We did not test this explanation.
+400 (only 4 and 2 runs still had both species), and with \(N_m = 100\) nearly all patches
+were shared, with and without evolution, so mass effects replaced local dominance. Local dominance was thus weaker than in their model, in which
+local co-occurrence was rare at \(N_m = 10\). We test two explanations below.
 
 ![Classes of occupied patches at generation 5000, in the runs that still had both species (n of 10 above each bar).](leibold_classes.png)
 
@@ -109,15 +106,61 @@ did not extract the proportions of their Fig. S1, so we cannot say by how much d
 
 The control with a single patch type points to a second difference. With two identical species
 and no evolution, both persisted in all 10 runs; with \(G = 200\), one was lost in 9 runs, after
-a median of 1300 generations. Our interpretation is that drift and founder sampling move the
-optima of populations away from the environment, which creates fitness differences between
-the two species that selection then amplifies, so that evolution accelerates the loss of a
-species even where the species are equivalent. In their Fig. S2, a single patch type gave drift
+a median of 1300 generations, so evolution accelerated the loss of a species even where the
+species are equivalent (see the next section). In their Fig. S2, a single patch type gave drift
 through local neutrality both with and without evolution, and drift was stronger under local
 than under regional neutrality; without evolution, our identical species drifted too slowly to
 lose one in 10,000 generations.
 
 ![Proportion of species 1 in the metacommunity in each run, with \(N_m = 10\), for two patch types or one, with and without evolution (\(G = 200\)).](leibold_drift.png)
+
+## Two explanations tested
+
+We first suspected that both departures come from following populations rather than
+individuals: comdynamite merges immigrants into the mean of the resident population before
+selection, whereas an individual-based model removes maladapted immigrants one by one. A second
+possibility, suggested by the control with a single patch type, is that drift of the population
+means and founder sampling move populations away from their optimum, which creates fitness
+differences between species that selection then amplifies. The script
+`data-raw/mechanism_leibold2019.R` crossed both factors with the same seeds as above (\(G\) of
+50 to 400, \(N_m\) of 1, 10 and 100, 10 replicates). Immigrant selection was turned on with
+`evolution_control(immigrant_selection = TRUE)`, added for this test, which lets the immigrants
+of each source arrive in proportion to the fitness of their phenotype in the site they reach,
+so that the immigrants that join a population are the survivors of this filter. Drift of the
+means was turned off with `ne_ratio = Inf`, and a last set of runs (\(G = 200\), \(N_m = 10\))
+also turned founder sampling off (`founder = FALSE`). `data-raw/figures_mechanism_leibold2019.R`
+makes the table behind the numbers below.
+
+Immigrant selection did not explain either departure. In runs that kept both species at
+generation 5000 (\(N_m = 10\), drift on), 27 to 39% of the patches were shared with it,
+against 29 to 38% without it. With \(N_m = 10\) it delayed the loss of a species modestly
+(median 2300 to 3250 generations, against 1550 to 2150), but with \(N_m\) of 1 and 100 the
+medians moved in both directions, by up to 850 generations. We therefore found no evidence
+that merging immigrants before selection causes the departures.
+
+Drift explained most of the faster loss. Without drift of the means, the median time to the
+loss of a species rose from 1550 to 2150 generations to 3950 to 6250 generations with
+\(N_m = 10\), and from 1000 to 4100 to 4400 to 8200 generations with \(N_m = 100\). In the
+control with a single patch type and \(G = 200\), both species persisted to generation 5000 in
+8 of 10 runs without drift, against 1 of 10 with it. Without drift and without founder sampling,
+both species persisted to generation 10,000 in 9 of 10 runs of the control, as without
+evolution, and to generation 5000 in 9 of 10 runs with two patch types, although a species was still
+lost by generation 10,000 in 9 of these 10 runs (median 8500 generations). Thus, in our model,
+evolution speeds up regional drift mainly through drift and founder sampling of the population
+means, and the drift that remains under regional neutrality is the one that Leibold et al.
+(2019) described. A constant \(G\) seems to make this effect larger than in their model, since
+drift of the mean has a variance \(G / N_e\) per generation whatever the size of the
+population, whereas in an individual-based model a small population also holds less genetic
+variance.
+
+Neither factor restored local dominance. Without drift and founder sampling, 62% of the
+patches were shared at generation 5000 with two patch types (\(G = 200\), \(N_m = 10\)),
+more than with them. Our interpretation is that the remaining difference also comes from the
+constant \(G\): a few immigrants of the other species found a population that adapts as fast
+as the resident, so the resident keeps no evolutionary head start, whereas in an
+individual-based model a population founded by a few individuals has little genetic variance
+and adapts slowly. Testing this would need genetic variance that scales with population size,
+which comdynamite does not have.
 
 ## Summary
 
@@ -126,10 +169,11 @@ when local adaptation is fast relative to competitive displacement, both species
 patch types, fitness differences vanish within patch types, and patch type stops predicting
 composition while it still predicts traits. It departs from their model in two ways: local
 dominance is weaker at intermediate and high dispersal, and regional drift removes one species
-faster, more so with higher dispersal and with evolution. Both departures probably come from
-following populations with a constant \(G\) rather than individuals with loci, but this remains
-to be tested, for example with immigrants that keep their own phenotype until selection acts on
-them. These are 10 replicates per setting, and the speed of adaptation was set through \(G\)
+faster, more so with higher dispersal and with evolution. Filtering maladapted immigrants
+before they join a population changed neither. Drift and founder sampling of the population
+means explained most of the faster loss of species; the weaker local dominance seems to come
+from a genetic variance that does not depend on population size, which remains to be tested.
+These are 10 replicates per setting, and the speed of adaptation was set through \(G\)
 rather than matched to their model.
 
 ## References

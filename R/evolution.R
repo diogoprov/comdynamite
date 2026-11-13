@@ -101,6 +101,16 @@
 #'   step are divided by it (at least 1); dispersal and demography are per step.
 #' @param founder Should populations founded at a step start from the sampled mean of their
 #'   founders (`TRUE`) or from the mean of their source (`FALSE`)?
+#' @param immigrant_selection Should immigrants face viability selection in the site they reach
+#'   before they mix with residents? With `FALSE` (the default), the immigrants from all sources
+#'   join the population and the mean of the merged population is selected. With `TRUE`, the
+#'   immigrants from each source arrive in proportion to the mean fitness of their source
+#'   phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
+#'   as the growth rate, with the variance of the phenotypes), so that maladapted immigrants
+#'   are filtered source by source, as individuals are in an individual-based model, and the
+#'   mean and variance of the immigrants are those of the survivors. One trait only, on a
+#'   spatially explicit landscape with `immigration = "poisson"`; used in the article
+#'   "Replicating Leibold et al. (2019)".
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -125,7 +135,7 @@
 #' @export
 evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var = 0,
                               steps_per_generation = 1, founder = TRUE, env = NULL,
-                              traits = NULL) {
+                              traits = NULL, immigrant_selection = FALSE) {
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
   # several traits: covariance matrices (checked when the simulation starts)
   covariance <- function(v) is.matrix(v) || is.list(v)
@@ -134,10 +144,13 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
             is.numeric(ne_ratio), length(ne_ratio) == 1, ne_ratio > 0,
             is.numeric(plasticity),
             is.numeric(steps_per_generation), length(steps_per_generation) == 1,
-            steps_per_generation >= 1, is.logical(founder), length(founder) == 1)
+            steps_per_generation >= 1, is.logical(founder), length(founder) == 1,
+            is.logical(immigrant_selection), length(immigrant_selection) == 1,
+            !is.na(immigrant_selection))
   structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
                  env_var = env_var, steps_per_generation = steps_per_generation,
-                 founder = founder, env = env, traits = traits), class = "mc_evolution")
+                 founder = founder, env = env, traits = traits,
+                 immigrant_selection = immigrant_selection), class = "mc_evolution")
 }
 
 #' @export
@@ -188,7 +201,36 @@ evolution_state <- function(evolution, m, k_all, species) {
        optimum = traits$optimum, sigma = traits$sigma, r_max = traits$r_max,
        g = each(evolution$genetic_var), b = each(evolution$plasticity),
        ve = each(evolution$env_var), nu = evolution$ne_ratio,
-       per = evolution$steps_per_generation, founder = evolution$founder)
+       per = evolution$steps_per_generation, founder = evolution$founder,
+       imm_sel = isTRUE(evolution$immigrant_selection))
+}
+
+# immigrants filtered by viability selection in the site they reach (immigrant_selection =
+# TRUE): the expected number from each source is weighted by the fitness of the source
+# phenotype in the destination; returns the expected numbers and the mean and variance of the
+# genetic means, and the mean phenotype, of the immigrants that arrive (sites x species)
+immigrants_selected <- function(em, za, pa, e, width, disp_matrix) {
+  m <- nrow(em)
+  k <- ncol(em)
+  lam <- zi <- z2 <- pi <- matrix(0, m, k)
+  for (s in seq_len(k)) {
+    src <- em[, s] > 0
+    if (!any(src)) next
+    # w[j, i]: fitness of the phenotype of source j in site i, relative to the optimum
+    w <- exp(-outer(pa[src, s], e, "-")^2 / (2 * width[s]))
+    flow <- disp_matrix[src, , drop = FALSE] * w * em[src, s]
+    lam[, s] <- colSums(flow)
+    zi[, s] <- colSums(flow * za[src, s])
+    z2[, s] <- colSums(flow * za[src, s]^2)
+    pi[, s] <- colSums(flow * pa[src, s])
+  }
+  has <- lam > 0
+  zi[has] <- zi[has] / lam[has]
+  pi[has] <- pi[has] / lam[has]
+  z2[has] <- pmax(z2[has] / lam[has] - zi[has]^2, 0)
+  zi[!has] <- za[!has]
+  pi[!has] <- pa[!has]
+  list(lambda = lam, mean = zi, between = z2, phenotype = pi)
 }
 
 # growth rates of the phenotypes p (sites x species) in environment e: the mean fitness under
