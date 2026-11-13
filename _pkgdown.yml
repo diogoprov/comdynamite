@@ -18,6 +18,8 @@ reference:
   - logistic_gradients
   - mc_dynamics
   - evolution_control
+  - genetic_matrices
+  - maladaptation
   - simulate_evolving_metacommunity
   - speciation_control
   - as_metacommunity
@@ -191,6 +193,7 @@ articles:
   - articles/rates-assembly
   - articles/correlated-traits
   - articles/watching-assembly
+  - articles/quantitative-genetics
 - title: Validation
   navbar: Validation
   contents:

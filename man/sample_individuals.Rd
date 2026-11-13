@@ -101,7 +101,12 @@ when given, then adds variation such as measurement error, and \code{local_adapt
 defaults (\code{env} is the environment at the sampled step). At a \code{step} before the last, the
 simulation needs \code{record_steps} with that step, which keep the genetic means (and, for
 evolving metacommunities, of the lineages extant at the end). Evolving metacommunities from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} are accepted
-too.}
+too. With several evolving traits (one per niche axis), individuals are drawn from a
+multivariate normal with covariance \eqn{G + E}{G + E} of their species, and
+\code{intraspecific_sd} takes one value or one per trait; the output then has, for each trait,
+the columns \verb{env_<trait>} and \verb{mean_<trait>} and the trait itself (named after its axis)
+instead of \code{env}, \code{optimum}, \code{population_mean} and \code{trait}, with the trait names in the
+attribute \code{"traits"}. \code{session_sd} shifts each trait on its own.}
 
 \item{session_sd}{Standard deviation of an error shared by all individuals measured on the
 same date (\code{step}), such as a difference between measurers or calibrations; it is added to

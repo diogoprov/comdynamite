@@ -306,6 +306,11 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   if (!inherits(evolution, "mc_evolution")) {
     stop("`evolution` must come from `evolution_control()`", call. = FALSE)
   }
+  if (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
+      is.matrix(evolution$env_var) || is.list(evolution$env_var)) {
+    stop("`simulate_evolving_metacommunity()` takes a single trait; covariance matrices are ",
+         "for `simulate_metacommunity()`", call. = FALSE)
+  }
   if (speciation$mode == "ecological" && all(evolution$genetic_var == 0)) {
     stop("ecological speciation needs `evolution` with genetic variance", call. = FALSE)
   }

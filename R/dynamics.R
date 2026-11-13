@@ -113,7 +113,9 @@
 #' @param evolution Optional settings from [evolution_control()] for the evolution of the niche
 #'   optimum within each population: selection by the local environment, drift, gene flow,
 #'   founder sampling and plasticity. `NULL` (the default) keeps the optimum of each species in
-#'   all its populations, as before. Needs a single environmental axis.
+#'   all its populations, as before. With a niche of several axes, one trait evolves per axis,
+#'   with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
+#'   [evolution_control()] and [genetic_matrices()]).
 #' @return An `mc_sim` object: a list with `abundance` (sites x species matrix
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
@@ -124,9 +126,13 @@
 #'   of its phenotype at the last step (`plastic`), the phenotype after dispersal (`phenotype`,
 #'   which mixes residents and immigrants), the genetic means and the environment at
 #'   `record_steps` (`history`, `environment_history`), the reference environment and the
-#'   settings; `NA` where a population is absent. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
+#'   settings; `NA` where a population is absent. With several evolving traits, `genetic`,
+#'   `plastic` and `phenotype` are arrays of sites x species x traits, `history` has the
+#'   recorded steps as a fourth dimension, and `genetic_var`, `env_var` (one matrix per species)
+#'   and `plasticity` (species x traits) are kept. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
 #'   `optimum_` column of traits per axis), while [summary_stats()] uses the first axis unless
-#'   given `trait` and `env`, and [sample_individuals()] needs a single axis.
+#'   given `trait` and `env`, and [sample_individuals()] needs a single axis unless the traits
+#'   evolved (`source = "evolution"`, one column per trait).
 #' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z.,
 #'   Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 #'   process-based metacommunity framework linking local and regional scale
@@ -196,10 +202,20 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
     if (!inherits(evolution, "mc_evolution")) {
       stop("`evolution` must come from `evolution_control()`", call. = FALSE)
     }
-    if (several) stop("`evolution` works with a single environmental axis", call. = FALSE)
+    mv <- is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
+      is.matrix(evolution$env_var) || is.list(evolution$env_var)
+    if (several || mv) {
+      if (!several) {
+        stop("`evolution` with covariance matrices needs a niche of several axes (a list of ",
+             "`traits` and `env`), one trait per axis", call. = FALSE)
+      }
+      evolution$traits <- stats::setNames(trait_list, names(env))
+      evolution$env <- as.matrix(env)
+    } else {
     evolution$traits <- traits
     evolution$env <- if (!is.null(env)) env[[1]] else if (is.null(env_time)) landscape$env else
       function(step) env_time[, step]
+    }
   }
   out <- mc_dynamics(r, alpha, dispersal, n_steps = n_steps, seed_steps = seed_steps,
                      seed_mean = seed_mean, disp_matrix = landscape$dispersal,
@@ -295,8 +311,24 @@ mc_setup <- function(st) {
     if (!is.null(pool)) n[!pool] <- 0L
     last_seed <- max(c(0, seed_steps))
     competition_hook <- NULL
-    ev <- if (!is.null(evolution)) evolution_state(evolution, m, k_all, species)
-    if (!is.null(ev)) {
+    ev <- if (!is.null(evolution)) {
+      if (!inherits(evolution, "mc_evolution")) {
+        stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+      }
+      if (evolution_is_mv(evolution)) evolution_state_mv(evolution, m, k_all, species) else
+        evolution_state(evolution, m, k_all, species)
+    }
+    if (isTRUE(ev$mv)) {
+      # several traits: genetic means and phenotypes as sites x species x traits
+      z <- ph <- array(NA_real_, c(m, k_all, ev$q))
+      z_history <- if (length(record_steps))
+        array(NA_real_, c(m, k_all, ev$q, length(record_steps)),
+              dimnames = list(sites, species, ev$axes, step_label(record_steps))) else NULL
+      fixed_z <- ev$fixed
+      pool_mean <- array(rep(ev$optimum, each = m), c(m, k_all, ev$q))
+      start_pop <- n > 0
+      if (any(start_pop)) z <- mv_found(ev, z, pool_mean, n, start_pop, seq_len(k_all))
+    } else if (!is.null(ev)) {
       # genetic mean and phenotype (after dispersal) of every population; NA where absent
       z <- matrix(NA_real_, m, k_all)
       ph <- matrix(NA_real_, m, k_all)
@@ -341,7 +373,17 @@ mc_step <- function(st, step) {
     if (step %in% seed_steps) {
       seeds <- stats::rpois(m * k, seed_mean)
       added <- if (is.null(inside)) seeds else seeds * inside
-      if (!is.null(ev)) {
+      if (isTRUE(ev$mv)) {
+        added_m <- added + matrix(0L, m, k)
+        za <- z[, alive, , drop = FALSE]
+        pm <- pool_mean[, alive, , drop = FALSE]
+        mix <- n > 0 & added_m > 0
+        w_mix <- ifelse(mix, n / (n + added_m), 1)
+        for (a in seq_len(ev$q)) za[, , a] <- w_mix * za[, , a] + (1 - w_mix) * pm[, , a]
+        new_seed <- n == 0 & added_m > 0
+        if (any(new_seed)) za <- mv_found(ev, za, pm, added_m, new_seed, alive)
+        z[, alive, ] <- za
+      } else if (!is.null(ev)) {
         # seeds carry the mean of the regional pool and mix with residents; populations
         # founded by seeds alone start from a sample of them
         added_m <- added + matrix(0L, m, k)
@@ -368,6 +410,14 @@ mc_step <- function(st, step) {
     if (k > 0) {
       if (is.null(ev)) {
         r_now <- r_fun(step)[, alive, drop = FALSE]
+      } else if (isTRUE(ev$mv)) {
+        e_now <- ev$env(step)
+        za <- z[, alive, , drop = FALSE]
+        pm <- pool_mean[, alive, , drop = FALSE]
+        za[is.na(za)] <- pm[is.na(za)]
+        if (any(fixed_z[alive])) za[, fixed_z[alive], ] <- pm[, fixed_z[alive], , drop = FALSE]
+        pa <- mv_phenotype(ev, za, e_now, alive)
+        r_now <- mv_growth(ev, pa, e_now, alive)
       } else {
         e_now <- ev$env(step)
         za <- z[, alive, drop = FALSE]
@@ -383,7 +433,10 @@ mc_step <- function(st, step) {
       crowding <- if (is.null(competition_hook)) n %*% at else competition_hook(n, pa)
       lam <- r_now * n / (1 + crowding)
       n <- matrix(stats::rpois(m * k, lam), m, k)
-      if (!is.null(ev)) {
+      if (isTRUE(ev$mv)) {
+        za <- mv_select(ev, za, pa, e_now, n, alive)
+        pa <- mv_phenotype(ev, za, e_now, alive)
+      } else if (!is.null(ev)) {
         # selection toward the local environment and drift, in populations present after
         # reproduction (Lande 1976); no draws without drift
         g <- matrix(ev$g[alive], m, k, byrow = TRUE)
@@ -412,7 +465,11 @@ mc_step <- function(st, step) {
           imm <- matrix(0L, m, k)
           for (j in which(tot > 0)) imm[, j] <- stats::rmultinom(1, tot[j], w[, j])
         }
-        if (!is.null(ev)) {
+        if (isTRUE(ev$mv)) {
+          flowed <- mv_flow(ev, za, pa, n, em, imm, disp_matrix, alive)
+          za <- flowed$za
+          pa <- flowed$pa
+        } else if (!is.null(ev)) {
           # gene flow: residents and immigrants mixed by their numbers; immigrants carry the
           # mean (and the phenotype) of their sources; new populations start from a sample of
           # their founders
@@ -438,7 +495,17 @@ mc_step <- function(st, step) {
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
       if (!is.null(inside)) n[!inside] <- 0L
-      if (!is.null(ev)) {
+      if (isTRUE(ev$mv)) {
+        if (any(fixed_z[alive])) {
+          za[, fixed_z[alive], ] <- pool_mean[, alive, , drop = FALSE][, fixed_z[alive], ,
+                                                                         drop = FALSE]
+        }
+        gone <- rep(n == 0, ev$q)
+        za[gone] <- NA_real_
+        pa[gone] <- NA_real_
+        z[, alive, ] <- za
+        ph[, alive, ] <- pa
+      } else if (!is.null(ev)) {
         if (any(fixed_z[alive])) za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
         za[n == 0] <- NA_real_
         pa[n == 0] <- NA_real_
@@ -489,7 +556,11 @@ mc_step <- function(st, step) {
     }
     if (!is.null(history) && step %in% record_steps) {
       history[, alive, match(step, record_steps)] <- n
-      if (!is.null(ev)) z_history[, alive, match(step, record_steps)] <- z[, alive]
+      if (isTRUE(ev$mv)) {
+        z_history[, alive, , match(step, record_steps)] <- z[, alive, ]
+      } else if (!is.null(ev)) {
+        z_history[, alive, match(step, record_steps)] <- z[, alive]
+      }
     }
   }), st)
   invisible(st)
@@ -510,7 +581,30 @@ mc_finish <- function(st) {
     out <- list(abundance = abundance, history = history, pool = pool, arrival = arrival,
                 propagule = propagule, immigrants = immigrants, migrant_load = load,
                 n_steps = n_steps)
-    if (!is.null(ev)) {
+    if (isTRUE(ev$mv)) {
+      gone <- rep(absent, ev$q)
+      z[gone] <- NA_real_
+      ph[gone] <- NA_real_
+      e_end <- ev$env(n_steps)
+      plastic <- z
+      for (a in seq_len(ev$q)) plastic[, , a] <- outer(e_end[, a] - ev$ref[a], ev$b[, a])
+      plastic[gone] <- NA_real_
+      dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- list(sites, species, ev$axes)
+      env_history <- if (length(record_steps)) {
+        array(e_end, c(m, ev$q, length(record_steps)),
+              dimnames = list(sites, ev$axes, step_label(record_steps)))
+      }
+      out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
+                            environment = matrix(e_end, m, dimnames = list(sites, ev$axes)),
+                            environment_history = env_history,
+                            reference = stats::setNames(ev$ref, ev$axes),
+                            genetic_var = stats::setNames(ev$G, species),
+                            env_var = stats::setNames(ev$E, species),
+                            plasticity = matrix(ev$b, k_all, dimnames = list(species, ev$axes)),
+                            settings = structure(evolution[setdiff(names(evolution),
+                                                                   c("env", "traits"))],
+                                                 class = "mc_evolution"))
+    } else if (!is.null(ev)) {
       z[absent] <- NA_real_
       ph[absent] <- NA_real_
       plastic <- sweep(matrix(ev$env(n_steps) - ev$ref, m, k_all), 2, ev$b, "*")

@@ -61,7 +61,9 @@ which conserves them. Spatially implicit landscapes are always multinomial.}
 \item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,
 founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of each species in
-all its populations, as before. Needs a single environmental axis.}
+all its populations, as before. With a niche of several axes, one trait evolves per axis,
+with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
+\code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},
@@ -83,8 +85,10 @@ Other simulate metacommunities:
 \code{\link[=as_metacommunity]{as_metacommunity()}},
 \code{\link[=colonisation_history]{colonisation_history()}},
 \code{\link[=evolution_control]{evolution_control()}},
+\code{\link[=genetic_matrices]{genetic_matrices()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=maladaptation]{maladaptation()}},
 \code{\link[=persistence]{persistence()}},
 \code{\link[=range_history]{range_history()}},
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},
