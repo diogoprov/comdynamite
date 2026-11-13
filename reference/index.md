@@ -235,6 +235,9 @@ analysis, community trait indices and decompositions of trait variation.
 
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   : Individuals from a simulated metacommunity
+- [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  : Test whether divergence among groups is proportional to variation
+  within them
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
   T-statistics of intraspecific trait variation
 - [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)

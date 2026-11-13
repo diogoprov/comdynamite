@@ -2,6 +2,48 @@
 
 ## comdynamite (development version)
 
+- Speciation with several traits. With a list of `traits` and an `env`
+  matrix (one column per niche axis),
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  evolves one trait per axis in every lineage, with (G) and (E) as
+  covariance matrices in
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
+  as in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
+  Ecological speciation compares populations by their Mahalanobis
+  distance under (P = G + E) (`threshold` in units of phenotypic
+  standard deviations), `jump_var` of
+  [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
+  takes a covariance matrix for the multivariate normal jump of the
+  optimum at speciation, and niche crowding multiplies the overlaps on
+  every axis. The outputs carry one table of `traits` per axis,
+  `genetic` and the evolutionary state as arrays with a third dimension
+  for the traits, and `genetic_<trait>` columns in `series`;
+  [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md),
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  and
+  [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md)
+  take them, and the last two now add the variance among the lineages of
+  a species in a site. `env_time` takes several axes in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+  as a list of matrices or an array sites x steps x axes.
+
+- New
+  [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  tests whether divergence among groups is proportional to the variation
+  within them, as expected under drift (Lande 1979), by regressing the
+  log variance among group means on the log eigenvalues of (W)
+  (Ackermann & Cheverud 2004), with (W) the pooled covariance within
+  groups or a known (G), after subtracting the sampling variance of the
+  means. In a validation in `data-raw` with clades simulated by
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
+  the test with a known (G) kept its size under drift (3.6% at 5%) and
+  gave slopes below 1 in every run under divergent selection along the
+  minor axis of (G), but rejected drift in only 36% of those runs with
+  eight traits; with (W) estimated from phenotypes and low heritability
+  on the minor axes, it rejected true drift in 57% of runs (Prôa et
+  al. 2013).
+
 - New
   [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md)
   gives, for every population of a simulation run with `evolution`, the
@@ -15,10 +57,12 @@
   priority effects that obscure the relationship between species and the
   environment (Urban & De Meester 2009; Leibold et al. 2019), and
   relates the model to the mechanistic models of Cabral and colleagues.
+
 - Bug fix:
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   with `evolution` and a niche of infinite breadth (`sigma = Inf`) gave
   growth rates of `NaN`.
+
 - Evolution of several traits at once. With a niche of several axes,
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   evolves one trait per axis (its optimum), with `genetic_var` and
@@ -35,10 +79,11 @@
   builds (G) and (E) for each species in three families (proportional to
   a common (P), with no common structure, or with shared principal
   components), and `sample_individuals(source = "evolution")` draws
-  individuals from (N(z, G + E)), one column per trait. Speciation with
-  several traits is not yet available. Behaviour change: `evolution`
-  with a niche of several axes used to stop with an error; with a single
-  variance it now evolves one trait per axis with (G = vI).
+  individuals from (N(z, G + E)), one column per trait. Behaviour
+  change: `evolution` with a niche of several axes used to stop with an
+  error; with a single variance it now evolves one trait per axis with
+  (G = vI).
+
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   simulates collections on several dates: `step` takes several recorded
   steps, each sampled on its own, with a column `step` in the result,
@@ -52,6 +97,7 @@
   keeps the genetic means, the variance among lineages and the
   environment of the extant species at `record_steps`
   (`evolution$history`, `within_history`, `environment_history`).
+
 - Phase 3b of the block on speciation.
   [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   logs every change of presence of every lineage in every site
@@ -70,6 +116,7 @@
   accept ranges of several regions.
   `history_rates(model = "sympatry", overlap = TRUE)` counts the
   lineages whose ranges share an area.
+
 - Phase 3a of the block on speciation.
   [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   returns a per-generation `series` of every lineage (occupancy,
@@ -92,6 +139,7 @@
   [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md)
   builds a landscape from a given dispersal matrix, such as a kernel of
   resistance distances.
+
 - [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
   gains the modes `"point"` (each individual starts a new species with
   probability `rate` per generation, the neutral limit) and `"fission"`
@@ -111,6 +159,7 @@
   `data-raw/evolving_neutral.R` (point mutation against the Ewens
   sampling formula) and `data-raw/evolving_pbd.R` (protracted fission
   against the gamma statistic and fits of the PBD).
+
 - [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   runs the metacommunity with speciation (phase 2a of the block on
   speciation): species bud when their populations diverge, and die out
@@ -138,6 +187,7 @@
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
   now runs its preparation, steps and end as internal functions on one
   state, with the same results.
+
 - [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
   and the argument `evolution` of
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)

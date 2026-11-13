@@ -96,7 +96,8 @@ given: it grows out of the dynamics. The community starts from the species of <c
 <span>  seed_mean <span class="op">=</span> <span class="fl">0.5</span>,</span>
 <span>  record_steps <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
-<span>  max_species <span class="op">=</span> <span class="fl">500</span></span>
+<span>  max_species <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  env <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -110,7 +111,9 @@ given: it grows out of the dynamics. The community starts from the species of <c
 
 <dt id="arg-traits">traits<a class="anchor" aria-label="anchor" href="#arg-traits"></a></dt>
 <dd><p>Traits of the species at the start, from <code><a href="species_traits.html">species_traits()</a></code> (one row per
-species).</p></dd>
+species), or a list of such tables, one per environmental axis of <code>env</code>, for a niche of
+several axes with one evolving trait per axis (the tree, when needed, goes with the first
+table).</p></dd>
 
 
 <dt id="arg-speciation">speciation<a class="anchor" aria-label="anchor" href="#arg-speciation"></a></dt>
@@ -176,6 +179,14 @@ which conserves them. Spatially implicit landscapes are always multinomial.</p><
 <dd><p>Maximum number of species ever, including extinct ones; the simulation
 stops with an error beyond it.</p></dd>
 
+
+<dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
+<dd><p>For a list of <code>traits</code>: the environmental axes of each site, a matrix or data
+frame with one row per site and one column per element of <code>traits</code>. The <code>genetic_var</code>
+and <code>env_var</code> of <code>evolution</code> are then covariance matrices (see the section Several traits
+of <code><a href="evolution_control.html">evolution_control()</a></code>); competition falls with the overlap of the niches on all axes,
+and new species inherit the matrices of their mother.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -194,16 +205,19 @@ each belongs to.</p></li>
 <li><p><code>richness</code> and <code>richness_good</code>: extant lineages, and extant lineages that have
 completed, at each generation (the second can be below the number of good species, some
 of which survive only in incipient lineages).</p></li>
-<li><p><code>genetic</code>: genetic means of the populations of the extant lineages.</p></li>
+<li><p><code>genetic</code>: genetic means of the populations of the extant lineages (sites x lineages,
+or sites x lineages x traits with several traits).</p></li>
 <li><p><code>traits</code>: of the extant species, with the mean genetic optimum over the populations of
-their lineages as <code>optimum</code>.</p></li>
+their lineages as <code>optimum</code>; with several traits, a list with one such table per axis,
+and <code>env</code>, the environmental axes.</p></li>
 <li><p><code>alpha</code>: among the extant species at the end, without the niche overlap, which varies
 among sites.</p></li>
 <li><p>The records and colonisation history of <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> for the extant
 species: records summed over their extant lineages (lineages extinct by the end are
 left out); colonisation, in each site, of the most abundant lineage.</p></li>
 <li><p><code>series</code>: one row per lineage alive in each generation, with its <code>occupancy</code> (sites),
-regional <code>abundance</code>, <code>genetic</code> mean (weighted by abundance), and the sites it
+regional <code>abundance</code>, <code>genetic</code> mean (weighted by abundance; <code>genetic_&lt;trait&gt;</code> for each
+trait with several traits), and the sites it
 <code>colonised</code> and lost (<code>extirpated</code>) since the previous generation, out of those where it
 was absent (<code>absent_before</code>) and present (<code>present_before</code>). Sites that a lineage passed
 to a new one are not counted as lost, and the transitions are <code>NA</code> in the generation of
@@ -222,7 +236,10 @@ environment at <code>record_steps</code> for the lineages extant at the end (<co
 <code>within_history</code>, <code>environment_history</code>), the reference environment of plasticity
 (<code>reference</code>), the genetic and environmental variances and the slope of plasticity of
 each species (<code>genetic_var</code>, <code>env_var</code>, <code>plasticity</code>) and the <code>settings</code>; otherwise
-<code>NULL</code>.</p></li>
+<code>NULL</code>. With several traits, the genetic means, plastic parts and variances among
+lineages (trait by trait) are arrays of sites x species x traits (with the recorded
+steps as a fourth dimension in the histories), <code>genetic_var</code> and <code>env_var</code> hold one
+matrix per species and <code>plasticity</code> is a matrix of species x traits.</p></li>
 <li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used.</p></li>
 </ul><p><code><a href="as_metacommunity.html">as_metacommunity()</a></code> turns it into an <code>mc_sim</code> for the other functions of the package.</p>
     </div>

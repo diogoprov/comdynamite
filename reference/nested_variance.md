@@ -111,6 +111,7 @@ Letters*, 13, 838–848.
 
 Other trait variation among individuals:
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
@@ -145,8 +146,8 @@ d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
 res <- nested_variance(d, "trait", c("region", "site", "population"))
 res
 #>        level        trait
-#> 1     region 2.551909e-08
-#> 2       site 3.509259e-17
+#> 1     region 1.741575e-08
+#> 2       site 1.125857e-17
 #> 3 population 9.862820e-01
 #> 4     within 1.371800e-02
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)

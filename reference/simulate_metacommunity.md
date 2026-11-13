@@ -66,7 +66,9 @@ simulate_metacommunity(
   Optional matrix (sites x `n_steps`) with the environment at each step,
   e.g. from
   [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md).
-  If `NULL`, the environment of the landscape is constant.
+  If `NULL`, the environment of the landscape is constant. With `env`
+  (several axes), a list with one such matrix per column of `env`
+  (matched by name when named), or an array of sites x steps x axes.
 
 - seed_steps:
 
@@ -108,8 +110,9 @@ simulate_metacommunity(
   Optional environmental axes of each site, a matrix or data frame with
   one row per site and one column per element of `traits` (such as the
   `env` of several landscapes on the same grid). Needed when `traits` is
-  a list; replaces the `env` of `landscape`. Not available with
-  `env_time`. Columns without names take the names of `traits`, or
+  a list; replaces the `env` of `landscape`. With `env_time`, it gives
+  the axes (names and number), and the environment of each step comes
+  from `env_time`. Columns without names take the names of `traits`, or
   `axis1`, `axis2`, ...
 
 - evolution:

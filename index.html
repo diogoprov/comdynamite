@@ -87,6 +87,7 @@
 <!-- badges: start -->
 
 <p>Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse data and to simulate it.</p>
+<p>The simulations work at the level of populations in ecological time: abundances in every site grow, compete and disperse, and, when asked, each population carries the genetic means of one or more traits that evolve by selection and drift under quantitative genetics (Lande 1979), with a covariance matrix <em>G</em> per species. Lineages can split into new species inside the metacommunity, so the same run gives communities, trait distributions of individuals and the true phylogeny. Because the truth is known, the analysis functions of the package can be tested on these simulations before they are applied to field data.</p>
 <div class="section level2">
 <h2 id="what-do-you-want-to-do">What do you want to do?<a class="anchor" aria-label="anchor" href="#what-do-you-want-to-do"></a>
 </h2>
@@ -181,6 +182,27 @@
 <td><a href="https://provetelab.org/comdynamite/articles/comdynamite.html">Get started</a></td>
 </tr>
 <tr>
+<td>Local adaptation, migration load and evolutionary rescue, with one or several traits</td>
+<td>
+<code><a href="reference/evolution_control.html">evolution_control()</a></code>, <code><a href="reference/genetic_matrices.html">genetic_matrices()</a></code>, <code><a href="reference/maladaptation.html">maladaptation()</a></code>
+</td>
+<td><a href="https://provetelab.org/comdynamite/articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></td>
+</tr>
+<tr>
+<td>Speciation inside the metacommunity, with the full and reconstructed trees</td>
+<td>
+<code><a href="reference/simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>, <code><a href="reference/speciation_control.html">speciation_control()</a></code>
+</td>
+<td></td>
+</tr>
+<tr>
+<td>Individuals sampled from simulated populations, and tests of drift</td>
+<td>
+<code><a href="reference/sample_individuals.html">sample_individuals()</a></code>, <code><a href="reference/drift_test.html">drift_test()</a></code>
+</td>
+<td></td>
+</tr>
+<tr>
 <td>Does a method work? Type I error and power by simulation</td>
 <td>all of the above</td>
 <td><a href="https://provetelab.org/comdynamite/articles/evaluating-methods.html">Evaluating methods</a></td>
@@ -253,6 +275,7 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to brain:body size allometry. <em>Evolution</em>, 33, 402–416. <a href="https://doi.org/10.1111/j.1558-5646.1979.tb04694.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.1979.tb04694.x</a></p>
 <p>Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., &amp; Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. <em>Ecology Letters</em>, 23, 1314–1329. <a href="https://doi.org/10.1111/ele.13568" class="external-link uri">https://doi.org/10.1111/ele.13568</a></p>
 <p>Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel, T. F., &amp; Pellissier, L. (2021). gen3sis: A general engine for eco-evolutionary simulations of the processes that shape Earth’s biodiversity. <em>PLoS Biology</em>, 19, e3001340. <a href="https://doi.org/10.1371/journal.pbio.3001340" class="external-link uri">https://doi.org/10.1371/journal.pbio.3001340</a></p>
 <p>Colwell, R. K., &amp; Winkler, D. W. (1984). A null model for null models in biogeography. In D. R. Strong, D. Simberloff, L. G. Abele, &amp; A. B. Thistle (Eds.), <em>Ecological Communities: Conceptual Issues and the Evidence</em> (pp. 344–359). Princeton University Press. <a href="https://doi.org/10.1515/9781400857081.344" class="external-link uri">https://doi.org/10.1515/9781400857081.344</a></p>

@@ -130,7 +130,8 @@ rows of <code>traits</code> by name, or by position if <code>alpha</code> has no
 <dt id="arg-env-time">env_time<a class="anchor" aria-label="anchor" href="#arg-env-time"></a></dt>
 <dd><p>Optional matrix (sites x <code>n_steps</code>) with the environment at
 each step, e.g. from <code><a href="env_over_time.html">env_over_time()</a></code>. If <code>NULL</code>, the environment of the
-landscape is constant.</p></dd>
+landscape is constant. With <code>env</code> (several axes), a list with one such matrix per column
+of <code>env</code> (matched by name when named), or an array of sites x steps x axes.</p></dd>
 
 
 <dt id="arg-seed-steps">seed_steps<a class="anchor" aria-label="anchor" href="#arg-seed-steps"></a></dt>
@@ -170,9 +171,10 @@ which conserves them. Spatially implicit landscapes are always multinomial.</p><
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
 <dd><p>Optional environmental axes of each site, a matrix or data frame with one row per
 site and one column per element of <code>traits</code> (such as the <code>env</code> of several landscapes on
-the same grid). Needed when <code>traits</code> is a list; replaces the <code>env</code> of <code>landscape</code>. Not
-available with <code>env_time</code>. Columns without names take the names of <code>traits</code>, or <code>axis1</code>,
-<code>axis2</code>, ...</p></dd>
+the same grid). Needed when <code>traits</code> is a list; replaces the <code>env</code> of <code>landscape</code>. With
+<code>env_time</code>, it gives the axes (names and number), and the environment of each step comes
+from <code>env_time</code>. Columns without names take the names of <code>traits</code>, or <code>axis1</code>, <code>axis2</code>,
+...</p></dd>
 
 
 <dt id="arg-evolution">evolution<a class="anchor" aria-label="anchor" href="#arg-evolution"></a></dt>

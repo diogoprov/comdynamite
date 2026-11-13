@@ -205,8 +205,8 @@ with \(d\) the difference between the environment and the phenotype on each axis
 growth, changes only through its genetic covariance with the selected traits and through
 drift, the correlated response of Lande (1979). Founders draw their means from
 \(N(\bar z_{in}, G / k)\) plus the variance among their sources trait by
-trait. Environments are static (<code>env_time</code> is not available with several axes), and
-<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> takes a single trait. With \(G = 0\) the
+trait. The environment can change on every axis (<code>env_time</code> as a list of matrices), and
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> takes several traits in the same way. With \(G = 0\) the
 abundances are those without evolution for the same seed.</p>
     </div>
     <div class="section level2">

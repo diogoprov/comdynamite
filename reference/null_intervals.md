@@ -53,6 +53,7 @@ A data frame with one row per site, trait and statistic (for
 
 Other trait variation among individuals:
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),

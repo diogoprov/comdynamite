@@ -41,7 +41,12 @@ speciation_control(
 
   For `"geographic"` and `"ecological"`: divergence in generations, or
   difference of genetic means in units of the environment, that
-  separates groups; `Inf` turns speciation off.
+  separates groups; `Inf` turns speciation off. With several traits (one
+  per niche axis), the difference of two populations in `"ecological"`
+  is the Mahalanobis distance of their genetic means under the
+  phenotypic matrix of the species, \\\sqrt{\Delta\bar z^\top P^{-1}
+  \Delta\bar z}\\, so `threshold` is in units of phenotypic standard
+  deviations.
 
 - rate:
 
@@ -87,7 +92,10 @@ speciation_control(
 
 - jump_var:
 
-  Variance of the shift of the genetic mean of each new species.
+  Variance of the shift of the genetic mean of each new species. With
+  several traits, one value (independent shifts of that variance on
+  every trait) or a covariance matrix with one row and column per trait
+  (for instance proportional to \\G\\).
 
 - completion:
 

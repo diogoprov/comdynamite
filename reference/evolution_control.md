@@ -174,11 +174,11 @@ the product over axes. An axis with an infinite niche breadth
 does not affect growth, changes only through its genetic covariance with
 the selected traits and through drift, the correlated response of Lande
 (1979). Founders draw their means from \\N(\bar z\_{in}, G / k)\\ plus
-the variance among their sources trait by trait. Environments are static
-(`env_time` is not available with several axes), and
+the variance among their sources trait by trait. The environment can
+change on every axis (`env_time` as a list of matrices), and
 [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
-takes a single trait. With \\G = 0\\ the abundances are those without
-evolution for the same seed.
+takes several traits in the same way. With \\G = 0\\ the abundances are
+those without evolution for the same seed.
 
 ## References
 

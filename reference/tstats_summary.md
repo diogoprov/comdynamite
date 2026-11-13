@@ -68,6 +68,7 @@ dependence among sites within a randomisation.
 
 Other trait variation among individuals:
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),

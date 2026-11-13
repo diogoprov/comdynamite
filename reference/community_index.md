@@ -125,6 +125,7 @@ traits to detect and quantify multi-level community assembly processes.
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md).
 
 Other trait variation among individuals:
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),

@@ -109,7 +109,10 @@ of length zero), so that the tree stays binary.</p>
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
 <dd><p>For <code>"geographic"</code> and <code>"ecological"</code>: divergence in generations, or
 difference of genetic means in units of the environment, that separates groups; <code>Inf</code>
-turns speciation off.</p></dd>
+turns speciation off. With several traits (one per niche axis), the difference of two
+populations in <code>"ecological"</code> is the Mahalanobis distance of their genetic means under
+the phenotypic matrix of the species, \(\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
+z}\), so <code>threshold</code> is in units of phenotypic standard deviations.</p></dd>
 
 
 <dt id="arg-rate">rate<a class="anchor" aria-label="anchor" href="#arg-rate"></a></dt>
@@ -153,7 +156,9 @@ counts as reduced.</p></dd>
 
 
 <dt id="arg-jump-var">jump_var<a class="anchor" aria-label="anchor" href="#arg-jump-var"></a></dt>
-<dd><p>Variance of the shift of the genetic mean of each new species.</p></dd>
+<dd><p>Variance of the shift of the genetic mean of each new species. With several
+traits, one value (independent shifts of that variance on every trait) or a covariance
+matrix with one row and column per trait (for instance proportional to \(G\)).</p></dd>
 
 
 <dt id="arg-completion">completion<a class="anchor" aria-label="anchor" href="#arg-completion"></a></dt>

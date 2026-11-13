@@ -33,7 +33,8 @@ simulate_evolving_metacommunity(
   seed_mean = 0.5,
   record_steps = NULL,
   immigration = c("poisson", "multinomial"),
-  max_species = 500
+  max_species = 500,
+  env = NULL
 )
 ```
 
@@ -47,7 +48,9 @@ simulate_evolving_metacommunity(
 
   Traits of the species at the start, from
   [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
-  (one row per species).
+  (one row per species), or a list of such tables, one per environmental
+  axis of `env`, for a niche of several axes with one evolving trait per
+  axis (the tree, when needed, goes with the first table).
 
 - speciation:
 
@@ -118,6 +121,16 @@ simulate_evolving_metacommunity(
   Maximum number of species ever, including extinct ones; the simulation
   stops with an error beyond it.
 
+- env:
+
+  For a list of `traits`: the environmental axes of each site, a matrix
+  or data frame with one row per site and one column per element of
+  `traits`. The `genetic_var` and `env_var` of `evolution` are then
+  covariance matrices (see the section Several traits of
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md));
+  competition falls with the overlap of the niches on all axes, and new
+  species inherit the matrices of their mother.
+
 ## Value
 
 An `mc_evolving` object, a list with:
@@ -148,10 +161,12 @@ An `mc_evolving` object, a list with:
   number of good species, some of which survive only in incipient
   lineages).
 
-- `genetic`: genetic means of the populations of the extant lineages.
+- `genetic`: genetic means of the populations of the extant lineages
+  (sites x lineages, or sites x lineages x traits with several traits).
 
 - `traits`: of the extant species, with the mean genetic optimum over
-  the populations of their lineages as `optimum`.
+  the populations of their lineages as `optimum`; with several traits, a
+  list with one such table per axis, and `env`, the environmental axes.
 
 - `alpha`: among the extant species at the end, without the niche
   overlap, which varies among sites.
@@ -164,11 +179,12 @@ An `mc_evolving` object, a list with:
 
 - `series`: one row per lineage alive in each generation, with its
   `occupancy` (sites), regional `abundance`, `genetic` mean (weighted by
-  abundance), and the sites it `colonised` and lost (`extirpated`) since
-  the previous generation, out of those where it was absent
-  (`absent_before`) and present (`present_before`). Sites that a lineage
-  passed to a new one are not counted as lost, and the transitions are
-  `NA` in the generation of birth.
+  abundance; `genetic_<trait>` for each trait with several traits), and
+  the sites it `colonised` and lost (`extirpated`) since the previous
+  generation, out of those where it was absent (`absent_before`) and
+  present (`present_before`). Sites that a lineage passed to a new one
+  are not counted as lost, and the transitions are `NA` in the
+  generation of birth.
   [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
   turns them into rates of colonisation and extirpation.
 
@@ -192,7 +208,12 @@ An `mc_evolving` object, a list with:
   `within_history`, `environment_history`), the reference environment of
   plasticity (`reference`), the genetic and environmental variances and
   the slope of plasticity of each species (`genetic_var`, `env_var`,
-  `plasticity`) and the `settings`; otherwise `NULL`.
+  `plasticity`) and the `settings`; otherwise `NULL`. With several
+  traits, the genetic means, plastic parts and variances among lineages
+  (trait by trait) are arrays of sites x species x traits (with the
+  recorded steps as a fourth dimension in the histories), `genetic_var`
+  and `env_var` hold one matrix per species and `plasticity` is a matrix
+  of species x traits.
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
   `n_steps` used.

@@ -3,6 +3,16 @@
 Methods that link traits, phylogenies, biogeography and metacommunities
 in R, to analyse data and to simulate it.
 
+The simulations work at the level of populations in ecological time:
+abundances in every site grow, compete and disperse, and, when asked,
+each population carries the genetic means of one or more traits that
+evolve by selection and drift under quantitative genetics (Lande 1979),
+with a covariance matrix *G* per species. Lineages can split into new
+species inside the metacommunity, so the same run gives communities,
+trait distributions of individuals and the true phylogeny. Because the
+truth is known, the analysis functions of the package can be tested on
+these simulations before they are applied to field data.
+
 ## What do you want to do?
 
 **Analyse data**
@@ -24,6 +34,9 @@ in R, to analyse data and to simulate it.
 | Static communities along gradients | [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md), [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md) | [Testing the whole tree](https://provetelab.org/comdynamite/articles/whole-tree.html) |
 | Assembly by rules, without dynamics, as in Kraft et al. (2007) | [`assemble_community()`](https://provetelab.org/comdynamite/reference/assemble_community.md) | [Watching assembly](https://provetelab.org/comdynamite/articles/watching-assembly.html) |
 | Traits with phylogenetic signal or under Ornstein-Uhlenbeck regimes | [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md), [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md) | [Get started](https://provetelab.org/comdynamite/articles/comdynamite.html) |
+| Local adaptation, migration load and evolutionary rescue, with one or several traits | [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md), [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md), [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md) | [Quantitative genetics in the metacommunity](https://provetelab.org/comdynamite/articles/quantitative-genetics.html) |
+| Speciation inside the metacommunity, with the full and reconstructed trees | [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md), [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md) |  |
+| Individuals sampled from simulated populations, and tests of drift | [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md), [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md) |  |
 | Does a method work? Type I error and power by simulation | all of the above | [Evaluating methods](https://provetelab.org/comdynamite/articles/evaluating-methods.html) |
 
 In R,
@@ -141,6 +154,10 @@ own DOI on Zenodo. In R, `citation("comdynamite")` gives the entry with
 the installed version.
 
 ## References
+
+Lande, R. (1979). Quantitative genetic analysis of multivariate
+evolution, applied to brain:body size allometry. *Evolution*, 33,
+402–416. <https://doi.org/10.1111/j.1558-5646.1979.tb04694.x>
 
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik,
 R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
@@ -402,6 +419,9 @@ analysis, community trait indices and decompositions of trait variation.
 
 - [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
   : Individuals from a simulated metacommunity
+- [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  : Test whether divergence among groups is proportional to variation
+  within them
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
   T-statistics of intraspecific trait variation
 - [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)

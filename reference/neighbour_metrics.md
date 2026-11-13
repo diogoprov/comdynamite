@@ -131,6 +131,7 @@ rules, morphological dispersion, and the coexistence of plant species.
 
 Other trait variation among individuals:
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
