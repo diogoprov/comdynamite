@@ -291,4 +291,8 @@ test_that("immigrant_selection is refused with several traits and in evolving si
                                                evolution = evolution_control(
                                                  10, immigrant_selection = TRUE),
                                                n_steps = 5), "not yet available")
+  expect_error(simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, n_steps = 5,
+                                      evolution = evolution_control(diag(2), ne_ratio = 0.5,
+                                                                    mutation_var = 0.1)),
+               "several traits")
 })

@@ -90,7 +90,8 @@ list with the genetic mean of the optimum in each population (\code{genetic}), t
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
 which mixes residents and immigrants), the genetic means and the environment at
 \code{record_steps} (\code{history}, \code{environment_history}), the reference environment and the
-settings; \code{NA} where a population is absent. With several evolving traits, \code{genetic},
+settings, and, with \code{mutation_var}, the genetic variance of each population at the last
+step (\code{genetic_variance}); \code{NA} where a population is absent. With several evolving traits, \code{genetic},
 \code{plastic} and \code{phenotype} are arrays of sites x species x traits, \code{history} has the
 recorded steps as a fourth dimension, and \code{genetic_var}, \code{env_var} (one matrix per species)
 and \code{plasticity} (species x traits) are kept. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one

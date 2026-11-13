@@ -9,7 +9,10 @@
 #     between populations that selection then amplifies, which would speed up regional drift
 #     even between equivalent species (the control with one patch type): `ne_ratio = Inf`
 #     turns drift of the means off (founder sampling stays); a last set also turns founder
-#     sampling off (`founder = FALSE`).
+#     sampling off (`founder = FALSE`);
+# (iii) a genetic variance that does not depend on population size lets a population founded
+#     by a few immigrants adapt as fast as the resident: `mutation_var` gives each population
+#     its own variance with mutation-drift dynamics.
 # Everything else as in the replication.
 
 source("data-raw/replication_leibold2019.R")
@@ -51,4 +54,33 @@ if (sys.nframe() == 0) {
                shared = if (s$both[s$step == 5000]) classify_leibold(r)[["shared"]] else NA)
   }, mc.cores = max(1, parallel::detectCores() - 2))
   saveRDS(do.call(rbind, out), "data-raw/mechanism_leibold2019_founder.rds")
+
+  # (iv) genetic variance that depends on population size: each population carries its own
+  # variance with mutation-drift dynamics (mutation_var = G / 400, so that a full patch with
+  # Ne = 0.5 x 400 has an equilibrium near G), with and without immigrant selection; the runs
+  # with a constant G are those of (i) and (ii)
+  dyn <- rbind(expand.grid(G = c(50, 100, 200, 400), nm = c(1, 10, 100), landscape_type = "two",
+                           selection = c(FALSE, TRUE), rep = seq_len(n_rep),
+                           stringsAsFactors = FALSE),
+               expand.grid(G = 200, nm = 10, landscape_type = "one", selection = c(FALSE, TRUE),
+                           rep = seq_len(n_rep), stringsAsFactors = FALSE))
+  results_dyn <- parallel::mclapply(seq_len(nrow(dyn)), function(i) {
+    d <- dyn[i, ]
+    run <- run_leibold(d$G, d$landscape_type, seed = 1000 + d$rep, n_steps = 10000,
+                       nm = d$nm, immigrant_selection = d$selection, ne_ratio = 0.5,
+                       mutation_var = d$G / 400)
+    # genetic variance at the end in populations that make up less than 10% of their patch
+    # (minorities) and in the others
+    share <- run$final / pmax(rowSums(run$final), 1)
+    present <- run$final > 0
+    minority <- present & share < 0.1
+    list(G = d$G, nm = d$nm, landscape_type = d$landscape_type, selection = d$selection,
+         ne_ratio = 0.5, rep = d$rep, summary = summarise_leibold(run),
+         classes = classify_leibold(run),
+         v_minority = if (any(minority)) mean(run$variance[minority]) else NA,
+         v_majority = mean(run$variance[present & !minority]))
+  }, mc.cores = max(1, parallel::detectCores() - 2), mc.preschedule = FALSE)
+  bad <- vapply(results_dyn, inherits, logical(1), "try-error")
+  if (any(bad)) stop("runs failed: ", results_dyn[[which(bad)[1]]])
+  saveRDS(results_dyn, "data-raw/mechanism_leibold2019_variance.rds")
 }

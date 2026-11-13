@@ -13,7 +13,8 @@ evolution_control(
   founder = TRUE,
   env = NULL,
   traits = NULL,
-  immigrant_selection = FALSE
+  immigrant_selection = FALSE,
+  mutation_var = NULL
 )
 }
 \arguments{
@@ -54,6 +55,19 @@ are filtered source by source, as individuals are in an individual-based model, 
 mean and variance of the immigrants are those of the survivors. One trait only, on a
 spatially explicit landscape with \code{immigration = "poisson"}; used in the article
 "Replicating Leibold et al. (2019)".}
+
+\item{mutation_var}{\code{NULL} (the default) for a constant genetic variance, or the mutational
+variance \eqn{V_m}{Vm} added per generation, one value or one per species. Each population
+then carries its own genetic variance, which loses a fraction \eqn{1 / (2 N_e)}{1 / (2 Ne)}
+and gains \eqn{V_m}{Vm} each generation (neutral mutation and drift, Lynch & Hill 1986),
+so that it approaches \eqn{2 N_e V_m}{2 Ne Vm} in a population of constant size and stays
+low in small ones. Founders keep the variance of their sources times
+\eqn{1 - 1 / (2k)}{1 - 1 / (2k)} for \eqn{k}{k} founders, and gene flow averages the
+variances of residents and immigrants by their numbers. The variance between the means of
+residents and immigrants (or of sources) is not added, as if selection removed it, since
+selection does not otherwise act on the variance; without this choice, gene flow between
+diverged populations inflates the variance without bound. \code{genetic_var} is then the
+variance of the populations at the start and of seeds. Needs a finite \code{ne_ratio}; one trait only.}
 }
 \value{
 An \code{mc_evolution} object, to pass as \code{evolution}.
@@ -165,6 +179,9 @@ evolution. \emph{Evolution}, 30, 314--334. \doi{10.1111/j.1558-5646.1976.tb00911
 Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
 brain:body size allometry. \emph{Evolution}, 33, 402--416.
 \doi{10.1111/j.1558-5646.1979.tb04694.x}
+
+Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. \emph{Evolution}, 40,
+915--935. \doi{10.1111/j.1558-5646.1986.tb00561.x}
 }
 \seealso{
 Other simulate metacommunities:

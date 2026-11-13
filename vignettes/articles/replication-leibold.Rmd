@@ -85,7 +85,7 @@ low dispersal even \(G = 20\), which left the species distinct at \(N_m = 10\), 
 switched patches. With \(N_m = 10\), shared patches made up 29 to 38% with \(G\) of 200 and
 400 (only 4 and 2 runs still had both species), and with \(N_m = 100\) nearly all patches
 were shared, with and without evolution, so mass effects replaced local dominance. Local dominance was thus weaker than in their model, in which
-local co-occurrence was rare at \(N_m = 10\). We test two explanations below.
+local co-occurrence was rare at \(N_m = 10\). We test three explanations below.
 
 ![Classes of occupied patches at generation 5000, in the runs that still had both species (n of 10 above each bar).](leibold_classes.png)
 
@@ -155,12 +155,48 @@ variance.
 
 Neither factor restored local dominance. Without drift and founder sampling, 62% of the
 patches were shared at generation 5000 with two patch types (\(G = 200\), \(N_m = 10\)),
-more than with them. Our interpretation is that the remaining difference also comes from the
-constant \(G\): a few immigrants of the other species found a population that adapts as fast
-as the resident, so the resident keeps no evolutionary head start, whereas in an
-individual-based model a population founded by a few individuals has little genetic variance
-and adapts slowly. Testing this would need genetic variance that scales with population size,
-which comdynamite does not have.
+more than with them.
+
+## Genetic variance that depends on population size
+
+A third explanation for the weak local dominance was the constant \(G\) itself: a few
+immigrants of the other species found a population that adapts as fast as the resident, so the
+resident keeps no evolutionary head start, whereas in an individual-based model a population
+founded by a few individuals holds little genetic variance and adapts slowly. To test it, we
+added `mutation_var` to `evolution_control()`. Each population then carries its own genetic
+variance, which loses a fraction \(1 / (2 N_e)\) and gains the mutational variance \(V_m\)
+each generation, so that it approaches \(2 N_e V_m\) (Lynch & Hill 1986); founders keep the
+variance of their sources less \(1 / (2k)\) for \(k\) founders, and gene flow averages the
+variances of residents and immigrants. Selection does not act on the variance, so the variance
+between the means of residents and immigrants is not added; a first version that added it let
+gene flow between patch types inflate the variance to more than twice its equilibrium. We set
+\(V_m = G / 400\), so that a full patch (\(N_e = 200\)) has an equilibrium near \(G\), and
+reran the factorial design with drift, with and without immigrant selection.
+
+The genetic variance did depend on population size: at generation 10,000 (\(G = 200\),
+\(N_m = 1\)), populations that made up less than 10% of their patch held a mean variance of 17,
+against 46 in the others. It did not restore local dominance, however; it removed it. With
+\(N_m = 10\) and \(G \geq 100\), 90 to 99% of the patches were shared at generation 5000, and
+even with \(N_m = 1\) the share of shared patches grew with \(G\), from 19 to 57%. At the
+same time, no species was lost in any of the 260 runs, including the control with a single
+patch type, whereas regional neutrality still emerged: without immigrant selection and with
+\(G \geq 100\), the fitness difference within patch types was 0.05 or less, and patch type
+explained 17% or less of the variation in composition (2% or less with \(G \geq 200\)).
+Immigrant selection changed little, except with \(N_m = 100\) and \(G = 100\), where patch
+type still explained 56% of the variation in composition.
+
+![Runs with both species at generation 10,000, and shared patches at generation 5000 in the runs that kept both species, with a constant \(G\) and with a genetic variance that depends on population size (no immigrant selection).](leibold_variance.png)
+
+Taken together, these runs suggest that, in comdynamite, local dominance and the fast loss of
+species have the same source. With a constant \(G\), drift of the population means has a
+variance of \(G / N_e\) per generation, which creates fitness differences between the
+species in a patch that selection then amplifies until one excludes the other; repeated over
+the landscape, the same fitness noise drives one species extinct. When the variance is held by
+the populations and shrinks in small ones, this noise is smaller, and two species adapted to
+the same patch type coexist locally as neutral competitors, refreshed by immigration. Local
+dominance in the model of Leibold et al. (2019) must therefore come from mechanisms that our
+model does not have. Lottery recruitment into vacated microsites, overlapping generations and
+the build-up of variance from new mutations are candidates, but we did not test them.
 
 ## Summary
 
@@ -171,12 +207,18 @@ composition while it still predicts traits. It departs from their model in two w
 dominance is weaker at intermediate and high dispersal, and regional drift removes one species
 faster, more so with higher dispersal and with evolution. Filtering maladapted immigrants
 before they join a population changed neither. Drift and founder sampling of the population
-means explained most of the faster loss of species; the weaker local dominance seems to come
-from a genetic variance that does not depend on population size, which remains to be tested.
+means explained most of the faster loss of species. With a genetic variance that depends on
+population size, regional neutrality emerged without any loss of species, but local dominance
+disappeared at intermediate and high dispersal, so the local dominance of our runs with a
+constant \(G\) seems to be a product of drift of the means, and the local dominance of their
+model remains unexplained by our engine.
 These are 10 replicates per setting, and the speed of adaptation was set through \(G\)
 rather than matched to their model.
 
 ## References
+
+Lynch, M., & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
+915--935. https://doi.org/10.1111/j.1558-5646.1986.tb00561.x
 
 Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J. (2019).
 Regional neutrality evolves through local adaptive niche evolution. *Proceedings of the

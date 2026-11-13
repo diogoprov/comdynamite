@@ -8,7 +8,12 @@
   vanish and patch type stops predicting composition while it still predicts traits, as in
   their model; local dominance is weaker and regional drift removes one species faster.
   A factorial test (`data-raw/mechanism_leibold2019.R`) traced the faster drift mainly to
-  drift and founder sampling of the population means, not to the merging of immigrants.
+  drift and founder sampling of the population means, not to the merging of immigrants;
+  with a genetic variance that depends on population size, no species was lost, but local
+  dominance disappeared at intermediate and high dispersal.
+- `mutation_var` in `evolution_control()`: each population carries its own genetic variance,
+  with a loss of 1 / (2 Ne) and a gain of the mutational variance per generation (Lynch & Hill
+  1986), a founder bottleneck and averaging by gene flow (one trait).
 - `immigrant_selection` in `evolution_control()`: immigrants from each source arrive in
   proportion to the fitness of their phenotype in the site they reach, before they mix with
   residents (one trait, spatially explicit landscapes).

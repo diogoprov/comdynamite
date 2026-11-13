@@ -1001,7 +1001,11 @@ as fases, em `dev/plano-especiacao.md`.
       a seleção dos imigrantes não explica nenhuma das diferenças; deriva e amostragem de
       fundador das médias explicam a maior parte da deriva regional mais rápida; a dominância
       local fraca parece vir do G que não depende do tamanho da população (a testar com G
-      dependente de N). Em aberto: (ii)
+      dependente de N). Testado (`mutation_var`, variância por população com mutação e deriva):
+      nenhuma espécie se perde, a neutralidade regional surge, mas a dominância local some
+      (90-99% de manchas compartilhadas com Nm = 10); a dominância local com G constante vem da
+      deriva das médias. A do modelo deles fica sem explicação (candidatos não testados:
+      recrutamento em loteria, gerações sobrepostas, variância a partir de mutações novas). Em aberto: (ii)
       Urban & De Meester 2009 e o mapa como artigo.
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.

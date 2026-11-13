@@ -195,3 +195,44 @@ test_that("immigrant_selection filters maladapted immigrants source by source", 
                                       evolution = evolution_control(1, immigrant_selection = TRUE)),
                "spatially explicit")
 })
+
+test_that("mutation_var gives each population a genetic variance with mutation-drift dynamics", {
+  ls <- landscape_points(expand.grid(x = 1:3, y = 1:2), rep(50, 6), disp_scale = 1)
+  tr <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  a <- matrix(0.01, dimnames = list("sp1", "sp1"))
+  init <- cbind(sp1 = rep(400L, 6))
+  run <- function(vm, g = 10, n_steps = 300, nu = 0.5) {
+    set.seed(5)
+    simulate_metacommunity(ls, tr, a, dispersal = 0, n_steps = n_steps,
+                           seed_steps = integer(0), initial = init,
+                           evolution = evolution_control(genetic_var = g, ne_ratio = nu,
+                                                         mutation_var = vm))
+  }
+  # equilibrium 2 Ne Vm: Ne = 0.5 x N (N about 395), so Vm = 0.025 keeps G near 10
+  eq <- run(0.025, n_steps = 1000)
+  expect_equal(mean(eq$evolution$genetic_variance), 0.025 * mean(eq$abundance), tolerance = 0.1)
+  # no mutation: the variance decays by about 1 / (2 Ne) per generation
+  dec <- run(0, n_steps = 100)
+  expected <- 10 * (1 - 1 / mean(dec$abundance))^100
+  expect_equal(mean(dec$evolution$genetic_variance), expected, tolerance = 0.03)
+  # constant G has no genetic_variance
+  expect_null(run(NULL)$evolution$genetic_variance)
+  expect_error(evolution_control(1, mutation_var = -1), "mutation_var")
+  expect_error(evolution_control(1, ne_ratio = Inf, mutation_var = 0.1), "finite")
+  # founders: a population founded by few immigrants starts with less variance
+  xy <- expand.grid(x = 0:3, y = 0:1)
+  ls2 <- landscape_points(xy, rep(50, 8), disp_scale = 0.5)
+  init2 <- cbind(sp1 = c(400L, rep(0L, 7)))
+  set.seed(6)
+  sim <- simulate_metacommunity(ls2, tr, a, dispersal = 0.01, n_steps = 40,
+                                seed_steps = integer(0), initial = init2,
+                                evolution = evolution_control(genetic_var = 10, ne_ratio = 0.5,
+                                                              mutation_var = 0.025,
+                                                              immigrant_selection = TRUE))
+  v <- sim$evolution$genetic_variance
+  expect_true(any(v[-1] < v[1], na.rm = TRUE))
+  # growth with one variance per population matches the vector version
+  p <- matrix(c(40, 55), 2, 1)
+  expect_equal(evolution_growth_cells(p, c(50, 50), 20, 5, matrix(3, 2, 1)),
+               evolution_growth(p, c(50, 50), 20, 5, 3))
+})

@@ -132,7 +132,8 @@
 #'   of its phenotype at the last step (`plastic`), the phenotype after dispersal (`phenotype`,
 #'   which mixes residents and immigrants), the genetic means and the environment at
 #'   `record_steps` (`history`, `environment_history`), the reference environment and the
-#'   settings; `NA` where a population is absent. With several evolving traits, `genetic`,
+#'   settings, and, with `mutation_var`, the genetic variance of each population at the last
+#'   step (`genetic_variance`); `NA` where a population is absent. With several evolving traits, `genetic`,
 #'   `plastic` and `phenotype` are arrays of sites x species x traits, `history` has the
 #'   recorded steps as a fourth dimension, and `genetic_var`, `env_var` (one matrix per species)
 #'   and `plasticity` (species x traits) are kept. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
@@ -393,8 +394,9 @@ mc_setup <- function(st) {
               dimnames = list(sites, species, step_label(record_steps))) else NULL
       # mean of k founders drawn from sources with mean `from` and, when they come from several
       # sources, variance `between` among their means, for the populations in `cells`
-      found <- function(from, k, cells, cols, between = 0) {
-        g <- matrix(ev$g[cols], m, length(cols), byrow = TRUE)[cells]
+      found <- function(from, k, cells, cols, between = 0, g_cells = NULL) {
+        g <- if (is.null(g_cells)) matrix(ev$g[cols], m, length(cols), byrow = TRUE)[cells] else
+          g_cells[cells]
         v <- g + (between + 0 * from)[cells]
         out <- from[cells]
         if (ev$founder && any(g > 0)) {
@@ -408,6 +410,13 @@ mc_setup <- function(st) {
       pool_mean <- matrix(ev$optimum, m, k_all, byrow = TRUE)
       start_pop <- n > 0
       if (any(start_pop)) z[start_pop] <- found(pool_mean, n, start_pop, seq_len(k_all))
+      # genetic variance of every population, with `mutation_var` (NA where absent)
+      pool_g <- matrix(ev$g, m, k_all, byrow = TRUE)
+      vg <- NULL
+      if (isTRUE(ev$dyn)) {
+        vg <- matrix(NA_real_, m, k_all)
+        vg[start_pop] <- pool_g[start_pop]
+      }
     }
     # colonisation history of every population (sites x all species): step of the last arrival,
     # number of founders, and immigrants and migrant load since then; no random draws, so seeds
@@ -450,6 +459,14 @@ mc_step <- function(st, step) {
         new_seed <- n == 0 & added_m > 0
         if (any(new_seed)) za[new_seed] <- found(pm, added_m, new_seed, alive)
         z[, alive] <- za
+        if (isTRUE(ev$dyn)) {
+          va <- vg[, alive, drop = FALSE]
+          pg <- pool_g[, alive, drop = FALSE]
+          w <- n[mix] / (n[mix] + added_m[mix])
+          va[mix] <- w * va[mix] + (1 - w) * pg[mix]
+          va[new_seed] <- pg[new_seed]
+          vg[, alive] <- va
+        }
       }
       n <- n + added
     }
@@ -480,8 +497,15 @@ mc_step <- function(st, step) {
         za[is.na(za)] <- pool_mean[, alive, drop = FALSE][is.na(za)]
         if (any(fixed_z[alive])) za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
-        r_now <- evolution_growth(pa, e_now, ev$sigma[alive], ev$r_max[alive],
-                                  ev$g[alive] + ev$ve[alive])
+        if (isTRUE(ev$dyn)) {
+          ga <- vg[, alive, drop = FALSE]
+          ga[is.na(ga)] <- pool_g[, alive, drop = FALSE][is.na(ga)]
+          r_now <- evolution_growth_cells(pa, e_now, ev$sigma[alive], ev$r_max[alive],
+                                          sweep(ga, 2, ev$ve[alive], "+"))
+        } else {
+          r_now <- evolution_growth(pa, e_now, ev$sigma[alive], ev$r_max[alive],
+                                    ev$g[alive] + ev$ve[alive])
+        }
       }
       start <- n
       # crowding; simulate_evolving_metacommunity() may replace it with competition that
@@ -495,8 +519,8 @@ mc_step <- function(st, step) {
       } else if (!is.null(ev)) {
         # selection toward the local environment and drift, in populations present after
         # reproduction (Lande 1976); no draws without drift
-        g <- matrix(ev$g[alive], m, k, byrow = TRUE)
-        width <- matrix(ev$sigma[alive]^2 + ev$g[alive] + ev$ve[alive], m, k, byrow = TRUE)
+        g <- if (isTRUE(ev$dyn)) ga else matrix(ev$g[alive], m, k, byrow = TRUE)
+        width <- g + matrix(ev$sigma[alive]^2 + ev$ve[alive], m, k, byrow = TRUE)
         live <- n > 0
         za[live] <- za[live] + (g[live] / width[live]) * (e_now - pa)[live] / ev$per
         drift <- live & g > 0
@@ -505,6 +529,15 @@ mc_step <- function(st, step) {
             stats::rnorm(sum(drift), 0, sqrt(g[drift] / (ev$per * ev$nu * n[drift])))
         }
         za[!live] <- NA_real_
+        if (isTRUE(ev$dyn)) {
+          # mutation-drift dynamics of the genetic variance (Lynch & Hill 1986): a loss of
+          # 1 / (2 Ne) and a gain of Vm per generation, equilibrium 2 Ne Vm
+          vm <- matrix(ev$vm[alive], m, k, byrow = TRUE)
+          keep_v <- pmax(1 - 1 / (2 * ev$nu * n), 0)^(1 / ev$per)
+          ga[live] <- ga[live] * keep_v[live] + vm[live] / ev$per
+          ga[!live] <- NA_real_
+          vg[, alive] <- ga
+        }
         # phenotype of the offspring, which develop in their site
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
       }
@@ -516,9 +549,12 @@ mc_step <- function(st, step) {
           imm <- place_emigrants(em, disp_matrix)
         } else if (!is.null(disp_matrix) && isTRUE(ev$imm_sel)) {
           # immigrants filtered by their fitness in the site they reach
+          g_src <- if (isTRUE(ev$dyn)) ifelse(is.na(ga), 0, ga) else
+            matrix(ev$g[alive], m, k, byrow = TRUE)
           sel <- immigrants_selected(em, ifelse(is.na(za), 0, za), ifelse(is.na(pa), 0, pa),
-                                     e_now, ev$sigma[alive]^2 + ev$g[alive] + ev$ve[alive],
-                                     disp_matrix)
+                                     e_now, g_src + matrix(ev$sigma[alive]^2 + ev$ve[alive], m,
+                                                           k, byrow = TRUE),
+                                     disp_matrix, g_src)
           imm <- matrix(stats::rpois(m * k, sel$lambda), m, k)
         } else if (!is.null(disp_matrix)) {
           imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em)), m, k)
@@ -541,21 +577,40 @@ mc_step <- function(st, step) {
             zi <- sel$mean
             between <- sel$between
             p_imm <- sel$phenotype
+            vi <- sel$variance
           } else {
             zi <- immigrant_mean(em, za, disp_matrix, za)
             between <- pmax(immigrant_mean(em, za^2, disp_matrix, za^2) - zi^2, 0)
             p_imm <- immigrant_mean(em, pa, disp_matrix, pa)
+            if (isTRUE(ev$dyn)) {
+              g0 <- ifelse(is.na(ga), 0, ga)
+              vi <- immigrant_mean(em, g0, disp_matrix, g0)
+            }
           }
           pa_now <- pa
           both <- res > 0 & imm_m > 0
+          if (isTRUE(ev$dyn)) {
+            # variance of the merged population: the mean of the variances of residents and
+            # immigrants; the difference between their means is not added, as if selection
+            # removed it
+            w <- res[both] / (res[both] + imm_m[both])
+            ga[both] <- w * ga[both] + (1 - w) * vi[both]
+          }
           za[both] <- (res[both] * za[both] + imm_m[both] * zi[both]) / (res[both] + imm_m[both])
           pa_now[both] <- (res[both] * pa[both] + imm_m[both] * p_imm[both]) /
             (res[both] + imm_m[both])
           founded <- res == 0 & imm_m > 0
           if (any(founded)) {
-            za[founded] <- found(zi, imm_m, founded, alive, between)
+            if (isTRUE(ev$dyn)) {
+              # founders carry the variance of their sources, less 1 / (2k) for k founders
+              za[founded] <- found(zi, imm_m, founded, alive, g_cells = vi + between)
+              ga[founded] <- (vi * pmax(1 - 1 / (2 * imm_m), 0))[founded]
+            } else {
+              za[founded] <- found(zi, imm_m, founded, alive, between)
+            }
             pa_now[founded] <- p_imm[founded]
           }
+          if (isTRUE(ev$dyn)) vg[, alive] <- ga
           pa <- pa_now
         }
         n <- n - em + imm
@@ -578,6 +633,11 @@ mc_step <- function(st, step) {
         if (any(fixed_z[alive])) za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
         za[n == 0] <- NA_real_
         pa[n == 0] <- NA_real_
+        if (isTRUE(ev$dyn)) {
+          va <- vg[, alive, drop = FALSE]
+          va[n == 0] <- NA_real_
+          vg[, alive] <- va
+        }
         z[, alive] <- za
         ph[, alive] <- pa
       }
@@ -684,9 +744,13 @@ mc_finish <- function(st) {
         matrix(vapply(record_steps, ev$env, numeric(m)), m,
                dimnames = list(sites, step_label(record_steps)))
       }
+      if (!is.null(vg)) {
+        vg[absent] <- NA_real_
+        dimnames(vg) <- labels
+      }
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
                             environment = ev$env(n_steps), environment_history = env_history,
-                            reference = ev$ref,
+                            reference = ev$ref, genetic_variance = vg,
                             settings = structure(evolution[setdiff(names(evolution),
                                                                    c("env", "traits"))],
                                                  class = "mc_evolution"))
