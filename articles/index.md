@@ -40,5 +40,7 @@
   (2012)](https://provetelab.org/comdynamite/articles/validation-gradient.md):
 - [Replicating Leibold et al.
   (2019)](https://provetelab.org/comdynamite/articles/replication-leibold.md):
+- [Replicating Urban & De Meester
+  (2009)](https://provetelab.org/comdynamite/articles/replication-urban.md):
 - [Known biogeographic histories for
   Herodotools](https://provetelab.org/comdynamite/articles/herodotools.md):

@@ -24,7 +24,8 @@ mc_dynamics(
   initial = NULL,
   immigration = c("poisson", "multinomial"),
   evolution = NULL,
-  disturbance = 0
+  disturbance = 0,
+  pool_from = NULL
 )
 ```
 
@@ -112,6 +113,17 @@ mc_dynamics(
 
   Probability that a site loses all its populations at each time step
   (one value; 0, the default, for none).
+
+- pool_from:
+
+  Optional matrix (sites x species) with the first step at which each
+  species can occur in each site (1 for the start), for example to open
+  a new site to two species at different times, as in the
+  colonisation-time experiments of Urban & De Meester (2009). Combined
+  with `pool`. Until then, seeds of that species do not establish there
+  and the site is not a destination of its emigrants: those that would
+  go there stay in their site, so that a closed site is not a sink
+  (sites outside `pool` are).
 
 ## Value
 

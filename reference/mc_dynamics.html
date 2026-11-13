@@ -42,6 +42,7 @@ their own growth rates (e.g. responses to several environmental variables)."><me
     <li><a class="dropdown-item" href="../articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="../articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="../articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
+    <li><a class="dropdown-item" href="../articles/replication-urban.html">Replicating Urban &amp; De Meester (2009)</a></li>
     <li><a class="dropdown-item" href="../articles/herodotools.html">Known biogeographic histories for Herodotools</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -83,7 +84,8 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  initial <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
 <span>  evolution <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  disturbance <span class="op">=</span> <span class="fl">0</span></span>
+<span>  disturbance <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  pool_from <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -164,6 +166,15 @@ with covariance matrices \(G\) and \(E\) (see the section Several traits of
 <dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
 <dd><p>Probability that a site loses all its populations at each time step
 (one value; 0, the default, for none).</p></dd>
+
+
+<dt id="arg-pool-from">pool_from<a class="anchor" aria-label="anchor" href="#arg-pool-from"></a></dt>
+<dd><p>Optional matrix (sites x species) with the first step at which each species
+can occur in each site (1 for the start), for example to open a new site to two species at
+different times, as in the colonisation-time experiments of Urban &amp; De Meester (2009).
+Combined with <code>pool</code>. Until then, seeds of that species do not establish there and the site
+is not a destination of its emigrants: those that would go there stay in their site, so
+that a closed site is not a sink (sites outside <code>pool</code> are).</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -2,6 +2,24 @@
 
 ## comdynamite (development version)
 
+- `pool_from` in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
+  a sites x species matrix of the first step at which each species can
+  occur in each site, for species introduced at different times; until
+  then the site is not a destination of its emigrants, which stay home.
+
+- New article “Replicating Urban & De Meester (2009)”
+  (`data-raw/replication_urban2009.R`): a species that evolves by
+  mutation wins a new site whatever the order of arrival, and evolution
+  in both species strengthens the priority effect, as in their model,
+  though less; standing variation reproduces their result only with a
+  constant genetic variance, since `mutation_var` carries a variance
+  load; over the dispersal grid, evolution makes the poorer disperser
+  win, as in their gene-flow maladaptation region, but no region favours
+  the better disperser.
+
 - `disturbance` in
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
   [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md)
