@@ -271,4 +271,12 @@ test_that("a site closed by pool_from is not a sink for emigrants", {
                                 seed_steps = integer(0), initial = init,
                                 pool_from = cbind(sp1 = c(1, 1, 100)))
   expect_true(all(sim$abundance[1:2, 1] > 800))
+  # the same on a spatially implicit landscape
+  set.seed(5)
+  sim <- simulate_metacommunity(landscape_implicit(3, env_range = c(39, 41)), tr,
+                                matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 30,
+                                seed_steps = integer(0), initial = init,
+                                pool_from = cbind(sp1 = c(1, 1, 100)))
+  expect_true(all(sim$abundance[1:2, 1] > 800))
+  expect_equal(sim$abundance[3, 1], 0L)
 })
