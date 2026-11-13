@@ -241,3 +241,17 @@ test_that("mutation_var gives each population a genetic variance with mutation-d
   expect_equal(evolution_growth_cells(p, c(50, 50), 20, 5, matrix(3, 2, 1)),
                evolution_growth(p, c(50, 50), 20, 5, 3))
 })
+
+test_that("mutation_var works with seeding and with gene flow without immigrant selection", {
+  ls <- landscape_points(expand.grid(x = 1:4, y = 1:3), rep(c(40, 60), 6), disp_scale = 1)
+  tr <- data.frame(optimum = c(45, 55), sigma = 20, r_max = 5, row.names = c("sp1", "sp2"))
+  set.seed(7)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 150,
+                                evolution = evolution_control(genetic_var = 10, ne_ratio = 0.5,
+                                                              mutation_var = 0.025))
+  v <- sim$evolution$genetic_variance
+  present <- sim$abundance > 0
+  expect_true(any(present))
+  expect_true(all(is.finite(v[present]) & v[present] > 0))
+  expect_true(all(is.na(v[!present])))
+})
