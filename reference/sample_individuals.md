@@ -23,7 +23,8 @@ sample_individuals(
   min_n = 1,
   founder_sd = 0,
   monopolization = 0,
-  gene_flow = 1
+  gene_flow = 1,
+  source = c("traits", "evolution")
 )
 ```
 
@@ -32,7 +33,9 @@ sample_individuals(
 - x:
 
   An `mc_sim` object from
-  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md).
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  (or an `mc_evolving` one from
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)).
 
 - n:
 
@@ -121,6 +124,26 @@ sample_individuals(
   when every newcomer mixes fully with the residents, 0 for no erosion.
   One value or one per species. Has no effect without `founder_sd` or
   `monopolization`.
+
+- source:
+
+  Where population means come from: `"traits"` (the default) builds them
+  from the optimum of each species with the arguments above;
+  `"evolution"` takes them from a simulation run with `evolution`
+  ([`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)),
+  as the genetic mean plus the plastic part of each population at the
+  last step, and draws individuals around them with the genetic plus
+  environmental variance of each species (`genetic_var + env_var`, plus,
+  for a species of several lineages, the variance among them in the
+  site), so that the T-statistics of
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  reflect the variation that evolved. `intraspecific_sd`, when given,
+  then adds variation such as measurement error, and `local_adaptation`,
+  `population_sd`, `displacement`, `founder_sd`, `monopolization`,
+  `step` and `env` must keep their defaults (`env` is the environment at
+  the last step). Evolving metacommunities from
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  are accepted too.
 
 ## Value
 

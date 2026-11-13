@@ -201,8 +201,21 @@ among sites.</p></li>
 <li><p>The records and colonisation history of <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> for the extant
 species: records summed over their extant lineages (lineages extinct by the end are
 left out); colonisation, in each site, of the most abundant lineage.</p></li>
-<li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code>, <code>evolution</code> and <code>n_steps</code>
-used.</p></li>
+<li><p><code>series</code>: one row per lineage alive in each generation, with its <code>occupancy</code> (sites),
+regional <code>abundance</code>, <code>genetic</code> mean (weighted by abundance), and the sites it
+<code>colonised</code> and lost (<code>extirpated</code>) since the previous generation, out of those where it
+was absent (<code>absent_before</code>) and present (<code>present_before</code>). Sites that a lineage passed
+to a new one are not counted as lost, and the transitions are <code>NA</code> in the generation of
+birth. <code><a href="persistence.html">persistence()</a></code> turns them into rates of colonisation and extirpation.</p></li>
+<li><p><code>evolution</code>: with <code>evolution</code>, the state of the extant species at the end, for
+<code><a href="sample_individuals.html">sample_individuals()</a></code> with <code>source = "evolution"</code>: genetic means in each site
+(<code>genetic</code>, weighted over their lineages by abundance; <code>NA</code> where absent), the plastic
+part of the phenotype (<code>plastic</code>), the variance among the lineages of a species in
+each site (<code>within_var</code>, 0 for species of one lineage), the environment of each site
+at the end (<code>environment</code>), the reference environment of plasticity (<code>reference</code>), the genetic and environmental variances and the slope of plasticity of
+each species (<code>genetic_var</code>, <code>env_var</code>, <code>plasticity</code>) and the <code>settings</code>; otherwise
+<code>NULL</code>.</p></li>
+<li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used.</p></li>
 </ul><p><code><a href="as_metacommunity.html">as_metacommunity()</a></code> turns it into an <code>mc_sim</code> for the other functions of the package.</p>
     </div>
     <div class="section level2">
@@ -243,6 +256,7 @@ of the processes that shape Earth's biodiversity. <em>PLOS Biology</em>, 19, e30
 <code><a href="growth_rates.html">growth_rates()</a></code>,
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
 <code><a href="mc_dynamics.html">mc_dynamics()</a></code>,
+<code><a href="persistence.html">persistence()</a></code>,
 <code><a href="simulate_logistic.html">simulate_logistic()</a></code>,
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>,
 <code><a href="simulate_static.html">simulate_static()</a></code>,

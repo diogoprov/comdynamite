@@ -162,8 +162,31 @@ An `mc_evolving` object, a list with:
   (lineages extinct by the end are left out); colonisation, in each
   site, of the most abundant lineage.
 
-- The `landscape`, `dispersal`, `extirpation`, `speciation`, `evolution`
-  and `n_steps` used.
+- `series`: one row per lineage alive in each generation, with its
+  `occupancy` (sites), regional `abundance`, `genetic` mean (weighted by
+  abundance), and the sites it `colonised` and lost (`extirpated`) since
+  the previous generation, out of those where it was absent
+  (`absent_before`) and present (`present_before`). Sites that a lineage
+  passed to a new one are not counted as lost, and the transitions are
+  `NA` in the generation of birth.
+  [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
+  turns them into rates of colonisation and extirpation.
+
+- `evolution`: with `evolution`, the state of the extant species at the
+  end, for
+  [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+  with `source = "evolution"`: genetic means in each site (`genetic`,
+  weighted over their lineages by abundance; `NA` where absent), the
+  plastic part of the phenotype (`plastic`), the variance among the
+  lineages of a species in each site (`within_var`, 0 for species of one
+  lineage), the environment of each site at the end (`environment`), the
+  reference environment of plasticity (`reference`), the genetic and
+  environmental variances and the slope of plasticity of each species
+  (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
+  `NULL`.
+
+- The `landscape`, `dispersal`, `extirpation`, `speciation` and
+  `n_steps` used.
 
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
 turns it into an `mc_sim` for the other functions of the package.
@@ -215,6 +238,7 @@ Other simulate metacommunities:
 [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md),
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
+[`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md),

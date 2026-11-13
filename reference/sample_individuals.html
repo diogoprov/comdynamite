@@ -83,7 +83,8 @@ T-statistics of Violle et al. (2012) (<code><a href="tstats.html">tstats()</a></
 <span>  min_n <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  founder_sd <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  monopolization <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  gene_flow <span class="op">=</span> <span class="fl">1</span></span>
+<span>  gene_flow <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traits"</span>, <span class="st">"evolution"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -92,7 +93,8 @@ T-statistics of Violle et al. (2012) (<code><a href="tstats.html">tstats()</a></
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <code>mc_sim</code> object from <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>.</p></dd>
+<dd><p>An <code>mc_sim</code> object from <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> (or an <code>mc_evolving</code> one from
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>).</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
@@ -175,6 +177,20 @@ species; 0 (the default) for none.</p></dd>
 and adaptation since arrival, per unit of migrant load: 1 (the default) when every
 newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
 Has no effect without <code>founder_sd</code> or <code>monopolization</code>.</p></dd>
+
+
+<dt id="arg-source">source<a class="anchor" aria-label="anchor" href="#arg-source"></a></dt>
+<dd><p>Where population means come from: <code>"traits"</code> (the default) builds them from
+the optimum of each species with the arguments above; <code>"evolution"</code> takes them from a
+simulation run with <code>evolution</code> (<code><a href="evolution_control.html">evolution_control()</a></code>), as the genetic mean plus the
+plastic part of each population at the last step, and draws individuals around them with
+the genetic plus environmental variance of each species (<code>genetic_var + env_var</code>, plus,
+for a species of several lineages, the variance among them in the site), so that
+the T-statistics of <code><a href="tstats.html">tstats()</a></code> reflect the variation that evolved. <code>intraspecific_sd</code>,
+when given, then adds variation such as measurement error, and <code>local_adaptation</code>,
+<code>population_sd</code>, <code>displacement</code>, <code>founder_sd</code>, <code>monopolization</code>, <code>step</code> and <code>env</code> must keep
+their defaults (<code>env</code> is the environment at the last step). Evolving metacommunities from <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> are accepted
+too.</p></dd>
 
 </dl></div>
     <div class="section level2">

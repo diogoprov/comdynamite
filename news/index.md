@@ -2,6 +2,28 @@
 
 ## comdynamite (development version)
 
+- Phase 3a of the block on speciation.
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  returns a per-generation `series` of every lineage (occupancy,
+  abundance, genetic mean, and sites colonised and lost out of those
+  exposed) and, with `evolution`, the evolutionary state of the extant
+  species at the end (`evolution`). New
+  [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
+  estimates the rates of colonisation and extirpation of a two-state
+  Markov model of presence, and from them the equilibrium occupancy
+  (`epsilon`, on the logit scale) and the resilience (`tau`, the log
+  turnover rate) of Januario et al. (2025), for evolving metacommunities
+  (per lineage, over a `window` of generations), for the records of
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+  and for arrays of sites x species x times.
+  `sample_individuals(source = "evolution")` draws individuals from the
+  genetic mean plus the plastic part of each population with the genetic
+  and environmental variances, for
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
+  and accepts evolving metacommunities. New
+  [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md)
+  builds a landscape from a given dispersal matrix, such as a kernel of
+  resistance distances.
 - [`speciation_control()`](https://provetelab.org/comdynamite/reference/speciation_control.md)
   gains the modes `"point"` (each individual starts a new species with
   probability `rate` per generation, the neutral limit) and `"fission"`

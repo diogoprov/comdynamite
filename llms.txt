@@ -201,6 +201,8 @@ The process-based model, from landscape and traits to abundances.
   : Speciation settings
 - [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
   : Convert to a simulated metacommunity
+- [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
+  : Metapopulation persistence
 - [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
   : Colonisation history of a simulated metacommunity
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)
@@ -212,6 +214,8 @@ Spatially implicit and grid landscapes, dispersal and environment.
 
 - [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
   : Landscape from site coordinates
+- [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md)
+  : Landscape from a dispersal matrix
 - [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
   : Spatially implicit landscape
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
