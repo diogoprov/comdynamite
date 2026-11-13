@@ -24,7 +24,13 @@ evolution_matrices <- function(x, q, species, name) {
     v
   }
   if (is.list(x)) {
-    if (!is.null(names(x)) && all(species %in% names(x))) x <- x[species]
+    if (!is.null(names(x))) {
+      if (!all(species %in% names(x))) {
+        stop("`", name, "` lacks matrices for ", species_list(setdiff(species, names(x))),
+             call. = FALSE)
+      }
+      x <- x[species]
+    }
     if (length(x) != length(species)) {
       stop("`", name, "` as a list needs one matrix per species (", length(species), ")",
            call. = FALSE)
@@ -45,11 +51,18 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   traits <- lapply(evolution$traits, as_traits)
   q <- length(traits)
   axes <- names(evolution$traits) %||% paste0("axis", seq_len(q))
-  if (!is.null(species) && all(species %in% rownames(traits[[1]]))) {
+  if (anyDuplicated(axes) || any(axes %in% c("site", "species", "individual", "abundance",
+                                              "step", ""))) {
+    stop("the axes of `env` need distinct names other than `site`, `species`, ",
+         "`individual`, `abundance` and `step`", call. = FALSE)
+  }
+  if (!is.null(species) && all(vapply(traits, function(t) all(species %in% rownames(t)),
+                                      logical(1)))) {
     traits <- lapply(traits, function(t) t[species, , drop = FALSE])
   }
-  if (nrow(traits[[1]]) != k_all) {
-    stop("`traits` of `evolution` need one row per species (", k_all, ")", call. = FALSE)
+  if (any(vapply(traits, nrow, integer(1)) != k_all)) {
+    stop("`traits` of `evolution` need one row per species (", k_all, ") on every axis",
+         call. = FALSE)
   }
   env <- as.matrix(evolution$env)
   if (!is.numeric(env) || nrow(env) != m || ncol(env) != q || anyNA(env)) {
@@ -61,17 +74,22 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   sigma <- vapply(traits, function(t) t$sigma, numeric(k_all))
   optimum <- matrix(optimum, k_all, q)
   sigma <- matrix(sigma, k_all, q)
+  r_axis <- matrix(vapply(traits, function(t) t$r_max, numeric(k_all)), k_all, q)
   r_max <- Reduce(`*`, lapply(traits, function(t) t$r_max))
   sp <- rownames(traits[[1]])
   G <- evolution_matrices(evolution$genetic_var, q, sp, "genetic_var")
   E <- evolution_matrices(evolution$env_var, q, sp, "env_var")
   b <- evolution$plasticity
-  b <- if (is.matrix(b)) b else if (length(b) == q && q > 1) matrix(b, k_all, q, byrow = TRUE) else
-    matrix(b, k_all, q)
-  if (!identical(dim(b), c(k_all, q)) || anyNA(b)) {
+  if (is.matrix(b) && !is.null(rownames(b)) && all(sp %in% rownames(b))) {
+    b <- b[sp, , drop = FALSE]
+  }
+  b <- if (is.matrix(b)) b else if (length(b) == 1) matrix(b, k_all, q) else
+    if (length(b) == q) matrix(b, k_all, q, byrow = TRUE) else NULL
+  if (!is.numeric(b) || !identical(dim(b), c(k_all, q)) || anyNA(b)) {
     stop("`plasticity` needs one value, one per trait (", q, ") or a matrix of species x traits",
          call. = FALSE)
   }
+  dimnames(b) <- NULL
   # selection on the axes with a finite niche breadth: the response of each population is
   # K (E - p), K = G[, S] (Omega + P)[S, S]^-1, and growth falls with the Mahalanobis distance
   sel <- lapply(seq_len(k_all), function(j) {
@@ -82,14 +100,20 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
       return(list(s = s, A = matrix(0, 0, 0), K = matrix(0, q, 0), c = r_max[j]))
     }
     Q <- diag(om[s], length(s)) + p[s, s, drop = FALSE]
+    if (any(diag(Q) <= 0)) {
+      stop("a niche breadth `sigma` of 0 needs phenotypic variance on that axis", call. = FALSE)
+    }
     A <- solve(Q)
+    # without covariances among the selected axes, growth is computed axis by axis as in
+    # growth_rates(), so that G = E = 0 gives the same numbers to the last bit
+    diagonal <- all(Q[row(Q) != col(Q)] == 0)
     logc <- 0.5 * (sum(log(om[s])) - as.numeric(determinant(Q)$modulus))
-    list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc))
+    list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
+         diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ])
   })
   list(mv = TRUE, q = q, axes = axes, env = function(step) env, ref = colMeans(env),
        optimum = optimum, sigma = sigma, r_max = r_max, G = G, E = E, b = b, sel = sel,
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
-       g = vapply(G, function(g) sum(diag(g)), numeric(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,
        founder = evolution$founder)
 }
@@ -109,6 +133,20 @@ mv_growth <- function(ev, pa, e, cols) {
     s <- ev$sel[[cols[i]]]
     if (!length(s$s)) {
       r[, i] <- s$c
+      next
+    }
+    if (s$diagonal) {
+      ri <- 1
+      for (a in seq_len(ev$q)) {
+        f <- if (is.finite(s$om[a])) {
+          exp(-(e[, a] - pa[, i, a])^2 / (2 * s$width[a])) *
+            (s$r_axis[a] * sqrt(s$om[a] / s$width[a]))
+        } else {
+          s$r_axis[a]
+        }
+        ri <- ri * f
+      }
+      r[, i] <- ri
       next
     }
     d <- e[, s$s, drop = FALSE] - matrix(pa[, i, s$s], dim(pa)[1])
@@ -168,8 +206,11 @@ mv_flow <- function(ev, za, pa, n, em, imm, disp_matrix, cols) {
   zi <- between <- p_imm <- za
   for (a in seq_len(ev$q)) {
     zi[, , a] <- immigrant_mean(em, za[, , a], disp_matrix, za[, , a])
-    between[, , a] <- pmax(immigrant_mean(em, za[, , a]^2, disp_matrix, za[, , a]^2) -
-                             zi[, , a]^2, 0)
+    # variance among sources; the residue of the subtraction (cancellation for large means)
+    # is set to 0
+    v <- immigrant_mean(em, za[, , a]^2, disp_matrix, za[, , a]^2) - zi[, , a]^2
+    v[v < 1e-10 * pmax(1, zi[, , a]^2)] <- 0
+    between[, , a] <- v
     p_imm[, , a] <- immigrant_mean(em, pa[, , a], disp_matrix, pa[, , a])
   }
   both <- res > 0 & imm > 0

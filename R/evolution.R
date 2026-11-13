@@ -168,6 +168,11 @@ evolution_state <- function(evolution, m, k_all, species) {
     stop("`traits` of `evolution` need one row per species (", k_all, ")", call. = FALSE)
   }
   if (!is.null(species) && all(species %in% rownames(traits))) traits <- traits[species, ]
+  if (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
+      is.matrix(evolution$env_var) || is.list(evolution$env_var)) {
+    stop("covariance matrices in `evolution` need a niche of several axes (a list of ",
+         "`traits`), one trait per axis", call. = FALSE)
+  }
   env_fun <- if (is.function(evolution$env)) evolution$env else {
     function(step) evolution$env
   }

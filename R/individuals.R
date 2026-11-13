@@ -301,8 +301,9 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                            displacement_width = NULL, step = NULL, env = NULL,
                            cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
                            gene_flow = 1, source = "traits", draws = NULL) {
+  recorded <- dimnames(x$evolution$history)
   if (source == "evolution" && !is.null(step) && step == x$n_steps &&
-      !step_label(step) %in% dimnames(x$evolution$history)[[3]]) {
+      !step_label(step) %in% recorded[[length(recorded)]]) {
     step <- NULL
   }
   if (source == "evolution" && length(dim(x$evolution$genetic)) == 3) {
@@ -311,7 +312,8 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                           intraspecific_sd = if (missing(intraspecific_sd)) 0 else
                             intraspecific_sd,
                           fixed = c(local_adaptation, population_sd, displacement,
-                                    founder_sd, monopolization)))
+                                    founder_sd, monopolization,
+                                    !is.null(displacement_width), any(gene_flow != 1))))
   }
   if (source == "evolution") {
     if (is.null(x$evolution$genetic)) {
@@ -901,7 +903,8 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
   if (any(fixed != 0)) {
     stop("with `source = \"evolution\"`, population means come from the simulation: ",
          "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
-         "`monopolization` must stay 0", call. = FALSE)
+         "`monopolization` must stay 0 (and `displacement_width` and `gene_flow` unset)",
+         call. = FALSE)
   }
   ev <- x$evolution
   axes <- dimnames(ev$genetic)[[3]]

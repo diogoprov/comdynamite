@@ -11,7 +11,8 @@
   species in three families (proportional to a common \(P\), with no common structure, or with
   shared principal components), and `sample_individuals(source = "evolution")` draws
   individuals from \(N(\bar z, G + E)\), one column per trait. Speciation with several traits is
-  not yet available.
+  not yet available. Behaviour change: `evolution` with a niche of several axes used to stop
+  with an error; with a single variance it now evolves one trait per axis with \(G = vI\).
 - `sample_individuals()` simulates collections on several dates: `step` takes several
   recorded steps, each sampled on its own, with a column `step` in the result, `env` takes a
   matrix with one column per step, and `session_sd` adds an error shared by all individuals

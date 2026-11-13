@@ -312,6 +312,9 @@ mc_setup <- function(st) {
     last_seed <- max(c(0, seed_steps))
     competition_hook <- NULL
     ev <- if (!is.null(evolution)) {
+      if (!inherits(evolution, "mc_evolution")) {
+        stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+      }
       if (evolution_is_mv(evolution)) evolution_state_mv(evolution, m, k_all, species) else
         evolution_state(evolution, m, k_all, species)
     }

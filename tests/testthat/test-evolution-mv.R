@@ -143,3 +143,73 @@ test_that("genetic_matrices() builds the three families", {
                                                               env_var = m$env_var))
   expect_equal(unname(sim$evolution$genetic_var$sp1), unname(m$genetic_var$sp1))
 })
+
+test_that("several species, migrants and plasticity follow the same engine", {
+  set.seed(11)
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  sp <- c("sp1", "sp2", "sp3")
+  tr <- list(a = data.frame(optimum = c(40, 50, 60), sigma = c(15, 20, 25), r_max = 4,
+                            row.names = sp),
+             b = data.frame(optimum = 0, sigma = c(Inf, 5, 10), r_max = c(1, 1.5, 1),
+                            row.names = sp))
+  env <- cbind(a = ls$env, b = seq(-2, 2, length.out = 16))
+  alpha <- matrix(0.03, 3, 3, dimnames = list(sp, sp))
+  run <- function(ev, seed = 4, ...) {
+    set.seed(seed)
+    simulate_metacommunity(ls, tr, alpha, env = env, dispersal = 0.05, extirpation = 0.02,
+                           n_steps = 40, evolution = ev, record_steps = c(20, 40), ...)
+  }
+  base <- run(NULL)
+  zero <- run(evolution_control(matrix(0, 2, 2)))
+  expect_identical(base$abundance, zero$abundance)
+  expect_identical(base$history, zero$history)
+  expect_true(all(is.na(zero$evolution$genetic[, , 1]) == (zero$abundance == 0)))
+  # G as a named list out of order is matched by species
+  Gs <- list(sp3 = diag(c(3, 1)), sp1 = diag(2), sp2 = matrix(c(2, 1, 1, 2), 2))
+  sim <- run(evolution_control(Gs, env_var = diag(2), plasticity = c(0.3, 0)))
+  expect_equal(unname(sim$evolution$genetic_var$sp3), diag(c(3, 1)))
+  plastic <- sim$evolution$plastic[, , "a"]
+  ok <- !is.na(plastic[, 1])
+  expect_equal(unname(plastic[ok, 1]), (env[ok, "a"] - mean(env[, "a"])) * 0.3)
+  expect_true(all(sim$evolution$plastic[, , "b"] == 0, na.rm = TRUE))
+  # implicit landscape: immigrants from all other sites
+  imp <- landscape_implicit(6)
+  t1 <- list(a = tr$a[1, , drop = FALSE], b = tr$b[1, , drop = FALSE])
+  set.seed(2)
+  s_imp <- simulate_metacommunity(imp, t1, alpha[1, 1, drop = FALSE],
+                                  env = cbind(a = imp$env * 10 + 40, b = 0),
+                                  dispersal = 0.2, n_steps = 20,
+                                  evolution = evolution_control(diag(c(4, 1))))
+  expect_equal(dim(s_imp$evolution$genetic), c(6, 1, 2))
+  expect_error(run(evolution_control(list(sp1 = diag(2), sp2 = diag(2), spx = diag(2)))),
+               "lacks matrices for")
+  expect_error(run(evolution_control(diag(2), plasticity = c(0.1, 0.2, 0.3))), "plasticity")
+  bm <- matrix(c(0.1, 0.2, 0.3, 0, 0, 0), 3, dimnames = list(c("sp3", "sp1", "sp2"), NULL))
+  sim_b <- run(evolution_control(diag(2), plasticity = bm), seed = 1)
+  expect_equal(unname(sim_b$evolution$plasticity[, 1]), c(0.2, 0.3, 0.1))
+})
+
+test_that("the engine refuses inconsistent multivariate settings", {
+  s <- mv_setup()
+  expect_error(mc_dynamics(matrix(5, 2, 1), matrix(0.05), 0, n_steps = 5,
+                           evolution = c(evolution_control(diag(2)), list(env = 1:2,
+                                         traits = data.frame(optimum = 1, sigma = 1,
+                                                             r_max = 1)))),
+               "evolution_control")
+  ev <- evolution_control(diag(2))
+  ev$env <- 1:2
+  ev$traits <- data.frame(optimum = 1, sigma = 1, r_max = 1)
+  expect_error(mc_dynamics(matrix(5, 2, 1), matrix(0.05), 0, n_steps = 5, evolution = ev),
+               "several axes")
+  bad <- s$tr
+  names(bad) <- c("site", "head")
+  env <- s$env
+  colnames(env) <- c("site", "head")
+  expect_error(simulate_metacommunity(s$ls, bad, s$alpha, env = env, dispersal = 0,
+                                      n_steps = 2, evolution = ev), "distinct names")
+  zero <- s$tr
+  zero$svl$sigma <- 0
+  expect_error(simulate_metacommunity(s$ls, zero, s$alpha, env = s$env, dispersal = 0,
+                                      n_steps = 2, evolution = evolution_control(0)),
+               "sigma")
+})
