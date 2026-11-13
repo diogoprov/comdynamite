@@ -87,7 +87,8 @@ with immigrants and starts from a sample of its founders.</p>
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  traits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigrant_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  mutation_var <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  mutation_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  variance_selection <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -162,6 +163,18 @@ residents and immigrants (or of sources) is not added, as if selection removed i
 selection does not otherwise act on the variance; without this choice, gene flow between
 diverged populations inflates the variance without bound. <code>genetic_var</code> is then the
 variance of the populations at the start and of seeds. Needs a finite <code>ne_ratio</code>; one trait only.</p></dd>
+
+
+<dt id="arg-variance-selection">variance_selection<a class="anchor" aria-label="anchor" href="#arg-variance-selection"></a></dt>
+<dd><p>With <code>mutation_var</code>, should stabilising selection also remove
+genetic variance? With <code>TRUE</code>, each generation loses \(G^2 / (\sigma^2 + G + V_E)\), the reduction of the genetic variance by Gaussian selection of width
+\(\sigma\) on a phenotype of variance \(G + V_E\) (Bulmer 1971). Under
+sexual reproduction most of this reduction is linkage disequilibrium, which recombination
+restores, so the full loss holds for clonal inheritance, as in the model of Urban &amp; De
+Meester (2009); with mutation, the variance then settles near the balance between
+mutation and selection (Lande 1975; Turelli 1984) rather than at \(2 N_e V_m\),
+and standing variation is eroded instead of carrying a load. <code>FALSE</code> (the default) keeps
+the mutation-drift dynamics alone.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -248,6 +261,14 @@ evolution. <em>Evolution</em>, 30, 314–334. <a href="https://doi.org/10.1111/j
 <p>Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
 brain:body size allometry. <em>Evolution</em>, 33, 402–416.
 <a href="https://doi.org/10.1111/j.1558-5646.1979.tb04694.x" class="external-link">doi:10.1111/j.1558-5646.1979.tb04694.x</a></p>
+<p>Bulmer, M. G. (1971). The effect of selection on genetic variability. <em>The American
+Naturalist</em>, 105, 201–211. <a href="https://doi.org/10.1086/282718" class="external-link">doi:10.1086/282718</a></p>
+<p>Lande, R. (1975). The maintenance of genetic variability by mutation in a polygenic
+character with linked loci. <em>Genetical Research</em>, 26, 221–235.
+<a href="https://doi.org/10.1017/S0016672300016037" class="external-link">doi:10.1017/S0016672300016037</a></p>
+<p>Turelli, M. (1984). Heritable genetic variation via mutation-selection balance: Lerch's
+zeta meets the abdominal bristle. <em>Theoretical Population Biology</em>, 25, 138–193.
+<a href="https://doi.org/10.1016/0040-5809%2884%2990017-0" class="external-link">doi:10.1016/0040-5809(84)90017-0</a></p>
 <p>Lynch, M. &amp; Hill, W. G. (1986). Phenotypic evolution by neutral mutation. <em>Evolution</em>, 40,
 915–935. <a href="https://doi.org/10.1111/j.1558-5646.1986.tb00561.x" class="external-link">doi:10.1111/j.1558-5646.1986.tb00561.x</a></p>
     </div>

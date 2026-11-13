@@ -100,7 +100,10 @@ probability <code>dispersal</code>, and emigrants are redistributed among sites:
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  evolution <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  disturbance <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  pool_from <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  pool_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  recruitment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beverton_holt"</span>, <span class="st">"lottery"</span><span class="op">)</span>,</span>
+<span>  microsites <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mortality <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -202,6 +205,39 @@ different times, as in the colonisation-time experiments of Urban &amp; De Meest
 Combined with <code>pool</code>. Until then, seeds of that species do not establish there and the site
 is not a destination of its emigrants: those that would go there stay in their site, so
 that a closed site is not a sink (sites outside <code>pool</code> are).</p></dd>
+
+
+<dt id="arg-recruitment">recruitment<a class="anchor" aria-label="anchor" href="#arg-recruitment"></a></dt>
+<dd><p>How populations grow at each step: <code>"beverton_holt"</code> (the default), the
+Beverton-Holt competition of Thompson et al. (2020), or <code>"lottery"</code>, recruitment into a
+fixed number of microsites per site, as in the individual-based models of Urban &amp; De
+Meester (2009) and Leibold et al. (2019). With a lottery, each adult survives the step with
+probability <code>1 - mortality</code>; adults produce Poisson offspring with mean equal to their
+growth rate (fecundity times the fitness of their phenotype, so that selection acts on
+recruits); offspring emigrate with probability <code>dispersal</code>; and the microsites left vacant
+by the survivors in each site are filled by a draw without replacement among the offspring
+present there (local and immigrant), so that emigration costs the site of origin little
+while offspring outnumber the vacancies. Competition is through the shared microsites, so
+<code>alpha</code> is not used. One trait at most with <code>evolution</code>; not available in
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>.</p></dd>
+
+
+<dt id="arg-microsites">microsites<a class="anchor" aria-label="anchor" href="#arg-microsites"></a></dt>
+<dd><p>With <code>recruitment = "lottery"</code>, the number of microsites of each site (one
+value or one per site). <code>initial</code> must fit in them; seeds take vacant microsites by lottery
+with the residents. In the colonisation history, <code>immigrants</code> and the migrant load count
+immigrant recruits, and <code>propagule</code> the individuals of a new population after recruitment.</p></dd>
+
+
+<dt id="arg-mortality">mortality<a class="anchor" aria-label="anchor" href="#arg-mortality"></a></dt>
+<dd><p>With <code>recruitment = "lottery"</code>, the probability that an adult dies at each
+step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
+overlapping generations, with a generation time of about <code>1 / mortality</code> steps. With
+<code>evolution</code>, selection, mutation and the loss of variance to selection act on recruits, so
+that their effect per step scales with the share of recruits in the population; drift
+comes from the sampling of both survivors and recruits, so that it approaches that of a
+Moran model at low mortality; founders are sampled once, when they recruit;
+<code>steps_per_generation</code> must stay 1.</p></dd>
 
 </dl></div>
     <div class="section level2">

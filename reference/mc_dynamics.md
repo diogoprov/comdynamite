@@ -25,7 +25,10 @@ mc_dynamics(
   immigration = c("poisson", "multinomial"),
   evolution = NULL,
   disturbance = 0,
-  pool_from = NULL
+  pool_from = NULL,
+  recruitment = c("beverton_holt", "lottery"),
+  microsites = NULL,
+  mortality = 1
 )
 ```
 
@@ -124,6 +127,46 @@ mc_dynamics(
   and the site is not a destination of its emigrants: those that would
   go there stay in their site, so that a closed site is not a sink
   (sites outside `pool` are).
+
+- recruitment:
+
+  How populations grow at each step: `"beverton_holt"` (the default),
+  the Beverton-Holt competition of Thompson et al. (2020), or
+  `"lottery"`, recruitment into a fixed number of microsites per site,
+  as in the individual-based models of Urban & De Meester (2009) and
+  Leibold et al. (2019). With a lottery, each adult survives the step
+  with probability `1 - mortality`; adults produce Poisson offspring
+  with mean equal to their growth rate (fecundity times the fitness of
+  their phenotype, so that selection acts on recruits); offspring
+  emigrate with probability `dispersal`; and the microsites left vacant
+  by the survivors in each site are filled by a draw without replacement
+  among the offspring present there (local and immigrant), so that
+  emigration costs the site of origin little while offspring outnumber
+  the vacancies. Competition is through the shared microsites, so
+  `alpha` is not used. One trait at most with `evolution`; not available
+  in
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md).
+
+- microsites:
+
+  With `recruitment = "lottery"`, the number of microsites of each site
+  (one value or one per site). `initial` must fit in them; seeds take
+  vacant microsites by lottery with the residents. In the colonisation
+  history, `immigrants` and the migrant load count immigrant recruits,
+  and `propagule` the individuals of a new population after recruitment.
+
+- mortality:
+
+  With `recruitment = "lottery"`, the probability that an adult dies at
+  each step, whatever its phenotype: 1 (the default) for discrete
+  generations, lower values for overlapping generations, with a
+  generation time of about `1 / mortality` steps. With `evolution`,
+  selection, mutation and the loss of variance to selection act on
+  recruits, so that their effect per step scales with the share of
+  recruits in the population; drift comes from the sampling of both
+  survivors and recruits, so that it approaches that of a Moran model at
+  low mortality; founders are sampled once, when they recruit;
+  `steps_per_generation` must stay 1.
 
 ## Value
 

@@ -2,6 +2,33 @@
 
 ## comdynamite (development version)
 
+- `recruitment = "lottery"`, `microsites` and `mortality` in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
+  adults survive with probability `1 - mortality`, offspring are
+  produced in proportion to fitness, and the microsites left vacant are
+  filled by a multivariate hypergeometric draw from the offspring
+  present after dispersal; `mortality < 1` gives overlapping
+  generations, with drift and selection scaled to the share of recruits
+  (one trait, one step per generation).
+
+- `variance_selection` in
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md):
+  with `mutation_var`, the genetic variance also loses the Bulmer (1971)
+  reduction by stabilising selection each generation, kept as under
+  clonal inheritance, so it approaches a mutation-selection-drift
+  balance.
+
+- Sections “Three missing mechanisms” in the articles replicating Urban
+  & De Meester (2009) and Leibold et al. (2019)
+  (`data-raw/mechanisms_urban2009.R`,
+  `data-raw/mechanisms_leibold2019_recruitment.R`): erosion of the
+  variance by selection restores the priority effect of standing
+  variation, and overlapping generations restore the advantage of the
+  better disperser under evolution, in the Urban model; none of the
+  three mechanisms produces the local dominance of Leibold et al.
+
 - `pool_from` in
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and
@@ -15,10 +42,11 @@
   mutation wins a new site whatever the order of arrival, and evolution
   in both species strengthens the priority effect, as in their model,
   though less; standing variation reproduces their result only with a
-  constant genetic variance, since `mutation_var` carries a variance
-  load; over the dispersal grid, evolution makes the poorer disperser
-  win, as in their gene-flow maladaptation region, but no region favours
-  the better disperser.
+  constant genetic variance or with `variance_selection`, since
+  `mutation_var` alone carries a variance load; over the dispersal grid,
+  evolution makes the poorer disperser win, as in their gene-flow
+  maladaptation region, and the better disperser keeps its advantage
+  only with overlapping generations.
 
 - `disturbance` in
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),

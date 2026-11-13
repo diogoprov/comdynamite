@@ -23,7 +23,8 @@ evolution_control(
   env = NULL,
   traits = NULL,
   immigrant_selection = FALSE,
-  mutation_var = NULL
+  mutation_var = NULL,
+  variance_selection = FALSE
 )
 ```
 
@@ -109,6 +110,20 @@ evolution_control(
   inflates the variance without bound. `genetic_var` is then the
   variance of the populations at the start and of seeds. Needs a finite
   `ne_ratio`; one trait only.
+
+- variance_selection:
+
+  With `mutation_var`, should stabilising selection also remove genetic
+  variance? With `TRUE`, each generation loses \\G^2 / (\sigma^2 + G +
+  V_E)\\, the reduction of the genetic variance by Gaussian selection of
+  width \\\sigma\\ on a phenotype of variance \\G + V_E\\ (Bulmer 1971).
+  Under sexual reproduction most of this reduction is linkage
+  disequilibrium, which recombination restores, so the full loss holds
+  for clonal inheritance, as in the model of Urban & De Meester (2009);
+  with mutation, the variance then settles near the balance between
+  mutation and selection (Lande 1975; Turelli 1984) rather than at \\2
+  N_e V_m\\, and standing variation is eroded instead of carrying a
+  load. `FALSE` (the default) keeps the mutation-drift dynamics alone.
 
 ## Value
 
@@ -226,6 +241,20 @@ Lande, R. (1979). Quantitative genetic analysis of multivariate
 evolution, applied to brain:body size allometry. *Evolution*, 33,
 402–416.
 [doi:10.1111/j.1558-5646.1979.tb04694.x](https://doi.org/10.1111/j.1558-5646.1979.tb04694.x)
+
+Bulmer, M. G. (1971). The effect of selection on genetic variability.
+*The American Naturalist*, 105, 201–211.
+[doi:10.1086/282718](https://doi.org/10.1086/282718)
+
+Lande, R. (1975). The maintenance of genetic variability by mutation in
+a polygenic character with linked loci. *Genetical Research*, 26,
+221–235.
+[doi:10.1017/S0016672300016037](https://doi.org/10.1017/S0016672300016037)
+
+Turelli, M. (1984). Heritable genetic variation via mutation-selection
+balance: Lerch's zeta meets the abdominal bristle. *Theoretical
+Population Biology*, 25, 138–193.
+[doi:10.1016/0040-5809(84)90017-0](https://doi.org/10.1016/0040-5809%2884%2990017-0)
 
 Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral
 mutation. *Evolution*, 40, 915–935.
