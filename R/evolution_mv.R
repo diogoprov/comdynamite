@@ -44,7 +44,7 @@ evolution_matrices <- function(x, q, species, name) {
 # Mahalanobis distances under P (directions without variance are left out)
 evolution_whiten <- function(p) {
   e <- eigen(p, symmetric = TRUE)
-  keep <- e$values > 1e-10 * max(1, e$values[1])
+  keep <- e$values > 1e-10 * e$values[1]
   e$vectors[, keep, drop = FALSE] %*% diag(1 / sqrt(e$values[keep]), sum(keep))
 }
 

@@ -130,3 +130,49 @@ test_that("evolving metacommunities check settings for several traits", {
                                                                   jump_var = diag(3)),
                                                env = s$env), "jump_var")
 })
+
+test_that("several traits survive total extinction, sigma = 0 and named axes", {
+  s <- ev_mv_setup(5)
+  G <- matrix(c(10, 2, 2, 1), 2)
+  set.seed(1)
+  gone <- simulate_evolving_metacommunity(s$ls, s$anc, speciation_control("fission", rate = 0.05),
+                                          evolution = evolution_control(G, env_var = diag(2)),
+                                          env = s$env, extirpation = 0.6, n_steps = 60)
+  expect_equal(ncol(gone$abundance), 0)
+  expect_equal(dim(gone$evolution$plasticity), c(0, 2))
+  # two niches of breadth 0 overlap fully at the same phenotype and not at all elsewhere
+  st <- new.env()
+  st$ev <- list(mv = TRUE, q = 1, sigma = matrix(0, 2, 1))
+  st$alive <- 1:2
+  st$at <- matrix(1, 2, 2)
+  hook <- niche_crowding(st)
+  expect_equal(hook(matrix(c(3, 4), 1), array(c(1, 1), c(1, 2, 1)))[1, ], c(7, 7))
+  expect_equal(hook(matrix(c(3, 4), 1), array(c(1, 2), c(1, 2, 1)))[1, ], c(3, 4))
+  st$ev <- list(sigma = c(0, 0))
+  hook1 <- niche_crowding(st)
+  expect_equal(hook1(matrix(c(3, 4), 1), matrix(c(1, 2), 1))[1, ], c(3, 4))
+  zero <- s$anc
+  zero$head$sigma <- 0
+  set.seed(2)
+  expect_no_warning(simulate_evolving_metacommunity(
+    s$ls, zero, speciation_control("fission", rate = 0.01),
+    evolution = evolution_control(G, env_var = diag(2)), env = s$env, niche_overlap = TRUE,
+    n_steps = 20))
+  # named axes are matched by name
+  set.seed(3)
+  a <- simulate_evolving_metacommunity(s$ls, s$anc, speciation_control("fission", rate = 0.01),
+                                       env = s$env, n_steps = 20)
+  set.seed(3)
+  b <- simulate_evolving_metacommunity(s$ls, s$anc, speciation_control("fission", rate = 0.01),
+                                       env = s$env[, 2:1], n_steps = 20)
+  expect_identical(a$abundance, b$abundance)
+  wrong <- s$env
+  colnames(wrong) <- c("svl", "tail")
+  expect_error(simulate_evolving_metacommunity(s$ls, s$anc,
+                                               speciation_control("fission", rate = 0.01),
+                                               env = wrong), "same axes")
+  expect_error(speciation_control("point", rate = 0.01, jump_var = matrix("a", 2, 2)))
+  # whitening is relative to the scale of P
+  expect_equal(unname(mv_distance(list(whiten = list(evolution_whiten(diag(2) * 1e-12))), 1,
+                                  rbind(c(0, 0), c(1e-6, 0))))[1, 2], 1)
+})

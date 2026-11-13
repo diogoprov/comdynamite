@@ -4,7 +4,7 @@
 \alias{drift_test}
 \title{Test whether divergence among groups is proportional to variation within them}
 \usage{
-drift_test(x, group, traits = NULL, W = NULL, level = 0.95)
+drift_test(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95)
 }
 \arguments{
 \item{x}{A data frame or a numeric matrix with one row per individual (for example, from
@@ -14,12 +14,15 @@ drift_test(x, group, traits = NULL, W = NULL, level = 0.95)
 \code{x}, or the name of a column of \code{x}.}
 
 \item{traits}{With a data frame, the names of the trait columns. \code{NULL} (the default) takes
-every numeric column except \code{group}; with the output of
+every numeric column except \code{group} (or the column equal to it); with the output of
 \code{\link[=sample_individuals]{sample_individuals()}}, which also has numeric columns of abundance, environment and means,
 name the traits.}
 
 \item{W}{\code{NULL} (the default) for the pooled covariance within groups, or a covariance matrix
 with one row and column per trait (for example, a known \eqn{G}{G}).}
+
+\item{correct}{Whether to subtract the sampling variance of the group means (needs groups
+with more than one individual).}
 
 \item{level}{The confidence level of the interval for the slope.}
 }
@@ -27,9 +30,10 @@ with one row and column per trait (for example, a known \eqn{G}{G}).}
 An object of class \code{drift_test}: a list with \code{slope}, its standard error \code{se}, the
 interval \code{conf_int}, the \code{statistic} (\eqn{t}{t}) and \code{p_value} of the test of slope 1, the
 \code{intercept} (the logarithm of the proportionality constant, an estimate of \eqn{\log(t /
-  N_e)}{log(t / Ne)} when \code{W} is \eqn{G}{G}), \code{df}, \code{n_groups}, \code{n_traits}, the matrix \code{W}
-and a data frame \code{components} with the \code{eigenvalue} and the \code{between} variance of each
-principal component. It has \code{print()} and \code{plot()} methods.
+  N_e)}{log(t / Ne)} when \code{W} is \eqn{G}{G} and \code{correct = TRUE}), \code{df}, \code{n_groups}, \code{n_traits}, the matrix \code{W}
+and a data frame \code{components} with the \code{eigenvalue}, the expected \code{sampling} variance of
+the means (0 without correction) and the \code{between} variance (corrected) of each principal
+component. It has \code{print()} and \code{plot()} methods.
 }
 \description{
 Tests the prediction of neutral evolution that the variance among group means is
@@ -49,7 +53,14 @@ By default \eqn{W}{W} is the pooled phenotypic covariance within groups, which s
 proportional; Prôa et al. (2013) found acceptable type I error rates with it only when the
 matrices are similar and heritabilities are high, or when \eqn{t / N_e}{t / Ne} is small. A
 known \eqn{G}{G} (for example, from \code{\link[=genetic_matrices]{genetic_matrices()}} or the \code{genetic_var} of a simulation)
-can be given in \code{W} instead. The regression treats each component as an independent
+can be given in \code{W} instead.
+
+The variance of the observed means includes their sampling error, \eqn{P / n}{P / n} for groups
+of \eqn{n}{n} individuals. Unless \eqn{P}{P} is proportional to \code{W}, this error flattens the
+slope (most with small groups and little divergence), so by default (\code{correct = TRUE}) the
+expected sampling variance on each component, \eqn{v_k^\top P v_k}{v_k' P v_k} times the mean of
+\eqn{1 / n}{1 / n} over groups, with \eqn{P}{P} the pooled covariance within groups, is
+subtracted from the variance among means before the regression. The regression treats each component as an independent
 observation, so with few traits the test has little power, and the slope has \eqn{q - 2}{q -
 2} degrees of freedom for \eqn{q}{q} traits.
 }

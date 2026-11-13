@@ -141,7 +141,8 @@ speciation_control <- function(mode = c("geographic", "ecological", "point", "fi
   stopifnot(one(migration_min), migration_min > 0, one(reset_generations),
             reset_generations >= 1, one(homogenization), homogenization >= 0,
             one(min_generations), min_generations >= 1, one(migration_max), migration_max >= 0,
-            is.matrix(jump_var) || (one(jump_var) && jump_var >= 0), one(completion),
+            (is.matrix(jump_var) && is.numeric(jump_var) && !anyNA(jump_var)) ||
+              (one(jump_var) && jump_var >= 0), one(completion),
             completion >= 0)
   structure(list(mode = mode, threshold = threshold, rate = rate, divergence = divergence,
                  migration_min = migration_min, reset_generations = reset_generations,
@@ -335,6 +336,14 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
         ncol(env) != length(trait_list) || anyNA(env)) {
       stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
            "set of traits (", length(trait_list), ")", call. = FALSE)
+    }
+    if (!is.null(colnames(env)) && !is.null(names(traits))) {
+      # named axes are matched by name
+      if (!setequal(colnames(env), names(traits)) || anyDuplicated(names(traits))) {
+        stop("the names of `traits` and the columns of `env` must be the same axes",
+             call. = FALSE)
+      }
+      env <- env[, names(traits), drop = FALSE]
     }
     colnames(env) <- colnames(env) %||% names(traits) %||% paste0("axis", seq_len(ncol(env)))
     sp1 <- rownames(trait_list[[1]])
@@ -766,7 +775,11 @@ niche_crowding <- function(st) {
         for (a in seq_len(st$ev$q)) {
           w <- outer(sigma2[here, a], sigma2[here, a], "+")
           d2 <- outer(p[s, here, a], p[s, here, a], "-")^2
-          log_overlap <- log_overlap - ifelse(is.finite(w), d2 / (2 * w), 0)
+          # sigma = Inf gives no penalty; sigma = 0 on both sides gives overlap 1 at the same
+          # phenotype and 0 elsewhere
+          log_overlap <- log_overlap - ifelse(!is.finite(w), 0,
+                                              ifelse(w > 0, d2 / (2 * w),
+                                                     ifelse(d2 > 0, Inf, 0)))
         }
         out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * exp(log_overlap))
       }
@@ -779,8 +792,9 @@ niche_crowding <- function(st) {
     # only species present in a site need its crowding (the others have no one to grow)
     for (s in which(rowSums(n) > 0)) {
       here <- which(n[s, ] > 0)
-      overlap <- exp(-outer(p[s, here], p[s, here], "-")^2 /
-                       (2 * outer(sigma2[here], sigma2[here], "+")))
+      w <- outer(sigma2[here], sigma2[here], "+")
+      d2 <- outer(p[s, here], p[s, here], "-")^2
+      overlap <- exp(-ifelse(w > 0, d2 / (2 * w), ifelse(d2 > 0, Inf, 0)))
       out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * overlap)
     }
     out
@@ -1258,7 +1272,8 @@ evolving_state_mv <- function(st, out, lineage_ab, genetic, members, species, ex
        environment_history = env_hist, reference = stats::setNames(ev$ref, ev$axes),
        genetic_var = stats::setNames(ev$G[sp_idx], species),
        env_var = stats::setNames(ev$E[sp_idx], species),
-       plasticity = matrix(ev$b[sp_idx, ], length(species), dimnames = list(species, ev$axes)),
+       plasticity = matrix(ev$b[sp_idx, , drop = FALSE], length(species), length(ev$axes),
+                           dimnames = list(species, ev$axes)),
        settings = out$evolution$settings)
 }
 

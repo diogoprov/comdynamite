@@ -16,7 +16,14 @@
 #' proportional; Prôa et al. (2013) found acceptable type I error rates with it only when the
 #' matrices are similar and heritabilities are high, or when \eqn{t / N_e}{t / Ne} is small. A
 #' known \eqn{G}{G} (for example, from [genetic_matrices()] or the `genetic_var` of a simulation)
-#' can be given in `W` instead. The regression treats each component as an independent
+#' can be given in `W` instead.
+#'
+#' The variance of the observed means includes their sampling error, \eqn{P / n}{P / n} for groups
+#' of \eqn{n}{n} individuals. Unless \eqn{P}{P} is proportional to `W`, this error flattens the
+#' slope (most with small groups and little divergence), so by default (`correct = TRUE`) the
+#' expected sampling variance on each component, \eqn{v_k^\top P v_k}{v_k' P v_k} times the mean of
+#' \eqn{1 / n}{1 / n} over groups, with \eqn{P}{P} the pooled covariance within groups, is
+#' subtracted from the variance among means before the regression. The regression treats each component as an independent
 #' observation, so with few traits the test has little power, and the slope has \eqn{q - 2}{q -
 #' 2} degrees of freedom for \eqn{q}{q} traits.
 #'
@@ -25,18 +32,21 @@
 #' @param group The groups (populations, sites or species): a vector with one value per row of
 #'   `x`, or the name of a column of `x`.
 #' @param traits With a data frame, the names of the trait columns. `NULL` (the default) takes
-#'   every numeric column except `group`; with the output of
+#'   every numeric column except `group` (or the column equal to it); with the output of
 #'   [sample_individuals()], which also has numeric columns of abundance, environment and means,
 #'   name the traits.
 #' @param W `NULL` (the default) for the pooled covariance within groups, or a covariance matrix
 #'   with one row and column per trait (for example, a known \eqn{G}{G}).
+#' @param correct Whether to subtract the sampling variance of the group means (needs groups
+#'   with more than one individual).
 #' @param level The confidence level of the interval for the slope.
 #' @return An object of class `drift_test`: a list with `slope`, its standard error `se`, the
 #'   interval `conf_int`, the `statistic` (\eqn{t}{t}) and `p_value` of the test of slope 1, the
 #'   `intercept` (the logarithm of the proportionality constant, an estimate of \eqn{\log(t /
-#'   N_e)}{log(t / Ne)} when `W` is \eqn{G}{G}), `df`, `n_groups`, `n_traits`, the matrix `W`
-#'   and a data frame `components` with the `eigenvalue` and the `between` variance of each
-#'   principal component. It has `print()` and `plot()` methods.
+#'   N_e)}{log(t / Ne)} when `W` is \eqn{G}{G} and `correct = TRUE`), `df`, `n_groups`, `n_traits`, the matrix `W`
+#'   and a data frame `components` with the `eigenvalue`, the expected `sampling` variance of
+#'   the means (0 without correction) and the `between` variance (corrected) of each principal
+#'   component. It has `print()` and `plot()` methods.
 #' @references
 #' Ackermann, R. R. & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human
 #' evolution. *Proceedings of the National Academy of Sciences*, 101, 17946--17951.
@@ -59,7 +69,7 @@
 #' test
 #' plot(test)
 #' @export
-drift_test <- function(x, group, traits = NULL, W = NULL, level = 0.95) {
+drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95) {
   if (is.data.frame(x)) {
     if (is.character(group) && length(group) == 1 && group %in% names(x)) {
       gname <- group
@@ -68,7 +78,11 @@ drift_test <- function(x, group, traits = NULL, W = NULL, level = 0.95) {
       gname <- NULL
     }
     if (is.null(traits)) {
-      traits <- setdiff(names(x)[vapply(x, is.numeric, logical(1))], gname)
+      numeric_cols <- names(x)[vapply(x, is.numeric, logical(1))]
+      same <- vapply(numeric_cols, function(v) {
+        length(group) == nrow(x) && isTRUE(all.equal(x[[v]], group, check.attributes = FALSE))
+      }, logical(1))
+      traits <- setdiff(numeric_cols[!same], gname)
     }
     if (!is.character(traits) || !all(traits %in% names(x))) {
       stop("`traits` must name columns of `x`", call. = FALSE)
@@ -84,25 +98,40 @@ drift_test <- function(x, group, traits = NULL, W = NULL, level = 0.95) {
   if (length(group) != nrow(x)) {
     stop("`group` must have one value per row of `x` or name a column", call. = FALSE)
   }
+  if (!is.logical(correct) || length(correct) != 1 || is.na(correct)) {
+    stop("`correct` must be TRUE or FALSE", call. = FALSE)
+  }
   if (!is.numeric(level) || length(level) != 1 || is.na(level) || level <= 0 || level >= 1) {
     stop("`level` must be a number between 0 and 1", call. = FALSE)
   }
   keep <- stats::complete.cases(x) & !is.na(group)
   x <- x[keep, , drop = FALSE]
   group <- factor(group[keep])
-  means <- rowsum(x, group) / as.vector(table(group))
+  sizes <- as.vector(table(group))
+  means <- rowsum(x, group) / sizes
   if (nrow(means) < 3) stop("the test needs at least three groups", call. = FALSE)
+  centred <- x - means[as.integer(group), , drop = FALSE]
+  df_within <- nrow(x) - nlevels(group)
+  P <- if (df_within > 0) crossprod(centred) / df_within else NULL
+  if (correct && is.null(P)) {
+    stop("the sampling correction needs groups with more than one individual; ",
+         "use `correct = FALSE`", call. = FALSE)
+  }
   if (is.null(W)) {
-    centred <- x - means[as.integer(group), , drop = FALSE]
-    df_within <- nrow(x) - nlevels(group)
     if (df_within < q) {
       stop("too few individuals within groups to estimate `W`; give `W`", call. = FALSE)
     }
-    W <- crossprod(centred) / df_within
+    W <- P
   } else {
-    W <- as.matrix(W)
-    if (!identical(dim(W), c(q, q)) || !isSymmetric(unname(W))) {
+    W <- as.matrix(if (is.data.frame(W)) data.matrix(W) else W)
+    if (!is.numeric(W) || !identical(dim(W), c(q, q)) || !isSymmetric(unname(W))) {
       stop("`W` must be a symmetric matrix with one row and column per trait", call. = FALSE)
+    }
+    if (!is.null(rownames(W)) && !is.null(colnames(W))) {
+      if (!setequal(rownames(W), colnames(x)) || !setequal(colnames(W), colnames(x))) {
+        stop("the names of `W` must be those of the traits", call. = FALSE)
+      }
+      W <- W[colnames(x), colnames(x)]
     }
   }
   dimnames(W) <- list(colnames(x), colnames(x))
@@ -112,8 +141,19 @@ drift_test <- function(x, group, traits = NULL, W = NULL, level = 0.95) {
   }
   scores <- means %*% eig$vectors
   between <- apply(scores, 2, stats::var)
-  components <- data.frame(component = seq_len(q), eigenvalue = eig$values, between = between)
   if (any(between <= 0)) stop("the group means do not vary on every component", call. = FALSE)
+  sampling <- if (correct) {
+    colSums(eig$vectors * (P %*% eig$vectors)) * mean(1 / sizes)
+  } else {
+    rep(0, q)
+  }
+  between <- between - sampling
+  if (any(between <= 0)) {
+    stop("on some components the variance among group means is no larger than their sampling ",
+         "error; measure more individuals per group or use `correct = FALSE`", call. = FALSE)
+  }
+  components <- data.frame(component = seq_len(q), eigenvalue = eig$values, sampling = sampling,
+                           between = between)
   fit <- stats::lm(log(between) ~ log(eigenvalue), data = components)
   coef <- summary(fit)$coefficients
   slope <- coef[2, 1]
