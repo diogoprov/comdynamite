@@ -196,7 +196,51 @@ the populations and shrinks in small ones, this noise is smaller, and two specie
 the same patch type coexist locally as neutral competitors, refreshed by immigration. Local
 dominance in the model of Leibold et al. (2019) must therefore come from mechanisms that our
 model does not have. Lottery recruitment into vacated microsites, overlapping generations and
-the build-up of variance from new mutations are candidates, but we did not test them.
+the build-up of variance from new mutations are candidates, tested in the next section.
+
+## Three missing mechanisms
+
+Their model has three features that the engine lacked: recruitment into the microsites
+vacated by mortality, overlapping generations ("one generation equals 10 iterations of
+mortality, reproduction, and dispersal"), and loci that start without standing variation, so
+that the genetic variance is built by mutation. We added `recruitment = "lottery"`, in which
+adults survive with probability `1 - mortality`, offspring are produced in proportion to
+fitness and the vacant microsites (400 per patch, the carrying capacity) are filled by a
+multivariate hypergeometric draw from the offspring present after dispersal, and
+`variance_selection = TRUE` in `evolution_control()`, which removes each generation the Bulmer
+(1971) reduction of the variance by stabilising selection, \(G^2/(\sigma^2 + G + V_E)\). We
+crossed three recruitment settings (Beverton-Holt growth, a lottery with discrete generations,
+and a lottery with mortality 0.1 per step, so 10 steps per generation) with five genetic
+settings at \(N_m = 10\): no evolution, a constant \(G = 200\), mutation and drift from
+\(G = 200\) (\(V_m = 0.5\)), mutation and drift from no variance, and the same with erosion
+by selection (`data-raw/mechanisms_leibold2019_recruitment.R`; 10 runs of 10,000 generations
+each, patch extinction 0.01 per generation). Erosion is taken as permanent, which holds for
+asexual reproduction; their default is sexual, where recombination restores most of it, so
+this setting is an upper bound on erosion.
+
+![Classes of occupied patches at generation 5000 for each recruitment setting (panels) and genetic setting, in the runs that kept both species (n of 10 above each bar). Notice that recruitment changes little, and that switched patches appear only with a constant genetic variance.](mechanisms_leibold_classes.png)
+
+None of the three mechanisms produced local dominance. The recruitment setting changed little
+within each genetic setting; the outcome was set by the genetic variance. With a constant
+\(G\), one species was lost by generation 5000 in 8, 10 and 9 of the 10 runs (Beverton-Holt,
+discrete lottery, overlapping lottery), and in the three runs that kept both species 24--30%
+of the patches were held by the species not preadapted to them. With mutation and drift from
+\(G = 200\), the mean variance fell to 49--91 by generation 10,000, both species persisted in
+all runs, fitness differences within patch types were 0.02 or less, and 98--100% of the
+patches were shared: regional neutrality without local dominance, as with the size-dependent
+variance above. Starting from no variance, the variance reached 73--138 by generation 10,000,
+but too slowly to adapt the species to the other patch type: patch type explained about 95%
+of the variation in composition at generations 4000--5000, the mean fitness difference within
+patch types fell only from 1.95 to 1.54--1.71, and 92--95% of the patches were held by the preadapted species, as without
+evolution. Erosion by selection kept the variance near 12 and gave the same result.
+
+Taken together, lottery recruitment and overlapping generations seem not to be the source of
+the local dominance of Leibold et al. (2019), and building the variance from new mutations
+moves the outcome towards species sorting rather than towards local dominance, at least with
+\(V_m = 0.5\). In comdynamite, switched patches appear only with a constant \(G\), together
+with a fast loss of species. The rate of mutation was not matched to their loci, so a higher
+\(V_m\) could reach the variance needed for adaptation within the 5000 generations; we did not
+explore it.
 
 ## Summary
 
@@ -212,10 +256,15 @@ population size, regional neutrality emerged without any loss of species, but lo
 disappeared at intermediate and high dispersal, so the local dominance of our runs with a
 constant \(G\) seems to be a product of drift of the means, and the local dominance of their
 model remains unexplained by our engine.
+Lottery recruitment into vacated microsites, overlapping generations and a variance built
+from new mutations, with or without erosion by selection, did not produce it either.
 These are 10 replicates per setting, and the speed of adaptation was set through \(G\)
 rather than matched to their model.
 
 ## References
+
+Bulmer, M. G. (1971). The effect of selection on genetic variability. *The American
+Naturalist*, 105, 201--211. https://doi.org/10.1086/282718
 
 Lynch, M., & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
 915--935. https://doi.org/10.1111/j.1558-5646.1986.tb00561.x

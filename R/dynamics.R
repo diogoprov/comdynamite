@@ -120,6 +120,30 @@
 #'   Combined with `pool`. Until then, seeds of that species do not establish there and the site
 #'   is not a destination of its emigrants: those that would go there stay in their site, so
 #'   that a closed site is not a sink (sites outside `pool` are).
+#' @param recruitment How populations grow at each step: `"beverton_holt"` (the default), the
+#'   Beverton-Holt competition of Thompson et al. (2020), or `"lottery"`, recruitment into a
+#'   fixed number of microsites per site, as in the individual-based models of Urban & De
+#'   Meester (2009) and Leibold et al. (2019). With a lottery, each adult survives the step with
+#'   probability `1 - mortality`; adults produce Poisson offspring with mean equal to their
+#'   growth rate (fecundity times the fitness of their phenotype, so that selection acts on
+#'   recruits); offspring emigrate with probability `dispersal`; and the microsites left vacant
+#'   by the survivors in each site are filled by a draw without replacement among the offspring
+#'   present there (local and immigrant), so that emigration costs the site of origin little
+#'   while offspring outnumber the vacancies. Competition is through the shared microsites, so
+#'   `alpha` is not used. One trait at most with `evolution`; not available in
+#'   [simulate_evolving_metacommunity()].
+#' @param microsites With `recruitment = "lottery"`, the number of microsites of each site (one
+#'   value or one per site). `initial` must fit in them; seeds take vacant microsites by lottery
+#'   with the residents. In the colonisation history, `immigrants` and the migrant load count
+#'   immigrant recruits, and `propagule` the individuals of a new population after recruitment.
+#' @param mortality With `recruitment = "lottery"`, the probability that an adult dies at each
+#'   step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
+#'   overlapping generations, with a generation time of about `1 / mortality` steps. With
+#'   `evolution`, selection, mutation and the loss of variance to selection act on recruits, so
+#'   that their effect per step scales with the share of recruits in the population; drift
+#'   comes from the sampling of both survivors and recruits, so that it approaches that of a
+#'   Moran model at low mortality; founders are sampled once, when they recruit;
+#'   `steps_per_generation` must stay 1.
 #' @param initial Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 #'   only where `pool` allows.
 #' @param evolution Optional settings from [evolution_control()] for the evolution of the niche
@@ -182,9 +206,12 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    record_steps = NULL, extirpation = 0, pool = NULL,
                                    initial = NULL, immigration = c("poisson", "multinomial"),
                                    env = NULL, evolution = NULL, disturbance = 0,
-                                   pool_from = NULL) {
+                                   pool_from = NULL,
+                                   recruitment = c("beverton_holt", "lottery"),
+                                   microsites = NULL, mortality = 1) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
+  recruitment <- match.arg(recruitment)
   several <- is.list(traits) && !is.data.frame(traits)
   if (several || !is.null(env)) {
     trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
@@ -255,12 +282,16 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      record_steps = record_steps, sites = sites, species = rownames(traits),
                      extirpation = extirpation, pool = pool, initial = initial,
                      immigration = immigration, evolution = evolution,
-                     disturbance = disturbance, pool_from = pool_from)
+                     disturbance = disturbance, pool_from = pool_from,
+                     recruitment = recruitment, microsites = microsites, mortality = mortality)
   tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, extirpation = extirpation,
-                        disturbance = disturbance, pool = out$pool, tree = tree)),
+                        disturbance = disturbance, pool = out$pool, tree = tree,
+                        recruitment = recruitment,
+                        microsites = if (recruitment == "lottery") microsites,
+                        mortality = if (recruitment == "lottery") mortality)),
             class = "mc_sim")
 }
 
@@ -315,7 +346,9 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         disp_matrix = NULL, record_steps = NULL,
                         sites = NULL, species = NULL, extirpation = 0, pool = NULL,
                         initial = NULL, immigration = c("poisson", "multinomial"),
-                        evolution = NULL, disturbance = 0, pool_from = NULL) {
+                        evolution = NULL, disturbance = 0, pool_from = NULL,
+                        recruitment = c("beverton_holt", "lottery"), microsites = NULL,
+                        mortality = 1) {
   # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
   # that simulate_evolving_metacommunity() can run the same steps and change species in between
   mc_setup(environment())
@@ -339,6 +372,21 @@ mc_setup <- function(st) {
     if (!is.numeric(disturbance) || length(disturbance) != 1 || is.na(disturbance) ||
         disturbance < 0 || disturbance > 1) {
       stop("`disturbance` must be one probability between 0 and 1", call. = FALSE)
+    }
+    recruitment <- match.arg(recruitment, c("beverton_holt", "lottery"))
+    lottery <- recruitment == "lottery"
+    if (lottery) {
+      if (is.null(microsites) || !is.numeric(microsites) || !length(microsites) %in% c(1, m) ||
+          anyNA(microsites) || any(microsites < 1) || any(microsites != round(microsites)) ||
+          any(microsites > .Machine$integer.max)) {
+        stop("`recruitment = \"lottery\"` needs `microsites`: whole numbers of 1 or more, one ",
+             "value or one per site (", m, ")", call. = FALSE)
+      }
+      microsites <- rep_len(as.integer(microsites), m)
+      if (!is.numeric(mortality) || length(mortality) != 1 || is.na(mortality) ||
+          mortality <= 0 || mortality > 1) {
+        stop("`mortality` must be one probability above 0 and up to 1", call. = FALSE)
+      }
     }
     if (m == 1 && any(dispersal > 0)) {
       stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
@@ -388,6 +436,13 @@ mc_setup <- function(st) {
     inside <- if (is.null(pool) && is.null(pool_from)) NULL else inside_at(1, seq_len(k_all))
     n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
     if (!is.null(inside)) n[!inside] <- 0L
+    if (lottery) {
+      if (!is.null(initial) && any(rowSums(n) > microsites)) {
+        stop("`initial` has more individuals than `microsites` in some sites", call. = FALSE)
+      }
+      # seeds at the start take the microsites by lottery
+      n <- lottery_draw(n, microsites)
+    }
     last_seed <- max(c(0, seed_steps))
     competition_hook <- NULL
     ev <- if (!is.null(evolution)) {
@@ -396,6 +451,13 @@ mc_setup <- function(st) {
       }
       if (evolution_is_mv(evolution)) evolution_state_mv(evolution, m, k_all, species) else
         evolution_state(evolution, m, k_all, species)
+    }
+    if (lottery && !is.null(ev) && !isTRUE(ev$mv) && ev$per != 1) {
+      stop("with `recruitment = \"lottery\"`, keep `steps_per_generation = 1`: overlapping ",
+           "generations come from `mortality`", call. = FALSE)
+    }
+    if (lottery && isTRUE(ev$mv)) {
+      stop("`recruitment = \"lottery\"` is not yet available with several traits", call. = FALSE)
     }
     if (isTRUE(ev$imm_sel) && (is.null(disp_matrix) || immigration != "poisson")) {
       stop("`immigrant_selection` needs a spatially explicit landscape and ",
@@ -496,6 +558,8 @@ mc_step <- function(st, step) {
         }
       }
       n <- n + added
+      # with a lottery, seeds compete with residents for the microsites
+      if (lottery) n <- lottery_draw(n, microsites)
     }
     keep <- colSums(n) > 0
     if (step > last_seed && !all(keep)) {
@@ -535,10 +599,33 @@ mc_step <- function(st, step) {
         }
       }
       start <- n
-      # crowding; simulate_evolving_metacommunity() may replace it with competition that
-      # depends on the phenotypes in each site
-      crowding <- if (is.null(competition_hook)) n %*% at else competition_hook(n, pa)
-      lam <- r_now * n / (1 + crowding)
+      if (lottery) {
+        # adults that survive the step, whatever their phenotype; n becomes the offspring
+        surv <- matrix(stats::rbinom(m * k, n, 1 - mortality), m, k)
+        # extra sampling variance and cells without drift for populations founded this step
+        extra_v <- matrix(0, m, k)
+        no_drift <- matrix(FALSE, m, k)
+        if (!is.null(ev)) {
+          z_surv <- za
+          if (isTRUE(ev$dyn)) g_surv <- ga
+          # survivors are a sample of the adults: drift of their mean and loss of variance, so
+          # that drift per generation approaches that of a Moran model at low mortality
+          g0 <- if (isTRUE(ev$dyn)) ga else matrix(ev$g[alive], m, k, byrow = TRUE)
+          x <- ifelse(surv > 0 & surv < n, 1 / pmax(surv, 1) - 1 / pmax(n, 1), 0)
+          sd_s <- surv > 0 & x > 0 & g0 > 0
+          if (is.finite(ev$nu) && any(sd_s)) {
+            z_surv[sd_s] <- z_surv[sd_s] + stats::rnorm(sum(sd_s), 0,
+                                                        sqrt(g0[sd_s] * x[sd_s] / ev$nu))
+            if (isTRUE(ev$dyn)) g_surv[sd_s] <- (g_surv * pmax(1 - x / (2 * ev$nu), 0))[sd_s]
+          }
+        }
+        lam <- r_now * n
+      } else {
+        # crowding; simulate_evolving_metacommunity() may replace it with competition that
+        # depends on the phenotypes in each site
+        crowding <- if (is.null(competition_hook)) n %*% at else competition_hook(n, pa)
+        lam <- r_now * n / (1 + crowding)
+      }
       n <- matrix(stats::rpois(m * k, lam), m, k)
       if (isTRUE(ev$mv)) {
         za <- mv_select(ev, za, pa, e_now, n, alive)
@@ -551,17 +638,17 @@ mc_step <- function(st, step) {
         live <- n > 0
         za[live] <- za[live] + (g[live] / width[live]) * (e_now - pa)[live] / ev$per
         drift <- live & g > 0
-        if (is.finite(ev$nu) && any(drift)) {
+        # with a lottery, drift and the dynamics of the variance act on the recruits
+        if (!lottery && is.finite(ev$nu) && any(drift)) {
           za[drift] <- za[drift] +
             stats::rnorm(sum(drift), 0, sqrt(g[drift] / (ev$per * ev$nu * n[drift])))
         }
         za[!live] <- NA_real_
-        if (isTRUE(ev$dyn)) {
+        if (isTRUE(ev$dyn) && !lottery) {
           # mutation-drift dynamics of the genetic variance (Lynch & Hill 1986): a loss of
-          # 1 / (2 Ne) and a gain of Vm per generation, equilibrium 2 Ne Vm
-          vm <- matrix(ev$vm[alive], m, k, byrow = TRUE)
-          keep_v <- pmax(1 - 1 / (2 * ev$nu * n), 0)^(1 / ev$per)
-          ga[live] <- ga[live] * keep_v[live] + vm[live] / ev$per
+          # 1 / (2 Ne) and a gain of Vm per generation, equilibrium 2 Ne Vm; with
+          # `variance_selection`, also the loss to stabilising selection
+          ga[live] <- variance_update(ga, n, width, ev, alive, 1 / ev$per)[live]
           ga[!live] <- NA_real_
           vg[, alive] <- ga
         }
@@ -640,7 +727,14 @@ mc_step <- function(st, step) {
           pa_now[both] <- (res[both] * pa[both] + imm_m[both] * p_imm[both]) /
             (res[both] + imm_m[both])
           founded <- res == 0 & imm_m > 0
-          if (any(founded)) {
+          if (any(founded) && lottery) {
+            # with a lottery, founders are sampled once, when they recruit
+            za[founded] <- zi[founded]
+            if (isTRUE(ev$dyn)) ga[founded] <- vi[founded]
+            extra_v[founded] <- between[founded]
+            no_drift[founded] <- !ev$founder
+            pa_now[founded] <- p_imm[founded]
+          } else if (any(founded)) {
             if (isTRUE(ev$dyn)) {
               # founders carry the variance of their sources, less 1 / (2k) for k founders
               za[founded] <- found(zi, imm_m, founded, alive, g_cells = vi + between)
@@ -654,6 +748,47 @@ mc_step <- function(st, step) {
           pa <- pa_now
         }
         n <- n - em + imm
+      }
+      if (lottery) {
+        # the microsites left by the survivors are filled by a draw among the offspring there
+        if (!is.null(inside)) n[!inside] <- 0L
+        rec <- lottery_draw(n, as.integer(pmax(microsites - rowSums(surv), 0)))
+        # immigrants among the recruits, for the colonisation history
+        imm <- imm + matrix(0L, m, k)
+        from_imm <- rec > 0 & imm > 0
+        if (any(from_imm)) {
+          imm[from_imm] <- stats::rhyper(sum(from_imm), pmin(imm, n)[from_imm],
+                                         pmax(n - imm, 0)[from_imm], rec[from_imm])
+        }
+        imm[!from_imm] <- 0L
+        n_new <- surv + rec
+        if (!is.null(ev)) {
+          g <- if (isTRUE(ev$dyn)) ga else matrix(ev$g[alive], m, k, byrow = TRUE)
+          g[is.na(g)] <- 0
+          v_rec <- g + extra_v
+          drift <- rec > 0 & v_rec > 0 & !no_drift
+          if (is.finite(ev$nu) && any(drift)) {
+            # recruits are a sample of the offspring (and founders of their sources)
+            za[drift] <- za[drift] + stats::rnorm(sum(drift), 0, sqrt(v_rec[drift] / (ev$nu *
+                                                                                      rec[drift])))
+          }
+          has <- n_new > 0
+          zs <- ifelse(surv > 0, z_surv, 0)
+          zr <- ifelse(rec > 0, za, 0)
+          za[has] <- ((surv * zs + rec * zr) / n_new)[has]
+          if (isTRUE(ev$dyn)) {
+            gs <- ifelse(surv > 0, g_surv, 0)
+            ga[has] <- ((surv * gs + rec * g) / n_new)[has]
+            # mutation, drift and selection on the variance, in proportion to the recruits
+            width <- ga + matrix(ev$sigma[alive]^2 + ev$ve[alive], m, k, byrow = TRUE)
+            ga[has] <- variance_update(ga, n_new, width, ev, alive, rec / pmax(n_new, 1))[has]
+            ga[!has] <- NA_real_
+            vg[, alive] <- ga
+          }
+          za[!has] <- NA_real_
+          pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
+        }
+        n <- n_new
       }
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
@@ -692,7 +827,7 @@ mc_step <- function(st, step) {
         # a population absent at the end of the last step starts from its seeds (or `initial`)
         # and the immigrants of this step
         cols <- propagule[, alive, drop = FALSE]
-        cols[new_pop] <- as.integer((start + imm)[new_pop])
+        cols[new_pop] <- as.integer((if (lottery) n else start + imm)[new_pop])
         propagule[, alive] <- cols
         cols <- immigrants[, alive, drop = FALSE]
         cols[new_pop] <- 0
@@ -797,6 +932,27 @@ mc_finish <- function(st) {
     }
     out
   }), st)
+}
+
+# recruits of a lottery: in each site, `vacant` microsites are filled by a draw without
+# replacement among the offspring `pool` (sites x species), species by species
+lottery_draw <- function(pool, vacant) {
+  out <- pool
+  full <- rowSums(pool) > vacant
+  if (any(full)) {
+    sub <- pool[full, , drop = FALSE]
+    left <- as.integer(vacant[full])
+    rest <- rowSums(sub)
+    res <- matrix(0L, nrow(sub), ncol(sub))
+    for (j in seq_len(ncol(sub))) {
+      rest <- rest - sub[, j]
+      res[, j] <- if (j == ncol(sub)) left else
+        stats::rhyper(nrow(sub), sub[, j], rest, left)
+      left <- left - res[, j]
+    }
+    out[full, ] <- res
+  }
+  out
 }
 
 # immigrants when the emigrants of each species at each site go to the other sites

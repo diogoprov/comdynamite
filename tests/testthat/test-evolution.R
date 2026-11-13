@@ -255,3 +255,60 @@ test_that("mutation_var works with seeding and with gene flow without immigrant 
   expect_true(all(is.finite(v[present]) & v[present] > 0))
   expect_true(all(is.na(v[!present])))
 })
+
+test_that("variance_selection erodes the variance to the mutation-selection-drift balance", {
+  tr <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp")
+  ls <- landscape_points(cbind(c(0, 10), c(0, 0)), env = c(50, 50), disp_scale = 1)
+  init <- matrix(400L, 2, 1, dimnames = list(NULL, "sp"))
+  set.seed(2)
+  ev <- evolution_control(genetic_var = 0, env_var = 4, ne_ratio = 0.5, mutation_var = 0.5,
+                          variance_selection = TRUE)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, 1, 1, dimnames = list("sp", "sp")),
+                                dispersal = 0, n_steps = 2000, seed_steps = integer(0),
+                                initial = init, evolution = ev)
+  n <- sim$abundance[, 1]
+  # equilibrium of G / (2 Ne) + G^2 / (sigma^2 + G + VE) = Vm with Ne = N / 2
+  g_eq <- vapply(n, function(N) {
+    stats::uniroot(function(G) G / N + G^2 / (404 + G) - 0.5, c(0, 500))$root
+  }, numeric(1))
+  expect_equal(unname(sim$evolution$genetic_variance[, 1]), unname(g_eq), tolerance = 0.02)
+  expect_error(evolution_control(genetic_var = 1, variance_selection = TRUE), "mutation_var")
+  expect_error(evolution_control(genetic_var = 1, mutation_var = 1, ne_ratio = 0.5,
+                                 variance_selection = NA), "TRUE or FALSE")
+})
+
+test_that("evolution under lottery recruitment: adaptation, drift on recruits and variance", {
+  tr <- data.frame(optimum = 40, sigma = 20, r_max = 5, row.names = "sp")
+  ls <- landscape_points(cbind(c(0, 10), c(0, 0)), env = c(60, 60), disp_scale = 1)
+  init <- matrix(400L, 2, 1, dimnames = list(NULL, "sp"))
+  set.seed(4)
+  ev <- evolution_control(genetic_var = 100, env_var = 4, ne_ratio = 0.5)
+  disc <- simulate_metacommunity(ls, tr, matrix(0.01, 1, 1, dimnames = list("sp", "sp")),
+                                 dispersal = 0.01, n_steps = 30, seed_steps = integer(0),
+                                 initial = init, evolution = ev, recruitment = "lottery",
+                                 microsites = 400)
+  over <- simulate_metacommunity(ls, tr, matrix(0.01, 1, 1, dimnames = list("sp", "sp")),
+                                 dispersal = 0.01, n_steps = 30, seed_steps = integer(0),
+                                 initial = init, evolution = ev, recruitment = "lottery",
+                                 microsites = 400, mortality = 0.1)
+  # 30 generations close the mismatch of 20 almost fully; 3 generations (30 steps at
+  # mortality 0.1) close about a fifth of it per generation
+  expect_true(all(disc$evolution$genetic[, 1] > 57))
+  expect_true(all(over$evolution$genetic[, 1] > 45 & over$evolution$genetic[, 1] < 55))
+  # mutation-drift variance from zero: with mortality 0.1 drift is close to a Moran model,
+  # with a loss of about 1 / (Ne) per generation, so the variance approaches Vm Ne = 100
+  ev <- evolution_control(genetic_var = 0, env_var = 4, ne_ratio = 0.5, mutation_var = 0.5)
+  sim <- simulate_metacommunity(landscape_points(cbind(c(0, 10), c(0, 0)), env = c(40, 40),
+                                                 disp_scale = 1), tr,
+                                matrix(0.01, 1, 1, dimnames = list("sp", "sp")), dispersal = 0,
+                                n_steps = 4000, seed_steps = integer(0), initial = init,
+                                evolution = ev, recruitment = "lottery", microsites = 400,
+                                mortality = 0.1)
+  expect_equal(unname(sim$evolution$genetic_variance[, 1]), rep(100 * (1 - exp(-2)), 2),
+               tolerance = 0.05)
+  expect_error(simulate_metacommunity(ls, list(a = tr, b = tr), matrix(0.01, 1, 1,
+                                                                      dimnames = list("sp", "sp")),
+                                      env = cbind(a = c(60, 60), b = c(60, 60)),
+                                      evolution = evolution_control(genetic_var = diag(2)),
+                                      recruitment = "lottery", microsites = 10), "several traits")
+})

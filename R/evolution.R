@@ -123,6 +123,16 @@
 #'   selection does not otherwise act on the variance; without this choice, gene flow between
 #'   diverged populations inflates the variance without bound. `genetic_var` is then the
 #'   variance of the populations at the start and of seeds. Needs a finite `ne_ratio`; one trait only.
+#' @param variance_selection With `mutation_var`, should stabilising selection also remove
+#'   genetic variance? With `TRUE`, each generation loses \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 /
+#'   (sigma^2 + G + VE)}, the reduction of the genetic variance by Gaussian selection of width
+#'   \eqn{\sigma}{sigma} on a phenotype of variance \eqn{G + V_E}{G + VE} (Bulmer 1971). Under
+#'   sexual reproduction most of this reduction is linkage disequilibrium, which recombination
+#'   restores, so the full loss holds for clonal inheritance, as in the model of Urban & De
+#'   Meester (2009); with mutation, the variance then settles near the balance between
+#'   mutation and selection (Lande 1975; Turelli 1984) rather than at \eqn{2 N_e V_m}{2 Ne Vm},
+#'   and standing variation is eroded instead of carrying a load. `FALSE` (the default) keeps
+#'   the mutation-drift dynamics alone.
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -133,6 +143,17 @@
 #'   Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to
 #'   brain:body size allometry. *Evolution*, 33, 402--416.
 #'   \doi{10.1111/j.1558-5646.1979.tb04694.x}
+#'
+#'   Bulmer, M. G. (1971). The effect of selection on genetic variability. *The American
+#'   Naturalist*, 105, 201--211. \doi{10.1086/282718}
+#'
+#'   Lande, R. (1975). The maintenance of genetic variability by mutation in a polygenic
+#'   character with linked loci. *Genetical Research*, 26, 221--235.
+#'   \doi{10.1017/S0016672300016037}
+#'
+#'   Turelli, M. (1984). Heritable genetic variation via mutation-selection balance: Lerch's
+#'   zeta meets the abdominal bristle. *Theoretical Population Biology*, 25, 138--193.
+#'   \doi{10.1016/0040-5809(84)90017-0}
 #'
 #'   Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
 #'   915--935. \doi{10.1111/j.1558-5646.1986.tb00561.x}
@@ -150,7 +171,8 @@
 #' @export
 evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var = 0,
                               steps_per_generation = 1, founder = TRUE, env = NULL,
-                              traits = NULL, immigrant_selection = FALSE, mutation_var = NULL) {
+                              traits = NULL, immigrant_selection = FALSE, mutation_var = NULL,
+                              variance_selection = FALSE) {
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
   # several traits: covariance matrices (checked when the simulation starts)
   covariance <- function(v) is.matrix(v) || is.list(v)
@@ -170,10 +192,18 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
       stop("`mutation_var` needs drift: a finite `ne_ratio`", call. = FALSE)
     }
   }
+  if (!is.logical(variance_selection) || length(variance_selection) != 1 ||
+      is.na(variance_selection)) {
+    stop("`variance_selection` must be TRUE or FALSE", call. = FALSE)
+  }
+  if (variance_selection && is.null(mutation_var)) {
+    stop("`variance_selection` needs `mutation_var`", call. = FALSE)
+  }
   structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
                  env_var = env_var, steps_per_generation = steps_per_generation,
                  founder = founder, env = env, traits = traits,
-                 immigrant_selection = immigrant_selection, mutation_var = mutation_var),
+                 immigrant_selection = immigrant_selection, mutation_var = mutation_var,
+                 variance_selection = variance_selection),
             class = "mc_evolution")
 }
 
@@ -228,7 +258,8 @@ evolution_state <- function(evolution, m, k_all, species) {
        per = evolution$steps_per_generation, founder = evolution$founder,
        imm_sel = isTRUE(evolution$immigrant_selection),
        dyn = !is.null(evolution$mutation_var),
-       vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var))
+       vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var),
+       vsel = isTRUE(evolution$variance_selection))
 }
 
 # immigrants filtered by viability selection in the site they reach (immigrant_selection =
@@ -297,4 +328,17 @@ immigrant_mean <- function(em, x, disp_matrix, fallback) {
   out <- num / den
   out[!is.finite(out)] <- fallback[!is.finite(out)]
   out
+}
+
+# the genetic variance g (sites x species) after a fraction f of a generation (a number or a
+# matrix) in populations of size n: drift removes 1 / (2 Ne) and mutation adds Vm per generation
+# (Lynch & Hill 1986) and, with `variance_selection`, Gaussian selection of width `width`
+# (= g + sigma^2 + VE) removes g^2 / width (Bulmer 1971)
+variance_update <- function(g, n, width, ev, alive, f) {
+  m <- nrow(g)
+  k <- ncol(g)
+  vm <- matrix(ev$vm[alive], m, k, byrow = TRUE)
+  keep <- pmax(1 - 1 / (2 * ev$nu * n), 0)^f
+  sel <- if (isTRUE(ev$vsel)) g^2 / width else 0
+  pmax(g * keep + f * (vm - sel), 0)
 }
