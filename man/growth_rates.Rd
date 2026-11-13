@@ -47,6 +47,7 @@ Other simulate metacommunities:
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
 \code{\link[=persistence]{persistence()}},
+\code{\link[=range_history]{range_history()}},
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}},

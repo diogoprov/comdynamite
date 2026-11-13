@@ -22,6 +22,7 @@ reference:
   - speciation_control
   - as_metacommunity
   - persistence
+  - range_history
   - colonisation_history
   - growth_rates
 - title: Landscapes

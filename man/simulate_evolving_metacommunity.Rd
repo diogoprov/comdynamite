@@ -101,6 +101,10 @@ regional \code{abundance}, \code{genetic} mean (weighted by abundance), and the 
 was absent (\code{absent_before}) and present (\code{present_before}). Sites that a lineage passed
 to a new one are not counted as lost, and the transitions are \code{NA} in the generation of
 birth. \code{\link[=persistence]{persistence()}} turns them into rates of colonisation and extirpation.
+\item \code{ranges}: the changes of presence of every lineage in every site, one row per change
+(\code{generation}, \code{lineage}, \code{site} and \code{present}), with the starting sites at generation
+0 and the sites a new lineage took from its mother at its birth. \code{\link[=range_history]{range_history()}} maps
+them on the tree as ranges of areas.
 \item \code{evolution}: with \code{evolution}, the state of the extant species at the end, for
 \code{\link[=sample_individuals]{sample_individuals()}} with \code{source = "evolution"}: genetic means in each site
 (\code{genetic}, weighted over their lineages by abundance; \code{NA} where absent), the plastic
@@ -171,6 +175,7 @@ Other simulate metacommunities:
 \code{\link[=logistic_gradients]{logistic_gradients()}},
 \code{\link[=mc_dynamics]{mc_dynamics()}},
 \code{\link[=persistence]{persistence()}},
+\code{\link[=range_history]{range_history()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}},
 \code{\link[=simulate_static]{simulate_static()}},
