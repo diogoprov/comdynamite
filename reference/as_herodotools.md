@@ -29,8 +29,8 @@ as_herodotools(x, regions, history = NULL, tree = NULL)
 
 - x:
 
-  An `mc_sim` or `mc_data` object, or a community matrix with sites in
-  rows and species in columns, named by species.
+  An `mc_sim`, `mc_evolving` or `mc_data` object, or a community matrix
+  with sites in rows and species in columns, named by species.
 
 - regions:
 
@@ -40,7 +40,10 @@ as_herodotools(x, regions, history = NULL, tree = NULL)
 
   Optional `simmap` tree from
   [`trait_mk()`](https://provetelab.org/comdynamite/reference/trait_mk.md)
-  whose states are the regions, with the same species as `x`.
+  or
+  [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+  whose states are the regions, or ranges of several regions joined by
+  `"+"`, with the same species as `x`.
 
 - tree:
 
@@ -55,6 +58,14 @@ frame with the area of each internal node, in the order of their numbers
 in `tree$edge` (the root first), as Herodotools reads it.
 
 ## Details
+
+For an evolving metacommunity from
+[`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
+`history` defaults to the true history of the ranges of its lineages,
+from
+[`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),
+whose ranges join regions with `"+"` (`"A+B"`); Herodotools then counts
+an ancestor in `"A+B"` as present in both regions.
 
 Herodotools finds a region among the areas of the ancestors by matching
 its name as a pattern, so no region name may be contained in another,

@@ -172,6 +172,13 @@ An `mc_evolving` object, a list with:
   [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
   turns them into rates of colonisation and extirpation.
 
+- `ranges`: the changes of presence of every lineage in every site, one
+  row per change (`generation`, `lineage`, `site` and `present`), with
+  the starting sites at generation 0 and the sites a new lineage took
+  from its mother at its birth.
+  [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+  maps them on the tree as ranges of areas.
+
 - `evolution`: with `evolution`, the state of the extant species at the
   end, for
   [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
@@ -239,6 +246,7 @@ Other simulate metacommunities:
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
+[`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),
 [`simulate_logistic()`](https://provetelab.org/comdynamite/reference/simulate_logistic.md),
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md),

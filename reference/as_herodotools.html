@@ -100,8 +100,8 @@ estimates from the nodes.</p>
 
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <code>mc_sim</code> or <code>mc_data</code> object, or a community matrix with sites in rows and species
-in columns, named by species.</p></dd>
+<dd><p>An <code>mc_sim</code>, <code>mc_evolving</code> or <code>mc_data</code> object, or a community matrix with sites in
+rows and species in columns, named by species.</p></dd>
 
 
 <dt id="arg-regions">regions<a class="anchor" aria-label="anchor" href="#arg-regions"></a></dt>
@@ -109,8 +109,8 @@ in columns, named by species.</p></dd>
 
 
 <dt id="arg-history">history<a class="anchor" aria-label="anchor" href="#arg-history"></a></dt>
-<dd><p>Optional <code>simmap</code> tree from <code><a href="trait_mk.html">trait_mk()</a></code> whose states are the regions, with the
-same species as <code>x</code>.</p></dd>
+<dd><p>Optional <code>simmap</code> tree from <code><a href="trait_mk.html">trait_mk()</a></code> or <code><a href="range_history.html">range_history()</a></code> whose states are
+the regions, or ranges of several regions joined by <code>"+"</code>, with the same species as <code>x</code>.</p></dd>
 
 
 <dt id="arg-tree">tree<a class="anchor" aria-label="anchor" href="#arg-tree"></a></dt>
@@ -126,7 +126,11 @@ in the order of their numbers in <code>tree$edge</code> (the root first), as Her
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>Herodotools finds a region among the areas of the ancestors by matching its name as a
+    <p>For an evolving metacommunity from <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>, <code>history</code> defaults to
+the true history of the ranges of its lineages, from <code><a href="range_history.html">range_history()</a></code>, whose ranges join
+regions with <code>"+"</code> (<code>"A+B"</code>); Herodotools then counts an ancestor in <code>"A+B"</code> as present in
+both regions.</p>
+<p>Herodotools finds a region among the areas of the ancestors by matching its name as a
 pattern, so no region name may be contained in another, such as <code>"A"</code> and <code>"AB"</code>. Sites
 without species are dropped with a warning, since Herodotools needs at least one species in
 each site.</p>

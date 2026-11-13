@@ -3,7 +3,8 @@
 Gives the `pool` of
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
 from a history of areas: each species can occur only in the sites of the
-region it occupies at the tips of `history`.
+region (or regions, in a range such as `"A+B"`) it occupies at the tips
+of `history`.
 
 ## Usage
 

@@ -3,13 +3,21 @@
 the region of the site, from the history of areas: the time spent in that region along the
 path from the tip towards the root, until the first period in another region, plus the time
 from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
-region since the root gets the age of the root. These are the true values of what
+region since the root gets the age of the root. With ranges of several regions (&quot;A+B&quot;, from
+range_history()), the age in each region is the time since the range last came to include
+it. For an evolving metacommunity with protracted speciation, the tips of range_history()
+have the range of the lineage that represents each species, so cells occupied only by its
+incipient lineages, elsewhere, get NA. These are the true values of what
 Herodotools::calc_age_arrival() estimates from the areas of the nodes, which can only see
 arrivals at nodes and so gives younger ages."><meta property="og:description" content="For each species in each site, the time before the present at which its lineage last entered
 the region of the site, from the history of areas: the time spent in that region along the
 path from the tip towards the root, until the first period in another region, plus the time
 from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
-region since the root gets the age of the root. These are the true values of what
+region since the root gets the age of the root. With ranges of several regions (&quot;A+B&quot;, from
+range_history()), the age in each region is the time since the range last came to include
+it. For an evolving metacommunity with protracted speciation, the tips of range_history()
+have the range of the lineage that represents each species, so cells occupied only by its
+incipient lineages, elsewhere, get NA. These are the true values of what
 Herodotools::calc_age_arrival() estimates from the areas of the nodes, which can only see
 arrivals at nodes and so gives younger ages."><meta property="og:image" content="https://provetelab.org/comdynamite/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -73,7 +81,11 @@ arrivals at nodes and so gives younger ages."><meta property="og:image" content=
 the region of the site, from the history of areas: the time spent in that region along the
 path from the tip towards the root, until the first period in another region, plus the time
 from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
-region since the root gets the age of the root. These are the true values of what
+region since the root gets the age of the root. With ranges of several regions (<code>"A+B"</code>, from
+<code><a href="range_history.html">range_history()</a></code>), the age in each region is the time since the range last came to include
+it. For an evolving metacommunity with protracted speciation, the tips of <code><a href="range_history.html">range_history()</a></code>
+have the range of the lineage that represents each species, so cells occupied only by its
+incipient lineages, elsewhere, get <code>NA</code>. These are the true values of what
 <code>Herodotools::calc_age_arrival()</code> estimates from the areas of the nodes, which can only see
 arrivals at nodes and so gives younger ages.</p>
     </div>
@@ -92,8 +104,8 @@ arrivals at nodes and so gives younger ages.</p>
 
 
 <dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
-<dd><p>An <code>mc_sim</code> or <code>mc_data</code> object, or a community matrix with sites in rows and species
-in columns, named by species.</p></dd>
+<dd><p>An <code>mc_sim</code>, <code>mc_evolving</code> or <code>mc_data</code> object, or a community matrix with sites in
+rows and species in columns, named by species.</p></dd>
 
 
 <dt id="arg-regions">regions<a class="anchor" aria-label="anchor" href="#arg-regions"></a></dt>

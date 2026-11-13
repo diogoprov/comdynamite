@@ -103,6 +103,7 @@ Other simulate metacommunities:
 [`logistic_gradients()`](https://provetelab.org/comdynamite/reference/logistic_gradients.md),
 [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md),
 [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md),
+[`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md),
 [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
 [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
 [`simulate_static()`](https://provetelab.org/comdynamite/reference/simulate_static.md),

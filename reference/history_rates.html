@@ -81,7 +81,8 @@ by time. Three models link the history to the rate:</p>
 <span>  state_rates <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  burst <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>  decay <span class="op">=</span> <span class="fl">0.1</span>,</span>
-<span>  r <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span></span>
+<span>  r <span class="op">=</span> <span class="op">-</span><span class="fl">0.1</span>,</span>
+<span>  overlap <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -116,6 +117,11 @@ and the time scale of its decay.</p></dd>
 <dd><p>For <code>"sympatry"</code>, the change in the logarithm of the rate per lineage in the same
 state.</p></dd>
 
+
+<dt id="arg-overlap">overlap<a class="anchor" aria-label="anchor" href="#arg-overlap"></a></dt>
+<dd><p>For <code>"sympatry"</code>, count the lineages whose state shares an area (states such
+as <code>"A+B"</code>, split at <code>"+"</code>) rather than those in the same state.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -137,7 +143,9 @@ is strongest when a lineage first adapts to a new community.</p></li>
 <li><p><code>"sympatry"</code>: the rate depends on the number of lineages that share the state at each
 moment, counting the lineage itself, as \(\mathrm{sigma2}\, e^{r n}\), with \(n\) that number; a negative \(r\) slows
 evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
-biogeography of Drury et al. (2016).</p></li>
+biogeography of Drury et al. (2016). With ranges made of several areas, such as those of
+<code><a href="range_history.html">range_history()</a></code> (<code>"A+B"</code>), <code>overlap = TRUE</code> counts the lineages whose range shares at
+least one area with that of the lineage, instead of those with the same range.</p></li>
 </ul></div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

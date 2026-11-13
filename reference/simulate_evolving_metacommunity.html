@@ -207,6 +207,10 @@ regional <code>abundance</code>, <code>genetic</code> mean (weighted by abundanc
 was absent (<code>absent_before</code>) and present (<code>present_before</code>). Sites that a lineage passed
 to a new one are not counted as lost, and the transitions are <code>NA</code> in the generation of
 birth. <code><a href="persistence.html">persistence()</a></code> turns them into rates of colonisation and extirpation.</p></li>
+<li><p><code>ranges</code>: the changes of presence of every lineage in every site, one row per change
+(<code>generation</code>, <code>lineage</code>, <code>site</code> and <code>present</code>), with the starting sites at generation
+0 and the sites a new lineage took from its mother at its birth. <code><a href="range_history.html">range_history()</a></code> maps
+them on the tree as ranges of areas.</p></li>
 <li><p><code>evolution</code>: with <code>evolution</code>, the state of the extant species at the end, for
 <code><a href="sample_individuals.html">sample_individuals()</a></code> with <code>source = "evolution"</code>: genetic means in each site
 (<code>genetic</code>, weighted over their lineages by abundance; <code>NA</code> where absent), the plastic
@@ -257,6 +261,7 @@ of the processes that shape Earth's biodiversity. <em>PLOS Biology</em>, 19, e30
 <code><a href="logistic_gradients.html">logistic_gradients()</a></code>,
 <code><a href="mc_dynamics.html">mc_dynamics()</a></code>,
 <code><a href="persistence.html">persistence()</a></code>,
+<code><a href="range_history.html">range_history()</a></code>,
 <code><a href="simulate_logistic.html">simulate_logistic()</a></code>,
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>,
 <code><a href="simulate_static.html">simulate_static()</a></code>,

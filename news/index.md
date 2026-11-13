@@ -2,6 +2,24 @@
 
 ## comdynamite (development version)
 
+- Phase 3b of the block on speciation.
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  logs every change of presence of every lineage in every site
+  (`ranges`), and the new
+  [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+  maps them on the full or reconstructed tree as a stochastic map (class
+  `simmap`) whose states are the combinations of areas occupied (`"A"`,
+  `"B"`, `"A+B"`).
+  [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md)
+  takes evolving metacommunities, with this history as the true areas of
+  the ancestors, and
+  [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md),
+  [`region_pool()`](https://provetelab.org/comdynamite/reference/region_pool.md)
+  and
+  [`arrival_ages()`](https://provetelab.org/comdynamite/reference/arrival_ages.md)
+  accept ranges of several regions.
+  `history_rates(model = "sympatry", overlap = TRUE)` counts the
+  lineages whose ranges share an area.
 - Phase 3a of the block on speciation.
   [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   returns a per-generation `series` of every lineage (occupancy,

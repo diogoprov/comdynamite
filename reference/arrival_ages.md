@@ -5,7 +5,15 @@ lineage last entered the region of the site, from the history of areas:
 the time spent in that region along the path from the tip towards the
 root, until the first period in another region, plus the time from the
 tip to the present when the tree is not ultrametric. A lineage that
-stayed in the region since the root gets the age of the root. These are
+stayed in the region since the root gets the age of the root. With
+ranges of several regions (`"A+B"`, from
+[`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)),
+the age in each region is the time since the range last came to include
+it. For an evolving metacommunity with protracted speciation, the tips
+of
+[`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+have the range of the lineage that represents each species, so cells
+occupied only by its incipient lineages, elsewhere, get `NA`. These are
 the true values of what `Herodotools::calc_age_arrival()` estimates from
 the areas of the nodes, which can only see arrivals at nodes and so
 gives younger ages.
@@ -26,8 +34,8 @@ arrival_ages(history, x, regions)
 
 - x:
 
-  An `mc_sim` or `mc_data` object, or a community matrix with sites in
-  rows and species in columns, named by species.
+  An `mc_sim`, `mc_evolving` or `mc_data` object, or a community matrix
+  with sites in rows and species in columns, named by species.
 
 - regions:
 

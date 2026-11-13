@@ -19,7 +19,8 @@ history_rates(
   state_rates = NULL,
   burst = 4,
   decay = 0.1,
-  r = -0.1
+  r = -0.1,
+  overlap = FALSE
 )
 ```
 
@@ -55,6 +56,12 @@ history_rates(
   For `"sympatry"`, the change in the logarithm of the rate per lineage
   in the same state.
 
+- overlap:
+
+  For `"sympatry"`, count the lineages whose state shares an area
+  (states such as `"A+B"`, split at `"+"`) rather than those in the same
+  state.
+
 ## Value
 
 Numeric vector with the rate of each branch, in the order of the rows of
@@ -80,7 +87,11 @@ Numeric vector with the rate of each branch, in the order of the rows of
   \\\mathrm{sigma2}\\ e^{r n}\\, with \\n\\ that number; a negative
   \\r\\ slows evolution down as lineages accumulate in the same region,
   as in the diversity-dependent model with biogeography of Drury et al.
-  (2016).
+  (2016). With ranges made of several areas, such as those of
+  [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+  (`"A+B"`), `overlap = TRUE` counts the lineages whose range shares at
+  least one area with that of the lineage, instead of those with the
+  same range.
 
 ## References
 

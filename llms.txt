@@ -203,6 +203,8 @@ The process-based model, from landscape and traits to abundances.
   : Convert to a simulated metacommunity
 - [`persistence()`](https://provetelab.org/comdynamite/reference/persistence.md)
   : Metapopulation persistence
+- [`range_history()`](https://provetelab.org/comdynamite/reference/range_history.md)
+  : History of the geographic ranges of lineages, as a stochastic map
 - [`colonisation_history()`](https://provetelab.org/comdynamite/reference/colonisation_history.md)
   : Colonisation history of a simulated metacommunity
 - [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)
