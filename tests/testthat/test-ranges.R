@@ -211,3 +211,14 @@ test_that("overlap in history_rates() counts lineages that share an area", {
   }
   expect_equal(sympatry_integral(h, -0.1, overlap = TRUE), brute(h, -0.1))
 })
+
+test_that("range helpers handle named areas, empty logs and empty pieces", {
+  r <- range_sim()
+  bad <- stats::setNames(r$areas, paste0("x", seq_along(r$areas)))
+  expect_error(range_history(r$sim, bad, tree = "full"), "site numbers")
+  named <- stats::setNames(r$areas, paste0("site", seq_along(r$areas)))
+  expect_s3_class(range_history(r$sim, named, tree = "full"), "simmap")
+  empty <- r$sim$ranges[0, ]
+  expect_identical(range_timelines(empty, factor(r$areas)), list())
+  expect_identical(range_pieces(stats::setNames(c(0, 0), c("", "")), "A"), c(A = 0))
+})
