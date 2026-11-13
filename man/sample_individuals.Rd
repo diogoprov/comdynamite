@@ -56,11 +56,14 @@ the species.}
 \item{step}{Recorded step to sample, as in \code{record_steps}; \code{NULL} (the default) uses the
 abundances at the last step. Several steps simulate collections on several dates: each
 date is sampled on its own (new individuals, drawn from the populations then), and the
-result gets a column \code{step}.}
+result gets a column \code{step}. The deviations of each population from \code{population_sd} (and
+\code{founder_sd}) are kept across dates, so populations change between dates only through
+the simulation. For evolving metacommunities, the records keep only the lineages extant at
+the end, so an earlier date misses species that died out later.}
 
 \item{env}{Optional environment of each site at the sampled step, or, with several steps, a
-matrix with one column per step. The default is the environment of the landscape; give it
-for simulations with \code{env_time}. With \code{source = "evolution"} the environment comes from the
+matrix with one column per step (a vector is used for every date). The default is the
+environment of the landscape for every date; give it for simulations with \code{env_time}. With \code{source = "evolution"} the environment comes from the
 simulation.}
 
 \item{cover}{Optional share (0 to 1) of the abundance of each site covered by the species
@@ -89,7 +92,7 @@ Has no effect without \code{founder_sd} or \code{monopolization}.}
 \item{source}{Where population means come from: \code{"traits"} (the default) builds them from
 the optimum of each species with the arguments above; \code{"evolution"} takes them from a
 simulation run with \code{evolution} (\code{\link[=evolution_control]{evolution_control()}}), as the genetic mean plus the
-plastic part of each population at the last step, and draws individuals around them with
+plastic part of each population at the sampled step, and draws individuals around them with
 the genetic plus environmental variance of each species (\code{genetic_var + env_var}, plus,
 for a species of several lineages, the variance among them in the site), so that
 the T-statistics of \code{\link[=tstats]{tstats()}} reflect the variation that evolved. \code{intraspecific_sd},

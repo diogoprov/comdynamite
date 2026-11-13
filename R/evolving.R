@@ -1061,7 +1061,8 @@ evolving_species_state <- function(ab, z, members, species) {
   wmean <- vapply(members, function(l) {
     w <- ab[, l, drop = FALSE]
     zz <- z[, l, drop = FALSE]
-    zz[w == 0 | is.na(zz)] <- 0
+    w[is.na(zz)] <- 0
+    zz[w == 0] <- 0
     ifelse(rowSums(w) > 0, rowSums(w * zz) / rowSums(w), NA_real_)
   }, numeric(nrow(z)))
   wmean <- matrix(wmean, nrow(z), length(species), dimnames = list(rownames(ab), species))
@@ -1069,7 +1070,8 @@ evolving_species_state <- function(ab, z, members, species) {
     l <- members[[i]]
     w <- ab[, l, drop = FALSE]
     dev <- sweep(z[, l, drop = FALSE], 1, wmean[, i])
-    dev[w == 0 | is.na(dev)] <- 0
+    w[is.na(dev)] <- 0
+    dev[w == 0] <- 0
     ifelse(rowSums(w) > 0, rowSums(w * dev^2) / rowSums(w), NA_real_)
   }, numeric(nrow(z)))
   list(genetic = wmean,

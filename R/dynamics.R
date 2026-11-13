@@ -283,7 +283,7 @@ mc_setup <- function(st) {
     record_steps <- sort(unique(record_steps[record_steps >= 1 & record_steps <= n_steps]))
     history <- if (length(record_steps))
       array(0L, c(m, k_all, length(record_steps)),
-            dimnames = list(sites, species, paste0("step", record_steps))) else NULL
+            dimnames = list(sites, species, step_label(record_steps))) else NULL
 
     alive <- seq_len(k_all)
     k <- k_all
@@ -302,7 +302,7 @@ mc_setup <- function(st) {
       ph <- matrix(NA_real_, m, k_all)
       z_history <- if (length(record_steps))
         array(NA_real_, c(m, k_all, length(record_steps)),
-              dimnames = list(sites, species, paste0("step", record_steps))) else NULL
+              dimnames = list(sites, species, step_label(record_steps))) else NULL
       # mean of k founders drawn from sources with mean `from` and, when they come from several
       # sources, variance `between` among their means, for the populations in `cells`
       found <- function(from, k, cells, cols, between = 0) {
@@ -518,7 +518,7 @@ mc_finish <- function(st) {
       dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- labels
       env_history <- if (length(record_steps)) {
         matrix(vapply(record_steps, ev$env, numeric(m)), m,
-               dimnames = list(sites, paste0("step", record_steps)))
+               dimnames = list(sites, step_label(record_steps)))
       }
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
                             environment = ev$env(n_steps), environment_history = env_history,
