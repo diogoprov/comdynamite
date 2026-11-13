@@ -312,3 +312,19 @@ test_that("evolution under lottery recruitment: adaptation, drift on recruits an
                                       evolution = evolution_control(genetic_var = diag(2)),
                                       recruitment = "lottery", microsites = 10), "several traits")
 })
+
+test_that("lottery founders carry the variance of their source with mutation_var", {
+  tr <- data.frame(optimum = 40, sigma = 20, r_max = 5, row.names = "sp")
+  ls <- landscape_points(cbind(c(0, 10), c(0, 0)), env = c(40, 40), disp_scale = 1)
+  init <- matrix(c(400L, 0L), 2, 1, dimnames = list(NULL, "sp"))
+  ev <- evolution_control(genetic_var = 100, env_var = 4, ne_ratio = 0.5, mutation_var = 0.25)
+  set.seed(7)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, 1, 1, dimnames = list("sp", "sp")),
+                                dispersal = 0.05, n_steps = 20, seed_steps = integer(0),
+                                initial = init, evolution = ev, recruitment = "lottery",
+                                microsites = 400)
+  # the empty site is founded by recruits, which bring a variance close to the source's
+  expect_gt(sim$abundance[2, 1], 0)
+  expect_true(all(is.finite(sim$evolution$genetic_variance[, 1])))
+  expect_gt(sim$evolution$genetic_variance[2, 1], 20)
+})
