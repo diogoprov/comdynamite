@@ -40,6 +40,19 @@ evolution_matrices <- function(x, q, species, name) {
   rep(list(as_one(x)), length(species))
 }
 
+# a matrix W with W' P W = I on the range of P, so that distances between rows of z %*% W are
+# Mahalanobis distances under P (directions without variance are left out)
+evolution_whiten <- function(p) {
+  e <- eigen(p, symmetric = TRUE)
+  keep <- e$values > 1e-10 * max(1, e$values[1])
+  e$vectors[, keep, drop = FALSE] %*% diag(1 / sqrt(e$values[keep]), sum(keep))
+}
+
+# Mahalanobis distances under the P of species j between the rows of z (populations x traits)
+mv_distance <- function(ev, j, z) {
+  as.matrix(stats::dist(z %*% ev$whiten[[j]]))
+}
+
 # any matrix with L %*% t(L) = v, also for singular v
 evolution_root <- function(v) {
   e <- eigen(v, symmetric = TRUE)
@@ -125,7 +138,8 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     function(step) env
   }
   list(mv = TRUE, q = q, axes = axes, env = env_now, ref = colMeans(env),
-       optimum = optimum, sigma = sigma, r_max = r_max, G = G, E = E, b = b, sel = sel,
+       optimum = optimum, sigma = sigma, r_max = r_max, r_axis = r_axis, G = G, E = E, b = b,
+       sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,
        founder = evolution$founder)

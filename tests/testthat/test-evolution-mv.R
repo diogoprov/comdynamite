@@ -79,7 +79,7 @@ test_that("multivariate settings are checked", {
   sp <- speciation_control("point", rate = 0.01)
   expect_error(simulate_evolving_metacommunity(s$ls, s$tr$svl, sp,
                                                evolution = evolution_control(diag(2))),
-               "single trait")
+               "several axes")
 })
 
 test_that("sample_individuals() draws several traits from N(mean, G + E)", {

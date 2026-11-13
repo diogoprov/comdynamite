@@ -64,7 +64,10 @@
 #' @param mode `"geographic"`, `"ecological"`, `"point"` or `"fission"`.
 #' @param threshold For `"geographic"` and `"ecological"`: divergence in generations, or
 #'   difference of genetic means in units of the environment, that separates groups; `Inf`
-#'   turns speciation off.
+#'   turns speciation off. With several traits (one per niche axis), the difference of two
+#'   populations in `"ecological"` is the Mahalanobis distance of their genetic means under
+#'   the phenotypic matrix of the species, \eqn{\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
+#'   z}}{sqrt(dz' P^-1 dz)}, so `threshold` is in units of phenotypic standard deviations.
 #' @param rate For `"point"`: probability per individual per generation; for `"fission"`: rate
 #'   per species per generation.
 #' @param divergence For `"geographic"`: `"cluster"` or `"gradual"`.
@@ -81,7 +84,9 @@
 #' @param migration_max For `"ecological"`: migration rate per generation below which gene flow
 #'   counts as reduced.
 #' @param partition For `"fission"`: `"spatial"` or `"random"`.
-#' @param jump_var Variance of the shift of the genetic mean of each new species.
+#' @param jump_var Variance of the shift of the genetic mean of each new species. With several
+#'   traits, one value (independent shifts of that variance on every trait) or a covariance
+#'   matrix with one row and column per trait (for instance proportional to \eqn{G}{G}).
 #' @param completion Time to complete speciation, in generations (fixed or mean); 0 for
 #'   instantaneous speciation.
 #' @param completion_dist `"fixed"` or `"exponential"`.
@@ -136,7 +141,8 @@ speciation_control <- function(mode = c("geographic", "ecological", "point", "fi
   stopifnot(one(migration_min), migration_min > 0, one(reset_generations),
             reset_generations >= 1, one(homogenization), homogenization >= 0,
             one(min_generations), min_generations >= 1, one(migration_max), migration_max >= 0,
-            one(jump_var), jump_var >= 0, one(completion), completion >= 0)
+            is.matrix(jump_var) || (one(jump_var) && jump_var >= 0), one(completion),
+            completion >= 0)
   structure(list(mode = mode, threshold = threshold, rate = rate, divergence = divergence,
                  migration_min = migration_min, reset_generations = reset_generations,
                  homogenization = homogenization, min_generations = min_generations,
@@ -163,7 +169,11 @@ print.mc_speciation <- function(x, ...) {
     cat(" | rate =", format(x$rate))
     if (x$mode == "fission") cat(" | partition:", x$partition)
   }
-  if (x$jump_var > 0) cat(" | jump_var =", format(x$jump_var))
+  if (is.matrix(x$jump_var)) {
+    cat(" | jump_var:", nrow(x$jump_var), "x", ncol(x$jump_var), "matrix")
+  } else if (x$jump_var > 0) {
+    cat(" | jump_var =", format(x$jump_var))
+  }
   if (x$completion > 0) cat(" | completion:", x$completion_dist, format(x$completion))
   cat("\n")
   invisible(x)
@@ -203,7 +213,9 @@ print.mc_speciation <- function(x, ...) {
 #'
 #' @inheritParams simulate_metacommunity
 #' @param traits Traits of the species at the start, from [species_traits()] (one row per
-#'   species).
+#'   species), or a list of such tables, one per environmental axis of `env`, for a niche of
+#'   several axes with one evolving trait per axis (the tree, when needed, goes with the first
+#'   table).
 #' @param speciation Settings from [speciation_control()].
 #' @param evolution Settings from [evolution_control()]; `NULL` keeps the optimum of each
 #'   species fixed (`genetic_var = 0`), which rules out ecological speciation.
@@ -219,6 +231,11 @@ print.mc_speciation <- function(x, ...) {
 #'   Poisson(`seed_mean`) individuals of each species in every site.
 #' @param max_species Maximum number of species ever, including extinct ones; the simulation
 #'   stops with an error beyond it.
+#' @param env For a list of `traits`: the environmental axes of each site, a matrix or data
+#'   frame with one row per site and one column per element of `traits`. The `genetic_var`
+#'   and `env_var` of `evolution` are then covariance matrices (see the section Several traits
+#'   of [evolution_control()]); competition falls with the overlap of the niches on all axes,
+#'   and new species inherit the matrices of their mother.
 #' @return An `mc_evolving` object, a list with:
 #'   * `abundance`: sites x extant species. With protracted speciation (`completion` of
 #'     [speciation_control()]), the species are the good species, each with the individuals
@@ -235,16 +252,19 @@ print.mc_speciation <- function(x, ...) {
 #'   * `richness` and `richness_good`: extant lineages, and extant lineages that have
 #'     completed, at each generation (the second can be below the number of good species, some
 #'     of which survive only in incipient lineages).
-#'   * `genetic`: genetic means of the populations of the extant lineages.
+#'   * `genetic`: genetic means of the populations of the extant lineages (sites x lineages,
+#'     or sites x lineages x traits with several traits).
 #'   * `traits`: of the extant species, with the mean genetic optimum over the populations of
-#'     their lineages as `optimum`.
+#'     their lineages as `optimum`; with several traits, a list with one such table per axis,
+#'     and `env`, the environmental axes.
 #'   * `alpha`: among the extant species at the end, without the niche overlap, which varies
 #'     among sites.
 #'   * The records and colonisation history of [simulate_metacommunity()] for the extant
 #'     species: records summed over their extant lineages (lineages extinct by the end are
 #'     left out); colonisation, in each site, of the most abundant lineage.
 #'   * `series`: one row per lineage alive in each generation, with its `occupancy` (sites),
-#'     regional `abundance`, `genetic` mean (weighted by abundance), and the sites it
+#'     regional `abundance`, `genetic` mean (weighted by abundance; `genetic_<trait>` for each
+#'     trait with several traits), and the sites it
 #'     `colonised` and lost (`extirpated`) since the previous generation, out of those where it
 #'     was absent (`absent_before`) and present (`present_before`). Sites that a lineage passed
 #'     to a new one are not counted as lost, and the transitions are `NA` in the generation of
@@ -263,7 +283,10 @@ print.mc_speciation <- function(x, ...) {
 #'     `within_history`, `environment_history`), the reference environment of plasticity
 #'     (`reference`), the genetic and environmental variances and the slope of plasticity of
 #'     each species (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
-#'     `NULL`.
+#'     `NULL`. With several traits, the genetic means, plastic parts and variances among
+#'     lineages (trait by trait) are arrays of sites x species x traits (with the recorded
+#'     steps as a fourth dimension in the histories), `genetic_var` and `env_var` hold one
+#'     matrix per species and `plasticity` is a matrix of species x traits.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
@@ -290,7 +313,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             initial = NULL, seed_mean = 0.5,
                                             record_steps = NULL,
                                             immigration = c("poisson", "multinomial"),
-                                            max_species = 500) {
+                                            max_species = 500, env = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
@@ -299,21 +322,55 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   immigration <- match.arg(immigration)
   stopifnot(inter_max >= 0, inter_min >= 0, inter_min <= inter_max, scale > 0,
             distance_scale > 0, max_species >= 1, is.logical(niche_overlap))
-  traits <- as_traits(traits)
+  # several niche axes: one trait per axis, evolving with covariance matrices
+  several <- is.list(traits) && !is.data.frame(traits)
+  trait_list <- NULL
+  if (several) {
+    trait_list <- lapply(traits, as_traits)
+    if (is.null(env)) {
+      stop("a list of traits needs `env`, one column per element", call. = FALSE)
+    }
+    env <- as.matrix(env)
+    if (!is.numeric(env) || nrow(env) != length(landscape$env) ||
+        ncol(env) != length(trait_list) || anyNA(env)) {
+      stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
+           "set of traits (", length(trait_list), ")", call. = FALSE)
+    }
+    colnames(env) <- colnames(env) %||% names(traits) %||% paste0("axis", seq_len(ncol(env)))
+    sp1 <- rownames(trait_list[[1]])
+    if (!all(vapply(trait_list, function(t) setequal(rownames(t), sp1), logical(1)))) {
+      stop("sets of traits have different species", call. = FALSE)
+    }
+    tree_attr <- attr(trait_list[[1]], "tree")
+    trait_list <- lapply(trait_list, function(t) t[sp1, , drop = FALSE])
+    attr(trait_list[[1]], "tree") <- tree_attr
+    traits <- trait_list[[1]]
+  } else {
+    if (!is.null(env)) stop("`env` needs a list of traits, one per column", call. = FALSE)
+    traits <- as_traits(traits)
+  }
   k0 <- nrow(traits)
   has_evolution <- !is.null(evolution)
   if (!has_evolution) evolution <- evolution_control(0, ne_ratio = Inf)
   if (!inherits(evolution, "mc_evolution")) {
     stop("`evolution` must come from `evolution_control()`", call. = FALSE)
   }
-  if (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
-      is.matrix(evolution$env_var) || is.list(evolution$env_var)) {
-    stop("`simulate_evolving_metacommunity()` takes a single trait; covariance matrices are ",
-         "for `simulate_metacommunity()`", call. = FALSE)
+  if (!several && (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
+                   is.matrix(evolution$env_var) || is.list(evolution$env_var))) {
+    stop("`evolution` with covariance matrices needs a niche of several axes (a list of ",
+         "`traits` and `env`), one trait per axis", call. = FALSE)
   }
-  if (speciation$mode == "ecological" && all(evolution$genetic_var == 0)) {
+  if (speciation$mode == "ecological" && all(unlist(evolution$genetic_var) == 0)) {
     stop("ecological speciation needs `evolution` with genetic variance", call. = FALSE)
   }
+  jump <- speciation$jump_var
+  if (is.matrix(jump)) {
+    if (!several) stop("a matrix `jump_var` needs several traits", call. = FALSE)
+    jump <- evolution_matrices(jump, ncol(env), "x", "jump_var")[[1]]
+  } else if (several) {
+    jump <- diag(jump, ncol(env))
+  }
+  jump_root <- if (several) evolution_root(jump) else NULL
   tree0 <- attr(traits, "tree")
   if (k0 > 1 && is.null(tree0)) {
     stop("several species at the start need a tree in `traits` (from `species_traits()`)",
@@ -335,8 +392,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   }
   sites <- paste0("site", seq_along(landscape$env))
   species0 <- rownames(traits)
-  evolution$traits <- traits
-  evolution$env <- landscape$env
+  evolution$traits <- if (several) stats::setNames(trait_list, colnames(env)) else traits
+  evolution$env <- if (several) env else landscape$env
   # time at which each pair of species at the start split, in generations before the start
   split0 <- matrix(0, k0, k0, dimnames = list(species0, species0))
   if (k0 > 1) split0 <- -ape::cophenetic.phylo(tree0)[species0, species0] / 2
@@ -450,7 +507,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
         buds[[i]]$ids <- st$k_all + pos
       }
       # every per-species structure grows once for all the buddings of the generation
-      evolving_split_many(st, buds, speciation$jump_var, mutants = speciation$mode == "point")
+      evolving_split_many(st, buds, speciation$jump_var, mutants = speciation$mode == "point",
+                          jump_root = jump_root)
       mothers <- sp_table$species[vapply(buds, function(b) b$j, numeric(1))]
       done <- gen + if (speciation$completion == 0) rep(0, sum(qs)) else
         if (speciation$completion_dist == "fixed") rep(speciation$completion, sum(qs)) else
@@ -500,7 +558,11 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     if (length(buds) && !is.null(st$history) && step %in% st$record_steps) {
       i <- match(step, st$record_steps)
       st$history[, st$alive, i] <- st$n
-      if (!is.null(st$z_history)) st$z_history[, st$alive, i] <- st$z[, st$alive]
+      if (isTRUE(st$ev$mv)) {
+        st$z_history[, st$alive, , i] <- st$z[, st$alive, ]
+      } else if (!is.null(st$z_history)) {
+        st$z_history[, st$alive, i] <- st$z[, st$alive]
+      }
     }
     if (competition == "phylo" || nrow(events)) {
       now <- st$species[st$alive]
@@ -534,12 +596,25 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     NULL
   }
   lineage_ab <- out$abundance[, extant, drop = FALSE]
-  genetic <- out$evolution$genetic[, extant, drop = FALSE]
+  mv <- isTRUE(st$ev$mv)
+  genetic <- if (mv) out$evolution$genetic[, extant, , drop = FALSE] else
+    out$evolution$genetic[, extant, drop = FALSE]
   members <- split(extant, factor(obs$group[extant], species))
-  optimum <- vapply(members, function(l) mean(genetic[, l], na.rm = TRUE), numeric(1))
   sp_idx <- match(species, st$species)
-  traits_out <- data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx],
-                           r_max = st$ev$r_max[sp_idx], row.names = species)
+  if (mv) {
+    # one table of traits per axis, with the mean genetic optimum over the populations
+    traits_out <- stats::setNames(lapply(seq_len(st$ev$q), function(a) {
+      ga <- genetic[, , a]
+      ga <- matrix(ga, st$m, dimnames = list(NULL, extant))
+      optimum <- vapply(members, function(l) mean(ga[, l], na.rm = TRUE), numeric(1))
+      data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx, a],
+                 r_max = st$ev$r_axis[sp_idx, a], row.names = species)
+    }), st$ev$axes)
+  } else {
+    optimum <- vapply(members, function(l) mean(genetic[, l], na.rm = TRUE), numeric(1))
+    traits_out <- data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx],
+                             r_max = st$ev$r_max[sp_idx], row.names = species)
+  }
   alpha <- evolving_alpha(split_time[obs$rep, obs$rep, drop = FALSE], generations,
                           competition, inter_max, inter_min, scale, distance_scale)
   dimnames(alpha) <- list(species, species)
@@ -550,7 +625,10 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     history <- array(0L, c(st$m, length(species), dim(out$history)[3]),
                      dimnames = list(rownames(out$history), species,
                                      dimnames(out$history)[[3]]))
-    for (i in seq_len(dim(out$history)[3])) history[, , i] <- by(out$history[, , i], TRUE)
+    for (i in seq_len(dim(out$history)[3])) {
+      history[, , i] <- by(matrix(out$history[, , i], st$m,
+                                  dimnames = dimnames(out$history)[1:2]), TRUE)
+    }
   }
   series_df <- if (length(series)) do.call(rbind, series) else evolving_series_rows(st, before,
                                                                                    list(), sp_table, 0)[0, ]
@@ -562,7 +640,10 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   # the evolutionary state by species, for sample_individuals(): genetic means weighted by the
   # abundance of the lineages, the plastic part and the variances among individuals
   ev_out <- NULL
-  if (has_evolution) {
+  if (has_evolution && mv) {
+    ev_out <- evolving_state_mv(st, out, lineage_ab, genetic, members, species, extant, sp_idx,
+                                n_steps)
+  } else if (has_evolution) {
     now <- evolving_species_state(lineage_ab, genetic, members, species)
     wmean <- now$genetic
     within <- now$within
@@ -602,6 +683,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
                  extirpation = st$extirpation[sp_idx], speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
+                 env = if (several) as.data.frame(env) else NULL,
                  generations = generations, history = history,
                  arrival = by(out$arrival), propagule = by(out$propagule),
                  immigrants = by(out$immigrants), migrant_load = by(out$migrant_load)),
@@ -651,7 +733,7 @@ as_metacommunity.mc_evolving <- function(x, ...) {
     y
   }
   structure(list(abundance = x$abundance, history = x$history, landscape = x$landscape,
-                 env = NULL, traits = traits, alpha = x$alpha, dispersal = x$dispersal,
+                 env = x$env, traits = traits, alpha = x$alpha, dispersal = x$dispersal,
                  extirpation = x$extirpation, pool = NULL, tree = x$tree,
                  arrival = fix(x$arrival), propagule = fix(x$propagule),
                  immigrants = fix(x$immigrants), migrant_load = fix(x$migrant_load),
@@ -673,6 +755,24 @@ evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, s
 # crowding in each site with competition scaled by the overlap of the Gaussian niches of the
 # phenotypes p there (sites x alive species); the phylogenetic part is the alpha of the state
 niche_crowding <- function(st) {
+  if (isTRUE(st$ev$mv)) {
+    return(function(n, p) {
+      sigma2 <- st$ev$sigma[st$alive, , drop = FALSE]^2
+      out <- matrix(0, nrow(n), ncol(n))
+      for (s in which(rowSums(n) > 0)) {
+        here <- which(n[s, ] > 0)
+        # the overlap of two Gaussian niches is the product over axes
+        log_overlap <- 0
+        for (a in seq_len(st$ev$q)) {
+          w <- outer(sigma2[here, a], sigma2[here, a], "+")
+          d2 <- outer(p[s, here, a], p[s, here, a], "-")^2
+          log_overlap <- log_overlap - ifelse(is.finite(w), d2 / (2 * w), 0)
+        }
+        out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * exp(log_overlap))
+      }
+      out
+    })
+  }
   function(n, p) {
     sigma2 <- st$ev$sigma[st$alive]^2
     out <- matrix(0, nrow(n), ncol(n))
@@ -775,9 +875,13 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
       sub <- d[idx, idx]
       rate <- migration_rate(f[idx, idx, drop = FALSE], st$n[idx, c])
       if (speciation$mode == "ecological") {
-        zj <- st$z[idx, j]
-        apart <- abs(outer(zj, zj, "-")) >= speciation$threshold &
-          rate < speciation$migration_max
+        far <- if (isTRUE(st$ev$mv)) {
+          mv_distance(st$ev, j, matrix(st$z[idx, j, ], length(idx)))
+        } else {
+          zj <- st$z[idx, j]
+          abs(outer(zj, zj, "-"))
+        }
+        apart <- far >= speciation$threshold & rate < speciation$migration_max
         sub[] <- ifelse(apart, sub + 1, 0)
       } else if (speciation$divergence == "cluster") {
         cl <- link_groups(rate >= speciation$migration_min)
@@ -827,6 +931,9 @@ evolving_order <- function(st, j, groups, d, speciation) {
   away <- function(s) {
     if (speciation$mode == "geographic") {
       mean(d[s, groups[[keep]], drop = FALSE], na.rm = TRUE)
+    } else if (isTRUE(st$ev$mv)) {
+      centre <- function(rows) colMeans(matrix(st$z[rows, j, ], length(rows)), na.rm = TRUE)
+      mv_distance(st$ev, j, rbind(centre(s), centre(groups[[keep]])))[1, 2]
     } else {
       abs(mean(st$z[s, j], na.rm = TRUE) - mean(st$z[groups[[keep]], j], na.rm = TRUE))
     }
@@ -927,34 +1034,55 @@ evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0
 # new species take the genetic means and history of the mother in their sites, shifted by one
 # Gaussian draw of variance `jump_var` each. Point mutants (`mutants = TRUE`) arrive now, from a
 # propagule of their own individuals.
-evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE) {
+evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_root = NULL) {
   q <- sum(vapply(buds, function(b) length(b$sites), numeric(1)))
   m <- st$m
+  mv <- isTRUE(st$ev$mv)
   mothers <- rep(vapply(buds, function(b) b$j, numeric(1)),
                  vapply(buds, function(b) length(b$sites), numeric(1)))
   names_new <- unlist(lapply(buds, function(b) b$names))
   grow_cols <- function(x, fill) cbind(x, matrix(fill, nrow(x), q))
   grow_vec <- function(x) c(x, x[mothers])
-  grow_hist <- function(x, fill) {
-    if (is.null(x)) return(NULL)
+  grow_rows <- function(x) rbind(x, x[mothers, , drop = FALSE])
+  # sites x species (x traits) arrays of the evolutionary state
+  grow_arr <- function(x, fill) {
+    if (length(dim(x)) == 2) return(grow_cols(x, fill))
     d <- dim(x)
     out <- array(fill, c(d[1], d[2] + q, d[3]))
     out[, seq_len(d[2]), ] <- x
-    dimnames(out) <- list(dimnames(x)[[1]], c(dimnames(x)[[2]], names_new), dimnames(x)[[3]])
+    out
+  }
+  grow_hist <- function(x, fill) {
+    if (is.null(x)) return(NULL)
+    d <- dim(x)
+    nd <- length(d)
+    out <- array(fill, replace(d, 2, d[2] + q))
+    if (nd == 3) out[, seq_len(d[2]), ] <- x else out[, seq_len(d[2]), , ] <- x
+    dn <- dimnames(x)
+    dn[[2]] <- c(dn[[2]], names_new)
+    dimnames(out) <- dn
     out
   }
   cols_j <- match(vapply(buds, function(b) b$j, numeric(1)), st$alive)
   for (nm in c("arrival", "propagule")) assign(nm, grow_cols(get(nm, st), NA_integer_), st)
   for (nm in c("immigrants", "load")) assign(nm, grow_cols(get(nm, st), 0), st)
   st$present <- grow_cols(st$present, FALSE)
-  st$z <- grow_cols(st$z, NA_real_)
-  st$ph <- grow_cols(st$ph, NA_real_)
-  st$pool_mean <- grow_cols(st$pool_mean, NA_real_)
+  st$z <- grow_arr(st$z, NA_real_)
+  st$ph <- grow_arr(st$ph, NA_real_)
+  st$pool_mean <- grow_arr(st$pool_mean, NA_real_)
   st$history <- grow_hist(st$history, 0L)
   st$z_history <- grow_hist(st$z_history, NA_real_)
   st$dispersal <- grow_vec(st$dispersal)
   st$extirpation <- grow_vec(st$extirpation)
-  for (nm in c("g", "b", "ve", "optimum", "sigma", "r_max")) st$ev[[nm]] <- grow_vec(st$ev[[nm]])
+  if (mv) {
+    for (nm in c("optimum", "sigma", "b", "r_axis")) st$ev[[nm]] <- grow_rows(st$ev[[nm]])
+    for (nm in c("r_max", "fixed")) st$ev[[nm]] <- grow_vec(st$ev[[nm]])
+    for (nm in c("G", "E", "sel", "L", "whiten")) st$ev[[nm]] <- c(st$ev[[nm]], st$ev[[nm]][mothers])
+  } else {
+    for (nm in c("g", "b", "ve", "optimum", "sigma", "r_max")) {
+      st$ev[[nm]] <- grow_vec(st$ev[[nm]])
+    }
+  }
   st$fixed_z <- grow_vec(st$fixed_z)
   st$species <- c(st$species, names_new)
   new_n <- matrix(0L, m, q)
@@ -976,9 +1104,17 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE) {
       a <- if (is.null(b$amounts)) n[s, c_j] else b$amounts[[g]]
       new_n[s, col] <- a
       taken[s] <- taken[s] + a
-      x$pool_mean[, id] <- x$pool_mean[, j]
-      for (nm in c("arrival", "propagule", "immigrants", "load", "present", "z", "ph")) {
+      for (nm in c("arrival", "propagule", "immigrants", "load", "present")) {
         x[[nm]][s, id] <- x[[nm]][s, j]
+      }
+      if (mv) {
+        x$pool_mean[, id, ] <- x$pool_mean[, j, ]
+        x$z[s, id, ] <- x$z[s, j, ]
+        x$ph[s, id, ] <- x$ph[s, j, ]
+      } else {
+        x$pool_mean[, id] <- x$pool_mean[, j]
+        x$z[s, id] <- x$z[s, j]
+        x$ph[s, id] <- x$ph[s, j]
       }
       if (mutants) {
         x$arrival[s, id] <- as.integer(st$step)
@@ -986,7 +1122,16 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE) {
         x$immigrants[s, id] <- 0
         x$load[s, id] <- 0
       }
-      if (jump_var > 0) {
+      if (mv && !is.null(jump_root) && any(jump_root != 0)) {
+        # one multivariate draw per new species, added to every trait of its populations
+        shift <- drop(jump_root %*% stats::rnorm(ncol(jump_root)))
+        for (tr in seq_along(shift)) {
+          x$z[s, id, tr] <- x$z[s, id, tr] + shift[tr]
+          x$ph[s, id, tr] <- x$ph[s, id, tr] + shift[tr]
+          x$pool_mean[, id, tr] <- x$pool_mean[, id, tr] + shift[tr]
+        }
+        optimum[id, ] <- optimum[id, ] + shift
+      } else if (!mv && jump_var > 0) {
         shift <- stats::rnorm(1, 0, sqrt(jump_var))
         x$z[s, id] <- x$z[s, id] + shift
         x$ph[s, id] <- x$ph[s, id] + shift
@@ -997,7 +1142,14 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE) {
     # the mother keeps what is left; where nothing is left, its population is gone
     n[, c_j] <- n[, c_j] - as.integer(taken)
     emptied <- which(taken > 0 & n[, c_j] == 0)
-    for (nm in c("arrival", "propagule", "z", "ph")) x[[nm]][emptied, j] <- NA
+    for (nm in c("arrival", "propagule")) x[[nm]][emptied, j] <- NA
+    if (mv) {
+      x$z[emptied, j, ] <- NA
+      x$ph[emptied, j, ] <- NA
+    } else {
+      x$z[emptied, j] <- NA
+      x$ph[emptied, j] <- NA
+    }
     for (nm in c("immigrants", "load")) x[[nm]][emptied, j] <- 0
     x$present[emptied, j] <- FALSE
   }
@@ -1059,6 +1211,57 @@ evolving_tree <- function(sp, tree0) {
   ape::read.tree(text = paste0(text, ";"))
 }
 
+# the evolutionary state by species with several traits: the genetic means and variance among
+# lineages of evolving_species_state(), trait by trait, as arrays of sites x species x traits,
+# at the end and at the recorded steps, with the plastic part and the matrices of each species
+evolving_state_mv <- function(st, out, lineage_ab, genetic, members, species, extant, sp_idx,
+                              n_steps) {
+  ev <- st$ev
+  q <- ev$q
+  sites <- rownames(lineage_ab)
+  by_trait <- function(ab, z) {
+    parts <- lapply(seq_len(q), function(a) {
+      evolving_species_state(ab, matrix(z[, , a], st$m, dimnames = list(sites, extant)),
+                             members, species)
+    })
+    shape <- function(what) {
+      array(vapply(parts, function(p) p[[what]], matrix(0, st$m, length(species))),
+            c(st$m, length(species), q), dimnames = list(sites, species, ev$axes))
+    }
+    list(genetic = shape("genetic"), within = shape("within"))
+  }
+  now <- by_trait(lineage_ab, genetic)
+  e_end <- ev$env(n_steps)
+  plastic <- now$genetic
+  for (a in seq_len(q)) plastic[, , a] <- outer(e_end[, a] - ev$ref[a], ev$b[sp_idx, a])
+  plastic[is.na(now$genetic)] <- NA_real_
+  z_hist <- within_hist <- env_hist <- NULL
+  if (!is.null(out$history) && !is.null(out$evolution$history)) {
+    steps <- dimnames(out$history)[[3]]
+    dims <- c(st$m, length(species), q, length(steps))
+    names4 <- list(sites, species, ev$axes, steps)
+    z_hist <- within_hist <- array(NA_real_, dims, dimnames = names4)
+    for (i in seq_along(steps)) {
+      ab <- matrix(out$history[, extant, i], st$m, dimnames = list(sites, extant))
+      z <- out$evolution$history[, extant, , i, drop = FALSE]
+      z <- array(z, c(st$m, length(extant), q))
+      at <- by_trait(ab, z)
+      z_hist[, , , i] <- at$genetic
+      within_hist[, , , i] <- at$within
+    }
+    env_hist <- out$evolution$environment_history
+    dimnames(env_hist)[[1]] <- sites
+  }
+  environment <- matrix(e_end, st$m, dimnames = list(sites, ev$axes))
+  list(genetic = now$genetic, plastic = plastic, within_var = now$within, history = z_hist,
+       within_history = within_hist, environment = environment,
+       environment_history = env_hist, reference = stats::setNames(ev$ref, ev$axes),
+       genetic_var = stats::setNames(ev$G[sp_idx], species),
+       env_var = stats::setNames(ev$E[sp_idx], species),
+       plasticity = matrix(ev$b[sp_idx, ], length(species), dimnames = list(species, ev$axes)),
+       settings = out$evolution$settings)
+}
+
 # genetic means of species (weighted by the abundance of their lineages) and the variance among
 # their lineages within each site (0 for species of one lineage), from lineage abundances and
 # genetic means (sites x extant lineages)
@@ -1112,13 +1315,22 @@ evolving_series_rows <- function(st, before, buds, sp_table, gen) {
     skip[given, c_j] <- TRUE
   }
   newborn <- sp_table$birth[ids] == gen & gen > 0
-  zz <- cbind(st$z[, st$alive, drop = FALSE], matrix(0, st$m, length(dead)))
-  zz[!now] <- 0
   abundance <- colSums(n)
+  # mean genetic optimum of each lineage, weighted by abundance (one column per trait)
+  lineage_mean <- function(z) {
+    zz <- cbind(z, matrix(0, st$m, length(dead)))
+    zz[!now] <- 0
+    ifelse(abundance > 0, colSums(n * zz) / abundance, NA_real_)
+  }
+  genetic <- if (isTRUE(st$ev$mv)) {
+    g <- lapply(seq_len(st$ev$q), function(a) lineage_mean(st$z[, st$alive, a]))
+    stats::setNames(g, paste0("genetic_", st$ev$axes))
+  } else {
+    list(genetic = lineage_mean(st$z[, st$alive, drop = FALSE]))
+  }
   keep <- !skip
   out <- data.frame(generation = rep(gen, length(ids)), lineage = st$species[ids],
-                    occupancy = colSums(now), abundance = abundance,
-                    genetic = ifelse(abundance > 0, colSums(n * zz) / abundance, NA_real_),
+                    occupancy = colSums(now), abundance = abundance, genetic,
                     colonised = colSums(now & !was & keep),
                     extirpated = colSums(!now & was & keep),
                     present_before = colSums(was & keep), absent_before = colSums(!was & keep),

@@ -22,14 +22,17 @@ simulate_evolving_metacommunity(
   seed_mean = 0.5,
   record_steps = NULL,
   immigration = c("poisson", "multinomial"),
-  max_species = 500
+  max_species = 500,
+  env = NULL
 )
 }
 \arguments{
 \item{landscape}{An \code{mc_landscape} object.}
 
 \item{traits}{Traits of the species at the start, from \code{\link[=species_traits]{species_traits()}} (one row per
-species).}
+species), or a list of such tables, one per environmental axis of \code{env}, for a niche of
+several axes with one evolving trait per axis (the tree, when needed, goes with the first
+table).}
 
 \item{speciation}{Settings from \code{\link[=speciation_control]{speciation_control()}}.}
 
@@ -68,6 +71,12 @@ which conserves them. Spatially implicit landscapes are always multinomial.}
 
 \item{max_species}{Maximum number of species ever, including extinct ones; the simulation
 stops with an error beyond it.}
+
+\item{env}{For a list of \code{traits}: the environmental axes of each site, a matrix or data
+frame with one row per site and one column per element of \code{traits}. The \code{genetic_var}
+and \code{env_var} of \code{evolution} are then covariance matrices (see the section Several traits
+of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
+and new species inherit the matrices of their mother.}
 }
 \value{
 An \code{mc_evolving} object, a list with:
@@ -87,16 +96,19 @@ each belongs to.
 \item \code{richness} and \code{richness_good}: extant lineages, and extant lineages that have
 completed, at each generation (the second can be below the number of good species, some
 of which survive only in incipient lineages).
-\item \code{genetic}: genetic means of the populations of the extant lineages.
+\item \code{genetic}: genetic means of the populations of the extant lineages (sites x lineages,
+or sites x lineages x traits with several traits).
 \item \code{traits}: of the extant species, with the mean genetic optimum over the populations of
-their lineages as \code{optimum}.
+their lineages as \code{optimum}; with several traits, a list with one such table per axis,
+and \code{env}, the environmental axes.
 \item \code{alpha}: among the extant species at the end, without the niche overlap, which varies
 among sites.
 \item The records and colonisation history of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} for the extant
 species: records summed over their extant lineages (lineages extinct by the end are
 left out); colonisation, in each site, of the most abundant lineage.
 \item \code{series}: one row per lineage alive in each generation, with its \code{occupancy} (sites),
-regional \code{abundance}, \code{genetic} mean (weighted by abundance), and the sites it
+regional \code{abundance}, \code{genetic} mean (weighted by abundance; \verb{genetic_<trait>} for each
+trait with several traits), and the sites it
 \code{colonised} and lost (\code{extirpated}) since the previous generation, out of those where it
 was absent (\code{absent_before}) and present (\code{present_before}). Sites that a lineage passed
 to a new one are not counted as lost, and the transitions are \code{NA} in the generation of
@@ -115,7 +127,10 @@ environment at \code{record_steps} for the lineages extant at the end (\code{his
 \code{within_history}, \code{environment_history}), the reference environment of plasticity
 (\code{reference}), the genetic and environmental variances and the slope of plasticity of
 each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \code{settings}; otherwise
-\code{NULL}.
+\code{NULL}. With several traits, the genetic means, plastic parts and variances among
+lineages (trait by trait) are arrays of sites x species x traits (with the recorded
+steps as a fourth dimension in the histories), \code{genetic_var} and \code{env_var} hold one
+matrix per species and \code{plasticity} is a matrix of species x traits.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used.
 }
 

@@ -80,7 +80,8 @@
 #' growth, changes only through its genetic covariance with the selected traits and through
 #' drift, the correlated response of Lande (1979). Founders draw their means from
 #' \eqn{N(\bar z_{in}, G / k)}{N(zbar_in, G / k)} plus the variance among their sources trait by
-#' trait. The environment can change on every axis (`env_time` as a list of matrices). With \eqn{G = 0}{G = 0} the
+#' trait. The environment can change on every axis (`env_time` as a list of matrices), and
+#' [simulate_evolving_metacommunity()] takes several traits in the same way. With \eqn{G = 0}{G = 0} the
 #' abundances are those without evolution for the same seed.
 #'
 #' @param genetic_var Additive genetic variance of the optimum \eqn{G}{G}, in squared units of

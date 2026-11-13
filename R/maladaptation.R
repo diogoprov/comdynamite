@@ -124,9 +124,18 @@ maladaptation_mv <- function(x, step) {
     if (!length(s)) next
     g <- match(species[k], names(ev$genetic_var))
     p <- ev$genetic_var[[g]] + ev$env_var[[g]]
-    A <- solve(diag(sigma[k, s]^2, length(s)) + p[s, s, drop = FALSE])
     d <- dev[rows, s, drop = FALSE]
-    distance[rows] <- sqrt(rowSums((d %*% A) * d))
+    if (is.null(state$within)) {
+      A <- solve(diag(sigma[k, s]^2, length(s)) + p[s, s, drop = FALSE])
+      distance[rows] <- sqrt(rowSums((d %*% A) * d))
+    } else {
+      # the variance among lineages in each site adds to the diagonal of P
+      w <- matrix(state$within, ncol = q)[cell[rows], , drop = FALSE]
+      for (r in seq_along(rows)) {
+        A <- solve(diag(sigma[k, s]^2 + w[r, s], length(s)) + p[s, s, drop = FALSE])
+        distance[rows[r]] <- sqrt(sum((d[r, ] %*% A) * d[r, ]))
+      }
+    }
   }
   out <- data.frame(site = sites[i], species = species[j], abundance = abundance[cell],
                     stringsAsFactors = FALSE)
