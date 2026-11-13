@@ -336,3 +336,105 @@ test_that("tstats() returns NA for a trait without values", {
   expect_true(all(is.na(res$T_IP.IC[res$trait == "empty"])))
   expect_false(all(is.na(res$T_IP.IC[res$trait == "trait"])))
 })
+
+test_that("sample_individuals() draws individuals from the evolutionary state", {
+  set.seed(4)
+  ls <- landscape_implicit(12)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  ev <- evolution_control(genetic_var = 4, env_var = 1, plasticity = 0.5,
+                          env = ls$env, traits = tr)
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 80, dispersal = 0.01, evolution = ev)
+  ind <- sample_individuals(sim, n = 2000, source = "evolution")
+  pop <- sim$evolution$genetic + sim$evolution$plastic
+  site <- as.integer(factor(ind$site, rownames(sim$abundance)))
+  expect_equal(ind$population_mean, unname(pop[cbind(site, 1)]))
+  # individuals vary around their population mean with variance G + VE
+  expect_gt(nrow(ind), 2000)
+  expect_equal(stats::var(ind$trait - ind$population_mean), 5, tolerance = 0.1)
+  more <- sample_individuals(sim, n = 2000, source = "evolution", intraspecific_sd = 2)
+  expect_equal(stats::var(more$trait - more$population_mean), 9, tolerance = 0.1)
+  expect_error(sample_individuals(sim, source = "evolution", local_adaptation = 0.5),
+               "must stay 0")
+  expect_error(sample_individuals(sim, source = "evolution", step = 10), "last step")
+  plain <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                  n_steps = 20)
+  expect_error(sample_individuals(plain, source = "evolution"), "needs a simulation")
+})
+
+test_that("sample_individuals() takes evolving metacommunities and feeds tstats()", {
+  set.seed(5)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  sim <- simulate_evolving_metacommunity(ls, anc, speciation_control("fission", rate = 0.02),
+                                         evolution = evolution_control(genetic_var = 10,
+                                                                       env_var = 2),
+                                         dispersal = 0.01, extirpation = 0.02, n_steps = 150)
+  ev <- sim$evolution
+  expect_equal(dim(ev$genetic), dim(sim$abundance))
+  expect_identical(is.na(ev$genetic), sim$abundance == 0)
+  expect_equal(unname(ev$genetic_var), rep(10, ncol(sim$abundance)))
+  ind <- sample_individuals(sim, n = 5, source = "evolution")
+  expect_setequal(unique(ind$species), colnames(sim$abundance))
+  expect_equal(nrow(ind), sum(pmin(sim$abundance, 5)))
+  ts <- tstats(ind, n_perm = 0)
+  expect_true(is.list(ts) || is.data.frame(ts))
+})
+
+test_that("the evolutionary state is NULL without evolution and keeps names and lineages", {
+  set.seed(6)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  plain <- simulate_evolving_metacommunity(ls, anc, speciation_control("fission", rate = 0.02),
+                                           dispersal = 0.01, n_steps = 60)
+  expect_null(plain$evolution)
+  expect_error(sample_individuals(plain, source = "evolution"), "needs a simulation")
+  # incipient lineages of one good species add their spread to the variance within sites
+  set.seed(7)
+  sim <- simulate_evolving_metacommunity(
+    ls, anc, speciation_control("fission", rate = 0.05, jump_var = 25, completion = 1000),
+    evolution = evolution_control(genetic_var = 1), dispersal = 0.05, n_steps = 100)
+  w <- sim$evolution$within_var
+  several <- table(sim$lineage_species) > 1
+  expect_true(any(several))
+  expect_true(any(w[, names(several)[several]] > 0, na.rm = TRUE))
+  if (any(!several)) expect_true(all(w[, names(several)[!several]] == 0, na.rm = TRUE))
+  # columns are matched by name, not position
+  mc <- as_metacommunity(sim)
+  set.seed(8)
+  a <- sample_individuals(mc, n = 3, source = "evolution")
+  mc2 <- mc
+  mc2$abundance <- mc2$abundance[, rev(colnames(mc2$abundance)), drop = FALSE]
+  set.seed(8)
+  b <- sample_individuals(mc2, n = 3, source = "evolution")
+  key <- function(d) d[order(d$site, d$species, d$individual), c("site", "species",
+                                                                   "population_mean")]
+  expect_equal(key(a), key(b), ignore_attr = TRUE)
+  expect_error(sample_individuals(mc, source = "evolution", env = ls$env), "env")
+  expect_equal(unique(a$env[a$site == "site1"]), sim$evolution$environment[1])
+})
+
+test_that("evolved_populations() checks the names of the evolutionary state", {
+  ab <- matrix(1, 2, 2, dimnames = list(c("s1", "s2"), c("a", "b")))
+  ev <- list(genetic = ab, plastic = ab * 0, genetic_var = 1, env_var = c(a = 1, b = 2))
+  x <- list(abundance = ab, evolution = ev)
+  st <- evolved_populations(x, c("s1", "s2"), c("b", "a"))
+  expect_equal(unname(st$var[1, ]), c(3, 2))
+  # sites matched by position when the state has other site names
+  x2 <- x
+  rownames(x2$evolution$genetic) <- rownames(x2$evolution$plastic) <- c("p", "q")
+  expect_equal(dim(evolved_populations(x2, c("s1", "s2"), "a")$mean), c(2, 1))
+  expect_error(evolved_populations(x2, c("s1", "s2", "s3"), "a"), "does not match")
+  expect_error(evolved_populations(x, "s1", "z"), "lacks")
+  x3 <- x
+  x3$evolution$genetic <- unname(ab)
+  expect_error(evolved_populations(x3, "s1", "a"), "no site or species names")
+  set.seed(4)
+  ls <- landscape_implicit(6)
+  tr <- data.frame(optimum = 50, sigma = 30, r_max = 5, row.names = "sp1")
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
+                                n_steps = 20, evolution = evolution_control(1, env = ls$env,
+                                                                            traits = tr))
+  expect_error(sample_individuals(sim, source = "evolution", intraspecific_sd = -1),
+               "negative")
+})

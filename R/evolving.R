@@ -243,8 +243,21 @@ print.mc_speciation <- function(x, ...) {
 #'   * The records and colonisation history of [simulate_metacommunity()] for the extant
 #'     species: records summed over their extant lineages (lineages extinct by the end are
 #'     left out); colonisation, in each site, of the most abundant lineage.
-#'   * The `landscape`, `dispersal`, `extirpation`, `speciation`, `evolution` and `n_steps`
-#'     used.
+#'   * `series`: one row per lineage alive in each generation, with its `occupancy` (sites),
+#'     regional `abundance`, `genetic` mean (weighted by abundance), and the sites it
+#'     `colonised` and lost (`extirpated`) since the previous generation, out of those where it
+#'     was absent (`absent_before`) and present (`present_before`). Sites that a lineage passed
+#'     to a new one are not counted as lost, and the transitions are `NA` in the generation of
+#'     birth. [persistence()] turns them into rates of colonisation and extirpation.
+#'   * `evolution`: with `evolution`, the state of the extant species at the end, for
+#'     [sample_individuals()] with `source = "evolution"`: genetic means in each site
+#'     (`genetic`, weighted over their lineages by abundance; `NA` where absent), the plastic
+#'     part of the phenotype (`plastic`), the variance among the lineages of a species in
+#'     each site (`within_var`, 0 for species of one lineage), the environment of each site
+#'     at the end (`environment`), the reference environment of plasticity (`reference`), the genetic and environmental variances and the slope of plasticity of
+#'     each species (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
+#'     `NULL`.
+#'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
 #' @references Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
@@ -281,7 +294,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
             distance_scale > 0, max_species >= 1, is.logical(niche_overlap))
   traits <- as_traits(traits)
   k0 <- nrow(traits)
-  if (is.null(evolution)) evolution <- evolution_control(0, ne_ratio = Inf)
+  has_evolution <- !is.null(evolution)
+  if (!has_evolution) evolution <- evolution_control(0, ne_ratio = Inf)
   if (!inherits(evolution, "mc_evolution")) {
     stop("`evolution` must come from `evolution_control()`", call. = FALSE)
   }
@@ -348,6 +362,20 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     flow <- lapply(seq_len(k0), function(j) matrix(0, st$m, st$m))
   }
   richness <- richness_good <- integer(0)
+  # presence of every lineage at the end of the last generation (sites x all lineages ever), for
+  # the colonisations and extirpations of the series; rows of the series by generation
+  # presence of every lineage ever (columns) in each site at the end of the last generation
+  grow <- function(b) {
+    if (ncol(b) < st$k_all) b <- cbind(b, matrix(FALSE, st$m, st$k_all - ncol(b)))
+    b
+  }
+  now_present <- function() {
+    b <- matrix(FALSE, st$m, st$k_all)
+    b[, st$alive] <- st$n > 0
+    b
+  }
+  before <- now_present()
+  series <- list()
   for (step in seq_len(n_steps)) {
     mc_step(st, step)
     gen <- step / per
@@ -379,6 +407,11 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     if (st$k == 0) {
       richness <- c(richness, 0L)
       richness_good <- c(richness_good, 0L)
+      if (any(before)) {
+        series[[length(series) + 1]] <- evolving_series_rows(st, grow(before), list(),
+                                                             sp_table, gen)
+        before[] <- FALSE
+      }
       next
     }
     if (uses_div) {
@@ -461,6 +494,9 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     }
     richness <- c(richness, length(st$alive))
     richness_good <- c(richness_good, sum(sp_table$completion[st$alive] <= gen))
+    series[[length(series) + 1]] <- evolving_series_rows(st, grow(before), buds, sp_table,
+                                                         gen)
+    before <- now_present()
   }
   out <- mc_finish(st)
   extant <- sp_table$species[sp_table$fate == "extant"]
@@ -498,13 +534,47 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                      dimnames(out$history)[[3]]))
     for (i in seq_len(dim(out$history)[3])) history[, , i] <- by(out$history[, , i], TRUE)
   }
+  series_df <- if (length(series)) do.call(rbind, series) else evolving_series_rows(st, before,
+                                                                                   list(), sp_table, 0)[0, ]
+  rownames(series_df) <- NULL
+  # the evolutionary state by species, for sample_individuals(): genetic means weighted by the
+  # abundance of the lineages, the plastic part and the variances among individuals
+  ev_out <- NULL
+  if (has_evolution) {
+    wmean <- vapply(members, function(l) {
+      w <- lineage_ab[, l, drop = FALSE]
+      zz <- genetic[, l, drop = FALSE]
+      zz[w == 0] <- 0
+      ifelse(rowSums(w) > 0, rowSums(w * zz) / rowSums(w), NA_real_)
+    }, numeric(st$m))
+    wmean <- matrix(wmean, st$m, length(species), dimnames = list(rownames(lineage_ab), species))
+    # variance among the lineages of a species within each site (weighted by abundance), 0 for
+    # species of one lineage
+    within <- vapply(seq_along(members), function(i) {
+      l <- members[[i]]
+      w <- lineage_ab[, l, drop = FALSE]
+      dev <- sweep(genetic[, l, drop = FALSE], 1, wmean[, i])
+      dev[w == 0] <- 0
+      ifelse(rowSums(w) > 0, rowSums(w * dev^2) / rowSums(w), NA_real_)
+    }, numeric(st$m))
+    within <- matrix(within, st$m, length(species), dimnames = dimnames(wmean))
+    plastic <- outer(st$ev$env(n_steps) - st$ev$ref, st$ev$b[sp_idx])
+    plastic[is.na(wmean)] <- NA_real_
+    dimnames(plastic) <- dimnames(wmean)
+    ev_out <- list(genetic = wmean, plastic = plastic, within_var = within,
+                   environment = st$ev$env(n_steps), reference = out$evolution$reference,
+                   genetic_var = stats::setNames(st$ev$g[sp_idx], species),
+                   env_var = stats::setNames(st$ev$ve[sp_idx], species),
+                   plasticity = stats::setNames(st$ev$b[sp_idx], species),
+                   settings = out$evolution$settings)
+  }
   structure(list(abundance = by(out$abundance, TRUE), tree = tree, tree_full = tree_full,
                  species = sp_table, events = events, lineages = lineage_ab,
                  lineage_species = obs$group[extant], richness = richness,
                  richness_good = richness_good, genetic = genetic, traits = traits_out,
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
                  extirpation = st$extirpation[sp_idx], speciation = speciation,
-                 evolution = out$evolution$settings, n_steps = n_steps,
+                 evolution = ev_out, series = series_df, n_steps = n_steps,
                  generations = generations, history = history,
                  arrival = by(out$arrival), propagule = by(out$propagule),
                  immigrants = by(out$immigrants), migrant_load = by(out$migrant_load)),
@@ -558,7 +628,7 @@ as_metacommunity.mc_evolving <- function(x, ...) {
                  extirpation = x$extirpation, pool = NULL, tree = x$tree,
                  arrival = fix(x$arrival), propagule = fix(x$propagule),
                  immigrants = fix(x$immigrants), migrant_load = fix(x$migrant_load),
-                 n_steps = x$n_steps), class = "mc_sim")
+                 evolution = x$evolution, n_steps = x$n_steps), class = "mc_sim")
 }
 
 # competition among species from the times at which each pair split (generations; 0 on the
@@ -960,6 +1030,42 @@ evolving_tree <- function(sp, tree0) {
   }
   text <- sub(":0$", "", node_newick(ntip + 1L, 0))
   ape::read.tree(text = paste0(text, ";"))
+}
+
+# rows of the series for generation `gen`: for each lineage alive at its start, its occupancy,
+# abundance and mean genetic optimum (weighted by abundance) at its end, and the sites it
+# colonised and lost since the last generation, out of those it did not and did occupy then.
+# Lineages that died out in this generation get a row with their last losses. A site a mother
+# passed to its buds in this generation counts neither as a loss nor as exposure; a lineage
+# born in this generation has no transitions yet.
+evolving_series_rows <- function(st, before, buds, sp_table, gen) {
+  dead <- setdiff(which(colSums(before) > 0), st$alive)
+  ids <- c(st$alive, dead)
+  n <- cbind(st$n, matrix(0, st$m, length(dead)))
+  now <- n > 0
+  was <- before[, ids, drop = FALSE]
+  skip <- matrix(FALSE, st$m, length(ids))
+  # a mother was alive at the start of the generation, so it is among `ids`
+  for (b in buds) {
+    c_j <- match(b$j, ids)
+    given <- unique(unlist(b$sites))
+    given <- given[!now[given, c_j]]
+    skip[given, c_j] <- TRUE
+  }
+  newborn <- sp_table$birth[ids] == gen & gen > 0
+  zz <- cbind(st$z[, st$alive, drop = FALSE], matrix(0, st$m, length(dead)))
+  zz[!now] <- 0
+  abundance <- colSums(n)
+  keep <- !skip
+  out <- data.frame(generation = rep(gen, length(ids)), lineage = st$species[ids],
+                    occupancy = colSums(now), abundance = abundance,
+                    genetic = ifelse(abundance > 0, colSums(n * zz) / abundance, NA_real_),
+                    colonised = colSums(now & !was & keep),
+                    extirpated = colSums(!now & was & keep),
+                    present_before = colSums(was & keep), absent_before = colSums(!was & keep),
+                    stringsAsFactors = FALSE)
+  out[newborn, c("colonised", "extirpated", "present_before", "absent_before")] <- NA
+  out
 }
 
 # extant lineages grouped into good species: a lineage that completed by its end (`status`

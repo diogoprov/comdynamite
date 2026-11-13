@@ -85,6 +85,7 @@ Other simulate metacommunities:
 \code{\link[=evolution_control]{evolution_control()}},
 \code{\link[=growth_rates]{growth_rates()}},
 \code{\link[=logistic_gradients]{logistic_gradients()}},
+\code{\link[=persistence]{persistence()}},
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},
 \code{\link[=simulate_logistic]{simulate_logistic()}},
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}},

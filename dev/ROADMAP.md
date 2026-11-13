@@ -958,9 +958,14 @@ as fases, em `dev/plano-especiacao.md`.
       2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético
       (árvore completa e reconstruída, tempos de iniciação e de conclusão) e extinção global;
       validação no limite neutro, contra o PBD e contra Desjardins-Proulx & Gravel (2012a).
-- [ ] Fase 3: saídas (simmap da distribuição de cada linhagem, métricas de persistência de
-      Januario et al. 2025, traits por população) integradas a `history_rates()`,
-      `trait_rates()` e às estatísticas T.
+- [ ] Fase 3a (em 2026-11-12): séries por linhagem, `persistence()` (ε e τ de Januario et al.
+      2025), `sample_individuals(source = "evolution")` para as estatísticas T e
+      `landscape_matrix()` (kernel por matriz, para os dados do Marcos).
+- [ ] Fase 3b: simmap da distribuição de cada linhagem (estado = combinação de áreas
+      ocupadas, decidido em 2026-11-12), integrado a `history_rates()` e `as_herodotools()`.
+- [ ] Bloco próprio, depois da Fase 3: G multivariada (vários traits com covariância
+      genética, B ∝ W), pedida para simular os dados do Marcos (ECY25-0086; decidido em
+      2026-11-12).
 - [ ] Fase 4: comparação com o gen3sis (GPL) e o MESS (sem licença declarada), só em
       `data-raw`, e medida de custo.
 - [ ] Fase 5: experimentos (persistência contra especiação nas pontas com verdade conhecida;

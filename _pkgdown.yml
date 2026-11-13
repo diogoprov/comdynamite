@@ -21,12 +21,14 @@ reference:
   - simulate_evolving_metacommunity
   - speciation_control
   - as_metacommunity
+  - persistence
   - colonisation_history
   - growth_rates
 - title: Landscapes
   desc: Spatially implicit and grid landscapes, dispersal and environment.
   contents:
   - landscape_points
+  - landscape_matrix
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel

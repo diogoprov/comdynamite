@@ -199,6 +199,17 @@ condiciona os resultados e precisa ser variada nos experimentos.
 **Primeira versão (proposta):** `"point"` e `"fission"` (para validar contra a teoria neutra e
 o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
 
+#### Decisões da Fase 3 (Diogo, 2026-11-12)
+
+- Fazer a 3a e a 3b. 3a: séries por linhagem (ocupação, abundância, média genética,
+  colonizações e extirpações), `persistence()` exportada (ε = logit(c/(c+e)) e τ = log(c+e),
+  a definição já usada em `data-raw/januario_power.R`), indivíduos sorteados do estado
+  evolutivo para `tstats()` e `landscape_matrix()`. 3b: simmap com estado = combinação de
+  áreas ocupadas ("A", "B", "A+B").
+- Para os dados do Marcos (ECY25-0086): o kernel por matriz entra na 3a; a G multivariada
+  vira um bloco próprio, depois da Fase 3. Datas de criação dos lagos e erro de medida e de
+  sessão ficam para quando o plano do Marcos for retomado.
+
 ### 3. Registro filogenético e da história
 
 - Cada especiação registra tempo, espécie mãe, espécies filhas e as populações de cada uma.

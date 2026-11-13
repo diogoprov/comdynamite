@@ -516,7 +516,7 @@ mc_finish <- function(st) {
       plastic[absent] <- NA_real_
       dimnames(z) <- dimnames(ph) <- dimnames(plastic) <- labels
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
-                            reference = ev$ref,
+                            environment = ev$env(n_steps), reference = ev$ref,
                             settings = structure(evolution[setdiff(names(evolution),
                                                                    c("env", "traits"))],
                                                  class = "mc_evolution"))
