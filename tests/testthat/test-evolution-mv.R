@@ -265,3 +265,18 @@ test_that("env_time changes every axis of a niche, with and without evolution", 
   expect_error(run(list(warm$svl)), "one matrix")
   expect_error(run(list(svl = warm$svl, head = warm$head[, 1:5])), "columns")
 })
+
+test_that("env_time as a matrix works with a single column of env and one evolving trait", {
+  s <- mv_setup()
+  n_steps <- 20
+  warm <- sapply(1:n_steps, function(t) s$ls$env + t)
+  run <- function(...) {
+    set.seed(8)
+    simulate_metacommunity(s$ls, s$tr$svl, s$alpha, dispersal = 0.01, n_steps = n_steps,
+                           evolution = evolution_control(4), record_steps = c(10, 20), ...)
+  }
+  a <- run(env = data.frame(svl = s$ls$env), env_time = warm)
+  b <- run(env_time = warm)
+  expect_equal(a$evolution$genetic, b$evolution$genetic)
+  expect_equal(unname(a$evolution$environment_history[, "step10"]), warm[, 10])
+})
