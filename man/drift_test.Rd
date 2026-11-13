@@ -14,7 +14,9 @@ drift_test(x, group, traits = NULL, W = NULL, level = 0.95)
 \code{x}, or the name of a column of \code{x}.}
 
 \item{traits}{With a data frame, the names of the trait columns. \code{NULL} (the default) takes
-every numeric column except \code{group}.}
+every numeric column except \code{group}; with the output of
+\code{\link[=sample_individuals]{sample_individuals()}}, which also has numeric columns of abundance, environment and means,
+name the traits.}
 
 \item{W}{\code{NULL} (the default) for the pooled covariance within groups, or a covariance matrix
 with one row and column per trait (for example, a known \eqn{G}{G}).}

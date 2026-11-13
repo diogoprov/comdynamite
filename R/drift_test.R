@@ -25,7 +25,9 @@
 #' @param group The groups (populations, sites or species): a vector with one value per row of
 #'   `x`, or the name of a column of `x`.
 #' @param traits With a data frame, the names of the trait columns. `NULL` (the default) takes
-#'   every numeric column except `group`.
+#'   every numeric column except `group`; with the output of
+#'   [sample_individuals()], which also has numeric columns of abundance, environment and means,
+#'   name the traits.
 #' @param W `NULL` (the default) for the pooled covariance within groups, or a covariance matrix
 #'   with one row and column per trait (for example, a known \eqn{G}{G}).
 #' @param level The confidence level of the interval for the slope.
