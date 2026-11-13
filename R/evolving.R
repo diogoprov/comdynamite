@@ -249,6 +249,10 @@ print.mc_speciation <- function(x, ...) {
 #'     was absent (`absent_before`) and present (`present_before`). Sites that a lineage passed
 #'     to a new one are not counted as lost, and the transitions are `NA` in the generation of
 #'     birth. [persistence()] turns them into rates of colonisation and extirpation.
+#'   * `ranges`: the changes of presence of every lineage in every site, one row per change
+#'     (`generation`, `lineage`, `site` and `present`), with the starting sites at generation
+#'     0 and the sites a new lineage took from its mother at its birth. [range_history()] maps
+#'     them on the tree as ranges of areas.
 #'   * `evolution`: with `evolution`, the state of the extant species at the end, for
 #'     [sample_individuals()] with `source = "evolution"`: genetic means in each site
 #'     (`genetic`, weighted over their lineages by abundance; `NA` where absent), the plastic
@@ -376,6 +380,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   }
   before <- now_present()
   series <- list()
+  # changes of presence of each lineage in each site (generation, lineage index, site, present)
+  range_log <- list(range_changes(matrix(FALSE, st$m, st$k_all), before, 0))
   for (step in seq_len(n_steps)) {
     mc_step(st, step)
     gen <- step / per
@@ -410,6 +416,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       if (any(before)) {
         series[[length(series) + 1]] <- evolving_series_rows(st, grow(before), list(),
                                                              sp_table, gen)
+        range_log[[length(range_log) + 1]] <- range_changes(grow(before),
+                                                            matrix(FALSE, st$m, st$k_all), gen)
         before[] <- FALSE
       }
       next
@@ -496,7 +504,9 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     richness_good <- c(richness_good, sum(sp_table$completion[st$alive] <= gen))
     series[[length(series) + 1]] <- evolving_series_rows(st, grow(before), buds, sp_table,
                                                          gen)
-    before <- now_present()
+    after <- now_present()
+    range_log[[length(range_log) + 1]] <- range_changes(grow(before), after, gen)
+    before <- after
   }
   out <- mc_finish(st)
   extant <- sp_table$species[sp_table$fate == "extant"]
@@ -537,6 +547,10 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   series_df <- if (length(series)) do.call(rbind, series) else evolving_series_rows(st, before,
                                                                                    list(), sp_table, 0)[0, ]
   rownames(series_df) <- NULL
+  range_log <- do.call(rbind, range_log)
+  ranges <- data.frame(generation = range_log[, 1], lineage = st$species[range_log[, 2]],
+                       site = as.integer(range_log[, 3]), present = range_log[, 4] == 1,
+                       stringsAsFactors = FALSE)
   # the evolutionary state by species, for sample_individuals(): genetic means weighted by the
   # abundance of the lineages, the plastic part and the variances among individuals
   ev_out <- NULL
@@ -574,7 +588,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  richness_good = richness_good, genetic = genetic, traits = traits_out,
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
                  extirpation = st$extirpation[sp_idx], speciation = speciation,
-                 evolution = ev_out, series = series_df, n_steps = n_steps,
+                 evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  generations = generations, history = history,
                  arrival = by(out$arrival), propagule = by(out$propagule),
                  immigrants = by(out$immigrants), migrant_load = by(out$migrant_load)),
@@ -1030,6 +1044,14 @@ evolving_tree <- function(sp, tree0) {
   }
   text <- sub(":0$", "", node_newick(ntip + 1L, 0))
   ape::read.tree(text = paste0(text, ";"))
+}
+
+# changes of presence between two matrices of sites x lineages (all lineages ever), as rows of
+# generation, lineage, site and new presence (1 or 0)
+range_changes <- function(was, now, gen) {
+  at <- which(was != now, arr.ind = TRUE)
+  if (!length(at)) return(matrix(numeric(0), 0, 4))
+  cbind(gen, at[, 2], at[, 1], now[at])
 }
 
 # rows of the series for generation `gen`: for each lineage alive at its start, its occupancy,

@@ -961,8 +961,10 @@ as fases, em `dev/plano-especiacao.md`.
 - [ ] Fase 3a (em 2026-11-12): séries por linhagem, `persistence()` (ε e τ de Januario et al.
       2025), `sample_individuals(source = "evolution")` para as estatísticas T e
       `landscape_matrix()` (kernel por matriz, para os dados do Marcos).
-- [ ] Fase 3b: simmap da distribuição de cada linhagem (estado = combinação de áreas
-      ocupadas, decidido em 2026-11-12), integrado a `history_rates()` e `as_herodotools()`.
+- [ ] Fase 3b (em 2026-11-12): registro das mudanças de presença (`ranges`) e
+      `range_history()`, simmap com estado = combinação de áreas ocupadas, na árvore completa
+      ou reconstruída; `as_herodotools()`, `region_pool()` e `arrival_ages()` com áreas
+      combinadas; `history_rates(overlap = TRUE)` na simpatria.
 - [ ] Bloco próprio, depois da Fase 3: G multivariada (vários traits com covariância
       genética, B ∝ W), pedida para simular os dados do Marcos (ECY25-0086; decidido em
       2026-11-12).

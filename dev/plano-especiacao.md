@@ -206,6 +206,12 @@ o PBD), `"geographic"` com a camada de conclusão e `"ecological"`.
   a definição já usada em `data-raw/januario_power.R`), indivíduos sorteados do estado
   evolutivo para `tstats()` e `landscape_matrix()`. 3b: simmap com estado = combinação de
   áreas ocupadas ("A", "B", "A+B").
+- 3b implementada assim: a simulação registra cada mudança de presença por sítio, e as áreas
+  entram depois, em `range_history(x, areas)`. Cada ramo da árvore completa segue uma
+  linhagem (a continuação da mãe é a mãe; o tronco da nova é a nova); a reconstruída junta
+  os ramos da completa entre os mesmos ancestrais. Na conclusão prolongada, a ponta tem a
+  área da linhagem representante, não a união das incipientes. Tempo antes do início leva a
+  área do início.
 - Para os dados do Marcos (ECY25-0086): o kernel por matriz entra na 3a; a G multivariada
   vira um bloco próprio, depois da Fase 3. Datas de criação dos lagos e erro de medida e de
   sessão ficam para quando o plano do Marcos for retomado.

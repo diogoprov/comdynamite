@@ -9,8 +9,8 @@ arrival_ages(history, x, regions)
 \arguments{
 \item{history}{A \code{simmap} tree from \code{\link[=trait_mk]{trait_mk()}} whose states are the regions.}
 
-\item{x}{An \code{mc_sim} or \code{mc_data} object, or a community matrix with sites in rows and species
-in columns, named by species.}
+\item{x}{An \code{mc_sim}, \code{mc_evolving} or \code{mc_data} object, or a community matrix with sites in
+rows and species in columns, named by species.}
 
 \item{regions}{Region of each site, by site name or in the order of the sites.}
 }
@@ -23,7 +23,9 @@ For each species in each site, the time before the present at which its lineage 
 the region of the site, from the history of areas: the time spent in that region along the
 path from the tip towards the root, until the first period in another region, plus the time
 from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
-region since the root gets the age of the root. These are the true values of what
+region since the root gets the age of the root. With ranges of several regions (\code{"A+B"}, from
+\code{\link[=range_history]{range_history()}}), the age in each region is the time since the range last came to include
+it. These are the true values of what
 \code{Herodotools::calc_age_arrival()} estimates from the areas of the nodes, which can only see
 arrivals at nodes and so gives younger ages.
 }

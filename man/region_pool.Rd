@@ -17,7 +17,8 @@ Logical matrix of sites x species.
 }
 \description{
 Gives the \code{pool} of \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} from a history of areas: each species can occur
-only in the sites of the region it occupies at the tips of \code{history}.
+only in the sites of the region (or regions, in a range such as \code{"A+B"}) it occupies at the
+tips of \code{history}.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}

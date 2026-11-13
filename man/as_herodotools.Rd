@@ -7,13 +7,13 @@
 as_herodotools(x, regions, history = NULL, tree = NULL)
 }
 \arguments{
-\item{x}{An \code{mc_sim} or \code{mc_data} object, or a community matrix with sites in rows and species
-in columns, named by species.}
+\item{x}{An \code{mc_sim}, \code{mc_evolving} or \code{mc_data} object, or a community matrix with sites in
+rows and species in columns, named by species.}
 
 \item{regions}{Region of each site, by site name or in the order of the sites.}
 
-\item{history}{Optional \code{simmap} tree from \code{\link[=trait_mk]{trait_mk()}} whose states are the regions, with the
-same species as \code{x}.}
+\item{history}{Optional \code{simmap} tree from \code{\link[=trait_mk]{trait_mk()}} or \code{\link[=range_history]{range_history()}} whose states are
+the regions, or ranges of several regions joined by \code{"+"}, with the same species as \code{x}.}
 
 \item{tree}{The tree, when \code{x} has none and \code{history} is not given.}
 }
@@ -37,6 +37,11 @@ true ages at which lineages arrived in each region, to compare with what Herodot
 estimates from the nodes.
 }
 \details{
+For an evolving metacommunity from \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}, \code{history} defaults to
+the true history of the ranges of its lineages, from \code{\link[=range_history]{range_history()}}, whose ranges join
+regions with \code{"+"} (\code{"A+B"}); Herodotools then counts an ancestor in \code{"A+B"} as present in
+both regions.
+
 Herodotools finds a region among the areas of the ancestors by matching its name as a
 pattern, so no region name may be contained in another, such as \code{"A"} and \code{"AB"}. Sites
 without species are dropped with a warning, since Herodotools needs at least one species in

@@ -12,16 +12,21 @@
 #' true ages at which lineages arrived in each region, to compare with what Herodotools
 #' estimates from the nodes.
 #'
+#' For an evolving metacommunity from [simulate_evolving_metacommunity()], `history` defaults to
+#' the true history of the ranges of its lineages, from [range_history()], whose ranges join
+#' regions with `"+"` (`"A+B"`); Herodotools then counts an ancestor in `"A+B"` as present in
+#' both regions.
+#'
 #' Herodotools finds a region among the areas of the ancestors by matching its name as a
 #' pattern, so no region name may be contained in another, such as `"A"` and `"AB"`. Sites
 #' without species are dropped with a warning, since Herodotools needs at least one species in
 #' each site.
 #'
-#' @param x An `mc_sim` or `mc_data` object, or a community matrix with sites in rows and species
-#'   in columns, named by species.
+#' @param x An `mc_sim`, `mc_evolving` or `mc_data` object, or a community matrix with sites in
+#'   rows and species in columns, named by species.
 #' @param regions Region of each site, by site name or in the order of the sites.
-#' @param history Optional `simmap` tree from [trait_mk()] whose states are the regions, with the
-#'   same species as `x`.
+#' @param history Optional `simmap` tree from [trait_mk()] or [range_history()] whose states are
+#'   the regions, or ranges of several regions joined by `"+"`, with the same species as `x`.
 #' @param tree The tree, when `x` has none and `history` is not given.
 #' @return A list with `W`, the incidence matrix of sites x species; `tree`, a plain `phylo`
 #'   object; `biogeo`, a one-column data frame with the region of each site; and, with
@@ -47,6 +52,10 @@
 #' # with Herodotools installed: do.call(Herodotools::calc_age_arrival, input)
 #' @export
 as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
+  if (inherits(x, "mc_evolving")) {
+    if (is.null(history)) history <- range_history(x, regions)
+    x <- as_metacommunity(x)
+  }
   d <- if (inherits(x, c("mc_sim", "mc_data"))) as_mc_data(x) else mc_data(x)
   tree <- history %||% tree %||% d$tree
   if (is.null(tree)) stop("give `history` or `tree`: `x` has no tree", call. = FALSE)
@@ -67,7 +76,8 @@ as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
               biogeo = data.frame(region = regions[!empty], row.names = rownames(W)[!empty]))
   if (!is.null(history)) {
     areas <- history_states(history)$nodes
-    check_region_names(unique(c(regions, areas)))
+    parts <- unique(unlist(strsplit(areas, "+", fixed = TRUE)))
+    check_region_names(unique(c(regions, parts)))
     out$ancestral.area <- data.frame(area = areas,
                                      row.names = paste0("N", ape::Ntip(history) + seq_along(areas)))
   }
@@ -77,7 +87,8 @@ as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
 #' Sites where each species can occur, from its region
 #'
 #' Gives the `pool` of [simulate_metacommunity()] from a history of areas: each species can occur
-#' only in the sites of the region it occupies at the tips of `history`.
+#' only in the sites of the region (or regions, in a range such as `"A+B"`) it occupies at the
+#' tips of `history`.
 #'
 #' @param history A `simmap` tree from [trait_mk()] whose states are the regions.
 #' @param regions Region of each site. Names, when given, name the sites; otherwise they are
@@ -89,7 +100,7 @@ as_herodotools <- function(x, regions, history = NULL, tree = NULL) {
 region_pool <- function(history, regions) {
   tips <- history_states(history)$tips
   sites <- names(regions) %||% paste0("site", seq_along(regions))
-  pool <- outer(as.character(regions), tips, "==")
+  pool <- outer(as.character(regions), tips, Vectorize(range_has))
   dimnames(pool) <- list(sites, names(tips))
   pool
 }
@@ -100,7 +111,9 @@ region_pool <- function(history, regions) {
 #' the region of the site, from the history of areas: the time spent in that region along the
 #' path from the tip towards the root, until the first period in another region, plus the time
 #' from the tip to the present when the tree is not ultrametric. A lineage that stayed in the
-#' region since the root gets the age of the root. These are the true values of what
+#' region since the root gets the age of the root. With ranges of several regions (`"A+B"`, from
+#' [range_history()]), the age in each region is the time since the range last came to include
+#' it. These are the true values of what
 #' `Herodotools::calc_age_arrival()` estimates from the areas of the nodes, which can only see
 #' arrivals at nodes and so gives younger ages.
 #'
@@ -126,18 +139,26 @@ arrival_ages <- function(history, x, regions) {
       node <- edge[edge_to[node], 1]
     }
     segments <- unlist(lapply(edges, function(e) rev(history$maps[[e]])))
-    here <- names(segments)[1]
-    away <- which(names(segments) != here)[1]
-    age <- if (is.na(away)) sum(segments) else sum(segments[seq_len(away - 1)])
-    stats::setNames(age + height - depth[i], here)
+    # for each region in the range at the tip, the time since the lineage last entered it
+    here <- strsplit(names(segments)[1], "+", fixed = TRUE)[[1]]
+    vapply(stats::setNames(here, here), function(r) {
+      away <- which(!range_has(r, names(segments)))[1]
+      age <- if (is.na(away)) sum(segments) else sum(segments[seq_len(away - 1)])
+      age + height - depth[i]
+    }, numeric(1))
   })
   species <- colnames(d$comm)
   out <- matrix(NA_real_, nrow(d$comm), length(species), dimnames = dimnames(d$comm))
   for (j in species) {
-    present <- d$comm[, j] > 0 & regions == names(since[[j]])
-    out[present, j] <- since[[j]]
+    present <- d$comm[, j] > 0 & regions %in% names(since[[j]])
+    out[present, j] <- since[[j]][regions[present]]
   }
   out
+}
+
+# does each range (a state such as "A" or "A+B") include the region?
+range_has <- function(region, range) {
+  vapply(strsplit(range, "+", fixed = TRUE), function(p) region %in% p, logical(1))
 }
 
 # states at the internal nodes (root first) and at the tips of a simmap tree

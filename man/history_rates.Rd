@@ -11,7 +11,8 @@ history_rates(
   state_rates = NULL,
   burst = 4,
   decay = 0.1,
-  r = -0.1
+  r = -0.1,
+  overlap = FALSE
 )
 }
 \arguments{
@@ -30,6 +31,9 @@ and the time scale of its decay.}
 
 \item{r}{For \code{"sympatry"}, the change in the logarithm of the rate per lineage in the same
 state.}
+
+\item{overlap}{For \code{"sympatry"}, count the lineages whose state shares an area (states such
+as \code{"A+B"}, split at \code{"+"}) rather than those in the same state.}
 }
 \value{
 Numeric vector with the rate of each branch, in the order of the rows of
@@ -57,7 +61,9 @@ is strongest when a lineage first adapts to a new community.
 moment, counting the lineage itself, as \eqn{\mathrm{sigma2}\, e^{r n}}{sigma2 * exp(r *
   n)}, with \eqn{n} that number; a negative \eqn{r} slows
 evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
-biogeography of Drury et al. (2016).
+biogeography of Drury et al. (2016). With ranges made of several areas, such as those of
+\code{\link[=range_history]{range_history()}} (\code{"A+B"}), \code{overlap = TRUE} counts the lineages whose range shares at
+least one area with that of the lineage, instead of those with the same range.
 }
 }
 \examples{

@@ -218,7 +218,9 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #'   moment, counting the lineage itself, as \eqn{\mathrm{sigma2}\, e^{r n}}{sigma2 * exp(r *
 #'   n)}, with \eqn{n} that number; a negative \eqn{r} slows
 #'   evolution down as lineages accumulate in the same region, as in the diversity-dependent model with
-#'   biogeography of Drury et al. (2016).
+#'   biogeography of Drury et al. (2016). With ranges made of several areas, such as those of
+#'   [range_history()] (`"A+B"`), `overlap = TRUE` counts the lineages whose range shares at
+#'   least one area with that of the lineage, instead of those with the same range.
 #'
 #' @param history A tree with the history of a discrete character, of class `simmap`, from
 #'   [trait_mk()] or phytools.
@@ -230,6 +232,8 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #'   and the time scale of its decay.
 #' @param r For `"sympatry"`, the change in the logarithm of the rate per lineage in the same
 #'   state.
+#' @param overlap For `"sympatry"`, count the lineages whose state shares an area (states such
+#'   as `"A+B"`, split at `"+"`) rather than those in the same state.
 #' @return Numeric vector with the rate of each branch, in the order of the rows of
 #'   `history$edge`.
 #' @references Drury, J., Clavel, J., Manceau, M., & Morlon, H. (2016). Estimating the effect of
@@ -257,7 +261,8 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #' s <- history_rates(habitat, "sympatry", r = -0.1)
 #' @export
 history_rates <- function(history, model = c("state", "burst", "sympatry"), sigma2 = 1,
-                          state_rates = NULL, burst = 4, decay = 0.1, r = -0.1) {
+                          state_rates = NULL, burst = 4, decay = 0.1, r = -0.1,
+                          overlap = FALSE) {
   if (!inherits(history, "phylo") || is.null(history$maps)) {
     stop("`history` must be a tree with a history of class `simmap`", call. = FALSE)
   }
@@ -289,7 +294,8 @@ history_rates <- function(history, model = c("state", "burst", "sympatry"), sigm
     },
     sympatry = {
       if (length(r) != 1 || !is.finite(r)) stop("`r` must be one number", call. = FALSE)
-      sympatry_integral(history, r) * sigma2
+      stopifnot(is.logical(overlap), length(overlap) == 1, !is.na(overlap))
+      sympatry_integral(history, r, overlap) * sigma2
     })
   rate <- integral / lengths
   zero <- lengths <= 0  # without length the rate does not matter; keep it finite and positive
@@ -324,7 +330,7 @@ burst_integral <- function(history, burst, decay) {
 
 # integral of exp(r * n) along each edge, where n is the number of lineages in the same state
 # at each moment, the lineage itself included
-sympatry_integral <- function(history, r) {
+sympatry_integral <- function(history, r, overlap = FALSE) {
   edge <- history$edge
   depth <- ape::node.depth.edgelength(history)
   pieces <- do.call(rbind, lapply(seq_len(nrow(edge)), function(e) {
@@ -338,7 +344,13 @@ sympatry_integral <- function(history, r) {
   integral <- numeric(nrow(edge))
   for (i in seq_len(length(breaks) - 1)) {
     alive <- which(pieces$from <= breaks[i] & pieces$to >= breaks[i + 1])
-    n <- table(pieces$state[alive])[pieces$state[alive]]
+    n <- if (overlap) {
+      parts <- strsplit(pieces$state[alive], "+", fixed = TRUE)
+      vapply(parts, function(p) sum(vapply(parts, function(q) any(p %in% q), logical(1))),
+             numeric(1))
+    } else {
+      table(pieces$state[alive])[pieces$state[alive]]
+    }
     add <- exp(r * as.numeric(n)) * (breaks[i + 1] - breaks[i])
     by_edge <- rowsum(add, pieces$edge[alive])
     at <- as.integer(rownames(by_edge))
