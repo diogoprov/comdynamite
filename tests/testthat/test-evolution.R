@@ -189,6 +189,11 @@ test_that("immigrant_selection filters maladapted immigrants source by source", 
                              matrix(c(40, 0), 2, 1), c(40, 60), 25, disp)
   expect_equal(sel$lambda[2, 1], 10 * exp(-400 / 50))
   expect_equal(sel$mean[2, 1], 40)
+  # a species without emigrants sends no one and keeps its own mean
+  none <- immigrants_selected(matrix(0, 2, 1), matrix(c(40, 45), 2, 1), matrix(c(40, 45), 2, 1),
+                              c(40, 60), 25, disp)
+  expect_equal(none$lambda, matrix(0, 2, 1))
+  expect_equal(none$mean, matrix(c(40, 45), 2, 1))
   expect_error(evolution_control(1, immigrant_selection = NA))
   expect_error(simulate_metacommunity(landscape_implicit(5), tr, matrix(0.04, 2, 2),
                                       n_steps = 5,
