@@ -218,6 +218,26 @@ partições equivalentes à testada e o p conta só partições aleatórias dist
 - Execução: 900 réplicas numa c7i.8xlarge on-demand, de 11/11 a 14/11 (~3 dias de máquina);
   nenhum erro.
 
+**Resultado S1, bootstrap paramétrico, rodada reduzida (14/11/2026; PR #99,
+`damocles_partition_test(n_rand = 0, n_boot = 49)`; só os 10 cenários com 1 mudança, 50
+réplicas cada; spot c7i.48xlarge, run `comdynamite-s1-boot1`; `data-raw/s1_boot.rds`):**
+
+- **Calibrado.** Rejeição a 5% de 0,000 a 0,100 por cenário; agregada, 24/500 = 0,048
+  [0,031, 0,071] (IC exato binomial). A distribuição dos p é uniforme (46–55 réplicas por
+  decil).
+- O χ² das mesmas réplicas: 27/500 = 0,054 [0,036, 0,078]. Os dois concordam.
+- Nenhum ajuste falhou (49 de 49 bootstraps válidos em todas as réplicas; zero erros).
+- O bootstrap resolve a falta de resolução do teste de partição com 1 mudança: sempre há
+  p, com mínimo 1/50.
+- Ressalva de interpretação: o bootstrap testa o mesmo nulo do χ² (taxas constantes no
+  modelo DAMOCLES), só que com a distribuição do LR simulada em vez da assintótica. Ele não
+  isola o efeito do regime de uma má especificação genérica, que era a motivação do teste de
+  partição. Aqui o χ² já estava calibrado, então o ganho é de robustez, não de correção.
+- Execução: 500 réplicas em ~2 h numa c7i.48xlarge spot, sem interrupções; custo estimado
+  em ~US$ 5 (não confirmado no Cost Explorer).
+- Pendente: os cenários com 3 mudanças (`SHIFTS=3`) e o poder (S2), para saber se o
+  bootstrap perde poder em relação ao χ².
+
 ### S2. Poder
 
 - Grade:
