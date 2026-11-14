@@ -110,6 +110,10 @@ settings <- expand.grid(n_tips = c(112, 250), n_shifts = c(1, 3), ratio = c(2, 4
 settings <- rbind(settings, data.frame(n_tips = c(112, 250), n_shifts = 1, ratio = 1, n_comm = 14))
 jobs <- expand.grid(setting = seq_len(nrow(settings)),
                     rep = seq_len(if (mode == "lrt") reps else n_partition))
+# SHIFTS (default "1,3"): numbers of shifts whose settings run; setting numbers, seeds and file
+# names stay those of the full grid.
+run_shifts <- as.numeric(strsplit(Sys.getenv("SHIFTS", "1,3"), ",")[[1]])
+jobs <- jobs[settings$n_shifts[jobs$setting] %in% run_shifts, ]
 jobs$file <- file.path(jobs_dir, sprintf("%s%02d_r%04d.rds",
                                          c(lrt = "s", partition = "p", boot = "b")[[mode]],
                                          jobs$setting, jobs$rep))
