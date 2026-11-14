@@ -10,9 +10,10 @@ effects make both species adapt to both patch types, so that patch type
 no longer predicts species composition, while each patch remains
 dominated by one species. We asked whether the quantitative-genetic
 engine of comdynamite reproduces these results, and where it departs
-from them. This article is part of the nesting map of the package, which
-lists the settings that approximate each published model and the
-mechanisms that are missing.
+from them. This article is part of the [nesting
+map](https://provetelab.org/comdynamite/articles/nesting-map.md) of the
+package, which lists the settings that approximate each published model
+and the mechanisms that are missing.
 
 ## Translation of the model
 

@@ -60,6 +60,7 @@
     <li><a class="dropdown-item" href="articles/quantitative-genetics.html">Quantitative genetics in the metacommunity</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Validation</h6></li>
+    <li><a class="dropdown-item" href="articles/nesting-map.html">Nesting map</a></li>
     <li><a class="dropdown-item" href="articles/validation.html">Validating the model of Thompson et al. (2020)</a></li>
     <li><a class="dropdown-item" href="articles/validation-gradient.html">Validating the methods of Leibold et al. (2010) and Peres-Neto et al. (2012)</a></li>
     <li><a class="dropdown-item" href="articles/replication-leibold.html">Replicating Leibold et al. (2019)</a></li>
@@ -90,6 +91,7 @@
 
 <p>Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse data and to simulate it.</p>
 <p>The simulations work at the level of populations in ecological time: abundances in every site grow, compete and disperse, and, when asked, each population carries the genetic means of one or more traits that evolve by selection and drift under quantitative genetics (Lande 1979), with a covariance matrix <em>G</em> per species. Lineages can split into new species inside the metacommunity, so the same run gives communities, trait distributions of individuals and the true phylogeny. Because the truth is known, the analysis functions of the package can be tested on these simulations before they are applied to field data.</p>
+<p>comdynamite is a modular framework rather than a model that contains the others: processes are switched on as options (evolution, speciation, disturbance, lottery recruitment, overlapping generations), in the spirit of the flexible mechanistic models called for by Cabral, Valente &amp; Hartig (2017). The <a href="https://provetelab.org/comdynamite/articles/nesting-map.html">nesting map</a> shows which settings approximate six published models, which of their mechanisms are missing, and what happened when we tried to reproduce the results of Urban &amp; De Meester (2009) and Leibold et al. (2019).</p>
 <div class="section level2">
 <h2 id="what-do-you-want-to-do">What do you want to do?<a class="anchor" aria-label="anchor" href="#what-do-you-want-to-do"></a>
 </h2>
@@ -255,7 +257,7 @@
 <li>
 <p><strong><a href="https://github.com/project-gen3sis/R-package" class="external-link">gen3sis</a></strong> (Hagen et al.</p>
 <ol start="2021" style="list-style-type: decimal">
-<li>is a general engine for eco-evolutionary simulations on landscapes that change over geological time. Speciation, extinction, dispersal and trait evolution are simulated, so the <strong>phylogeny is an outcome</strong> of the simulation, and the ecological rules are functions that the user writes. In comdynamite the <strong>phylogeny is an input</strong>: the tree is fixed, traits are placed on it with a chosen phylogenetic signal, and a fixed population model runs over ecological time (no speciation). This is what simulation studies of methods need, because tree shape and phylogenetic signal can be set independently and replicates can be paired by tree across scenarios. The two can be combined: a phylogeny produced by gen3sis can be used as the regional pool of a comdynamite simulation.</li>
+<li>is a general engine for eco-evolutionary simulations on landscapes that change over geological time. Speciation, extinction, dispersal and trait evolution are simulated, so the <strong>phylogeny is an outcome</strong> of the simulation, and the ecological rules are functions that the user writes. comdynamite works in ecological time, at the level of populations and their quantitative genetics. In <code><a href="reference/simulate_metacommunity.html">simulate_metacommunity()</a></code> the <strong>phylogeny is an input</strong>: the tree is fixed and traits are placed on it with a chosen phylogenetic signal, which is what simulation studies of methods need, because tree shape and phylogenetic signal can be set independently and replicates can be paired by tree across scenarios. In <code><a href="reference/simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> lineages also split inside the metacommunity, but over ecological rather than geological time and on a static set of sites. The two engines are complementary, and a phylogeny produced by gen3sis can be used as the regional pool of a comdynamite simulation.</li>
 </ol>
 </li>
 <li>
@@ -277,6 +279,9 @@
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
+<p>Cabral, J. S., Valente, L., &amp; Hartig, F. (2017). Mechanistic simulation models in macroecology and biogeography: state-of-art and prospects. <em>Ecography</em>, 40, 267–280. <a href="https://doi.org/10.1111/ecog.02480" class="external-link uri">https://doi.org/10.1111/ecog.02480</a></p>
+<p>Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., &amp; Vanoverbeke, J. (2019). Regional neutrality evolves through local adaptive niche evolution. <em>Proceedings of the National Academy of Sciences</em>, 116, 2612–2617. <a href="https://doi.org/10.1073/pnas.1808615116" class="external-link uri">https://doi.org/10.1073/pnas.1808615116</a></p>
+<p>Urban, M. C., &amp; De Meester, L. (2009). Community monopolization: local adaptation enhances priority effects in an evolving metacommunity. <em>Proceedings of the Royal Society B</em>, 276, 4129–4138. <a href="https://doi.org/10.1098/rspb.2009.1382" class="external-link uri">https://doi.org/10.1098/rspb.2009.1382</a></p>
 <p>Lande, R. (1979). Quantitative genetic analysis of multivariate evolution, applied to brain:body size allometry. <em>Evolution</em>, 33, 402–416. <a href="https://doi.org/10.1111/j.1558-5646.1979.tb04694.x" class="external-link uri">https://doi.org/10.1111/j.1558-5646.1979.tb04694.x</a></p>
 <p>Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., &amp; Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. <em>Ecology Letters</em>, 23, 1314–1329. <a href="https://doi.org/10.1111/ele.13568" class="external-link uri">https://doi.org/10.1111/ele.13568</a></p>
 <p>Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel, T. F., &amp; Pellissier, L. (2021). gen3sis: A general engine for eco-evolutionary simulations of the processes that shape Earth’s biodiversity. <em>PLoS Biology</em>, 19, e3001340. <a href="https://doi.org/10.1371/journal.pbio.3001340" class="external-link uri">https://doi.org/10.1371/journal.pbio.3001340</a></p>

@@ -11,7 +11,9 @@ the outcome turns on dispersal instead. We asked whether the
 quantitative-genetic engine of comdynamite reproduces these results, and
 where it departs from them. Like the [replication of Leibold et
 al. (2019)](https://provetelab.org/comdynamite/articles/replication-leibold.md),
-this article is part of the nesting map of the package.
+this article is part of the [nesting
+map](https://provetelab.org/comdynamite/articles/nesting-map.md) of the
+package.
 
 ## Translation of the model
 

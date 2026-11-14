@@ -13,6 +13,16 @@ trait distributions of individuals and the true phylogeny. Because the
 truth is known, the analysis functions of the package can be tested on
 these simulations before they are applied to field data.
 
+comdynamite is a modular framework rather than a model that contains the
+others: processes are switched on as options (evolution, speciation,
+disturbance, lottery recruitment, overlapping generations), in the
+spirit of the flexible mechanistic models called for by Cabral, Valente
+& Hartig (2017). The [nesting
+map](https://provetelab.org/comdynamite/articles/nesting-map.html) shows
+which settings approximate six published models, which of their
+mechanisms are missing, and what happened when we tried to reproduce the
+results of Urban & De Meester (2009) and Leibold et al. (2019).
+
 ## What do you want to do?
 
 **Analyse data**
@@ -119,16 +129,21 @@ the function reference. To read the vignettes in R, install with
         landscapes that change over geological time. Speciation,
         extinction, dispersal and trait evolution are simulated, so the
         **phylogeny is an outcome** of the simulation, and the
-        ecological rules are functions that the user writes. In
-        comdynamite the **phylogeny is an input**: the tree is fixed,
-        traits are placed on it with a chosen phylogenetic signal, and a
-        fixed population model runs over ecological time (no
-        speciation). This is what simulation studies of methods need,
-        because tree shape and phylogenetic signal can be set
-        independently and replicates can be paired by tree across
-        scenarios. The two can be combined: a phylogeny produced by
-        gen3sis can be used as the regional pool of a comdynamite
-        simulation.
+        ecological rules are functions that the user writes. comdynamite
+        works in ecological time, at the level of populations and their
+        quantitative genetics. In
+        [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+        the **phylogeny is an input**: the tree is fixed and traits are
+        placed on it with a chosen phylogenetic signal, which is what
+        simulation studies of methods need, because tree shape and
+        phylogenetic signal can be set independently and replicates can
+        be paired by tree across scenarios. In
+        [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+        lineages also split inside the metacommunity, but over
+        ecological rather than geological time and on a static set of
+        sites. The two engines are complementary, and a phylogeny
+        produced by gen3sis can be used as the regional pool of a
+        comdynamite simulation.
 
 - **[treeshapesim](https://github.com/diogoprov/treeshapesim)**
   simulates trees with separately controlled imbalance and branching
@@ -154,6 +169,20 @@ own DOI on Zenodo. In R, `citation("comdynamite")` gives the entry with
 the installed version.
 
 ## References
+
+Cabral, J. S., Valente, L., & Hartig, F. (2017). Mechanistic simulation
+models in macroecology and biogeography: state-of-art and prospects.
+*Ecography*, 40, 267–280. <https://doi.org/10.1111/ecog.02480>
+
+Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., &
+Vanoverbeke, J. (2019). Regional neutrality evolves through local
+adaptive niche evolution. *Proceedings of the National Academy of
+Sciences*, 116, 2612–2617. <https://doi.org/10.1073/pnas.1808615116>
+
+Urban, M. C., & De Meester, L. (2009). Community monopolization: local
+adaptation enhances priority effects in an evolving metacommunity.
+*Proceedings of the Royal Society B*, 276, 4129–4138.
+<https://doi.org/10.1098/rspb.2009.1382>
 
 Lande, R. (1979). Quantitative genetic analysis of multivariate
 evolution, applied to brain:body size allometry. *Evolution*, 33,
@@ -588,6 +617,8 @@ Colonisation and local extinction along the tree (DAMOCLES).
 
 ### Validation
 
+- [Nesting
+  map](https://provetelab.org/comdynamite/articles/nesting-map.md):
 - [Validating the model of Thompson et al.
   (2020)](https://provetelab.org/comdynamite/articles/validation.md):
 - [Validating the methods of Leibold et al. (2010) and Peres-Neto et al.

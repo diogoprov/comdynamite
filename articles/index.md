@@ -34,6 +34,8 @@
 
 ### Validation
 
+- [Nesting
+  map](https://provetelab.org/comdynamite/articles/nesting-map.md):
 - [Validating the model of Thompson et al.
   (2020)](https://provetelab.org/comdynamite/articles/validation.md):
 - [Validating the methods of Leibold et al. (2010) and Peres-Neto et al.
