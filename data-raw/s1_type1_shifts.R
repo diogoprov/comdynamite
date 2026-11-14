@@ -23,7 +23,10 @@
 #    with one shift and 3 with three, as nested regimes often find no placement within 2;
 #    random partitions that split the tree as the true one are excluded (random_regimes()) and
 #    each distinct random partition counts once in the p-value; `distinct` in the summary is
-#    the median number of distinct random partitions and `no_p` the replicates without any.
+#    the median number of distinct random partitions and `no_p` the replicates without any;
+#    and (MODE=boot) the parametric bootstrap of damocles_partition_test() (n_rand = 0, N_BOOT
+#    simulations under the constant rates estimated, default 99; files bXX_rYYYY) in the same
+#    PARTITION replicates, on the same trees and communities.
 # Settings: n_tips 112 or 250, n_shifts 1 or 3, ratio 2 or 4, n_comm 14 or 40, plus a control
 # with ratio 1 (shifts with no change in rate). REPS replicates per setting (default 500),
 # PARTITION replicates with the partition test (default 50), WORKERS processes (default 6).
@@ -44,10 +47,12 @@ workers <- as.integer(Sys.getenv("WORKERS", Sys.getenv("CORES", "6")))
 reps <- as.integer(Sys.getenv("REPS", "500"))
 n_partition <- as.integer(Sys.getenv("PARTITION", "50"))
 n_rand <- as.integer(Sys.getenv("N_RAND", "199"))
+n_boot <- as.integer(Sys.getenv("N_BOOT", "99"))
 jobs_dir <- Sys.getenv("JOBS", "data-raw/s1_jobs")
-mode <- match.arg(Sys.getenv("MODE", "lrt"), c("lrt", "partition"))
-out <- Sys.getenv("OUT", if (mode == "lrt") "data-raw/s1_type1_shifts.rds" else
-  "data-raw/s1_partition.rds")
+mode <- match.arg(Sys.getenv("MODE", "lrt"), c("lrt", "partition", "boot"))
+out <- Sys.getenv("OUT", switch(mode, lrt = "data-raw/s1_type1_shifts.rds",
+                                partition = "data-raw/s1_partition.rds",
+                                boot = "data-raw/s1_boot.rds"))
 RNGkind("L'Ecuyer-CMRG")
 dir.create(jobs_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -86,6 +91,14 @@ one_partition <- function(setting) {
   data.frame(p_partition = test$p_random, p_partition_chisq = test$p_chisq,
              n_distinct = test$n_distinct, shifted_tips = mean(d$sim$tip_regime > 0))
 }
+one_boot <- function(setting) {
+  d <- simulate(setting)
+  test <- quiet(damocles_partition_test(d$comm, d$sim$tree, d$sim$regimes, n_rand = 0,
+                                        n_boot = n_boot, vary = "both",
+                                        cores = partition_cores))
+  data.frame(p_boot = test$p_boot, p_boot_chisq = test$p_chisq,
+             n_boot_ok = length(test$null_boot), shifted_tips = mean(d$sim$tip_regime > 0))
+}
 failed <- function(e, columns) {
   r <- as.data.frame(as.list(stats::setNames(rep(NA_real_, length(columns)), columns)))
   r$error <- conditionMessage(e)
@@ -97,7 +110,8 @@ settings <- expand.grid(n_tips = c(112, 250), n_shifts = c(1, 3), ratio = c(2, 4
 settings <- rbind(settings, data.frame(n_tips = c(112, 250), n_shifts = 1, ratio = 1, n_comm = 14))
 jobs <- expand.grid(setting = seq_len(nrow(settings)),
                     rep = seq_len(if (mode == "lrt") reps else n_partition))
-jobs$file <- file.path(jobs_dir, sprintf("%s%02d_r%04d.rds", if (mode == "lrt") "s" else "p",
+jobs$file <- file.path(jobs_dir, sprintf("%s%02d_r%04d.rds",
+                                         c(lrt = "s", partition = "p", boot = "b")[[mode]],
                                          jobs$setting, jobs$rep))
 # The slowest first: large trees, many communities and many shifts.
 cost <- settings$n_tips[jobs$setting] / 112 * settings$n_comm[jobs$setting] / 14 *
@@ -106,19 +120,18 @@ todo <- which(!file.exists(jobs$file))
 todo <- todo[order(-cost[todo])]
 started <- Sys.time()
 cat("S1 (", mode, "): ", length(todo), " of ", nrow(jobs), " replicates to run on ", workers,
-    " workers", if (mode == "partition") paste0(" (", partition_cores, " per replicate)"), "\n",
+    " workers", if (mode != "lrt") paste0(" (", partition_cores, " per replicate)"), "\n",
     sep = "")
-columns <- if (mode == "lrt") {
-  c("p_both", "p_gamma", "p_dr", "shifted_tips", "shifted_edges", "convergence")
-} else {
-  c("p_partition", "p_partition_chisq", "n_distinct", "shifted_tips")
-}
+columns <- switch(mode,
+  lrt = c("p_both", "p_gamma", "p_dr", "shifted_tips", "shifted_edges", "convergence"),
+  partition = c("p_partition", "p_partition_chisq", "n_distinct", "shifted_tips"),
+  boot = c("p_boot", "p_boot_chisq", "n_boot_ok", "shifted_tips"))
 invisible(parallel::mclapply(todo, function(j) {
   s <- settings[jobs$setting[j], ]
   # The same seed in both modes: the partition test sees the trees and communities of the
   # likelihood-ratio tests of the same replicate.
   set.seed(101 + 10000 * jobs$setting[j] + jobs$rep[j])
-  r <- tryCatch(if (mode == "lrt") one_lrt(s) else one_partition(s),
+  r <- tryCatch(switch(mode, lrt = one_lrt(s), partition = one_partition(s), boot = one_boot(s)),
                 error = function(e) failed(e, columns))
   if (is.null(r$error)) r$error <- NA_character_
   saveRDS(cbind(s, rep = jobs$rep[j], r), jobs$file[j])
@@ -136,8 +149,9 @@ rate <- function(p) {
   ci <- if (length(p)) stats::binom.test(k, length(p))$conf.int else c(NA, NA)
   sprintf("%.3f [%.3f, %.3f] (n=%d)", k / max(length(p), 1), ci[1], ci[2], length(p))
 }
-tests <- if (mode == "lrt") c("p_both", "p_gamma", "p_dr") else
-  c("p_partition", "p_partition_chisq")
+tests <- switch(mode, lrt = c("p_both", "p_gamma", "p_dr"),
+                partition = c("p_partition", "p_partition_chisq"),
+                boot = c("p_boot", "p_boot_chisq"))
 summary <- do.call(rbind, lapply(split(results, results[, names(settings)], drop = TRUE),
   function(d) {
     rates <- as.data.frame(lapply(d[tests], rate))
@@ -149,6 +163,7 @@ summary <- do.call(rbind, lapply(split(results, results[, names(settings)], drop
       extra$no_p <- sum(is.na(d$p_partition))
       extra$distinct <- stats::median(d$n_distinct, na.rm = TRUE)
     }
+    if (mode == "boot") extra$boot_ok <- stats::median(d$n_boot_ok, na.rm = TRUE)
     cbind(d[1, names(settings)], rates, extra)
   }))
 summary <- summary[order(summary$ratio, summary$n_tips, summary$n_shifts, summary$n_comm), ]
