@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- New article "Nesting map" (`data-raw/figure_nesting_map.R`): six published models mapped
+  onto comdynamite, with the settings that approximate each, the mechanisms it lacks and the
+  outcome of the replications; comdynamite is presented as a modular framework for populations
+  and quantitative genetics in ecological time, not as a model that contains the others.
 - `recruitment = "lottery"`, `microsites` and `mortality` in `simulate_metacommunity()` and
   `mc_dynamics()`: adults survive with probability `1 - mortality`, offspring are produced in
   proportion to fitness, and the microsites left vacant are filled by a multivariate

@@ -9,8 +9,8 @@ local conditions fast enough to keep out a species that was pre-adapted to them.
 the landscape, these evolution-mediated priority effects make both species adapt to both patch
 types, so that patch type no longer predicts species composition, while each patch remains
 dominated by one species. We asked whether the quantitative-genetic engine of comdynamite
-reproduces these results, and where it departs from them. This article is part of the nesting
-map of the package, which lists the settings that approximate each published model and the
+reproduces these results, and where it departs from them. This article is part of the [nesting
+map](nesting-map.html) of the package, which lists the settings that approximate each published model and the
 mechanisms that are missing.
 
 ## Translation of the model

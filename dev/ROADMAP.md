@@ -982,7 +982,7 @@ as fases, em `dev/plano-especiacao.md`.
         matricial, sobreposição de nicho produto dos eixos); `env_time` com vários eixos;
         `drift_test()` (Ackermann & Cheverud 2004) e validação B ∝ W em
         `data-raw/validation_drift.R` (deriva contra seleção divergente no eixo menor da G).
-- [ ] Mapa de aninhamento e replicações (decidido em 2026-11-12; antes da Fase 4): tabela de
+- [x] Mapa de aninhamento e replicações (decidido em 2026-11-12; antes da Fase 4): tabela de
       quais configurações recuperam cada modelo publicado e quais mecanismos ficam de fora
       (genética individual de Urban & De Meester 2009, distúrbio de Leibold et al. 2019,
       restrições metabólicas, estágios e dinâmica geoclimática de Cabral e colaboradores/BioGEEM,
@@ -992,6 +992,8 @@ as fases, em `dev/plano-especiacao.md`.
       que é bom para tempo profundo e menos para tempo ecológico. O posicionamento (populações e
       genética quantitativa em tempo ecológico, módulos testáveis com a verdade conhecida;
       Cabral, Valente & Hartig 2017) vai para o README e para o preprint.
+      Artigo "Nesting map" (2026-11-13): seis modelos, status, matriz mecanismo × modelo
+      (`data-raw/figure_nesting_map.R`); posicionamento no README (mesmo PR).
       Feito (2026-11-13): rascunho do mapa em `dev/nesting-map.md` (seis modelos, fontes por
       item; BioGEEM só pelo preprint, Tabela S1 de Urban & De Meester 2009 não lida);
       `disturbance` no motor; replicação (i) em `data-raw/replication_leibold2019.R` e no
