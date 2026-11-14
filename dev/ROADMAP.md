@@ -993,7 +993,7 @@ as fases, em `dev/plano-especiacao.md`.
       genética quantitativa em tempo ecológico, módulos testáveis com a verdade conhecida;
       Cabral, Valente & Hartig 2017) vai para o README e para o preprint.
       Artigo "Nesting map" (2026-11-13): seis modelos, status, matriz mecanismo × modelo
-      (`data-raw/figure_nesting_map.R`); falta levar o posicionamento ao README.
+      (`data-raw/figure_nesting_map.R`); posicionamento no README (mesmo PR).
       Feito (2026-11-13): rascunho do mapa em `dev/nesting-map.md` (seis modelos, fontes por
       item; BioGEEM só pelo preprint, Tabela S1 de Urban & De Meester 2009 não lida);
       `disturbance` no motor; replicação (i) em `data-raw/replication_leibold2019.R` e no
