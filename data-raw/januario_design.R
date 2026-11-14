@@ -119,8 +119,17 @@ es_sim <- function(y, w, tree, n_null = 999) {
 pgls_pic <- function(y, w, tree) {
   cy <- ape::pic(y, tree); cw <- ape::pic(w, tree)
   m <- stats::lm(cy ~ cw - 1)
+  t_hc3 <- stats::coef(m)[[1]] / sqrt(sandwich::vcovHC(m, type = "HC3")[1, 1])
   c(r_pic = sum(cy * cw) / sqrt(sum(cy^2) * sum(cw^2)),
-    p = summary(m)$coefficients["cw", "Pr(>|t|)"])
+    p = summary(m)$coefficients["cw", "Pr(>|t|)"],
+    p_hc3 = 2 * stats::pt(-abs(t_hc3), df = length(cw) - 1))
+}
+# PGLS with Pagel's lambda estimated by maximum likelihood (phylolm)
+pgls_lambda <- function(y, w, tree) {
+  d <- data.frame(y = y, w = w, row.names = tree$tip.label)
+  fit <- tryCatch(phylolm::phylolm(y ~ w, d, tree, model = "lambda"), error = function(e) NULL)
+  if (is.null(fit)) return(c(p = NA_real_, lambda = NA_real_))
+  c(p = summary(fit)$coefficients["w", "p.value"], lambda = fit$optpar)
 }
 
 one_replicate <- function(b, shifts) {
@@ -137,10 +146,11 @@ one_replicate <- function(b, shifts) {
     z <- as.vector(scale(s$x[tr$tip.label]))
     for (R in c(1, 0.75)) {
       w <- stats::setNames(sqrt(R) * z + sqrt(1 - R) * stats::rnorm(length(z)), tr$tip.label)
-      pg <- pgls_pic(y, w, tr); es <- es_sim(y, w, tr)
+      pg <- pgls_pic(y, w, tr); pl <- pgls_lambda(y, w, tr); es <- es_sim(y, w, tr)
       out[[length(out) + 1]] <- data.frame(
         b = b, shifts = shifts, scheme = scheme, reliability = R, n = length(tips),
         r_raw = stats::cor(y, w), r_pic = pg[["r_pic"]], p_pgls = pg[["p"]],
+        p_hc3 = pg[["p_hc3"]], p_lambda = pl[["p"]], lambda = pl[["lambda"]],
         p_es = es[["p"]], sd_x = stats::sd(s$x[tr$tip.label]),
         cor_dr_true = suppressWarnings(stats::cor(y, log(s$base[tr$tip.label]) + b * s$x[tr$tip.label])))
     }
@@ -163,7 +173,7 @@ if (sys.nframe() == 0L) {
               n_tips = N_TIPS, elapsed = difftime(Sys.time(), start, units = "mins"))
   saveRDS(res, Sys.getenv("OUT", "data-raw/januario_design.rds"))
   m <- res$main
-  print(aggregate(cbind(pgls = p_pgls < 0.05, es = p_es <= 0.05, r_raw, r_pic, n) ~
-                    reliability + scheme + shifts + b, m, mean), digits = 2)
+  print(aggregate(cbind(pgls = p_pgls < 0.05, hc3 = p_hc3 < 0.05, lam = p_lambda < 0.05, es = p_es <= 0.05, r_raw, r_pic, n) ~
+                    reliability + scheme + shifts + b, m, mean, na.action = na.pass), digits = 2)
   cat("done in", format(res$elapsed), "with", sum(!ok), "errors\n")
 }
