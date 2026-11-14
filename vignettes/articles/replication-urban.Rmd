@@ -10,7 +10,7 @@ process they called community monopolization. When dispersal is high, gene flow 
 sources prevents adaptation, and the outcome turns on dispersal instead. We asked whether the
 quantitative-genetic engine of comdynamite reproduces these results, and where it departs
 from them. Like the [replication of Leibold et al. (2019)](replication-leibold.html), this
-article is part of the nesting map of the package.
+article is part of the [nesting map](nesting-map.html) of the package.
 
 ## Translation of the model
 

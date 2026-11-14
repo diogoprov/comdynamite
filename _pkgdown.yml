@@ -198,6 +198,7 @@ articles:
 - title: Validation
   navbar: Validation
   contents:
+  - articles/nesting-map
   - articles/validation
   - articles/validation-gradient
   - articles/replication-leibold
