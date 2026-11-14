@@ -192,6 +192,32 @@ cenário, 49 partições aleatórias, `vary = "both"`; `data-raw/s1_partition.rd
   10–30 min (23 relançamentos); custo total do S1 estimado em ~US$ 40 (sem acesso ao Cost
   Explorer para confirmar).
 
+**Resultado S1, teste de partição v3 (14/11/2026; depois do PR #76: `random_regimes()` exclui
+partições equivalentes à testada e o p conta só partições aleatórias distintas; 99 sorteios,
+50 réplicas por cenário, AWS on-demand c7i.8xlarge, run `comdynamite-s1-partition3`;
+`data-raw/s1_partition.rds`):**
+
+- **O excesso com 1 mudança sumiu.** Rejeição a 5% nos cenários com 1 mudança: 0,000–0,065
+  (antes 0,12–0,40). A interpretação acima (clado com mudança não permutável com clados
+  aleatórios) fica superada: boa parte do excesso vinha de partições aleatórias equivalentes à
+  verdadeira entrando no nulo.
+- **Mas, com 1 mudança, o nulo quase não existe.** Mediana de 3 partições distintas por réplica
+  (máximo 47); 79 de 500 réplicas sem nenhuma (sem p), e 325 com menos de 19, que não podem
+  rejeitar a 5% (p mínimo 1/(k+1)). A rejeição baixa é, em boa parte, falta de resolução.
+- **Com 3 mudanças:** mediana de 93–98 partições distintas; rejeição 0,042–0,191. O cenário 112
+  pontas, razão 2, 14 comunidades fica acima de 5% (0,191 [0,091, 0,333]); 112, razão 4, 40
+  comunidades, 0,111 [0,037, 0,241].
+- **Nas réplicas com ≥ 19 partições distintas** (as que podem rejeitar), a rejeição é 0,083
+  [0,037, 0,158] com 1 mudança (n = 96) e 0,081 [0,055, 0,115] com 3 (n = 356): levemente
+  liberal.
+- O χ² do mesmo ajuste: 0,000–0,120, média 0,047; continua calibrado.
+- Conclusão: o teste de partição, como está, não serve para regimes com uma mudança (poucas
+  partições comparáveis na árvore) e é levemente liberal quando há partições suficientes.
+  Para o artigo, os caminhos (b) bootstrap paramétrico e (c) reportar o χ² ganham peso; o (a)
+  não resolve a falta de partições com 1 mudança.
+- Execução: 900 réplicas numa c7i.8xlarge on-demand, de 11/11 a 14/11 (~3 dias de máquina);
+  nenhum erro.
+
 ### S2. Poder
 
 - Grade:
