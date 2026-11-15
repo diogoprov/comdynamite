@@ -86,6 +86,7 @@ large or larger.</p>
 <span>  <span class="va">tree</span>,</span>
 <span>  <span class="va">regimes</span>,</span>
 <span>  n_rand <span class="op">=</span> <span class="fl">99</span>,</span>
+<span>  n_boot <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"gamma"</span>, <span class="st">"mu"</span><span class="op">)</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
 <span>  sympatry <span class="op">=</span> <span class="fl">0</span>,</span>
@@ -116,7 +117,13 @@ regimes.</p></dd>
 
 
 <dt id="arg-n-rand">n_rand<a class="anchor" aria-label="anchor" href="#arg-n-rand"></a></dt>
-<dd><p>Number of random partitions drawn; each distinct one is fitted once.</p></dd>
+<dd><p>Number of random partitions drawn; each distinct one is fitted once. 0 skips
+the test against random partitions.</p></dd>
+
+
+<dt id="arg-n-boot">n_boot<a class="anchor" aria-label="anchor" href="#arg-n-boot"></a></dt>
+<dd><p>Number of parametric bootstrap simulations under the constant rates estimated
+(0, the default, skips the bootstrap).</p></dd>
 
 
 <dt id="arg-vary">vary<a class="anchor" aria-label="anchor" href="#arg-vary"></a></dt>
@@ -143,9 +150,10 @@ partition agrees with <code>regimes</code> at most as much (adjusted Rand index)
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
-<dd><p>Number of cores, with random partitions fitted in parallel. Not available on
-Windows, where one core is used. The random partitions are drawn before the fits, so the
-p-value does not depend on the number of cores.</p></dd>
+<dd><p>Number of cores, with random partitions and bootstrap simulations fitted in
+parallel. Not available on
+Windows, where one core is used. The random partitions and the simulated communities are
+drawn before the fits, so the p-values do not depend on the number of cores.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -153,8 +161,9 @@ p-value does not depend on the number of cores.</p></dd>
     <p>A list of class <code>mc_damocles_partition</code> with the observed <code>statistic</code>, its degrees
 of freedom <code>df</code>, the chi-squared p-value <code>p_chisq</code>, the p-value against random partitions
 <code>p_random</code> (<code>NA</code> when no random partition could be drawn), the statistics of the distinct
-random partitions <code>null</code>, their number <code>n_distinct</code>, and <code>fit</code>, the fit with
-<code>regimes</code>.</p>
+random partitions <code>null</code>, their number <code>n_distinct</code>, <code>n_rand</code>, the p-value of the
+parametric bootstrap <code>p_boot</code> (<code>NA</code> without it), the simulated statistics <code>null_boot</code>, and
+<code>fit</code>, the fit with <code>regimes</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -190,8 +199,20 @@ to 40% of replicates before random partitions matching <code>regimes</code> were
 <code>n_rand</code> draws are a way to find distinct placements: the p-value is the proportion of the
 distinct random partitions, plus the one tested, with a statistic as large or larger, so with
 fewer than 19 distinct ones it cannot fall below 0.05 (a warning says so). Trees with a strong
-shift in diversification often leave that little room; then only the chi-squared test of
-<code><a href="damocles_lrt.html">damocles_lrt()</a></code> is available.</p>
+shift in diversification often leave that little room. In the same simulations after both
+changes (50 replicates per setting, 99 draws), replicates with one shift had a median of 3
+distinct random partitions and 79 of 500 had none; replicates with 19 or more rejected in 8%
+(37 of 452).</p>
+<p><code>n_boot</code> adds a parametric bootstrap of the same likelihood ratio: communities are simulated
+with the constant rates estimated from <code>comm</code> (<code><a href="simulate_damocles.html">simulate_damocles()</a></code>), as many as in <code>comm</code>,
+and each set is fitted with and without <code>regimes</code>; <code>p_boot</code> is the proportion of simulated
+statistics, plus the observed one, as large or larger. It asks the question of the
+chi-squared test (do rates vary along the tree as the partition allows?) without relying on
+the asymptotic distribution of the likelihood ratio, which is doubtful with few communities
+and rates near zero, and it needs no room on the tree, so it is available for any partition.
+It does not ask whether the partition is better placed than others: with rate heterogeneity
+elsewhere on the tree it rejects, like the chi-squared test. Each simulation costs two fits,
+twice a random partition. Set <code>n_rand = 0</code> to run the bootstrap alone.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -206,10 +227,15 @@ shift in diversification often leave that little room; then only the chi-squared
 <span class="r-in"><span><span class="va">comm</span> <span class="op">&lt;-</span> <span class="fu"><a href="simulate_damocles.html">simulate_damocles</a></span><span class="op">(</span><span class="va">tr</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">reg</span> <span class="op">==</span> <span class="st">"A"</span>, <span class="fl">3</span>, <span class="fl">0.5</span><span class="op">)</span>, mu <span class="op">=</span> <span class="fl">1</span>, n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">damocles_partition_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, <span class="va">reg</span>, n_rand <span class="op">=</span> <span class="fl">19</span>, vary <span class="op">=</span> <span class="st">"gamma"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>only 18 distinct random partitions in 19 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.053</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Partition of the tree against 18 random partitions (DAMOCLES)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Partition of the tree against constant rates (DAMOCLES)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Likelihood ratio against constant rates: 28.07 on 1 df</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> p (chi-squared): 1.17e-07 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> p (random partitions): 0.0526 (18 distinct random partitions)</span>
+<span class="r-in"><span><span class="fu">damocles_partition_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, <span class="va">reg</span>, n_rand <span class="op">=</span> <span class="fl">0</span>, n_boot <span class="op">=</span> <span class="fl">19</span>, vary <span class="op">=</span> <span class="st">"gamma"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Partition of the tree against constant rates (DAMOCLES)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Likelihood ratio against constant rates: 28.07 on 1 df</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> p (chi-squared): 1.17e-07 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> p (parametric bootstrap): 0.05 (19 simulations under constant rates)</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

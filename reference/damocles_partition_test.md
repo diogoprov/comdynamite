@@ -18,6 +18,7 @@ damocles_partition_test(
   tree,
   regimes,
   n_rand = 99,
+  n_boot = 0,
   vary = c("both", "gamma", "mu"),
   root = c("both", "absent", "present"),
   sympatry = 0,
@@ -48,7 +49,13 @@ damocles_partition_test(
 
 - n_rand:
 
-  Number of random partitions drawn; each distinct one is fitted once.
+  Number of random partitions drawn; each distinct one is fitted once. 0
+  skips the test against random partitions.
+
+- n_boot:
+
+  Number of parametric bootstrap simulations under the constant rates
+  estimated (0, the default, skips the bootstrap).
 
 - vary:
 
@@ -84,10 +91,10 @@ damocles_partition_test(
 
 - cores:
 
-  Number of cores, with random partitions fitted in parallel. Not
-  available on Windows, where one core is used. The random partitions
-  are drawn before the fits, so the p-value does not depend on the
-  number of cores.
+  Number of cores, with random partitions and bootstrap simulations
+  fitted in parallel. Not available on Windows, where one core is used.
+  The random partitions and the simulated communities are drawn before
+  the fits, so the p-values do not depend on the number of cores.
 
 ## Value
 
@@ -95,8 +102,9 @@ A list of class `mc_damocles_partition` with the observed `statistic`,
 its degrees of freedom `df`, the chi-squared p-value `p_chisq`, the
 p-value against random partitions `p_random` (`NA` when no random
 partition could be drawn), the statistics of the distinct random
-partitions `null`, their number `n_distinct`, and `fit`, the fit with
-`regimes`.
+partitions `null`, their number `n_distinct`, `n_rand`, the p-value of
+the parametric bootstrap `p_boot` (`NA` without it), the simulated
+statistics `null_boot`, and `fit`, the fit with `regimes`.
 
 ## Details
 
@@ -146,10 +154,25 @@ and before the p-value counted each distinct partition once. The
 proportion of the distinct random partitions, plus the one tested, with
 a statistic as large or larger, so with fewer than 19 distinct ones it
 cannot fall below 0.05 (a warning says so). Trees with a strong shift in
-diversification often leave that little room; then only the chi-squared
-test of
-[`damocles_lrt()`](https://provetelab.org/comdynamite/reference/damocles_lrt.md)
-is available.
+diversification often leave that little room. In the same simulations
+after both changes (50 replicates per setting, 99 draws), replicates
+with one shift had a median of 3 distinct random partitions and 79 of
+500 had none; replicates with 19 or more rejected in 8% (37 of 452).
+
+`n_boot` adds a parametric bootstrap of the same likelihood ratio:
+communities are simulated with the constant rates estimated from `comm`
+([`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)),
+as many as in `comm`, and each set is fitted with and without `regimes`;
+`p_boot` is the proportion of simulated statistics, plus the observed
+one, as large or larger. It asks the question of the chi-squared test
+(do rates vary along the tree as the partition allows?) without relying
+on the asymptotic distribution of the likelihood ratio, which is
+doubtful with few communities and rates near zero, and it needs no room
+on the tree, so it is available for any partition. It does not ask
+whether the partition is better placed than others: with rate
+heterogeneity elsewhere on the tree it rejects, like the chi-squared
+test. Each simulation costs two fits, twice a random partition. Set
+`n_rand = 0` to run the bootstrap alone.
 
 ## See also
 
@@ -166,8 +189,13 @@ reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
 damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
 #> Warning: only 18 distinct random partitions in 19 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.053
-#> Partition of the tree against 18 random partitions (DAMOCLES)
+#> Partition of the tree against constant rates (DAMOCLES)
 #> Likelihood ratio against constant rates: 28.07 on 1 df
 #> p (chi-squared): 1.17e-07 
 #> p (random partitions): 0.0526 (18 distinct random partitions)
+damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
+#> Partition of the tree against constant rates (DAMOCLES)
+#> Likelihood ratio against constant rates: 28.07 on 1 df
+#> p (chi-squared): 1.17e-07 
+#> p (parametric bootstrap): 0.05 (19 simulations under constant rates)
 ```
