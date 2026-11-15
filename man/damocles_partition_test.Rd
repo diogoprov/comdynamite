@@ -9,6 +9,7 @@ damocles_partition_test(
   tree,
   regimes,
   n_rand = 99,
+  n_boot = 0,
   vary = c("both", "gamma", "mu"),
   root = c("both", "absent", "present"),
   sympatry = 0,
@@ -28,7 +29,11 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{regimes}{Regime of each edge of \code{tree}, in the order of \code{tree$edge}, with two or more
 regimes.}
 
-\item{n_rand}{Number of random partitions drawn; each distinct one is fitted once.}
+\item{n_rand}{Number of random partitions drawn; each distinct one is fitted once. 0 skips
+the test against random partitions.}
+
+\item{n_boot}{Number of parametric bootstrap simulations under the constant rates estimated
+(0, the default, skips the bootstrap).}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -45,16 +50,18 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 at most \code{max_overlap} of their edges with them (Jaccard index), and the whole random
 partition agrees with \code{regimes} at most as much (adjusted Rand index).}
 
-\item{cores}{Number of cores, with random partitions fitted in parallel. Not available on
-Windows, where one core is used. The random partitions are drawn before the fits, so the
-p-value does not depend on the number of cores.}
+\item{cores}{Number of cores, with random partitions and bootstrap simulations fitted in
+parallel. Not available on
+Windows, where one core is used. The random partitions and the simulated communities are
+drawn before the fits, so the p-values do not depend on the number of cores.}
 }
 \value{
 A list of class \code{mc_damocles_partition} with the observed \code{statistic}, its degrees
 of freedom \code{df}, the chi-squared p-value \code{p_chisq}, the p-value against random partitions
 \code{p_random} (\code{NA} when no random partition could be drawn), the statistics of the distinct
-random partitions \code{null}, their number \code{n_distinct}, and \code{fit}, the fit with
-\code{regimes}.
+random partitions \code{null}, their number \code{n_distinct}, \code{n_rand}, the p-value of the
+parametric bootstrap \code{p_boot} (\code{NA} without it), the simulated statistics \code{null_boot}, and
+\code{fit}, the fit with \code{regimes}.
 }
 \description{
 \code{damocles_partition_test()} asks whether rates that change among \code{regimes} fit the local
@@ -99,8 +106,21 @@ to 40\% of replicates before random partitions matching \code{regimes} were excl
 \code{n_rand} draws are a way to find distinct placements: the p-value is the proportion of the
 distinct random partitions, plus the one tested, with a statistic as large or larger, so with
 fewer than 19 distinct ones it cannot fall below 0.05 (a warning says so). Trees with a strong
-shift in diversification often leave that little room; then only the chi-squared test of
-\code{\link[=damocles_lrt]{damocles_lrt()}} is available.
+shift in diversification often leave that little room. In the same simulations after both
+changes (50 replicates per setting, 99 draws), replicates with one shift had a median of 3
+distinct random partitions and 79 of 500 had none; replicates with 19 or more rejected in 8\%
+(37 of 452).
+
+\code{n_boot} adds a parametric bootstrap of the same likelihood ratio: communities are simulated
+with the constant rates estimated from \code{comm} (\code{\link[=simulate_damocles]{simulate_damocles()}}), as many as in \code{comm},
+and each set is fitted with and without \code{regimes}; \code{p_boot} is the proportion of simulated
+statistics, plus the observed one, as large or larger. It asks the question of the
+chi-squared test (do rates vary along the tree as the partition allows?) without relying on
+the asymptotic distribution of the likelihood ratio, which is doubtful with few communities
+and rates near zero, and it needs no room on the tree, so it is available for any partition.
+It does not ask whether the partition is better placed than others: with rate heterogeneity
+elsewhere on the tree it rejects, like the chi-squared test. Each simulation costs two fits,
+twice a random partition. Set \code{n_rand = 0} to run the bootstrap alone.
 }
 \examples{
 \dontshow{if (requireNamespace("treeshapesim", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -109,6 +129,7 @@ tr <- treeshapesim::sim_tree_shape(30)
 reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
 damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
+damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
 \dontshow{\}) # examplesIf}
 }
 \seealso{

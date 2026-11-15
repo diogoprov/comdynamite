@@ -90,7 +90,11 @@ test_that("damocles_partition_test compares a partition with random ones", {
   expect_output(print(res), paste0("(", res$n_distinct, " distinct random partitions)"),
                 fixed = TRUE)
   expect_error(damocles_partition_test(comm, tree, rep("x", length(reg))), "two or more")
-  expect_error(damocles_partition_test(comm, tree, reg, n_rand = 0), "n_rand")
+  expect_error(damocles_partition_test(comm, tree, reg, n_rand = 0), "`n_rand` or `n_boot`")
+  expect_error(damocles_partition_test(comm, tree, reg, n_rand = -1), "n_rand")
+  expect_error(damocles_partition_test(comm, tree, reg, n_boot = 1.5), "n_boot")
+  expect_true(is.na(res$p_boot))
+  expect_length(res$null_boot, 0)
   # The partitions are drawn before the fits: the p-value does not depend on the cores.
   set.seed(3)
   one <- suppressWarnings(damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma"))
@@ -98,6 +102,55 @@ test_that("damocles_partition_test compares a partition with random ones", {
   two <- suppressWarnings(damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma",
                                                   cores = 2))
   expect_identical(one$null, two$null)
+})
+
+test_that("damocles_partition_test runs a parametric bootstrap under constant rates", {
+  set.seed(18)
+  tree <- treeshapesim::sim_tree_shape(30)
+  reg <- clade_regimes(tree, list(A = ape::Ntip(tree) + 2))
+  comm <- simulate_damocles(tree, ifelse(reg == "A", 3, 0.5), 1, n = 5)
+  set.seed(5)
+  res <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 9, vary = "gamma")
+  expect_true(is.na(res$p_random))
+  expect_identical(res$n_distinct, 0L)
+  expect_length(res$null_boot, 9)
+  expect_true(all(res$null_boot > -1e-6))
+  expect_equal(res$p_boot, (sum(res$null_boot >= res$statistic - 1e-8) + 1) / 10)
+  out <- capture.output(print(res))
+  expect_true(any(grepl("(9 simulations under constant rates)", out, fixed = TRUE)))
+  expect_false(any(grepl("random partitions)", out, fixed = TRUE)))
+  # The communities are simulated before the fits: the p-value does not depend on the cores.
+  set.seed(5)
+  two <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 9, vary = "gamma",
+                                 cores = 2)
+  expect_identical(res$null_boot, two$null_boot)
+})
+
+test_that("bootstrap fits that fail are left out", {
+  set.seed(18)
+  tree <- treeshapesim::sim_tree_shape(30)
+  reg <- clade_regimes(tree, list(A = ape::Ntip(tree) + 2))
+  comm <- simulate_damocles(tree, ifelse(reg == "A", 3, 0.5), 1, n = 5)
+  real_sim <- simulate_damocles
+  calls <- 0
+  local_mocked_bindings(simulate_damocles = function(...) {
+    calls <<- calls + 1
+    out <- real_sim(...)
+    if (calls == 1) out[] <- NA  # a set that cannot be fitted
+    out
+  })
+  set.seed(6)
+  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 3,
+                                                vary = "gamma"),
+                 "1 of 3 bootstrap fits failed")
+  expect_length(res$null_boot, 2)
+  local_mocked_bindings(simulate_damocles = function(...) {
+    out <- real_sim(...); out[] <- NA; out
+  })
+  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 2,
+                                                vary = "gamma"),
+                 "2 of 2")
+  expect_true(is.na(res$p_boot))
 })
 
 test_that("random partitions that split the tree as the original are excluded", {

@@ -323,25 +323,43 @@ adjusted_rand <- function(a, b) {
 #' `n_rand` draws are a way to find distinct placements: the p-value is the proportion of the
 #' distinct random partitions, plus the one tested, with a statistic as large or larger, so with
 #' fewer than 19 distinct ones it cannot fall below 0.05 (a warning says so). Trees with a strong
-#' shift in diversification often leave that little room; then only the chi-squared test of
-#' [damocles_lrt()] is available.
+#' shift in diversification often leave that little room. In the same simulations after both
+#' changes (50 replicates per setting, 99 draws), replicates with one shift had a median of 3
+#' distinct random partitions and 79 of 500 had none; replicates with 19 or more rejected in 8%
+#' (37 of 452).
+#'
+#' `n_boot` adds a parametric bootstrap of the same likelihood ratio: communities are simulated
+#' with the constant rates estimated from `comm` ([simulate_damocles()]), as many as in `comm`,
+#' and each set is fitted with and without `regimes`; `p_boot` is the proportion of simulated
+#' statistics, plus the observed one, as large or larger. It asks the question of the
+#' chi-squared test (do rates vary along the tree as the partition allows?) without relying on
+#' the asymptotic distribution of the likelihood ratio, which is doubtful with few communities
+#' and rates near zero, and it needs no room on the tree, so it is available for any partition.
+#' It does not ask whether the partition is better placed than others: with rate heterogeneity
+#' elsewhere on the tree it rejects, like the chi-squared test. Each simulation costs two fits,
+#' twice a random partition. Set `n_rand = 0` to run the bootstrap alone.
 #'
 #' @inheritParams damocles_fit
 #' @param regimes Regime of each edge of `tree`, in the order of `tree$edge`, with two or more
 #'   regimes.
-#' @param n_rand Number of random partitions drawn; each distinct one is fitted once.
+#' @param n_rand Number of random partitions drawn; each distinct one is fitted once. 0 skips
+#'   the test against random partitions.
+#' @param n_boot Number of parametric bootstrap simulations under the constant rates estimated
+#'   (0, the default, skips the bootstrap).
 #' @param tolerance,max_overlap Passed to [random_regimes()]: random clades hold between
 #'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes`, share
 #'   at most `max_overlap` of their edges with them (Jaccard index), and the whole random
 #'   partition agrees with `regimes` at most as much (adjusted Rand index).
-#' @param cores Number of cores, with random partitions fitted in parallel. Not available on
-#'   Windows, where one core is used. The random partitions are drawn before the fits, so the
-#'   p-value does not depend on the number of cores.
+#' @param cores Number of cores, with random partitions and bootstrap simulations fitted in
+#'   parallel. Not available on
+#'   Windows, where one core is used. The random partitions and the simulated communities are
+#'   drawn before the fits, so the p-values do not depend on the number of cores.
 #' @return A list of class `mc_damocles_partition` with the observed `statistic`, its degrees
 #'   of freedom `df`, the chi-squared p-value `p_chisq`, the p-value against random partitions
 #'   `p_random` (`NA` when no random partition could be drawn), the statistics of the distinct
-#'   random partitions `null`, their number `n_distinct`, and `fit`, the fit with
-#'   `regimes`.
+#'   random partitions `null`, their number `n_distinct`, `n_rand`, the p-value of the
+#'   parametric bootstrap `p_boot` (`NA` without it), the simulated statistics `null_boot`, and
+#'   `fit`, the fit with `regimes`.
 #' @seealso [random_regimes()], [damocles_samples()], [damocles_lrt()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
 #' set.seed(9)
@@ -349,15 +367,19 @@ adjusted_rand <- function(a, b) {
 #' reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 #' comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
 #' damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
+#' damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
 #' @export
-damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
+damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0,
                                     vary = c("both", "gamma", "mu"),
                                     root = c("both", "absent", "present"), sympatry = 0,
                                     tolerance = 2, max_overlap = 0.25, cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
-  if (length(n_rand) != 1 || !is.finite(n_rand) || n_rand < 1 || n_rand != round(n_rand)) {
-    stop("`n_rand` must be one whole number, 1 or more", call. = FALSE)
+  whole <- function(x) length(x) == 1 && is.finite(x) && x >= 0 && x == round(x)
+  if (!whole(n_rand)) stop("`n_rand` must be one whole number, 0 or more", call. = FALSE)
+  if (!whole(n_boot)) stop("`n_boot` must be one whole number, 0 or more", call. = FALSE)
+  if (n_rand + n_boot == 0) {
+    stop("`n_rand` or `n_boot` must be 1 or more", call. = FALSE)
   }
   check_damocles_tree(tree)
   if (nlevels(droplevels(factor(regimes))) < 2) {
@@ -377,7 +399,7 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
     tryCatch(random_regimes(tree, regimes, tolerance, max_overlap), error = function(e) e)
   })
   failed <- vapply(draws, inherits, logical(1), what = "error")
-  if (all(failed)) {
+  if (n_rand > 0 && all(failed)) {
     warning("no random partition could be drawn (", conditionMessage(draws[[1]]), "); ",
             "`p_random` is NA", call. = FALSE)
   }
@@ -400,20 +422,55 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99,
             "tree has few places for clades like those of `regimes`, and `p_random` cannot be ",
             "below ", format(1 / (length(null) + 1), digits = 2), call. = FALSE)
   }
+  # Parametric bootstrap: communities simulated with the constant rates estimated, refitted
+  # with and without `regimes`. All communities are simulated before the fits, so the p-value
+  # does not depend on the number of cores.
+  null_boot <- numeric(0)
+  p_boot <- NA_real_
+  if (n_boot > 0) {
+    sims <- lapply(seq_len(n_boot), function(i) {
+      simulate_damocles(tree, constant$gamma[1], constant$mu[1], n = nrow(presence),
+                        root = root, sympatry = constant$sympatry[1])
+    })
+    null_boot <- unlist(damocles_apply(sims, function(sim) {
+      tryCatch({
+        base <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry)
+        alt <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry,
+                            regimes = regimes, vary = vary)
+        damocles_lrt(base, alt)$statistic[2]
+      }, error = function(e) NA_real_)
+    }, cores))
+    null_boot <- unname(null_boot[is.finite(null_boot)])
+    if (length(null_boot) < n_boot) {
+      warning(n_boot - length(null_boot), " of ", n_boot, " bootstrap fits failed and were ",
+              "left out", call. = FALSE)
+    }
+    if (length(null_boot)) {
+      p_boot <- (sum(null_boot >= observed$statistic[2] - 1e-8) + 1) / (length(null_boot) + 1)
+    }
+  }
   structure(list(statistic = observed$statistic[2], df = observed$df[2],
                  p_chisq = observed$p_value[2], p_random = p_random, null = null,
-                 n_distinct = length(null), fit = fit),
+                 n_distinct = length(null), n_rand = n_rand, p_boot = p_boot,
+                 null_boot = null_boot,
+                 fit = fit),
             class = "mc_damocles_partition")
 }
 
 #' @export
 print.mc_damocles_partition <- function(x, ...) {
-  cat("Partition of the tree against", length(x$null), "random partitions (DAMOCLES)\n")
+  cat("Partition of the tree against constant rates (DAMOCLES)\n")
   cat("Likelihood ratio against constant rates:", format(x$statistic, digits = 4), "on",
       x$df, "df\n")
   cat("p (chi-squared):", format(x$p_chisq, digits = 3), "\n")
-  cat("p (random partitions): ", format(x$p_random, digits = 3), " (", x$n_distinct,
-      " distinct random partitions)\n", sep = "")
+  if ((x$n_rand %||% 1) > 0) {
+    cat("p (random partitions): ", format(x$p_random, digits = 3), " (", x$n_distinct,
+        " distinct random partitions)\n", sep = "")
+  }
+  if (!is.null(x$p_boot) && (length(x$null_boot) || !is.na(x$p_boot))) {
+    cat("p (parametric bootstrap): ", format(x$p_boot, digits = 3), " (",
+        length(x$null_boot), " simulations under constant rates)\n", sep = "")
+  }
   invisible(x)
 }
 
