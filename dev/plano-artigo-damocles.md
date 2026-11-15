@@ -235,8 +235,32 @@ réplicas cada; spot c7i.48xlarge, run `comdynamite-s1-boot1`; `data-raw/s1_boot
   partição. Aqui o χ² já estava calibrado, então o ganho é de robustez, não de correção.
 - Execução: 500 réplicas em ~2 h numa c7i.48xlarge spot, sem interrupções; custo estimado
   em ~US$ 5 (não confirmado no Cost Explorer).
-- Pendente: os cenários com 3 mudanças (`SHIFTS=3`) e o poder (S2), para saber se o
-  bootstrap perde poder em relação ao χ².
+- Os cenários com 3 mudanças foram rodados depois (abaixo). Continua pendente o poder (S2),
+  para saber se o bootstrap perde poder em relação ao χ².
+
+**Resultado S1, bootstrap paramétrico, desenho completo (15/11/2026; cenários com 3 mudanças
+adicionados, run `comdynamite-s1-boot3`; os 18 cenários estão em `data-raw/s1_boot.rds`):**
+
+| Mudanças | Réplicas | Bootstrap (rejeição a 5%) | χ² (mesmas réplicas) |
+|---|---|---|---|
+| 1 | 500 | 0,048 [0,031, 0,071] | 0,054 [0,036, 0,078] |
+| 3 | 400 | 0,048 [0,029, 0,073] | 0,038 [0,021, 0,061] |
+
+- Com 3 mudanças, a rejeição por cenário vai de 0,00 a 0,08. O cenário em que o teste de
+  partição v3 era liberal (112 pontas, razão 2, 14 comunidades: 0,191) dá 0,08 no bootstrap
+  e 0,08 no χ², dentro do esperado para n = 50.
+- Os p do bootstrap são uniformes nos dois blocos (77–87 réplicas por quintil com 3
+  mudanças). Nenhum erro, e 49 de 49 bootstraps válidos em todas as 900 réplicas.
+- **Conclusão do S1:** sob diversificação heterogênea e taxas de montagem constantes, o LR
+  do DAMOCLES está calibrado tanto pelo χ² quanto pelo bootstrap paramétrico. O teste de
+  partição aleatória não serve com 1 mudança e é levemente liberal com 3. Para o artigo:
+  χ² como teste principal, bootstrap paramétrico como checagem de robustez, e o teste de
+  partição como diagnóstico, não como teste de significância. Isso supõe que o bootstrap não
+  perde poder demais, o que o S2 tem de mostrar.
+- Execução com 3 mudanças: 400 réplicas, ~14 h de c7i.48xlarge spot em três instâncias
+  (duas interrupções spot; uma delas sem relançamento porque o SSO expirou de madrugada).
+  Custo estimado em ~US$ 30 (não confirmado no Cost Explorer). Cada réplica com 3 mudanças
+  custa ~10 vezes uma com 1 mudança.
 
 ### S2. Poder
 
