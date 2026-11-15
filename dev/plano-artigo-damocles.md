@@ -264,14 +264,32 @@ adicionados, run `comdynamite-s1-boot3`; os 18 cenários estão em `data-raw/s1_
 
 ### S2. Poder
 
-- Grade:
-  - n ∈ {5, 10, 14, 20, 40};
-  - pontas ∈ {50, 112, 250};
-  - razão de γ entre regimes ∈ {1,5; 2; 3};
-  - efeito em γ, em μ ou em ambos;
-  - fração da árvore no regime focal (10%, 25%, 50%).
-- Inclui o caso realista de Benício: n = 14 e pool de 112 ou 248.
-- Saída: curvas de poder. É ela que diz se n = 14 sustenta o caso focal sozinho.
+Desenho revisado em 15/11/2026, depois do S1 (script `data-raw/s2_power.R`):
+
+- Regimes verdadeiros (conhecidos); regimes estimados ficam para o S3. Árvore como no S1
+  (`sim_shift_tree()`, uma mudança que dobra λ), sorteada de novo até o clado focal ter a
+  fração pedida das pontas (±20%). Taxas de base do S1 (γ = 5, μ = 1); no regime focal, γ, μ
+  ou ambos multiplicados pela razão (ambos: a mesma razão, ocupação parecida, mais turnover).
+- **Camada A (χ²):** n {5, 10, 14, 20, 40} × pontas {112, 250} × razão {1,5; 2; 3} × efeito
+  {γ, μ, ambos}, fração 0,25 (90 cenários), mais a fração 0,1 e 0,5 em 112 pontas, n {14, 40},
+  efeito em γ (12 cenários). 200 réplicas; testes p_both (df 2), p_gamma e p_mu (df 1) e a
+  razão estimada. O tamanho (razão 1) vem do S1. 50 pontas cortadas (nenhum caso real).
+- **Camada B (bootstrap contra χ², mesmas árvores e comunidades):** 112 pontas, n {14, 40},
+  razão {1,5; 2; 3}, efeito em γ, fração 0,25; 100 réplicas, 49 simulações.
+- Caso de Benício: n = 14 com 112 e 250 pontas, nas duas camadas.
+
+**Piloto (15/11/2026, local, 18 núcleos):** 8 cenários × 6 réplicas do χ² com razão 2 e 2
+cenários × 2 réplicas do bootstrap.
+
+- Tempo por réplica: χ² ~5 s com 112 pontas e ~10 s com 250, quase sem efeito de n; bootstrap
+  ~40 s em 24 núcleos. Nenhum erro, nenhuma falha de convergência.
+- Custo: camada A ~41 h de processo (~2,6 h local com 16 processos; ~15–20 min numa
+  c7i.48xlarge); camada B ~7 h local ou <1 h numa 48xlarge. Na AWS spot, as duas juntas ficam
+  em ~US$ 3–5 com a subida das instâncias.
+- **Com razão 2 e efeito em γ, o poder já é 1 com n = 5** (6/6 réplicas, nos dois tamanhos de
+  árvore). Efeito em μ com n = 40: 2–3 de 6. A razão estimada fica perto de 2 (1,84–2,14).
+  Com essas taxas, a curva só vai mostrar alguma coisa em razões pequenas e no efeito em μ.
+  Proposta: acrescentar a razão 1,25 (e talvez 1,1) às duas camadas, o que custa pouco.
 
 ### S3. Integração do posterior (o ponto metodologicamente aberto)
 
