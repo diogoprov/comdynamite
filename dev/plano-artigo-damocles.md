@@ -392,6 +392,19 @@ Acerto da taxa entre as réplicas em que o melhor modelo de uma taxa rejeita o c
   lá também o efeito sobre a extinção é o menos preciso, com outro modelo e inferência por
   deep learning; os classificadores deles acertam 73–87% da presença de cada efeito. Os
   desenhos não são comparáveis número a número.
+  - **Versão publicada (Syst. Biol., doi:10.1093/sysbio/syag085, PDF lido em 16/11/2026):**
+    cobertura dos intervalos conformalizados de 80% em 79–81% para todos os parâmetros
+    (Fig. 5, p. 36 do PDF), mas a inclinação estimado × verdadeiro do efeito sobre a
+    extinção fica em ~0,12 (contra ~0,42–0,45 dos outros efeitos; lido da figura); os
+    autores dizem que os classificadores detectam se o efeito existe, mas não estimam seu
+    valor (p. 45), e atribuem isso à extinção, não à arquitetura (pp. 45–46). Falsos
+    positivos entre processos de até ~0,30 (Fig. 6). Não modelam amostragem incompleta
+    nem detecção imperfeita (pp. 48–49), escala só regional, e não citam DAMOCLES nem Pigot
+    & Etienne (2015). Para o artigo: o paralelo sustenta enquadrar μ como "presença do
+    efeito" e não magnitude; a detecção imperfeita (S6b) é um diferencial. Referências
+    da lista deles a considerar (copiadas da lista, não conferidas no Crossref): Etienne,
+    Pigot & Phillimore (2016, Methods Ecol. Evol. 7:1092–1099); Swiston & Landis (2025,
+    Syst. Biol. 74:282–300).
 
 - **Conclusão do S2:** o χ² continua como teste principal (o bootstrap não muda o poder). No
   artigo:
@@ -559,6 +572,44 @@ num PR próprio.
     Benício; (iv) bootstrap em blocos espaciais, idem;
   - com Benício (dois blocos), nenhuma correção por reamostragem funciona; o caso só serve
     como ilustração, com o teste estratificado por região como análise principal.
+
+#### Camada B: correções (16/11/2026, `data-raw/s5_corrections.R` e `.rds`)
+
+- n = 40 comunidades em blocos de 2, 4 ou 10 (20, 10 ou 4 blocos), a_s ∈ {∞, 0,1, 0,05,
+  0,02}, efeito nenhum ou γ × 1,5; 200 réplicas por cenário, 4800 no total (64 min), sem
+  erros. Para os testes de 1 gl de γ e de μ:
+  - **ingênuo:** LRT contra χ²₁ com todas as comunidades;
+  - **subamostra:** uma comunidade sorteada por bloco;
+  - **Chandler & Bate (2007):** LRT dividido por λ = c′H⁻¹JH⁻¹c / c′H⁻¹c (sanduíche por
+    blocos, scores numéricos), contra χ²₁ ("CB") e contra F(1, G − 1) ("CB-F").
+- **Tamanho do teste de γ (sem efeito), ingênuo / subamostra / CB / CB-F:**
+
+  | blocos | a_s = ∞ | 0,1 | 0,05 | 0,02 |
+  |---|---|---|---|---|
+  | 20 | 0,06 / 0,07 / 0,10 / 0,07 | 0,03 / 0,06 / 0,03 / 0,02 | 0,07 / 0,03 / 0,05 / 0,05 | 0,12 / 0,05 / 0,05 / 0,03 |
+  | 10 | 0,04 / 0,04 / 0,08 / 0,06 | 0,10 / 0,04 / 0,10 / 0,06 | 0,18 / 0,09 / 0,11 / 0,06 | 0,27 / 0,03 / 0,08 / 0,07 |
+  | 4 | 0,05 / 0,05 / 0,14 / 0,07 | 0,22 / 0,04 / 0,16 / 0,10 | 0,36 / 0,08 / 0,12 / 0,04 | 0,38 / 0,06 / 0,09 / 0,02 |
+
+- **Poder do teste de γ (efeito 1,5), subamostra / CB-F:** 20 blocos 0,98 / 0,99–1;
+  10 blocos 0,82–0,88 / 0,91–1; 4 blocos 0,42–0,54 / 0,32–0,96 (cai com a dependência).
+- **λ acompanha a dependência:** mediana ~0,8–1 sem blocos, 1,7 / 2,9 / 5,4 com a_s = 0,02
+  e blocos de 2 / 4 / 10.
+- **Para μ o ajuste falha:** o CB-F de μ rejeita 0,07–0,26 sem efeito, já 0,08–0,10 com
+  comunidades independentes (μ perto da fronteira deixa H mal estimada). Com efeito em γ, o
+  λ de μ vai a ~10⁻⁷ (o modelo de μ vai à fronteira) e o teste de μ ajustado rejeita quase
+  sempre: o ajuste herda e piora a falta de atribuição do S2. A subamostra fica calibrada
+  para μ (0,02–0,07), com pouco poder.
+- **Conclusões:**
+  - para γ, o ajuste de Chandler & Bate com referência F(1, G − 1) segura o tamanho em
+    0,02–0,10 com 4 a 20 blocos e mantém quase todo o poder com ≥ 10 blocos; é a correção
+    principal para o E6 (blocos espaciais no ATLANTIC AMPHIBIANS, que terá dezenas);
+  - a subamostra (uma comunidade por bloco) é calibrada em todos os cenários e serve de
+    análise de robustez, inclusive para μ;
+  - para μ, sem correção confiável por sanduíche: reportar como secundário (intervalos por
+    perfil sobre subamostras), coerente com a conclusão do S2;
+  - falta: como definir os blocos nos dados reais (agrupamento espacial com raio a
+    escolher) e checar o ajuste com blocos de tamanho desigual. Implementar o ajuste no
+    pacote (`damocles_fit()` ou função nova) só depois do S3.
 
 ### S6. Pool mal especificado
 
