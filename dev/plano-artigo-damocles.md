@@ -501,6 +501,45 @@ num PR próprio.
   - (ii) a união das espécies observadas (como a árvore de 112).
 - Medir o viés em γ, μ e β, e o efeito no teste de regime.
 
+### S6b. Detecção imperfeita (feito em 16/11/2026)
+
+- `data-raw/s6_detection.R` e `.rds`: árvores e comunidades como no S2 (112 pontas, regime
+  focal com 0,25 das pontas, γ = 5 e μ = 1 no fundo), n = 14 ou 40, efeito nenhum ou razão
+  1,5 e 3 em γ ou em μ; 200 réplicas por cenário. Em cada réplica, cada presença vira
+  ausência com probabilidade q = 0; 0,1; 0,25; 0,4, sobre a mesma árvore e as mesmas
+  comunidades (pareado). Os quatro modelos da camada C do S2 em cada conjunto. Sem erros nem
+  falhas de convergência em 8000 ajustes (73 min, 16 núcleos).
+- **Viés das taxas absolutas, forte e previsível.** Sem efeito, a mediana de γ cai de 4,98
+  (q = 0) para 3,73 (q = 0,25) e 3,00 (q = 0,4), e a de μ sobe de 0,91 para 2,13 e 2,92: a
+  falsa ausência vira extinção local. Com q = 0,25, μ sai inflado ~2× e γ ~25% abaixo.
+  Taxas absolutas de listas do ATLANTIC AMPHIBIANS não podem ser interpretadas sem correção.
+- **O teste de regime continua calibrado.** Sem efeito, a rejeição fica em 0,04–0,09 nos
+  três testes em todos os q (sem tendência com q).
+- **A razão de γ entre regimes não tem viés:** com efeito em γ, a mediana de γ₁/γ₀ fica em
+  1,50–1,54 (razão 1,5) e 2,92–2,98 (razão 3) em todos os q. A razão de μ é atenuada: com
+  efeito em μ de razão 3, a mediana cai de 2,90–3,00 (q = 0) para 1,78–1,86 (q = 0,25).
+- **Poder cai com q, mais para μ.** Teste de γ com razão 1,5: n = 14 vai de 0,92 (q = 0) a
+  0,74 (q = 0,25) e 0,55 (q = 0,4); com n = 40 fica ≥ 0,95. Teste de μ com razão 3: n = 40
+  vai de 0,84 a 0,62 (q = 0,25) e 0,51 (q = 0,4); n = 14, de 0,46 a 0,32 e 0,17.
+- **Atribuição:** efeitos em γ detectados continuam atribuídos a γ (0,82–1); efeitos em μ
+  detectados vão para μ só em 0,42–0,79 das vezes, pior com q alto.
+- **Efeito espúrio em μ quando γ muda.** Com efeito forte em γ (razão 3), a falsa ausência
+  cria uma diferença aparente de μ entre regimes no modelo com as duas taxas livres (mediana
+  de μ₁/μ₀ de 1,6–2,4 com q > 0) e o LRT "duas taxas contra a melhor de uma" rejeita em
+  0,17/0,32/0,42 (n = 40, q = 0,1/0,25/0,4), contra 0,04–0,06 sem falsa ausência. Com razão
+  1,5 o excesso é pequeno (≤ 0,10). Interpretação (minha, não verificada analiticamente): o
+  regime com γ maior tem mais presenças a perder, e o modelo absorve essa perda como
+  extinção local maior.
+- **Implicações para o E6:**
+  - a pergunta central (γ difere entre regimes; "a dinâmica local difere") resiste à
+    detecção imperfeita: tamanho calibrado, razão de γ sem viés, poder alto com n = 40;
+  - não reportar γ e μ absolutos como taxas biológicas; reportar razões entre regimes;
+  - não interpretar "μ também difere" quando γ difere muito: com q ≈ 0,2–0,3 essa conclusão
+    é falso positivo em ~1/3 dos casos. Uma diferença em μ só vale com γ semelhante entre
+    regimes, ou com correção de detecção;
+  - mitigações a testar: agregar estudos por localidade (reduz q), filtrar por esforço, ou
+    um modelo de detecção dentro da verossimilhança (extensão de código, não planejada).
+
 ### S7. Incerteza de topologia e datação
 
 - Caso empírico: repetir o ajuste principal nos 100 bootstraps datados do Portik e nas
