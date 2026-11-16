@@ -17,9 +17,17 @@
 #    N_BOOT simulations under the constant rates, default 49, vary = "both", 24 cores per
 #    replicate) on the same trees and communities (same seed); it reports p_boot and the
 #    chi-square p of the same statistic (p_boot_chisq).
+#    MODE=compare (layer C) refits the four models (constant, gamma free, mu free, both free)
+#    on the same trees and communities (same seed) and keeps their log-likelihoods, to ask
+#    whether the data tell which rate changed: the gamma and mu models have the same number of
+#    parameters, so the one with the higher likelihood is chosen (equal AIC penalty); and the
+#    LRT of both free against the better single-rate model (df 1) asks whether the other rate
+#    also changed.
 # Settings (MODE=chisq): grid A, n_comm 5, 10, 14, 20 or 40, n_tips 112 or 250, ratio 1.1, 1.25,
 # 1.5, 2 or 3, effect on gamma, mu or both, fraction 0.25; plus a sweep of fraction 0.1 and 0.5 with
 # n_tips 112, n_comm 14 or 40, effect on gamma. Type I error (ratio 1) comes from S1.
+# MODE=compare: grid C, fraction 0.25, n_comm 5, 14 or 40, both tree sizes, every ratio and
+# effect (90 settings of grid A), REPS default 100.
 # MODE=boot: grid B, n_tips 112, n_comm 14 or 40, every ratio, effect on gamma,
 # fraction 0.25 (the same settings and seeds as in grid A).
 # REPS replicates per setting (default 200 with chisq, 100 with boot), WORKERS processes
@@ -32,11 +40,12 @@
 # rate at 5% with a 95% binomial interval (Clopper-Pearson).
 suppressMessages(pkgload::load_all(".", quiet = TRUE, export_all = TRUE))
 workers <- as.integer(Sys.getenv("WORKERS", "6"))
-mode <- match.arg(Sys.getenv("MODE", "chisq"), c("chisq", "boot"))
+mode <- match.arg(Sys.getenv("MODE", "chisq"), c("chisq", "boot", "compare"))
 reps <- as.integer(Sys.getenv("REPS", if (mode == "chisq") "200" else "100"))
 n_boot <- as.integer(Sys.getenv("N_BOOT", "49"))
 jobs_dir <- Sys.getenv("JOBS", "data-raw/s2_jobs")
-out <- Sys.getenv("OUT", c(chisq = "data-raw/s2_power.rds", boot = "data-raw/s2_boot.rds")[[mode]])
+out <- Sys.getenv("OUT", c(chisq = "data-raw/s2_power.rds", boot = "data-raw/s2_boot.rds",
+                           compare = "data-raw/s2_compare.rds")[[mode]])
 RNGkind("L'Ecuyer-CMRG")
 dir.create(jobs_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -85,6 +94,17 @@ one_chisq <- function(setting) {
              convergence = max(null$convergence, both$convergence, gamma$convergence,
                                mu$convergence))
 }
+one_compare <- function(setting) {
+  d <- simulate(setting)
+  tree <- d$sim$tree
+  regimes <- d$sim$regimes
+  null <- quiet(damocles_fit(d$comm, tree, shared = TRUE))
+  start <- c(null$gamma[1], null$mu[1])
+  ll <- function(vary) attr(quiet(damocles_fit(d$comm, tree, shared = TRUE, regimes = regimes,
+                                                vary = vary, start = start)), "loglik_total")
+  data.frame(ll_null = attr(null, "loglik_total"), ll_gamma = ll("gamma"), ll_mu = ll("mu"),
+             ll_both = ll("both"))
+}
 boot_cores <- 24
 one_boot <- function(setting) {
   d <- simulate(setting)
@@ -109,11 +129,12 @@ sweep <- expand.grid(n_comm = c(14, 40), n_tips = 112, ratio = c(1.1, 1.25, 1.5,
 settings <- rbind(grid_a, sweep)
 in_b <- settings$n_tips == 112 & settings$n_comm %in% c(14, 40) & settings$effect == "gamma" &
   settings$fraction == 0.25
-run <- if (mode == "chisq") seq_len(nrow(settings)) else which(in_b)
+in_c <- settings$fraction == 0.25 & settings$n_comm %in% c(5, 14, 40)
+run <- switch(mode, chisq = seq_len(nrow(settings)), boot = which(in_b), compare = which(in_c))
 only <- Sys.getenv("SETTINGS", "")
 if (nzchar(only)) run <- intersect(run, as.integer(strsplit(only, ",")[[1]]))
 jobs <- expand.grid(setting = run, rep = seq_len(reps))
-jobs$file <- file.path(jobs_dir, sprintf("%s%03d_r%04d.rds", c(chisq = "c", boot = "b")[[mode]],
+jobs$file <- file.path(jobs_dir, sprintf("%s%03d_r%04d.rds", c(chisq = "c", boot = "b", compare = "k")[[mode]],
                                          jobs$setting, jobs$rep))
 # The slowest first: large trees and many communities.
 cost <- settings$n_tips[jobs$setting] * settings$n_comm[jobs$setting]
@@ -125,25 +146,50 @@ cat("S2 (", mode, "): ", length(todo), " of ", nrow(jobs), " replicates to run o
     sep = "")
 columns <- switch(mode,
   chisq = c("p_both", "p_gamma", "p_mu", "ratio_hat", "focal_tips", "convergence"),
-  boot = c("p_boot", "p_boot_chisq", "n_boot_ok", "focal_tips"))
+  boot = c("p_boot", "p_boot_chisq", "n_boot_ok", "focal_tips"),
+  compare = c("ll_null", "ll_gamma", "ll_mu", "ll_both"))
 invisible(parallel::mclapply(todo, function(j) {
   s <- settings[jobs$setting[j], ]
   # The same seed in both modes: the bootstrap sees the trees and communities of grid A.
   set.seed(202 + 10000 * jobs$setting[j] + jobs$rep[j])
   t0 <- Sys.time()
-  r <- tryCatch(switch(mode, chisq = one_chisq(s), boot = one_boot(s)),
+  r <- tryCatch(switch(mode, chisq = one_chisq(s), boot = one_boot(s), compare = one_compare(s)),
                 error = function(e) failed(e, columns))
   if (is.null(r$error)) r$error <- NA_character_
   r$seconds <- as.numeric(difftime(Sys.time(), t0, units = "secs"))
   saveRDS(cbind(s, rep = jobs$rep[j], r), jobs$file[j])
   NULL
-}, mc.cores = if (mode == "chisq") workers else max(1, workers %/% (boot_cores / 2)),
+}, mc.cores = if (mode != "boot") workers else max(1, workers %/% (boot_cores / 2)),
    mc.preschedule = FALSE))
 elapsed <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 done <- file.exists(jobs$file)
 if (!all(done)) stop(sum(!done), " replicates missing in ", jobs_dir, call. = FALSE)
 results <- do.call(rbind, lapply(jobs$file, readRDS))
 
+if (mode == "compare") {
+  # Chosen single-rate model; LRT of both free against the chosen one (df 1); AIC choice among
+  # the four models (parameters 2, 3, 3, 4).
+  results$pick <- ifelse(results$ll_gamma >= results$ll_mu, "gamma", "mu")
+  best1 <- pmax(results$ll_gamma, results$ll_mu)
+  results$p_both_vs_best <- stats::pchisq(pmax(2 * (results$ll_both - best1), 0), 1,
+                                          lower.tail = FALSE)
+  aic <- cbind(null = 4 - 2 * results$ll_null, gamma = 6 - 2 * results$ll_gamma,
+               mu = 6 - 2 * results$ll_mu, both = 8 - 2 * results$ll_both)
+  results$aic_pick <- colnames(aic)[apply(aic, 1, which.min)]
+  keys <- c("n_comm", "n_tips", "ratio", "effect")
+  summary <- do.call(rbind, lapply(split(results, results[, keys], drop = TRUE), function(d) {
+    data.frame(d[1, keys], pick_gamma = mean(d$pick == "gamma"),
+               both_vs_best = mean(d$p_both_vs_best < 0.05),
+               aic_null = mean(d$aic_pick == "null"), aic_gamma = mean(d$aic_pick == "gamma"),
+               aic_mu = mean(d$aic_pick == "mu"), aic_both = mean(d$aic_pick == "both"),
+               errors = sum(!is.na(d$error)), seconds = round(stats::median(d$seconds), 1))
+  }))
+  summary <- summary[order(summary$effect, summary$n_tips, summary$ratio, summary$n_comm), ]
+  cat("S2 (compare): ", nrow(results), " replicates in ", round(elapsed, 1), " min\n", sep = "")
+  print(summary, row.names = FALSE, digits = 2)
+  saveRDS(list(settings = settings, results = results, summary = summary, minutes = elapsed), out)
+  quit(save = "no")
+}
 rate <- function(p) {
   p <- p[!is.na(p)]
   k <- sum(p < 0.05)

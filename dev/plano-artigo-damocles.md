@@ -360,10 +360,53 @@ Efeito nos dois (mesma razão), p_both:
 - **Caso de Benício (n = 14):** diferenças de 50% em γ entre regimes são detectadas com
   segurança (0,95 com 112 pontas, 1 com 250); de 25%, com 0,48–0,77. Diferenças em μ só
   aparecem se forem de ~3 vezes, e mesmo assim com poder ~0,5–0,6.
+**Camada C: qual taxa mudou (16/11/2026, local, 16 processos, 109 min;
+`data-raw/s2_compare.rds`, `MODE=compare`).** Os quatro modelos (constante, γ livre, μ livre,
+ambos livres) reajustados nas mesmas árvores e comunidades da camada A (mesmas sementes; os
+p_gamma conferem exatamente). n {5, 14, 40} × 112 e 250 pontas × as cinco razões × os três
+efeitos, fração 0,25, 100 réplicas (9.000), nenhum erro. Os modelos γ e μ têm o mesmo número
+de parâmetros, então escolher o de maior verossimilhança é o mesmo que escolher por AIC.
+
+Acerto da taxa entre as réplicas em que o melhor modelo de uma taxa rejeita o constante
+(LRT, 5%):
+
+| efeito | pontas | 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|
+| γ | 112 | 0,80 | 0,84 | 0,95 | 0,98 | 1 |
+| γ | 250 | 0,78 | 0,93 | 1 | 1 | 1 |
+| μ | 112 | 0,47 | 0,52 | 0,66 | 0,65 | 0,71 |
+| μ | 250 | 0,44 | 0,61 | 0,57 | 0,70 | 0,74 |
+
+- **Efeito em γ detectado é atribuído a γ** em 78–84% das vezes com razão 1,1 e em 95–100%
+  com razão ≥ 1,5.
+- **Efeito em μ detectado vai para γ em ~30% das vezes,** mesmo com razão 3; com razões
+  pequenas o acerto é o do acaso. Sem sinal, a escolha pende para γ (59% das réplicas com
+  razão 1,1, somando os três efeitos).
+- **Por AIC entre os quatro modelos,** o efeito em μ só é preferido na maioria das réplicas
+  com n = 40 e razão 3 (0,65 com 112 pontas, 0,75 com 250); com n = 14 e razão 3, 0,39–0,51.
+- **Ambas livres contra o melhor modelo de uma taxa (LRT, df 1):** quando só uma taxa muda,
+  rejeita em 0–8% (perto do nominal). Quando as duas mudam, o modelo γ quase sempre vence o
+  μ, e a mudança em μ só é detectada com razões grandes: 0,23–0,32 com razão 3 e n = 14,
+  0,55–0,69 com razão 3 e n = 40.
+- **Comparação com o DDGeoSSE** (Soewongsono & Landis 2026, preprint lido em 16/11/2026):
+  lá também o efeito sobre a extinção é o menos preciso, com outro modelo e inferência por
+  deep learning; os classificadores deles acertam 73–87% da presença de cada efeito. Os
+  desenhos não são comparáveis número a número.
+
 - **Conclusão do S2:** o χ² continua como teste principal (o bootstrap não muda o poder). No
-  artigo, reportar o poder por taxa e deixar claro que um teste de uma taxa não atribui o
-  efeito; a comparação direta entre os modelos γ e μ fica como pendência (pode entrar no S2
-  como camada C, só com o χ², barata).
+  artigo:
+  - reportar o poder por taxa;
+  - um teste de uma taxa não atribui o efeito; a atribuição a γ é confiável com efeitos de
+    pelo menos 50%, e a atribuição a μ não é (~30% de erro mesmo com razão 3);
+  - enquadrar a pergunta empírica como "γ difere entre regimes?" e "a dinâmica local difere
+    entre regimes?", e tratar μ como secundário, com intervalos por perfil em vez de
+    decisão por teste.
+- **Benício como banco de prova (conversa de 16/11/2026, a confirmar):**
+  - comparar as listas das 14 áreas com as dos sítios correspondentes do ATLANTIC
+    AMPHIBIANS para estimar a omissão (parametriza a detecção imperfeita), se as listas de
+    Benício vierem de amostragem própria (checar nos métodos);
+  - diagnóstico espacial com γ e μ por comunidade contra distância;
+  - geografia real das 14 áreas para desenhar o S5.
 
 ### S3. Integração do posterior (o ponto metodologicamente aberto)
 
