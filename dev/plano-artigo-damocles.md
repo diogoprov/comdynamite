@@ -401,10 +401,24 @@ Acerto da taxa entre as réplicas em que o melhor modelo de uma taxa rejeita o c
   - enquadrar a pergunta empírica como "γ difere entre regimes?" e "a dinâmica local difere
     entre regimes?", e tratar μ como secundário, com intervalos por perfil em vez de
     decisão por teste.
-- **Benício como banco de prova (conversa de 16/11/2026, a confirmar):**
-  - comparar as listas das 14 áreas com as dos sítios correspondentes do ATLANTIC
-    AMPHIBIANS para estimar a omissão (parametriza a detecção imperfeita), se as listas de
-    Benício vierem de amostragem própria (checar nos métodos);
+- **Benício como banco de prova (conversa de 16/11/2026):**
+  - **Origem das listas (conferido em 16/11/2026, Métodos de Benício et al. 2021):**
+    amostragem própria e padronizada, de dezembro de 2014 a fevereiro de 2017, 27 dias por
+    área (9 por ano, em três anos), seis sítios reprodutivos por área (duas poças, dois
+    riachos, dois transectos em mata), com busca acústica, coleta de girinos e busca visual.
+  - **Sobreposição com o ATLANTIC AMPHIBIANS** (sítios a até 15 km de cada área; script em
+    scratchpad, a passar para `data-raw/`): todas as 14 áreas têm sítios por perto (o mais
+    próximo a 0–14 km; em dez áreas a menos de 2 km). Em quatro
+    áreas os registros vêm do mesmo projeto: PEVA (Benício & Da Silva 2017) e PECU, PESB e
+    PESV (Da Silva et al. 2017a, Serra do Mar, 2014–2017). Essas quatro ficam fora da
+    comparação (circular). Nas outras dez, os estudos do ATLANTIC AMPHIBIANS são
+    independentes (1987–2015); seis delas (EECA, EEAS, EEJA, FEENA, EESB, PECB) têm sítio a
+    menos de 2 km, e quatro a 4,7–14,1 km (EEIT, EEJI, PETAR, PEJU).
+  - Comparar as listas das dez áreas independentes com as dos sítios correspondentes do
+    ATLANTIC AMPHIBIANS para estimar a omissão (parametriza a detecção imperfeita).
+    Ressalvas: os sítios não são idênticos (distância de corte a decidir), os períodos
+    diferem (turnover temporal real se confunde com omissão) e Benício também omite
+    espécies, então a comparação dá discordância, não omissão absoluta;
   - diagnóstico espacial com γ e μ por comunidade contra distância;
   - geografia real das 14 áreas para desenhar o S5.
 
