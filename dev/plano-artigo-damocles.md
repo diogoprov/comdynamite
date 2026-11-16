@@ -484,6 +484,77 @@ Entregável provável: um argumento `integrate = TRUE` (ou uma função nova) qu
 (c), e uma recomendação documentada para (b) ou (d). Isso vira código no pacote, com testes,
 num PR próprio.
 
+#### Posterior sintético (16/11/2026, `data-raw/s3_integration.R` e `.rds`)
+
+Desenho: árvores do S2 (112 pontas, regime focal com 0,25 das pontas), μ = 1, n = 14 ou 40,
+K = 20 configurações, 100 réplicas por cenário, 1.600 réplicas em 86 min sem erros nem falhas
+de convergência.
+
+- **Regimes**: γ = 5 no fundo e 5 × razão (1 ou 1,5) abaixo do shift. Em cada amostra, o shift
+  cai no ramo certo com probabilidade p_right (0,7 ou 0,4); senão cai num vizinho (pai, filho
+  ou irmão).
+- **Covariável**: log x browniano (DP 0,5 entre ramos), γ = 5 (x/média geométrica)^β, β = 0
+  ou 1. Centro do posterior m = log x + N(0, s), amostras m + N(0, s), com s = 0,3 ou 0,7
+  (0,7 é o DP posterior médio do exemplo do ClaDS).
+- **Estimadores**:
+  - oráculo;
+  - (a) mediana por amostra, com rejeição quando o p mediano é menor que 0,05;
+  - (b) configuração resumo (regime por maioria, média posterior de log x);
+  - (c) verossimilhança integrada (logsumexp sobre as K configurações);
+  - (d) SIMEX sobre (b), só para a covariável: λ = 1 e 2, três sorteios cada, extrapolação
+    quadrática a −1.
+
+Resultados (mediana do efeito; rejeição a 5%):
+
+- **Regimes: o deslocamento do shift para ramos vizinhos quase não importa.**
+  - Todos os estimadores são praticamente não viesados. Com razão 1,5 e p_right = 0,4, as
+    medianas vão de 1,44 a 1,53, contra 1,48–1,53 do oráculo; o RMSE fica a no máximo 0,03 do
+    oráculo.
+  - Tamanho: 0,02–0,06 em todos.
+  - Poder com n = 14 e p_right = 0,4: oráculo 0,94, (a) 0,85, (b) 0,90, (c) 0,91. Com n = 40,
+    0,95–1 em todos.
+  - Com p_right = 0,7, (a), (b) e o oráculo coincidem: a maioria das amostras acerta o ramo,
+    então a configuração resumo é a verdadeira.
+  - A verossimilhança integrada não traz ganho que justifique o custo (K ajustes por avaliação
+    da verossimilhança).
+- **Covariável: a diluição é forte, e nenhum estimador a remove por completo.** Para β = 1
+  (oráculo 0,99–1,01):
+
+  | s | (a) por amostra | (b) resumo | (c) integrada | (d) SIMEX |
+  |---|---|---|---|---|
+  | 0,3 | 0,69 | 0,81 | 0,74 | 0,93–0,97 |
+  | 0,7 | 0,28–0,29 | 0,43–0,44 | 0,34–0,35 | 0,65–0,70 |
+
+  - O RMSE segue a mesma ordem: com s = 0,7, 0,72 para (a), 0,57 para (b), 0,65 para (c) e
+    0,37 para (d).
+  - Com β = 0, nenhum estimador tem viés. O RMSE do SIMEX é cerca de 1,5 a 3 vezes o dos
+    outros, porque a extrapolação amplia a variância. Os testes ficam conservadores
+    (rejeição de 0 a 0,05).
+  - Com β = 1, o poder é 1 em todos os estimadores. **O teste da covariável sobrevive à
+    diluição; o que se perde é a magnitude**, o mesmo padrão do DDGeoSSE publicado.
+  - A integrada fica entre (a) e (b). Promediar verossimilhanças sobre configurações ruidosas
+    não corrige o erro nas variáveis.
+  - A extrapolação quadrática do SIMEX subcorrige quando a confiabilidade é baixa. Com
+    s = 0,7, a confiabilidade é 0,25/(0,25 + 0,49) ≈ 0,34.
+- **Ressalva de desenho.** O posterior sintético é centrado em m sem encolhimento, o
+  equivalente a um prior plano: ignora que os log x vêm de uma população com DP 0,5.
+  - Um posterior hierárquico como o do ClaDS encolhe m em direção à média, e a regressão
+    sobre a média posterior (regressão de calibração) tende a reduzir a atenuação.
+  - O exemplo do ClaDS é coerente com isso, mas é um caso só: MAP 1,64 e mediana por amostra
+    0,22 para β verdadeiro 2.
+  - Os números acima são, portanto, o pior caso para (b) e (d). A validação com ClaDS real
+    em ~20 árvores decide quanto da diluição sobra.
+- **Não medido**: cobertura de intervalos por perfil (fica para a validação).
+
+Consequências para o pacote e o artigo (interpretação minha, a confirmar com a validação):
+
+1. Regimes do BAMM: usar a configuração resumo (b), ou relatar (a) e (b). `integrate = TRUE`
+   perde prioridade.
+2. Covariável contínua: interpretar o teste, não a magnitude de β. Se a magnitude importar,
+   usar SIMEX sobre a média posterior e relatar a estimativa como limite inferior.
+3. O resumo atual de `damocles_samples()` (mediana de β por amostra) é o pior estimador de
+   magnitude nos dois cenários de ruído. A documentação deve recomendar (b) no lugar dele.
+
 ### S4. Calibração do teste de partições aleatórias
 
 - Indício atual: 0,10 de rejeição no cenário nulo com 40 réplicas e 0,17 num teste menor.
