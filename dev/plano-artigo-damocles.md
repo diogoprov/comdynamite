@@ -554,8 +554,8 @@ num PR próprio.
   - correções a avaliar (camada B do S5): (i) agregar sítios em células ou localidades, o
     que também reduz a falsa ausência (S6b); (ii) bootstrap paramétrico com simulação em
     blocos, com a_s estimado da similaridade observada dentro dos blocos; (iii)
-    verossimilhança composta com ajuste do LRT por blocos (Chandler & Bate 2007 [CITAR:
-    não verifiquei esta referência]), viável com muitos blocos, inútil com os dois de
+    verossimilhança composta com ajuste do LRT por blocos (Chandler & Bate 2007, Biometrika,
+    doi:10.1093/biomet/asm015, verificado no Crossref), viável com muitos blocos, inútil com os dois de
     Benício; (iv) bootstrap em blocos espaciais, idem;
   - com Benício (dois blocos), nenhuma correção por reamostragem funciona; o caso só serve
     como ilustração, com o teste estratificado por região como análise principal.
