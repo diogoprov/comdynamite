@@ -419,6 +419,32 @@ Acerto da taxa entre as réplicas em que o melhor modelo de uma taxa rejeita o c
     Ressalvas: os sítios não são idênticos (distância de corte a decidir), os períodos
     diferem (turnover temporal real se confunde com omissão) e Benício também omite
     espécies, então a comparação dá discordância, não omissão absoluta;
+  - **Resultado (16/11/2026, `data-raw/benicio2021_omission.R` e `.rds`).** Fração da
+    união das duas listas ausente de cada uma, somando as áreas:
+
+    | corte | áreas | ausente do ATLANTIC AMPHIBIANS | ausente de Benício | Jaccard |
+    |---|---|---|---|---|
+    | 2 km | 6 | 0,30 (mediana 0,28) | 0,14 (mediana 0,13) | 0,46–0,65 |
+    | 15 km | 10 | 0,21 (mediana 0,12) | 0,27 (mediana 0,25) | 0,12–0,81 |
+
+    - Com 2 km (sítios praticamente no mesmo lugar, um ou dois estudos por área), as listas
+      do ATLANTIC AMPHIBIANS deixam de fora ~30% das espécies das duas listas juntas, o
+      dobro de Benício. O caso extremo é o PECB: 21 espécies só em Benício (muitas de
+      riacho e de serapilheira, como *Cycloramphus*, *Ischnocnema*, *Paratelmatobius*),
+      contra 8 só no ATLANTIC AMPHIBIANS.
+    - Com 15 km, mais estudos entram e a lacuna do ATLANTIC AMPHIBIANS cai para 21%, mas
+      as espécies de fora da área inflam o que falta em Benício (27%). O PEJU (um sítio a
+      14 km, 13 espécies contra 43) mostra que um sítio distante não serve.
+    - Parte da discordância é taxonômica e não omissão: pares como *Scinax similis*/*S.
+      fuscomarginatus*, *Physalaemus olfersii*/*P. lateristriga* e *Scinax alter*/*S.
+      littoralis*/*S. tymbamirim* aparecem trocados entre as listas da mesma área. Não
+      foram resolvidos à mão.
+    - **Implicação:** para listas do ATLANTIC AMPHIBIANS, uma taxa de falsa ausência por
+      espécie presente de ~0,2–0,3 é um ponto de partida realista para a simulação de
+      detecção (variante do S6). Como μ já é o parâmetro mal identificado (S2), esse viés
+      pode dominar a estimativa de μ no E6; γ deve ser menos afetado, mas isso precisa ser
+      simulado. Filtrar sítios por esforço (2.2) e agregar estudos por localidade são as
+      mitigações óbvias a testar;
   - diagnóstico espacial com γ e μ por comunidade contra distância;
   - geografia real das 14 áreas para desenhar o S5.
 
