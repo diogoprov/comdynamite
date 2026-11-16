@@ -292,6 +292,79 @@ cenários × 2 réplicas do bootstrap.
   Por isso as razões 1,1 e 1,25 entraram nas duas camadas (decisão de 15/11/2026): 170
   cenários × 200 réplicas no χ² e 10 × 100 no bootstrap.
 
+**Resultados (16/11/2026, AWS spot; `data-raw/s2_power.rds` e `data-raw/s2_boot.rds`).**
+Camada A: 34.000 réplicas, ~177 h de processo (mediana de 12 s por réplica com 112 pontas e
+26 s com 250), nenhum erro nem falha de convergência. Camada B: 1.000 réplicas, nenhum erro.
+Poder a 5%, fração focal 0,25; linhas n, colunas razão; teste correspondente ao efeito
+(γ → p_gamma, μ → p_mu, ambos → p_both).
+
+Efeito em γ:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,05 | 0,18 | 0,52 | 0,96 | 1 | 0,11 | 0,36 | 0,86 | 1 | 1 |
+| 10 | 0,12 | 0,36 | 0,81 | 1 | 1 | 0,14 | 0,62 | 0,98 | 1 | 1 |
+| 14 | 0,14 | 0,48 | 0,95 | 1 | 1 | 0,22 | 0,77 | 1 | 1 | 1 |
+| 20 | 0,16 | 0,62 | 1 | 1 | 1 | 0,28 | 0,90 | 1 | 1 | 1 |
+| 40 | 0,27 | 0,88 | 1 | 1 | 1 | 0,50 | 0,99 | 1 | 1 | 1 |
+
+Efeito em μ:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,04 | 0,04 | 0,05 | 0,10 | 0,18 | 0,04 | 0,05 | 0,05 | 0,12 | 0,30 |
+| 10 | 0,04 | 0,06 | 0,10 | 0,12 | 0,44 | 0,04 | 0,06 | 0,10 | 0,20 | 0,52 |
+| 14 | 0,06 | 0,06 | 0,09 | 0,16 | 0,50 | 0,04 | 0,06 | 0,06 | 0,28 | 0,60 |
+| 20 | 0,06 | 0,05 | 0,10 | 0,26 | 0,62 | 0,06 | 0,06 | 0,09 | 0,36 | 0,74 |
+| 40 | 0,06 | 0,09 | 0,16 | 0,39 | 0,87 | 0,04 | 0,10 | 0,20 | 0,49 | 0,92 |
+
+Efeito nos dois (mesma razão), p_both:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,04 | 0,11 | 0,34 | 0,76 | 0,99 | 0,04 | 0,22 | 0,74 | 0,97 | 1 |
+| 10 | 0,06 | 0,20 | 0,63 | 0,99 | 1 | 0,12 | 0,39 | 0,90 | 1 | 1 |
+| 14 | 0,10 | 0,25 | 0,81 | 0,98 | 1 | 0,12 | 0,58 | 0,98 | 1 | 1 |
+| 20 | 0,09 | 0,37 | 0,90 | 1 | 1 | 0,15 | 0,72 | 1 | 1 | 1 |
+| 40 | 0,15 | 0,72 | 1 | 1 | 1 | 0,32 | 0,94 | 1 | 1 | 1 |
+
+- **γ é bem detectado; μ, não.** Com γ = 5 e μ = 1, a ocupação esperada é γ/(γ + μ) ≈ 0,83, e
+  multiplicar μ por 1,5 só a leva a ≈ 0,77. Com n = 14, a razão 1,5 em γ dá 0,95–1, e a razão
+  3 em μ dá 0,50–0,60. Árvores maiores ajudam mais que dobrar n entre 5 e 10.
+- **O teste livre nos dois (df 2) custa pouco:** p_both fica 0,05–0,10 abaixo do teste de uma
+  taxa quando só uma muda.
+- **Os testes de uma taxa não atribuem a taxa.** Com efeito só em γ, o teste que libera só μ
+  rejeita quase tanto (112 pontas, n = 14: 0,34 com razão 1,25 e 0,87 com 1,5). Com efeito em
+  μ, o teste de γ também rejeita (0,43 com razão 3). Um p_gamma ou p_mu significativo indica
+  que os regimes diferem, não qual taxa muda; para isso é preciso comparar os modelos γ e μ
+  entre si (AIC ou LRT não aninhado), o que ainda não testamos.
+- **Fração focal:** com 112 pontas e efeito em γ, a fração 0,1 perde poder (n = 14, razão
+  1,25: 0,26 contra 0,48 com 0,25); 0,5 quase não ganha (0,55).
+- **Razão estimada sem viés para γ** (mediana/verdadeira entre 0,99 e 1,01). Para μ a mediana
+  também fica perto do verdadeiro (0,94–1,03), mas 953 das 10.200 réplicas com efeito em μ
+  (428 delas com n = 5) têm μ estimado na fronteira (zero) num dos regimes, com razão < 0,1 ou
+  > 10. μ é pouco identificável com poucas comunidades.
+- **Bootstrap contra χ² (camada B):** concordam (tabela abaixo; razões 2 e 3 dão 1 nos dois).
+  O χ² rejeita sozinho em 26 réplicas e o bootstrap sozinho em 5; com 49 simulações, o p
+  mínimo do bootstrap é 0,02, o que explica parte da diferença.
+
+| n | razão | bootstrap | χ² |
+|---|---|---|---|
+| 14 | 1,1 | 0,15 | 0,13 |
+| 40 | 1,1 | 0,14 | 0,21 |
+| 14 | 1,25 | 0,35 | 0,41 |
+| 40 | 1,25 | 0,68 | 0,76 |
+| 14 | 1,5 | 0,86 | 0,88 |
+| 40 | 1,5 | 1 | 1 |
+
+- **Caso de Benício (n = 14):** diferenças de 50% em γ entre regimes são detectadas com
+  segurança (0,95 com 112 pontas, 1 com 250); de 25%, com 0,48–0,77. Diferenças em μ só
+  aparecem se forem de ~3 vezes, e mesmo assim com poder ~0,5–0,6.
+- **Conclusão do S2:** o χ² continua como teste principal (o bootstrap não muda o poder). No
+  artigo, reportar o poder por taxa e deixar claro que um teste de uma taxa não atribui o
+  efeito; a comparação direta entre os modelos γ e μ fica como pendência (pode entrar no S2
+  como camada C, só com o χ², barata).
+
 ### S3. Integração do posterior (o ponto metodologicamente aberto)
 
 Hoje `damocles_samples()` resume por "proporção de amostras com p < 0,05" e β mediano. A
