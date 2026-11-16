@@ -494,6 +494,72 @@ num PR próprio.
   - partições aleatórias com reamostragem em blocos.
 - Com Benício, os blocos naturais são as duas regiões.
 
+#### Diagnóstico em Benício (16/11/2026, `data-raw/s5_benicio_spatial.R` e `.rds`)
+
+- 14 comunidades na árvore de 112 espécies (melhor árvore, altura reescalada para 1), taxas
+  compartilhadas, 999 conjuntos de 14 comunidades simuladas independentes com as taxas
+  ajustadas. Regiões: interior (latitude ao norte de 23° S, sete áreas) e costa/Serra do Mar
+  (sete áreas).
+
+  | estatística | observado | nulo, IC 95% |
+  |---|---|---|
+  | Jaccard médio entre pares | 0,31 | 0,15–0,18 |
+  | Jaccard dentro da região − entre regiões | 0,43 | −0,02–0,02 |
+  | Mantel r (Jaccard × distância), todos os pares | −0,62 | −0,21–0,22 |
+  | Mantel r dentro das regiões | −0,16 | −0,31–0,32 (p = 0,14) |
+
+- A dependência é regional (as duas regiões quase não compartilham espécies); dentro de cada
+  região não há declínio detectável com a distância (só 21 pares por região).
+- As taxas diferem entre regiões (LRT 66,9, 2 gl, p ≈ 3 × 10⁻¹⁵). No interior, γ = 3,75 e
+  μ = 12,2; na costa, as duas vão ao infinito (presença sem sinal filogenético). O ajuste
+  conjunto também vai a taxas enormes (γ ≈ 5000, μ ≈ 12700): com as 14 comunidades e o pool
+  de 112, o modelo trata a ocupação como sorteio por espécie.
+- Interpretação (minha): filtragem ambiental e biogeografia (interior com Cerrado × floresta
+  costeira) somadas ao pool mal especificado (S6), mais do que história de colonização
+  compartilhada em escala fina; com esses dados as duas não se separam.
+
+#### Simulação (16/11/2026, `data-raw/s5_spatial.R` e `.rds`)
+
+- Árvores do S2 (112 pontas, regime focal com 0,25 das pontas, γ = 5, μ = 1), 200 réplicas por
+  cenário, 4800 no total (55 min, 16 núcleos), sem erros nem falhas de convergência.
+  - **História compartilhada:** blocos (n = 14: dois de sete; n = 40: quatro de dez) que
+    compartilham estados e resultados de especiação até a idade de separação a_s ∈ {∞, 0,2,
+    0,1, 0,05, 0,02}. Correlação dos estados das pontas dentro do bloco ≈ 0,14, 0,25, 0,48 e
+    0,7 (0,11 entre blocos).
+  - **Regiões com taxas diferentes:** dois grupos de comunidades, μ × 3 ou × 10 no segundo
+    (em toda a árvore), mais um teste estratificado (taxas de fundo e efeito de regime livres
+    por grupo, verossimilhanças somadas).
+- **Tamanho (sem efeito), LRT de γ / μ / ambos a 5%:**
+
+  | a_s | n = 14 | n = 40 |
+  |---|---|---|
+  | ∞ | 0,06 / 0,05 / 0,05 | 0,03 / 0,05 / 0,05 |
+  | 0,2 | 0,09 / 0,08 / 0,08 | 0,07 / 0,07 / 0,06 |
+  | 0,1 | 0,12 / 0,12 / 0,12 | 0,22 / 0,28 / 0,27 |
+  | 0,05 | 0,34 / 0,29 / 0,39 | 0,32 / 0,41 / 0,46 |
+  | 0,02 | 0,47 / 0,36 / 0,58 | 0,44 / 0,44 / 0,60 |
+
+- **História compartilhada infla muito o teste de regime,** e mais com n maior (mais
+  comunidades por bloco = mais pseudorreplicação). A estimativa da razão de γ continua sem
+  viés (mediana 0,96–1,07 sem efeito; 1,47–1,56 com efeito 1,5). O poder cai pouco
+  (n = 14: 0,93 → 0,77 com a_s = 0,02).
+- **Taxas diferentes entre regiões não inflam o teste:** 0,03–0,06 com μ × 3 ou × 10, tanto
+  no teste conjunto quanto no estratificado (0,03–0,08). A heterogeneidade entre grupos de
+  sítios, sozinha, não é o problema.
+- **Implicações para o E6:**
+  - o perigo é a dependência por história compartilhada entre sítios próximos, não a
+    diferença de taxas entre regiões. No ATLANTIC AMPHIBIANS, com centenas de sítios e
+    muitos pares a poucos km, a pseudorreplicação é provável; o teste χ² com todas as
+    comunidades não é confiável sem correção;
+  - correções a avaliar (camada B do S5): (i) agregar sítios em células ou localidades, o
+    que também reduz a falsa ausência (S6b); (ii) bootstrap paramétrico com simulação em
+    blocos, com a_s estimado da similaridade observada dentro dos blocos; (iii)
+    verossimilhança composta com ajuste do LRT por blocos (Chandler & Bate 2007 [CITAR:
+    não verifiquei esta referência]), viável com muitos blocos, inútil com os dois de
+    Benício; (iv) bootstrap em blocos espaciais, idem;
+  - com Benício (dois blocos), nenhuma correção por reamostragem funciona; o caso só serve
+    como ilustração, com o teste estratificado por região como análise principal.
+
 ### S6. Pool mal especificado
 
 - Simular com um pool verdadeiro de 250 espécies e ajustar com:
