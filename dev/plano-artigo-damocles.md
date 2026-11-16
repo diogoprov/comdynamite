@@ -270,12 +270,12 @@ Desenho revisado em 15/11/2026, depois do S1 (script `data-raw/s2_power.R`):
   (`sim_shift_tree()`, uma mudança que dobra λ), sorteada de novo até o clado focal ter a
   fração pedida das pontas (±20%). Taxas de base do S1 (γ = 5, μ = 1); no regime focal, γ, μ
   ou ambos multiplicados pela razão (ambos: a mesma razão, ocupação parecida, mais turnover).
-- **Camada A (χ²):** n {5, 10, 14, 20, 40} × pontas {112, 250} × razão {1,5; 2; 3} × efeito
-  {γ, μ, ambos}, fração 0,25 (90 cenários), mais a fração 0,1 e 0,5 em 112 pontas, n {14, 40},
-  efeito em γ (12 cenários). 200 réplicas; testes p_both (df 2), p_gamma e p_mu (df 1) e a
+- **Camada A (χ²):** n {5, 10, 14, 20, 40} × pontas {112, 250} × razão {1,1; 1,25; 1,5; 2; 3} ×
+  efeito {γ, μ, ambos}, fração 0,25 (150 cenários), mais a fração 0,1 e 0,5 em 112 pontas,
+  n {14, 40}, efeito em γ (20 cenários). 200 réplicas; testes p_both (df 2), p_gamma e p_mu (df 1) e a
   razão estimada. O tamanho (razão 1) vem do S1. 50 pontas cortadas (nenhum caso real).
 - **Camada B (bootstrap contra χ², mesmas árvores e comunidades):** 112 pontas, n {14, 40},
-  razão {1,5; 2; 3}, efeito em γ, fração 0,25; 100 réplicas, 49 simulações.
+  as cinco razões, efeito em γ, fração 0,25 (10 cenários); 100 réplicas, 49 simulações.
 - Caso de Benício: n = 14 com 112 e 250 pontas, nas duas camadas.
 
 **Piloto (15/11/2026, local, 18 núcleos):** 8 cenários × 6 réplicas do χ² com razão 2 e 2
@@ -289,7 +289,8 @@ cenários × 2 réplicas do bootstrap.
 - **Com razão 2 e efeito em γ, o poder já é 1 com n = 5** (6/6 réplicas, nos dois tamanhos de
   árvore). Efeito em μ com n = 40: 2–3 de 6. A razão estimada fica perto de 2 (1,84–2,14).
   Com essas taxas, a curva só vai mostrar alguma coisa em razões pequenas e no efeito em μ.
-  Proposta: acrescentar a razão 1,25 (e talvez 1,1) às duas camadas, o que custa pouco.
+  Por isso as razões 1,1 e 1,25 entraram nas duas camadas (decisão de 15/11/2026): 170
+  cenários × 200 réplicas no χ² e 10 × 100 no bootstrap.
 
 ### S3. Integração do posterior (o ponto metodologicamente aberto)
 

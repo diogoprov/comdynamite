@@ -17,10 +17,10 @@
 #    N_BOOT simulations under the constant rates, default 49, vary = "both", 24 cores per
 #    replicate) on the same trees and communities (same seed); it reports p_boot and the
 #    chi-square p of the same statistic (p_boot_chisq).
-# Settings (MODE=chisq): grid A, n_comm 5, 10, 14, 20 or 40, n_tips 112 or 250, ratio 1.5, 2
-# or 3, effect on gamma, mu or both, fraction 0.25; plus a sweep of fraction 0.1 and 0.5 with
+# Settings (MODE=chisq): grid A, n_comm 5, 10, 14, 20 or 40, n_tips 112 or 250, ratio 1.1, 1.25,
+# 1.5, 2 or 3, effect on gamma, mu or both, fraction 0.25; plus a sweep of fraction 0.1 and 0.5 with
 # n_tips 112, n_comm 14 or 40, effect on gamma. Type I error (ratio 1) comes from S1.
-# MODE=boot: grid B, n_tips 112, n_comm 14 or 40, ratio 1.5, 2 or 3, effect on gamma,
+# MODE=boot: grid B, n_tips 112, n_comm 14 or 40, every ratio, effect on gamma,
 # fraction 0.25 (the same settings and seeds as in grid A).
 # REPS replicates per setting (default 200 with chisq, 100 with boot), WORKERS processes
 # (default 6). SETTINGS (optional, comma-separated setting numbers) restricts the run, for
@@ -101,9 +101,10 @@ failed <- function(e, columns) {
 
 # Settings and jobs ----------------------------------------------------------------------------
 grid_a <- expand.grid(n_comm = c(5, 10, 14, 20, 40), n_tips = c(112, 250),
-                      ratio = c(1.5, 2, 3), effect = c("gamma", "mu", "both"),
+                      ratio = c(1.1, 1.25, 1.5, 2, 3), effect = c("gamma", "mu", "both"),
                       fraction = 0.25, stringsAsFactors = FALSE)
-sweep <- expand.grid(n_comm = c(14, 40), n_tips = 112, ratio = c(1.5, 2, 3), effect = "gamma",
+sweep <- expand.grid(n_comm = c(14, 40), n_tips = 112, ratio = c(1.1, 1.25, 1.5, 2, 3),
+                     effect = "gamma",
                      fraction = c(0.1, 0.5), stringsAsFactors = FALSE)
 settings <- rbind(grid_a, sweep)
 in_b <- settings$n_tips == 112 & settings$n_comm %in% c(14, 40) & settings$effect == "gamma" &
