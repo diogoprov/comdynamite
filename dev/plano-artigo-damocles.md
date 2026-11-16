@@ -264,14 +264,189 @@ adicionados, run `comdynamite-s1-boot3`; os 18 cenários estão em `data-raw/s1_
 
 ### S2. Poder
 
-- Grade:
-  - n ∈ {5, 10, 14, 20, 40};
-  - pontas ∈ {50, 112, 250};
-  - razão de γ entre regimes ∈ {1,5; 2; 3};
-  - efeito em γ, em μ ou em ambos;
-  - fração da árvore no regime focal (10%, 25%, 50%).
-- Inclui o caso realista de Benício: n = 14 e pool de 112 ou 248.
-- Saída: curvas de poder. É ela que diz se n = 14 sustenta o caso focal sozinho.
+Desenho revisado em 15/11/2026, depois do S1 (script `data-raw/s2_power.R`):
+
+- Regimes verdadeiros (conhecidos); regimes estimados ficam para o S3. Árvore como no S1
+  (`sim_shift_tree()`, uma mudança que dobra λ), sorteada de novo até o clado focal ter a
+  fração pedida das pontas (±20%). Taxas de base do S1 (γ = 5, μ = 1); no regime focal, γ, μ
+  ou ambos multiplicados pela razão (ambos: a mesma razão, ocupação parecida, mais turnover).
+- **Camada A (χ²):** n {5, 10, 14, 20, 40} × pontas {112, 250} × razão {1,1; 1,25; 1,5; 2; 3} ×
+  efeito {γ, μ, ambos}, fração 0,25 (150 cenários), mais a fração 0,1 e 0,5 em 112 pontas,
+  n {14, 40}, efeito em γ (20 cenários). 200 réplicas; testes p_both (df 2), p_gamma e p_mu (df 1) e a
+  razão estimada. O tamanho (razão 1) vem do S1. 50 pontas cortadas (nenhum caso real).
+- **Camada B (bootstrap contra χ², mesmas árvores e comunidades):** 112 pontas, n {14, 40},
+  as cinco razões, efeito em γ, fração 0,25 (10 cenários); 100 réplicas, 49 simulações.
+- Caso de Benício: n = 14 com 112 e 250 pontas, nas duas camadas.
+
+**Piloto (15/11/2026, local, 18 núcleos):** 8 cenários × 6 réplicas do χ² com razão 2 e 2
+cenários × 2 réplicas do bootstrap.
+
+- Tempo por réplica: χ² ~5 s com 112 pontas e ~10 s com 250, quase sem efeito de n; bootstrap
+  ~40 s em 24 núcleos. Nenhum erro, nenhuma falha de convergência.
+- Custo: camada A ~41 h de processo (~2,6 h local com 16 processos; ~15–20 min numa
+  c7i.48xlarge); camada B ~7 h local ou <1 h numa 48xlarge. Na AWS spot, as duas juntas ficam
+  em ~US$ 3–5 com a subida das instâncias.
+- **Com razão 2 e efeito em γ, o poder já é 1 com n = 5** (6/6 réplicas, nos dois tamanhos de
+  árvore). Efeito em μ com n = 40: 2–3 de 6. A razão estimada fica perto de 2 (1,84–2,14).
+  Com essas taxas, a curva só vai mostrar alguma coisa em razões pequenas e no efeito em μ.
+  Por isso as razões 1,1 e 1,25 entraram nas duas camadas (decisão de 15/11/2026): 170
+  cenários × 200 réplicas no χ² e 10 × 100 no bootstrap.
+
+**Resultados (16/11/2026, AWS spot; `data-raw/s2_power.rds` e `data-raw/s2_boot.rds`).**
+Camada A: 34.000 réplicas, ~177 h de processo (mediana de 12 s por réplica com 112 pontas e
+26 s com 250), nenhum erro nem falha de convergência. Camada B: 1.000 réplicas, nenhum erro.
+Poder a 5%, fração focal 0,25; linhas n, colunas razão; teste correspondente ao efeito
+(γ → p_gamma, μ → p_mu, ambos → p_both).
+
+Efeito em γ:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,05 | 0,18 | 0,52 | 0,96 | 1 | 0,11 | 0,36 | 0,86 | 1 | 1 |
+| 10 | 0,12 | 0,36 | 0,81 | 1 | 1 | 0,14 | 0,62 | 0,98 | 1 | 1 |
+| 14 | 0,14 | 0,48 | 0,95 | 1 | 1 | 0,22 | 0,77 | 1 | 1 | 1 |
+| 20 | 0,16 | 0,62 | 1 | 1 | 1 | 0,28 | 0,90 | 1 | 1 | 1 |
+| 40 | 0,27 | 0,88 | 1 | 1 | 1 | 0,50 | 0,99 | 1 | 1 | 1 |
+
+Efeito em μ:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,04 | 0,04 | 0,05 | 0,10 | 0,18 | 0,04 | 0,05 | 0,05 | 0,12 | 0,30 |
+| 10 | 0,04 | 0,06 | 0,10 | 0,12 | 0,44 | 0,04 | 0,06 | 0,10 | 0,20 | 0,52 |
+| 14 | 0,06 | 0,06 | 0,09 | 0,16 | 0,50 | 0,04 | 0,06 | 0,06 | 0,28 | 0,60 |
+| 20 | 0,06 | 0,05 | 0,10 | 0,26 | 0,62 | 0,06 | 0,06 | 0,09 | 0,36 | 0,74 |
+| 40 | 0,06 | 0,09 | 0,16 | 0,39 | 0,87 | 0,04 | 0,10 | 0,20 | 0,49 | 0,92 |
+
+Efeito nos dois (mesma razão), p_both:
+
+| n | 112 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 | 250 pontas: 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 5 | 0,04 | 0,11 | 0,34 | 0,76 | 0,99 | 0,04 | 0,22 | 0,74 | 0,97 | 1 |
+| 10 | 0,06 | 0,20 | 0,63 | 0,99 | 1 | 0,12 | 0,39 | 0,90 | 1 | 1 |
+| 14 | 0,10 | 0,25 | 0,81 | 0,98 | 1 | 0,12 | 0,58 | 0,98 | 1 | 1 |
+| 20 | 0,09 | 0,37 | 0,90 | 1 | 1 | 0,15 | 0,72 | 1 | 1 | 1 |
+| 40 | 0,15 | 0,72 | 1 | 1 | 1 | 0,32 | 0,94 | 1 | 1 | 1 |
+
+- **γ é bem detectado; μ, não.** Com γ = 5 e μ = 1, a ocupação esperada é γ/(γ + μ) ≈ 0,83, e
+  multiplicar μ por 1,5 só a leva a ≈ 0,77. Com n = 14, a razão 1,5 em γ dá 0,95–1, e a razão
+  3 em μ dá 0,50–0,60. Árvores maiores ajudam mais que dobrar n entre 5 e 10.
+- **O teste livre nos dois (df 2) custa pouco:** p_both fica 0,05–0,10 abaixo do teste de uma
+  taxa quando só uma muda.
+- **Os testes de uma taxa não atribuem a taxa.** Com efeito só em γ, o teste que libera só μ
+  rejeita quase tanto (112 pontas, n = 14: 0,34 com razão 1,25 e 0,87 com 1,5). Com efeito em
+  μ, o teste de γ também rejeita (0,43 com razão 3). Um p_gamma ou p_mu significativo indica
+  que os regimes diferem, não qual taxa muda; para isso é preciso comparar os modelos γ e μ
+  entre si (AIC ou LRT não aninhado), o que ainda não testamos.
+- **Fração focal:** com 112 pontas e efeito em γ, a fração 0,1 perde poder (n = 14, razão
+  1,25: 0,26 contra 0,48 com 0,25); 0,5 quase não ganha (0,55).
+- **Razão estimada sem viés para γ** (mediana/verdadeira entre 0,99 e 1,01). Para μ a mediana
+  também fica perto do verdadeiro (0,94–1,03), mas 953 das 10.200 réplicas com efeito em μ
+  (428 delas com n = 5) têm μ estimado na fronteira (zero) num dos regimes, com razão < 0,1 ou
+  > 10. μ é pouco identificável com poucas comunidades.
+- **Bootstrap contra χ² (camada B):** concordam (tabela abaixo; razões 2 e 3 dão 1 nos dois).
+  O χ² rejeita sozinho em 26 réplicas e o bootstrap sozinho em 5; com 49 simulações, o p
+  mínimo do bootstrap é 0,02, o que explica parte da diferença.
+
+| n | razão | bootstrap | χ² |
+|---|---|---|---|
+| 14 | 1,1 | 0,15 | 0,13 |
+| 40 | 1,1 | 0,14 | 0,21 |
+| 14 | 1,25 | 0,35 | 0,41 |
+| 40 | 1,25 | 0,68 | 0,76 |
+| 14 | 1,5 | 0,86 | 0,88 |
+| 40 | 1,5 | 1 | 1 |
+
+- **Caso de Benício (n = 14):** diferenças de 50% em γ entre regimes são detectadas com
+  segurança (0,95 com 112 pontas, 1 com 250); de 25%, com 0,48–0,77. Diferenças em μ só
+  aparecem se forem de ~3 vezes, e mesmo assim com poder ~0,5–0,6.
+**Camada C: qual taxa mudou (16/11/2026, local, 16 processos, 109 min;
+`data-raw/s2_compare.rds`, `MODE=compare`).** Os quatro modelos (constante, γ livre, μ livre,
+ambos livres) reajustados nas mesmas árvores e comunidades da camada A (mesmas sementes; os
+p_gamma conferem exatamente). n {5, 14, 40} × 112 e 250 pontas × as cinco razões × os três
+efeitos, fração 0,25, 100 réplicas (9.000), nenhum erro. Os modelos γ e μ têm o mesmo número
+de parâmetros, então escolher o de maior verossimilhança é o mesmo que escolher por AIC.
+
+Acerto da taxa entre as réplicas em que o melhor modelo de uma taxa rejeita o constante
+(LRT, 5%):
+
+| efeito | pontas | 1,1 | 1,25 | 1,5 | 2 | 3 |
+|---|---|---|---|---|---|---|
+| γ | 112 | 0,80 | 0,84 | 0,95 | 0,98 | 1 |
+| γ | 250 | 0,78 | 0,93 | 1 | 1 | 1 |
+| μ | 112 | 0,47 | 0,52 | 0,66 | 0,65 | 0,71 |
+| μ | 250 | 0,44 | 0,61 | 0,57 | 0,70 | 0,74 |
+
+- **Efeito em γ detectado é atribuído a γ** em 78–84% das vezes com razão 1,1 e em 95–100%
+  com razão ≥ 1,5.
+- **Efeito em μ detectado vai para γ em ~30% das vezes,** mesmo com razão 3; com razões
+  pequenas o acerto é o do acaso. Sem sinal, a escolha pende para γ (59% das réplicas com
+  razão 1,1, somando os três efeitos).
+- **Por AIC entre os quatro modelos,** o efeito em μ só é preferido na maioria das réplicas
+  com n = 40 e razão 3 (0,65 com 112 pontas, 0,75 com 250); com n = 14 e razão 3, 0,39–0,51.
+- **Ambas livres contra o melhor modelo de uma taxa (LRT, df 1):** quando só uma taxa muda,
+  rejeita em 0–8% (perto do nominal). Quando as duas mudam, o modelo γ quase sempre vence o
+  μ, e a mudança em μ só é detectada com razões grandes: 0,23–0,32 com razão 3 e n = 14,
+  0,55–0,69 com razão 3 e n = 40.
+- **Comparação com o DDGeoSSE** (Soewongsono & Landis 2026, preprint lido em 16/11/2026):
+  lá também o efeito sobre a extinção é o menos preciso, com outro modelo e inferência por
+  deep learning; os classificadores deles acertam 73–87% da presença de cada efeito. Os
+  desenhos não são comparáveis número a número.
+
+- **Conclusão do S2:** o χ² continua como teste principal (o bootstrap não muda o poder). No
+  artigo:
+  - reportar o poder por taxa;
+  - um teste de uma taxa não atribui o efeito; a atribuição a γ é confiável com efeitos de
+    pelo menos 50%, e a atribuição a μ não é (~30% de erro mesmo com razão 3);
+  - enquadrar a pergunta empírica como "γ difere entre regimes?" e "a dinâmica local difere
+    entre regimes?", e tratar μ como secundário, com intervalos por perfil em vez de
+    decisão por teste.
+- **Benício como banco de prova (conversa de 16/11/2026):**
+  - **Origem das listas (conferido em 16/11/2026, Métodos de Benício et al. 2021):**
+    amostragem própria e padronizada, de dezembro de 2014 a fevereiro de 2017, 27 dias por
+    área (9 por ano, em três anos), seis sítios reprodutivos por área (duas poças, dois
+    riachos, dois transectos em mata), com busca acústica, coleta de girinos e busca visual.
+  - **Sobreposição com o ATLANTIC AMPHIBIANS** (sítios a até 15 km de cada área; script em
+    scratchpad, a passar para `data-raw/`): todas as 14 áreas têm sítios por perto (o mais
+    próximo a 0–14 km; em dez áreas a menos de 2 km). Em quatro
+    áreas os registros vêm do mesmo projeto: PEVA (Benício & Da Silva 2017) e PECU, PESB e
+    PESV (Da Silva et al. 2017a, Serra do Mar, 2014–2017). Essas quatro ficam fora da
+    comparação (circular). Nas outras dez, os estudos do ATLANTIC AMPHIBIANS são
+    independentes (1987–2015); seis delas (EECA, EEAS, EEJA, FEENA, EESB, PECB) têm sítio a
+    menos de 2 km, e quatro a 4,7–14,1 km (EEIT, EEJI, PETAR, PEJU).
+  - Comparar as listas das dez áreas independentes com as dos sítios correspondentes do
+    ATLANTIC AMPHIBIANS para estimar a omissão (parametriza a detecção imperfeita).
+    Ressalvas: os sítios não são idênticos (distância de corte a decidir), os períodos
+    diferem (turnover temporal real se confunde com omissão) e Benício também omite
+    espécies, então a comparação dá discordância, não omissão absoluta;
+  - **Resultado (16/11/2026, `data-raw/benicio2021_omission.R` e `.rds`).** Fração da
+    união das duas listas ausente de cada uma, somando as áreas:
+
+    | corte | áreas | ausente do ATLANTIC AMPHIBIANS | ausente de Benício | Jaccard |
+    |---|---|---|---|---|
+    | 2 km | 6 | 0,30 (mediana 0,28) | 0,14 (mediana 0,13) | 0,46–0,65 |
+    | 15 km | 10 | 0,21 (mediana 0,12) | 0,27 (mediana 0,25) | 0,12–0,81 |
+
+    - Com 2 km (sítios praticamente no mesmo lugar, um ou dois estudos por área), as listas
+      do ATLANTIC AMPHIBIANS deixam de fora ~30% das espécies das duas listas juntas, o
+      dobro de Benício. O caso extremo é o PECB: 21 espécies só em Benício (muitas de
+      riacho e de serapilheira, como *Cycloramphus*, *Ischnocnema*, *Paratelmatobius*),
+      contra 8 só no ATLANTIC AMPHIBIANS.
+    - Com 15 km, mais estudos entram e a lacuna do ATLANTIC AMPHIBIANS cai para 21%, mas
+      as espécies de fora da área inflam o que falta em Benício (27%). O PEJU (um sítio a
+      14 km, 13 espécies contra 43) mostra que um sítio distante não serve.
+    - Parte da discordância é taxonômica e não omissão: pares como *Scinax similis*/*S.
+      fuscomarginatus*, *Physalaemus olfersii*/*P. lateristriga* e *Scinax alter*/*S.
+      littoralis*/*S. tymbamirim* aparecem trocados entre as listas da mesma área. Não
+      foram resolvidos à mão.
+    - **Implicação:** para listas do ATLANTIC AMPHIBIANS, uma taxa de falsa ausência por
+      espécie presente de ~0,2–0,3 é um ponto de partida realista para a simulação de
+      detecção (variante do S6). Como μ já é o parâmetro mal identificado (S2), esse viés
+      pode dominar a estimativa de μ no E6; γ deve ser menos afetado, mas isso precisa ser
+      simulado. Filtrar sítios por esforço (2.2) e agregar estudos por localidade são as
+      mitigações óbvias a testar;
+  - diagnóstico espacial com γ e μ por comunidade contra distância;
+  - geografia real das 14 áreas para desenhar o S5.
 
 ### S3. Integração do posterior (o ponto metodologicamente aberto)
 
