@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `env_pulse()`: pulse (or permanent) changes of the environment of some sites, for the
+  `env_time` of `simulate_metacommunity()`, so that disturbance acts on growth rates through
+  the niche rather than by removing individuals. New article "Replicating Hajian-Forooshani &
+  Chase (2026)" (`data-raw/replication_hajian2026.R`, `data-raw/figures_hajian2026.R`): their
+  pulse-disturbance model of scale-dependent diversity change, from the code archived with the
+  article.
+
 - `n_boot` in `damocles_partition_test()`: a parametric bootstrap of the likelihood ratio
   against constant rates, with communities simulated under the constant rates estimated and
   refitted with and without the partition (`p_boot`, `null_boot`); it needs no room on the tree

@@ -36,6 +36,7 @@ reference:
   - landscape_grid
   - dispersal_kernel
   - env_over_time
+  - env_pulse
 - title: Species traits
   desc: Traits with phylogenetic signal and evolutionary regimes.
   contents:
@@ -203,4 +204,5 @@ articles:
   - articles/validation-gradient
   - articles/replication-leibold
   - articles/replication-urban
+  - articles/replication-disturbance
   - articles/herodotools

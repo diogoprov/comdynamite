@@ -35,6 +35,7 @@ round(ls$dist)
 Other landscapes:
 \code{\link[=dispersal_kernel]{dispersal_kernel()}},
 \code{\link[=env_over_time]{env_over_time()}},
+\code{\link[=env_pulse]{env_pulse()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
 \code{\link[=landscape_matrix]{landscape_matrix()}}
