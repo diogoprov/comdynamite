@@ -2,27 +2,36 @@
 % Please edit documentation in R/landscape.R
 \name{dispersal_kernel}
 \alias{dispersal_kernel}
-\title{Exponential dispersal kernel}
+\title{Dispersal kernel}
 \usage{
-dispersal_kernel(dist, scale)
+dispersal_kernel(dist, scale, shape = c("exponential", "gaussian"))
 }
 \arguments{
 \item{dist}{Square matrix of distances among sites.}
 
-\item{scale}{Scale of the kernel, in the units of \code{dist}.}
+\item{scale}{Scale of the kernel, in the units of \code{dist}: the mean distance of the
+exponential kernel and the standard deviation of the Gaussian one.}
+
+\item{shape}{\code{"exponential"} (the default) or \code{"gaussian"}.}
 }
 \value{
 Row-stochastic matrix with a zero diagonal: row s gives the
 probabilities that an emigrant from site s reaches each site.
 }
 \description{
-The probability that an emigrant from site s reaches site t is proportional
-to exp(-d / \code{scale}), where d is the distance between the sites. Emigrants
-do not stay at their own site.
+The probability that an emigrant from site s reaches site t is proportional to
+exp(-d / \code{scale}) for the exponential kernel or exp(-d^2 / (2 \code{scale}^2)) for the Gaussian
+one, where d is the distance between the sites. Emigrants do not stay at their own site:
+the share that stays is set by the emigration probability (\code{dispersal} in
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}). For the same \code{scale}, the Gaussian kernel sends emigrants to
+near sites more often and to far sites much less often (a thin tail), whereas the
+exponential kernel keeps more long-distance dispersal. Any other kernel can be passed as a
+matrix to \code{\link[=landscape_matrix]{landscape_matrix()}}.
 }
 \examples{
 d <- as.matrix(dist(cbind(1:5, 0)))
 round(dispersal_kernel(d, scale = 1), 2)
+round(dispersal_kernel(d, scale = 1, shape = "gaussian"), 2)
 }
 \seealso{
 Other landscapes:

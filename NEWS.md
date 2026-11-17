@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `shape = "gaussian"` in `dispersal_kernel()` and `disp_shape` in `landscape_grid()` and
+  `landscape_points()`: a Gaussian kernel, with a thinner tail than the exponential one (the
+  default, unchanged). Kernel weights are now computed on the log scale, so that sites far
+  apart relative to `scale` no longer underflow to zero.
+- `every` in `env_pulse()`: recurrent pulses, one every `every` steps, so that both the
+  duration and the frequency of disturbance can be set.
+
 - `env_pulse()`: pulse (or permanent) changes of the environment of some sites, for the
   `env_time` of `simulate_metacommunity()`, so that disturbance acts on growth rates through
   the niche rather than by removing individuals. New article "Replicating Hajian-Forooshani &

@@ -9,7 +9,8 @@ landscape_grid(
   env_bandwidth = 2,
   disp_scale = 2,
   torus = TRUE,
-  env_range = c(0, 100)
+  env_range = c(0, 100),
+  disp_shape = c("exponential", "gaussian")
 )
 }
 \arguments{
@@ -18,12 +19,15 @@ landscape_grid(
 \item{env_bandwidth}{Bandwidth (in cells) of the Gaussian kernel that
 smooths the environment. Larger values give smoother gradients.}
 
-\item{disp_scale}{Scale (in cells) of the exponential dispersal kernel.}
+\item{disp_scale}{Scale (in cells) of the dispersal kernel.}
 
 \item{torus}{Wrap the grid as a torus?}
 
 \item{env_range}{Range of the uniform marginal distribution of the
 environment.}
+
+\item{disp_shape}{Shape of the dispersal kernel, \code{"exponential"} (the default) or
+\code{"gaussian"}; see \code{\link[=dispersal_kernel]{dispersal_kernel()}}.}
 }
 \value{
 An \code{mc_landscape} object: a list with \code{env}, \code{coords} (data frame

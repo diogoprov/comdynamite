@@ -74,3 +74,17 @@ test_that("an undisturbed control still validates its arguments", {
   expect_error(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = numeric(0)),
                "value")
 })
+
+test_that("env_pulse repeats pulses with a period of every", {
+  e <- env_pulse(c(1, 2), 30, sites = 1, start = 5, duration = 3, value = 0, every = 10)
+  expect_equal(which(e[1, ] == 0), c(5:7, 15:17, 25:27))
+  expect_equal(e[2, ], rep(2, 30))
+  # a last pulse cut by the end of the run
+  e <- env_pulse(c(1, 2), 26, sites = 1, start = 5, duration = 3, value = 0, every = 10)
+  expect_equal(which(e[1, ] == 0), c(5:7, 15:17, 25:26))
+  expect_error(env_pulse(c(1, 2), 30, sites = 1, start = 5, value = 0, every = 10), "longer")
+  expect_error(env_pulse(c(1, 2), 30, sites = 1, start = 5, duration = 10, value = 0,
+                         every = 10), "longer")
+  expect_error(env_pulse(c(1, 2), 30, sites = 1, start = 5, duration = 2, value = 0,
+                         every = 1.5), "whole number")
+})

@@ -4,7 +4,15 @@
 \alias{env_pulse}
 \title{Pulse disturbance of the environment}
 \usage{
-env_pulse(env, n_steps = NULL, sites, start, duration = Inf, value)
+env_pulse(
+  env,
+  n_steps = NULL,
+  sites,
+  start,
+  duration = Inf,
+  value,
+  every = NULL
+)
 }
 \arguments{
 \item{env}{Environment of each site (a vector, e.g. the \code{env} of an \code{mc_landscape}), or a
@@ -17,9 +25,13 @@ site (e.g. \code{integer(0)}), \code{env} is returned unchanged, as an undisturb
 
 \item{start}{First disturbed step.}
 
-\item{duration}{Number of disturbed steps; \code{Inf} for a permanent change.}
+\item{duration}{Number of disturbed steps of each pulse; \code{Inf} for a permanent change.}
 
 \item{value}{Environment of the disturbed sites: one value, or one per disturbed site.}
+
+\item{every}{Optional period of recurrent pulses: a new pulse starts every \code{every} steps
+after \code{start} until the last step, so that the frequency of disturbance is \code{1 / every}.
+\code{NULL} (the default) for a single pulse. Needs a finite \code{duration} shorter than \code{every}.}
 }
 \value{
 Matrix with one row per site and one column per time step, for the \code{env_time}
@@ -39,6 +51,10 @@ set.seed(1)
 env <- runif(6, 0.5, 1)
 e <- env_pulse(env, n_steps = 30, sites = 1:3, start = 10, duration = 10, value = 0.1)
 matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
+# recurrent pulses of 3 steps every 10 steps
+e <- env_pulse(env, n_steps = 60, sites = 1:3, start = 5, duration = 3, value = 0.1,
+               every = 10)
+which(e[1, ] == 0.1)
 }
 \references{
 Hajian-Forooshani, Z., & Chase, J. M. (2026). Disturbance interacts with
