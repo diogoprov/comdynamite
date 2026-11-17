@@ -39,7 +39,10 @@ test_that("a permanent change reaches the last step", {
   expect_equal(e[1, ], c(1, 0, 0, 0, 0))
 })
 
-test_that("a pulse below every optimum empties disturbed sites, which are recolonised", {
+test_that("a pulse below every optimum depresses disturbed sites, which recover", {
+  # abundance rather than richness: with these niche breadths, species with low optima keep
+  # positive growth at 0.1, so richness need not fall in every site (criteria held for seeds
+  # 1 to 50)
   set.seed(3)
   ls <- landscape_grid(side = 4, disp_scale = 10)
   traits <- data.frame(optimum = seq(0.55, 0.95, length.out = 6), sigma = 0.25 * sqrt(2),
@@ -50,9 +53,10 @@ test_that("a pulse below every optimum empties disturbed sites, which are recolo
                                 dispersal = 0.05, n_steps = 160, env_time = et,
                                 seed_steps = numeric(0), seed_mean = 1,
                                 immigration = "multinomial", record_steps = c(59, 109, 160))
-  richness <- apply(sim$history > 0, c(1, 3), sum)
-  expect_true(all(richness[1:8, "step109"] < richness[1:8, "step59"]))
-  expect_gt(mean(richness[1:8, "step160"]), mean(richness[1:8, "step109"]))
+  n <- apply(sim$history, c(1, 3), sum)
+  expect_true(all(n[1:8, "step109"] < 0.5 * n[1:8, "step59"]))
+  expect_true(all(n[9:16, "step109"] > 0.5 * n[9:16, "step59"]))
+  expect_true(all(n[1:8, "step160"] > 2 * n[1:8, "step109"]))
 })
 
 test_that("env_pulse without disturbed sites returns the environment unchanged", {
