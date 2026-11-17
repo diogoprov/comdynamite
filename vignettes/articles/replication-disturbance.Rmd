@@ -63,7 +63,11 @@ pool and competition matrix in each replicate.
   \(r = 5e^{-1} = 1.8\) at an environment of 0.1. The pulse therefore filters species by their
   optima, the "disturbance tolerant" species of the article, rather than emptying the disturbed
   patches.
-* **Replicates.** The legends of their figures give 100 replicates; the archived code runs 50.
+* **Replicates and kernels.** The archived code runs 50 replicates per batch; their archived
+  simulations have 100 per setting, as the legends say, for two dispersal kernels,
+  \(\exp(-0.1\,d)\) and \(\exp(-0.5\,d)\). The script of their Fig. 2 uses the first, that of
+  their Fig. 4 pools both. We compare with the first, which the article describes; the second
+  gives nearly the same results.
 
 ## Dispersal sets the direction of the change in beta diversity
 
@@ -77,11 +81,25 @@ regional richness kept falling, and beta diversity decreased at every extent, fr
 direction depended on the extent, as in the article: beta diversity decreased slightly when
 1–10% of the landscape was disturbed (\(-0.04\) to \(-0.01\)), did not change at 15–20%,
 increased from 25% to 95% (up to 0.21 at 75%), and
-decreased again when the whole landscape was disturbed (\(-0.32\)). We cannot compare the
-magnitudes with theirs from the figures alone; their simulated data are archived with the
-code (a 106 MB file) and would allow a quantitative comparison.
+decreased again when the whole landscape was disturbed (\(-0.32\)).
 
 ![Changes in local (\(\Delta\alpha\)) and regional (\(\Delta\gamma\)) richness and in beta diversity (\(\Delta\beta\)) between step 499 and step 700, against the percentage of the landscape disturbed, for niche breadth \(n = 0.25\). Means and 95% confidence intervals of 100 replicates. Dashed lines: the same changes in metacommunities without disturbance. Notice that with intermediate and high dispersal the undisturbed metacommunities also homogenise.](hajian_fig2.png)
+
+## Agreement with their simulations
+
+Their simulations are archived with the code (Figshare, 106 MB), so the replication can be
+compared setting by setting. The script `data-raw/compare_hajian2026.R` summarises them in
+`data-raw/hajian2026_archived_summary.rds`, and we matched the 2268 combinations of niche
+breadth, dispersal, extent and step (601 and every 50 steps to 1000) shared with our runs. The
+mean changes agreed closely: the correlations between their means and ours were 0.999 for
+\(\Delta\alpha\) and 0.998 for \(\Delta\gamma\) and \(\Delta\beta\), the mean absolute
+differences 0.008, 0.011 and 0.014, without bias (mean differences below 0.001), and 94%, 96%
+and 95% of the differences lay within their 95% confidence interval, as expected if both
+implementations sample the same model. For example, with \(n = 0.25\) at step 700, half of the
+landscape disturbed and dispersal limitation, \(\Delta\beta\) was 0.365 in their simulations
+and 0.358 in ours.
+
+![Mean changes from step 499 in comdynamite against those of the simulations archived by Hajian-Forooshani & Chase (2026), for the 2268 combinations of niche breadth (0.2, 0.25, 0.3, 0.4), dispersal, extent and step (601 to 1000) that both share. Grey line: identity.](hajian_comparison.png)
 
 ## Recovery and niche breadth
 
@@ -96,10 +114,25 @@ half of the landscape disturbed, beta diversity increased with narrow niches (\(
 ones (\(-0.01\) for \(n = 0.4\)). Losses with narrow niches grew nonlinearly with the extent,
 and with broad niches nearly linearly. With narrow niches and the whole landscape disturbed,
 the whole metacommunity went extinct in 2 of 100 replicates with \(d = 10^{-5}\) and 6 with
-\(d = 10^{-3}\); these were left out of the means, as in their script of Fig. 3. We did not
-replicate their Fig. 4, which separates regional extinctions during and after the pulse.
+\(d = 10^{-3}\); these were left out of the means, as in their script of Fig. 3.
 
 ![Changes in local (solid) and regional (dashed) richness from step 499 to steps 601–1000 (lighter colours: later steps), against the percentage of the landscape disturbed, for three niche breadths (rows) and three dispersal rates (columns). Means of 100 replicates.](hajian_fig3.png)
+
+## Regional extinctions during and after the pulse
+
+Their Fig. 4 splits the change in regional richness into the part during the pulse,
+\(\ln(\gamma_{601}/\gamma_{499})\), and the part after it, \(\ln(\gamma_{1000}/\gamma_{601})\),
+which the article reads as transient extinctions that follow the disturbance. Both parts agreed
+with their simulations (figure below). During the pulse, losses grew nonlinearly with the
+extent and were larger with narrow niches; with \(n = 0.25\) and 90% of the landscape
+disturbed, the change was \(-0.41\) to \(-0.44\) in both implementations at every dispersal
+rate. After the pulse, dispersal-limited metacommunities lost almost nothing (\(-0.004\) to
+\(-0.02\)), whereas they kept losing species with intermediate dispersal (\(-0.05\) to
+\(-0.14\) up to 90% disturbed) and with a dispersal surplus (\(-0.09\) to \(-0.18\)) and, with a dispersal surplus and the whole
+landscape disturbed, lost much more (\(-0.23\) to \(-0.40\) in ours, \(-0.29\) to \(-0.33\) in
+theirs).
+
+![Log change in regional richness during the pulse (step 499 to 601, top) and after it (step 601 to 1000, bottom), against the percentage of the landscape disturbed, by niche breadth. Lines: comdynamite; open circles: the simulations archived by Hajian-Forooshani & Chase (2026), kernel \(\exp(-0.1\,d)\); means of 100 replicates. Dashed lines: the same changes without disturbance. Notice that after the pulse the disturbed metacommunities lose about as many species as the undisturbed ones, except with a dispersal surplus and most of the landscape disturbed.](hajian_fig4.png)
 
 ## Not all of the homogenisation is caused by the disturbance
 
@@ -126,16 +159,32 @@ before-after-control-impact design. On that scale, at step 700 and with \(n = 0.
 
 The shift towards homogenisation over the recovery phase at intermediate dispersal (their
 Fig. 3b) also follows the background decline: by step 1000, the control alone has
-\(\Delta\beta = -0.12\). A longer burn-in before the pulse, or the difference from paired
-undisturbed runs, would separate the two.
+\(\Delta\beta = -0.12\).
 
-In short, comdynamite reproduces the patterns of Hajian-Forooshani & Chase (2026) with
-`env_pulse()` and no change to its engine. The paired control shows that part of the
-homogenisation they report at intermediate and high dispersal comes from the transient
-dynamics of the metacommunity rather than from the disturbance, while the differentiation
-under dispersal limitation and the homogenisation after extensive disturbance with a dispersal
-surplus are effects of the disturbance itself. We did not check whether a longer burn-in
-removes the background decline in their own simulations; their archived data would show it.
+The same holds for the extinctions after the pulse (their Fig. 4, bottom row). Without any
+disturbance, regional richness fell from step 601 to step 1000 by \(-0.07\) to \(-0.09\) with
+\(d = 10^{-4}\) and by \(-0.10\) to \(-0.13\) with \(d = 10^{-3}\), depending on niche
+breadth. With intermediate dispersal, the disturbed metacommunities lost about as much
+(\(-0.086\) with \(n = 0.25\) and half of the landscape disturbed, against \(-0.084\) in the
+control); with a dispersal surplus, they lost 0.02 more than the control at half of the
+landscape, 0.05 more at 90%, and 0.30 more when all of it was disturbed (\(n = 0.25\)). The
+larger losses of broad-niche metacommunities after the pulse with a dispersal surplus are also
+mostly background: the control loses more with broad niches too (\(-0.13\) with \(n = 0.4\)
+against \(-0.11\) with \(n = 0.2\)). The archived simulations have no control, but they match
+ours so closely that the same background decline is very likely present in them.
+
+A longer burn-in before the pulse, or the difference from paired undisturbed runs, would
+separate the effect of the disturbance from the transient dynamics.
+
+In short, comdynamite reproduces the model of Hajian-Forooshani & Chase (2026) with
+`env_pulse()` and no change to its engine: its mean changes are statistically
+indistinguishable from their archived simulations, and all three of their figures are
+reproduced. The paired control shows that the homogenisation they report at small extents and
+intermediate dispersal, and most of the regional extinctions that follow the pulse, come from
+the transient dynamics of the metacommunity rather than from the disturbance. The
+differentiation under dispersal limitation, the losses during the pulse, and the homogenisation
+and extinctions after extensive disturbance with a dispersal surplus are effects of the
+disturbance itself.
 
 ## References
 

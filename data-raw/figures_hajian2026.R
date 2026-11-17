@@ -76,3 +76,84 @@ print(ctrl[ctrl$step %in% c(700, 1000), c("niche", "dispersal", "step", "d_alpha
 ext <- s[s$n_extinct > 0, ]
 cat("settings with extinct replicates:\n")
 print(stats::aggregate(n_extinct ~ niche + dispersal + n_disturbed, ext, max))
+
+# Comparison with their archived simulations (data-raw/hajian2026_archived_summary.rds, written
+# by data-raw/compare_hajian2026.R), kernel exp(-0.1 d) as in the article and here
+arch <- readRDS("data-raw/hajian2026_archived_summary.rds")
+theirs <- arch$changes[arch$changes$exp_kernal == 0.1, ]
+names(theirs)[names(theirs) == "niche_breadth"] <- "niche"
+names(theirs)[names(theirs) == "dispersal_prob"] <- "dispersal"
+names(theirs)[names(theirs) == "n.patches.pulsed"] <- "n_disturbed"
+names(theirs)[names(theirs) == "post.data.ts"] <- "step"
+both <- merge(s, theirs, by = c("niche", "dispersal", "n_disturbed", "step"),
+              suffixes = c("_ours", "_theirs"))
+agree <- do.call(rbind, lapply(c("d_alpha", "d_gamma", "d_beta"), function(v) {
+  o <- both[[paste0(v, "_ours")]]
+  t <- both[[paste0(v, "_theirs")]]
+  se <- sqrt(both[[paste0(v, "_se_ours")]]^2 + both[[paste0(v, "_se_theirs")]]^2)
+  data.frame(measure = v, n = length(o), r = stats::cor(o, t),
+             mean_abs_diff = mean(abs(o - t)), mean_diff = mean(o - t),
+             within_95 = mean(abs(o - t) <= 1.96 * se))
+}))
+cat("agreement with their archived simulations (kernel 0.1):\n")
+print(agree, digits = 3)
+long_cmp <- do.call(rbind, lapply(c("d_alpha", "d_gamma", "d_beta"), function(v) {
+  data.frame(measure = unname(c(d_alpha = "Δα", d_gamma = "Δγ", d_beta = "Δβ")[v]),
+             regime = both$regime, ours = both[[paste0(v, "_ours")]],
+             theirs = both[[paste0(v, "_theirs")]])
+}))
+long_cmp$measure <- factor(long_cmp$measure, c("Δα", "Δγ", "Δβ"))
+pc <- ggplot(long_cmp, aes(theirs, ours, colour = regime)) +
+  geom_abline(colour = "grey60") + geom_point(size = 0.8, alpha = 0.5) +
+  facet_wrap(~measure, scales = "free") +
+  scale_colour_manual(values = c("#009E73", "#E69F00", "#56B4E9"), name = NULL) +
+  labs(x = "Hajian-Forooshani & Chase (archived simulations)", y = "comdynamite") +
+  theme(legend.position = "bottom")
+save(pc, "hajian_comparison.png", h = 4)
+
+# Fig. 4: log change in gamma during the pulse (step 499 to 601) and after it (601 to 1000).
+# Ours: the change after the pulse is the difference of the mean log changes at steps 1000 and
+# 601, equal to the mean change per replicate except where whole metacommunities went extinct
+wide <- function(d) {
+  a <- d[d$step == 601, c("niche", "dispersal", "n_disturbed", "d_gamma")]
+  b <- d[d$step == 1000, c("niche", "dispersal", "n_disturbed", "d_gamma")]
+  m <- merge(a, b, by = c("niche", "dispersal", "n_disturbed"), suffixes = c("_601", "_1000"))
+  m$during <- m$d_gamma_601
+  m$after <- m$d_gamma_1000 - m$d_gamma_601
+  m
+}
+o4 <- wide(s)
+c4 <- wide(ctrl)
+t4 <- arch$fig4[arch$fig4$exp_kernal == 0.1 & arch$fig4$niche_breadth %in% unique(s$niche), ]
+t4 <- data.frame(niche = t4$niche_breadth, dispersal = t4$dispersal_prob,
+                 n_disturbed = t4$n.patches.pulsed, during = t4$during, after = t4$after)
+stack4 <- function(d, source) {
+  rbind(data.frame(d[c("niche", "dispersal", "n_disturbed")], phase = "During the pulse",
+                   value = d$during, source = source),
+        data.frame(d[c("niche", "dispersal", "n_disturbed")], phase = "After the pulse",
+                   value = d$after, source = source))
+}
+l4 <- rbind(stack4(o4, "comdynamite"), stack4(t4, "Hajian-Forooshani & Chase"))
+l4$phase <- factor(l4$phase, c("During the pulse", "After the pulse"))
+l4$regime <- factor(l4$dispersal, levels = c(1e-5, 1e-4, 1e-3), labels = levels(s$regime))
+l4$niche <- factor(l4$niche)
+lc <- stack4(c4, "control")
+lc$phase <- factor(lc$phase, levels(l4$phase))
+lc$regime <- factor(lc$dispersal, levels = c(1e-5, 1e-4, 1e-3), labels = levels(s$regime))
+lc$niche <- factor(lc$niche)
+p4 <- ggplot(l4, aes(n_disturbed, value, colour = niche)) +
+  geom_hline(yintercept = 0, linetype = 3) +
+  geom_hline(data = lc, aes(yintercept = value, colour = niche), linetype = 2, alpha = 0.6) +
+  geom_line(data = l4[l4$source == "comdynamite", ]) +
+  geom_point(data = l4[l4$source != "comdynamite", ], size = 1, shape = 1) +
+  facet_grid(phase ~ regime, scales = "free_y") +
+  scale_colour_viridis_d(end = 0.85, name = "Niche breadth n") +
+  labs(x = "% of landscape disturbed", y = "Log change in regional richness")
+save(p4, "hajian_fig4.png", h = 5.5)
+cat("Fig. 4, n = 0.25, extents 10, 50, 90:\n")
+sel <- function(d) d[d$niche == 0.25 & d$n_disturbed %in% c(10, 50, 90),
+                     c("dispersal", "n_disturbed", "during", "after")]
+print(merge(sel(o4), sel(t4), by = c("dispersal", "n_disturbed"),
+            suffixes = c("_ours", "_theirs")), digits = 2)
+cat("control, after the pulse (601 to 1000):\n")
+print(c4[, c("niche", "dispersal", "after")], digits = 2)

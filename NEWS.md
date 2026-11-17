@@ -5,7 +5,9 @@
   the niche rather than by removing individuals. New article "Replicating Hajian-Forooshani &
   Chase (2026)" (`data-raw/replication_hajian2026.R`, `data-raw/figures_hajian2026.R`): their
   pulse-disturbance model of scale-dependent diversity change, from the code archived with the
-  article.
+  article, compared setting by setting with their archived simulations
+  (`data-raw/compare_hajian2026.R`; correlations of 0.998-0.999), with their Figs. 2-4 and a
+  control without disturbance.
 
 - `n_boot` in `damocles_partition_test()`: a parametric bootstrap of the likelihood ratio
   against constant rates, with communities simulated under the constant rates estimated and
