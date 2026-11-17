@@ -270,6 +270,75 @@ env_over_time <- function(env, n_steps, rho = 0.9, sd = 5) {
   env + dev
 }
 
+#' Pulse disturbance of the environment
+#'
+#' Sets the environment of some sites to a new value from step `start` for `duration` steps,
+#' after which it returns to its previous course, as the pulse disturbances of
+#' Hajian-Forooshani & Chase (2026). Disturbance then acts on growth rates through the niche
+#' of each species, not by removing individuals as `disturbance` in [simulate_metacommunity()]
+#' does. Their disturbed environment (0.1) lies below the optima of all species (0.5 to 1), so
+#' that no species grows well in disturbed sites; a value inside the range of optima instead
+#' shifts which species are favoured, and `duration = Inf` makes the change permanent.
+#'
+#' @param env Environment of each site (a vector, e.g. the `env` of an `mc_landscape`), or a
+#'   matrix (sites x steps) with the environment at each step, e.g. from [env_over_time()].
+#' @param n_steps Number of time steps. Taken from `env` when it is a matrix.
+#' @param sites Disturbed sites: indices or a logical vector with one value per site. With no
+#'   site (e.g. `integer(0)`), `env` is returned unchanged, as an undisturbed control.
+#' @param start First disturbed step.
+#' @param duration Number of disturbed steps; `Inf` for a permanent change.
+#' @param value Environment of the disturbed sites: one value, or one per disturbed site.
+#' @return Matrix with one row per site and one column per time step, for the `env_time`
+#'   argument of [simulate_metacommunity()].
+#' @references Hajian-Forooshani, Z., & Chase, J. M. (2026). Disturbance interacts with
+#'   dispersal and niche breadth to shape scale-dependent diversity change in metacommunities.
+#'   *The American Naturalist*, 207, 838--850. \doi{10.1086/739955}
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' env <- runif(6, 0.5, 1)
+#' e <- env_pulse(env, n_steps = 30, sites = 1:3, start = 10, duration = 10, value = 0.1)
+#' matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
+#' @export
+env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) {
+  if (is.matrix(env)) {
+    if (!is.null(n_steps) && n_steps != ncol(env)) {
+      stop("`n_steps` differs from the number of columns of `env`", call. = FALSE)
+    }
+    out <- env
+  } else {
+    if (!is.numeric(env) || anyNA(env)) {
+      stop("`env` must be a numeric vector without NA, or a matrix (sites x steps)",
+           call. = FALSE)
+    }
+    if (is.null(n_steps)) stop("`n_steps` is needed when `env` is a vector", call. = FALSE)
+    check_count(n_steps, "n_steps")
+    if (!is.finite(n_steps)) stop("`n_steps` must be finite", call. = FALSE)
+    out <- matrix(env, length(env), n_steps)
+  }
+  m <- nrow(out)
+  if (is.logical(sites)) {
+    if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
+    sites <- which(sites)
+  }
+  if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
+    stop("`sites` must be distinct indices of sites", call. = FALSE)
+  }
+  check_count(start, "start")
+  if (start > ncol(out)) {
+    stop("`start` is after the last step (", ncol(out), ")", call. = FALSE)
+  }
+  check_count(duration, "duration")
+  n_values <- if (length(sites) > 0) c(1, length(sites)) else 1
+  if (!is.numeric(value) || anyNA(value) || !length(value) %in% n_values) {
+    stop("`value` must be one number, or one per disturbed site, without NA", call. = FALSE)
+  }
+  if (length(sites) == 0) return(out)
+  steps <- seq(start, min(ncol(out), start + duration - 1))
+  out[sites, steps] <- value
+  out
+}
+
 new_landscape <- function(env, coords, dist, dispersal, torus = NA) {
   structure(list(env = env, coords = coords, dist = dist, dispersal = dispersal,
                  torus = torus), class = "mc_landscape")
