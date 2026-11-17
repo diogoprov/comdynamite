@@ -30,6 +30,7 @@ test_that("env_pulse rejects wrong sites and steps", {
   expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, duration = 0.5, value = 0),
                "whole number")
   expect_error(env_pulse(c(1, 2), sites = 1, start = 1, value = 0), "n_steps")
+  expect_error(env_pulse(c(1, 2), Inf, sites = 1, start = 1, value = 0), "finite")
   expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, value = NA_real_), "value")
   expect_error(env_pulse(c(1, NA), 5, sites = 1, start = 1, value = 0), "NA")
 })
