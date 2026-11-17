@@ -21,7 +21,7 @@ with the location of every item in its source, is in
 | Model | Level and time scale | Status in comdynamite |
 |---|---|---|
 | Thompson et al. (2020) | Populations, ecological time | Native: the engine implements its equations; validated against analytical results, mcomsimr and the article ([article](validation.html)) |
-| Hajian-Forooshani & Chase (2026) | Populations, ecological time | Native: a special case of the engine with a pulse in the environment; replicated qualitatively ([article](replication-disturbance.html)) |
+| Hajian-Forooshani & Chase (2026) | Populations, ecological time | Native: a special case of the engine with a pulse in the environment; replicated, with mean changes indistinguishable from their archived simulations ([article](replication-disturbance.html)) |
 | Urban & De Meester (2009) | Individuals with loci, ecological time | Replicated in part ([article](replication-urban.html)) |
 | Leibold et al. (2019) | Individuals with loci, ecological time | Replicated in part ([article](replication-leibold.html)) |
 | Cabral & Kreft (2012) | Stage-structured populations, ecological time | Ecological analogue only; not run |
@@ -51,13 +51,15 @@ the replication needed no change to the engine, only `env_pulse()` to write the 
 `env_time`; the parameters missing from the text came from the code archived with the article.
 The main difference in structure is the redistribution of emigrants: their code pools the
 emigrants of each species over the landscape, whereas `immigration = "multinomial"` distributes
-those of each patch among the others. The replication reproduced their Figs. 2 and 3
-qualitatively: dispersal limitation leads to differentiation, a dispersal surplus to
-homogenisation, and intermediate dispersal to an outcome that depends on the extent of the
-disturbance and on niche breadth. A control without disturbance, which the article does not
-have, showed that the metacommunities are still losing species at the time of the pulse when
-dispersal is intermediate or high, so that part of the homogenisation is background rather
-than an effect of the disturbance ([article](replication-disturbance.html)).
+those of each patch among the others. The replication reproduced their three figures, and its
+mean changes in local, regional and beta diversity matched those of the simulations archived
+with their code in 2268 combinations of niche breadth, dispersal, extent and step
+(correlations of 0.998 to 0.999, no bias, and 94% to 96% of the differences within their 95%
+confidence intervals). A control without disturbance, which the article does not have, showed
+that the metacommunities are still losing species at the time of the pulse when dispersal is
+intermediate or high, so that the homogenisation at small extents and most of the regional
+extinctions after the pulse are background rather than effects of the disturbance
+([article](replication-disturbance.html)).
 
 ## Urban & De Meester (2009)
 
@@ -149,8 +151,9 @@ Kreft (2012) was read from the Early View version, where some exponents and sign
 text extraction, and its Appendix S1 was not read; nor were the appendices of Cabral et al.
 (2019) or the supplementary notes of Hagen et al. (2021). The settings proposed for the last
 three models were written from the function signatures and were not run. For Hajian-Forooshani &
-Chase (2026), the replication was compared with their figures only, not with the simulated data
-archived with their code.
+Chase (2026), the comparison with their archived simulations used the kernel
+\(\exp(-0.1\,d)\); their second kernel was checked only by eye in one figure, and their
+dispersal rate of \(10^{-2}\) and niche breadths of 0.1, 0.15 and 0.35 were not run.
 
 ## References
 
