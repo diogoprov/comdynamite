@@ -306,7 +306,13 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     }
     out <- env
   } else {
-    stopifnot(is.numeric(env), length(n_steps) == 1, n_steps >= 1)
+    if (!is.numeric(env) || anyNA(env)) {
+      stop("`env` must be a numeric vector without NA, or a matrix (sites x steps)",
+           call. = FALSE)
+    }
+    if (is.null(n_steps)) stop("`n_steps` is needed when `env` is a vector", call. = FALSE)
+    check_count(n_steps, "n_steps")
+    if (!is.finite(n_steps)) stop("`n_steps` must be finite", call. = FALSE)
     out <- matrix(env, length(env), n_steps)
   }
   m <- nrow(out)
@@ -314,11 +320,17 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
     sites <- which(sites)
   }
-  if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
+  if (length(sites) == 0 || !all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
     stop("`sites` must be distinct indices of sites", call. = FALSE)
   }
-  stopifnot(length(start) == 1, start >= 1, start <= ncol(out), length(duration) == 1,
-            duration >= 1, is.numeric(value), length(value) %in% c(1, length(sites)))
+  check_count(start, "start")
+  if (start > ncol(out)) {
+    stop("`start` is after the last step (", ncol(out), ")", call. = FALSE)
+  }
+  check_count(duration, "duration")
+  if (!is.numeric(value) || anyNA(value) || !length(value) %in% c(1, length(sites))) {
+    stop("`value` must be one number, or one per disturbed site, without NA", call. = FALSE)
+  }
   steps <- seq(start, min(ncol(out), start + duration - 1))
   out[sites, steps] <- value
   out

@@ -25,7 +25,20 @@ test_that("env_pulse rejects wrong sites and steps", {
   expect_error(env_pulse(c(1, 2), 5, sites = 3, start = 1, value = 0), "indices")
   expect_error(env_pulse(c(1, 2), 5, sites = TRUE, start = 1, value = 0), "one value per site")
   expect_error(env_pulse(matrix(1, 2, 5), 6, sites = 1, start = 1, value = 0), "n_steps")
-  expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 6, value = 0))
+  expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 6, value = 0), "after the last")
+  expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 2.5, value = 0), "whole number")
+  expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, duration = 0.5, value = 0),
+               "whole number")
+  expect_error(env_pulse(c(1, 2), sites = 1, start = 1, value = 0), "n_steps")
+  expect_error(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
+               "indices")
+  expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, value = NA_real_), "value")
+  expect_error(env_pulse(c(1, NA), 5, sites = 1, start = 1, value = 0), "NA")
+})
+
+test_that("a permanent change reaches the last step", {
+  e <- env_pulse(c(1, 2), 5, sites = 1, start = 2, value = 0)
+  expect_equal(e[1, ], c(1, 0, 0, 0, 0))
 })
 
 test_that("a pulse below every optimum empties disturbed sites, which are recolonised", {

@@ -16,7 +16,7 @@
   against random partitions rarely has 19 distinct ones. `n_rand = 0` runs the bootstrap alone.
   `data-raw/s1_type1_shifts.R` gains `MODE=boot`.
 
-- New article "Nesting map" (`data-raw/figure_nesting_map.R`): six published models mapped
+- New article "Nesting map" (`data-raw/figure_nesting_map.R`): seven published models mapped
   onto comdynamite, with the settings that approximate each, the mechanisms it lacks and the
   outcome of the replications; comdynamite is presented as a modular framework for populations
   and quantitative genetics in ecological time, not as a model that contains the others.

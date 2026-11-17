@@ -11,23 +11,24 @@ another and still fail to reproduce its results. comdynamite is therefore not an
 all-encompassing model. It is a modular framework in the sense of Cabral, Valente & Hartig
 (2017), centred on populations and quantitative genetics in ecological time, with speciation
 inside a competitive metacommunity and an inference layer with known truth. This article maps
-six published models onto it: which settings approximate each model, which mechanisms it
+seven published models onto it: which settings approximate each model, which mechanisms it
 lacks, and what happened when we tried to reproduce the results. The detailed extraction,
 with the location of every item in its source, is in
 [`dev/nesting-map.md`](https://github.com/diogoprov/comdynamite/blob/main/dev/nesting-map.md).
 
-## The six models
+## The seven models
 
 | Model | Level and time scale | Status in comdynamite |
 |---|---|---|
 | Thompson et al. (2020) | Populations, ecological time | Native: the engine implements its equations; validated against analytical results, mcomsimr and the article ([article](validation.html)) |
+| Hajian-Forooshani & Chase (2026) | Populations, ecological time | Native: a special case of the engine with a pulse in the environment; replicated qualitatively ([article](replication-disturbance.html)) |
 | Urban & De Meester (2009) | Individuals with loci, ecological time | Replicated in part ([article](replication-urban.html)) |
 | Leibold et al. (2019) | Individuals with loci, ecological time | Replicated in part ([article](replication-leibold.html)) |
 | Cabral & Kreft (2012) | Stage-structured populations, ecological time | Ecological analogue only; not run |
 | Cabral, Wiegand & Kreft (2019), BioGEEM | Stage-structured populations, deep time on an island | Out of scope: weak analogue, not run |
 | Hagen et al. (2021), gen3sis | Species as sets of populations, deep time | Out of scope: partial analogue, not run |
 
-![Mechanisms of the six models and their status in comdynamite. Blank cells are mechanisms that the model does not have. Notice that the options added for the two replications fill most of the gaps of the individual-based models, whereas the stage structure, metabolic constraints and changing landscapes of the deep-time models remain missing.](nesting_map.png)
+![Mechanisms of the seven models and their status in comdynamite. Blank cells are mechanisms that the model does not have. Notice that the options added for the two replications fill most of the gaps of the individual-based models, whereas the stage structure, metabolic constraints and changing landscapes of the deep-time models remain missing.](nesting_map.png)
 
 ## Thompson et al. (2020)
 
@@ -39,6 +40,24 @@ extirpation of populations. Their model is therefore a special case of
 mcomsimr, the implementation of the same authors, in 160 comparisons, but it also found that
 the article and its archived code differ in several points that change the results, so the
 text alone does not reproduce the figures ([article](validation.html)).
+
+## Hajian-Forooshani & Chase (2026)
+
+Their model is that of Thompson et al. (2020) with one pulse disturbance: for about 100 steps,
+the environment of a set of patches falls below the optima of all species and then returns to
+its previous value, so that disturbance acts on growth rates through the niche rather than by
+removing individuals. It is therefore also a special case of `simulate_metacommunity()`, and
+the replication needed no change to the engine, only `env_pulse()` to write the pulse into
+`env_time`; the parameters missing from the text came from the code archived with the article.
+The main difference in structure is the redistribution of emigrants: their code pools the
+emigrants of each species over the landscape, whereas `immigration = "multinomial"` distributes
+those of each patch among the others. The replication reproduced their Figs. 2 and 3
+qualitatively: dispersal limitation leads to differentiation, a dispersal surplus to
+homogenisation, and intermediate dispersal to an outcome that depends on the extent of the
+disturbance and on niche breadth. A control without disturbance, which the article does not
+have, showed that the metacommunities are still losing species at the time of the pulse when
+dispersal is intermediate or high, so that part of the homogenisation is background rather
+than an effect of the disturbance ([article](replication-disturbance.html)).
 
 ## Urban & De Meester (2009)
 
@@ -110,9 +129,11 @@ whereas comdynamite is built for populations and quantitative genetics in ecolog
 
 ## What the map shows
 
-The two models closest to comdynamite in level and time scale are the ones that could be
-replicated, and both replications departed from the original results in ways that the added
-mechanisms explained only in part. This seems to be the general lesson of the map: matching
+The models closest to comdynamite in level and time scale are the ones that could be
+replicated. The two population models built on the equations of Thompson et al. (2020) are
+special cases of the engine, and their results were reproduced without new mechanisms. The two
+individual-based models departed from the original results in ways that the added mechanisms
+explained only in part. This seems to be the general lesson of the map: matching
 structure is necessary but not sufficient, because results of individual-based models depend
 on how genetic variance is generated and lost, which a quantitative-genetic engine represents
 only through its assumptions about the variance. The deep-time models are out of scope by
@@ -127,7 +148,9 @@ accessible, and for Leibold et al. (2019) only Table S2 of the supplement was re
 Kreft (2012) was read from the Early View version, where some exponents and signs were lost in
 text extraction, and its Appendix S1 was not read; nor were the appendices of Cabral et al.
 (2019) or the supplementary notes of Hagen et al. (2021). The settings proposed for the last
-three models were written from the function signatures and were not run.
+three models were written from the function signatures and were not run. For Hajian-Forooshani &
+Chase (2026), the replication was compared with their figures only, not with the simulated data
+archived with their code.
 
 ## References
 
@@ -147,6 +170,10 @@ Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
 Pellissier, L. (2021). gen3sis: A general engine for eco-evolutionary simulations of the
 processes that shape Earth's biodiversity. *PLOS Biology*, 19, e3001340.
 https://doi.org/10.1371/journal.pbio.3001340
+
+Hajian-Forooshani, Z., & Chase, J. M. (2026). Disturbance interacts with dispersal and niche
+breadth to shape scale-dependent diversity change in metacommunities. *The American
+Naturalist*, 207, 838--850. https://doi.org/10.1086/739955
 
 Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., & Vanoverbeke, J. (2019).
 Regional neutrality evolves through local adaptive niche evolution. *Proceedings of the
