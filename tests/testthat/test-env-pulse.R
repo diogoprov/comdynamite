@@ -61,3 +61,11 @@ test_that("env_pulse without disturbed sites returns the environment unchanged",
   expect_equal(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
                matrix(c(1, 2), 2, 5))
 })
+
+test_that("an undisturbed control still validates its arguments", {
+  expect_error(env_pulse(c(1, 2), 5, sites = integer(0), start = -4, value = 0), "whole number")
+  expect_error(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = NA_real_), "value")
+  expect_error(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = c(0, 1)), "value")
+  expect_error(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = numeric(0)),
+               "value")
+})

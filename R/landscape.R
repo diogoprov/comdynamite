@@ -321,7 +321,6 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
     sites <- which(sites)
   }
-  if (length(sites) == 0) return(out)
   if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
     stop("`sites` must be distinct indices of sites", call. = FALSE)
   }
@@ -330,9 +329,11 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     stop("`start` is after the last step (", ncol(out), ")", call. = FALSE)
   }
   check_count(duration, "duration")
-  if (!is.numeric(value) || anyNA(value) || !length(value) %in% c(1, length(sites))) {
+  n_values <- if (length(sites) > 0) c(1, length(sites)) else 1
+  if (!is.numeric(value) || anyNA(value) || !length(value) %in% n_values) {
     stop("`value` must be one number, or one per disturbed site, without NA", call. = FALSE)
   }
+  if (length(sites) == 0) return(out)
   steps <- seq(start, min(ncol(out), start + duration - 1))
   out[sites, steps] <- value
   out
