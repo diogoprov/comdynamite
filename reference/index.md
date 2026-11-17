@@ -63,6 +63,8 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Exponential dispersal kernel
 - [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md)
   : Environment that changes over time
+- [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md)
+  : Pulse disturbance of the environment
 
 ## Species traits
 

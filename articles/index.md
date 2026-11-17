@@ -44,5 +44,7 @@
   (2019)](https://provetelab.org/comdynamite/articles/replication-leibold.md):
 - [Replicating Urban & De Meester
   (2009)](https://provetelab.org/comdynamite/articles/replication-urban.md):
+- [Replicating Hajian-Forooshani & Chase
+  (2026)](https://provetelab.org/comdynamite/articles/replication-disturbance.md):
 - [Known biogeographic histories for
   Herodotools](https://provetelab.org/comdynamite/articles/herodotools.md):

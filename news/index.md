@@ -2,6 +2,19 @@
 
 ## comdynamite (development version)
 
+- [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md):
+  pulse (or permanent) changes of the environment of some sites, for the
+  `env_time` of
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md),
+  so that disturbance acts on growth rates through the niche rather than
+  by removing individuals. New article “Replicating Hajian-Forooshani &
+  Chase (2026)” (`data-raw/replication_hajian2026.R`,
+  `data-raw/figures_hajian2026.R`): their pulse-disturbance model of
+  scale-dependent diversity change, from the code archived with the
+  article, compared setting by setting with their archived simulations
+  (`data-raw/compare_hajian2026.R`; correlations of 0.998-0.999), with
+  their Figs. 2-4 and a control without disturbance.
+
 - `n_boot` in
   [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md):
   a parametric bootstrap of the likelihood ratio against constant rates,
@@ -12,7 +25,7 @@
   partitions rarely has 19 distinct ones. `n_rand = 0` runs the
   bootstrap alone. `data-raw/s1_type1_shifts.R` gains `MODE=boot`.
 
-- New article “Nesting map” (`data-raw/figure_nesting_map.R`): six
+- New article “Nesting map” (`data-raw/figure_nesting_map.R`): seven
   published models mapped onto comdynamite, with the settings that
   approximate each, the mechanisms it lacks and the outcome of the
   replications; comdynamite is presented as a modular framework for

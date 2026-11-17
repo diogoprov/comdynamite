@@ -34,6 +34,7 @@ for a spatially explicit landscape.
 Other landscapes:
 [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md),
 [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md),
+[`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md),
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
 [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md),
 [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
