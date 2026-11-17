@@ -136,6 +136,18 @@
 #'   value or one per site). `initial` must fit in them; seeds take vacant microsites by lottery
 #'   with the residents. In the colonisation history, `immigrants` and the migrant load count
 #'   immigrant recruits, and `propagule` the individuals of a new population after recruitment.
+#' @param dispersal_time Optional change of emigration through time: a vector with one
+#'   multiplier of `dispersal` per step (probabilities above 1 are set to 1), or a matrix with
+#'   one row per step and one column, or one per species, of emigration probabilities. For
+#'   example, a dispersal pulse during floods or a breeding migration in some steps. `NULL`
+#'   (the default) keeps `dispersal` at every step.
+#' @param kernels,kernel_step Optional change of the routes of dispersal through time:
+#'   `kernels` is a list of dispersal matrices (sites x sites, e.g. from [dispersal_kernel()]
+#'   or the `dispersal` of other landscapes on the same sites; rows are rescaled to sum to 1
+#'   and the diagonal is ignored), and `kernel_step` gives, for each step, the index or name of
+#'   the matrix used. For example, a matrix of connected ponds for flood steps and one of
+#'   isolated ponds for dry steps. Only for spatially explicit landscapes; `NULL` (the
+#'   default) keeps the dispersal matrix of `landscape`.
 #' @param mortality With `recruitment = "lottery"`, the probability that an adult dies at each
 #'   step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
 #'   overlapping generations, with a generation time of about `1 / mortality` steps. With
@@ -208,7 +220,9 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    env = NULL, evolution = NULL, disturbance = 0,
                                    pool_from = NULL,
                                    recruitment = c("beverton_holt", "lottery"),
-                                   microsites = NULL, mortality = 1) {
+                                   microsites = NULL, mortality = 1,
+                                   dispersal_time = NULL, kernels = NULL,
+                                   kernel_step = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
   recruitment <- match.arg(recruitment)
@@ -283,11 +297,15 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      extirpation = extirpation, pool = pool, initial = initial,
                      immigration = immigration, evolution = evolution,
                      disturbance = disturbance, pool_from = pool_from,
-                     recruitment = recruitment, microsites = microsites, mortality = mortality)
+                     recruitment = recruitment, microsites = microsites, mortality = mortality,
+                     dispersal_time = dispersal_time, kernels = kernels,
+                     kernel_step = kernel_step)
   tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
-                        dispersal = dispersal, extirpation = extirpation,
+                        dispersal = dispersal, dispersal_time = dispersal_time,
+                        kernels = kernels, kernel_step = kernel_step,
+                        extirpation = extirpation,
                         disturbance = disturbance, pool = out$pool, tree = tree,
                         recruitment = recruitment,
                         microsites = if (recruitment == "lottery") microsites,
@@ -348,7 +366,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         initial = NULL, immigration = c("poisson", "multinomial"),
                         evolution = NULL, disturbance = 0, pool_from = NULL,
                         recruitment = c("beverton_holt", "lottery"), microsites = NULL,
-                        mortality = 1) {
+                        mortality = 1, dispersal_time = NULL, kernels = NULL,
+                        kernel_step = NULL) {
   # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
   # that simulate_evolving_metacommunity() can run the same steps and change species in between
   mc_setup(environment())
@@ -391,6 +410,12 @@ mc_setup <- function(st) {
     if (m == 1 && any(dispersal > 0)) {
       stop("dispersal needs at least two sites: use `dispersal = 0` with one site", call. = FALSE)
     }
+    # emigration probabilities at each step (steps x species), from `dispersal_time`
+    disp_prob_time <- dispersal_by_step(dispersal_time, dispersal, n_steps, k_all)
+    if (!is.null(disp_prob_time) && m == 1 && any(disp_prob_time > 0)) {
+      stop("dispersal needs at least two sites", call. = FALSE)
+    }
+    kernels <- kernels_by_step(kernels, kernel_step, n_steps, m, disp_matrix)
     sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
     species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
     if (!is.null(pool)) {
@@ -655,6 +680,8 @@ mc_step <- function(st, step) {
         # phenotype of the offspring, which develop in their site
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
       }
+      if (!is.null(disp_prob_time)) p_em <- rep(disp_prob_time[step, alive], each = m)
+      if (!is.null(kernels)) disp_matrix <- kernels[[kernel_step[step]]]
       if (is.null(pool_from)) {
         em <- em_to <- matrix(stats::rbinom(m * k, n, p_em), m, k)
         open_to <- NULL
@@ -956,6 +983,73 @@ lottery_draw <- function(pool, vacant) {
 }
 
 # immigrants when the emigrants of each species at each site go to the other sites
+# emigration probabilities at each step (steps x all species) from `dispersal_time`: a vector of
+# multipliers of `dispersal`, one per step, or a matrix of probabilities (steps x species);
+# NULL when the probabilities are constant
+dispersal_by_step <- function(dispersal_time, dispersal, n_steps, k) {
+  if (is.null(dispersal_time)) return(NULL)
+  if (is.matrix(dispersal_time)) {
+    if (nrow(dispersal_time) < n_steps || !ncol(dispersal_time) %in% c(1, k) ||
+        !is.numeric(dispersal_time) || anyNA(dispersal_time) || any(dispersal_time < 0) ||
+        any(dispersal_time > 1)) {
+      stop("a matrix `dispersal_time` needs emigration probabilities (0 to 1) with one row ",
+           "per step (", n_steps, ") and one column, or one per species (", k, ")",
+           call. = FALSE)
+    }
+    return(matrix(dispersal_time[seq_len(n_steps), ], n_steps, k))
+  }
+  if (!is.numeric(dispersal_time) || length(dispersal_time) < n_steps ||
+      anyNA(dispersal_time) || any(dispersal_time < 0) || any(!is.finite(dispersal_time))) {
+    stop("`dispersal_time` needs one multiplier of `dispersal` (0 or more) per step (",
+         n_steps, "), or a matrix of emigration probabilities", call. = FALSE)
+  }
+  pmin(outer(dispersal_time[seq_len(n_steps)], dispersal), 1)
+}
+
+# dispersal matrices to switch among, checked and made row-stochastic with a zero diagonal;
+# NULL when the matrix of the landscape holds at every step
+kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix) {
+  if (is.null(kernels) && is.null(kernel_step)) return(NULL)
+  if (is.null(kernels) || is.null(kernel_step)) {
+    stop("`kernels` and `kernel_step` go together", call. = FALSE)
+  }
+  if (is.null(disp_matrix)) {
+    stop("`kernels` needs a spatially explicit landscape", call. = FALSE)
+  }
+  if (is.matrix(kernels)) kernels <- list(kernels)
+  if (!is.list(kernels) || length(kernels) == 0) {
+    stop("`kernels` must be a list of dispersal matrices", call. = FALSE)
+  }
+  kernels <- lapply(kernels, function(x) {
+    if (inherits(x, "mc_landscape")) x <- x$dispersal
+    if (!is.matrix(x) || !is.numeric(x) || any(dim(x) != m) || anyNA(x) || any(x < 0)) {
+      stop("each of `kernels` must be a non-negative ", m, " x ", m, " matrix",
+           call. = FALSE)
+    }
+    x <- unname(x)
+    diag(x) <- 0
+    if (any(rowSums(x) <= 0)) {
+      stop("each site needs at least one destination in every matrix of `kernels`",
+           call. = FALSE)
+    }
+    x / rowSums(x)
+  })
+  if (is.character(kernel_step)) {
+    if (is.null(names(kernels)) || !all(kernel_step %in% names(kernels))) {
+      stop("a character `kernel_step` must hold names of `kernels`", call. = FALSE)
+    }
+  } else if (!is.numeric(kernel_step) || anyNA(kernel_step) ||
+             any(kernel_step != round(kernel_step)) || any(kernel_step < 1) ||
+             any(kernel_step > length(kernels))) {
+    stop("`kernel_step` must give, for each step, the index or name of one of `kernels`",
+         call. = FALSE)
+  }
+  if (length(kernel_step) < n_steps) {
+    stop("`kernel_step` needs one value per step (", n_steps, ")", call. = FALSE)
+  }
+  kernels
+}
+
 # multinomially, with the probabilities of the rows of `disp_matrix`
 place_emigrants <- function(em, disp_matrix, open_to = NULL) {
   m <- nrow(em)
