@@ -283,7 +283,8 @@ env_over_time <- function(env, n_steps, rho = 0.9, sd = 5) {
 #' @param env Environment of each site (a vector, e.g. the `env` of an `mc_landscape`), or a
 #'   matrix (sites x steps) with the environment at each step, e.g. from [env_over_time()].
 #' @param n_steps Number of time steps. Taken from `env` when it is a matrix.
-#' @param sites Disturbed sites: indices or a logical vector with one value per site.
+#' @param sites Disturbed sites: indices or a logical vector with one value per site. With no
+#'   site (e.g. `integer(0)`), `env` is returned unchanged, as an undisturbed control.
 #' @param start First disturbed step.
 #' @param duration Number of disturbed steps; `Inf` for a permanent change.
 #' @param value Environment of the disturbed sites: one value, or one per disturbed site.
@@ -320,7 +321,8 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
     sites <- which(sites)
   }
-  if (length(sites) == 0 || !all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
+  if (length(sites) == 0) return(out)
+  if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
     stop("`sites` must be distinct indices of sites", call. = FALSE)
   }
   check_count(start, "start")

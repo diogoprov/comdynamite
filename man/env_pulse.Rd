@@ -12,7 +12,8 @@ matrix (sites x steps) with the environment at each step, e.g. from \code{\link[
 
 \item{n_steps}{Number of time steps. Taken from \code{env} when it is a matrix.}
 
-\item{sites}{Disturbed sites: indices or a logical vector with one value per site.}
+\item{sites}{Disturbed sites: indices or a logical vector with one value per site. With no
+site (e.g. \code{integer(0)}), \code{env} is returned unchanged, as an undisturbed control.}
 
 \item{start}{First disturbed step.}
 

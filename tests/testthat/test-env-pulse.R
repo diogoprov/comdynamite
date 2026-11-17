@@ -30,8 +30,6 @@ test_that("env_pulse rejects wrong sites and steps", {
   expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, duration = 0.5, value = 0),
                "whole number")
   expect_error(env_pulse(c(1, 2), sites = 1, start = 1, value = 0), "n_steps")
-  expect_error(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
-               "indices")
   expect_error(env_pulse(c(1, 2), 5, sites = 1, start = 1, value = NA_real_), "value")
   expect_error(env_pulse(c(1, NA), 5, sites = 1, start = 1, value = 0), "NA")
 })
@@ -55,4 +53,11 @@ test_that("a pulse below every optimum empties disturbed sites, which are recolo
   richness <- apply(sim$history > 0, c(1, 3), sum)
   expect_true(all(richness[1:8, "step109"] < richness[1:8, "step59"]))
   expect_gt(mean(richness[1:8, "step160"]), mean(richness[1:8, "step109"]))
+})
+
+test_that("env_pulse without disturbed sites returns the environment unchanged", {
+  expect_equal(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = 0),
+               matrix(c(1, 2), 2, 5))
+  expect_equal(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
+               matrix(c(1, 2), 2, 5))
 })
