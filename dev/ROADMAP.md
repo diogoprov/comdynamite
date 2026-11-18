@@ -1,20 +1,19 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-17. Versão atual: 0.8.0 (DOI `10.5281/zenodo.24161612`), com
-`0.8.0.9000` em desenvolvimento (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0` e `v0.8.0`.
+Atualizado em 2026-11-18. Versão atual: 0.9.0 (DOI `10.5281/zenodo.24341231`), com
+`0.9.0.9000` em desenvolvimento (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`
+e `v0.9.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-17)
+## Próximos passos (2026-11-18)
 
-1. **v0.9.0 fechada em 2026-11-17** com o que já entrou (ver a seção do marco); os dois itens
-   abertos passaram para o bloco A (ver "Itens abertos e plano de implementação"). A release no GitHub gera DOI no Zenodo e espera confirmação.
-2. **Reescrever o preprint** para a 0.9.0. O texto atual descreve a 0.7.0 e diz que a
-   filogenia é só entrada, sem especiação, o que deixou de valer na 0.8.0. Entram: especiação
-   na metacomunidade, genética quantitativa em tempo ecológico, mapa de aninhamento com sete
-   modelos e as três replicações (Leibold et al. 2019, Urban & De Meester 2009,
-   Hajian-Forooshani & Chase 2026), com o enquadramento já decidido (framework modular,
-   Cabral, Valente & Hartig 2017; sem "übermodel", sem "o primeiro").
+1. **v0.9.0 publicada em 2026-11-18** (tag `v0.9.0`, release no GitHub, DOI
+   `10.5281/zenodo.24341231`); os dois itens abertos do marco passaram para o bloco A (ver
+   "Itens abertos e plano de implementação"), o próximo marco de código.
+2. **Preprint reescrito para a 0.9.0** (PR #112, em draft): versão anônima, title page e cover
+   letter prontas para o Journal of Biogeography (Methods and Tools, double blind). Falta o
+   usuário preencher os campos da carta e submeter.
 3. **DAMOCLES:** terminar a validação S3 com o ClaDS2 e escrever o plano do artigo
    (`dev/plano-artigo-damocles.md`); depois, o proxy de persistência por traits (ideia do
    Januário) com ATLANTIC AMPHIBIANS e TetrapodTraits.
