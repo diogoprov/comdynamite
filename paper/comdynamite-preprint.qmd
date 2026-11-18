@@ -23,15 +23,15 @@ date: last-modified
 abstract: |
   **Aim:** Metacommunity models usually treat niches as fixed, whereas models with evolving niches are either individual-based and built for one question or run over deep time on species rather than populations. I describe an engine in which the niche optimum evolves within every population of a metacommunity in ecological time, with speciation emerging from population divergence, and evaluate it against theory and published models.
 
-  **Location:** Simulated landscapes; applicable to any region.
+  **Location:** Simulated landscapes; any region.
 
   **Taxon:** Any taxon.
 
   **Methods:** The engine, in the R package comdynamite, extends the metacommunity model of Thompson et al. (2020) with the quantitative genetics of Lande (1976, 1979): population genetic means respond to local selection, drift, mix by gene flow and are sampled by founders. Species split by point mutation, fission, geographic isolation or ecological divergence, with protracted completion. I compared the engine with analytical expectations, replicated three published models after checking their text against their archived code, tested whether approximate Bayesian computation recovers genetic variance, and illustrated effects on ranges.
 
-  **Results:** The engine matched expected drift and migration–selection balance, the Ewens sampling formula and the signature of protracted speciation on reconstructed trees. It was indistinguishable from archived simulations of a disturbance experiment, and reproduced in part two individual-based models, whose outcomes depended on how genetic variance was generated and lost. The archived code of two published models departed from their text in ways that changed results. The genetic variance was recovered from abundances ($R^2$ = 0.66–0.75) and closely with species mean traits (0.94–0.95); the effective size required population trait means. Local adaptation placed a third of occupied sites outside the ancestral potential range.
+  **Results:** The engine matched expected drift and migration–selection balance, the Ewens sampling formula and the signature of protracted speciation on reconstructed trees. It was indistinguishable from archived simulations of a disturbance experiment, and partly reproduced two individual-based models whose outcomes hinged on how genetic variance was maintained. The archived code of two published models departed from their text in ways that changed results. The genetic variance was recovered from abundances ($R^2$ = 0.66–0.75) and closely with species mean traits (0.94–0.95); the effective size required population trait means. Local adaptation placed a third of occupied sites outside the ancestral potential range.
 
-  **Main conclusions:** A quantitative-genetic approximation makes eco-evolutionary metacommunities fast enough for replicated designs and simulation-based inference. It is one module of a modular framework, not a replacement for individual-based or deep-time models, and the replications show where it departs from them.
+  **Main conclusions:** A quantitative-genetic approximation makes eco-evolutionary metacommunities fast enough for replicated designs and simulation-based inference. It is one module of a modular framework, complementing individual-based and deep-time models, and the replications show where it departs from them.
 keywords: [eco-evolutionary dynamics, gene flow, local adaptation, metacommunity, protracted speciation, quantitative genetics, R package, simulation]
 bibliography: references.bib
 csl: ecology.csl
@@ -67,7 +67,7 @@ Between these traditions lies a gap: a model in which populations of many specie
 
 Here, I describe the eco-evolutionary engine of comdynamite, an R package for simulating and analysing metacommunities with traits, phylogenies and biogeography. I first describe the model: the population dynamics it inherits from @Thompson_2020, the quantitative genetics within populations, speciation, and the temporal structure of environment and dispersal. I then evaluate the engine in three ways: (i) against analytical expectations and reference models, (ii) by replicating three published models whose results depend on adaptation or disturbance, reporting where it departs from them and where the archived code of those models departs from their text, and (iii) by asking whether the genetic variance can be recovered by approximate Bayesian computation from data that a field study could collect. Finally, I illustrate how local adaptation changes range limits and potential ranges, two quantities of direct interest to biogeography. Throughout, the aim is not to replace individual-based or deep-time models, but to provide a module in ecological time that can be compared with them [@cabral2017mechanistic].
 
-# Materials and methods
+# Materials and Methods
 
 ## Population dynamics
 
@@ -205,25 +205,25 @@ The engine has limitations that users should know. First, phenotypes are Gaussia
 
 In summary, a quantitative-genetic approximation makes it feasible to simulate eco-evolutionary metacommunities with speciation in ecological time, to check them against theory, and to compare them with published models whose genetics is richer. The package is open source, and its replications, with their departures, are documented so that users can judge when the approximation is adequate for their questions.
 
-# Data availability statement
-
-comdynamite is written in R [@rcoreteam2026r] and distributed under the MIT license. It imports only ape [@paradis2019ape] and base packages; every other dependency is optional. The package exports 121 functions, covered by 548 unit-test blocks that run on macOS, Windows and Linux at every change. The source code is at <https://github.com/diogoprov/comdynamite>, binaries are built by r-universe (`install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev", "https://cloud.r-project.org"))`), and the documentation, articles and function reference, including the replications and the nesting map, are at <https://provetelab.org/comdynamite/>. Each release is archived on Zenodo under the concept DOI <https://doi.org/10.5281/zenodo.23993533> [@Provete_2026]; this article describes version 0.9.0 (<https://doi.org/10.5281/zenodo.24341231>). The scripts that produced every result and figure are in the `data-raw/` and `paper/` folders of the repository.
-
-# Funding
+# Acknowledgements {.unnumbered}
 
 This study was supported by the Fundação de Apoio ao Desenvolvimento do Ensino, Ciência e Tecnologia do Estado de Mato Grosso do Sul (FUNDECT; grant 83/027.032/2024) and financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior – Brasil (CAPES) – Finance Code 001.
 
-# Use of generative AI
+# Author Contributions {.unnumbered}
 
-I report the use of generative AI following the AIdIT framework [@drobniak2026aidit]. I used the following AI engine in the present study: Claude Opus (Anthropic), via Claude Code (v. claude-opus-5-5; timestamps: 2026-11-05 to 2026-11-18). Area(s) of generative AI usage: new code generation, code generation for visuals, data analysis, identification of literature to cite, text generation based on prompts, bibliography management, text editing for style/grammar/spelling. I declare that I have verified and approved all content generated or modified by the AI tools used. The use of AI in this paper was in compliance with the ethical regulations of all funders and host institutions. Representative prompts used in AI content generation are available upon request. The AI engine wrote the R code of the package, its tests, documentation and validation scripts under my direction, following the models I chose and the decisions I made on how departures from published models should be investigated; the commits made with the AI engine are identified as such in the history of the repository. The AI engine also drafted the manuscript from the documentation and saved results of the package, and searched for references, each of which was checked against Crossref metadata before inclusion.
+D.B.P. conceived the study, designed the engine and the validation, directed the implementation and the analyses, and wrote the manuscript.
 
-# Conflict of interest
+# Conflict of Interest {.unnumbered}
 
 The author declares no conflict of interest.
 
-# Biosketch
+# Data Availability Statement {.unnumbered}
 
-Diogo B. Provete is an ecologist interested in amphibian ecology, macroecology and metacommunity ecology, and in numerical tools that link community assembly to evolutionary history.
+comdynamite is written in R [@rcoreteam2026r] and distributed under the MIT license. It imports only ape [@paradis2019ape] and base packages; every other dependency is optional. The package exports 121 functions, covered by 548 unit-test blocks that run on macOS, Windows and Linux at every change. The source code is at <https://github.com/diogoprov/comdynamite>, binaries are built by r-universe (`install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev", "https://cloud.r-project.org"))`), and the documentation, articles and function reference, including the replications and the nesting map, are at <https://provetelab.org/comdynamite/>. Each release is archived on Zenodo under the concept DOI <https://doi.org/10.5281/zenodo.23993533> [@Provete_2026]; this article describes version 0.9.0 (<https://doi.org/10.5281/zenodo.24341231>). The scripts that produced every result and figure are in the `data-raw/` and `paper/` folders of the repository.
+
+# Use of Generative AI {.unnumbered}
+
+I report the use of generative AI following the AIdIT framework [@drobniak2026aidit]. I used the following AI engine in the present study: Claude Opus (Anthropic), via Claude Code (v. claude-opus-5-5; timestamps: 2026-11-05 to 2026-11-18). Area(s) of generative AI usage: new code generation, code generation for visuals, data analysis, identification of literature to cite, text generation based on prompts, bibliography management, text editing for style/grammar/spelling. I declare that I have verified and approved all content generated or modified by the AI tools used. The use of AI in this paper was in compliance with the ethical regulations of all funders and host institutions. Representative prompts used in AI content generation are available upon request. The AI engine wrote the R code of the package, its tests, documentation and validation scripts under my direction, following the models I chose and the decisions I made on how departures from published models should be investigated; the commits made with the AI engine are identified as such in the history of the repository. The AI engine also drafted the manuscript from the documentation and saved results of the package, and searched for references, each of which was checked against Crossref metadata before inclusion.
 
 # References {.unnumbered}
 
