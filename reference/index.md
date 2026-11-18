@@ -60,7 +60,7 @@ Spatially implicit and grid landscapes, dispersal and environment.
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
   : Spatially explicit landscape on a square grid
 - [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md)
-  : Exponential dispersal kernel
+  : Dispersal kernel
 - [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md)
   : Environment that changes over time
 - [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md)

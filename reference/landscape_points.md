@@ -9,7 +9,13 @@ probabilities from
 ## Usage
 
 ``` r
-landscape_points(coords, env, disp_scale, lonlat = FALSE)
+landscape_points(
+  coords,
+  env,
+  disp_scale,
+  lonlat = FALSE,
+  disp_shape = c("exponential", "gaussian")
+)
 ```
 
 ## Arguments
@@ -26,14 +32,20 @@ landscape_points(coords, env, disp_scale, lonlat = FALSE)
 
 - disp_scale:
 
-  Scale of the exponential dispersal kernel, in the units of the
-  distances (kilometres with `lonlat = TRUE`).
+  Scale of the dispersal kernel, in the units of the distances
+  (kilometres with `lonlat = TRUE`).
 
 - lonlat:
 
   Are the coordinates longitude and latitude? Distances are then
   great-circle distances in kilometres, with a spherical Earth of radius
   6371 km; otherwise Euclidean.
+
+- disp_shape:
+
+  Shape of the dispersal kernel, `"exponential"` (the default) or
+  `"gaussian"`; see
+  [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md).
 
 ## Value
 

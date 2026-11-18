@@ -14,7 +14,15 @@ favoured, and `duration = Inf` makes the change permanent.
 ## Usage
 
 ``` r
-env_pulse(env, n_steps = NULL, sites, start, duration = Inf, value)
+env_pulse(
+  env,
+  n_steps = NULL,
+  sites,
+  start,
+  duration = Inf,
+  value,
+  every = NULL
+)
 ```
 
 ## Arguments
@@ -42,12 +50,19 @@ env_pulse(env, n_steps = NULL, sites, start, duration = Inf, value)
 
 - duration:
 
-  Number of disturbed steps; `Inf` for a permanent change.
+  Number of disturbed steps of each pulse; `Inf` for a permanent change.
 
 - value:
 
   Environment of the disturbed sites: one value, or one per disturbed
   site.
+
+- every:
+
+  Optional period of recurrent pulses: a new pulse starts every `every`
+  steps after `start` until the last step, so that the frequency of
+  disturbance is `1 / every`. `NULL` (the default) for a single pulse.
+  Needs a finite `duration` shorter than `every`.
 
 ## Value
 
@@ -79,4 +94,10 @@ set.seed(1)
 env <- runif(6, 0.5, 1)
 e <- env_pulse(env, n_steps = 30, sites = 1:3, start = 10, duration = 10, value = 0.1)
 matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
+
+# recurrent pulses of 3 steps every 10 steps
+e <- env_pulse(env, n_steps = 60, sites = 1:3, start = 5, duration = 3, value = 0.1,
+               every = 10)
+which(e[1, ] == 0.1)
+#>  [1]  5  6  7 15 16 17 25 26 27 35 36 37 45 46 47 55 56 57
 ```

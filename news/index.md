@@ -2,6 +2,22 @@
 
 ## comdynamite (development version)
 
+- `shape = "gaussian"` in
+  [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md)
+  and `disp_shape` in
+  [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
+  and
+  [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md):
+  a Gaussian kernel, with a thinner tail than the exponential one (the
+  default, unchanged). Kernel weights are now computed on the log scale,
+  so that sites far apart relative to `scale` no longer underflow to
+  zero.
+
+- `every` in
+  [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md):
+  recurrent pulses, one every `every` steps, so that both the duration
+  and the frequency of disturbance can be set.
+
 - [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md):
   pulse (or permanent) changes of the environment of some sites, for the
   `env_time` of

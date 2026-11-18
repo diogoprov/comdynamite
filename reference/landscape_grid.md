@@ -16,7 +16,8 @@ landscape_grid(
   env_bandwidth = 2,
   disp_scale = 2,
   torus = TRUE,
-  env_range = c(0, 100)
+  env_range = c(0, 100),
+  disp_shape = c("exponential", "gaussian")
 )
 ```
 
@@ -33,7 +34,7 @@ landscape_grid(
 
 - disp_scale:
 
-  Scale (in cells) of the exponential dispersal kernel.
+  Scale (in cells) of the dispersal kernel.
 
 - torus:
 
@@ -42,6 +43,12 @@ landscape_grid(
 - env_range:
 
   Range of the uniform marginal distribution of the environment.
+
+- disp_shape:
+
+  Shape of the dispersal kernel, `"exponential"` (the default) or
+  `"gaussian"`; see
+  [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md).
 
 ## Value
 

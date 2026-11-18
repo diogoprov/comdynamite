@@ -87,7 +87,8 @@ probabilities from <code><a href="dispersal_kernel.html">dispersal_kernel()</a><
 <span>  env_bandwidth <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  disp_scale <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  torus <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  env_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span></span>
+<span>  env_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span>
+<span>  disp_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exponential"</span>, <span class="st">"gaussian"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -105,7 +106,7 @@ smooths the environment. Larger values give smoother gradients.</p></dd>
 
 
 <dt id="arg-disp-scale">disp_scale<a class="anchor" aria-label="anchor" href="#arg-disp-scale"></a></dt>
-<dd><p>Scale (in cells) of the exponential dispersal kernel.</p></dd>
+<dd><p>Scale (in cells) of the dispersal kernel.</p></dd>
 
 
 <dt id="arg-torus">torus<a class="anchor" aria-label="anchor" href="#arg-torus"></a></dt>
@@ -115,6 +116,11 @@ smooths the environment. Larger values give smoother gradients.</p></dd>
 <dt id="arg-env-range">env_range<a class="anchor" aria-label="anchor" href="#arg-env-range"></a></dt>
 <dd><p>Range of the uniform marginal distribution of the
 environment.</p></dd>
+
+
+<dt id="arg-disp-shape">disp_shape<a class="anchor" aria-label="anchor" href="#arg-disp-shape"></a></dt>
+<dd><p>Shape of the dispersal kernel, <code>"exponential"</code> (the default) or
+<code>"gaussian"</code>; see <code><a href="dispersal_kernel.html">dispersal_kernel()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
