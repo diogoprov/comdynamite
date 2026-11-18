@@ -8,7 +8,7 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 ## Próximos passos (2026-11-17)
 
 1. **v0.9.0 fechada em 2026-11-17** com o que já entrou (ver a seção do marco); os dois itens
-   abertos passaram para depois. A release no GitHub gera DOI no Zenodo e espera confirmação.
+   abertos passaram para o bloco A (ver "Itens abertos e plano de implementação"). A release no GitHub gera DOI no Zenodo e espera confirmação.
 2. **Reescrever o preprint** para a 0.9.0. O texto atual descreve a 0.7.0 e diz que a
    filogenia é só entrada, sem especiação, o que deixou de valer na 0.8.0. Entram: especiação
    na metacomunidade, genética quantitativa em tempo ecológico, mapa de aninhamento com sete
@@ -32,6 +32,99 @@ identificabilidade (`data-raw/seasonal_pilot/`) mostrou que dados mensais de uma
 13 poças mal separam os modelos de comunidade; issue fechada como "not planned" em 2026-11-17.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
+
+## Itens abertos e plano de implementação (levantamento de 2026-11-17)
+
+Levantamento de todos os itens abertos do roadmap: as caixas não marcadas e os "Falta:" que
+ficaram dentro de itens marcados como feitos, sobretudo na v0.7.0. Conferido contra o código
+na `main` (f3aab10). As fases 1 a 3 da especiação e a G multivariada estavam com a caixa
+aberta, mas foram feitas (0.8.0); foram marcadas. Os rótulos dos blocos não são números de
+versão: o número sai quando o bloco fecha.
+
+**Bloco A, nulos e ambiente (próximo marco de código, candidato a 0.10.0).** Itens pequenos,
+dentro do pacote, que melhoram o núcleo antes de congelar a API.
+
+1. *Nulos restritos com bordas para preditores contínuos e para o simulador.* Hoje o toro numa
+   grade com bordas rejeita 6% a 25% sem relação real em `pcps_test()`, e
+   `patch_permutations()` cobre só eventos (áreas). Plano: (i) estudo em
+   `data-raw/validation_continuous_nulls.R` com preditores contínuos autocorrelados em grade
+   com bordas, paisagem irregular (`landscape_points()`) e região em L, comparando toro,
+   `rigid_permutations()`, redes de Moran (MSR, `adespatial::msr()`, em `Suggests`) e a
+   Constant Moran permutation (Arthur 2024; referência não verificada, conferir antes de
+   citar); (ii) implementar só o que ficar dentro de 0,04 a 0,06 de rejeição, como opção
+   `null = ` em `pcps_test()`, `node_test()` e `phylo_beta_test()`; (iii) para o simulador,
+   uma função que gere ambientes nulos com a mesma autocorrelação (substitutos espectrais ou
+   MSR) para testar se um padrão simulado depende do ambiente. Pendências antigas que entram
+   aqui: blocos aleatórios fora de grade liberais (acima de 0,07) e eventos grandes em grade
+   com jitter lentos (v0.6.0), e aplicar os nulos com borda a dados reais (v0.5.2).
+2. *Gerador de ambiente temporal fiel ao de Thompson et al. (2020).* `env_over_time()` é um
+   AR(1) independente por sítio, sem estrutura espacial no tempo. Plano: (i) ler como o
+   ambiente é gerado no código Julia dos autores e em `mcomsimr::env_generate()` (estrutura
+   espacial, autocorrelação temporal, conversão em postos, que a seção de erros do artigo já
+   registra) antes de escrever qualquer coisa; (ii) `env_thompson()` (nome provisório) que
+   devolva a matriz sítio × passo aceita por `env_time`, com semente reprodutível e sem
+   `RandomFields` (fora do CRAN), por exemplo campo Gaussiano por decomposição espectral;
+   (iii) validação contra o mcomsimr com o ambiente mudando no tempo, que é o "Falta um
+   ambiente que mude no tempo" da comparação da v0.2.0, com os mesmos testes KS das 80
+   comparações; (iv) usar o gerador na vignette de validação no lugar do ambiente constante.
+3. *Competição a partir da distância entre traits*: `competition_matrix(type = "trait")`, com
+   o mesmo núcleo de sobreposição de nicho que o motor evolutivo já usa (v0.7.0, "Falta").
+4. *Nicho com correlação entre eixos* (matriz de largura por espécie) em `growth_rates()`, e
+   paisagens que gerem vários eixos ambientais de uma vez em `landscape_grid()` (v0.7.0).
+5. *Dispersão variável no tempo no motor evolutivo*: `dispersal_time`, `kernels` e
+   `kernel_step` com `evolution`, hoje recusados (artigo "Dispersal and disturbance through
+   time").
+6. *Saída de "tempo desde a mudança"* no motor evolutivo, a única sugestão do ECY25-0086 feita
+   só em parte.
+
+Ordem sugerida: 2, 1, 3, 5, 4, 6. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
+estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
+
+**Bloco B, especiação: comparação e experimentos.** Fase 4 (gen3sis, GPL, e MESS, sem
+licença, só em `data-raw`, com medida de custo) e Fase 5 (persistência contra especiação nas
+pontas com verdade conhecida; neutralidade regional contra taxas por ramo). Decisões
+pendentes: nome final (recomendado manter `simulate_evolving_metacommunity()`; o nome
+provisório `simulate_diversification()` não foi exportado) e o mapa de aninhamento como
+artigo. Depois da Fase 4, o preprint pode ganhar a comparação.
+
+**Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
+o primeiro: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
+(v0.3.0); (ii) PPC com modelo mal especificado de fato: filtro urbano conservado na filogenia
+nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`;
+(iii) colonização limitada a partir do pool regional; (iv) validação cruzada por blocos numa
+paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção
+imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de
+download do GBIF para os pools de `anurans` (exige a conta do usuário).
+
+**Bloco D, indivíduos e traits (ponte Leibold–Januario).** (i) vários traits por indivíduo e
+traits de indivíduos que afetem a dinâmica (hoje são sorteados depois); (ii) cruzar com
+dispersão e extinção de manchas (cenário 9); (iii) nulo de T_PC.PR levemente liberal na cauda
+inferior (0,068 contra 0,04): sortear médias de população com o denominador observado;
+(iv) `food_web_rates()` com várias espécies por nível; (v) cenário 8 de `history_rates()`
+(mudanças de taxa por Poisson em eventos de reembaralhamento); (vi) `alpha` matricial no OU,
+como `mvOU()`, e taxas por ramo vezes uma matriz.
+
+**Bloco E, DAMOCLES.** Segue o plano do artigo (`dev/plano-artigo-damocles.md`): S3 com o
+ClaDS2 em andamento. Variantes ainda não feitas: colonização dependente do tempo (`gamma_td`),
+modelos com traits discretos (`model = 1, 2` do pacote), amostragem incompleta do pool, taxas
+por época, ligação com a saída de `simulate_metacommunity()`. A suspeita de que o teste contra
+partições aleatórias fosse liberal foi resolvida no S1 (calibrado com o qui-quadrado e o
+bootstrap; a partição ficou só como diagnóstico).
+
+**Bloco F, fluxo biogeográfico de Benício et al. (2021).** É a lista da antiga seção v0.8.0,
+que saiu com outro conteúdo (eco-evolução). Já há partes: `observe_detection()` (detecção
+imperfeita), `region_pool()`, `arrival_ages()` e `as_herodotools()`. Faltam: árvore e regiões
+geradas juntas (GeoSSE), filtragem por traits discretos na comunidade, duas regiões com pools
+próprios, e a camada de análise (iNEXT, Rao nos nós, GeoHiSSE, FiSSE e ES-sim, LTT por região,
+DEC, MPD e MNTD em três extensões, clima e topografia, RPANDA, ClaSSE, SBEARS), tudo pelos
+pacotes de referência em `Suggests`. Sobrepõe-se ao artigo do DAMOCLES e à ideia do Januário
+(persistência por traits); decidir o escopo depois do S3.
+
+**Bloco G, validação do `pcps.curve()`.** Estudo em `data-raw/validation_pcps_curve.R`, como
+descrito na seção de métodos; só entra no pacote se tiver poder.
+
+**v1.0.0 (CRAN).** Depois do bloco A e da Fase 4, que são os que ainda mexem na API. Os blocos
+C a G são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas.
 
 ## Visão
 
@@ -968,28 +1061,28 @@ as fases, em `dev/plano-especiacao.md`.
       migração–seleção. Neutralidade regional reproduzida qualitativamente em
       `data-raw/evolution_leibold.R`: só com extirpação, dispersão baixa e adaptação rápida
       (sorting de 0,99 para 0,04 com G = 50, contra 0,90 no controle sem resposta).
-- [ ] Fase 2a (feita em 2026-11-12): `simulate_evolving_metacommunity()`, `speciation_control()`
+- [x] Fase 2a (feita em 2026-11-12): `simulate_evolving_metacommunity()`, `speciation_control()`
       (`"geographic"` com regras de clusters e gradual; `"ecological"`), árvore completa e
       reconstruída, extinção global, `as_metacommunity()`; validação 3 sem apoio (ρ ≈ 0).
       Revisada antes da 2b: brotamento, ligação por taxa de migração com persistência
       (`migration_min`, `reset_generations`), modo ecológico com persistência e fluxo reduzido
       (`min_generations`, `migration_max`) e competição pela sobreposição de nicho.
-- [ ] Fase 2b (em 2026-11-12): `"point"`, `"fission"` (partição espacial ou aleatória),
+- [x] Fase 2b (feita em 2026-11-12): `"point"`, `"fission"` (partição espacial ou aleatória),
       `jump_var`, conclusão prolongada (fixa ou exponencial) com agrupamento das linhagens em
       espécies boas; validações 1 (Ewens) e 2 (γ e PBD).
-- [ ] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
+- [x] Fase 2: divergência entre populações e especiação (iniciação por `"point"`,
       `"fission"`, `"geographic"` ou `"ecological"`, seguindo os quadros de Hubert et al.
       2015, e uma camada de conclusão prolongada como no PBD), com registro filogenético
       (árvore completa e reconstruída, tempos de iniciação e de conclusão) e extinção global;
       validação no limite neutro, contra o PBD e contra Desjardins-Proulx & Gravel (2012a).
-- [ ] Fase 3a (em 2026-11-12): séries por linhagem, `persistence()` (ε e τ de Januario et al.
+- [x] Fase 3a (feita em 2026-11-12): séries por linhagem, `persistence()` (ε e τ de Januario et al.
       2025), `sample_individuals(source = "evolution")` para as estatísticas T e
       `landscape_matrix()` (kernel por matriz, para os dados do Marcos).
-- [ ] Fase 3b (em 2026-11-12): registro das mudanças de presença (`ranges`) e
+- [x] Fase 3b (feita em 2026-11-12): registro das mudanças de presença (`ranges`) e
       `range_history()`, simmap com estado = combinação de áreas ocupadas, na árvore completa
       ou reconstruída; `as_herodotools()`, `region_pool()` e `arrival_ages()` com áreas
       combinadas; `history_rates(overlap = TRUE)` na simpatria.
-- [ ] Bloco próprio, depois da Fase 3: G multivariada (vários traits com covariância
+- [x] Bloco próprio, depois da Fase 3: G multivariada (vários traits com covariância
       genética, B ∝ W), pedida para simular os dados do Marcos (ECY25-0086; decidido em
       2026-11-12).
   - [x] Parte 1 (sem especiação): um trait por eixo de nicho, G e E como matrizes em
@@ -1063,11 +1156,13 @@ as fases, em `dev/plano-especiacao.md`.
       neutralidade regional contra taxas por ramo) e artigo.
 - [x] Interface: função nova (decidido em 2026-11-08), com `as_metacommunity()` para os
       métodos atuais; nome provisório `simulate_diversification()`.
-- [ ] Decidir: nome final, modos da primeira versão e número da versão.
-- [ ] Avaliar as oito sugestões do ECY25-0086 para a Fase 1 (deriva explícita, G
+- [ ] Decidir o nome final. Modos e número de versão já saíram (0.8.0, quatro modos).
+      Recomendado em 2026-11-17: manter `simulate_evolving_metacommunity()`.
+- [x] Avaliar as oito sugestões do ECY25-0086 para a Fase 1 (deriva explícita, G
       multivariada, plasticidade separada da genética, fundador mecanístico, ótimo variável no
-      tempo, passos por geração, amostragem alocrônica e testes analíticos), registradas em
-      `dev/plano-especiacao.md` em 2026-11-11 e ainda não aprovadas.
+      tempo, passos por geração, amostragem alocrônica e testes analíticos). Conferido em
+      2026-11-17: sete feitas; a 5 (ótimo variável no tempo) está feita sem a saída de
+      "tempo desde a mudança", que foi para o bloco A.
 
 **Concluído quando:** as fases 1 a 4 tiverem testes, validação em `data-raw` e uma vignette.
 
