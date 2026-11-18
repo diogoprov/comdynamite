@@ -33,9 +33,9 @@ I evaluated the engine against analytical expectations and by replicating three 
 
 The manuscript fits the scope of Methods and Tools, since it presents a new method, applies it to biogeographic data and discusses its potential for the field. It also complements tools recently published in the journal, such as Herodotools (Nakamura et al., 2023), whose ancestral ranges and tip-based metrics can now be evaluated on phylogenies that emerged from metacommunity dynamics, through a function that exports the simulated histories to that package. The package is open source (MIT licence), tested on three operating systems, and every result and figure can be reproduced from the scripts in its repository.
 
-The abstract has 291 words and the main text 5,696 words (5,987 together), with four figures and two tables. Following the double-blind policy of the journal, the title page is supplied as a separate file and the manuscript has been anonymised, with the links to the code and data given only on the title page. The use of generative AI is reported in the manuscript following the AIdIT framework. The empirical data come from the CESTES database and are used under its open licence.
+The abstract has 238 words and the main text 5,638 words (5,876 together), with four figures and two tables. Following the double-blind policy of the journal, the title page is supplied as a separate file and the manuscript has been anonymised, with the code given through an anonymised repository. The use of generative AI is reported in the manuscript following the AIdIT framework. The empirical data come from the CESTES database and are used under its open licence.
 
-This manuscript has not been published and is not under consideration elsewhere. [PREPRINT: state whether a preprint has been posted, with its DOI.] I declare no conflict of interest.
+This manuscript has not been published and is not under consideration elsewhere. [PREPRINT: state whether a preprint has been posted, with its DOI.] I declare that I am a Senior Author and a Full-time Editor at Wiley; I have no other conflict of interest.
 
 [OPTIONAL: suggested and opposed reviewers.]
 

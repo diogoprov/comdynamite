@@ -44,6 +44,8 @@ format:
 
 {{< include _statements.qmd >}}
 
+{{< include _data.qmd >}}
+
 {{< include _ai.qmd >}}
 
 # References {.unnumbered}
