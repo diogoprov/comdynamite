@@ -32,10 +32,12 @@ landscape_implicit <- function(n_sites, env_range = c(0, 100)) {
 #' @param side Number of cells per side.
 #' @param env_bandwidth Bandwidth (in cells) of the Gaussian kernel that
 #'   smooths the environment. Larger values give smoother gradients.
-#' @param disp_scale Scale (in cells) of the exponential dispersal kernel.
+#' @param disp_scale Scale (in cells) of the dispersal kernel.
 #' @param torus Wrap the grid as a torus?
 #' @param env_range Range of the uniform marginal distribution of the
 #'   environment.
+#' @param disp_shape Shape of the dispersal kernel, `"exponential"` (the default) or
+#'   `"gaussian"`; see [dispersal_kernel()].
 #' @return An `mc_landscape` object: a list with `env`, `coords` (data frame
 #'   with columns `x` and `y`), `dist` (distances among sites, toroidal if
 #'   `torus = TRUE`) and `dispersal` (row-stochastic matrix with a zero
@@ -49,7 +51,9 @@ landscape_implicit <- function(n_sites, env_range = c(0, 100)) {
 #' image(matrix(ls$env, 8, 8), asp = 1)
 #' @export
 landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
-                           torus = TRUE, env_range = c(0, 100)) {
+                           torus = TRUE, env_range = c(0, 100),
+                           disp_shape = c("exponential", "gaussian")) {
+  disp_shape <- match.arg(disp_shape)
   stopifnot(side >= 2, env_bandwidth > 0, disp_scale > 0)
   xy <- expand.grid(x = seq_len(side) - 1, y = seq_len(side) - 1)
   dx <- abs(outer(xy$x, xy$x, "-"))
@@ -62,7 +66,7 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
   z <- drop(exp(-d^2 / (2 * env_bandwidth^2)) %*% stats::rnorm(side^2))
   env <- rank_to_marginal(z, stats::runif(side^2, env_range[1], env_range[2]))
   new_landscape(env = unname(env), coords = xy, dist = d,
-                dispersal = dispersal_kernel(d, disp_scale), torus = torus)
+                dispersal = dispersal_kernel(d, disp_scale, disp_shape), torus = torus)
 }
 
 #' Landscape from site coordinates
@@ -74,8 +78,10 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
 #' @param coords Matrix or data frame with one row per site and two columns of coordinates.
 #'   With `lonlat = TRUE`, longitude and latitude in decimal degrees.
 #' @param env Numeric vector with the environment of each site.
-#' @param disp_scale Scale of the exponential dispersal kernel, in the units of the distances
+#' @param disp_scale Scale of the dispersal kernel, in the units of the distances
 #'   (kilometres with `lonlat = TRUE`).
+#' @param disp_shape Shape of the dispersal kernel, `"exponential"` (the default) or
+#'   `"gaussian"`; see [dispersal_kernel()].
 #' @param lonlat Are the coordinates longitude and latitude? Distances are then great-circle
 #'   distances in kilometres, with a spherical Earth of radius 6371 km; otherwise Euclidean.
 #' @return An `mc_landscape` object, as from [landscape_grid()], without a torus.
@@ -85,7 +91,9 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
 #' ls <- landscape_points(xy, env = c(10, 20, 80), disp_scale = 50, lonlat = TRUE)
 #' round(ls$dist)
 #' @export
-landscape_points <- function(coords, env, disp_scale, lonlat = FALSE) {
+landscape_points <- function(coords, env, disp_scale, lonlat = FALSE,
+                             disp_shape = c("exponential", "gaussian")) {
+  disp_shape <- match.arg(disp_shape)
   coords <- as.matrix(coords)
   stopifnot(is.numeric(coords), ncol(coords) == 2, nrow(coords) >= 2, all(is.finite(coords)),
             is.numeric(env), length(env) == nrow(coords), all(is.finite(env)),
@@ -105,7 +113,7 @@ landscape_points <- function(coords, env, disp_scale, lonlat = FALSE) {
   coords <- as.data.frame(coords)
   rownames(coords) <- NULL
   out <- new_landscape(env = unname(env), coords = coords, dist = d,
-                       dispersal = dispersal_kernel(d, disp_scale), torus = FALSE)
+                       dispersal = dispersal_kernel(d, disp_scale, disp_shape), torus = FALSE)
   out$points <- TRUE
   out
 }
@@ -165,25 +173,37 @@ landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
   out
 }
 
-#' Exponential dispersal kernel
+#' Dispersal kernel
 #'
-#' The probability that an emigrant from site s reaches site t is proportional
-#' to exp(-d / `scale`), where d is the distance between the sites. Emigrants
-#' do not stay at their own site.
+#' The probability that an emigrant from site s reaches site t is proportional to
+#' exp(-d / `scale`) for the exponential kernel or exp(-d^2 / (2 `scale`^2)) for the Gaussian
+#' one, where d is the distance between the sites. Emigrants do not stay at their own site:
+#' the share that stays is set by the emigration probability (`dispersal` in
+#' [simulate_metacommunity()]). For the same `scale`, the Gaussian kernel sends emigrants to
+#' near sites more often and to far sites much less often (a thin tail), whereas the
+#' exponential kernel keeps more long-distance dispersal. Any other kernel can be passed as a
+#' matrix to [landscape_matrix()].
 #'
 #' @param dist Square matrix of distances among sites.
-#' @param scale Scale of the kernel, in the units of `dist`.
+#' @param scale Scale of the kernel, in the units of `dist`: the mean distance of the
+#'   exponential kernel and the standard deviation of the Gaussian one.
+#' @param shape `"exponential"` (the default) or `"gaussian"`.
 #' @return Row-stochastic matrix with a zero diagonal: row s gives the
 #'   probabilities that an emigrant from site s reaches each site.
 #' @family landscapes
 #' @examples
 #' d <- as.matrix(dist(cbind(1:5, 0)))
 #' round(dispersal_kernel(d, scale = 1), 2)
+#' round(dispersal_kernel(d, scale = 1, shape = "gaussian"), 2)
 #' @export
-dispersal_kernel <- function(dist, scale) {
-  stopifnot(is.matrix(dist), nrow(dist) == ncol(dist), scale > 0)
-  k <- exp(-dist / scale)
-  diag(k) <- 0
+dispersal_kernel <- function(dist, scale, shape = c("exponential", "gaussian")) {
+  shape <- match.arg(shape)
+  stopifnot(is.matrix(dist), nrow(dist) == ncol(dist), nrow(dist) >= 2,
+            length(scale) == 1, is.finite(scale), scale > 0)
+  # log weights, shifted by the row maximum so that far sites do not underflow to zero
+  w <- if (shape == "exponential") -dist / scale else -dist^2 / (2 * scale^2)
+  diag(w) <- -Inf
+  k <- exp(w - apply(w, 1, max))
   k / rowSums(k)
 }
 
@@ -286,7 +306,10 @@ env_over_time <- function(env, n_steps, rho = 0.9, sd = 5) {
 #' @param sites Disturbed sites: indices or a logical vector with one value per site. With no
 #'   site (e.g. `integer(0)`), `env` is returned unchanged, as an undisturbed control.
 #' @param start First disturbed step.
-#' @param duration Number of disturbed steps; `Inf` for a permanent change.
+#' @param duration Number of disturbed steps of each pulse; `Inf` for a permanent change.
+#' @param every Optional period of recurrent pulses: a new pulse starts every `every` steps
+#'   after `start` until the last step, so that the frequency of disturbance is `1 / every`.
+#'   `NULL` (the default) for a single pulse. Needs a finite `duration` shorter than `every`.
 #' @param value Environment of the disturbed sites: one value, or one per disturbed site.
 #' @return Matrix with one row per site and one column per time step, for the `env_time`
 #'   argument of [simulate_metacommunity()].
@@ -299,8 +322,13 @@ env_over_time <- function(env, n_steps, rho = 0.9, sd = 5) {
 #' env <- runif(6, 0.5, 1)
 #' e <- env_pulse(env, n_steps = 30, sites = 1:3, start = 10, duration = 10, value = 0.1)
 #' matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
+#' # recurrent pulses of 3 steps every 10 steps
+#' e <- env_pulse(env, n_steps = 60, sites = 1:3, start = 5, duration = 3, value = 0.1,
+#'                every = 10)
+#' which(e[1, ] == 0.1)
 #' @export
-env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) {
+env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value,
+                      every = NULL) {
   if (is.matrix(env)) {
     if (!is.null(n_steps) && n_steps != ncol(env)) {
       stop("`n_steps` differs from the number of columns of `env`", call. = FALSE)
@@ -329,12 +357,19 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value) 
     stop("`start` is after the last step (", ncol(out), ")", call. = FALSE)
   }
   check_count(duration, "duration")
+  if (!is.null(every)) {
+    check_count(every, "every")
+    if (!is.finite(every) || duration >= every) {
+      stop("`every` must be finite and longer than `duration`", call. = FALSE)
+    }
+  }
   n_values <- if (length(sites) > 0) c(1, length(sites)) else 1
   if (!is.numeric(value) || anyNA(value) || !length(value) %in% n_values) {
     stop("`value` must be one number, or one per disturbed site, without NA", call. = FALSE)
   }
   if (length(sites) == 0) return(out)
-  steps <- seq(start, min(ncol(out), start + duration - 1))
+  starts <- if (is.null(every)) start else seq(start, ncol(out), by = every)
+  steps <- unlist(lapply(starts, function(s) seq(s, min(ncol(out), s + duration - 1))))
   out[sites, steps] <- value
   out
 }

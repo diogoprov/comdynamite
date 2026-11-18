@@ -4,7 +4,13 @@
 \alias{landscape_points}
 \title{Landscape from site coordinates}
 \usage{
-landscape_points(coords, env, disp_scale, lonlat = FALSE)
+landscape_points(
+  coords,
+  env,
+  disp_scale,
+  lonlat = FALSE,
+  disp_shape = c("exponential", "gaussian")
+)
 }
 \arguments{
 \item{coords}{Matrix or data frame with one row per site and two columns of coordinates.
@@ -12,11 +18,14 @@ With \code{lonlat = TRUE}, longitude and latitude in decimal degrees.}
 
 \item{env}{Numeric vector with the environment of each site.}
 
-\item{disp_scale}{Scale of the exponential dispersal kernel, in the units of the distances
+\item{disp_scale}{Scale of the dispersal kernel, in the units of the distances
 (kilometres with \code{lonlat = TRUE}).}
 
 \item{lonlat}{Are the coordinates longitude and latitude? Distances are then great-circle
 distances in kilometres, with a spherical Earth of radius 6371 km; otherwise Euclidean.}
+
+\item{disp_shape}{Shape of the dispersal kernel, \code{"exponential"} (the default) or
+\code{"gaussian"}; see \code{\link[=dispersal_kernel]{dispersal_kernel()}}.}
 }
 \value{
 An \code{mc_landscape} object, as from \code{\link[=landscape_grid]{landscape_grid()}}, without a torus.
