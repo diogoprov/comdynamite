@@ -2,6 +2,13 @@
 
 ## comdynamite (development version)
 
+- New article “Dispersal and disturbance through time”: the shape of the
+  dispersal kernel, recurrent pulses with `env_pulse(every =)`,
+  `dispersal_time` and `kernels`, and a flood-pulse example that
+  compares constant dispersal, dispersal pulses during high water,
+  long-distance connectivity during floods and philopatry in the dry
+  season.
+
 - `dispersal_time`, `kernels` and `kernel_step` in
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   and

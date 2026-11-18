@@ -7,6 +7,7 @@ articles:
   branch-rates: branch-rates.html
   comdynamite: comdynamite.html
   articles/correlated-traits: correlated-traits.html
+  articles/dispersal-disturbance: dispersal-disturbance.html
   evaluating-methods: evaluating-methods.html
   articles/herodotools: herodotools.html
   articles/nesting-map: nesting-map.html
@@ -22,7 +23,7 @@ articles:
   articles/validation: validation.html
   articles/watching-assembly: watching-assembly.html
   articles/whole-tree: whole-tree.html
-last_built: 2026-11-18T02:19Z
+last_built: 2026-11-18T03:13Z
 urls:
   reference: https://provetelab.org/comdynamite/reference
   article: https://provetelab.org/comdynamite/articles
