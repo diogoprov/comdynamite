@@ -2,8 +2,11 @@
 # random forests (abc_fit(), abc_recovery()) from data that a field study could collect? Eight
 # species with ancestral optima spread along an environmental gradient on a 10 x 10 grid, with
 # five parameters drawn from uniform priors: log10 G, log10 dispersal, the niche breadth sigma,
-# log10 Ne/N, which sets drift, and the ratio of inter- to intraspecific competition, two
-# nuisance parameters that could be confounded with G. Two environments: static for 400 steps, or static for 300 steps and then warming by
+# log10 Ne/N, which sets drift, the ratio of inter- to intraspecific competition and log10 of
+# the non-genetic phenotypic variance V_E, three nuisance parameters that could be confounded
+# with G. V_E is unknown, as in a field study, so the phenotypic variance P = G + V_E of measured
+# individuals does not reveal G by itself (a first version fixed V_E = 2, which let the spread of
+# measured means within populations carry G directly). Two environments: static for 400 steps, or static for 300 steps and then warming by
 # 0.1 per step for 100 steps (+10 units, about two thirds of a mean niche breadth). Every run is
 # summarised at its last step in three views of increasing detail:
 #   community   abundances of species in sites, with the environment and coordinates
@@ -30,10 +33,9 @@ side <- 10
 land <- landscape_grid(side, env_bandwidth = 3, disp_scale = 1.5)
 n_sp <- 8
 species <- paste0("sp", seq_len(n_sp))
-env_var <- 2
 n_ind <- 10
 prior <- list(log_G = c(-1, 1.5), log_dispersal = c(-3, -0.5), sigma = c(8, 25),
-              log_ne_ratio = c(-1.3, 0), competition = c(0.2, 1))
+              log_ne_ratio = c(-1.3, 0), competition = c(0.2, 1), log_VE = c(-0.5, 1.5))
 environments <- list(
   static = matrix(land$env, length(land$env), 400),
   warming = sapply(1:400, function(t) land$env + 0.1 * max(0, t - 300))
@@ -47,7 +49,7 @@ one_run <- function(scenario, shared) {
   simulate_metacommunity(land, traits, alpha, dispersal = 10^scenario$log_dispersal,
                          n_steps = 400, env_time = shared$env_time, record_steps = 400,
                          evolution = evolution_control(10^scenario$log_G, ne_ratio = 10^scenario$log_ne_ratio,
-                                                       env_var = env_var))
+                                                       env_var = 10^scenario$log_VE))
 }
 
 # statistics of the three views; traits are measured on phenotypes, with sampling error
@@ -58,6 +60,7 @@ summarise_views <- function(sim, shared) {
   community <- summary_stats(comm, env = env, coords = coords, n_null = 19)
   names(community) <- paste0("c_", names(community))
   g <- sim$evolution$settings$genetic_var
+  env_var <- sim$evolution$settings$env_var
   pheno <- sim$evolution$phenotype
   measured <- pheno + matrix(stats::rnorm(length(pheno), 0, sqrt((g + env_var) / n_ind)),
                              nrow(pheno))
