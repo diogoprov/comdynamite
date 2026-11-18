@@ -1,5 +1,5 @@
 ---
-title: "Local adaptation, gene flow and speciation in simulated metacommunities: a quantitative-genetic engine in the R package comdynamite"
+title: "comdynamite: an R package to simulate eco-evolutionary metacommunity dynamics under evolutionary quantitative genetic models"
 subtitle: "Title page"
 date: last-modified
 bibliography: references.bib

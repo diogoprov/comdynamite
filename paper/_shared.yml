@@ -1,4 +1,4 @@
-title: "Local adaptation, gene flow and speciation in simulated metacommunities: a quantitative-genetic engine in the R package comdynamite"
+title: "comdynamite: an R package to simulate eco-evolutionary metacommunity dynamics under evolutionary quantitative genetic models"
 abstract: |
   **Aim:** Metacommunity models usually treat niches as fixed, whereas models with evolving niches are either individual-based and built for one question or run over deep time on species rather than populations. I describe an engine in which the niche optimum evolves within every population of a metacommunity in ecological time, with speciation emerging from population divergence, and evaluate it against theory and published models.
 

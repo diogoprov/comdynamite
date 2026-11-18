@@ -25,7 +25,7 @@ The Editor\
 
 Dear Editor,
 
-I am pleased to submit the manuscript "Local adaptation, gene flow and speciation in simulated metacommunities: a quantitative-genetic engine in the R package comdynamite" for consideration as a Methods and Tools article in the *Journal of Biogeography*.
+I am pleased to submit the manuscript "comdynamite: an R package to simulate eco-evolutionary metacommunity dynamics under evolutionary quantitative genetic models" for consideration as a Methods and Tools article in the *Journal of Biogeography*.
 
 Biogeographers routinely infer niches and potential ranges from the match between species and environment, yet this match may reflect local adaptation and the history of colonisation as much as the ancestral niche. Models that let niches evolve within metacommunities are either individual-based and built for a single question, or run over deep time on species rather than populations. The manuscript describes a simulation engine that fills the level between them: the niche optimum evolves within every population of a metacommunity in ecological time, following the quantitative genetics of Lande, and speciation emerges from the divergence of populations, so that phylogenies and the history of ranges are outcomes of the simulation rather than inputs.
 
