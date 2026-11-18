@@ -555,6 +555,70 @@ Consequências para o pacote e o artigo (interpretação minha, a confirmar com 
 3. O resumo atual de `damocles_samples()` (mediana de β por amostra) é o pior estimador de
    magnitude nos dois cenários de ruído. A documentação deve recomendar (b) no lugar dele.
 
+#### Validação com posteriores reais do ClaDS2 (18/11/2026, `data-raw/s3_clads_validation.R` e `.rds`)
+
+Desenho:
+
+- 16 árvores de `RPANDA::sim_ClaDS` (λ0 = 0,1, μ0 = 0,5, σ = 0,2, α = 0,95,
+  113 pontas), com as taxas verdadeiras por ramo guardadas.
+- Ajuste `fit_ClaDS(model_id = "ClaDS2")` em blocos de 2.500 iterações (thin 20), até
+  R-hat (percentil 95) < 1,05 ou 30.000 iterações; cerca de 25 h por árvore em 16 processos.
+- Comunidades simuladas como na seção anterior: γ = 5·exp(β(log x − média)), μ = 1,
+  β ∈ {0, 1}, n ∈ {14, 40}, 10 réplicas por árvore, K = 20 amostras do posterior.
+
+Convergência: **nenhuma árvore convergiu**. Todas chegaram ao teto, com R-hat no percentil
+95 entre 1,80 e 2,32 e máximo entre 2,6 e 4,5. Os resultados abaixo usam posteriores mal
+misturados. É o que um usuário obtém com um orçamento realista, mas não necessariamente o
+que o ClaDS2 entrega quando converge.
+
+Qualidade do posterior por árvore:
+
+- Correlação entre média posterior e log taxa verdadeira: mediana 0,39 (de −0,01 a 0,69).
+- Inclinação da verdade sobre a média posterior: mediana 0,37 (de −0,01 a 1,11). Abaixo
+  de 1, ou seja, o posterior não encolhe o bastante.
+- Cobertura dos intervalos de 95%: de 0,85 a 0,99.
+- O piloto anterior (uma árvore, 5.000 iterações, cor = 0,70, inclinação 0,98) foi
+  otimista: corresponde às melhores árvores daqui (4, 9).
+
+Estimadores (mediana de β estimado; rejeição a 5%):
+
+| n | β | oráculo | por amostra | resumo (b) | MAP | integrada | SIMEX |
+|---|---|---|---|---|---|---|---|
+| 14 | 0 | 0,00 | 0,00 | 0,02 | 0,03 | 0,00 | 0,02 |
+| 40 | 0 | 0,00 | 0,00 | 0,00 | −0,01 | 0,00 | −0,01 |
+| 14 | 1 | 1,00 (1,00) | 0,10 (0,36) | 0,32 (0,68) | 0,25 (0,62) | 0,25 (0,80) | 0,83 |
+| 40 | 1 | 1,00 (1,00) | 0,09 (0,69) | 0,30 (0,91) | 0,24 (0,80) | 0,23 (0,98) | 0,70 |
+
+Tamanho do teste com β = 0: oráculo 0,04; por amostra 0; resumo 0,03–0,05; MAP 0,04–0,06;
+integrada 0,03–0,06.
+
+Leitura:
+
+- A diluição é pior que no posterior sintético com s = 0,7: o resumo (b) recupera ~30% de β.
+- Por árvore, o β estimado pelo resumo acompanha a inclinação de calibração
+  (r = 0,91) e não o R-hat (r = −0,20). É diluição de regressão clássica, governada
+  pela informação que o posterior tem sobre as taxas por ramo.
+  - Na árvore 1, o posterior não tem informação (cor ≈ 0) e β estimado é negativo.
+- **Com posterior real, o teste perde poder.** Com n = 14, o resumo rejeita em 68% e a
+  integrada em 80%; com n = 40, 91% e 98%. A mediana por amostra fica em 36% e 69%.
+  - A integrada passa a ser o melhor teste, ao contrário do posterior sintético.
+- O SIMEX chega perto de β na mediana, mas varia muito entre árvores. O intervalo de 10% a
+  90% vai de 0,1 a 2,2, e a árvore 1 dá −0,94. Não serve como estimativa pontual.
+- Não sei separar quanto da baixa informação vem da falta de convergência e quanto é
+  limite do ClaDS2 com 113 pontas. Para separar, seria preciso rodar cadeias até convergir
+  (custo de dias) ou usar mais pontas.
+
+Consequências (interpretação minha; substitui a lista anterior onde conflita):
+
+1. Covariável contínua vinda do ClaDS: usar a verossimilhança integrada para o teste e
+   relatar o resumo (b) como limite inferior da magnitude. Não interpretar β por amostra.
+2. Relatar, ao lado de qualquer resultado, a correlação entre réplicas do posterior
+   (ou a variância posterior relativa à variância entre ramos) como medida de confiabilidade.
+3. `integrate = TRUE` volta a ter prioridade para covariáveis contínuas. Para regimes do
+   BAMM, a conclusão anterior (resumo (b)) continua, porque não foi testada aqui.
+4. No artigo, esta é a principal limitação da camada de covariáveis: o sinal macroevolutivo
+   chega muito diluído quando as taxas por ramo vêm de um posterior pouco informativo.
+
 ### S4. Calibração do teste de partições aleatórias
 
 - Indício atual: 0,10 de rejeição no cenário nulo com 40 réplicas e 0,17 num teste menor.
