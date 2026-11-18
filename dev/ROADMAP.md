@@ -7,9 +7,8 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
 ## Próximos passos (2026-11-17)
 
-1. **Fechar a v0.9.0** com o que já entrou (ver a seção do marco) e passar os dois itens
-   abertos para depois. Versão proposta: 0.9.0; a release no GitHub gera DOI no Zenodo e
-   espera confirmação.
+1. **v0.9.0 fechada em 2026-11-17** com o que já entrou (ver a seção do marco); os dois itens
+   abertos passaram para depois. A release no GitHub gera DOI no Zenodo e espera confirmação.
 2. **Reescrever o preprint** para a 0.9.0. O texto atual descreve a 0.7.0 e diz que a
    filogenia é só entrada, sem especiação, o que deixou de valer na 0.8.0. Entram: especiação
    na metacomunidade, genética quantitativa em tempo ecológico, mapa de aninhamento com sete
@@ -1116,7 +1115,7 @@ Depois:
 **Concluído quando:** um estudo de simulação mostrar quando o fluxo acerta e quando erra.
 Esse estudo pode virar artigo próprio.
 
-## v0.9.0: mais processos
+## v0.9.0: mais processos (concluída em 2026-11-17)
 
 Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 
@@ -1139,8 +1138,8 @@ Para depois da 0.9.0 (proposto em 2026-11-17):
 - [ ] Gerador de ambiente temporal fiel ao de Thompson et al. (2020), como alternativa
       a `env_over_time()`.
 
-**Concluído quando:** os itens escolhidos tiverem testes e exemplo em vignette. Os itens
-marcados têm testes e artigos; falta só decidir o fechamento e a versão.
+**Concluído quando:** os itens escolhidos tiverem testes e exemplo em vignette. Fechada
+em 2026-11-17 com os itens marcados, que têm testes e artigos.
 
 ## v1.0.0: CRAN e artigo
 
