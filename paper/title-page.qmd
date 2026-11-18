@@ -1,0 +1,37 @@
+---
+title: "Local adaptation, gene flow and speciation in simulated metacommunities: a quantitative-genetic engine in the R package comdynamite"
+subtitle: "Title page"
+date: last-modified
+bibliography: references.bib
+csl: ecology.csl
+format:
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.5
+    colorlinks: true
+  docx: default
+---
+
+**Running title:** A quantitative-genetic metacommunity engine
+
+**Article type:** Methods and Tools
+
+**Author:** Diogo B. Provete (ORCID 0000-0002-0097-0651)
+
+**Affiliations:** Instituto de Biociências, Universidade Federal de Mato Grosso do Sul, Cidade Universitária, 79002-970, Campo Grande, Mato Grosso do Sul, Brazil; Gothenburg Global Biodiversity Centre, University of Gothenburg, Box 100, 405 30 Gothenburg, Sweden.
+
+**Correspondence:** Diogo B. Provete, Instituto de Biociências, Universidade Federal de Mato Grosso do Sul, Cidade Universitária, 79002-970, Campo Grande, MS, Brazil. Email: diogo.provete@ufms.br
+
+**Word counts:** abstract 291; main text (Introduction to Discussion) 5696; abstract and main text 5987.
+
+**Figures and tables:** 4 figures and 2 tables.
+
+{{< include _statements.qmd >}}
+
+# References {.unnumbered}
+
+::: {#refs}
+:::

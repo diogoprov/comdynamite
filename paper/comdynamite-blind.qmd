@@ -1,0 +1,33 @@
+---
+date: last-modified
+metadata-files:
+  - _shared.yml
+format:
+  pdf:
+    documentclass: article
+    papersize: a4
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.5
+    number-sections: true
+    colorlinks: true
+    include-in-header:
+      text: |
+        \usepackage{lineno}
+        \linenumbers
+  docx:
+    number-sections: true
+---
+
+{{< include _body.qmd >}}
+
+# Data Availability Statement {.unnumbered}
+
+The R package, the scripts that produced every result and figure, and the archived release described here are openly available; the links are withheld for double-blind review and given on the title page.
+
+{{< include _ai.qmd >}}
+
+# References {.unnumbered}
+
+::: {#refs}
+:::

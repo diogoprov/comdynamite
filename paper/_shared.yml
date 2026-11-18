@@ -1,0 +1,19 @@
+title: "Local adaptation, gene flow and speciation in simulated metacommunities: a quantitative-genetic engine in the R package comdynamite"
+abstract: |
+  **Aim:** Metacommunity models usually treat niches as fixed, whereas models with evolving niches are either individual-based and built for one question or run over deep time on species rather than populations. I describe an engine in which the niche optimum evolves within every population of a metacommunity in ecological time, with speciation emerging from population divergence, and evaluate it against theory and published models.
+
+  **Location:** Simulated landscapes; farm ponds in France.
+
+  **Taxon:** Any taxon; amphibians.
+
+  **Methods:** The engine, in the R package comdynamite, extends the metacommunity model of Thompson et al. (2020) with the quantitative genetics of Lande (1976, 1979): population genetic means respond to local selection, drift, mix by gene flow and are sampled by founders. Species split by point mutation, fission, geographic isolation or ecological divergence, with protracted completion. I compared the engine with analytical expectations, replicated three published models after checking their text against their archived code, tested whether approximate Bayesian computation recovers genetic variance, and applied it to pond amphibians.
+
+  **Results:** The engine matched expected drift and migration–selection balance, the Ewens sampling formula and the signature of protracted speciation on reconstructed trees. It was indistinguishable from archived simulations of a disturbance experiment, and partly reproduced two individual-based models whose outcomes hinged on how genetic variance was maintained. The archived code of two published models departed from their text in ways that changed results. Genetic variance was recovered from abundances ($R^2$ = 0.63–0.71) and closely with species mean traits (0.93–0.95); effective size was not. In 135 amphibian ponds, counts rejected neutrality but could not separate fixed from evolving niches.
+
+  **Main conclusions:** A quantitative-genetic approximation makes eco-evolutionary metacommunities fast enough for replicated designs and simulation-based inference. It is one module of a modular framework, complementing individual-based and deep-time models.
+keywords: [eco-evolutionary dynamics, gene flow, local adaptation, metacommunity, protracted speciation, quantitative genetics, R package, simulation]
+bibliography: references.bib
+csl: ecology.csl
+execute:
+  echo: false
+  warning: false

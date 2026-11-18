@@ -1,0 +1,16 @@
+# Acknowledgements {.unnumbered}
+
+This study was supported by the Fundação de Apoio ao Desenvolvimento do Ensino, Ciência e Tecnologia do Estado de Mato Grosso do Sul (FUNDECT; grant 83/027.032/2024) and financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior – Brasil (CAPES) – Finance Code 001.
+
+# Author Contributions {.unnumbered}
+
+D.B.P. conceived the study, designed the engine and the validation, directed the implementation and the analyses, and wrote the manuscript.
+
+# Conflict of Interest {.unnumbered}
+
+The author declares no conflict of interest.
+
+# Data Availability Statement {.unnumbered}
+
+comdynamite is written in R [@rcoreteam2026r] and distributed under the MIT license. It imports only ape [@paradis2019ape] and base packages; every other dependency is optional. The package exports 121 functions, covered by 548 unit-test blocks that run on macOS, Windows and Linux at every change. The source code is at <https://github.com/diogoprov/comdynamite>, binaries are built by r-universe (`install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev", "https://cloud.r-project.org"))`), and the documentation, articles and function reference, including the replications and the nesting map, are at <https://provetelab.org/comdynamite/>. Each release is archived on Zenodo under the concept DOI <https://doi.org/10.5281/zenodo.23993533> [@Provete_2026]; this article describes version 0.9.0 (<https://doi.org/10.5281/zenodo.24341231>). The scripts that produced every result and figure are in the `data-raw/` and `paper/` folders of the repository.
+
