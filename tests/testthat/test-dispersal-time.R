@@ -77,3 +77,18 @@ test_that("kernels_by_step checks its arguments", {
   expect_equal(rowSums(k[[1]]), rep(1, 3))
   expect_equal(diag(k[[1]]), rep(0, 3))
 })
+
+test_that("kernels accept landscapes and reject other objects", {
+  ls <- landscape_points(cbind(0:2, 0), env = rep(50, 3), disp_scale = 1)
+  d <- diag(0, 3) + 1
+  k <- kernels_by_step(list(ls, d), c(1, 2), 2, 3, d)
+  expect_equal(k[[1]], unname(ls$dispersal))
+  expect_error(kernels_by_step(list(), 1, 1, 3, d), "list of dispersal matrices")
+  expect_error(kernels_by_step("a", 1, 1, 3, d), "list of dispersal matrices")
+})
+
+test_that("dispersal_time needs at least two sites", {
+  expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0, n_steps = 2,
+                           dispersal_time = matrix(0.2, 2, 1)),
+               "two sites")
+})
