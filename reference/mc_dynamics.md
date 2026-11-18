@@ -28,7 +28,10 @@ mc_dynamics(
   pool_from = NULL,
   recruitment = c("beverton_holt", "lottery"),
   microsites = NULL,
-  mortality = 1
+  mortality = 1,
+  dispersal_time = NULL,
+  kernels = NULL,
+  kernel_step = NULL
 )
 ```
 
@@ -167,6 +170,27 @@ mc_dynamics(
   survivors and recruits, so that it approaches that of a Moran model at
   low mortality; founders are sampled once, when they recruit;
   `steps_per_generation` must stay 1.
+
+- dispersal_time:
+
+  Optional change of emigration through time: a vector with one
+  multiplier of `dispersal` per step (probabilities above 1 are set to
+  1), or a matrix with one row per step and one column, or one per
+  species, of emigration probabilities. For example, a dispersal pulse
+  during floods or a breeding migration in some steps. `NULL` (the
+  default) keeps `dispersal` at every step.
+
+- kernels, kernel_step:
+
+  Optional change of the routes of dispersal through time: `kernels` is
+  a list of dispersal matrices (sites x sites, e.g. from
+  [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md)
+  or the `dispersal` of other landscapes on the same sites; rows are
+  rescaled to sum to 1 and the diagonal is ignored), and `kernel_step`
+  gives, for each step, the index or name of the matrix used. For
+  example, a matrix of connected ponds for flood steps and one of
+  isolated ponds for dry steps. Only for spatially explicit landscapes;
+  `NULL` (the default) keeps the dispersal matrix of `landscape`.
 
 ## Value
 

@@ -90,7 +90,10 @@ their own growth rates (e.g. responses to several environmental variables).</p>
 <span>  pool_from <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  recruitment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"beverton_holt"</span>, <span class="st">"lottery"</span><span class="op">)</span>,</span>
 <span>  microsites <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  mortality <span class="op">=</span> <span class="fl">1</span></span>
+<span>  mortality <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  dispersal_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kernels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kernel_step <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -213,6 +216,24 @@ that their effect per step scales with the share of recruits in the population; 
 comes from the sampling of both survivors and recruits, so that it approaches that of a
 Moran model at low mortality; founders are sampled once, when they recruit;
 <code>steps_per_generation</code> must stay 1.</p></dd>
+
+
+<dt id="arg-dispersal-time">dispersal_time<a class="anchor" aria-label="anchor" href="#arg-dispersal-time"></a></dt>
+<dd><p>Optional change of emigration through time: a vector with one
+multiplier of <code>dispersal</code> per step (probabilities above 1 are set to 1), or a matrix with
+one row per step and one column, or one per species, of emigration probabilities. For
+example, a dispersal pulse during floods or a breeding migration in some steps. <code>NULL</code>
+(the default) keeps <code>dispersal</code> at every step.</p></dd>
+
+
+<dt id="arg-kernels-kernel-step">kernels, kernel_step<a class="anchor" aria-label="anchor" href="#arg-kernels-kernel-step"></a></dt>
+<dd><p>Optional change of the routes of dispersal through time:
+<code>kernels</code> is a list of dispersal matrices (sites x sites, e.g. from <code><a href="dispersal_kernel.html">dispersal_kernel()</a></code>
+or the <code>dispersal</code> of other landscapes on the same sites; rows are rescaled to sum to 1
+and the diagonal is ignored), and <code>kernel_step</code> gives, for each step, the index or name of
+the matrix used. For example, a matrix of connected ponds for flood steps and one of
+isolated ponds for dry steps. Only for spatially explicit landscapes; <code>NULL</code> (the
+default) keeps the dispersal matrix of <code>landscape</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -2,6 +2,16 @@
 
 ## comdynamite (development version)
 
+- `dispersal_time`, `kernels` and `kernel_step` in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`mc_dynamics()`](https://provetelab.org/comdynamite/reference/mc_dynamics.md):
+  dispersal that changes through time. `dispersal_time` sets the
+  emigration probability at each step (multipliers of `dispersal`, or
+  probabilities per step and species), and `kernels` with `kernel_step`
+  switch among dispersal matrices, for example connected ponds during
+  floods and isolated ponds in the dry season.
+
 - `shape = "gaussian"` in
   [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md)
   and `disp_shape` in
