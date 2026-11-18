@@ -1,10 +1,11 @@
 # Figures of the comdynamite preprint (eco-evolutionary engine, version 0.9.0). Run from the
 # package root:
 #   Rscript paper/figures.R
-# Figure 1 is drawn here. Figures 3 and 4 assemble panels that the scripts in data-raw/ saved
-# for the articles of the package website (figures_leibold2019.R, figures_urban2009.R,
-# compare_hajian2026.R, animation_quantgen.R); Figure 2 is the nesting map of
-# data-raw/figure_nesting_map.R, included directly from vignettes/articles/.
+# Figure 1 is drawn here. Figures 3 and 4 assemble panels that the scripts of the articles of the
+# package website draw (data-raw/figures_leibold2019.R, figures_urban2009.R, figures_hajian2026.R
+# from the saved replications, and animation_quantgen.R, which reruns its single simulations with
+# fixed seeds); here they are drawn again at 300 dpi into paper/figures/panels/. Figure 2 is the
+# nesting map of data-raw/figure_nesting_map.R, included directly from vignettes/articles/.
 library(ggplot2)
 library(magick)
 
@@ -53,12 +54,23 @@ fig1 <- ggplot() +
   theme_void()
 ggsave("paper/figures/fig1_model.png", fig1, width = 7.5, height = 4.3, dpi = 300, bg = "white")
 
-# Panels saved by the article scripts, with a letter in the top-left corner -----------------
-panel <- function(file, letter, width = 2400) {
-  img <- image_scale(image_read(file.path("vignettes/articles", file)), as.character(width))
-  img <- image_border(img, "white", "0x60", operator = "copy")
-  image_annotate(img, letter, size = 70, weight = 700, gravity = "northwest",
-                 location = "+10+0")
+# Panels drawn again at 300 dpi by the article scripts --------------------------------------
+panels <- "paper/figures/panels"
+dir.create(panels, showWarnings = FALSE)
+env <- c(FIG_DIR = panels, FIG_DPI = "300", FIG_ONLY = "true")
+for (script in c("figures_leibold2019.R", "figures_urban2009.R", "figures_hajian2026.R",
+                 "animation_quantgen.R")) {
+  status <- system2("Rscript", file.path("data-raw", script), env = paste0(names(env), "=", env),
+                    stdout = FALSE)
+  if (status != 0) stop(script, " failed")
+}
+
+# a letter in the top-left corner of each panel
+panel <- function(file, letter, width = 2700) {
+  img <- image_scale(image_read(file.path(panels, file)), as.character(width))
+  img <- image_border(img, "white", "0x80", operator = "copy")
+  image_annotate(img, letter, size = 90, weight = 700, gravity = "northwest",
+                 location = "+12+0")
 }
 
 # Figure 3: replications --------------------------------------------------------------------
@@ -68,6 +80,6 @@ fig3 <- image_append(c(panel("leibold_signatures.png", "(a)"),
 image_write(fig3, "paper/figures/fig3_replications.png", density = 300)
 
 # Figure 4: local adaptation along a gradient and evolutionary rescue -----------------------
-fig4 <- image_append(c(panel("quantgen_gradient.png", "(a)"),
-                       panel("quantgen_rescue.png", "(b)", width = 1800)), stack = TRUE)
+fig4 <- image_append(c(panel("quantgen_gradient.png", "(a)", width = 3000),
+                       panel("quantgen_rescue.png", "(b)", width = 2250)), stack = TRUE)
 image_write(fig4, "paper/figures/fig4_ranges.png", density = 300)

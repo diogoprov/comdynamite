@@ -24,7 +24,8 @@ two$nm_f <- factor(paste("Nm =", two$nm), paste("Nm =", sort(unique(two$nm))))
 pal <- c("#999999", "#56B4E9", "#009E73", "#E69F00", "#D55E00", "#CC79A7")
 theme_set(theme_minimal(base_size = 11))
 save <- function(p, name, w = 8, h = 4) {
-  ggsave(file.path("vignettes/articles", name), p, width = w, height = h, dpi = 120,
+  ggsave(file.path(Sys.getenv("FIG_DIR", "vignettes/articles"), name), p, width = w, height = h,
+         dpi = as.numeric(Sys.getenv("FIG_DPI", "120")),
          bg = "white")
 }
 

@@ -1,11 +1,14 @@
 # Animations and figures for the article "Quantitative genetics in the metacommunity". Run
 # from the package root; needs ggplot2, gganimate and gifski, and writes GIFs and PNGs to
 # vignettes/articles/ and the numbers quoted in the text to data-raw/quantgen_numbers.rds.
-library(comdynamite)
+suppressMessages(devtools::load_all(quiet = TRUE))
 library(ggplot2)
 library(gganimate)
 
-out <- "vignettes/articles"
+# FIG_DIR and FIG_DPI redirect the PNGs (paper/figures.R uses them for 300-dpi panels);
+# FIG_ONLY = "true" skips the GIFs and the numbers.
+out <- Sys.getenv("FIG_DIR", "vignettes/articles")
+fig_only <- identical(Sys.getenv("FIG_ONLY"), "true")
 dir.create(out, showWarnings = FALSE)
 numbers <- list()
 
@@ -18,12 +21,14 @@ plot_theme <- theme_bw(base_size = 13) +
         legend.position = "bottom")
 
 animate_plot <- function(p, n_frames, width, height, file) {
+  if (fig_only) return(invisible(NULL))
   animate(p, nframes = n_frames, fps = 10, width = width, height = height, res = 96,
           renderer = gifski_renderer(file.path(out, file), loop = TRUE))
 }
 
 save_plot <- function(p, file, width = 8, height = 4) {
-  ggsave(file.path(out, file), p, width = width, height = height, dpi = 110, bg = "white")
+  ggsave(file.path(out, file), p, width = width, height = height, dpi = as.numeric(Sys.getenv("FIG_DPI", "110")),
+         bg = "white")
 }
 
 # one species on an environmental gradient: maps of the load of each population
@@ -333,5 +338,5 @@ filling <- do.call(rbind, Map(function(sim, label) {
 }, monopoly, labels))
 numbers$filling <- filling
 
-saveRDS(numbers, "data-raw/quantgen_numbers.rds")
+if (!fig_only) saveRDS(numbers, "data-raw/quantgen_numbers.rds")
 print(numbers)

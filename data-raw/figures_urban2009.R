@@ -6,7 +6,8 @@ library(ggplot2)
 res <- readRDS("data-raw/replication_urban2009.rds")
 theme_set(theme_minimal(base_size = 11))
 save <- function(p, name, w = 9, h = 4.5) {
-  ggsave(file.path("vignettes/articles", name), p, width = w, height = h, dpi = 120,
+  ggsave(file.path(Sys.getenv("FIG_DIR", "vignettes/articles"), name), p, width = w, height = h,
+         dpi = as.numeric(Sys.getenv("FIG_DPI", "120")),
          bg = "white")
 }
 labels <- c(none = "No evolution",
