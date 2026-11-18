@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `dispersal_time`, `kernels` and `kernel_step` in `simulate_metacommunity()` and
+  `mc_dynamics()`: dispersal that changes through time. `dispersal_time` sets the emigration
+  probability at each step (multipliers of `dispersal`, or probabilities per step and
+  species), and `kernels` with `kernel_step` switch among dispersal matrices, for example
+  connected ponds during floods and isolated ponds in the dry season.
+
 - `shape = "gaussian"` in `dispersal_kernel()` and `disp_shape` in `landscape_grid()` and
   `landscape_points()`: a Gaussian kernel, with a thinner tail than the exponential one (the
   default, unchanged). Kernel weights are now computed on the log scale, so that sites far
