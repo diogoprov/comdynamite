@@ -1,5 +1,7 @@
 # Changelog
 
+## comdynamite (development version)
+
 ## comdynamite 0.9.0
 
 - New article “Dispersal and disturbance through time”: the shape of the
