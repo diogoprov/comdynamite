@@ -1,11 +1,36 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-07. Versão atual: 0.6.2, com `0.6.2.9000` em desenvolvimento (DOI de
-conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, com o que faltava da v0.5.0, `v0.5.2`, `v0.6.0`,
-`v0.6.1` e `v0.6.2`. O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`. A
-`v0.4.0` começou com `mc_data()` e traits externos e tem 3 itens abertos. Todas as pendências das etapas
-anteriores estão fechadas.
+Atualizado em 2026-11-17. Versão atual: 0.8.0 (DOI `10.5281/zenodo.24161612`), com
+`0.8.0.9000` em desenvolvimento (DOI de conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0` e `v0.8.0`.
+O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
+
+## Próximos passos (2026-11-17)
+
+1. **Fechar a v0.9.0** com o que já entrou (ver a seção do marco) e passar os dois itens
+   abertos para depois. Versão proposta: 0.9.0; a release no GitHub gera DOI no Zenodo e
+   espera confirmação.
+2. **Reescrever o preprint** para a 0.9.0. O texto atual descreve a 0.7.0 e diz que a
+   filogenia é só entrada, sem especiação, o que deixou de valer na 0.8.0. Entram: especiação
+   na metacomunidade, genética quantitativa em tempo ecológico, mapa de aninhamento com sete
+   modelos e as três replicações (Leibold et al. 2019, Urban & De Meester 2009,
+   Hajian-Forooshani & Chase 2026), com o enquadramento já decidido (framework modular,
+   Cabral, Valente & Hartig 2017; sem "übermodel", sem "o primeiro").
+3. **DAMOCLES:** terminar a validação S3 com o ClaDS2 e escrever o plano do artigo
+   (`dev/plano-artigo-damocles.md`); depois, o proxy de persistência por traits (ideia do
+   Januário) com ATLANTIC AMPHIBIANS e TetrapodTraits.
+4. **Delatorre et al. (2015):** experimento virtual feito (local, `dev/delatorre2015/`, fora
+   do git). Sorting no ambiente medido é descartado; sorting em eixo não medido contra
+   neutralidade fica em aberto com as estatísticas do artigo, e a matriz de espécies
+   resolveria (correlação entre espécies e primeiro eixo dos resíduos). Matriz pedida aos
+   autores em 2026-11-17.
+5. **Fase 4 da especiação:** comparação com o gen3sis e o MESS, só em `data-raw`.
+6. **Pendentes de decisão do usuário:** issue #56 do RPANDA e e-mail à Melissa Guzman (não
+   enviado); nome final e modos de `simulate_diversification()`; sugestões do ECY25-0086.
+
+Fechado sem continuação: o simulador sazonal com passo mensal (issue #97). O piloto de
+identificabilidade (`data-raw/seasonal_pilot/`) mostrou que dados mensais de uma paisagem de
+13 poças mal separam os modelos de comunidade; issue fechada como "not planned" em 2026-11-17.
 As versões abaixo são uma sugestão: cada marco tem um critério de conclusão, e a
 ordem pode mudar. Tag no formato `vX.Y.Z`, com release no GitHub.
 
@@ -1019,6 +1044,9 @@ as fases, em `dev/plano-especiacao.md`.
       Leibold: nenhum dos três produz dominância local; o resultado depende do regime de
       variância (G constante: perda de espécie; mutação a partir de G: manchas compartilhadas;
       a partir de zero ou erodida: species sorting). Em aberto: V_m maior que 0,5.
+- [x] Replicação (iii), Hajian-Forooshani & Chase 2026 (PR #106, 2026-11-17): `env_pulse()` e o
+      artigo `replication-disturbance`, estatisticamente indistinguível das simulações
+      arquivadas pelos autores; o mapa de aninhamento passou a sete modelos.
 - [x] Replicação (ii), Urban & De Meester 2009 (`pool_from`, `data-raw/replication_urban2009.R`,
       artigo `replication-urban`): a espécie que evolui por mutação vence o sítio novo em
       qualquer ordem de chegada e a evolução nas duas torna o sítio mais monopolizado, mas
@@ -1092,8 +1120,18 @@ Esse estudo pode virar artigo próprio.
 
 Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 
-- [ ] Vários eixos ambientais (hoje há um só).
-- [ ] Paisagens irregulares ou lidas de coordenadas, além da grade.
+- [x] Vários eixos ambientais: `env` com uma coluna por eixo e `env_time` em lista ou array.
+- [x] Paisagens irregulares ou lidas de coordenadas: `landscape_points()`.
+- [x] Distúrbio: `disturbance` (perda de populações) e `env_pulse()` (pulsos no ambiente, com
+      duração e, desde a PR #107, frequência via `every`).
+- [x] Recrutamento em loteria, gerações sobrepostas e abertura de sítios no tempo
+      (`recruitment = "lottery"`, `microsites`, `mortality`, `pool_from`).
+- [x] Kernel Gaussiano (`disp_shape`, PR #107) e dispersão variável no tempo (`dispersal_time`,
+      `kernels`, `kernel_step`, PR #108), com o artigo "Dispersal and disturbance through time"
+      (PR #110, exemplo de pulso de inundação).
+
+Para depois da 0.9.0 (proposto em 2026-11-17):
+
 - [ ] Null models restritos com bordas para preditores contínuos e para o simulador. Em
       `pcps_test()`, o toro numa grade com bordas rejeitou 6% a 25% sem relação real.
       `patch_permutations()` cobre só eventos; candidato: Constant Moran permutation
@@ -1101,7 +1139,8 @@ Objetivo: ampliar os cenários do simulador. Escolher pelo uso real.
 - [ ] Gerador de ambiente temporal fiel ao de Thompson et al. (2020), como alternativa
       a `env_over_time()`.
 
-**Concluído quando:** os itens escolhidos tiverem testes e exemplo em vignette.
+**Concluído quando:** os itens escolhidos tiverem testes e exemplo em vignette. Os itens
+marcados têm testes e artigos; falta só decidir o fechamento e a versão.
 
 ## v1.0.0: CRAN e artigo
 
