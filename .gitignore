@@ -27,3 +27,4 @@ data-raw/s3c_jobs*/
 paper/*.pdf
 paper/*.docx
 paper/~$*
+data-raw/persistence_proxy/fits/
