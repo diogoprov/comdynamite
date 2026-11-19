@@ -76,11 +76,16 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
 5. *Dispersão variável no tempo e filtragem de imigrantes com especiação e vários traits*:
    `dispersal_time`, `kernels` e `kernel_step` com `evolution`, e `immigrant_selection` com
    `speciation` e com G multivariada, hoje recusados (artigo "Dispersal and disturbance through
-   time"). É a terceira limitação do manuscrito, a única que é só engenharia.
+   time"). É a terceira limitação do manuscrito, a única que é só engenharia. Feito em
+   2026-11-19 (PR #116, d6df7f1): `simulate_evolving_metacommunity()` aceita `dispersal_time`,
+   `kernels` e `kernel_step`, e `immigrant_selection` funciona com especiação e com G
+   multivariada; só `mutation_var` continua recusado no motor de especiação. Sem especiação,
+   a dispersão variável no tempo com vários traits já funcionava, ao contrário do que o
+   manuscrito diz; corrigir o texto na revisão.
 6. *Saída de "tempo desde a mudança"* no motor evolutivo, a única sugestão do ECY25-0086 feita
    só em parte.
 
-Ordem sugerida: 2, 1, 3, 5, 4, 6. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
+Ordem sugerida para o que falta: 2, 1, 3, 4, 6. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
 
 **Bloco B, especiação: comparação e experimentos.** Fase 4 (gen3sis, GPL, e MESS, sem
@@ -92,7 +97,10 @@ artigo. Depois da Fase 4, o preprint pode ganhar a comparação. Da quinta limit
 manuscrito: repetir as três replicações (Leibold et al. 2019, Urban & De Meester 2009,
 Hajian-Forooshani & Chase 2026) com mais réplicas e uma varredura dos parâmetros centrais de
 cada uma, em `data-raw`, para mostrar que as diferenças relatadas não dependem do ponto
-escolhido. Rodar na AWS; serve de resposta pronta se a revisão pedir.
+escolhido. Serve de resposta pronta se a revisão pedir. Drivers em `data-raw/blockB/`
+(PR #117, d9deb7f), com execução em blocos retomável; rodando no Mac a partir de 2026-11-19,
+depois do lote Stan, de uma cópia congelada do pacote (custo estimado em cerca de 57 CPU-h,
+3,5 a 5 h com 16 núcleos). Falta resumir os resultados contra os artigos num PR próprio.
 
 **Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
