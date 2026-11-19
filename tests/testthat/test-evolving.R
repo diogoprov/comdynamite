@@ -556,3 +556,43 @@ test_that("the evolving engine filters immigrants by their fitness", {
   expect_equal(w[1, ], exp(-(c(50, 55, 60) - 50)^2 / 20))
   expect_equal(dim(w), c(3L, 3L))
 })
+
+test_that("immigrant fitness in the evolving engine covers several traits and wide niches", {
+  st <- new.env()
+  st$m <- 3
+  st$ev <- list(g = 1, sigma = Inf, ve = 0)
+  st$pa_em <- matrix(c(50, NA, 60), 3, 1)
+  st$e_now <- c(50, 55, 60)
+  expect_equal(evolving_immigrant_fitness(st, 1, 1), matrix(1, 3, 3))
+  # several traits: the multivariate weights of mv_fitness()
+  set.seed(16)
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  env <- cbind(svl = ls$env, head = seq(-3, 3, length.out = 16))
+  anc <- list(svl = data.frame(optimum = 50, sigma = 10, r_max = 5, row.names = "sp1"),
+              head = data.frame(optimum = 0, sigma = 3, r_max = 1, row.names = "sp1"))
+  set.seed(17)
+  sim <- simulate_evolving_metacommunity(ls, anc, env = env,
+                                         speciation = speciation_control("geographic", 30),
+                                         dispersal = 0.05, n_steps = 100,
+                                         evolution = evolution_control(diag(2) * 5,
+                                                                       ne_ratio = 0.5,
+                                                                       immigrant_selection = TRUE))
+  expect_s3_class(sim, "mc_evolving")
+})
+
+test_that("evolving_prune drops the phenotypes of emigrants with their species", {
+  for (three in c(FALSE, TRUE)) {
+    st <- new.env()
+    st$m <- 2
+    st$k <- 2
+    st$alive <- c(1L, 2L)
+    st$n <- matrix(c(3L, 1L, 0L, 0L), 2)
+    st$at <- diag(2)
+    st$em <- NULL
+    st$dispersal <- c(0.1, 0.1)
+    st$extirpation <- c(0, 0)
+    st$pa_em <- if (three) array(1:8, c(2, 2, 2)) else matrix(1:4, 2)
+    expect_equal(evolving_prune(st), 2L)
+    expect_equal(dim(st$pa_em), if (three) c(2L, 1L, 2L) else c(2L, 1L))
+  }
+})

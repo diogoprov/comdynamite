@@ -320,6 +320,14 @@ test_that("mv_immigrants_selected reduces to immigrants_selected with one select
   expect_equal(mv$mean[, , 1], drop(uni$mean))
   expect_equal(mv_fitness(ev, matrix(c(40, 0), 1), env, 1)[1, ],
                unname(exp(-(env[, 1] - 40)^2 / (2 * (20^2 + 5)))))
+  # a species without emigrants sends no one and keeps its own means
+  none <- mv_immigrants_selected(ev, matrix(0, 4, 1), za, za, env, disp, 1)
+  expect_equal(none$lambda, matrix(0, 4, 1))
+  expect_equal(none$mean, za)
+  # no axis under selection: every source has fitness 1
+  control$traits$svl$sigma <- Inf
+  free <- evolution_state_mv(control, 4L, 1L, "sp1")
+  expect_equal(mv_fitness(free, matrix(c(40, 0), 1), env, 1), matrix(1, 1, 4))
 })
 
 test_that("mutation_var is refused with several traits and in evolving simulations", {
