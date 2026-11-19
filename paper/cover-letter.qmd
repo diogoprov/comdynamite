@@ -1,0 +1,46 @@
+---
+format:
+  pdf:
+    documentclass: letter
+    papersize: a4
+    geometry: margin=2.5cm
+    fontsize: 11pt
+    linestretch: 1.15
+    colorlinks: true
+    pagestyle: empty
+  docx: default
+---
+
+\raggedright
+
+Diogo B. Provete\
+Instituto de Biociências, Universidade Federal de Mato Grosso do Sul\
+Cidade Universitária, 79002-970, Campo Grande, MS, Brazil\
+diogo.provete@ufms.br
+
+[DATE]
+
+The Editor\
+*Journal of Biogeography*
+
+Dear Editor,
+
+I am pleased to submit the manuscript "comdynamite: an R package to simulate eco-evolutionary metacommunity dynamics under evolutionary quantitative genetic models" for consideration as a Methods and Tools article in the *Journal of Biogeography*.
+
+Biogeographers routinely infer niches and potential ranges from the match between species and environment, yet this match may reflect local adaptation and the history of colonisation as much as the ancestral niche. Models that let niches evolve within metacommunities are either individual-based and built for a single question, or run over deep time on species rather than populations. The manuscript describes a simulation engine that fills the level between them: the niche optimum evolves within every population of a metacommunity in ecological time, following the quantitative genetics of Lande, and speciation emerges from the divergence of populations, so that phylogenies and the history of ranges are outcomes of the simulation rather than inputs.
+
+I evaluated the engine against analytical expectations and by replicating three published eco-evolutionary models. In doing so, I found that the archived code of two published models departs from the text of their articles in ways that change results, and I document these differences. I then tested whether approximate Bayesian computation can recover the genetic variance and the orientation of the genetic covariance matrix from data that a field study could collect, and applied the engine to an amphibian metacommunity of 135 ponds. Two results seem of direct interest to biogeographers. First, local adaptation and gene flow placed a third of occupied sites outside the potential range predicted from the ancestral niche, which bears on correlative models of distribution. Second, the divergence of populations along environmental gradients recovered the orientation of the genetic covariance matrix where the phenotypic matrix did not, whereas counts of species alone could not separate fixed from evolving niches. This suggests that intraspecific trait data along gradients, common in phylogeographic studies, are what make local adaptation inferable at the metacommunity scale.
+
+The manuscript fits the scope of Methods and Tools, since it presents a new method, applies it to biogeographic data and discusses its potential for the field. It also complements tools recently published in the journal, such as Herodotools (Nakamura et al., 2023), whose ancestral ranges and tip-based metrics can now be evaluated on phylogenies that emerged from metacommunity dynamics, through a function that exports the simulated histories to that package. The package is open source (MIT licence), tested on three operating systems, and every result and figure can be reproduced from the scripts in its repository.
+
+The abstract has 238 words and the main text 5,638 words (5,876 together), with four figures and two tables. Following the double-blind policy of the journal, the title page is supplied as a separate file and the manuscript has been anonymised, with the code given through an anonymised repository. The use of generative AI is reported in the manuscript following the AIdIT framework. The empirical data come from the CESTES database and are used under its open licence.
+
+This manuscript has not been published and is not under consideration elsewhere. [PREPRINT: state whether a preprint has been posted, with its DOI.] I declare that I am a Senior Author and a Full-time Editor at Wiley; I have no other conflict of interest.
+
+[OPTIONAL: suggested and opposed reviewers.]
+
+Thank you for considering this submission.
+
+Sincerely,
+
+Diogo B. Provete

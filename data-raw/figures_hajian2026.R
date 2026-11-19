@@ -9,7 +9,8 @@ s$extent <- s$n_disturbed # 100 patches, so the number of patches is the percent
 ctrl <- res$control
 theme_set(theme_minimal(base_size = 11))
 save <- function(p, name, w = 9, h = 5.5) {
-  ggsave(file.path("vignettes/articles", name), p, width = w, height = h, dpi = 120,
+  ggsave(file.path(Sys.getenv("FIG_DIR", "vignettes/articles"), name), p, width = w, height = h,
+         dpi = as.numeric(Sys.getenv("FIG_DPI", "120")),
          bg = "white")
 }
 s$regime <- factor(s$dispersal, levels = c(1e-5, 1e-4, 1e-3),

@@ -1,0 +1,11 @@
+# Acknowledgements {.unnumbered}
+
+This study was supported by the Fundação de Apoio ao Desenvolvimento do Ensino, Ciência e Tecnologia do Estado de Mato Grosso do Sul (FUNDECT; grant 83/027.032/2024) and financed in part by the Coordenação de Aperfeiçoamento de Pessoal de Nível Superior – Brasil (CAPES) – Finance Code 001.
+
+# Author Contributions {.unnumbered}
+
+D.B.P. conceived the study, designed the engine and the validation, directed the implementation and the analyses, and wrote the manuscript.
+
+# Conflict of Interest {.unnumbered}
+
+DBP is a Senior Author and a Full-time Editor at Wiley.

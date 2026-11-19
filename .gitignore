@@ -20,4 +20,10 @@ data-raw/s1_jobs_partition_v1/
 data-raw/s5_jobs*/
 data-raw/s5c_jobs*/
 data-raw/s3_jobs*/
+paper/figures/panels/
 data-raw/s3c_jobs*/
+
+# rendered manuscript files live in Box (Meus Artigos/2026 - comdynamite JBI)
+paper/*.pdf
+paper/*.docx
+paper/~$*

@@ -1,133 +1,85 @@
-# Figures of the comdynamite preprint. Run from the package root:
+# Figures of the comdynamite preprint (eco-evolutionary engine, version 0.9.0). Run from the
+# package root:
 #   Rscript paper/figures.R
-# Uses only results saved by the scripts in data-raw/ and vignettes/, so it runs in seconds.
+# Figure 1 is drawn here. Figures 3 and 4 assemble panels that the scripts of the articles of the
+# package website draw (data-raw/figures_leibold2019.R, figures_urban2009.R, figures_hajian2026.R
+# from the saved replications, and animation_quantgen.R, which reruns its single simulations with
+# fixed seeds); here they are drawn again at 300 dpi into paper/figures/panels/. Figure 2 is the
+# nesting map of data-raw/figure_nesting_map.R, included directly from vignettes/articles/.
 library(ggplot2)
-library(patchwork)
+library(magick)
 
 okabe <- c("#E69F00", "#56B4E9", "#009E73", "#D55E00", "#0072B2", "#CC79A7", "#999999")
 dir.create("paper/figures", showWarnings = FALSE)
 
-# Figure 1: structure of the package -------------------------------------------------------
+# Figure 1: structure of the eco-evolutionary engine ----------------------------------------
 boxes <- data.frame(
-  id = c("pool", "sim", "obs", "data", "null", "ana", "eval"),
-  x = c(1.3, 1.3, 4.1, 4.1, 6.9, 6.9, 4.1),
-  y = c(4.2, 2.4, 4.2, 2.4, 4.2, 2.4, 0.6),
-  title = c("Regional pool", "Simulators", "Observed data", "mc_data()",
-            "Null models", "Analyses", "Simulation studies"),
-  body = c("trees (treeshapesim, gen3sis)\ntrait_bm(), trait_ou(), trait_mk()\ntrait_rates(), history_rates()",
-           "simulate_metacommunity()\nsimulate_static(), assemble_community()\nsimulate_damocles(), food_web_dynamics()\nsample_individuals()",
-           "community, tree, traits,\nenvironment, coordinates",
-           "one object with names\nchecked once",
-           "torus_permutations()\nrigid_permutations()\npatch_permutations()",
-           "node_test(), pcc_test(), pcps_test()\nphylo_beta_test(), trait_partition()\ntstats(), trait_gradient(), damocles_fit()",
-           "run_scenarios(), summary_stats()\nequilibrium_check()\ntype I error, power, recovery"),
-  fill = c("pool", "sim", "data", "data", "ana", "ana", "eval")
+  x = c(1.4, 4.2, 7.0, 1.4, 4.2, 7.0),
+  y = c(3.9, 3.9, 3.9, 1.3, 1.3, 1.3),
+  title = c("Landscape and time", "Ecological dynamics", "Quantitative genetics",
+            "Inference", "Outputs", "Speciation"),
+  body = c("sites, kernels, env axes\nenv_over_time(), env_pulse()\ndispersal_time, kernels",
+           "growth by niche match\ncompetition, dispersal\ndemographic drift\n(Thompson et al. 2020)",
+           "genetic mean per population\nselection, drift (Ne), gene flow\nfounders, plasticity, G or G(t)\n(Lande 1976, 1979)",
+           "abc_choose(), abc_fit()\nabc_recovery(), abc_ppc()",
+           "abundances, genetic means\nfull and reconstructed trees\nhistory of ranges\nmaladaptation(), persistence()",
+           "point, fission, geographic,\necological modes\nprotracted completion\n(Hubert et al. 2015)"),
+  fill = c("land", "eco", "gen", "inf", "out", "spe")
 )
-arrows <- data.frame(
-  x = c(1.3, 2.6, 4.1, 5.4, 6.9, 6.9, 2.8),
-  y = c(3.65, 2.4, 3.65, 2.4, 3.65, 1.85, 0.6),
-  xend = c(1.3, 2.8, 4.1, 5.6, 6.9, 5.4, 1.3),
-  yend = c(2.95, 2.4, 2.95, 2.4, 2.95, 0.85, 1.75)
-)
+arr <- data.frame(x = c(2.6, 5.4, 7.0, 5.8, 3.0),
+                  y = c(3.9, 4.0, 3.3, 1.3, 1.3),
+                  xend = c(3.0, 5.8, 7.0, 5.4, 2.6),
+                  yend = c(3.9, 4.0, 1.9, 1.3, 1.3))
 fig1 <- ggplot() +
-  geom_segment(data = arrows[1:6, ], aes(x, y, xend = xend, yend = yend),
+  geom_segment(data = arr, aes(x, y, xend = xend, yend = yend),
                arrow = arrow(length = unit(2.2, "mm"), type = "closed"), colour = "grey35") +
-  geom_curve(data = arrows[7, ], aes(x, y, xend = xend, yend = yend), curvature = -0.3,
-             arrow = arrow(length = unit(2.2, "mm"), type = "closed"), colour = okabe[4],
-             linetype = "dashed") +
-  annotate("text", x = 1.55, y = 0.75, label = "known truth", colour = okabe[4],
-           size = 3, fontface = "italic", hjust = 0) +
-  geom_tile(data = boxes, aes(x, y, fill = fill), width = 2.6, height = 1.1,
+  geom_segment(aes(x = 5.4, y = 3.8, xend = 5.8, yend = 3.8),
+               arrow = arrow(length = unit(2.2, "mm"), type = "closed", ends = "first"),
+               colour = "grey35") +
+  geom_curve(aes(x = 4.2, y = 3.3, xend = 4.2, yend = 1.9), curvature = 0,
+             arrow = arrow(length = unit(2.2, "mm"), type = "closed"), colour = "grey35") +
+  geom_tile(data = boxes, aes(x, y, fill = fill), width = 2.4, height = 1.2,
             colour = "grey30", alpha = 0.35) +
-  geom_text(data = boxes, aes(x, y + 0.36, label = title), fontface = "bold", size = 3.3) +
-  geom_text(data = boxes, aes(x, y - 0.12, label = body), size = 2.3, lineheight = 0.95,
-            family = "mono") +
-  scale_fill_manual(values = c(pool = okabe[3], sim = okabe[2], data = okabe[7],
-                               ana = okabe[1], eval = okabe[6]), guide = "none") +
-  coord_cartesian(xlim = c(-0.05, 8.25), ylim = c(-0.05, 4.85), expand = FALSE) +
+  geom_text(data = boxes, aes(x, y + 0.45, label = title), fontface = "bold", size = 3.3) +
+  geom_text(data = boxes, aes(x, y - 0.12, label = body), size = 2.4, lineheight = 0.95) +
+  annotate("text", x = 5.6, y = 4.75, size = 2.3, fontface = "italic", colour = okabe[4],
+           label = "phenotype vs environment;\nimmigrants, founders, Ne") +
+  annotate("text", x = 7.12, y = 2.6, size = 2.3, fontface = "italic", colour = okabe[4],
+           hjust = 0, label = "divergence\nof populations") +
+  annotate("text", x = 4.32, y = 2.6, size = 2.3, fontface = "italic", colour = okabe[4],
+           hjust = 0, label = "records") +
+  scale_fill_manual(values = c(land = okabe[7], eco = okabe[2], gen = okabe[3],
+                               spe = okabe[1], out = okabe[5], inf = okabe[6]), guide = "none") +
+  coord_cartesian(xlim = c(-0.05, 8.45), ylim = c(0.5, 5.0), expand = FALSE) +
   theme_void()
-ggsave("paper/figures/fig1_structure.png", fig1, width = 7.5, height = 5, dpi = 300, bg = "white")
+ggsave("paper/figures/fig1_model.png", fig1, width = 7.5, height = 4.3, dpi = 300, bg = "white")
 
-# Figure 3: two questions answered by simulation ----------------------------------------------
-# (a) phylogenetic structure along dispersal, from vignettes/phylogenetic-structure.rds
-ps <- readRDS("vignettes/phylogenetic-structure.rds")
-ps <- ps[is.finite(ps$ses_mpd), ]
-means <- aggregate(ses_mpd ~ dispersal + lambda + competition, ps, mean)
-ses <- aggregate(ses_mpd ~ dispersal + lambda + competition, ps,
-                 function(z) sd(z) / sqrt(length(z)))
-means$se <- ses$ses_mpd
-means$scenario <- paste0("lambda = ", means$lambda, ", ",
-                         ifelse(means$competition == "none", "no competition",
-                                "competition among relatives"))
-panel_a <- ggplot(means, aes(dispersal, ses_mpd, colour = scenario, shape = scenario)) +
-  geom_hline(yintercept = 0, colour = "grey70") +
-  geom_errorbar(aes(ymin = ses_mpd - 2 * se, ymax = ses_mpd + 2 * se), width = 0.06) +
-  geom_line() + geom_point(size = 2) +
-  scale_x_log10() +
-  scale_colour_manual(values = okabe[c(1, 2, 3, 4)], name = NULL) +
-  scale_shape_manual(values = c(15, 16, 17, 18), name = NULL) +
-  labs(x = "Dispersal (emigration probability)", y = "SES MPD (mean of sites)") +
-  theme_bw(base_size = 10) +
-  guides(colour = guide_legend(ncol = 1)) +
-  theme(legend.position = "bottom", panel.grid.minor = element_blank())
+# Panels drawn again at 300 dpi by the article scripts --------------------------------------
+panels <- "paper/figures/panels"
+dir.create(panels, showWarnings = FALSE)
+env <- c(FIG_DIR = panels, FIG_DPI = "300", FIG_ONLY = "true")
+for (script in c("figures_leibold2019.R", "figures_urban2009.R", "figures_hajian2026.R",
+                 "animation_quantgen.R")) {
+  status <- system2("Rscript", file.path("data-raw", script), env = paste0(names(env), "=", env),
+                    stdout = FALSE)
+  if (status != 0) stop(script, " failed")
+}
 
-# (b) type I error of free and restricted permutations
-edges <- readRDS("data-raw/validation_edges.rds")
-edges <- edges[edges$effect == 0, ]
-long <- rbind(
-  data.frame(test = "node_test(), events", case = edges$kind, null = "free", p = edges$free),
-  data.frame(test = "node_test(), events", case = edges$kind, null = "torus", p = edges$torus),
-  data.frame(test = "node_test(), events", case = edges$kind, null = "patch", p = edges$patch)
-)
-long <- long[is.finite(long$p), ]
-long$case <- c(blocks = "two blocks", others = "area vs. others", tails = "two ends")[long$case]
-em <- readRDS("vignettes/evaluating-methods.rds")
-em <- em[em$predictor == "unrelated", ]
-long <- rbind(long, data.frame(test = "community ~ predictor", case = "torus landscape",
-                               null = em$null_model, p = em$p))
-rates <- aggregate(p ~ test + case + null, long, function(p) mean(p <= 0.05))
-n <- aggregate(p ~ test + case + null, long, length)
-rates$se <- sqrt(rates$p * (1 - rates$p) / n$p)
-rates$null <- factor(rates$null, c("free", "torus", "patch"),
-                     c("free", "torus", "patch_permutations()"))
-rates$label <- paste0(rates$case, "\n(", rates$test, ")")
-panel_b <- ggplot(rates, aes(p, label, colour = null, shape = null)) +
-  geom_vline(xintercept = 0.05, linetype = "dashed", colour = "grey40") +
-  geom_errorbarh(aes(xmin = pmax(p - 2 * se, 0), xmax = p + 2 * se), height = 0.2,
-                 position = position_dodge(width = 0.5)) +
-  geom_point(size = 2, position = position_dodge(width = 0.5)) +
-  scale_x_continuous(trans = "sqrt", breaks = c(0, 0.05, 0.1, 0.25, 0.5, 0.75)) +
-  scale_colour_manual(values = okabe[c(4, 5, 3)], name = "Permutations") +
-  scale_shape_manual(values = c(16, 17, 15), name = "Permutations") +
-  labs(x = "Rejection rate of a true null hypothesis (5% level)", y = NULL) +
-  theme_bw(base_size = 10) +
-  theme(legend.position = "bottom", legend.direction = "vertical", panel.grid.minor = element_blank())
-fig2 <- panel_a + panel_b + plot_annotation(tag_levels = "a") + plot_layout(widths = c(1, 1.1))
-ggsave("paper/figures/fig3_simulation_studies.png", fig2, width = 9, height = 4.8, dpi = 300,
-       bg = "white")
+# a letter in the top-left corner of each panel
+panel <- function(file, letter, width = 2700) {
+  img <- image_scale(image_read(file.path(panels, file)), as.character(width))
+  img <- image_border(img, "white", "0x80", operator = "copy")
+  image_annotate(img, letter, size = 90, weight = 700, gravity = "northwest",
+                 location = "+12+0")
+}
 
-# Figure 2: reproduction of Thompson et al. (2020) ------------------------------------------
-th <- readRDS("data-raw/validation_thompson.rds")
-th$niche <- as.numeric(th$niche)
-keys <- c("dispersal", "niche", "competition")
-med <- aggregate(th[c("beta_spatial", "beta_temporal")], th[keys], median, na.rm = TRUE)
-persisted <- aggregate(list(n = is.finite(th$alpha)), th[keys], sum)
-med <- merge(med, persisted)
-med[med$n < 10, c("beta_spatial", "beta_temporal")] <- NA
-long <- rbind(data.frame(med[keys], measure = "spatial beta", value = med$beta_spatial),
-              data.frame(med[keys], measure = "temporal beta", value = med$beta_temporal))
-long$niche <- factor(signif(long$niche, 2))
-fig3 <- ggplot(long, aes(dispersal, niche, fill = value)) +
-  geom_tile() +
-  facet_grid(competition ~ measure) +
-  scale_x_log10() +
-  scale_fill_viridis_c(option = "inferno", trans = "log10", na.value = "white",
-                       name = "beta\n(gamma/alpha)") +
-  labs(x = "Dispersal (emigration probability)", y = "Abiotic niche breadth (sigma)") +
-  theme_minimal(base_size = 10) +
-  theme(panel.grid = element_blank())
-ggsave("paper/figures/fig2_thompson.png", fig3, width = 7, height = 6.5, dpi = 300, bg = "white")
+# Figure 3: replications --------------------------------------------------------------------
+fig3 <- image_append(c(panel("leibold_signatures.png", "(a)"),
+                       panel("urban_delay.png", "(b)"),
+                       panel("hajian_comparison.png", "(c)")), stack = TRUE)
+image_write(fig3, "paper/figures/fig3_replications.png", density = 300)
 
-# Numbers quoted in the text ----------------------------------------------------------------
-print(rates[order(rates$test, rates$case, rates$null), c("test", "case", "null", "p", "se")])
-print(means[order(means$scenario, means$dispersal), c("scenario", "dispersal", "ses_mpd", "se")])
+# Figure 4: local adaptation along a gradient and evolutionary rescue -----------------------
+fig4 <- image_append(c(panel("quantgen_gradient.png", "(a)", width = 3000),
+                       panel("quantgen_rescue.png", "(b)", width = 2250)), stack = TRUE)
+image_write(fig4, "paper/figures/fig4_ranges.png", density = 300)
