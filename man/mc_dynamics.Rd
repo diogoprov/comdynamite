@@ -64,7 +64,8 @@ only where \code{pool} allows.}
 
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
-which conserves them. Spatially implicit landscapes are always multinomial.}
+which conserves them and is recommended for low dispersal (see Details). Spatially
+implicit landscapes are always multinomial.}
 
 \item{evolution}{Optional settings from \code{\link[=evolution_control]{evolution_control()}} for the evolution of the niche
 optimum within each population: selection by the local environment, drift, gene flow,

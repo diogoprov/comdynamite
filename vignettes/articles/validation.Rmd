@@ -47,7 +47,10 @@ total abundance stayed below 1.5%. The Poisson draw of immigrants mattered more 
 a constant environment, probably because populations that track a moving environment
 depend more on immigrants: at dispersal of 0.001 on the grid, alpha was 16% lower than in mcomsimr
 without extirpation and 26% lower with it. With `immigration = "multinomial"`, these
-differences fell to 6% or less, of either sign.
+differences fell to 6% or less, of either sign. The Poisson draw remains the default,
+since it is what the authors' code does, but `immigration = "multinomial"` is the better
+choice for low dispersal, for an environment that changes in time, and for studies of
+long-term persistence.
 
 ## Article and archived code
 

@@ -5,6 +5,9 @@
   to ranks, as in the authors' code. RandomFields is no longer on CRAN, so the field is drawn
   by random Fourier features, with the covariance exact in expectation. Unlike
   `env_over_time()`, sites close together change together.
+- The help of `simulate_metacommunity()` and the validation article now recommend
+  `immigration = "multinomial"` for low dispersal, an environment that changes in time and
+  studies of long-term persistence; the Poisson draw stays the default.
 - `simulate_evolving_metacommunity()` takes `dispersal_time`, `kernels` and `kernel_step`:
   dispersal that changes through time now works with speciation. New species inherit the
   emigration through time of their mother, and the gene flow that keeps populations together

@@ -23,7 +23,12 @@
 #'   the emigrants of each species at each site are instead distributed among the other
 #'   sites multinomially, with the probabilities of the kernel, which conserves them. It
 #'   costs about as much as the Poisson draw at low dispersal and up to 20 times more at high
-#'   dispersal, where the two give nearly the same results.
+#'   dispersal, where the two give nearly the same results. Use it for low dispersal (below
+#'   about 0.01), especially with `extirpation` or an environment that changes in time
+#'   (`env_time`), and for studies of long-term persistence: against mcomsimr with an
+#'   environment from [env_space_time()], the Poisson draw gave 16% to 26% lower local
+#'   richness at dispersal 0.001 on a grid, and the multinomial draw 6% or less, of either
+#'   sign (see the validation article on the package website).
 #'
 #' After dispersal, each population is lost with probability `extirpation`,
 #' independently of its size. Thompson et al. (2020) used 0.002 in their
@@ -111,7 +116,8 @@
 #' @param record_steps Optional steps at which abundances are recorded.
 #' @param immigration How emigrants reach other sites on spatially explicit landscapes:
 #'   `"poisson"` (the default, as in the code of Thompson et al. 2020) or `"multinomial"`,
-#'   which conserves them. Spatially implicit landscapes are always multinomial.
+#'   which conserves them and is recommended for low dispersal (see Details). Spatially
+#'   implicit landscapes are always multinomial.
 #' @param pool Optional matrix (sites x species), logical or 0/1, with the sites where each
 #'   species can occur.
 #' @param pool_from Optional matrix (sites x species) with the first step at which each species

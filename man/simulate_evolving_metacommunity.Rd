@@ -71,7 +71,8 @@ site at each seeding step (and at the start).}
 
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
-which conserves them. Spatially implicit landscapes are always multinomial.}
+which conserves them and is recommended for low dispersal (see Details). Spatially
+implicit landscapes are always multinomial.}
 
 \item{max_species}{Maximum number of species ever, including extinct ones; the simulation
 stops with an error beyond it.}
