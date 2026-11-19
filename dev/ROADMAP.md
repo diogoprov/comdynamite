@@ -11,9 +11,12 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 1. **v0.9.0 publicada em 2026-11-18** (tag `v0.9.0`, release no GitHub, DOI
    `10.5281/zenodo.24341231`); os dois itens abertos do marco passaram para o bloco A (ver
    "Itens abertos e plano de implementação"), o próximo marco de código.
-2. **Preprint reescrito para a 0.9.0** (PR #112, em draft): versão anônima, title page e cover
-   letter prontas para o Journal of Biogeography (Methods and Tools, double blind). Falta o
-   usuário preencher os campos da carta e submeter.
+2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
+   postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
+   2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),
+   fora do git. Falta registrar o DOI do preprint em `CITATION` e no README quando sair.
+   As limitações resolvíveis do manuscrito entraram nos blocos A, B, C e H (ver "Limitações do
+   manuscrito" abaixo), para que a revisão já encontre parte delas feitas.
 3. **DAMOCLES:** terminar a validação S3 com o ClaDS2 e escrever o plano do artigo
    (`dev/plano-artigo-damocles.md`); depois, o proxy de persistência por traits (ideia do
    Januário) com ATLANTIC AMPHIBIANS e TetrapodTraits.
@@ -70,9 +73,10 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    o mesmo núcleo de sobreposição de nicho que o motor evolutivo já usa (v0.7.0, "Falta").
 4. *Nicho com correlação entre eixos* (matriz de largura por espécie) em `growth_rates()`, e
    paisagens que gerem vários eixos ambientais de uma vez em `landscape_grid()` (v0.7.0).
-5. *Dispersão variável no tempo no motor evolutivo*: `dispersal_time`, `kernels` e
-   `kernel_step` com `evolution`, hoje recusados (artigo "Dispersal and disturbance through
-   time").
+5. *Dispersão variável no tempo e filtragem de imigrantes com especiação e vários traits*:
+   `dispersal_time`, `kernels` e `kernel_step` com `evolution`, e `immigrant_selection` com
+   `speciation` e com G multivariada, hoje recusados (artigo "Dispersal and disturbance through
+   time"). É a terceira limitação do manuscrito, a única que é só engenharia.
 6. *Saída de "tempo desde a mudança"* no motor evolutivo, a única sugestão do ECY25-0086 feita
    só em parte.
 
@@ -84,16 +88,23 @@ licença, só em `data-raw`, com medida de custo) e Fase 5 (persistência contra
 pontas com verdade conhecida; neutralidade regional contra taxas por ramo). Decisões
 pendentes: nome final (recomendado manter `simulate_evolving_metacommunity()`; o nome
 provisório `simulate_diversification()` não foi exportado) e o mapa de aninhamento como
-artigo. Depois da Fase 4, o preprint pode ganhar a comparação.
+artigo. Depois da Fase 4, o preprint pode ganhar a comparação. Da quinta limitação do
+manuscrito: repetir as três replicações (Leibold et al. 2019, Urban & De Meester 2009,
+Hajian-Forooshani & Chase 2026) com mais réplicas e uma varredura dos parâmetros centrais de
+cada uma, em `data-raw`, para mostrar que as diferenças relatadas não dependem do ponto
+escolhido. Rodar na AWS; serve de resposta pronta se a revisão pedir.
 
 **Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
-o primeiro: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
+o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
 (v0.3.0); (ii) PPC com modelo mal especificado de fato: filtro urbano conservado na filogenia
 nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`;
 (iii) colonização limitada a partir do pool regional; (iv) validação cruzada por blocos numa
 paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção
-imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de
-download do GBIF para os pools de `anurans` (exige a conta do usuário).
+imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
+`anurans` (exige a conta do usuário); (viii) da quarta limitação do manuscrito: estatísticas que tornem `ne_ratio` e G
+identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica dentro das
+populações e a divergência entre populações relativa à distância (tipo QST), testadas com
+`abc_recovery()` nos desenhos do artigo, e um guia curto de desenho amostral na `vignette("abc")`. Prioridade alta entre os itens do bloco.
 
 **Bloco D, indivíduos e traits (ponte Leibold–Januario).** (i) vários traits por indivíduo e
 traits de indivíduos que afetem a dinâmica (hoje são sorteados depois); (ii) cruzar com
@@ -119,11 +130,25 @@ DEC, MPD e MNTD em três extensões, clima e topografia, RPANDA, ClaSSE, SBEARS)
 pacotes de referência em `Suggests`. Sobrepõe-se ao artigo do DAMOCLES e à ideia do Januário
 (persistência por traits); decidir o escopo depois do S3.
 
+**Bloco H, arquitetura genética (primeira limitação do manuscrito).** O motor assume
+fenótipos Gaussianos e G constante ou resumida numa variância por população, o que parece ser
+o que faltou nas replicações de modelos individuais. Plano em duas etapas: (i) G dinâmica com
+equilíbrio mutação, seleção e deriva por população (redução de Bulmer transitória, não só a
+permanente que já existe), que cabe no motor atual; (ii) só se (i) não bastar para a
+dominância local de Leibold et al. (2019), um módulo opcional de poucos locos de efeito grande,
+validado contra a replicação com indivíduos. Reprodução sexuada e ligação ficam fora. Estudo
+primeiro, API depois; não bloqueia o CRAN.
+
+**Limitações do manuscrito fora do escopo.** A segunda (estrutura de estágios, restrições
+metabólicas, paisagens que mudam em tempo geológico) não entra: o pacote fica no tempo
+ecológico e em paisagens estáticas, e o gen3sis e o BioGEEM cobrem o tempo profundo (ver
+"Visão" e o posicionamento modular).
+
 **Bloco G, validação do `pcps.curve()`.** Estudo em `data-raw/validation_pcps_curve.R`, como
 descrito na seção de métodos; só entra no pacote se tiver poder.
 
 **v1.0.0 (CRAN).** Depois do bloco A e da Fase 4, que são os que ainda mexem na API. Os blocos
-C a G são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas.
+C a H são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas.
 
 ## Visão
 
