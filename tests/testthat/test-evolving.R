@@ -564,6 +564,18 @@ test_that("immigrant fitness in the evolving engine covers several traits and wi
   st$pa_em <- matrix(c(50, NA, 60), 3, 1)
   st$e_now <- c(50, 55, 60)
   expect_equal(evolving_immigrant_fitness(st, 1, 1), matrix(1, 3, 3))
+  # several traits: the weights of mv_fitness() for the phenotypes of the emigrants
+  control <- evolution_control(diag(c(4, 0)), env_var = diag(c(1, 0)))
+  control$traits <- list(
+    svl = data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1"),
+    head = data.frame(optimum = 0, sigma = Inf, r_max = 1, row.names = "sp1"))
+  control$env <- cbind(svl = c(50, 55, 60), head = 0)
+  st$ev <- evolution_state_mv(control, 3L, 1L, "sp1")
+  st$pa_em <- array(c(50, NA, 60, 0, NA, 0), c(3, 1, 2))
+  st$e_now <- control$env
+  w <- evolving_immigrant_fitness(st, 1, 1)
+  expect_equal(w[1, ], unname(exp(-(c(50, 55, 60) - 50)^2 / (2 * (20^2 + 5)))))
+  expect_equal(w[2, ], unname(exp(-(c(50, 55, 60) - 0)^2 / (2 * (20^2 + 5)))))
   # several traits: the multivariate weights of mv_fitness()
   set.seed(16)
   ls <- landscape_grid(4, disp_scale = 0.5)
