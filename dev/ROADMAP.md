@@ -97,8 +97,12 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    rede, pelos modelos tail-up de Ver Hoef et al. (2006, Environmental and Ecological
    Statistics, doi:10.1007/s10651-006-0022-8) e Ver Hoef & Peterson (2010, JASA,
    doi:10.1198/jasa.2009.ap08248), já que a exponencial com distância de rede não é sempre
-   positiva definida; (iii) um gerador de redes dendríticas (por exemplo, optimal channel
-   networks) se as redes reais não bastarem; (iv) estudo de persistência de longo prazo com
+   positiva definida; (iii) um gerador de redes dendríticas, que entra no item (decisão do usuário em
+   2026-11-19), para variar o tamanho e a forma da rede com réplicas; candidatos: optimal
+   channel networks e árvores aleatórias com ordem de Strahler controlada; ler antes como os
+   trabalhos de Altermatt e Carrara geram as redes; deve devolver coordenadas, a matriz de
+   distâncias ao longo do canal e a direção do fluxo, para alimentar `landscape_matrix()` e a
+   covariância de (ii), aceitando também redes reais; (iv) estudo de persistência de longo prazo com
    cheias sazonais, com a dispersão a favor e contra a corrente. A lição do piloto sazonal
    (issue #97) vale aqui: o gerador serve para dinâmica e persistência, não para inferência
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
