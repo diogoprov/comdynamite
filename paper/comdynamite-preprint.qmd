@@ -1,4 +1,5 @@
 ---
+host-rule: "Resolução nº 455-Coun/UFMS, de 1º de dezembro de 2025"
 author:
   - name: Diogo B. Provete
     orcid: 0000-0002-0097-0651

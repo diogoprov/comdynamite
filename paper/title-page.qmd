@@ -1,7 +1,5 @@
 ---
 title: "comdynamite: an R package to simulate eco-evolutionary metacommunity dynamics under evolutionary quantitative genetic models"
-subtitle: "Title page"
-date: last-modified
 format:
   pdf:
     documentclass: article
@@ -13,7 +11,7 @@ format:
   docx: default
 ---
 
-Diogo B. Provete^1,2^ (ORCID 0000-0002-0097-0651)
+Diogo B. Provete^1,2^
 
 ^1^ Instituto de Biociências, Universidade Federal de Mato Grosso do Sul, Cidade Universitária, 79002-970, Campo Grande, Mato Grosso do Sul, Brazil.
 
@@ -25,7 +23,7 @@ Diogo B. Provete^1,2^ (ORCID 0000-0002-0097-0651)
 
 **Article type:** Methods and Tools
 
-**Word counts:** abstract 238; main text (Introduction to Discussion) 5638; abstract and main text 5876.
+**Word counts:** abstract 238; main text (Introduction to Discussion) 5643; abstract and main text 5881.
 
 **Figures and tables:** 4 figures and 2 tables.
 

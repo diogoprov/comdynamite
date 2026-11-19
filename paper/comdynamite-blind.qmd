@@ -1,5 +1,5 @@
 ---
-date: last-modified
+host-rule: "regulation withheld for double-blind review"
 metadata-files:
   - _shared.yml
 format:
@@ -15,8 +15,12 @@ format:
       text: |
         \usepackage{lineno}
         \linenumbers
+        \usepackage{titling}
+        \pretitle{\begin{center}\fontsize{14}{17}\selectfont}
+        \posttitle{\par\end{center}}
   docx:
     number-sections: true
+    reference-doc: reference-14pt.docx
 ---
 
 {{< include _body.qmd >}}
