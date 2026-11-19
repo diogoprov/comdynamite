@@ -84,6 +84,24 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    manuscrito diz; corrigir o texto na revisão.
 6. *Saída de "tempo desde a mudança"* no motor evolutivo, a única sugestão do ECY25-0086 feita
    só em parte.
+7. *Ambiente sazonal e correlacionado ao longo de redes fluviais* (pedido em 2026-11-19).
+   Objetivo: investigar dinâmica e persistência de longo prazo em metacomunidades fluviais,
+   como as de Altermatt (2013, Aquatic Ecology, doi:10.1007/s10452-013-9450-3) e Carrara et
+   al. (2012, PNAS, doi:10.1073/pnas.1119651109). A dispersão em rede dendrítica já cabe em
+   `landscape_matrix()`; falta o ambiente. `env_space_time()` é estacionário, sem ciclo, e usa
+   distância euclidiana, de modo que afluentes próximos em linha reta mudam juntos. Plano:
+   (i) componente sazonal, um ciclo determinístico com amplitude por sítio (por exemplo,
+   cota ou distância ao canal) somado a variação entre anos, compondo com
+   `env_space_time(ranks = FALSE)` e `env_pulse()` para cheias; (ii) covariância ao longo da
+   rede, pelos modelos tail-up de Ver Hoef et al. (2006, Environmental and Ecological
+   Statistics, doi:10.1007/s10651-006-0022-8) e Ver Hoef & Peterson (2010, JASA,
+   doi:10.1198/jasa.2009.ap08248), já que a exponencial com distância de rede não é sempre
+   positiva definida; (iii) um gerador de redes dendríticas (por exemplo, optimal channel
+   networks) se as redes reais não bastarem; (iv) estudo de persistência de longo prazo com
+   cheias sazonais, com a dispersão a favor e contra a corrente. A lição do piloto sazonal
+   (issue #97) vale aqui: o gerador serve para dinâmica e persistência, não para inferência
+   com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
+   de citar resultados.
 
 Ordem sugerida para o que falta: 2, 1, 3, 4, 6. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
