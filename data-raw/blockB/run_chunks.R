@@ -51,5 +51,12 @@ collect_chunks <- function(name, settings = block_settings()) {
   if (length(files) < expected) {
     stop(name, ": ", length(files), " of ", expected, " chunks done", call. = FALSE)
   }
-  do.call(rbind, lapply(files, readRDS))
+  chunks <- lapply(files, readRDS)
+  # designs with different landscapes (the control of Leibold et al. 2019 has one patch type)
+  # give different columns; missing ones are filled with NA
+  cols <- unique(unlist(lapply(chunks, names)))
+  do.call(rbind, lapply(chunks, function(x) {
+    x[setdiff(cols, names(x))] <- NA
+    x[cols]
+  }))
 }

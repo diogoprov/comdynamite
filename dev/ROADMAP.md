@@ -100,7 +100,15 @@ cada uma, em `data-raw`, para mostrar que as diferenças relatadas não dependem
 escolhido. Serve de resposta pronta se a revisão pedir. Drivers em `data-raw/blockB/`
 (PR #117, d9deb7f), com execução em blocos retomável; rodando no Mac a partir de 2026-11-19,
 depois do lote Stan, de uma cópia congelada do pacote (custo estimado em cerca de 57 CPU-h,
-3,5 a 5 h com 16 núcleos). Falta resumir os resultados contra os artigos num PR próprio.
+3,5 a 5 h com 16 núcleos). Rodou em 7 h 20 min em 2026-11-19; resumo em
+`data-raw/blockB/README.md` (`summarise_blockB.R`, tabelas em `blockB_summary.rds`). Nada
+inverte uma conclusão. Mudanças a levar aos artigos de replicação e à revisão do manuscrito:
+Leibold (persistência com 500 réplicas, robustez à extinção de manchas, `Vm` alto dá
+neutralidade regional sem dominância local); Urban (vantagem do primeiro a chegar 76% e 74%,
+não 84% e 72%; a inversão com variação permanente e a vantagem de quem evolui por mutação
+dependem do contraste ambiental, o que qualifica a frase do manuscrito sobre variação
+permanente); Hajian (sem mudança a 15%, não a 15% a 20%; comparação com o controle; direção
+dada pela dispersão robusta à duração e à intensidade do pulso).
 
 **Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
