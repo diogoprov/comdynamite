@@ -680,6 +680,8 @@ mc_step <- function(st, step) {
         # phenotype of the offspring, which develop in their site
         pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
       }
+      # phenotypes of the emigrants, for the fitness of immigrants in the speciation engine
+      if (isTRUE(ev$imm_sel)) pa_em <- pa
       if (!is.null(disp_prob_time)) p_em <- rep(disp_prob_time[step, alive], each = m)
       if (!is.null(kernels)) disp_matrix <- kernels[[kernel_step[step]]]
       if (is.null(pool_from)) {
@@ -700,6 +702,10 @@ mc_step <- function(st, step) {
       if (any(tot > 0)) {
         if (!is.null(disp_matrix) && immigration == "multinomial") {
           imm <- place_emigrants(em, disp_matrix, open_to)
+        } else if (!is.null(disp_matrix) && isTRUE(ev$imm_sel) && isTRUE(ev$mv)) {
+          # immigrants filtered by their fitness in the site they reach, several traits
+          sel <- mv_immigrants_selected(ev, em_to, za, pa, e_now, disp_matrix, alive)
+          imm <- matrix(stats::rpois(m * k, sel$lambda), m, k)
         } else if (!is.null(disp_matrix) && isTRUE(ev$imm_sel)) {
           # immigrants filtered by their fitness in the site they reach
           g_src <- if (isTRUE(ev$dyn)) ifelse(is.na(ga), 0, ga) else
@@ -718,7 +724,8 @@ mc_step <- function(st, step) {
           for (j in which(tot > 0)) imm[, j] <- stats::rmultinom(1, tot[j], w[, j])
         }
         if (isTRUE(ev$mv)) {
-          flowed <- mv_flow(ev, za, pa, n - em + em_to, em_to, imm, disp_matrix, alive)
+          flowed <- mv_flow(ev, za, pa, n - em + em_to, em_to, imm, disp_matrix, alive,
+                            sel = if (isTRUE(ev$imm_sel) && !is.null(disp_matrix)) sel)
           za <- flowed$za
           pa <- flowed$pa
         } else if (!is.null(ev)) {
@@ -1032,7 +1039,12 @@ kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix) {
       stop("each site needs at least one destination in every matrix of `kernels`",
            call. = FALSE)
     }
-    x / rowSums(x)
+    # rows already summing to 1 are kept as they are, so that the matrix of the landscape
+    # given as a kernel reproduces a run without `kernels` to the last bit
+    total <- rowSums(x)
+    off <- abs(total - 1) > 1e-12
+    x[off, ] <- x[off, ] / total[off]
+    x
   })
   if (is.character(kernel_step)) {
     if (is.null(names(kernels)) || !all(kernel_step %in% names(kernels))) {

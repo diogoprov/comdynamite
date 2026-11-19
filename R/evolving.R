@@ -288,7 +288,10 @@ print.mc_speciation <- function(x, ...) {
 #'     lineages (trait by trait) are arrays of sites x species x traits (with the recorded
 #'     steps as a fourth dimension in the histories), `genetic_var` and `env_var` hold one
 #'     matrix per species and `plasticity` is a matrix of species x traits.
-#'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used.
+#'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used, and
+#'     `dispersal_time`, `kernels` (rescaled) and `kernel_step`. New species take the
+#'     emigration through time of their mother. The gene flow that keeps populations together
+#'     follows the kernel of each step; fission by distance uses the kernel of `landscape`.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
 #' @references Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
@@ -314,15 +317,17 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             initial = NULL, seed_mean = 0.5,
                                             record_steps = NULL,
                                             immigration = c("poisson", "multinomial"),
-                                            max_species = 500, env = NULL, disturbance = 0) {
+                                            max_species = 500, env = NULL, disturbance = 0,
+                                            dispersal_time = NULL, kernels = NULL,
+                                            kernel_step = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
   }
   competition <- match.arg(competition)
-  if (isTRUE(evolution$immigrant_selection) || !is.null(evolution$mutation_var)) {
-    stop("`immigrant_selection` and `mutation_var` are not yet available in ",
-         "`simulate_evolving_metacommunity()`", call. = FALSE)
+  if (!is.null(evolution$mutation_var)) {
+    stop("`mutation_var` is not yet available in `simulate_evolving_metacommunity()`",
+         call. = FALSE)
   }
   immigration <- match.arg(immigration)
   stopifnot(inter_max >= 0, inter_min >= 0, inter_min <= inter_max, scale > 0,
@@ -419,7 +424,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                seed_steps = numeric(0), seed_mean = seed_mean,
                disp_matrix = landscape$dispersal, record_steps = record_steps, sites = sites,
                species = species0, extirpation = extirpation, pool = NULL, initial = initial,
-               immigration = immigration, evolution = evolution, disturbance = disturbance)
+               immigration = immigration, evolution = evolution, disturbance = disturbance,
+               dispersal_time = dispersal_time, kernels = kernels, kernel_step = kernel_step)
   st <- do.call(mc_state, args)
   if (niche_overlap && competition == "phylo") st$competition_hook <- niche_crowding(st)
 
@@ -474,7 +480,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       if (uses_div) divergence[lost] <- together[lost] <- flow[lost] <- list(NULL)
     }
     if (uses_div && st$k > 0) {
-      flow <- evolving_flow(st, flow, landscape$dispersal)
+      flow <- evolving_flow(st, flow, st$disp_matrix)
       # a population lost at any step of the generation founds anew
       for (c in seq_len(st$k)) {
         gone <- st$n[, c] == 0
@@ -695,7 +701,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  richness_good = richness_good, genetic = genetic, traits = traits_out,
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
                  extirpation = st$extirpation[sp_idx], disturbance = disturbance,
-                 speciation = speciation,
+                 dispersal_time = dispersal_time, kernels = st$kernels,
+                 kernel_step = kernel_step, speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  env = if (several) as.data.frame(env) else NULL,
                  generations = generations, history = history,
@@ -839,9 +846,27 @@ evolving_flow <- function(st, flow, disp_matrix) {
       diag(out) <- 0
       out
     }
+    # with immigrant selection, only the immigrants that survive in the site they reach
+    if (isTRUE(st$ev$imm_sel)) f <- f * evolving_immigrant_fitness(st, c, j)
     flow[[j]] <- flow[[j]] + f
   }
   flow
+}
+
+# relative fitness (sources x sites) of the emigrants of the alive column c (species j) in
+# each site, as in immigrants_selected() and mv_immigrants_selected()
+evolving_immigrant_fitness <- function(st, c, j) {
+  ev <- st$ev
+  if (isTRUE(ev$mv)) {
+    p <- matrix(st$pa_em[, c, ], st$m)
+    p[is.na(p)] <- 0
+    return(mv_fitness(ev, p, st$e_now, j))
+  }
+  p <- st$pa_em[, c]
+  p[is.na(p)] <- 0
+  width <- ev$g[j] + ev$sigma[j]^2 + ev$ve[j]
+  if (!is.finite(width)) return(matrix(1, st$m, st$m))
+  exp(-outer(p, st$e_now, "-")^2 / (2 * width))
 }
 
 # migration rate between pairs of populations: the larger of the migrants each sends to the
@@ -1093,6 +1118,10 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$z_history <- grow_hist(st$z_history, NA_real_)
   st$dispersal <- grow_vec(st$dispersal)
   st$extirpation <- grow_vec(st$extirpation)
+  # emigration through time (steps x species): new species take that of their mother
+  if (!is.null(st$disp_prob_time)) {
+    st$disp_prob_time <- cbind(st$disp_prob_time, st$disp_prob_time[, mothers, drop = FALSE])
+  }
   if (mv) {
     for (nm in c("optimum", "sigma", "b", "r_axis")) st$ev[[nm]] <- grow_rows(st$ev[[nm]])
     for (nm in c("r_max", "fixed")) st$ev[[nm]] <- grow_vec(st$ev[[nm]])
@@ -1433,6 +1462,10 @@ evolving_prune <- function(st) {
   st$n <- st$n[, keep, drop = FALSE]
   st$at <- st$at[keep, keep, drop = FALSE]
   if (!is.null(st$em)) st$em <- st$em[, keep, drop = FALSE]
+  if (!is.null(st$pa_em)) {
+    st$pa_em <- if (length(dim(st$pa_em)) == 3) st$pa_em[, keep, , drop = FALSE] else
+      st$pa_em[, keep, drop = FALSE]
+  }
   st$k <- length(st$alive)
   st$p_em <- rep(st$dispersal[st$alive], each = st$m)
   st$p_ex <- rep(st$extirpation[st$alive], each = st$m)
