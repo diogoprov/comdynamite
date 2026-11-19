@@ -176,6 +176,41 @@ ours so closely that the same background decline is very likely present in them.
 A longer burn-in before the pulse, or the difference from paired undisturbed runs, would
 separate the effect of the disturbance from the transient dynamics.
 
+## More replicates and a sweep of the pulse
+
+The scripts in `data-raw/blockB/` reran the design of their Fig. 2 and the control with 500
+replicates per setting and new seeds, and swept the duration and severity of the pulse (the
+numbers are in `data-raw/blockB/README.md`).
+
+With 500 replicates (\(n = 0.25\), step 700), the pattern above held. With dispersal limitation,
+beta diversity increased at every extent, up to 0.60 at 85% of the landscape disturbed, and with
+a dispersal surplus it decreased at every extent, from \(-0.08\) to \(-0.93\). At intermediate
+dispersal, it decreased with 0 to 10% of the landscape disturbed, did not change at 15% (95%
+interval \(-0.007\) to 0.003), increased from 20% to 95% (up to 0.20 at 80%) and decreased at
+100%, so the extent without change is 15% rather than 15 to 20%. The control confirmed the
+decline of beta diversity without disturbance at intermediate and high dispersal (\(-0.05\) to
+\(-0.06\) and \(-0.07\) to \(-0.10\) across niche breadths, at step 700). Relative to the control,
+disturbance with a dispersal surplus lowered beta diversity by less than 0.03 up to half of the
+landscape disturbed, and at intermediate dispersal it raised beta diversity at every extent from
+5% to 95%, so the conclusions of the previous section hold.
+
+The sweep crossed the duration of the pulse (10 to 400 steps), the disturbed environment (0.1
+to 0.5), dispersal (\(10^{-5}\) to \(10^{-1}\)) and the extent (1% to 100%), with 100 runs per
+setting and \(\Delta\beta\) measured 100 steps after the end of the pulse. Dispersal set the
+direction of the change whatever the pulse: beta diversity never decreased with dispersal
+limitation (139 of 150 settings positive, the others unchanged) and always decreased at
+\(10^{-3}\) and \(10^{-2}\) (150 of 150). At intermediate dispersal, the direction depended on the
+pulse: short and severe pulses increased beta diversity, and long and mild ones decreased it
+(with 40% of the landscape disturbed, from 0.09 for 50 steps at an environment of 0.1 to
+\(-0.10\) for 400 steps at 0.4). This seems to follow from the background decline, which a long
+pulse leaves more time to accumulate before the measurement, and from the weaker filtering of a
+mild pulse. At \(10^{-1}\), the metacommunity was well mixed, and the change was zero in 97 of 150
+settings and small where negative. The central result of Hajian-Forooshani & Chase (2026) is
+therefore robust to the duration and severity of the pulse except at intermediate dispersal,
+where they already reported that the direction depends on the conditions.
+
+## Summary
+
 In short, comdynamite reproduces the model of Hajian-Forooshani & Chase (2026) with
 `env_pulse()` and no change to its engine: its mean changes are statistically
 indistinguishable from their archived simulations, and all three of their figures are
@@ -184,7 +219,9 @@ intermediate dispersal, and most of the regional extinctions that follow the pul
 the transient dynamics of the metacommunity rather than from the disturbance. The
 differentiation under dispersal limitation, the losses during the pulse, and the homogenisation
 and extinctions after extensive disturbance with a dispersal surplus are effects of the
-disturbance itself.
+disturbance itself. These conclusions held with 500 replicates, and the direction set by
+dispersal held over pulses of 10 to 400 steps and of every severity studied, except at
+intermediate dispersal.
 
 ## References
 
