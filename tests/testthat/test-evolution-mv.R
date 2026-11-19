@@ -281,15 +281,53 @@ test_that("env_time as a matrix works with a single column of env and one evolvi
   expect_equal(unname(a$evolution$environment_history[, "step10"]), warm[, 10])
 })
 
-test_that("immigrant_selection is refused with several traits and in evolving simulations", {
+test_that("immigrant_selection filters maladapted immigrants with several traits", {
+  xy <- expand.grid(x = 0:4, y = 0:3)
+  env <- cbind(a = rep(c(40, 60), 10), b = rep(c(0, 5), 10))
+  ls <- landscape_points(xy, env[, "a"], disp_scale = 1)
+  tr <- list(a = data.frame(optimum = c(40, 60), sigma = 5, r_max = 5,
+                            row.names = c("sp1", "sp2")),
+             b = data.frame(optimum = c(0, 5), sigma = 3, r_max = 1, row.names = c("sp1", "sp2")))
+  init <- cbind(sp1 = (env[, "a"] == 40) * 100L, sp2 = (env[, "a"] == 60) * 100L)
+  run <- function(sel) {
+    set.seed(4)
+    simulate_metacommunity(ls, tr, matrix(0.04, 2, 2), env = env, dispersal = 0.2,
+                           n_steps = 30, seed_steps = integer(0), initial = init,
+                           evolution = evolution_control(diag(2), ne_ratio = Inf,
+                                                         immigrant_selection = sel))
+  }
+  wrong <- function(s) {
+    sum(s$abundance[env[, "a"] == 60, "sp1"]) + sum(s$abundance[env[, "a"] == 40, "sp2"])
+  }
+  expect_lt(wrong(run(TRUE)), wrong(run(FALSE)))
+})
+
+test_that("mv_immigrants_selected reduces to immigrants_selected with one selected axis", {
+  s <- mv_setup(4)
+  env <- cbind(svl = c(40, 60, 45, 50), head = 0)
+  control <- evolution_control(diag(c(4, 0)), env_var = diag(c(1, 0)))
+  control$traits <- s$tr
+  control$env <- env
+  ev <- evolution_state_mv(control, 4L, 1L, "sp1")
+  em <- matrix(c(10, 0, 3, 0), 4, 1)
+  za <- array(c(40, 0, 52, 0, 0, 0, 0, 0), c(4, 1, 2))
+  disp <- matrix(1 / 3, 4, 4)
+  diag(disp) <- 0
+  mv <- mv_immigrants_selected(ev, em, za, za, env, disp, 1)
+  uni <- immigrants_selected(em, matrix(za[, , 1], 4), matrix(za[, , 1], 4), env[, 1],
+                             20^2 + 4 + 1, disp)
+  expect_equal(mv$lambda, uni$lambda)
+  expect_equal(mv$mean[, , 1], drop(uni$mean))
+  expect_equal(mv_fitness(ev, matrix(c(40, 0), 1), env, 1)[1, ],
+               unname(exp(-(env[, 1] - 40)^2 / (2 * (20^2 + 5)))))
+})
+
+test_that("mutation_var is refused with several traits and in evolving simulations", {
   s <- mv_setup()
-  ev <- evolution_control(genetic_var = diag(2), immigrant_selection = TRUE)
-  expect_error(simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, n_steps = 5,
-                                      evolution = ev), "several traits")
   expect_error(simulate_evolving_metacommunity(s$ls, s$tr$svl,
                                                speciation_control("geographic", Inf),
                                                evolution = evolution_control(
-                                                 10, immigrant_selection = TRUE),
+                                                 10, ne_ratio = 0.5, mutation_var = 0.1),
                                                n_steps = 5), "not yet available")
   expect_error(simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, n_steps = 5,
                                       evolution = evolution_control(diag(2), ne_ratio = 0.5,

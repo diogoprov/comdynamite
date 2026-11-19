@@ -24,7 +24,10 @@ simulate_evolving_metacommunity(
   immigration = c("poisson", "multinomial"),
   max_species = 500,
   env = NULL,
-  disturbance = 0
+  disturbance = 0,
+  dispersal_time = NULL,
+  kernels = NULL,
+  kernel_step = NULL
 )
 }
 \arguments{
@@ -81,6 +84,20 @@ and new species inherit the matrices of their mother.}
 
 \item{disturbance}{Probability that a site loses all its populations at each time step
 (one value; 0, the default, for none).}
+
+\item{dispersal_time}{Optional change of emigration through time: a vector with one
+multiplier of \code{dispersal} per step (probabilities above 1 are set to 1), or a matrix with
+one row per step and one column, or one per species, of emigration probabilities. For
+example, a dispersal pulse during floods or a breeding migration in some steps. \code{NULL}
+(the default) keeps \code{dispersal} at every step.}
+
+\item{kernels, kernel_step}{Optional change of the routes of dispersal through time:
+\code{kernels} is a list of dispersal matrices (sites x sites, e.g. from \code{\link[=dispersal_kernel]{dispersal_kernel()}}
+or the \code{dispersal} of other landscapes on the same sites; rows are rescaled to sum to 1
+and the diagonal is ignored), and \code{kernel_step} gives, for each step, the index or name of
+the matrix used. For example, a matrix of connected ponds for flood steps and one of
+isolated ponds for dry steps. Only for spatially explicit landscapes; \code{NULL} (the
+default) keeps the dispersal matrix of \code{landscape}.}
 }
 \value{
 An \code{mc_evolving} object, a list with:
@@ -135,7 +152,10 @@ each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \co
 lineages (trait by trait) are arrays of sites x species x traits (with the recorded
 steps as a fourth dimension in the histories), \code{genetic_var} and \code{env_var} hold one
 matrix per species and \code{plasticity} is a matrix of species x traits.
-\item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used.
+\item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used, and
+\code{dispersal_time}, \code{kernels} (rescaled) and \code{kernel_step}. New species take the
+emigration through time of their mother. The gene flow that keeps populations together
+follows the kernel of each step; fission by distance uses the kernel of \code{landscape}.
 }
 
 \code{\link[=as_metacommunity]{as_metacommunity()}} turns it into an \code{mc_sim} for the other functions of the package.

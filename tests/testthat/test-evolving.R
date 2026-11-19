@@ -497,3 +497,62 @@ test_that("split times of several buddings at once agree with one at a time", {
   expect_equal(many, t(many))
   expect_equal(unname(diag(many)), rep(0, 5))
 })
+
+test_that("the evolving engine takes dispersal_time and kernels", {
+  set.seed(11)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  sp <- speciation_control("geographic", threshold = 50)
+  run <- function(...) {
+    set.seed(12)
+    simulate_evolving_metacommunity(ls, anc, speciation = sp, dispersal = 0.01,
+                                    n_steps = 150,
+                                    evolution = evolution_control(20, ne_ratio = 0.5), ...)
+  }
+  base <- run()
+  # a constant multiplier of 1 and the landscape's own matrix as a kernel change nothing
+  expect_identical(run(dispersal_time = rep(1, 150))$abundance, base$abundance)
+  same <- run(kernels = list(ls$dispersal), kernel_step = rep(1, 150))
+  expect_identical(same$abundance, base$abundance)
+  expect_identical(same$species, base$species)
+  # no emigration: species stay in the sites where they started, new species included
+  init <- matrix(0L, 25, 1, dimnames = list(NULL, "sp1"))
+  init[c(1, 25), 1] <- 50L
+  set.seed(13)
+  still <- simulate_evolving_metacommunity(ls, anc, speciation_control("point", rate = 0.01),
+                                           dispersal = 0.2, n_steps = 60, initial = init,
+                                           seed_mean = 0, dispersal_time = rep(0, 60))
+  expect_gt(nrow(still$events), 0)
+  expect_true(all(rowSums(still$abundance)[-c(1, 25)] == 0))
+  expect_equal(still$dispersal_time, rep(0, 60))
+  # two kernels in turn run, and the kernels are returned
+  dry <- landscape_grid(5, disp_scale = 0.1)$dispersal
+  two <- run(kernels = list(wet = ls$dispersal, dry = dry),
+             kernel_step = rep(c("wet", "dry"), each = 25, length.out = 150))
+  expect_s3_class(two, "mc_evolving")
+  expect_named(two$kernels, c("wet", "dry"))
+})
+
+test_that("the evolving engine filters immigrants by their fitness", {
+  set.seed(14)
+  ls <- landscape_grid(5, disp_scale = 0.5)
+  anc <- data.frame(optimum = 50, sigma = 10, r_max = 5, row.names = "sp1")
+  run <- function(sel) {
+    set.seed(15)
+    simulate_evolving_metacommunity(ls, anc, speciation_control("geographic", threshold = 50),
+                                    dispersal = 0.05, n_steps = 150,
+                                    evolution = evolution_control(5, ne_ratio = 0.5,
+                                                                  immigrant_selection = sel))
+  }
+  filtered <- run(TRUE)
+  expect_s3_class(filtered, "mc_evolving")
+  # the flow counted for divergence is weighted by the fitness of emigrants where they land
+  st <- new.env()
+  st$m <- 3
+  st$ev <- list(g = 1, sigma = 3, ve = 0)
+  st$pa_em <- matrix(c(50, NA, 60), 3, 1)
+  st$e_now <- c(50, 55, 60)
+  w <- evolving_immigrant_fitness(st, 1, 1)
+  expect_equal(w[1, ], exp(-(c(50, 55, 60) - 50)^2 / 20))
+  expect_equal(dim(w), c(3L, 3L))
+})

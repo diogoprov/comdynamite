@@ -61,9 +61,6 @@ evolution_root <- function(v) {
 
 # the state of multivariate evolution inside mc_dynamics()
 evolution_state_mv <- function(evolution, m, k_all, species) {
-  if (isTRUE(evolution$immigrant_selection)) {
-    stop("`immigrant_selection` is not yet available with several traits", call. = FALSE)
-  }
   if (!is.null(evolution$mutation_var)) {
     stop("`mutation_var` is not yet available with several traits", call. = FALSE)
   }
@@ -148,7 +145,7 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
        sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,
-       founder = evolution$founder)
+       founder = evolution$founder, imm_sel = isTRUE(evolution$immigrant_selection))
 }
 
 # phenotypes: genetic means plus the plastic response to the environment e (sites x traits)
@@ -231,20 +228,78 @@ mv_found <- function(ev, target, from, k, cells, cols, between = NULL) {
   target
 }
 
+# relative fitness (sources x sites) of the mean phenotypes `p` (sources x traits) of species j
+# in the environment `e` (sites x traits): the multivariate Gaussian of mv_growth(), with the
+# variance of phenotypes, divided by its maximum, so that a perfectly adapted source gives 1
+mv_fitness <- function(ev, p, e, j) {
+  s <- ev$sel[[j]]
+  w <- matrix(1, nrow(p), nrow(e))
+  if (!length(s$s)) return(w)
+  for (i in seq_len(nrow(p))) {
+    d <- e[, s$s, drop = FALSE] - matrix(p[i, s$s], nrow(e), length(s$s), byrow = TRUE)
+    w[i, ] <- exp(-0.5 * rowSums((d %*% s$A) * d))
+  }
+  w
+}
+
+# immigrants filtered by viability selection in the site they reach, with several traits: as
+# immigrants_selected(), with the weights of mv_fitness(); returns the expected numbers
+# (sites x species) and the means, variances among sources and phenotypes of the immigrants
+# that arrive (sites x species x traits)
+mv_immigrants_selected <- function(ev, em, za, pa, e, disp_matrix, cols) {
+  m <- nrow(em)
+  k <- ncol(em)
+  za[is.na(za)] <- 0
+  pa[is.na(pa)] <- 0
+  lam <- matrix(0, m, k)
+  zi <- z2 <- pi <- array(0, c(m, k, ev$q))
+  for (s in seq_len(k)) {
+    src <- em[, s] > 0
+    if (!any(src)) next
+    w <- mv_fitness(ev, matrix(pa[src, s, ], sum(src)), e, cols[s])
+    flow <- disp_matrix[src, , drop = FALSE] * w * em[src, s]
+    lam[, s] <- colSums(flow)
+    for (a in seq_len(ev$q)) {
+      zi[, s, a] <- colSums(flow * za[src, s, a])
+      z2[, s, a] <- colSums(flow * za[src, s, a]^2)
+      pi[, s, a] <- colSums(flow * pa[src, s, a])
+    }
+  }
+  has <- lam > 0
+  for (a in seq_len(ev$q)) {
+    za_a <- za[, , a]
+    pa_a <- pa[, , a]
+    zi_a <- ifelse(has, zi[, , a] / lam, za_a)
+    v <- ifelse(has, z2[, , a] / lam - zi_a^2, 0)
+    v[v < 1e-10 * pmax(1, zi_a^2)] <- 0
+    zi[, , a] <- zi_a
+    z2[, , a] <- v
+    pi[, , a] <- ifelse(has, pi[, , a] / lam, pa_a)
+  }
+  list(lambda = lam, mean = zi, between = z2, phenotype = pi)
+}
+
 # gene flow: residents and immigrants mixed by their numbers, immigrants with the means of
-# their sources; populations without residents are founded by a sample of their immigrants
-mv_flow <- function(ev, za, pa, n, em, imm, disp_matrix, cols) {
+# their sources (or, with `sel` from mv_immigrants_selected(), of the immigrants that survive);
+# populations without residents are founded by a sample of their immigrants
+mv_flow <- function(ev, za, pa, n, em, imm, disp_matrix, cols, sel = NULL) {
   imm <- imm + matrix(0L, nrow(n), ncol(n))
   res <- n - em
   zi <- between <- p_imm <- za
-  for (a in seq_len(ev$q)) {
-    zi[, , a] <- immigrant_mean(em, za[, , a], disp_matrix, za[, , a])
-    # variance among sources; the residue of the subtraction (cancellation for large means)
-    # is set to 0
-    v <- immigrant_mean(em, za[, , a]^2, disp_matrix, za[, , a]^2) - zi[, , a]^2
-    v[v < 1e-10 * pmax(1, zi[, , a]^2)] <- 0
-    between[, , a] <- v
-    p_imm[, , a] <- immigrant_mean(em, pa[, , a], disp_matrix, pa[, , a])
+  if (!is.null(sel)) {
+    zi <- sel$mean
+    between <- sel$between
+    p_imm <- sel$phenotype
+  } else {
+    for (a in seq_len(ev$q)) {
+      zi[, , a] <- immigrant_mean(em, za[, , a], disp_matrix, za[, , a])
+      # variance among sources; the residue of the subtraction (cancellation for large means)
+      # is set to 0
+      v <- immigrant_mean(em, za[, , a]^2, disp_matrix, za[, , a]^2) - zi[, , a]^2
+      v[v < 1e-10 * pmax(1, zi[, , a]^2)] <- 0
+      between[, , a] <- v
+      p_imm[, , a] <- immigrant_mean(em, pa[, , a], disp_matrix, pa[, , a])
+    }
   }
   both <- res > 0 & imm > 0
   w_res <- ifelse(both, res / (res + imm), 1)
