@@ -1,12 +1,12 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-18. Versão atual: 0.9.0 (DOI `10.5281/zenodo.24341231`), com
+Atualizado em 2026-11-19. Versão atual: 0.9.0 (DOI `10.5281/zenodo.24341231`), com
 `0.9.0.9000` em desenvolvimento (DOI de conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`
 e `v0.9.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-18)
+## Próximos passos (2026-11-19)
 
 1. **v0.9.0 publicada em 2026-11-18** (tag `v0.9.0`, release no GitHub, DOI
    `10.5281/zenodo.24341231`); os dois itens abertos do marco passaram para o bloco A (ver
@@ -18,8 +18,9 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    As limitações resolvíveis do manuscrito entraram nos blocos A, B, C e H (ver "Limitações do
    manuscrito" abaixo), para que a revisão já encontre parte delas feitas.
 3. **DAMOCLES:** terminar a validação S3 com o ClaDS2 e escrever o plano do artigo
-   (`dev/plano-artigo-damocles.md`); depois, o proxy de persistência por traits (ideia do
-   Januário) com ATLANTIC AMPHIBIANS e TetrapodTraits.
+   (`dev/plano-artigo-damocles.md`). O proxy de persistência por traits (ideia do Januário)
+   foi testado com TetrapodTraits, longevidade e ocupação dinâmica no NAAMP (PR #120,
+   2026-11-19); nota enviada ao Januário em 2026-11-19, aguardando a reunião.
 4. **Delatorre et al. (2015):** experimento virtual feito (local, `dev/delatorre2015/`, fora
    do git). Sorting no ambiente medido é descartado; sorting em eixo não medido contra
    neutralidade fica em aberto com as estatísticas do artigo, e a matriz de espécies
@@ -103,7 +104,7 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
    de citar resultados.
 
-Ordem sugerida para o que falta: 2, 1, 3, 4, 6. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
+Ordem sugerida para o que falta: 2, 1, 3, 4, 6. Próximo passo de código (2026-11-19): o item 2. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
 
 **Bloco B, especiação: comparação e experimentos.** Fase 4 (gen3sis, GPL, e MESS, sem
@@ -126,7 +127,10 @@ neutralidade regional sem dominância local); Urban (vantagem do primeiro a cheg
 não 84% e 72%; a inversão com variação permanente e a vantagem de quem evolui por mutação
 dependem do contraste ambiental, o que qualifica a frase do manuscrito sobre variação
 permanente); Hajian (sem mudança a 15%, não a 15% a 20%; comparação com o controle; direção
-dada pela dispersão robusta à duração e à intensidade do pulso).
+dada pela dispersão robusta à duração e à intensidade do pulso). Os três artigos de
+replicação foram atualizados em 2026-11-19 (PR #122, 92a29d6), com uma seção de réplicas e
+varreduras em cada um. Falta só levar ao manuscrito, na revisão do JBI: a frase sobre variação
+permanente (Urban), a persistência com 500 réplicas (Leibold) e a extensão sem mudança (Hajian).
 
 **Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
