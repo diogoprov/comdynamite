@@ -177,6 +177,29 @@ dominância local de Leibold et al. (2019), um módulo opcional de poucos locos 
 validado contra a replicação com indivíduos. Reprodução sexuada e ligação ficam fora. Estudo
 primeiro, API depois; não bloqueia o CRAN.
 
+**Bloco I, metacomunidades multitróficas (pedido em 2026-11-19).** Estender o modelo de
+Thompson et al. (2020) de `simulate_metacommunity()`, hoje de um nível trófico (nicho abiótico
+e competição de Beverton-Holt), para vários níveis, no quadro de Guzman et al. (Ecology
+Letters, doi:10.1111/ele.13162), em que os níveis diferem em dispersão e escala espacial.
+Plano: (i) ler Guzman et al. e os modelos espaciais de teias já publicados antes de escrever
+código, entre eles Pillai et al. (2011, PNAS, doi:10.1073/pnas.1106235108), Gravel et al.
+(2011, PLoS ONE, doi:10.1371/journal.pone.0019374) e Haegeman & Loreau (2014, Ecology
+Letters, doi:10.1111/ele.12214), e escolher um como alvo de replicação; (ii) matriz de
+interações com sinais (consumo e competição) e resposta funcional de tipo II por par
+consumidor-recurso, mantendo o nicho abiótico por espécie; (iii) dispersão, kernel e
+extinção por nível trófico, para os cenários de Guzman et al.; (iv) ligação com o que já
+existe: `food_web_dynamics()` (três níveis de McPeek 2017, sem espaço, eco-evolutivo) e
+`food_web_rates()`, e com o motor evolutivo, para traits que mudam a interação; (v)
+validação contra o caso de um nível (deve reproduzir `simulate_metacommunity()` exatamente)
+e contra o modelo escolhido em (i); (vi) estatísticas por nível em `summary_stats()` e nos
+artigos (alfa, beta e gama por nível, persistência). Mexe na API do motor, então pesa na
+decisão de fazer antes ou depois do CRAN; recomendação: estudo e protótipo antes, API
+depois do bloco A. Combina com o item 7 do bloco A (redes fluviais, em que consumidores e
+recursos dispersam de modos diferentes ao longo da corrente). A Melissa Guzman é coautora de
+Thompson et al. (2020) e primeira autora do quadro multitrófico; o e-mail a ela segue
+pendente de decisão do usuário. Referências conferidas no OpenAlex em 2026-11-19 (só os
+metadados); ler os artigos antes de citar resultados.
+
 **Limitações do manuscrito fora do escopo.** A segunda (estrutura de estágios, restrições
 metabólicas, paisagens que mudam em tempo geológico) não entra: o pacote fica no tempo
 ecológico e em paisagens estáticas, e o gen3sis e o BioGEEM cobrem o tempo profundo (ver
@@ -186,7 +209,9 @@ ecológico e em paisagens estáticas, e o gen3sis e o BioGEEM cobrem o tempo pro
 descrito na seção de métodos; só entra no pacote se tiver poder.
 
 **v1.0.0 (CRAN).** Depois do bloco A e da Fase 4, que são os que ainda mexem na API. Os blocos
-C a H são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas.
+C a H são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas. O bloco I
+muda o motor; se entrar antes do CRAN, adia a 1.0.0, e depois dele pode vir como função nova
+sem quebrar `simulate_metacommunity()`.
 
 ## Visão
 
