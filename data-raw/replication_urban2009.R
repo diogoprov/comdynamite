@@ -69,14 +69,20 @@ genetics <- list(
   constant_both = list(g = c(120, 120), vm = NULL)
 )
 
+# `env_sites` (environment of the three sites) and `vm_value` (mutational variance of the
+# evolving species) are for the sweeps of data-raw/blockB/blockB_urban.R;
 # `recruitment`, `mortality` and `variance_selection` are for data-raw/mechanisms_urban2009.R;
 # with overlapping generations (mortality < 1), delays, n_steps, start and record_steps stay in
 # generations and are converted to steps (1 / mortality per generation)
 run_urban <- function(genetic, delay = 0, dispersal = c(0.05, 0.05), seed, n_steps = 500,
                       start = 21, record_steps = NULL, recruitment = "beverton_holt",
-                      mortality = 1, variance_selection = FALSE) {
+                      mortality = 1, variance_selection = FALSE, env_sites = env,
+                      vm_value = vm) {
   set.seed(seed)
   gs <- genetics[[genetic]]
+  if (!is.null(gs$vm)) gs$vm <- gs$vm / vm * vm_value
+  land <- if (identical(env_sites, env)) landscape else
+    landscape_matrix(matrix(1, 3, 3), env = env_sites)
   per <- 1 / mortality
   open <- round((start - 1) * per) + 1
   from <- cbind(sp1 = c(1, 1, open + round(max(0, -delay) * per)),
@@ -86,7 +92,7 @@ run_urban <- function(genetic, delay = 0, dispersal = c(0.05, 0.05), seed, n_ste
                       mutation_var = gs$vm,
                       variance_selection = variance_selection && !is.null(gs$vm))
   }
-  sim <- simulate_metacommunity(landscape, traits, alpha, dispersal = dispersal,
+  sim <- simulate_metacommunity(land, traits, alpha, dispersal = dispersal,
                                 n_steps = round(n_steps * per), seed_steps = integer(0),
                                 initial = initial, pool_from = from,
                                 record_steps = if (!is.null(record_steps)) round(record_steps * per),

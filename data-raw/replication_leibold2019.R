@@ -51,7 +51,7 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
                         every = 100, nm = 10, immigrant_selection = FALSE,
                         ne_ratio = 0.5, founder = TRUE, mutation_var = NULL,
                         recruitment = "beverton_holt", mortality = 1,
-                        variance_selection = FALSE) {
+                        variance_selection = FALSE, p_ext = 0.01) {
   landscape_type <- match.arg(landscape_type)
   set.seed(seed)
   env <- if (landscape_type == "two") sample(rep(c(40, 60), side^2 / 2)) else rep(50, side^2)
@@ -72,7 +72,7 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
                                 n_steps = round(n_steps * per),
                                 seed_steps = integer(0), initial = initial,
                                 record_steps = round(steps * per),
-                                disturbance = 1 - (1 - 0.01)^(1 / per),
+                                disturbance = 1 - (1 - p_ext)^(1 / per),
                                 recruitment = recruitment, microsites = 400,
                                 mortality = mortality,
                                 evolution = evolution_control(
