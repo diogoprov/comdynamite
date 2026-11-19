@@ -37,6 +37,7 @@ round(dispersal_kernel(d, scale = 1, shape = "gaussian"), 2)
 Other landscapes:
 \code{\link[=env_over_time]{env_over_time()}},
 \code{\link[=env_pulse]{env_pulse()}},
+\code{\link[=env_space_time]{env_space_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
 \code{\link[=landscape_matrix]{landscape_matrix()}},
