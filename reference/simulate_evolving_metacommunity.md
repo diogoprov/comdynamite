@@ -35,7 +35,10 @@ simulate_evolving_metacommunity(
   immigration = c("poisson", "multinomial"),
   max_species = 500,
   env = NULL,
-  disturbance = 0
+  disturbance = 0,
+  dispersal_time = NULL,
+  kernels = NULL,
+  kernel_step = NULL
 )
 ```
 
@@ -137,6 +140,27 @@ simulate_evolving_metacommunity(
   Probability that a site loses all its populations at each time step
   (one value; 0, the default, for none).
 
+- dispersal_time:
+
+  Optional change of emigration through time: a vector with one
+  multiplier of `dispersal` per step (probabilities above 1 are set to
+  1), or a matrix with one row per step and one column, or one per
+  species, of emigration probabilities. For example, a dispersal pulse
+  during floods or a breeding migration in some steps. `NULL` (the
+  default) keeps `dispersal` at every step.
+
+- kernels, kernel_step:
+
+  Optional change of the routes of dispersal through time: `kernels` is
+  a list of dispersal matrices (sites x sites, e.g. from
+  [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md)
+  or the `dispersal` of other landscapes on the same sites; rows are
+  rescaled to sum to 1 and the diagonal is ignored), and `kernel_step`
+  gives, for each step, the index or name of the matrix used. For
+  example, a matrix of connected ponds for flood steps and one of
+  isolated ponds for dry steps. Only for spatially explicit landscapes;
+  `NULL` (the default) keeps the dispersal matrix of `landscape`.
+
 ## Value
 
 An `mc_evolving` object, a list with:
@@ -222,7 +246,11 @@ An `mc_evolving` object, a list with:
   of species x traits.
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
-  `n_steps` used.
+  `n_steps` used, and `dispersal_time`, `kernels` (rescaled) and
+  `kernel_step`. New species take the emigration through time of their
+  mother. The gene flow that keeps populations together follows the
+  kernel of each step; fission by distance uses the kernel of
+  `landscape`.
 
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
 turns it into an `mc_sim` for the other functions of the package.

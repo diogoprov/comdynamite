@@ -103,7 +103,10 @@ given: it grows out of the dynamics. The community starts from the species of <c
 <span>  immigration <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"poisson"</span>, <span class="st">"multinomial"</span><span class="op">)</span>,</span>
 <span>  max_species <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  disturbance <span class="op">=</span> <span class="fl">0</span></span>
+<span>  disturbance <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  dispersal_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kernels <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kernel_step <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -198,6 +201,24 @@ and new species inherit the matrices of their mother.</p></dd>
 <dd><p>Probability that a site loses all its populations at each time step
 (one value; 0, the default, for none).</p></dd>
 
+
+<dt id="arg-dispersal-time">dispersal_time<a class="anchor" aria-label="anchor" href="#arg-dispersal-time"></a></dt>
+<dd><p>Optional change of emigration through time: a vector with one
+multiplier of <code>dispersal</code> per step (probabilities above 1 are set to 1), or a matrix with
+one row per step and one column, or one per species, of emigration probabilities. For
+example, a dispersal pulse during floods or a breeding migration in some steps. <code>NULL</code>
+(the default) keeps <code>dispersal</code> at every step.</p></dd>
+
+
+<dt id="arg-kernels-kernel-step">kernels, kernel_step<a class="anchor" aria-label="anchor" href="#arg-kernels-kernel-step"></a></dt>
+<dd><p>Optional change of the routes of dispersal through time:
+<code>kernels</code> is a list of dispersal matrices (sites x sites, e.g. from <code><a href="dispersal_kernel.html">dispersal_kernel()</a></code>
+or the <code>dispersal</code> of other landscapes on the same sites; rows are rescaled to sum to 1
+and the diagonal is ignored), and <code>kernel_step</code> gives, for each step, the index or name of
+the matrix used. For example, a matrix of connected ponds for flood steps and one of
+isolated ponds for dry steps. Only for spatially explicit landscapes; <code>NULL</code> (the
+default) keeps the dispersal matrix of <code>landscape</code>.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -251,7 +272,10 @@ each species (<code>genetic_var</code>, <code>env_var</code>, <code>plasticity</
 lineages (trait by trait) are arrays of sites x species x traits (with the recorded
 steps as a fourth dimension in the histories), <code>genetic_var</code> and <code>env_var</code> hold one
 matrix per species and <code>plasticity</code> is a matrix of species x traits.</p></li>
-<li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used.</p></li>
+<li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used, and
+<code>dispersal_time</code>, <code>kernels</code> (rescaled) and <code>kernel_step</code>. New species take the
+emigration through time of their mother. The gene flow that keeps populations together
+follows the kernel of each step; fission by distance uses the kernel of <code>landscape</code>.</p></li>
 </ul><p><code><a href="as_metacommunity.html">as_metacommunity()</a></code> turns it into an <code>mc_sim</code> for the other functions of the package.</p>
     </div>
     <div class="section level2">

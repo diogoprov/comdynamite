@@ -148,9 +148,11 @@ immigrants from each source arrive in proportion to the mean fitness of their so
 phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
 as the growth rate, with the variance of the phenotypes), so that maladapted immigrants
 are filtered source by source, as individuals are in an individual-based model, and the
-mean and variance of the immigrants are those of the survivors. One trait only, on a
-spatially explicit landscape with <code>immigration = "poisson"</code>; used in the article
-"Replicating Leibold et al. (2019)".</p></dd>
+mean and variance of the immigrants are those of the survivors. With several traits, the
+fitness is the multivariate Gaussian of the growth rate. Needs a spatially explicit
+landscape with <code>immigration = "poisson"</code>; also in <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>,
+where the gene flow that keeps populations together counts only the immigrants that
+survive. Used in the article "Replicating Leibold et al. (2019)".</p></dd>
 
 
 <dt id="arg-mutation-var">mutation_var<a class="anchor" aria-label="anchor" href="#arg-mutation-var"></a></dt>

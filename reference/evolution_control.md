@@ -88,9 +88,13 @@ evolution_control(
   (the same Gaussian as the growth rate, with the variance of the
   phenotypes), so that maladapted immigrants are filtered source by
   source, as individuals are in an individual-based model, and the mean
-  and variance of the immigrants are those of the survivors. One trait
-  only, on a spatially explicit landscape with
-  `immigration = "poisson"`; used in the article "Replicating Leibold et
+  and variance of the immigrants are those of the survivors. With
+  several traits, the fitness is the multivariate Gaussian of the growth
+  rate. Needs a spatially explicit landscape with
+  `immigration = "poisson"`; also in
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
+  where the gene flow that keeps populations together counts only the
+  immigrants that survive. Used in the article "Replicating Leibold et
   al. (2019)".
 
 - mutation_var:

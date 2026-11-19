@@ -2,6 +2,21 @@
 
 ## comdynamite (development version)
 
+- [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  takes `dispersal_time`, `kernels` and `kernel_step`: dispersal that
+  changes through time now works with speciation. New species inherit
+  the emigration through time of their mother, and the gene flow that
+  keeps populations together follows the kernel of each step.
+- `immigrant_selection` in
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
+  now works with several traits (fitness under the multivariate Gaussian
+  niche) and with speciation, where the gene flow counted for divergence
+  includes only the immigrants that survive. `mutation_var` is still
+  refused in both cases.
+- A matrix of `kernels` whose rows already sum to 1 is no longer
+  rescaled, so that the matrix of the landscape given as a kernel
+  reproduces a run without `kernels` exactly.
+
 ## comdynamite 0.9.0
 
 - New article “Dispersal and disturbance through time”: the shape of the
