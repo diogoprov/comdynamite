@@ -844,6 +844,88 @@ Consequências (interpretação minha; substitui a lista anterior onde conflita)
   espécies) e regimes dentro de cada clado. Comparar com os modelos "global" e "por clado"
   de Reijenga et al. (2026).
 
+### 4.1 Proxy de persistência (sugestão do Januário, 17–19/11/2026, `data-raw/persistence_proxy/`)
+
+**Ideia.** Na foto única de Benício, τ = log(c + e) não é identificável; ε = logit(c/(c+e))
+aproxima-se da ocupação. O Januário sugeriu usar um traço como proxy de persistência,
+validá-lo onde há dinâmica temporal e então testá-lo contra as taxas de diversificação no
+pool regional (ES-sim/FiSSE contra DR ou ClaDS, e covariável de traço no DAMOCLES).
+
+**Etapa 1 — traços do TetrapodTraits no pool** (`tt_match.R`, `proxy_size_habitat.R`):
+- TetrapodTraits v3.0.1 (Moura et al. 2024, doi 10.1371/journal.pbio.3002658) casa 212 de
+  222 espécies do pool (nomes antigos: *Hypsiboas*, *T. venulosus*, *Eupemphix*); só
+  valores observados (sem imputação).
+- ES-sim de log CRC, verticalidade e amplitude de habitat contra log DR (melhor árvore do
+  Portik + 100 bootstraps, 196 espécies): nulo (CRC r = 0,17, p = 0,12; ≤ 1% das árvores
+  significativas). Ocupação (n de sítios no ATLANTIC AMPHIBIANS) contra DR: r = −0,08.
+- PGLS da ocupação: cresce com CRC e com amplitude de habitat (esta em parte circular).
+- Isso não diz se tamanho ou habitat medem persistência; o proxy nunca foi validado.
+
+**Etapa 2 — longevidade** (`longevity_coverage.R`): a união de Stark & Meiri (2018, doi
+10.1111/geb.12804), Stark et al. (2020, doi 10.1111/geb.13069) e TetrapodTraits dá 674
+anfíbios, mas só 20 das 222 espécies do pool. Reinke et al. (2022, doi
+10.1126/science.abm0151) não tem nenhuma espécie do pool. Traços demográficos da Mata
+Atlântica praticamente não existem.
+
+**Etapa 3 — validação no NAAMP** (USGS, doi 10.5066/F7G44NG0; protocolo unificado
+2001–2015; unidade = ponto de escuta, estação = ano, réplica = visita):
+- 40 espécies (sem complexos) com ≥ 50 pontos, 34 com longevidade.
+- Modelo de ocupação dinâmica em Stan (algoritmo forward, efeitos aleatórios não
+  centrados, priors explícitos). Versões: v2 (rota e ano em c e e; rota e ponto em p;
+  janela fixa), v3 (+ observador em p, ponto em ψ, c e e), v4 (+ estado × janela e
+  ano × janela em p, isto é, fenologia regional e interanual). c e e da espécie são
+  integrados sobre a distribuição dos efeitos aleatórios (Monte Carlo); o valor da
+  "unidade mediana" representa mal a espécie (ε mediano 5,6 contra integrado 2,4 em
+  *P. crucifer*).
+- **PPC:** o número de trocas entre anos é superestimado em todas as versões (os dados
+  são mais persistentes que o modelo); a fenologia por estado reduz o desvio, mas não o
+  elimina. A taxa de detecção na janela 2 vai de 0,12 (Mississippi) a 0,95 (Maine) em
+  *P. crucifer*.
+- **Robustez (10 espécies, `compare_versions.R`):** postos entre v2 e v4 — e 0,88, c 0,92,
+  ε 0,78, τ 0,92. Correlação de e com a detectabilidade empírica: −0,62 (v2), −0,43 (v4).
+- **Lote de 34 espécies** (`run_overnight.sh`, v4): 20 passam no filtro (≥ 10 rotas,
+  R-hat < 1,05, < 5% de draws NaN). Falham, entre outras, *A. americanus* (R-hat 1,42
+  mesmo com 2.000 iterações), *H. chrysoscelis*, *Gastrophryne* (c + e ≥ 1 em parte da
+  posterior) e *A. terrestris*. O ajuste v4 de *P. crucifer* foi reconstruído do log
+  (o `.rds` se perdeu); só resumos com 3 algarismos.
+- Nas 20 espécies, e vai de 0,03 a 0,47 e c de 0,09 a 0,51; em geral e < c, mas não sempre
+  (*P. ornata*), e τ não é dominado só por c. A medida direta de persistência é e
+  (com estacionariedade, ε = log c − log e).
+
+**Resultado (`pgls_persistence.R`, n = 20, λ por perfil em [0, 1], ≈ 0):**
+
+| Modelo | log longevidade | logit detecção |
+|---|---|---|
+| log e ~ longevidade | −0,18 ± 0,35 (p = 0,60) | — |
+| log e ~ longevidade + detecção | −0,07 ± 0,30 (p = 0,81) | −1,26 ± 0,47 (p = 0,016) |
+| ε ~ longevidade + detecção | 0,29 ± 0,44 (p = 0,52) | 1,45 ± 0,68 (p = 0,048) |
+| τ ~ longevidade + detecção | 0,14 ± 0,22 (p = 0,53) | −0,50 ± 0,33 (p = 0,15) |
+
+- CRC também é nulo (β = 0,007, p = 0,98). Propagando a posterior de e (200 draws), a
+  inclinação da longevidade tem mediana 0,00 (IC 90% −0,43 a 0,35). Com filtro frouxo
+  (R-hat < 1,10, n = 26), o mesmo padrão.
+- Poder: com EP ≈ 0,3, só seria detectável uma variação de cerca de 3× em e entre 4 e 16
+  anos de longevidade.
+- Índice de canto médio (1–3) como proxy de abundância local: sozinho, −0,61 ± 0,42
+  (p = 0,16); com a detecção no modelo, some (−0,26, p = 0,52; n = 26: −0,03). Correlação
+  com a detecção: 0,37.
+
+**Leitura (interpretação).** Longevidade e tamanho não predizem persistência local no
+NAAMP. O único preditor é a detectabilidade, com duas leituras não separáveis com estes
+dados: (i) artefato, o modelo ainda confunde detecção baixa com turnover; (ii) abundância
+como causa comum, porque populações grandes cantam mais e também se extinguem menos
+localmente. O índice de canto é uma medida grosseira de abundância e não decide entre as
+duas. Além disso, turnover em pontos de escuta ao longo de ~15 anos é tempo ecológico, não
+persistência de linhagem; a ligação com a diversificação é premissa.
+
+**Consequências.**
+1. Não usar longevidade (nem tamanho) como proxy de τ no pool de Benício.
+2. O ATLANTIC AMPHIBIANS tem abundância local; se a leitura (ii) valer, a abundância é o
+   candidato a proxy de persistência no próprio pool. Antes, decidir como separar
+   abundância de detectabilidade (p.ex., Royle–Nichols no NAAMP com o índice de canto) e
+   como padronizar abundância entre estudos com esforço desigual.
+3. Discutir com o Januário antes de investir mais (nota curta em pt-BR).
+
 ## 5. Cronograma (estimativa)
 
 | Etapa | Duração |
