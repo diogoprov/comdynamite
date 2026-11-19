@@ -38,10 +38,18 @@ landscape_implicit <- function(n_sites, env_range = c(0, 100)) {
 #'   environment.
 #' @param disp_shape Shape of the dispersal kernel, `"exponential"` (the default) or
 #'   `"gaussian"`; see [dispersal_kernel()].
+#' @param n_axes Number of environmental axes. With more than one, each axis is a field
+#'   smoothed in the same way, the axes are correlated by `axis_cor` before the conversion to
+#'   ranks, and the landscape also holds `env_axes`, a matrix with one column per axis, which
+#'   [simulate_metacommunity()] uses with a list of traits when `env` is not given. The first
+#'   axis is `env`, the same as with `n_axes = 1` and the same seed.
+#' @param axis_cor Correlation between the axes: one number for all pairs, or a correlation
+#'   matrix (`n_axes` x `n_axes`). It applies to the smoothed fields, so the correlation of the
+#'   uniform axes (by ranks) is slightly lower.
 #' @return An `mc_landscape` object: a list with `env`, `coords` (data frame
 #'   with columns `x` and `y`), `dist` (distances among sites, toroidal if
-#'   `torus = TRUE`) and `dispersal` (row-stochastic matrix with a zero
-#'   diagonal).
+#'   `torus = TRUE`), `dispersal` (row-stochastic matrix with a zero
+#'   diagonal) and, with `n_axes > 1`, `env_axes`.
 #' @seealso [torus_permutations()] for site permutations that keep the spatial
 #'   structure of a torus.
 #' @family landscapes
@@ -52,9 +60,12 @@ landscape_implicit <- function(n_sites, env_range = c(0, 100)) {
 #' @export
 landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
                            torus = TRUE, env_range = c(0, 100),
-                           disp_shape = c("exponential", "gaussian")) {
+                           disp_shape = c("exponential", "gaussian"), n_axes = 1,
+                           axis_cor = 0) {
   disp_shape <- match.arg(disp_shape)
-  stopifnot(side >= 2, env_bandwidth > 0, disp_scale > 0)
+  stopifnot(side >= 2, env_bandwidth > 0, disp_scale > 0, n_axes >= 1)
+  n_axes <- as.integer(n_axes)
+  if (n_axes > 1) axis_cor <- axis_correlation(axis_cor, n_axes)
   xy <- expand.grid(x = seq_len(side) - 1, y = seq_len(side) - 1)
   dx <- abs(outer(xy$x, xy$x, "-"))
   dy <- abs(outer(xy$y, xy$y, "-"))
@@ -63,10 +74,41 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
     dy <- pmin(dy, side - dy)
   }
   d <- sqrt(dx^2 + dy^2)
-  z <- drop(exp(-d^2 / (2 * env_bandwidth^2)) %*% stats::rnorm(side^2))
+  smooth <- exp(-d^2 / (2 * env_bandwidth^2))
+  z <- drop(smooth %*% stats::rnorm(side^2))
   env <- rank_to_marginal(z, stats::runif(side^2, env_range[1], env_range[2]))
-  new_landscape(env = unname(env), coords = xy, dist = d,
-                dispersal = dispersal_kernel(d, disp_scale, disp_shape), torus = torus)
+  out <- new_landscape(env = unname(env), coords = xy, dist = d,
+                       dispersal = dispersal_kernel(d, disp_scale, disp_shape), torus = torus)
+  if (n_axes > 1) {
+    extra <- smooth %*% matrix(stats::rnorm(side^2 * (n_axes - 1)), side^2)
+    # the first column of the mixture is z itself, since chol() is upper triangular
+    mixed <- cbind(z, extra) %*% chol(axis_cor)
+    axes <- cbind(env, vapply(seq_len(n_axes)[-1], function(a) {
+      rank_to_marginal(mixed[, a], stats::runif(side^2, env_range[1], env_range[2]))
+    }, numeric(side^2)))
+    dimnames(axes) <- list(NULL, paste0("axis", seq_len(n_axes)))
+    out$env_axes <- axes
+  }
+  out
+}
+
+# correlation matrix among n axes from one number or a matrix
+axis_correlation <- function(axis_cor, n) {
+  if (length(axis_cor) == 1) {
+    if (!is.numeric(axis_cor) || is.na(axis_cor) || axis_cor <= -1 / (n - 1) || axis_cor >= 1) {
+      stop("one `axis_cor` must lie between -1 / (n_axes - 1) and 1", call. = FALSE)
+    }
+    m <- matrix(axis_cor, n, n)
+    diag(m) <- 1
+    return(m)
+  }
+  if (!is.matrix(axis_cor) || !identical(dim(axis_cor), c(n, n)) ||
+      max(abs(axis_cor - t(axis_cor))) > 1e-10 || max(abs(diag(axis_cor) - 1)) > 1e-10 ||
+      min(eigen(axis_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+    stop("`axis_cor` must be a positive definite correlation matrix of n_axes x n_axes",
+         call. = FALSE)
+  }
+  unname(axis_cor)
 }
 
 #' Landscape from site coordinates

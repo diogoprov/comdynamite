@@ -69,6 +69,7 @@ Other species traits:
 \code{\link[=arrival_ages]{arrival_ages()}},
 \code{\link[=as_herodotools]{as_herodotools()}},
 \code{\link[=history_rates]{history_rates()}},
+\code{\link[=niche_correlation]{niche_correlation()}},
 \code{\link[=paint_regimes]{paint_regimes()}},
 \code{\link[=partner_turnover]{partner_turnover()}},
 \code{\link[=plot.rate_matrix]{plot.rate_matrix()}},

@@ -229,6 +229,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   several <- is.list(traits) && !is.data.frame(traits)
   if (several || !is.null(env)) {
     trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
+    attr(trait_list, "niche_cor") <- attr(traits, "niche_cor")
+    if (is.null(env)) env <- landscape$env_axes
     if (is.null(env)) stop("a list of traits needs `env`, one column per element", call. = FALSE)
     unnamed <- is.null(colnames(env)) && !is.data.frame(env)
     env <- as.data.frame(env)
@@ -271,6 +273,10 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   if (!is.null(evolution)) {
     if (!inherits(evolution, "mc_evolution")) {
       stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+    }
+    if (several && !is.null(attr(trait_list, "niche_cor"))) {
+      stop("`evolution` does not yet take a niche with correlated axes (`niche_correlation()`)",
+           call. = FALSE)
     }
     mv <- is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
       is.matrix(evolution$env_var) || is.list(evolution$env_var)

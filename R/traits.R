@@ -157,6 +157,14 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #' maxima multiply too, so give the traits of all but one axis `r_max` of 1, for example with
 #' `species_traits(rmax_range = c(1, 1))`.
 #'
+#' A list of traits passed through [niche_correlation()] gives the responses to the axes a
+#' correlation \eqn{R}{R}: the growth rate is then \eqn{\prod_a r_a \exp(-d^\top R^{-1} d /
+#' 2)}{prod(r_max) exp(-t(d) solve(R) d / 2)}, with \eqn{d_a = (E_a - \theta_a)/\sigma_a}{d_a =
+#' (E_a - theta_a) / sigma_a}, a multivariate Gaussian niche whose covariance has the breadths
+#' \eqn{\sigma_a}{sigma_a} on the diagonal. A positive correlation favours sites where both
+#' axes depart from the optima in the same direction. With \eqn{R}{R} the identity, it is the
+#' product above.
+#'
 #' @param env Environment of each site; for several axes, a matrix, data frame or list with
 #'   one axis per column or element, in the order of `traits`.
 #' @param traits Data frame from [species_traits()], or any data frame with
@@ -172,6 +180,7 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #' @export
 growth_rates <- function(env, traits) {
   if (is.list(traits) && !is.data.frame(traits)) {
+    traits_in <- traits
     traits <- lapply(traits, as_traits)
     axes <- if (is.matrix(env)) as.data.frame(env) else as.list(env)
     if (length(axes) != length(traits)) {
@@ -184,8 +193,13 @@ growth_rates <- function(env, traits) {
     }
     sites <- if (is.matrix(env) || is.data.frame(env)) rownames(env)
     if (is.data.frame(env) && .row_names_info(env) < 0) sites <- NULL
-    r <- Reduce(`*`, Map(function(e, x) growth_rates(unname(e), x[species, , drop = FALSE]),
-                         unname(as.list(axes)), traits))
+    traits <- lapply(traits, function(x) x[species, , drop = FALSE])
+    cor <- attr(traits_in, "niche_cor")
+    r <- if (is.null(cor)) {
+      Reduce(`*`, Map(function(e, x) growth_rates(unname(e), x), unname(as.list(axes)), traits))
+    } else {
+      correlated_growth(axes, traits, cor, species)
+    }
     rownames(r) <- sites
     return(r)
   }
@@ -198,6 +212,84 @@ growth_rates <- function(env, traits) {
   r <- sweep(r, 2, traits$r_max, "*")
   dimnames(r) <- list(names(env), rownames(traits))
   r
+}
+
+# multivariate Gaussian response: standardised departures d (sites x axes) for each species,
+# exp(-t(d) solve(R) d / 2), times the product of the maxima
+correlated_growth <- function(axes, traits, cor, species) {
+  q <- length(traits)
+  env <- vapply(unname(as.list(axes)), function(e) as.numeric(unname(e)), numeric(length(axes[[1]])))
+  env <- matrix(env, ncol = q)
+  cor_of <- if (is.list(cor)) function(j) cor[[species[j]]] else function(j) cor
+  r <- matrix(0, nrow(env), length(species))
+  for (j in seq_along(species)) {
+    theta <- vapply(traits, function(x) x$optimum[j], numeric(1))
+    sigma <- vapply(traits, function(x) x$sigma[j], numeric(1))
+    rmax <- prod(vapply(traits, function(x) x$r_max[j], numeric(1)))
+    d <- sweep(sweep(env, 2, theta, "-"), 2, sigma, "/")
+    d[, !is.finite(sigma)] <- 0
+    m <- rowSums((d %*% solve(cor_of(j))) * d)
+    r[, j] <- rmax * exp(-m / 2)
+  }
+  colnames(r) <- species
+  r
+}
+
+#' Correlation between the axes of a niche
+#'
+#' Attaches to a list of traits (one set per environmental axis, as for [growth_rates()] and
+#' [simulate_metacommunity()]) a correlation between the responses of each species to the
+#' axes, so that the niche is a multivariate Gaussian with breadths `sigma` on each axis and
+#' this correlation. A species with a positive correlation between two axes grows best where
+#' both depart from its optima in the same direction, as a species that tolerates warm water
+#' only if it is also well oxygenated.
+#'
+#' @param traits List of data frames from [species_traits()], one per axis, with the same
+#'   species.
+#' @param cor A correlation matrix (axes x axes), shared by all species, or a list of them
+#'   named by species. Each must be symmetric, with ones on the diagonal and positive
+#'   definite.
+#' @return `traits`, with the attribute `niche_cor`.
+#' @family species traits
+#' @examples
+#' set.seed(1)
+#' tr <- list(temperature = species_traits(2, optima = c(40, 60), sigma = c(10, 10),
+#'                                         r_max = c(5, 5), rescale_optima = FALSE),
+#'            oxygen = species_traits(2, optima = c(40, 60), sigma = c(10, 10),
+#'                                    r_max = c(1, 1), rescale_optima = FALSE))
+#' env <- cbind(temperature = c(30, 50), oxygen = c(30, 50))
+#' growth_rates(env, tr)
+#' growth_rates(env, niche_correlation(tr, matrix(c(1, 0.8, 0.8, 1), 2)))
+#' @export
+niche_correlation <- function(traits, cor) {
+  if (!is.list(traits) || is.data.frame(traits) || length(traits) < 2) {
+    stop("`traits` must be a list of at least two sets of traits, one per axis", call. = FALSE)
+  }
+  q <- length(traits)
+  species <- rownames(as_traits(traits[[1]]))
+  check <- function(m, what) {
+    if (!is.matrix(m) || !identical(dim(m), c(q, q)) || !is.numeric(m) || anyNA(m)) {
+      stop(what, " must be a ", q, " x ", q, " numeric matrix", call. = FALSE)
+    }
+    if (max(abs(m - t(m))) > 1e-10 || max(abs(diag(m) - 1)) > 1e-10) {
+      stop(what, " must be symmetric with ones on the diagonal", call. = FALSE)
+    }
+    if (min(eigen(m, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+      stop(what, " must be positive definite", call. = FALSE)
+    }
+    unname(m)
+  }
+  if (is.list(cor)) {
+    if (is.null(names(cor)) || !setequal(names(cor), species)) {
+      stop("a list of `cor` needs one matrix per species, named by species", call. = FALSE)
+    }
+    cor <- lapply(stats::setNames(names(cor), names(cor)),
+                  function(sp) check(cor[[sp]], paste0("`cor` of ", sp)))
+  } else {
+    cor <- check(cor, "`cor`")
+  }
+  attr(traits, "niche_cor") <- cor
+  traits
 }
 
 # traits of species_traits() as a data frame with names of species, also from a matrix or a
