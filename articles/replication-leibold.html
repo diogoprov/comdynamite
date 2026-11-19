@@ -254,7 +254,8 @@ loss of a species even where the species are equivalent (see the next
 section). In their Fig. S2, a single patch type gave drift through local
 neutrality both with and without evolution, and drift was stronger under
 local than under regional neutrality; without evolution, our identical
-species drifted too slowly to lose one in 10,000 generations.</p>
+species drifted too slowly to lose one in 10 runs of 10,000 generations
+(6% of 500 runs lost one; see below).</p>
 <div class="float">
 <img src="leibold_drift.png" alt="Proportion of species 1 in the metacommunity in each run, with N_m = 10, for two patch types or one, with and without evolution (G = 200)."><div class="figcaption">Proportion of species 1 in the metacommunity in
 each run, with <span class="math inline">N_m = 10</span>, for two patch
@@ -436,8 +437,57 @@ species sorting rather than towards local dominance, at least with <span class="
 appear only with a constant <span class="math inline">G</span>, together
 with a fast loss of species. The rate of mutation was not matched to
 their loci, so a higher <span class="math inline">V_m</span> could reach
-the variance needed for adaptation within the 5000 generations; we did
-not explore it.</p>
+the variance needed for adaptation within the 5000 generations; the
+sweep below explores it.</p>
+</div>
+<div class="section level2">
+<h2 id="more-replicates-and-parameter-sweeps">More replicates and parameter sweeps<a class="anchor" aria-label="anchor" href="#more-replicates-and-parameter-sweeps"></a>
+</h2>
+<p>The scripts in <code>data-raw/blockB/</code> reran the main design
+with 500 replicates per setting and swept patch extinction and the
+mutational variance (100 runs per setting; the numbers are in
+<code>data-raw/blockB/README.md</code>). The seeds of the first 10
+replicates are those above, so they reproduce the numbers of this
+article exactly.</p>
+<p>With 500 replicates, the qualitative results held. With <span class="math inline">G \geq 50</span>, the fitness difference within
+patch types at generation 5000 was 0.01 to 0.07 and patch type explained
+less than 2% of the variation in composition, while it explained 70 to
+95% of the variation in the community mean optimum. With <span class="math inline">N_m = 1</span>, 42 to 45% of the patches were
+switched with <span class="math inline">G \geq 20</span>, and with <span class="math inline">N_m = 10</span>, 33 to 42% were shared with <span class="math inline">G \geq 50</span>, against 29 to 38% in the first 10
+runs. The loss of a species was slightly faster than estimated from 10
+replicates: with <span class="math inline">N_m = 10</span>, both species
+persisted to generation 10,000 in 7% and 12% of the runs with <span class="math inline">G</span> of 200 and 400 (2 of 10 above), and in 6%
+of the control with a single patch type and <span class="math inline">G
+= 200</span>. Interestingly, the control without evolution also lost a
+species by generation 10,000 in 6% of the 500 runs, so identical species
+do drift to extinction in our model, only more slowly than with
+evolution.</p>
+<p>Patch extinction (0 to 0.05 per generation, <span class="math inline">N_m</span> of 1 to 100) did not change these
+conclusions. With <span class="math inline">G \geq 50</span>, patch type
+explained at most 7% of the variation in composition at every extinction
+rate, including none, and at every dispersal level at which both species
+persisted. The fast loss of a species did not depend on extinction
+either: without it, both species persisted to generation 10,000 in 11 to
+33% of the runs with <span class="math inline">N_m = 10</span> and in
+none with <span class="math inline">N_m = 30</span>, and the loss became
+faster as extinction increased. Shared patches at <span class="math inline">N_m = 10</span> made up 29 to 40% across extinction
+rates. With <span class="math inline">G = 20</span> and <span class="math inline">N_m = 1</span>, however, regional neutrality
+appeared from <span class="math inline">p_{ext} = 0.001</span> upwards
+but not without extinction (<span class="math inline">R^2</span> of
+composition 0.92), so at low dispersal it is patch extinction that lets
+slow adaptation erase species sorting, through recolonisation of empty
+patches.</p>
+<p>The sweep of <span class="math inline">V_m</span> (0.01 to 1, from no
+variance, <span class="math inline">N_m</span> of 1 to 100) answers the
+question left open above. With <span class="math inline">V_m \leq
+0.1</span>, the variance built too slowly, and the runs stayed close to
+species sorting (<span class="math inline">R^2</span> of composition
+0.52 to 0.96 at generation 5000). With <span class="math inline">V_m</span> of 0.5 and 1, regional neutrality emerged
+(fitness differences 0.01 to 0.03, <span class="math inline">R^2</span>
+of composition below 0.01), and no species was lost in any run, but
+local dominance did not: 46 to 56% of the patches were shared with <span class="math inline">N_m = 1</span>, and 80 to 100% with <span class="math inline">N_m \geq 3</span>. A variance built faster by
+mutation therefore gives the same outcome as the size-dependent variance
+above, regional neutrality without local dominance.</p>
 </div>
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
@@ -459,10 +509,10 @@ dominance of our runs with a constant <span class="math inline">G</span>
 seems to be a product of drift of the means, and the local dominance of
 their model remains unexplained by our engine. Lottery recruitment into
 vacated microsites, overlapping generations and a variance built from
-new mutations, with or without erosion by selection, did not produce it
-either. These are 10 replicates per setting, and the speed of adaptation
-was set through <span class="math inline">G</span> rather than matched
-to their model.</p>
+new mutations, at low or high mutation rates and with or without erosion
+by selection, did not produce it either. These conclusions held with 500
+replicates per setting and across patch extinction rates from 0 to 0.05,
+although the speed of adaptation was set through <span class="math inline">G</span> rather than matched to their model.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
