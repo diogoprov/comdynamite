@@ -192,6 +192,49 @@ generations. Lottery recruitment with discrete generations changed none of the r
 weak priority effect with mutation and the loss of the source at low rather than high
 dispersal remain unexplained.
 
+## More replicates and parameter sweeps
+
+The scripts in `data-raw/blockB/` reran the three experiments with 500 replicates per setting
+and swept the mutational variance and the environment of the new site (the numbers are in
+`data-raw/blockB/README.md`). The seeds of the first 100 replicates are those above, so they
+reproduce the numbers of this article exactly.
+
+The numbers above fell within the intervals of the 500 replicates except three, all on the
+advantage of the first arrival. Without evolution, it won 76% of the runs with a lead of 10
+generations (95% interval 74 to 79%, against 84% in the first 100) and held 64% of the new site
+(68% above). With both species evolving by mutation, it won 61% of the runs with a lead of one
+generation (66% above) and 74% with a lead of 10, against 64% and 76% without evolution. The
+conclusion above therefore holds, and with 500 replicates the two settings are even closer:
+evolution by mutation did not make the first arrival more likely to win. One species held more
+than 90% of the new site in 34% of the runs with mutation in both species and in 9% without
+evolution. With standing variation in both species, the first arrival won 29 to 39% of the runs
+(the reversal), and with a constant \(G\) in both, 68 to 93%.
+
+Over the dispersal grid, the poorer disperser won in 65 of the 110 cells off the diagonal
+(interval of the dominance excluding zero) and the better disperser in 3. Two of these are
+adjacent (species 1 at 0.126 and 0.199 against 0.005; dominance 0.09 and 0.14), and their mirror
+cells have the same sign with intervals that include zero. With 110 cells, about three would
+exceed the interval by chance, so this is at most weak evidence for a small monopolization
+region at the edge of the grid. Gene flow back into the sources gave the same result as with 40
+replicates: the winner of the new site held 11% of its own source at dispersal 0.01, and 69%
+and 75% at 0.05 and 0.10.
+
+The sweep (\(V_m\) from 0.01 to 0.25, environment of the new site from 50 to 70 with the sources
+at 40, 200 runs per setting) shows that two results depend on the environmental contrast. The
+advantage of a species that evolves by mutation against one that does not held when the new
+site differed from the sources by 15 units or more and \(V_m \leq 0.1\): arriving 10
+generations late, it held 63 to 94% of the site. It disappeared with a contrast of 10 units (28
+to 49%), where adaptation adds little and the first arrival keeps the site, and weakened with
+\(V_m = 0.25\) (8 to 82%). The reversal with standing variation appeared only at contrasts of 10
+to 20 units (the design above has 20), where the first arrival won 10 to 49% of the runs. At 25
+and 30 units it won 84% to nearly 100% with \(V_m \leq 0.1\) (but 18% at 25 units with
+\(V_m = 0.25\)), so the priority effect of standing variation in their model reappears without
+erosion of the variance when the new environment is far enough from the sources. This suggests
+that the variance load reverses the priority effect only while the late arrival can still catch
+up, that is, when the maladaptation of both species in the new site is moderate.
+Monopolization with mutation in both species (one species above 90% of the site) increased with
+the contrast, from 6 to 18% at 10 units to 27 to 54% at 25 and 30 units (\(V_m \leq 0.1\)).
+
 ## Summary
 
 The quantitative-genetic engine reproduces two results of Urban & De Meester (2009): a
@@ -199,15 +242,17 @@ species that evolves by mutation wins a new site against one that does not, what
 order of arrival, and evolution in both species makes the new site more often dominated by a
 single species. It departs from their model in three ways. With mutation, the first arrival
 is not more likely to win than without evolution; with standing variation, the priority
-effect is reproduced only with a constant \(G\), since the size-dependent variance of
-`mutation_var` carries a variance load that reverses it; and over the dispersal grid,
+effect is reproduced only with a constant \(G\) or with a large environmental contrast, since
+the size-dependent variance of `mutation_var` carries a variance load that reverses it at the
+contrast of their design; and over the dispersal grid,
 evolution makes the poorer disperser win, as in their region of gene-flow-induced
 maladaptation, but no region favours the better disperser. Gene flow from the new site
 replaced a source population, as in their Fig. 3, but at low dispersal. Of three
 mechanisms missing from the engine, erosion of the variance by selection restored the
 priority effect of standing variation, and overlapping generations restored the advantage of
-the better disperser; lottery recruitment changed nothing. One step was taken as 10 of their time steps, and the speed of adaptation was
-set by \(V_m\) and the variance rather than matched to their loci.
+the better disperser; lottery recruitment changed nothing. These results held with 500
+replicates per setting. One step was taken as 10 of their time steps, and the speed of
+adaptation was set by \(V_m\) and the variance rather than matched to their loci.
 
 ## References
 
