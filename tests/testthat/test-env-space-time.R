@@ -22,6 +22,8 @@ test_that("env_space_time accepts a landscape and checks its input", {
   expect_error(env_space_time(landscape_implicit(5), 10), "no coordinates")
   expect_error(env_space_time(matrix(1:3), 10), "two columns")
   expect_error(env_space_time(cbind(1:3, 1:3), 10, burn_in = 10))
+  # one site has no range at the first step, so `min_range` can never be met
+  expect_error(env_space_time(cbind(1, 1), 3, burn_in = 1, n_features = 5), "lower it")
 })
 
 test_that("the spectral field has the exponential covariance", {
