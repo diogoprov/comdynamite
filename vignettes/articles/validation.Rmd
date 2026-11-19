@@ -37,6 +37,18 @@ in mcomsimr (600 runs each, standard error 0.015). Since version 0.6.3.9000,
 counting empty sites in alpha, it gave 1.61 against 1.61 in mcomsimr and 1.51 with the
 default Poisson draw.
 
+The comparison above holds the environment constant. `validation_mcomsimr_time.R`
+repeats it with an environment that changes in space and time, from
+`env_space_time()` (spatial scale of 2 cells on the 5 x 5 grid and temporal scale of 50
+steps, so that it changes several times over the 200 steps), constant during the
+initialisation as in mcomsimr. Again, none of the 160 comparisons was significant. With
+dispersal of 0.01 or more and without extirpation, mean differences in alpha, gamma and
+total abundance stayed below 1.5%. The Poisson draw of immigrants mattered more than with
+a constant environment, probably because populations that track a moving environment
+depend more on immigrants: at dispersal of 0.001 on the grid, alpha was 16% lower than in mcomsimr
+without extirpation and 26% lower with it. With `immigration = "multinomial"`, these
+differences fell to 6% or less, of either sign.
+
 ## Article and archived code
 
 We compared the article with the code archived for it,

@@ -104,7 +104,7 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
    de citar resultados.
 
-Ordem sugerida para o que falta: 2, 1, 3, 4, 6. Próximo passo de código (2026-11-19): o item 2. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
+Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. O item 2 está em andamento (2026-11-19): `env_space_time()` reproduz o campo de Thompson et al. (2020) e foi validada contra o mcomsimr com o ambiente mudando no tempo. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
 
 **Bloco B, especiação: comparação e experimentos.** Fase 4 (gen3sis, GPL, e MESS, sem
