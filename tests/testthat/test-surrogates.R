@@ -1,0 +1,80 @@
+field_on <- function(coords, range, seed) {
+  set.seed(seed)
+  d <- as.matrix(dist(coords))
+  unname(drop(t(chol(exp(-d / range) + diag(1e-8, nrow(d)))) %*% rnorm(nrow(d))))
+}
+grid <- as.matrix(expand.grid(1:12, 1:12))
+
+test_that("parametric surrogates are permutations of whole rows", {
+  x <- field_on(grid, 3, 1)
+  env <- cbind(a = x, b = x + rnorm(144, sd = 0.5))
+  draws <- env_surrogates(env, grid, n = 4, method = "parametric")
+  rows <- attr(draws, "rows")
+  expect_length(draws, 4)
+  expect_equal(dim(rows), c(4L, 144L))
+  expect_true(all(apply(rows, 1, function(r) all(sort(r) == 1:144))))
+  expect_equal(draws[[2]], env[rows[2, ], ])
+  expect_equal(colnames(draws[[1]]), c("a", "b"))
+  one <- env_surrogates(x, grid, n = 1, method = "parametric")
+  expect_equal(sort(one[[1]][, 1]), sort(x))
+  expect_equal(dim(attr(one, "rows")), c(1L, 144L))
+})
+
+test_that("the fitted range follows the range of the field", {
+  d <- as.matrix(dist(grid))
+  short <- median(vapply(1:5, function(s) fit_exponential_range(field_on(grid, 1, s), d), 1))
+  long <- median(vapply(1:5, function(s) fit_exponential_range(field_on(grid, 6, s), d), 1))
+  expect_lt(short, long)
+})
+
+test_that("variogram surrogates keep the autocorrelation and lose the values", {
+  x <- field_on(grid, 4, 2)
+  draws <- env_surrogates(x, grid, n = 20)
+  setup <- variogram_setup(as.matrix(dist(grid)))
+  target <- binned_variogram(x, setup)
+  mean_vgram <- rowMeans(vapply(draws, function(e) binned_variogram(e[, 1], setup),
+                                numeric(length(target))))
+  permuted <- binned_variogram(sample(x), setup)
+  # at short distances the surrogates are much closer to the observed variogram than a
+  # permutation, which has no autocorrelation
+  expect_lt(abs(mean_vgram[1] - target[1]), abs(permuted[1] - target[1]) / 2)
+  expect_lt(abs(mean(vapply(draws, function(e) cor(e[, 1], x), 1))), 0.2)
+  two <- env_surrogates(cbind(p = x, q = -x), grid, n = 2)
+  expect_equal(colnames(two[[1]]), c("p", "q"))
+})
+
+test_that("env_surrogates() checks its input", {
+  x <- field_on(grid, 3, 1)
+  expect_error(env_surrogates(x, grid[-1, ]), "nrow")
+  expect_error(env_surrogates(x, rbind(grid[-1, ], grid[1, , drop = FALSE])[c(144, 1:143), ][
+    c(1, 1:143), ]), "same coordinates")
+  expect_error(env_surrogates(x, grid, method = "torus"), "should be one of")
+})
+
+test_that("the tests take surrogates as their null of sites", {
+  set.seed(5)
+  tree <- ape::rcoal(8)
+  coords <- as.matrix(expand.grid(1:6, 1:6))
+  env <- cbind(x = field_on(coords, 2, 3))
+  rate <- exp(-outer(env[, 1], seq(-2, 2, length.out = 8), "-")^2)
+  comm <- matrix(rpois(36 * 8, 4 * rate) + 1, 36,
+                 dimnames = list(paste0("s", 1:36), tree$tip.label))
+  out <- pcps_test(comm, tree, env, n_perm = 9, null = "variogram", coords = coords)
+  expect_equal(out$permutations$null, "variogram")
+  expect_output(print(out), "9 variogram surrogates of the predictors")
+  beta <- phylo_beta_test(comm, tree, env, n_perm = 9, null = "parametric", coords = coords)
+  expect_equal(beta$permutations$null, "parametric")
+  expect_gte(beta$p_site, 1 / 10)
+  nodes <- node_contrasts(tree)
+  node <- node_test(comm, nodes, env, n_perm = 9, null = "parametric", coords = coords)
+  expect_equal(node$permutations$null, "parametric")
+  expect_true(all(node$nodes$p_site >= 1 / 10, na.rm = TRUE))
+  data <- mc_data(comm, tree = tree, env = data.frame(env), coords = coords)
+  from_data <- pcps_test(data, n_perm = 9, null = "parametric")
+  expect_equal(from_data$permutations$null, "parametric")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = "variogram"), "needs `coords`")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = "variogram", coords = coords[-1, ]),
+               "one row per site")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = "parametric", coords = coords,
+                         site_permutations = torus_permutations(6)), "either")
+})

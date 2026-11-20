@@ -147,6 +147,7 @@ Ecology}, 89, 947--959.
 gives a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
 
 Other restricted null models:
+\code{\link[=env_surrogates]{env_surrogates()}},
 \code{\link[=patch_permutations]{patch_permutations()}},
 \code{\link[=torus_permutations]{torus_permutations()}}
 }

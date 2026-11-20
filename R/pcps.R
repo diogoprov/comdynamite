@@ -25,7 +25,8 @@
 #' that are broad relative to the grid, so the torus reduces this error without removing it in
 #' a landscape with edges. It also costs power: with a correlation of 0.7 between the predictor
 #' and the field behind the communities, the whole-dissimilarity `p_site` fell from 98-100% to
-#' 23-79%.
+#' 23-79%. In landscapes with edges, `null = "variogram"` or `"parametric"` came closer to the
+#' nominal rate (see [env_surrogates()]).
 #'
 #' `data-raw/validation_pcps.R` checks the statistics against the package PCPS and gives these
 #' rates.
@@ -41,6 +42,12 @@
 #'   example from [torus_permutations()], to use instead of free permutations of sites. Empty
 #'   sites are then allowed: they leave the analysis but their predictors can reach occupied
 #'   sites.
+#' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
+#'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
+#'   `"parametric"`, for landscapes with edges (see [env_surrogates()], which gives their
+#'   rates of type I error). Surrogates need `coords`; empty sites are then not allowed.
+#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
+#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
 #' @return List of class `mc_pcps` with `tests`, a data frame with one row for all the
 #'   dissimilarity (`whole`) and one for each axis, and the columns `share`, the share of the
 #'   positive eigenvalues; `r2`; `statistic`, the F statistic; `p_site`, `p_species` and
@@ -76,10 +83,13 @@
 #' res
 #' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
 #' @export
-pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL) {
+pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL,
+                      null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")
     if (missing(env)) env <- data_part(comm, "env")
+    if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
@@ -104,8 +114,9 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   }
   scores <- ordination$scores[, axes, drop = FALSE]
   observed <- pcps_fit(gower, scores, env)
-  null_site <- progress_map(seq_len(nrow(draws$rows)), function(r) {
-    pcps_fit(gower, scores, landscape_env[draws$rows[r, ], , drop = FALSE])$statistic
+  site <- site_null(null, draws, landscape_env, env, coords, n_perm)
+  null_site <- progress_map(seq_len(site$n), function(r) {
+    pcps_fit(gower, scores, site$env_at(r))$statistic
   }, "Sites")
   null_species <- progress_map(seq_len(n_perm), function(r) {
     moved <- sample.int(ncol(comm))
@@ -134,7 +145,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   rownames(ordination$scores) <- rownames(comm)
   structure(list(tests = tests, scores = ordination$scores, share = ordination$share,
                  species = species, env = env, tree = tree,
-                 permutations = permutation_record(n_perm, site_permutations)),
+                 permutations = permutation_record(n_perm, site_permutations, null = null)),
             class = "mc_pcps")
 }
 

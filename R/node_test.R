@@ -174,6 +174,13 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @param area_permutations Optional list with one matrix per event, from
 #'   [rigid_permutations()] or [patch_permutations()], to use for the events instead of `site_permutations` or free
 #'   permutations. Sites must be in the order of `comm`.
+#' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
+#'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
+#'   `"parametric"`, for landscapes with edges (see [env_surrogates()]; their rates of type I
+#'   error were checked in [pcps_test()], not here). Surrogates need `coords`. They
+#'   replace the permutations of sites, not those of the areas of `biogeography`.
+#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
+#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
 #' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
 #'   where one core is used. For reproducible p-values with more than one core, call
 #'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results still depend on the number of
@@ -218,10 +225,13 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' plot_node_test(out, daphniids$tree_leibold, test = "site")
 #' @export
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores = 1,
-                      site_permutations = NULL, area_permutations = NULL) {
+                      site_permutations = NULL, area_permutations = NULL,
+                      null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(nodes)) nodes <- node_contrasts(data_part(comm, "tree", "nodes"))
     if (missing(env)) env <- data_part(comm, "env")
+    if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
   if (inherits(nodes, "phylo")) {
@@ -263,7 +273,12 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
            dimnames = list(node_names, names))
   }
   # one draw of the null model of sites: rows of the community or areas moved across sites
+  # with surrogates, the predictors move instead, the same draw for each node
+  surrogates <- if (null != "permutation") {
+    site_null(null, list(occupied = rep(TRUE, nrow(comm))), env, env, coords, n_perm)
+  }
   shuffle_sites <- function(r) {
+    if (!is.null(surrogates)) return(list(comm = comm, env = surrogates$env_at(r)))
     rows <- if (is.null(site_permutations)) sample.int(nrow(comm)) else site_permutations[r, ]
     list(comm = comm[rows, , drop = FALSE], env = env)
   }
@@ -319,7 +334,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
                         p_partial_joint = shaped(first("p_partial_joint")))
                  },
                  permutations = permutation_record(n_perm, site_permutations,
-                                                   area_permutations)),
+                                                   area_permutations, null = null)),
             class = "mc_node_test")
 }
 

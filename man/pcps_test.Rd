@@ -4,7 +4,16 @@
 \alias{pcps_test}
 \title{Principal coordinates of phylogenetic structure}
 \usage{
-pcps_test(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL)
+pcps_test(
+  comm,
+  tree,
+  env,
+  axes = 1:2,
+  n_perm = 999,
+  site_permutations = NULL,
+  null = c("permutation", "variogram", "parametric"),
+  coords = NULL
+)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species. Species are matched
@@ -23,6 +32,14 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Empty
 sites are then allowed: they leave the analysis but their predictors can reach occupied
 sites.}
+
+\item{null}{Null model of sites: \code{"permutation"} (free, or \code{site_permutations} when given),
+or surrogates of the predictors with the same spatial autocorrelation, \code{"variogram"} or
+\code{"parametric"}, for landscapes with edges (see \code{\link[=env_surrogates]{env_surrogates()}}, which gives their
+rates of type I error). Surrogates need \code{coords}; empty sites are then not allowed.}
+
+\item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or
+\code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when it has them.}
 }
 \value{
 List of class \code{mc_pcps} with \code{tests}, a data frame with one row for all the
@@ -63,7 +80,8 @@ the edges of the grid it rejected 6-25\%, and \code{p_max} 1-10\%, the highest v
 that are broad relative to the grid, so the torus reduces this error without removing it in
 a landscape with edges. It also costs power: with a correlation of 0.7 between the predictor
 and the field behind the communities, the whole-dissimilarity \code{p_site} fell from 98-100\% to
-23-79\%.
+23-79\%. In landscapes with edges, \code{null = "variogram"} or \code{"parametric"} came closer to the
+nominal rate (see \code{\link[=env_surrogates]{env_surrogates()}}).
 
 \code{data-raw/validation_pcps.R} checks the statistics against the package PCPS and gives these
 rates.

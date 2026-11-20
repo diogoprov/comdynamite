@@ -136,8 +136,8 @@ and 0.08 are compatible with it):
 | Grid | 2 | 0.24 | 0.055 | 0.045 | 0.050 | 0.030 | 0.035 |
 | Grid | 5 | 0.60 | 0.100 | 0.075 | 0.085 | 0.055 | 0.055 |
 | Grid | 10 | 0.73 | 0.140 | 0.080 | 0.135 | 0.080 | 0.085 |
-| L-shape | 2 | 0.27 | | 0.085 | 0.055 | 0.065 | 0.070 |
-| L-shape | 5 | 0.49 | | 0.160 | 0.095 | 0.085 | 0.075 |
+| L-shape | 2 | 0.27 | | 0.085 | 0.055 | 0.060 | 0.070 |
+| L-shape | 5 | 0.49 | | 0.160 | 0.095 | 0.080 | 0.075 |
 | L-shape | 10 | 0.65 | | 0.230 | 0.120 | 0.085 | 0.090 |
 | Strip | 2 | 0.32 | | 0.025 | 0.055 | 0.035 | 0.025 |
 | Strip | 5 | 0.65 | | 0.055 | 0.060 | 0.070 | 0.055 |
@@ -146,12 +146,23 @@ and 0.08 are compatible with it):
 Free permutations rejected in 24% to 79% of the landscapes. No restricted null stayed at 0.05 in
 every case, since all of them became liberal as the range approached the size of the landscape,
 when there are few independent patches of environment left to compare. Variogram matching came
-closest (mean 0.062, at most 0.09), followed by the parametric surrogate (mean 0.067, at most
+closest (mean 0.062, at most 0.09), followed by the parametric surrogate (mean 0.066, at most
 0.10). MSR worked on the grid and the strip but not in the L-shaped region (up to 0.23), and the
 torus and the rotation were liberal on the grid from a range of 5. Power at a correlation of 0.6
 was similar among the restricted nulls (0.90 to 0.94 on average), so the gain in type I error did
-not cost power. Variogram matching took about 2 to 3 s per test with 199 draws, MSR about 3 s and
-the parametric surrogate under 0.5 s.
+not cost power. Variogram matching took about 5 s per test with 199 draws, MSR about 3 s and the
+parametric surrogate under 0.5 s. The parametric and variogram surrogates were drawn with
+`env_surrogates()`, the code of the package.
+
+The two that came closest are options of the tests, as `null = "variogram"` or
+`null = "parametric"` with the coordinates of the sites, and `env_surrogates()` draws them for
+other uses, such as null environments for simulations:
+
+```r
+pcps_test(comm, tree, env, null = "variogram", coords = coords)
+```
+
+With fields as broad as the landscape, p values near 0.05 still deserve caution.
 
 ## References
 

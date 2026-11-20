@@ -41,6 +41,7 @@ Ecology}, 89, 947--959.
 }
 \seealso{
 Other restricted null models:
+\code{\link[=env_surrogates]{env_surrogates()}},
 \code{\link[=patch_permutations]{patch_permutations()}},
 \code{\link[=rigid_permutations]{rigid_permutations()}}
 }
