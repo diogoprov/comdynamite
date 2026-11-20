@@ -96,11 +96,12 @@ reference:
   - trait_partition
   - plot_trait_partition
 - title: Restricted null models
-  desc: Permutations for sites that are neighbours.
+  desc: Permutations and surrogates for sites that are neighbours.
   contents:
   - torus_permutations
   - rigid_permutations
   - patch_permutations
+  - env_surrogates
 - title: Simulation studies
   desc: Grids of scenarios, summaries and checks.
   contents:

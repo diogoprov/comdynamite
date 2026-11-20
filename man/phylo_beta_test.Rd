@@ -4,7 +4,15 @@
 \alias{phylo_beta_test}
 \title{Test phylogenetic beta diversity against the environment}
 \usage{
-phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
+phylo_beta_test(
+  comm,
+  tree,
+  env,
+  n_perm = 999,
+  site_permutations = NULL,
+  null = c("permutation", "variogram", "parametric"),
+  coords = NULL
+)
 }
 \arguments{
 \item{comm}{Matrix with one row per site and one column per species, named
@@ -22,6 +30,15 @@ site.}
 per row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free
 permutations of sites. Empty sites are then allowed, because they are part of the
 landscape: they leave the analysis but their predictors can reach occupied sites.}
+
+\item{null}{Null model of sites: \code{"permutation"} (free, or \code{site_permutations} when given),
+or surrogates of the predictors with the same spatial autocorrelation, \code{"variogram"} or
+\code{"parametric"}, for landscapes with edges (see \code{\link[=env_surrogates]{env_surrogates()}}; their rates of type I
+error were checked in \code{\link[=pcps_test]{pcps_test()}}, not here). Surrogates need \code{coords}; empty sites
+are then not allowed.}
+
+\item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or
+\code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when it has them.}
 }
 \value{
 List of class \code{mc_phylo_beta} with \code{r2_adjusted}, the adjusted R2; \code{statistic},

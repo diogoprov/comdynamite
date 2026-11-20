@@ -112,16 +112,23 @@ future_workers <- function(installed = requireNamespace("future.apply", quietly 
 }
 
 # what the null models used, kept in the results and shown when they are printed
-permutation_record <- function(n_perm, site_permutations = NULL, area_permutations = NULL) {
+permutation_record <- function(n_perm, site_permutations = NULL, area_permutations = NULL,
+                               null = "permutation") {
   restricted <- !is.null(site_permutations)
   record <- list(species = n_perm, sites = if (restricted) nrow(site_permutations) else n_perm,
-                 null = if (restricted) "restricted" else "free")
+                 null = if (null != "permutation") null else if (restricted) "restricted" else
+                   "free")
   if (!is.null(area_permutations)) record$areas <- vapply(area_permutations, nrow, 1L)
   record
 }
 
 permutation_line <- function(record) {
-  cat("permutations: ", record$sites, " ", record$null, " of sites, ", record$species, " of species",
+  sites <- if (record$null %in% c("variogram", "parametric")) {
+    paste0(record$sites, " ", record$null, " surrogates of the predictors")
+  } else {
+    paste0(record$sites, " ", record$null, " of sites")
+  }
+  cat("permutations: ", sites, ", ", record$species, " of species",
       if (!is.null(record$areas)) {
         paste0(", of areas ", paste(names(record$areas), record$areas, collapse = ", "))
       },

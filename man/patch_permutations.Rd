@@ -81,6 +81,7 @@ matrix(event[permutations$barrier[1, ]], 10)
 them, and \code{\link[=torus_permutations]{torus_permutations()}} gives a torus. \code{\link[=biogeography_matrix]{biogeography_matrix()}} codes the events.
 
 Other restricted null models:
+\code{\link[=env_surrogates]{env_surrogates()}},
 \code{\link[=rigid_permutations]{rigid_permutations()}},
 \code{\link[=torus_permutations]{torus_permutations()}}
 }

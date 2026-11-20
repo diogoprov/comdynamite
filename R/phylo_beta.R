@@ -74,6 +74,13 @@ phylo_beta <- function(comm, tree) {
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites. Empty sites are then allowed, because they are part of the
 #'   landscape: they leave the analysis but their predictors can reach occupied sites.
+#' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
+#'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
+#'   `"parametric"`, for landscapes with edges (see [env_surrogates()]; their rates of type I
+#'   error were checked in [pcps_test()], not here). Surrogates need `coords`; empty sites
+#'   are then not allowed.
+#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
+#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
 #' @return List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2; `statistic`,
 #'   the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`, the sites on the
 #'   principal coordinates of the predicted matrix, which the authors suggest
@@ -105,10 +112,13 @@ phylo_beta <- function(comm, tree) {
 #' keep <- rowSums(comm) > 0
 #' phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
 #' @export
-phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL) {
+phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL,
+                            null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")
     if (missing(env)) env <- data_part(comm, "env")
+    if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
   restricted <- !is.null(site_permutations)
@@ -128,8 +138,9 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   centred <- gower_centre(beta_matrix(weights, distances))
   fit <- beta_fit(centred, basis)
 
-  null_site <- unlist(progress_map(seq_len(nrow(draws$rows)), function(r) {
-    beta_fit(centred, env_basis(landscape_env[draws$rows[r, ], , drop = FALSE]))$statistic
+  site <- site_null(null, draws, landscape_env, env, coords, n_perm)
+  null_site <- unlist(progress_map(seq_len(site$n), function(r) {
+    beta_fit(centred, env_basis(site$env_at(r)))$statistic
   }, "Sites"))
   null_taxa <- unlist(progress_map(seq_len(n_perm), function(r) {
     shuffled <- weights[, sample.int(ncol(weights)), drop = FALSE]
@@ -139,7 +150,7 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   p_species <- (sum(null_taxa >= fit$statistic) + 1) / (length(null_taxa) + 1)
   structure(list(r2_adjusted = fit$r2, statistic = fit$statistic, p_site = p_site, p_species = p_species,
                  p_max = max(p_site, p_species), scores = predicted_scores(centred, basis),
-                 permutations = permutation_record(n_perm, site_permutations)),
+                 permutations = permutation_record(n_perm, site_permutations, null = null)),
             class = "mc_phylo_beta")
 }
 

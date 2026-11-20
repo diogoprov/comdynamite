@@ -21,6 +21,8 @@
 #   that of x up to distances of the 25% quantile of the pairs, then rescaled (and noise
 #   added for the nugget) so that scale and intercept match too. We use binned variograms
 #   rather than their kernel-smoothed one, and an exponential kernel over the neighbours.
+# Since version 0.10.0 the parametric and variogram nulls come from env_surrogates(), so the
+# rates are those of the package code.
 # PILOT=1 runs a small design to time the nulls. Run from the package root, with the package
 # installed. Writes data-raw/validation_continuous_nulls(_pilot).rds.
 library(comdynamite)
@@ -48,74 +50,10 @@ torus20 <- torus_permutations(20)
 
 field_root <- function(xy, range) t(chol(exp(-as.matrix(stats::dist(xy)) / range) + diag(1e-8, nrow(xy))))
 
-# exponential range by maximum likelihood on normal scores, over a grid of ranges
-fit_range <- function(x, d) {
-  y <- stats::qnorm(rank(x) / (length(x) + 1))
-  y <- y - mean(y)
-  candidates <- exp(seq(log(0.5), log(max(d) / 2), length.out = 25))
-  ll <- vapply(candidates, function(r) {
-    s <- exp(-d / r) + diag(1e-8, nrow(d))
-    u <- chol(s)
-    q <- backsolve(u, y, transpose = TRUE)
-    # profile likelihood with the variance at its maximum
-    -length(y) / 2 * log(sum(q^2) / length(y)) - sum(log(diag(u)))
-  }, numeric(1))
-  candidates[which.max(ll)]
-}
-
-# variogram matching (Viladomat et al. 2014): the smoothers and distance bins depend only on
-# the coordinates, so they are built once per landscape
-vgram_setup <- function(xy, deltas = c(0.01, 0.02, 0.03, 0.05, 0.08, 0.12, 0.18, 0.25, 0.35,
-                                       0.5), n_bins = 15) {
-  d <- as.matrix(stats::dist(xy))
-  m <- nrow(d)
-  pairs <- which(upper.tri(d), arr.ind = TRUE)
-  h <- d[pairs]
-  cutoff <- stats::quantile(h, 0.25)
-  keep <- h <= cutoff
-  pairs <- pairs[keep, , drop = FALSE]
-  bin <- cut(h[keep], n_bins, labels = FALSE)
-  order_nb <- t(apply(d, 1, order))
-  smoothers <- lapply(deltas, function(delta) {
-    k <- max(2, ceiling(delta * m))
-    w <- matrix(0, m, m)
-    for (i in seq_len(m)) {
-      nb <- order_nb[i, seq_len(k)]
-      scale <- max(d[i, nb[k]], 1e-12)
-      w[i, nb] <- exp(-d[i, nb] / scale)
-    }
-    w / rowSums(w)
-  })
-  list(pairs = pairs, bin = bin, smoothers = smoothers)
-}
-binned_vgram <- function(x, setup) {
-  g <- 0.5 * (x[setup$pairs[, 1]] - x[setup$pairs[, 2]])^2
-  as.numeric(tapply(g, setup$bin, mean))
-}
-vgram_surrogate <- function(x, setup) {
-  target <- binned_vgram(x, setup)
-  xp <- x[sample.int(length(x))]
-  best <- NULL
-  for (w in setup$smoothers) {
-    xs <- drop(w %*% xp)
-    g <- binned_vgram(xs, setup)
-    ok <- is.finite(g) & is.finite(target)
-    fit <- stats::lm.fit(cbind(1, g[ok]), target[ok])
-    rss <- sum(fit$residuals^2)
-    if (is.null(best) || rss < best$rss) best <- list(rss = rss, xs = xs, coef = fit$coefficients)
-  }
-  beta <- max(best$coef[2], 0)
-  sqrt(beta) * (best$xs - mean(best$xs)) + sqrt(abs(best$coef[1])) * stats::rnorm(length(x)) +
-    mean(x)
-}
-
 nulls <- function(name, x, xy, n) {
   m <- length(x)
   switch(name,
-    vgram = {
-      setup <- vgram_setup(xy)
-      replicate(n, vgram_surrogate(x, setup), simplify = FALSE)
-    },
+    vgram = lapply(env_surrogates(x, xy, n, "variogram"), drop),
     free = replicate(n, x[sample.int(m)], simplify = FALSE),
     torus = lapply(sample.int(nrow(torus20), n), function(i) x[torus20[i, ]]),
     msr = {
@@ -138,13 +76,7 @@ nulls <- function(name, x, xy, n) {
         x[nearest]
       }, simplify = FALSE)
     },
-    param_rank = {
-      d <- as.matrix(stats::dist(xy))
-      root <- field_root(xy, fit_range(x, d))
-      sorted <- sort(x)
-      replicate(n, sorted[rank(drop(root %*% stats::rnorm(m)), ties.method = "random")],
-                simplify = FALSE)
-    })
+    param_rank = lapply(env_surrogates(x, xy, n, "parametric"), drop))
 }
 null_names <- function(geo) c("free", if (geo == "grid") "torus", "msr", "shift_rotate", "param_rank",
                                 "vgram")
