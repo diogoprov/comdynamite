@@ -583,3 +583,13 @@ test_that("visits share populations and sessions can be visits to a site", {
   expect_error(sample_individuals(sim, step = c(60, 60)), "use `visits`")
   expect_error(sample_individuals(sim, visits = 0))
 })
+
+test_that("session shifts leave empty samples and zero errors alone", {
+  empty <- data.frame(site = character(0), trait = numeric(0))
+  expect_identical(session_shift(empty, 1, 1), empty)
+  one <- data.frame(site = c("a", "a", "b"), trait = c(1, 2, 3))
+  expect_identical(session_shift(one, 0, one$site), one)
+  set.seed(1)
+  moved <- session_shift(one, 1, one$site)
+  expect_equal(diff(moved$trait[1:2]), 1)
+})
