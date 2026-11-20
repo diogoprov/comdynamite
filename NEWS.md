@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- `sample_individuals(visits =, session =)`: several visits to each site at the same step,
+  with a column `visit`, and `session = "visit"` for a `session_sd` error shared by the
+  individuals of one visit to one site rather than by all sites on a date. The help now says
+  that with one step and `session = "step"` the error is a constant that vanishes from
+  centred statistics. Repeated steps in `step` are an error pointing to `visits`.
 - New `env_surrogates()`: predictors with the same spatial autocorrelation as the observed
   ones, by variogram matching (Viladomat et al. 2014) or a parametric Gaussian field matched
   by rank. `pcps_test()`, `node_test()` and `phylo_beta_test()` take them with

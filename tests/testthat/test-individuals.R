@@ -542,3 +542,44 @@ test_that("evolved_at() refuses steps without a record of the evolutionary state
              environment_history = NULL)
   expect_error(evolved_at(ev, 10), "record_steps")
 })
+
+test_that("visits share populations and sessions can be visits to a site", {
+  set.seed(6)
+  ls <- landscape_implicit(30)
+  tr <- data.frame(optimum = c(40, 60), sigma = 30, r_max = 5, row.names = c("sp1", "sp2"))
+  sim <- simulate_metacommunity(ls, tr, matrix(0.01, 2, 2, dimnames = list(rownames(tr),
+                                                                           rownames(tr))),
+                                n_steps = 60, record_steps = c(50, 60))
+  set.seed(1)
+  v <- sample_individuals(sim, n = 4, visits = 3, population_sd = 5, intraspecific_sd = 0,
+                          session = "visit", session_sd = 2)
+  expect_true("visit" %in% names(v))
+  expect_false("step" %in% names(v))
+  expect_setequal(unique(v$visit), 1:3)
+  # the visits of a site share the population means
+  means <- tapply(v$population_mean, paste(v$site, v$species), function(m) length(unique(m)))
+  expect_true(all(means == 1))
+  # without variation within populations, every species of a visit is shifted alike, and the
+  # shifts recover session_sd
+  dev <- v$trait - v$population_mean
+  session <- paste(v$site, v$visit)
+  expect_true(all(tapply(dev, session, function(d) diff(range(d))) < 1e-10))
+  set.seed(2)
+  many <- sample_individuals(sim, n = 1, visits = 20, intraspecific_sd = 0,
+                             session = "visit", session_sd = 2)
+  shifts <- tapply(many$trait - many$population_mean, paste(many$site, many$visit), mean)
+  expect_equal(stats::sd(shifts), 2, tolerance = 0.1)
+  # visits on several dates, and a single visit with sessions by site
+  both <- sample_individuals(sim, n = 2, step = c(50, 60), visits = 2, session = "visit",
+                             session_sd = 1)
+  expect_true(all(c("step", "visit") %in% names(both)))
+  set.seed(3)
+  by_site <- sample_individuals(sim, n = 3, intraspecific_sd = 0, session = "visit",
+                                session_sd = 1)
+  site_dev <- tapply(by_site$trait - by_site$population_mean, by_site$site,
+                     function(d) diff(range(d)))
+  expect_true(all(site_dev < 1e-10))
+  expect_gt(stats::sd(tapply(by_site$trait - by_site$population_mean, by_site$site, mean)), 0)
+  expect_error(sample_individuals(sim, step = c(60, 60)), "use `visits`")
+  expect_error(sample_individuals(sim, visits = 0))
+})

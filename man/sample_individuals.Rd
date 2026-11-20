@@ -21,7 +21,9 @@ sample_individuals(
   monopolization = 0,
   gene_flow = 1,
   source = c("traits", "evolution"),
-  session_sd = 0
+  session_sd = 0,
+  visits = 1,
+  session = c("step", "visit")
 )
 }
 \arguments{
@@ -108,13 +110,26 @@ the columns \verb{env_<trait>} and \verb{mean_<trait>} and the trait itself (nam
 instead of \code{env}, \code{optimum}, \code{population_mean} and \code{trait}, with the trait names in the
 attribute \code{"traits"}. \code{session_sd} shifts each trait on its own.}
 
-\item{session_sd}{Standard deviation of an error shared by all individuals measured on the
-same date (\code{step}), such as a difference between measurers or calibrations; it is added to
-\code{trait}, not to \code{population_mean}. 0 (the default) for none.}
+\item{session_sd}{Standard deviation of an error shared by all individuals measured in the
+same session, such as a difference between measurers or calibrations; it is added to
+\code{trait}, not to \code{population_mean}. 0 (the default) for none. What a session is depends on
+\code{session}. With a single step and \code{session = "step"}, there is one session, so the error
+is a constant added to every individual, which vanishes from any statistic centred on
+means (deviations from population means, variance components) and has no effect on them.}
+
+\item{visits}{Number of visits to each site at each sampled step. Each visit samples its own
+individuals (\code{n} or \code{fraction} per population and visit) from the same populations, whose
+means do not change between visits of the same step, and the result gets a column
+\code{visit}. 1 (the default) for one.}
+
+\item{session}{What shares the error of \code{session_sd}: \code{"step"} (the default), all the
+individuals of a date, at every site; or \code{"visit"}, the individuals of one visit to one
+site at one step (every species measured then), as when each visit to a pond is a field
+session.}
 }
 \value{
 Data frame with one row per individual and the columns \code{step} (with several steps),
-\code{site}, \code{species},
+\code{visit} (with several visits), \code{site}, \code{species},
 \code{individual} (its number within the population), \code{abundance} (of the population), \code{env}
 (of the site), \code{optimum} (of the species), \code{population_mean} (the expected value of the
 population, \eqn{m_{ij}}{m_ij} above, after character displacement) and

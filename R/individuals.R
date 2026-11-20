@@ -168,9 +168,20 @@
 #'   and adaptation since arrival, per unit of migrant load: 1 (the default) when every
 #'   newcomer mixes fully with the residents, 0 for no erosion. One value or one per species.
 #'   Has no effect without `founder_sd` or `monopolization`.
-#' @param session_sd Standard deviation of an error shared by all individuals measured on the
-#'   same date (`step`), such as a difference between measurers or calibrations; it is added to
-#'   `trait`, not to `population_mean`. 0 (the default) for none.
+#' @param session_sd Standard deviation of an error shared by all individuals measured in the
+#'   same session, such as a difference between measurers or calibrations; it is added to
+#'   `trait`, not to `population_mean`. 0 (the default) for none. What a session is depends on
+#'   `session`. With a single step and `session = "step"`, there is one session, so the error
+#'   is a constant added to every individual, which vanishes from any statistic centred on
+#'   means (deviations from population means, variance components) and has no effect on them.
+#' @param visits Number of visits to each site at each sampled step. Each visit samples its own
+#'   individuals (`n` or `fraction` per population and visit) from the same populations, whose
+#'   means do not change between visits of the same step, and the result gets a column
+#'   `visit`. 1 (the default) for one.
+#' @param session What shares the error of `session_sd`: `"step"` (the default), all the
+#'   individuals of a date, at every site; or `"visit"`, the individuals of one visit to one
+#'   site at one step (every species measured then), as when each visit to a pond is a field
+#'   session.
 #' @param source Where population means come from: `"traits"` (the default) builds them from
 #'   the optimum of each species with the arguments above; `"evolution"` takes them from a
 #'   simulation run with `evolution` ([evolution_control()]), as the genetic mean plus the
@@ -190,7 +201,7 @@
 #'   instead of `env`, `optimum`, `population_mean` and `trait`, with the trait names in the
 #'   attribute `"traits"`. `session_sd` shifts each trait on its own.
 #' @return Data frame with one row per individual and the columns `step` (with several steps),
-#'   `site`, `species`,
+#'   `visit` (with several visits), `site`, `species`,
 #'   `individual` (its number within the population), `abundance` (of the population), `env`
 #'   (of the site), `optimum` (of the species), `population_mean` (the expected value of the
 #'   population, \eqn{m_{ij}}{m_ij} above, after character displacement) and
@@ -242,13 +253,19 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                displacement_width = NULL, step = NULL, env = NULL,
                                cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
                                gene_flow = 1, source = c("traits", "evolution"),
-                               session_sd = 0) {
+                               session_sd = 0, visits = 1, session = c("step", "visit")) {
   if (inherits(x, "mc_evolving")) x <- as_metacommunity(x)
   if (!inherits(x, "mc_sim")) {
     stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
   }
   source <- match.arg(source)
   stopifnot(is.numeric(session_sd), length(session_sd) == 1, session_sd >= 0)
+  session <- match.arg(session)
+  stopifnot(length(visits) == 1, visits >= 1, visits == round(visits))
+  if (anyDuplicated(step)) {
+    stop("`step` has repeated steps: for several visits to each site at the same step, use ",
+         "`visits`", call. = FALSE)
+  }
   stopifnot(length(n) == 1, n >= 1, n == round(n), length(min_n) == 1, min_n >= 1,
             min_n == round(min_n))
   if (is.matrix(env) && ncol(env) == 1 && length(step) <= 1) env <- env[, 1]
@@ -256,41 +273,56 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     stop("`env` as a matrix needs one column per step (", max(1, length(step)), ")",
          call. = FALSE)
   }
-  args <- mget(setdiff(names(formals(sample_individuals)), c("x", "session_sd")))
+  args <- mget(setdiff(names(formals(sample_individuals)),
+                       c("x", "session_sd", "visits", "session")))
   if (missing(intraspecific_sd)) args$intraspecific_sd <- NULL
-  if (length(step) <= 1) {
+  if (length(step) <= 1 && visits == 1) {
     out <- do.call(individuals_at, c(list(x = quote(x)), args))
-    if (session_sd > 0) {
-      for (a in attr(out, "traits") %||% "trait") {
-        out[[a]] <- out[[a]] + stats::rnorm(1, 0, session_sd)
-      }
-    }
-    return(out)
+    return(session_shift(out, session_sd, if (session == "visit") out$site else 1))
   }
-  # several dates: each is sampled on its own, with the deviations of each population (of
-  # `population_sd` and `founder_sd`) kept across dates, and a shift shared by the individuals
-  # of each date
+  # several dates or visits: each is sampled on its own, with the deviations of each population
+  # (of `population_sd` and `founder_sd`) kept across them, and a shift shared by the
+  # individuals of each session
   dims <- dim(x$abundance)
   args$draws <- list(population = matrix(stats::rnorm(prod(dims)), dims[1]),
                      founder = matrix(stats::rnorm(prod(dims)), dims[1]))
-  dates <- lapply(seq_along(step), function(i) {
-    args$step <- step[i]
+  steps <- if (is.null(step)) list(NULL) else as.list(step)
+  occasions <- expand.grid(visit = seq_len(visits), date = seq_along(steps))
+  samples <- lapply(seq_len(nrow(occasions)), function(o) {
+    i <- occasions$date[o]
+    args$step <- steps[[i]]
     if (is.matrix(env)) args$env <- env[, i]
     d <- do.call(individuals_at, c(list(x = quote(x)), args))
-    out <- cbind(step = rep(step[i], nrow(d)), d)
+    out <- d
+    if (visits > 1) out <- cbind(visit = rep(occasions$visit[o], nrow(d)), out)
+    if (length(steps) > 1) out <- cbind(step = rep(step[i], nrow(d)), out)
     attr(out, "traits") <- attr(d, "traits")
+    attr(out, "date") <- rep(i, nrow(d))
     out
   })
-  traits <- attr(dates[[1]], "traits") %||% "trait"
-  shift <- matrix(stats::rnorm(length(step) * length(traits), 0, session_sd), length(step))
-  for (i in seq_along(dates)) {
-    for (a in seq_along(traits)) {
-      dates[[i]][[traits[a]]] <- dates[[i]][[traits[a]]] + shift[i, a]
-    }
-  }
-  out <- do.call(rbind, dates)
-  attr(out, "traits") <- attr(dates[[1]], "traits")
+  date <- unlist(lapply(samples, attr, "date"))
+  traits <- attr(samples[[1]], "traits")
+  out <- do.call(rbind, samples)
+  attr(out, "traits") <- traits
   rownames(out) <- NULL
+  key <- if (session == "visit") {
+    paste(date, out$site, if (visits > 1) out$visit else 1)
+  } else {
+    date
+  }
+  session_shift(out, session_sd, key)
+}
+
+# adds to the traits a deviation of standard deviation `sd` shared by the individuals with the
+# same `key` (a date, or a visit to a site), one per trait
+session_shift <- function(out, sd, key) {
+  if (sd == 0 || nrow(out) == 0) return(out)
+  key <- rep_len(key, nrow(out))
+  sessions <- unique(key)
+  for (a in attr(out, "traits") %||% "trait") {
+    shift <- stats::rnorm(length(sessions), 0, sd)
+    out[[a]] <- out[[a]] + shift[match(key, sessions)]
+  }
   out
 }
 
