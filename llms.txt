@@ -276,6 +276,8 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Dispersal kernel
 - [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md)
   : Environment that changes over time
+- [`env_space_time()`](https://provetelab.org/comdynamite/reference/env_space_time.md)
+  : Environment autocorrelated in space and time
 - [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md)
   : Pulse disturbance of the environment
 

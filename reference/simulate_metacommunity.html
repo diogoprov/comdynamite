@@ -178,7 +178,8 @@ only where <code>pool</code> allows.</p></dd>
 <dt id="arg-immigration">immigration<a class="anchor" aria-label="anchor" href="#arg-immigration"></a></dt>
 <dd><p>How emigrants reach other sites on spatially explicit landscapes:
 <code>"poisson"</code> (the default, as in the code of Thompson et al. 2020) or <code>"multinomial"</code>,
-which conserves them. Spatially implicit landscapes are always multinomial.</p></dd>
+which conserves them and is recommended for low dispersal (see Details). Spatially
+implicit landscapes are always multinomial.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
@@ -303,7 +304,12 @@ than in mcomsimr, which conserves dispersers. With <code>immigration = "multinom
 the emigrants of each species at each site are instead distributed among the other
 sites multinomially, with the probabilities of the kernel, which conserves them. It
 costs about as much as the Poisson draw at low dispersal and up to 20 times more at high
-dispersal, where the two give nearly the same results.</p></li>
+dispersal, where the two give nearly the same results. Use it for low dispersal (below
+about 0.01), especially with <code>extirpation</code> or an environment that changes in time
+(<code>env_time</code>), and for studies of long-term persistence: against mcomsimr with an
+environment from <code><a href="env_space_time.html">env_space_time()</a></code>, the Poisson draw gave 16% to 26% lower local
+richness at dispersal 0.001 on a grid, and the multinomial draw 6% or less, of either
+sign (see the validation article on the package website).</p></li>
 </ul><p>After dispersal, each population is lost with probability <code>extirpation</code>,
 independently of its size. Thompson et al. (2020) used 0.002 in their
 competition-colonisation scenario and no extirpation in the others. With <code>disturbance</code>,

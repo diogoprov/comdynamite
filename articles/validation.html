@@ -131,6 +131,24 @@ Since version 0.6.3.9000, <code>immigration = "multinomial"</code>
 conserves dispersers in comdynamite too; in the same scenario, counting
 empty sites in alpha, it gave 1.61 against 1.61 in mcomsimr and 1.51
 with the default Poisson draw.</p>
+<p>The comparison above holds the environment constant.
+<code>validation_mcomsimr_time.R</code> repeats it with an environment
+that changes in space and time, from <code><a href="../reference/env_space_time.html">env_space_time()</a></code>
+(spatial scale of 2 cells on the 5 x 5 grid and temporal scale of 50
+steps, so that it changes several times over the 200 steps), constant
+during the initialisation as in mcomsimr. Again, none of the 160
+comparisons was significant. With dispersal of 0.01 or more and without
+extirpation, mean differences in alpha, gamma and total abundance stayed
+below 1.5%. The Poisson draw of immigrants mattered more than with a
+constant environment, probably because populations that track a moving
+environment depend more on immigrants: at dispersal of 0.001 on the
+grid, alpha was 16% lower than in mcomsimr without extirpation and 26%
+lower with it. With <code>immigration = "multinomial"</code>, these
+differences fell to 6% or less, of either sign. The Poisson draw remains
+the default, since it is what the authors’ code does, but
+<code>immigration = "multinomial"</code> is the better choice for low
+dispersal, for an environment that changes in time, and for studies of
+long-term persistence.</p>
 </div>
 <div class="section level2">
 <h2 id="article-and-archived-code">Article and archived code<a class="anchor" aria-label="anchor" href="#article-and-archived-code"></a>
@@ -222,11 +240,15 @@ that nobody has noticed them.</p>
 </h2>
 <p><code>validation_thompson.R</code> follows the archived code, with
 100 patches, 50 species, 15 dispersal rates, 30 landscapes, three types
-of competition and 6 of the 13 niche breadths. Two differences remain.
-RandomFields is no longer on CRAN, so the field before conversion to
-ranks is an AR(1) process with spatial covariance, not a single
-covariance over space and time, and emigrants are binomial, as in the
-article.</p>
+of competition and 6 of the 13 niche breadths. The environment comes
+from <code><a href="../reference/env_space_time.html">env_space_time()</a></code>, which draws their field (a single
+exponential covariance over space and time, with scales of 50 and 500
+steps) by random Fourier features, since RandomFields is no longer on
+CRAN; up to version 0.9.0 the script used an AR(1) process with spatial
+covariance instead, which gave nearly the same values at niche breadths
+of 0.5 and above, and higher spatial beta at 0.215 (for example, 14.4
+against 11.1 under stabilising competition at the lowest dispersal). One
+difference remains: emigrants are binomial, as in the article.</p>
 <p>Values at dispersal of 0.00001 are close to Figure 3, read from the
 plot because the article has no table of values:</p>
 <table class="table">
@@ -242,43 +264,43 @@ plot because the article has no table of values:</p>
 <td>Equal</td>
 <td>0.5</td>
 <td>1.0</td>
-<td>39</td>
-<td>38.8</td>
+<td>38</td>
+<td>37.9</td>
 </tr>
 <tr class="even">
 <td>Equal</td>
 <td>10</td>
 <td>1.0</td>
-<td>44</td>
-<td>43.1</td>
+<td>43</td>
+<td>42.7</td>
 </tr>
 <tr class="odd">
 <td>Mixed</td>
 <td>0.5</td>
 <td>1.9</td>
 <td>40</td>
-<td>21.5</td>
+<td>21.2</td>
 </tr>
 <tr class="even">
 <td>Mixed</td>
 <td>10</td>
 <td>2.3</td>
-<td>43</td>
-<td>18.6</td>
+<td>44</td>
+<td>19.0</td>
 </tr>
 <tr class="odd">
 <td>Stabilising</td>
 <td>0.5</td>
-<td>4.6</td>
-<td>42</td>
-<td>9.1</td>
+<td>4.5</td>
+<td>41</td>
+<td>9.3</td>
 </tr>
 <tr class="even">
 <td>Stabilising</td>
 <td>10</td>
 <td>6.6</td>
-<td>46</td>
-<td>7.0</td>
+<td>47</td>
+<td>6.9</td>
 </tr>
 </tbody>
 </table>
@@ -290,22 +312,22 @@ in which species persisted in fewer than 10 of 30 landscapes.</div>
 <p>Their hypotheses H1, H2, H3, H5 and H6 appear. H4 states that spatial
 and temporal beta are promoted by narrow niches or strong competition.
 The part on competition holds: at the lowest dispersal and a niche
-breadth of 0.5, spatial beta is 38.8 with equal competition, 21.5 with
-mixed competition and 9.1 with stabilising competition.</p>
+breadth of 0.5, spatial beta is 37.9 with equal competition, 21.2 with
+mixed competition and 9.3 with stabilising competition.</p>
 <p>The part on niches depends on the scenario. Under stabilising
-competition, spatial beta peaks at a niche breadth of 0.215 (14.4,
-against 7.0 at 10). Under mixed competition the peak is weak. Under
-equal competition and low dispersal, beta increases with niche breadth
-(16.5, 38.8 and 43.1 at 0.215, 0.5 and 10), because drift fixes a
-different species in each patch. Narrow niches raise beta under equal
-competition only from a dispersal of about 0.02. Figure 4 of the article
-shows the same pattern, so the difference lies between that figure and
-the wording of H4.</p>
+competition, spatial beta peaks at a niche breadth of 0.215 (11.1,
+against 6.9 at 10). Under mixed competition the peak is weak and lies at
+0.5 (21.2, against 19.0 at 10). Under equal competition and low
+dispersal, beta increases with niche breadth (13.8, 37.9 and 42.7 at
+0.215, 0.5 and 10), because drift fixes a different species in each
+patch. Narrow niches raise beta under equal competition only from a
+dispersal of about 0.02. Figure 4 of the article shows the same pattern,
+so the difference lies between that figure and the wording of H4.</p>
 <p>The competition-colonisation scenario, in
 <code>validation_thompson_cc.R</code>, uses
 <code>extirpation = 0.002</code> and reproduces the code in the two last
-rows of the table. At a niche breadth of 0.5, gamma rises from 3.6 to
-about 6 near a dispersal of 0.0005 and then falls. At 10, the
+rows of the table. At a niche breadth of 0.5, gamma rises from 3.5 to
+about 6 near a dispersal of 0.001 and then falls. At 10, the
 metacommunity collapses to one species from a dispersal of about 0.02.
 Both agree with Figure 3g and h by eye.</p>
 </div>

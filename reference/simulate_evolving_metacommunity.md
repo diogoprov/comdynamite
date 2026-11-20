@@ -117,8 +117,9 @@ simulate_evolving_metacommunity(
 
   How emigrants reach other sites on spatially explicit landscapes:
   `"poisson"` (the default, as in the code of Thompson et al. 2020) or
-  `"multinomial"`, which conserves them. Spatially implicit landscapes
-  are always multinomial.
+  `"multinomial"`, which conserves them and is recommended for low
+  dispersal (see Details). Spatially implicit landscapes are always
+  multinomial.
 
 - max_species:
 

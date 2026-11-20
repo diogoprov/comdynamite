@@ -47,6 +47,7 @@ Other landscapes:
 [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md),
 [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md),
 [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md),
+[`env_space_time()`](https://provetelab.org/comdynamite/reference/env_space_time.md),
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
 [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md),
 [`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
