@@ -13,10 +13,20 @@
 #'   of phylogenetic similarity (1 - d / max(d), with d the patristic
 #'   distance), so that close relatives compete more strongly while the
 #'   distribution of coefficients stays the same as with `"random"`.
+#' * `"trait"`: competition falls with the distance between the niches of the two species,
+#'   \eqn{\alpha_{jk} = q \exp(-(\theta_j - \theta_k)^2 / (2(\sigma_j^2 +
+#'   \sigma_k^2)))}{alpha_jk = q exp(-(theta_j - theta_k)^2 / (2 (sigma_j^2 + sigma_k^2)))},
+#'   with \eqn{q}{q} = `inter_max`, \eqn{\theta}{theta} the optima and \eqn{\sigma}{sigma}
+#'   the niche breadths of `traits`. The last factor is the overlap of two Gaussian niches, the
+#'   kernel that [simulate_evolving_metacommunity()] uses with `niche_overlap = TRUE`, so that
+#'   with `inter_max = 1` two species with the same niche compete as one species. With a list
+#'   of traits (several axes), the overlap is the product over axes. Nothing is random.
 #'
 #' @param species A `phylo` tree, or the number of species (not for
-#'   `type = "phylo"`).
+#'   `type = "phylo"`); ignored for `type = "trait"`, where the species are those of `traits`.
 #' @param type Type of interspecific competition.
+#' @param traits For `type = "trait"`: a data frame from [species_traits()], or any data frame
+#'   with columns `optimum` and `sigma`, or a list of them for a niche of several axes.
 #' @param inter_max Maximum interspecific coefficient, relative to
 #'   intraspecific competition.
 #' @param scale Multiplier of all coefficients.
@@ -26,11 +36,15 @@
 #' set.seed(1)
 #' tr <- treeshapesim::sim_tree_shape(5)
 #' round(competition_matrix(tr, "phylo", inter_max = 0.5), 3)
+#' traits <- species_traits(tr)
+#' round(competition_matrix(type = "trait", traits = traits, inter_max = 1), 3)
 #' @export
-competition_matrix <- function(species, type = c("none", "random", "phylo"),
-                               inter_max = 0.1, scale = 0.05) {
+competition_matrix <- function(species, type = c("none", "random", "phylo", "trait"),
+                               inter_max = 0.1, scale = 0.05, traits = NULL) {
   type <- match.arg(type)
   stopifnot(inter_max >= 0, scale > 0)
+  if (type == "trait") return(scale * trait_competition(traits, inter_max))
+  if (!is.null(traits)) stop("`traits` is used only with type = \"trait\"", call. = FALSE)
   is_tree <- inherits(species, "phylo")
   if (type == "phylo" && !is_tree) stop("type = \"phylo\" needs a 'phylo' tree as `species`", call. = FALSE)
   sp <- if (is_tree) species$tip.label else paste0("sp", seq_len(species))
@@ -47,4 +61,36 @@ competition_matrix <- function(species, type = c("none", "random", "phylo"),
   a <- a + t(a)
   diag(a) <- 1
   scale * a
+}
+
+# competition by the overlap of Gaussian niches, 1 on the diagonal; product over axes
+trait_competition <- function(traits, inter_max) {
+  if (is.null(traits)) stop("type = \"trait\" needs `traits`", call. = FALSE)
+  axes <- if (is.list(traits) && !is.data.frame(traits)) traits else list(traits)
+  axes <- lapply(axes, function(x) {
+    if (!all(c("optimum", "sigma") %in% names(x))) {
+      stop("`traits` needs columns `optimum` and `sigma`", call. = FALSE)
+    }
+    x
+  })
+  sp <- rownames(axes[[1]])
+  if (is.null(sp) || (is.data.frame(axes[[1]]) && .row_names_info(axes[[1]]) < 0)) {
+    sp <- paste0("sp", seq_len(nrow(axes[[1]])))
+  } else if (length(axes) > 1) {
+    if (!all(vapply(axes, function(x) setequal(rownames(x), sp), logical(1)))) {
+      stop("sets of traits have different species", call. = FALSE)
+    }
+    axes <- lapply(axes, function(x) x[sp, , drop = FALSE])
+  }
+  log_overlap <- 0
+  for (x in axes) {
+    w <- outer(x$sigma^2, x$sigma^2, "+")
+    d2 <- outer(x$optimum, x$optimum, "-")^2
+    log_overlap <- log_overlap - ifelse(!is.finite(w), 0,
+                                        ifelse(w > 0, d2 / (2 * w), ifelse(d2 > 0, Inf, 0)))
+  }
+  a <- inter_max * exp(log_overlap)
+  diag(a) <- 1
+  dimnames(a) <- list(sp, sp)
+  a
 }

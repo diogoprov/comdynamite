@@ -72,8 +72,13 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    comparações; (iv) usar o gerador na vignette de validação no lugar do ambiente constante.
 3. *Competição a partir da distância entre traits*: `competition_matrix(type = "trait")`, com
    o mesmo núcleo de sobreposição de nicho que o motor evolutivo já usa (v0.7.0, "Falta").
+   Feito em 2026-11-19 (branch `bloco-a-itens-3-4`), com vários eixos pelo produto das
+   sobreposições.
 4. *Nicho com correlação entre eixos* (matriz de largura por espécie) em `growth_rates()`, e
    paisagens que gerem vários eixos ambientais de uma vez em `landscape_grid()` (v0.7.0).
+   Feito em 2026-11-19 (mesma branch): `niche_correlation()` (uma matriz para todas as
+   espécies ou uma por espécie) e `landscape_grid(n_axes, axis_cor)`, com `env_axes`. Falta:
+   nicho correlacionado com `evolution` e com especiação (hoje recusados).
 5. *Dispersão variável no tempo e filtragem de imigrantes com especiação e vários traits*:
    `dispersal_time`, `kernels` e `kernel_step` com `evolution`, e `immigrant_selection` com
    `speciation` e com G multivariada, hoje recusados (artigo "Dispersal and disturbance through

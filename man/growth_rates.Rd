@@ -33,6 +33,14 @@ several dimensions whose axes are independent (no correlation between the respon
 different axes), with the optimum and breadth of each axis in its own set of traits. The
 maxima multiply too, so give the traits of all but one axis \code{r_max} of 1, for example with
 \code{species_traits(rmax_range = c(1, 1))}.
+
+A list of traits passed through \code{\link[=niche_correlation]{niche_correlation()}} gives the responses to the axes a
+correlation \eqn{R}{R}: the growth rate is then \eqn{\prod_a r_a \exp(-d^\top R^{-1} d /
+2)}{prod(r_max) exp(-t(d) solve(R) d / 2)}, with \eqn{d_a = (E_a - \theta_a)/\sigma_a}{d_a =
+(E_a - theta_a) / sigma_a}, a multivariate Gaussian niche whose covariance has the breadths
+\eqn{\sigma_a}{sigma_a} on the diagonal. A positive correlation favours sites where both
+axes depart from the optima in the same direction. With \eqn{R}{R} the identity, it is the
+product above.
 }
 \examples{
 set.seed(1)

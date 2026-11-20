@@ -42,6 +42,7 @@ reference:
   desc: Traits with phylogenetic signal and evolutionary regimes.
   contents:
   - species_traits
+  - niche_correlation
   - trait_bm
   - trait_ou
   - rate_matrix
@@ -67,7 +68,7 @@ reference:
   - plot.food_web
   - animate_food_web
 - title: Competition
-  desc: Interspecific competition, optionally structured by relatedness.
+  desc: Interspecific competition, optionally structured by relatedness or by niche overlap.
   contents:
   - competition_matrix
 - title: Clades and biogeography

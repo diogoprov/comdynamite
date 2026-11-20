@@ -10,7 +10,9 @@ landscape_grid(
   disp_scale = 2,
   torus = TRUE,
   env_range = c(0, 100),
-  disp_shape = c("exponential", "gaussian")
+  disp_shape = c("exponential", "gaussian"),
+  n_axes = 1,
+  axis_cor = 0
 )
 }
 \arguments{
@@ -28,12 +30,22 @@ environment.}
 
 \item{disp_shape}{Shape of the dispersal kernel, \code{"exponential"} (the default) or
 \code{"gaussian"}; see \code{\link[=dispersal_kernel]{dispersal_kernel()}}.}
+
+\item{n_axes}{Number of environmental axes. With more than one, each axis is a field
+smoothed in the same way, the axes are correlated by \code{axis_cor} before the conversion to
+ranks, and the landscape also holds \code{env_axes}, a matrix with one column per axis, which
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}} uses with a list of traits when \code{env} is not given. The first
+axis is \code{env}, the same as with \code{n_axes = 1} and the same seed.}
+
+\item{axis_cor}{Correlation between the axes: one number for all pairs, or a correlation
+matrix (\code{n_axes} x \code{n_axes}). It applies to the smoothed fields, so the correlation of the
+uniform axes (by ranks) is slightly lower.}
 }
 \value{
 An \code{mc_landscape} object: a list with \code{env}, \code{coords} (data frame
 with columns \code{x} and \code{y}), \code{dist} (distances among sites, toroidal if
-\code{torus = TRUE}) and \code{dispersal} (row-stochastic matrix with a zero
-diagonal).
+\code{torus = TRUE}), \code{dispersal} (row-stochastic matrix with a zero
+diagonal) and, with \code{n_axes > 1}, \code{env_axes}.
 }
 \description{
 Sites on a \code{side} x \code{side} grid, optionally wrapped as a torus so that no

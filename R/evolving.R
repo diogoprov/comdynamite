@@ -336,7 +336,12 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   several <- is.list(traits) && !is.data.frame(traits)
   trait_list <- NULL
   if (several) {
+    if (!is.null(attr(traits, "niche_cor"))) {
+      stop("a niche with correlated axes (`niche_correlation()`) is not yet available with ",
+           "speciation", call. = FALSE)
+    }
     trait_list <- lapply(traits, as_traits)
+    if (is.null(env)) env <- landscape$env_axes
     if (is.null(env)) {
       stop("a list of traits needs `env`, one column per element", call. = FALSE)
     }

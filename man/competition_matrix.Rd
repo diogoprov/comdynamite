@@ -6,14 +6,15 @@
 \usage{
 competition_matrix(
   species,
-  type = c("none", "random", "phylo"),
+  type = c("none", "random", "phylo", "trait"),
   inter_max = 0.1,
-  scale = 0.05
+  scale = 0.05,
+  traits = NULL
 )
 }
 \arguments{
 \item{species}{A \code{phylo} tree, or the number of species (not for
-\code{type = "phylo"}).}
+\code{type = "phylo"}); ignored for \code{type = "trait"}, where the species are those of \code{traits}.}
 
 \item{type}{Type of interspecific competition.}
 
@@ -21,6 +22,9 @@ competition_matrix(
 intraspecific competition.}
 
 \item{scale}{Multiplier of all coefficients.}
+
+\item{traits}{For \code{type = "trait"}: a data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame
+with columns \code{optimum} and \code{sigma}, or a list of them for a niche of several axes.}
 }
 \value{
 Square matrix: element [j, k] is the effect of species k on
@@ -42,6 +46,14 @@ competition. The matrix is symmetric.
 of phylogenetic similarity (1 - d / max(d), with d the patristic
 distance), so that close relatives compete more strongly while the
 distribution of coefficients stays the same as with \code{"random"}.
+\item \code{"trait"}: competition falls with the distance between the niches of the two species,
+\eqn{\alpha_{jk} = q \exp(-(\theta_j - \theta_k)^2 / (2(\sigma_j^2 +
+  \sigma_k^2)))}{alpha_jk = q exp(-(theta_j - theta_k)^2 / (2 (sigma_j^2 + sigma_k^2)))},
+with \eqn{q}{q} = \code{inter_max}, \eqn{\theta}{theta} the optima and \eqn{\sigma}{sigma}
+the niche breadths of \code{traits}. The last factor is the overlap of two Gaussian niches, the
+kernel that \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} uses with \code{niche_overlap = TRUE}, so that
+with \code{inter_max = 1} two species with the same niche compete as one species. With a list
+of traits (several axes), the overlap is the product over axes. Nothing is random.
 }
 }
 \examples{
@@ -49,5 +61,7 @@ distribution of coefficients stays the same as with \code{"random"}.
 set.seed(1)
 tr <- treeshapesim::sim_tree_shape(5)
 round(competition_matrix(tr, "phylo", inter_max = 0.5), 3)
+traits <- species_traits(tr)
+round(competition_matrix(type = "trait", traits = traits, inter_max = 1), 3)
 \dontshow{\}) # examplesIf}
 }
