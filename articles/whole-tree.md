@@ -229,6 +229,31 @@ pcps_test(comm, tree, env, null = "variogram", coords = coords)
 With fields as broad as the landscape, p values near 0.05 still deserve
 caution.
 
+The same surrogates serve as null environments for the simulator. Given
+a landscape,
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md)
+returns landscapes with the environment moved but its spatial structure
+kept, so a simulated pattern can be compared between the observed
+landscape and landscapes where the environment is equally autocorrelated
+but placed elsewhere:
+
+``` r
+
+grid <- landscape_grid(20, torus = FALSE)
+nulls <- env_surrogates(grid, n = 99, method = "parametric")
+# traits and alpha as in the introductory vignette; here, the decay of similarity with distance
+statistic <- function(land) {
+  summary_stats(simulate_metacommunity(land, traits, alpha, n_steps = 500))[["decay"]]
+}
+observed <- statistic(grid)
+null <- vapply(nulls, statistic, numeric(1))
+```
+
+For an environment that changes in time,
+`env_surrogates(env_time, coords, method = "parametric")` moves the
+whole series of each site to another site, which keeps the dynamics of
+each site and changes only their place.
+
 ## References
 
 Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS – an R-package for

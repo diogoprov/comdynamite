@@ -22,11 +22,14 @@ env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
 - env:
 
   Predictor, or matrix or data frame of predictors, with one row per
-  site.
+  site, such as an `env_time` matrix with one column per step. Or an
+  `mc_landscape`, whose environment (or `env_axes`) is replaced, with
+  the distances of the landscape.
 
 - coords:
 
-  Matrix or data frame of coordinates with one row per site.
+  Matrix or data frame of coordinates with one row per site. Not needed
+  for a landscape.
 
 - n:
 
@@ -38,9 +41,10 @@ env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
 
 ## Value
 
-List of `n` matrices with the dimensions and column names of `env`. For
-`"parametric"`, `attr(, "rows")` is a matrix with one row per draw,
-giving for each site the row of `env` it received.
+List of `n` matrices with the dimensions and column names of `env`, or
+of `n` landscapes when `env` is one. For `"parametric"`,
+`attr(, "rows")` is a matrix with one row per draw, giving for each site
+the row of `env` it received.
 
 ## Details
 
@@ -80,6 +84,19 @@ and
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
 they were not checked.
 
+For simulations, `env_surrogates()` gives null environments: a
+landscape, or an `env_time` matrix, with the same spatial structure but
+no relation to the environment that shaped the observed communities. To
+ask whether a simulated pattern depends on where the environment is,
+rather than only on how much of it is autocorrelated, run the same
+simulation on the observed landscape and on its surrogates and compare a
+statistic. With `env_time`, `"parametric"` moves the whole series of
+each site to another site, so the dynamics of each site are kept and
+only their place changes; `"variogram"` smooths each step on its own,
+which does not keep the temporal autocorrelation. Landscapes keep their
+own distances, such as those of a torus, though the exponential
+covariance may then not be positive definite.
+
 ## References
 
 Viladomat, J., Mazumder, R., McInturff, A., McCauley, D. J., & Hastie,
@@ -110,4 +127,9 @@ length(draws)
 cor(field, draws[[1]])
 #>           [,1]
 #> [1,] 0.1758885
+# null landscapes for the simulator
+grid <- landscape_grid(10, env_range = c(0, 100))
+nulls <- env_surrogates(grid, n = 2, method = "parametric")
+cor(grid$env, nulls[[1]]$env)
+#> [1] -0.2500471
 ```

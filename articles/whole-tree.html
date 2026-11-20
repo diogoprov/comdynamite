@@ -381,6 +381,25 @@ them for other uses, such as null environments for simulations:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/pcps_test.html">pcps_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, null <span class="op">=</span> <span class="st">"variogram"</span>, coords <span class="op">=</span> <span class="va">coords</span><span class="op">)</span></span></code></pre></div>
 <p>With fields as broad as the landscape, p values near 0.05 still
 deserve caution.</p>
+<p>The same surrogates serve as null environments for the simulator.
+Given a landscape, <code><a href="../reference/env_surrogates.html">env_surrogates()</a></code> returns landscapes with
+the environment moved but its spatial structure kept, so a simulated
+pattern can be compared between the observed landscape and landscapes
+where the environment is equally autocorrelated but placed
+elsewhere:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/landscape_grid.html">landscape_grid</a></span><span class="op">(</span><span class="fl">20</span>, torus <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="va">nulls</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/env_surrogates.html">env_surrogates</a></span><span class="op">(</span><span class="va">grid</span>, n <span class="op">=</span> <span class="fl">99</span>, method <span class="op">=</span> <span class="st">"parametric"</span><span class="op">)</span></span>
+<span><span class="co"># traits and alpha as in the introductory vignette; here, the decay of similarity with distance</span></span>
+<span><span class="va">statistic</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">land</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/summary_stats.html">summary_stats</a></span><span class="op">(</span><span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="va">land</span>, <span class="va">traits</span>, <span class="va">alpha</span>, n_steps <span class="op">=</span> <span class="fl">500</span><span class="op">)</span><span class="op">)</span><span class="op">[[</span><span class="st">"decay"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu">statistic</span><span class="op">(</span><span class="va">grid</span><span class="op">)</span></span>
+<span><span class="va">null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">vapply</a></span><span class="op">(</span><span class="va">nulls</span>, <span class="va">statistic</span>, <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>For an environment that changes in time,
+<code>env_surrogates(env_time, coords, method = "parametric")</code>
+moves the whole series of each site to another site, which keeps the
+dynamics of each site and changes only their place.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

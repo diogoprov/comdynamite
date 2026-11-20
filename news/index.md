@@ -15,6 +15,11 @@
   for landscapes with edges, where the torus rejects too often. Both
   still become liberal when the range of the field approaches the size
   of the landscape.
+- [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md)
+  also takes a landscape, and returns landscapes with the environment
+  (or `env_axes`) replaced and the distances of the landscape kept, as
+  null environments for the simulator; with `env_time` and
+  `"parametric"`, it moves the whole series of each site.
 - The “whole tree” article compares six null models for a continuous,
   autocorrelated predictor in landscapes with edges
   (`data-raw/validation_continuous_nulls.R`). Variogram matching
