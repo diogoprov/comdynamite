@@ -105,6 +105,7 @@ gives a torus.
 codes the events.
 
 Other restricted null models:
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md),
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md),
 [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
 

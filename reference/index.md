@@ -184,7 +184,7 @@ Phylogenetic vectors and the partition of trait variation.
 
 ## Restricted null models
 
-Permutations for sites that are neighbours.
+Permutations and surrogates for sites that are neighbours.
 
 - [`torus_permutations()`](https://provetelab.org/comdynamite/reference/torus_permutations.md)
   : Site permutations that keep the structure of a torus
@@ -192,6 +192,8 @@ Permutations for sites that are neighbours.
   : Permutations that move biogeographic events as rigid bodies
 - [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
   : Permutations that move the patches of biogeographic events
+- [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md)
+  : Spatial surrogates of predictors
 
 ## Simulation studies
 

@@ -19,7 +19,9 @@ node_test(
   n_perm = 999,
   cores = 1,
   site_permutations = NULL,
-  area_permutations = NULL
+  area_permutations = NULL,
+  null = c("permutation", "variogram", "parametric"),
+  coords = NULL
 )
 ```
 
@@ -77,6 +79,25 @@ node_test(
   [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
   to use for the events instead of `site_permutations` or free
   permutations. Sites must be in the order of `comm`.
+
+- null:
+
+  Null model of sites: `"permutation"` (free, or `site_permutations`
+  when given), or surrogates of the predictors with the same spatial
+  autocorrelation, `"variogram"` or `"parametric"`, for landscapes with
+  edges (see
+  [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md);
+  their rates of type I error were checked in
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  not here). Surrogates need `coords`. They replace the permutations of
+  sites, not those of the areas of `biogeography`.
+
+- coords:
+
+  Matrix of coordinates with one row per site, for `null = "variogram"`
+  or `"parametric"`. Taken from an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object when it has them.
 
 ## Value
 

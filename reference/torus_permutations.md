@@ -54,6 +54,7 @@ plot. *Journal of Ecology*, 89, 947–959.
 ## See also
 
 Other restricted null models:
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md),
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
 [`rigid_permutations()`](https://provetelab.org/comdynamite/reference/rigid_permutations.md)
 

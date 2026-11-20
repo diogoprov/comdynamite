@@ -2,6 +2,19 @@
 
 ## comdynamite (development version)
 
+- New
+  [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md):
+  predictors with the same spatial autocorrelation as the observed ones,
+  by variogram matching (Viladomat et al. 2014) or a parametric Gaussian
+  field matched by rank.
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  and
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  take them with `null = "variogram"` or `"parametric"` and `coords`,
+  for landscapes with edges, where the torus rejects too often. Both
+  still become liberal when the range of the field approaches the size
+  of the landscape.
 - The “whole tree” article compares six null models for a continuous,
   autocorrelated predictor in landscapes with edges
   (`data-raw/validation_continuous_nulls.R`). Variogram matching

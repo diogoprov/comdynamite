@@ -304,7 +304,7 @@ it):</p>
 <td></td>
 <td>0.085</td>
 <td>0.055</td>
-<td>0.065</td>
+<td>0.060</td>
 <td>0.070</td>
 </tr>
 <tr class="odd">
@@ -314,7 +314,7 @@ it):</p>
 <td></td>
 <td>0.160</td>
 <td>0.095</td>
-<td>0.085</td>
+<td>0.080</td>
 <td>0.075</td>
 </tr>
 <tr class="even">
@@ -364,13 +364,23 @@ restricted null stayed at 0.05 in every case, since all of them became
 liberal as the range approached the size of the landscape, when there
 are few independent patches of environment left to compare. Variogram
 matching came closest (mean 0.062, at most 0.09), followed by the
-parametric surrogate (mean 0.067, at most 0.10). MSR worked on the grid
+parametric surrogate (mean 0.066, at most 0.10). MSR worked on the grid
 and the strip but not in the L-shaped region (up to 0.23), and the torus
 and the rotation were liberal on the grid from a range of 5. Power at a
 correlation of 0.6 was similar among the restricted nulls (0.90 to 0.94
 on average), so the gain in type I error did not cost power. Variogram
-matching took about 2 to 3 s per test with 199 draws, MSR about 3 s and
-the parametric surrogate under 0.5 s.</p>
+matching took about 5 s per test with 199 draws, MSR about 3 s and the
+parametric surrogate under 0.5 s. The parametric and variogram
+surrogates were drawn with <code><a href="../reference/env_surrogates.html">env_surrogates()</a></code>, the code of
+the package.</p>
+<p>The two that came closest are options of the tests, as
+<code>null = "variogram"</code> or <code>null = "parametric"</code> with
+the coordinates of the sites, and <code><a href="../reference/env_surrogates.html">env_surrogates()</a></code> draws
+them for other uses, such as null environments for simulations:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/pcps_test.html">pcps_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, null <span class="op">=</span> <span class="st">"variogram"</span>, coords <span class="op">=</span> <span class="va">coords</span><span class="op">)</span></span></code></pre></div>
+<p>With fields as broad as the landscape, p values near 0.05 still
+deserve caution.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>

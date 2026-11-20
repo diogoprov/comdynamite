@@ -13,7 +13,15 @@ so the p-value to report is the larger of the two.
 ## Usage
 
 ``` r
-phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
+phylo_beta_test(
+  comm,
+  tree,
+  env,
+  n_perm = 999,
+  site_permutations = NULL,
+  null = c("permutation", "variogram", "parametric"),
+  coords = NULL
+)
 ```
 
 ## Arguments
@@ -46,6 +54,24 @@ phylo_beta_test(comm, tree, env, n_perm = 999, site_permutations = NULL)
   to use instead of free permutations of sites. Empty sites are then
   allowed, because they are part of the landscape: they leave the
   analysis but their predictors can reach occupied sites.
+
+- null:
+
+  Null model of sites: `"permutation"` (free, or `site_permutations`
+  when given), or surrogates of the predictors with the same spatial
+  autocorrelation, `"variogram"` or `"parametric"`, for landscapes with
+  edges (see
+  [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md);
+  their rates of type I error were checked in
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  not here). Surrogates need `coords`; empty sites are then not allowed.
+
+- coords:
+
+  Matrix of coordinates with one row per site, for `null = "variogram"`
+  or `"parametric"`. Taken from an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object when it has them.
 
 ## Value
 

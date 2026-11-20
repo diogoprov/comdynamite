@@ -13,7 +13,16 @@ that dissimilarity, as a distance-based regression, and on each axis in
 ## Usage
 
 ``` r
-pcps_test(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL)
+pcps_test(
+  comm,
+  tree,
+  env,
+  axes = 1:2,
+  n_perm = 999,
+  site_permutations = NULL,
+  null = c("permutation", "variogram", "parametric"),
+  coords = NULL
+)
 ```
 
 ## Arguments
@@ -50,6 +59,23 @@ pcps_test(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL)
   to use instead of free permutations of sites. Empty sites are then
   allowed: they leave the analysis but their predictors can reach
   occupied sites.
+
+- null:
+
+  Null model of sites: `"permutation"` (free, or `site_permutations`
+  when given), or surrogates of the predictors with the same spatial
+  autocorrelation, `"variogram"` or `"parametric"`, for landscapes with
+  edges (see
+  [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md),
+  which gives their rates of type I error). Surrogates need `coords`;
+  empty sites are then not allowed.
+
+- coords:
+
+  Matrix of coordinates with one row per site, for `null = "variogram"`
+  or `"parametric"`. Taken from an
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  object when it has them.
 
 ## Value
 
@@ -91,7 +117,10 @@ With fields that stop at the edges of the grid it rejected 6-25%, and
 the grid, so the torus reduces this error without removing it in a
 landscape with edges. It also costs power: with a correlation of 0.7
 between the predictor and the field behind the communities, the
-whole-dissimilarity `p_site` fell from 98-100% to 23-79%.
+whole-dissimilarity `p_site` fell from 98-100% to 23-79%. In landscapes
+with edges, `null = "variogram"` or `"parametric"` came closer to the
+nominal rate (see
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md)).
 
 `data-raw/validation_pcps.R` checks the statistics against the package
 PCPS and gives these rates.

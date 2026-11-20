@@ -86,7 +86,15 @@ requires both, so the p-value to report is the larger of the two.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">phylo_beta_test</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tree</span>, <span class="va">env</span>, n_perm <span class="op">=</span> <span class="fl">999</span>, site_permutations <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">phylo_beta_test</span><span class="op">(</span></span>
+<span>  <span class="va">comm</span>,</span>
+<span>  <span class="va">tree</span>,</span>
+<span>  <span class="va">env</span>,</span>
+<span>  n_perm <span class="op">=</span> <span class="fl">999</span>,</span>
+<span>  site_permutations <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  null <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"permutation"</span>, <span class="st">"variogram"</span>, <span class="st">"parametric"</span><span class="op">)</span>,</span>
+<span>  coords <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -117,6 +125,19 @@ site.</p></dd>
 per row, for example from <code><a href="torus_permutations.html">torus_permutations()</a></code>, to use instead of free
 permutations of sites. Empty sites are then allowed, because they are part of the
 landscape: they leave the analysis but their predictors can reach occupied sites.</p></dd>
+
+
+<dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
+<dd><p>Null model of sites: <code>"permutation"</code> (free, or <code>site_permutations</code> when given),
+or surrogates of the predictors with the same spatial autocorrelation, <code>"variogram"</code> or
+<code>"parametric"</code>, for landscapes with edges (see <code><a href="env_surrogates.html">env_surrogates()</a></code>; their rates of type I
+error were checked in <code><a href="pcps_test.html">pcps_test()</a></code>, not here). Surrogates need <code>coords</code>; empty sites
+are then not allowed.</p></dd>
+
+
+<dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
+<dd><p>Matrix of coordinates with one row per site, for <code>null = "variogram"</code> or
+<code>"parametric"</code>. Taken from an <code><a href="mc_data.html">mc_data()</a></code> object when it has them.</p></dd>
 
 </dl></div>
     <div class="section level2">
