@@ -83,8 +83,9 @@ surrogate_env <- function(env) {
   if (is.data.frame(env)) {
     check_numeric_columns(env, "`env`", "Code factors as dummy variables.")
   }
-  env <- as.matrix(env) * 1
-  if (!is.numeric(env)) stop("`env` is not numeric", call. = FALSE)
+  env <- as.matrix(env)
+  if (!is.numeric(env) && !is.logical(env)) stop("`env` is not numeric", call. = FALSE)
+  env <- env * 1
   if (anyNA(env)) stop("`env` has missing values", call. = FALSE)
   variable <- apply(env, 2, stats::var) > 0
   if (!any(variable)) stop("`env` has no variation among sites", call. = FALSE)

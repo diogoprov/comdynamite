@@ -111,4 +111,5 @@ test_that("an env_time matrix moves whole series with the parametric surrogate",
   expect_error(env_surrogates(matrix(1, 36, 2), coords), "no variation")
   expect_error(env_surrogates(c(1:35, NA), coords), "missing values")
   expect_error(env_surrogates(data.frame(a = letters[1:36]), coords), "dummy")
+  expect_error(env_surrogates(matrix(letters[1:36]), coords), "not numeric")
 })
