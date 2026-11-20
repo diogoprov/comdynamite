@@ -12,9 +12,10 @@ to intraspecific competition. The matrix is symmetric.
 ``` r
 competition_matrix(
   species,
-  type = c("none", "random", "phylo"),
+  type = c("none", "random", "phylo", "trait"),
   inter_max = 0.1,
-  scale = 0.05
+  scale = 0.05,
+  traits = NULL
 )
 ```
 
@@ -22,7 +23,8 @@ competition_matrix(
 
 - species:
 
-  A `phylo` tree, or the number of species (not for `type = "phylo"`).
+  A `phylo` tree, or the number of species (not for `type = "phylo"`);
+  ignored for `type = "trait"`, where the species are those of `traits`.
 
 - type:
 
@@ -36,6 +38,13 @@ competition_matrix(
 - scale:
 
   Multiplier of all coefficients.
+
+- traits:
+
+  For `type = "trait"`: a data frame from
+  [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md),
+  or any data frame with columns `optimum` and `sigma`, or a list of
+  them for a niche of several axes.
 
 ## Value
 
@@ -52,6 +61,17 @@ Square matrix: element \[j, k\] is the effect of species k on species j.
   distance), so that close relatives compete more strongly while the
   distribution of coefficients stays the same as with `"random"`.
 
+- `"trait"`: competition falls with the distance between the niches of
+  the two species, \\\alpha\_{jk} = q \exp(-(\theta_j - \theta_k)^2 /
+  (2(\sigma_j^2 + \sigma_k^2)))\\, with \\q\\ = `inter_max`, \\\theta\\
+  the optima and \\\sigma\\ the niche breadths of `traits`. The last
+  factor is the overlap of two Gaussian niches, the kernel that
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  uses with `niche_overlap = TRUE`, so that with `inter_max = 1` two
+  species with the same niche compete as one species. With a list of
+  traits (several axes), the overlap is the product over axes. Nothing
+  is random.
+
 ## Examples
 
 ``` r
@@ -64,4 +84,12 @@ round(competition_matrix(tr, "phylo", inter_max = 0.5), 3)
 #> t3 0.003 0.007 0.050 0.019 0.018
 #> t4 0.016 0.005 0.019 0.050 0.025
 #> t5 0.012 0.010 0.018 0.025 0.050
+traits <- species_traits(tr)
+round(competition_matrix(type = "trait", traits = traits, inter_max = 1), 3)
+#>       t1    t2    t3    t4    t5
+#> t1 0.050 0.000 0.002 0.036 0.017
+#> t2 0.000 0.050 0.004 0.000 0.000
+#> t3 0.002 0.004 0.050 0.017 0.005
+#> t4 0.036 0.000 0.017 0.050 0.049
+#> t5 0.017 0.000 0.005 0.049 0.050
 ```

@@ -89,7 +89,9 @@ probabilities from <code><a href="dispersal_kernel.html">dispersal_kernel()</a><
 <span>  disp_scale <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  torus <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  env_range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">100</span><span class="op">)</span>,</span>
-<span>  disp_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exponential"</span>, <span class="st">"gaussian"</span><span class="op">)</span></span>
+<span>  disp_shape <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"exponential"</span>, <span class="st">"gaussian"</span><span class="op">)</span>,</span>
+<span>  n_axes <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  axis_cor <span class="op">=</span> <span class="fl">0</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -123,13 +125,27 @@ environment.</p></dd>
 <dd><p>Shape of the dispersal kernel, <code>"exponential"</code> (the default) or
 <code>"gaussian"</code>; see <code><a href="dispersal_kernel.html">dispersal_kernel()</a></code>.</p></dd>
 
+
+<dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
+<dd><p>Number of environmental axes. With more than one, each axis is a field
+smoothed in the same way, the axes are correlated by <code>axis_cor</code> before the conversion to
+ranks, and the landscape also holds <code>env_axes</code>, a matrix with one column per axis, which
+<code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> uses with a list of traits when <code>env</code> is not given. The first
+axis is <code>env</code>, the same as with <code>n_axes = 1</code> and the same seed.</p></dd>
+
+
+<dt id="arg-axis-cor">axis_cor<a class="anchor" aria-label="anchor" href="#arg-axis-cor"></a></dt>
+<dd><p>Correlation between the axes: one number for all pairs, or a correlation
+matrix (<code>n_axes</code> x <code>n_axes</code>). It applies to the smoothed fields, so the correlation of the
+uniform axes (by ranks) is slightly lower.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An <code>mc_landscape</code> object: a list with <code>env</code>, <code>coords</code> (data frame
 with columns <code>x</code> and <code>y</code>), <code>dist</code> (distances among sites, toroidal if
-<code>torus = TRUE</code>) and <code>dispersal</code> (row-stochastic matrix with a zero
-diagonal).</p>
+<code>torus = TRUE</code>), <code>dispersal</code> (row-stochastic matrix with a zero
+diagonal) and, with <code>n_axes &gt; 1</code>, <code>env_axes</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

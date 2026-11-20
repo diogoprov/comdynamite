@@ -111,6 +111,12 @@ several dimensions whose axes are independent (no correlation between the respon
 different axes), with the optimum and breadth of each axis in its own set of traits. The
 maxima multiply too, so give the traits of all but one axis <code>r_max</code> of 1, for example with
 <code>species_traits(rmax_range = c(1, 1))</code>.</p>
+<p>A list of traits passed through <code><a href="niche_correlation.html">niche_correlation()</a></code> gives the responses to the axes a
+correlation \(R\): the growth rate is then \(\prod_a r_a \exp(-d^\top R^{-1} d /
+2)\), with \(d_a = (E_a - \theta_a)/\sigma_a\), a multivariate Gaussian niche whose covariance has the breadths
+\(\sigma_a\) on the diagonal. A positive correlation favours sites where both
+axes depart from the optima in the same direction. With \(R\) the identity, it is the
+product above.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

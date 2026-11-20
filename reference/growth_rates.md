@@ -43,6 +43,15 @@ and breadth of each axis in its own set of traits. The maxima multiply
 too, so give the traits of all but one axis `r_max` of 1, for example
 with `species_traits(rmax_range = c(1, 1))`.
 
+A list of traits passed through
+[`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md)
+gives the responses to the axes a correlation \\R\\: the growth rate is
+then \\\prod_a r_a \exp(-d^\top R^{-1} d / 2)\\, with \\d_a = (E_a -
+\theta_a)/\sigma_a\\, a multivariate Gaussian niche whose covariance has
+the breadths \\\sigma_a\\ on the diagonal. A positive correlation
+favours sites where both axes depart from the optima in the same
+direction. With \\R\\ the identity, it is the product above.
+
 ## See also
 
 Other simulate metacommunities:

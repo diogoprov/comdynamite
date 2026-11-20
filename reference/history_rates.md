@@ -119,6 +119,7 @@ Other species traits:
 [`arrival_ages()`](https://provetelab.org/comdynamite/reference/arrival_ages.md),
 [`as_herodotools()`](https://provetelab.org/comdynamite/reference/as_herodotools.md),
 [`food_web_rates()`](https://provetelab.org/comdynamite/reference/food_web_rates.md),
+[`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md),
 [`paint_regimes()`](https://provetelab.org/comdynamite/reference/paint_regimes.md),
 [`partner_turnover()`](https://provetelab.org/comdynamite/reference/partner_turnover.md),
 [`plot.rate_matrix()`](https://provetelab.org/comdynamite/reference/plot.rate_matrix.md),

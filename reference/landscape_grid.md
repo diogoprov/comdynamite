@@ -17,7 +17,9 @@ landscape_grid(
   disp_scale = 2,
   torus = TRUE,
   env_range = c(0, 100),
-  disp_shape = c("exponential", "gaussian")
+  disp_shape = c("exponential", "gaussian"),
+  n_axes = 1,
+  axis_cor = 0
 )
 ```
 
@@ -50,12 +52,29 @@ landscape_grid(
   `"gaussian"`; see
   [`dispersal_kernel()`](https://provetelab.org/comdynamite/reference/dispersal_kernel.md).
 
+- n_axes:
+
+  Number of environmental axes. With more than one, each axis is a field
+  smoothed in the same way, the axes are correlated by `axis_cor` before
+  the conversion to ranks, and the landscape also holds `env_axes`, a
+  matrix with one column per axis, which
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  uses with a list of traits when `env` is not given. The first axis is
+  `env`, the same as with `n_axes = 1` and the same seed.
+
+- axis_cor:
+
+  Correlation between the axes: one number for all pairs, or a
+  correlation matrix (`n_axes` x `n_axes`). It applies to the smoothed
+  fields, so the correlation of the uniform axes (by ranks) is slightly
+  lower.
+
 ## Value
 
 An `mc_landscape` object: a list with `env`, `coords` (data frame with
 columns `x` and `y`), `dist` (distances among sites, toroidal if
-`torus = TRUE`) and `dispersal` (row-stochastic matrix with a zero
-diagonal).
+`torus = TRUE`), `dispersal` (row-stochastic matrix with a zero
+diagonal) and, with `n_axes > 1`, `env_axes`.
 
 ## See also
 

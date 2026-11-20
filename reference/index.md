@@ -74,6 +74,8 @@ Traits with phylogenetic signal and evolutionary regimes.
 
 - [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
   : Species traits, with or without phylogenetic signal
+- [`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md)
+  : Correlation between the axes of a niche
 - [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
   : Trait evolution by Brownian motion with Pagel's lambda
 - [`trait_ou()`](https://provetelab.org/comdynamite/reference/trait_ou.md)
@@ -128,7 +130,8 @@ Abundances and mean traits of a resource, a consumer and a predator.
 
 ## Competition
 
-Interspecific competition, optionally structured by relatedness.
+Interspecific competition, optionally structured by relatedness or by
+niche overlap.
 
 - [`competition_matrix()`](https://provetelab.org/comdynamite/reference/competition_matrix.md)
   : Competition matrix

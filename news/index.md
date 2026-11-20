@@ -2,6 +2,27 @@
 
 ## comdynamite (development version)
 
+- `competition_matrix(type = "trait", traits = )`: competition by the
+  overlap of the Gaussian niches of two species, the kernel of
+  `niche_overlap` in
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
+  with the product over axes for several axes.
+- New
+  [`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md):
+  a correlation between the responses of a species to the axes of its
+  niche, so that
+  [`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)
+  and
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  use a multivariate Gaussian niche (one matrix for all species or one
+  per species). Not yet with `evolution` or speciation.
+- `landscape_grid(n_axes, axis_cor)`: several correlated environmental
+  axes, in `env_axes`, which
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  use with a list of traits when `env` is not given. The first axis is
+  the `env` of a single-axis grid with the same seed.
 - New
   [`env_space_time()`](https://provetelab.org/comdynamite/reference/env_space_time.md):
   the environment of Thompson et al. (2020), a Gaussian field over space
