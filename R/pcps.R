@@ -44,7 +44,9 @@
 #'   sites.
 #' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
 #'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
-#'   `"parametric"`, for landscapes with edges (see [env_surrogates()], which gives their
+#'   `"parametric"`, for landscapes with edges, or a list of surrogates from
+#'   [env_surrogates()], with one row per site (or per occupied site), for example drawn
+#'   within strata (see [env_surrogates()], which gives their
 #'   rates of type I error). Surrogates need `coords`; empty sites are then not allowed.
 #' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
 #'   `"parametric"`. Taken from an [mc_data()] object when it has them.

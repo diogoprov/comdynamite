@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- `env_surrogates(lonlat =, strata =)`: great-circle distances, and surrogates drawn within
+  groups of sites such as cities. `pcps_test()`, `node_test()` and `phylo_beta_test()` take a
+  list of surrogates as `null`.
+- The articles on clades and on the whole tree apply the restricted nulls to `daphniids` and
+  `anurans` (`data-raw/real_data_nulls.R`).
 - New `env_surrogates()`: predictors with the same spatial autocorrelation as the observed
   ones, by variogram matching (Viladomat et al. 2014) or a parametric Gaussian field matched
   by rank. `pcps_test()`, `node_test()` and `phylo_beta_test()` take them with

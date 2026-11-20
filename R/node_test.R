@@ -176,7 +176,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   permutations. Sites must be in the order of `comm`.
 #' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
 #'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
-#'   `"parametric"`, for landscapes with edges (see [env_surrogates()]; their rates of type I
+#'   `"parametric"`, for landscapes with edges, or a list of surrogates from
+#'   [env_surrogates()], with one row per site (or per occupied site), for example drawn
+#'   within strata (see [env_surrogates()]; their rates of type I
 #'   error were checked in [pcps_test()], not here). Surrogates need `coords`. They
 #'   replace the permutations of sites, not those of the areas of `biogeography`.
 #' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
@@ -274,7 +276,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   }
   # one draw of the null model of sites: rows of the community or areas moved across sites
   # with surrogates, the predictors move instead, the same draw for each node
-  surrogates <- if (null != "permutation") {
+  surrogates <- if (!identical(null, "permutation")) {
     site_null(null, list(occupied = rep(TRUE, nrow(comm))), env, env, coords, n_perm)
   }
   shuffle_sites <- function(r) {
@@ -290,7 +292,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
            env = cbind(moved[sites], env[sites, , drop = FALSE]))
     }
   }
-  n_site <- if (is.null(site_permutations)) n_perm else nrow(site_permutations)
+  n_site <- if (!is.null(surrogates)) surrogates$n else if (is.null(site_permutations)) n_perm else
+    nrow(site_permutations)
   results <- per_node(function(contrast) {
     one_node(comm, contrast, env, n_perm, shuffle_sites, n_site)
   }, "Nodes")

@@ -113,3 +113,52 @@ test_that("an env_time matrix moves whole series with the parametric surrogate",
   expect_error(env_surrogates(data.frame(a = letters[1:36]), coords), "dummy")
   expect_error(env_surrogates(matrix(letters[1:36]), coords), "not numeric")
 })
+
+test_that("surrogates use great-circle distances and stay within strata", {
+  set.seed(9)
+  lonlat <- cbind(-48 + runif(30, 0, 0.5), -21 + runif(30, 0, 0.5))
+  x <- lonlat[, 1] + rnorm(30, sd = 0.05)
+  expect_length(env_surrogates(x, lonlat, n = 2, lonlat = TRUE), 2)
+  expect_equal(great_circle(rbind(c(0, 0), c(0, 1)))[1, 2], 6371 * pi / 180)
+  city <- rep(c("a", "b", "c"), each = 10)
+  env <- cbind(x = x + 10 * (city == "b"))
+  env[city == "c", ] <- 3
+  draws <- env_surrogates(env, lonlat, n = 3, method = "parametric", lonlat = TRUE,
+                          strata = city)
+  rows <- attr(draws, "rows")
+  expect_true(all(city[rows[1, ]] == city))
+  expect_equal(draws[[2]][, 1], env[rows[2, ], 1])
+  expect_equal(draws[[1]][city == "c", 1], rep(3, 10))
+  smooth <- env_surrogates(env, lonlat, n = 2, lonlat = TRUE, strata = city)
+  expect_lt(abs(mean(smooth[[1]][city == "b", 1]) - mean(env[city == "b", 1])), 1)
+  expect_error(env_surrogates(env, lonlat, strata = city[-1]), "one value per site")
+  expect_error(env_surrogates(env, lonlat, strata = rep(1:6, each = 5)[c(1:29, 1)]), "at least 5")
+})
+
+test_that("the tests take a list of surrogates", {
+  set.seed(5)
+  tree <- ape::rcoal(8)
+  coords <- as.matrix(expand.grid(1:6, 1:6))
+  env <- cbind(x = field_on(coords, 2, 3))
+  rate <- exp(-outer(env[, 1], seq(-2, 2, length.out = 8), "-")^2)
+  comm <- matrix(rpois(36 * 8, 4 * rate) + 1, 36,
+                 dimnames = list(paste0("s", 1:36), tree$tip.label))
+  strata <- rep(1:2, each = 18)
+  draws <- env_surrogates(env, coords, n = 7, method = "parametric", strata = strata)
+  out <- pcps_test(comm, tree, env, n_perm = 9, null = draws)
+  expect_equal(out$permutations$null, "surrogates")
+  expect_equal(out$permutations$sites, 7)
+  expect_output(print(out), "7 surrogates of the predictors")
+  beta <- phylo_beta_test(comm, tree, env, n_perm = 9, null = draws)
+  expect_equal(beta$permutations$sites, 7)
+  node <- node_test(comm, node_contrasts(tree), env, n_perm = 9, null = draws)
+  expect_equal(node$permutations$sites, 7)
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = list(1:3)), "numeric matrices")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = lapply(draws, `[`, 1:30, ,
+                                                                     drop = FALSE)),
+               "one row per site")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = lapply(draws, cbind, 1)),
+               "one column per predictor")
+  expect_error(pcps_test(comm, tree, env, n_perm = 9, null = draws,
+                         site_permutations = torus_permutations(6)), "either")
+})

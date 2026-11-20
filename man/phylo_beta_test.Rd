@@ -33,7 +33,9 @@ landscape: they leave the analysis but their predictors can reach occupied sites
 
 \item{null}{Null model of sites: \code{"permutation"} (free, or \code{site_permutations} when given),
 or surrogates of the predictors with the same spatial autocorrelation, \code{"variogram"} or
-\code{"parametric"}, for landscapes with edges (see \code{\link[=env_surrogates]{env_surrogates()}}; their rates of type I
+\code{"parametric"}, for landscapes with edges, or a list of surrogates from
+\code{\link[=env_surrogates]{env_surrogates()}}, with one row per site (or per occupied site), for example drawn
+within strata (see \code{\link[=env_surrogates]{env_surrogates()}}; their rates of type I
 error were checked in \code{\link[=pcps_test]{pcps_test()}}, not here). Surrogates need \code{coords}; empty sites
 are then not allowed.}
 

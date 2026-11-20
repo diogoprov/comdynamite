@@ -35,7 +35,9 @@ sites.}
 
 \item{null}{Null model of sites: \code{"permutation"} (free, or \code{site_permutations} when given),
 or surrogates of the predictors with the same spatial autocorrelation, \code{"variogram"} or
-\code{"parametric"}, for landscapes with edges (see \code{\link[=env_surrogates]{env_surrogates()}}, which gives their
+\code{"parametric"}, for landscapes with edges, or a list of surrogates from
+\code{\link[=env_surrogates]{env_surrogates()}}, with one row per site (or per occupied site), for example drawn
+within strata (see \code{\link[=env_surrogates]{env_surrogates()}}, which gives their
 rates of type I error). Surrogates need \code{coords}; empty sites are then not allowed.}
 
 \item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or

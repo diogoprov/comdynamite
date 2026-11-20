@@ -3,7 +3,8 @@
 #' Draws predictors with the same spatial autocorrelation as the observed ones but no relation
 #' to anything else, as null models for tests in landscapes with edges, where
 #' [torus_permutations()] do not apply or reject too often. They are the `null` options of
-#' [pcps_test()], [node_test()] and [phylo_beta_test()], and also serve as null environments for
+#' [pcps_test()], [node_test()] and [phylo_beta_test()], which also take the list returned
+#' here (for example drawn with `lonlat` or `strata`), and also serve as null environments for
 #' simulations.
 #'
 #' `"variogram"` follows Viladomat et al. (2014): each predictor is permuted, smoothed with an
@@ -47,6 +48,12 @@
 #'   landscape.
 #' @param n Number of surrogates.
 #' @param method `"variogram"` or `"parametric"`.
+#' @param lonlat Are `coords` longitude and latitude in decimal degrees? Distances are then
+#'   great-circle distances in kilometres.
+#' @param strata Optional group of each site, such as the city or the basin where it lies.
+#'   Surrogates are drawn within each group on its own, so values never move between groups,
+#'   which have their own autocorrelation. Each group needs at least 5 sites; a group where
+#'   the predictors do not vary keeps them.
 #' @return List of `n` matrices with the dimensions and column names of `env`, or of `n`
 #'   landscapes when `env` is one. For
 #'   `"parametric"`, `attr(, "rows")` is a matrix with one row per draw, giving for each site
@@ -69,14 +76,40 @@
 #' nulls <- env_surrogates(grid, n = 2, method = "parametric")
 #' cor(grid$env, nulls[[1]]$env)
 #' @export
-env_surrogates <- function(env, coords, n = 99, method = c("variogram", "parametric")) {
+env_surrogates <- function(env, coords, n = 99, method = c("variogram", "parametric"),
+                           lonlat = FALSE, strata = NULL) {
   method <- match.arg(method)
   if (inherits(env, "mc_landscape")) return(landscape_surrogates(env, n, method))
   env <- surrogate_env(env)
   coords <- as.matrix(check_coords(coords))
-  stopifnot(nrow(coords) == nrow(env))
-  d <- as.matrix(stats::dist(coords))
-  surrogates_from(env, d, n, method)
+  stopifnot(nrow(coords) == nrow(env), is.logical(lonlat), length(lonlat) == 1)
+  distances <- function(rows) {
+    if (lonlat) great_circle(coords[rows, , drop = FALSE]) else
+      as.matrix(stats::dist(coords[rows, , drop = FALSE]))
+  }
+  if (is.null(strata)) return(surrogates_from(env, distances(seq_len(nrow(env))), n, method))
+  if (length(strata) != nrow(env) || anyNA(strata)) {
+    stop("`strata` needs one value per site, without NA", call. = FALSE)
+  }
+  # each stratum on its own, so values never move between strata
+  groups <- split(seq_len(nrow(env)), strata, drop = TRUE)
+  small <- vapply(groups, length, 1L) < 5
+  if (any(small)) {
+    stop("strata need at least 5 sites: ", paste(names(groups)[small], collapse = ", "),
+         call. = FALSE)
+  }
+  out <- replicate(n, env, simplify = FALSE)
+  rows <- matrix(seq_len(nrow(env)), n, nrow(env), byrow = TRUE)
+  for (g in groups) {
+    local <- env[g, , drop = FALSE]
+    if (any(apply(local, 2, stats::var) > 0)) {
+      draws <- surrogates_from(local, distances(g), n, method)
+      for (r in seq_len(n)) out[[r]][g, ] <- draws[[r]]
+      if (method == "parametric") rows[, g] <- matrix(g[attr(draws, "rows")], n)
+    }
+  }
+  if (method == "parametric") attr(out, "rows") <- rows
+  out
 }
 
 surrogate_env <- function(env) {
@@ -213,9 +246,23 @@ variogram_surrogate <- function(x, moved, setup) {
   sqrt(slope) * (best$smoothed - mean(best$smoothed)) + sqrt(nugget) * stats::rnorm(m) + mean(x)
 }
 
-# null draws of the predictors for the occupied sites: permutations of sites (free or given) or
-# surrogates. `env_at(r)` gives draw r
+# null draws of the predictors for the occupied sites: permutations of sites (free or given),
+# surrogates drawn here, or surrogates given as a list. `env_at(r)` gives draw r
 site_null <- function(null, draws, landscape_env, env, coords, n_perm) {
+  if (is.list(null)) {
+    m <- nrow(null[[1]])
+    if (m == length(draws$occupied)) {
+      null <- lapply(null, function(e) e[draws$occupied, , drop = FALSE])
+    } else if (m != sum(draws$occupied)) {
+      stop("the surrogates in `null` need one row per site (", length(draws$occupied), ")",
+           call. = FALSE)
+    }
+    if (any(vapply(null, ncol, 1L) != ncol(env))) {
+      stop("the surrogates in `null` need one column per predictor (", ncol(env), ")",
+           call. = FALSE)
+    }
+    return(list(n = length(null), env_at = function(r) null[[r]]))
+  }
   if (null == "permutation") {
     return(list(n = nrow(draws$rows),
                 env_at = function(r) landscape_env[draws$rows[r, ], , drop = FALSE]))
@@ -229,7 +276,18 @@ site_null <- function(null, draws, landscape_env, env, coords, n_perm) {
   list(n = n_perm, env_at = function(r) surrogates[[r]])
 }
 
+# a name of a null model, or a list of surrogates from env_surrogates()
 check_null <- function(null, site_permutations) {
+  if (is.list(null)) {
+    if (length(null) == 0 || !all(vapply(null, function(e) is.matrix(e) && is.numeric(e),
+                                         logical(1)))) {
+      stop("`null` as a list needs numeric matrices, as from `env_surrogates()`", call. = FALSE)
+    }
+    if (!is.null(site_permutations)) {
+      stop("give either `site_permutations` or surrogates in `null`", call. = FALSE)
+    }
+    return(null)
+  }
   null <- match.arg(null, c("permutation", "variogram", "parametric"))
   if (null != "permutation" && !is.null(site_permutations)) {
     stop("give either `site_permutations` or `null = \"", null, "\"`", call. = FALSE)
