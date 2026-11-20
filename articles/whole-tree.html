@@ -225,6 +225,152 @@ rates of these tests with those published.</p>
 neighbours, <code>site_permutations</code> takes a restricted null
 model, such as those of <code><a href="../reference/torus_permutations.html">torus_permutations()</a></code> for a grid on
 a torus.</p>
+<p>Real landscapes have edges, however, and the predictor is often
+continuous. We compared six nulls for the site test of
+<code><a href="../reference/pcps_test.html">pcps_test()</a></code> in
+<code>data-raw/validation_continuous_nulls.R</code>. Communities of 12
+species followed a hidden environment, a Gaussian field with exponential
+covariance, while the measured predictor was a second, independent field
+with the same covariance (no relation), or correlated with the first at
+0.6 (power). Landscapes were a 20 x 20 grid, an L-shaped region of 280
+random points and a 50 x 8 strip, with ranges of 2, 5 and 10 cells, 200
+replicates and 199 null draws each. The nulls were free permutations,
+the torus (grid only), Moran spectral randomisation (MSR; Wagner &amp;
+Dray 2015), an ad hoc rotation and shift of the map wrapped within its
+bounding box, a parametric surrogate (a Gaussian field with the range
+fitted to the predictor by maximum likelihood, given the observed values
+by rank) and variogram matching (Viladomat et al. 2014), in which the
+predictor is permuted, smoothed over its nearest neighbours and rescaled
+so that its variogram matches the observed one.</p>
+<p>Rejection rates without a relation (nominal 0.05; with 200
+replicates, rates between about 0.02 and 0.08 are compatible with
+it):</p>
+<table class="table">
+<colgroup>
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+<col width="12%">
+</colgroup>
+<thead><tr class="header">
+<th>Landscape</th>
+<th>Range</th>
+<th>Free</th>
+<th>Torus</th>
+<th>MSR</th>
+<th>Shift and rotate</th>
+<th>Parametric</th>
+<th>Variogram</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Grid</td>
+<td>2</td>
+<td>0.24</td>
+<td>0.055</td>
+<td>0.045</td>
+<td>0.050</td>
+<td>0.030</td>
+<td>0.035</td>
+</tr>
+<tr class="even">
+<td>Grid</td>
+<td>5</td>
+<td>0.60</td>
+<td>0.100</td>
+<td>0.075</td>
+<td>0.085</td>
+<td>0.055</td>
+<td>0.055</td>
+</tr>
+<tr class="odd">
+<td>Grid</td>
+<td>10</td>
+<td>0.73</td>
+<td>0.140</td>
+<td>0.080</td>
+<td>0.135</td>
+<td>0.080</td>
+<td>0.085</td>
+</tr>
+<tr class="even">
+<td>L-shape</td>
+<td>2</td>
+<td>0.27</td>
+<td></td>
+<td>0.085</td>
+<td>0.055</td>
+<td>0.065</td>
+<td>0.070</td>
+</tr>
+<tr class="odd">
+<td>L-shape</td>
+<td>5</td>
+<td>0.49</td>
+<td></td>
+<td>0.160</td>
+<td>0.095</td>
+<td>0.085</td>
+<td>0.075</td>
+</tr>
+<tr class="even">
+<td>L-shape</td>
+<td>10</td>
+<td>0.65</td>
+<td></td>
+<td>0.230</td>
+<td>0.120</td>
+<td>0.085</td>
+<td>0.090</td>
+</tr>
+<tr class="odd">
+<td>Strip</td>
+<td>2</td>
+<td>0.32</td>
+<td></td>
+<td>0.025</td>
+<td>0.055</td>
+<td>0.035</td>
+<td>0.025</td>
+</tr>
+<tr class="even">
+<td>Strip</td>
+<td>5</td>
+<td>0.65</td>
+<td></td>
+<td>0.055</td>
+<td>0.060</td>
+<td>0.070</td>
+<td>0.055</td>
+</tr>
+<tr class="odd">
+<td>Strip</td>
+<td>10</td>
+<td>0.79</td>
+<td></td>
+<td>0.095</td>
+<td>0.080</td>
+<td>0.100</td>
+<td>0.070</td>
+</tr>
+</tbody>
+</table>
+<p>Free permutations rejected in 24% to 79% of the landscapes. No
+restricted null stayed at 0.05 in every case, since all of them became
+liberal as the range approached the size of the landscape, when there
+are few independent patches of environment left to compare. Variogram
+matching came closest (mean 0.062, at most 0.09), followed by the
+parametric surrogate (mean 0.067, at most 0.10). MSR worked on the grid
+and the strip but not in the L-shaped region (up to 0.23), and the torus
+and the rotation were liberal on the grid from a range of 5. Power at a
+correlation of 0.6 was similar among the restricted nulls (0.90 to 0.94
+on average), so the gain in type I error did not cost power. Variogram
+matching took about 2 to 3 s per test with 199 draws, MSR about 3 s and
+the parametric surrogate under 0.5 s.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -248,6 +394,14 @@ ecological communities. <em>Plant Ecology</em>, 216, 709–724. <a href="https:/
 <p>Pillar, V. D., &amp; Duarte, L. D. S. (2010). A framework for
 metacommunity analysis of phylogenetic structure. <em>Ecology
 Letters</em>, 13, 587–596. <a href="https://doi.org/10.1111/j.1461-0248.2010.01456.x" class="external-link uri">https://doi.org/10.1111/j.1461-0248.2010.01456.x</a></p>
+<p>Viladomat, J., Mazumder, R., McInturff, A., McCauley, D. J., &amp;
+Hastie, T. (2014). Assessing the significance of global and local
+correlations under spatial autocorrelation: a nonparametric approach.
+<em>Biometrics</em>, 70, 409–418. <a href="https://doi.org/10.1111/biom.12139" class="external-link uri">https://doi.org/10.1111/biom.12139</a></p>
+<p>Wagner, H. H., &amp; Dray, S. (2015). Generating spatially
+constrained null models for irregularly spaced data using Moran spectral
+randomization methods. <em>Methods in Ecology and Evolution</em>, 6,
+1169–1178. <a href="https://doi.org/10.1111/2041-210X.12407" class="external-link uri">https://doi.org/10.1111/2041-210X.12407</a></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
