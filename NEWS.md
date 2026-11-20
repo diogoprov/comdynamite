@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- The "whole tree" article compares six null models for a continuous, autocorrelated
+  predictor in landscapes with edges (`data-raw/validation_continuous_nulls.R`). Variogram
+  matching (Viladomat et al. 2014) and a parametric surrogate came closest to the nominal rate,
+  but every restricted null became liberal when the range of the field approached the size of
+  the landscape.
+- The validation article has an animation of `env_space_time()` next to `env_over_time()`.
 - `competition_matrix(type = "trait", traits = )`: competition by the overlap of the Gaussian
   niches of two species, the kernel of `niche_overlap` in
   `simulate_evolving_metacommunity()`, with the product over axes for several axes.
