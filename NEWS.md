@@ -11,6 +11,14 @@
   which `simulate_metacommunity()` and `simulate_evolving_metacommunity()` use with a list of
   traits when `env` is not given. The first axis is the `env` of a single-axis grid with the
   same seed.
+- New `env_space_time()`: the environment of Thompson et al. (2020), a Gaussian field over
+  space and time with exponential covariance, held constant during a burn-in and converted
+  to ranks, as in the authors' code. RandomFields is no longer on CRAN, so the field is drawn
+  by random Fourier features, with the covariance exact in expectation. Unlike
+  `env_over_time()`, sites close together change together.
+- The help of `simulate_metacommunity()` and the validation article now recommend
+  `immigration = "multinomial"` for low dispersal, an environment that changes in time and
+  studies of long-term persistence; the Poisson draw stays the default.
 - `simulate_evolving_metacommunity()` takes `dispersal_time`, `kernels` and `kernel_step`:
   dispersal that changes through time now works with speciation. New species inherit the
   emigration through time of their mother, and the gene flow that keeps populations together

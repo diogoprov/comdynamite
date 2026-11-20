@@ -13,10 +13,10 @@
 # - dispersal starts at 0.00001, not at 0.0001;
 # - sites are seeded every 20 steps up to step 100, not every 10.
 #
-# Differences from the original: RandomFields is no longer on CRAN, so the
-# environment before the conversion to ranks is a Gaussian field with exponential
-# spatial covariance evolving as an AR(1) process, whereas theirs has one covariance
-# over space and time. Their code draws emigrants from a Poisson distribution and
+# Differences from the original: RandomFields is no longer on CRAN, so
+# env_space_time() draws their field (one exponential covariance over space and
+# time, scales 50 and 500) by random Fourier features; up to version 0.9.0 this
+# script used an AR(1) process with exponential spatial covariance instead. Their code draws emigrants from a Poisson distribution and
 # the article from a binomial, which we use. We run 6 of their 13 niche breadths.
 # Run from the package root; writes data-raw/validation_thompson.rds.
 library(comdynamite)
@@ -40,24 +40,6 @@ torus_distances <- function(xy, size = 100) {
   dx <- abs(outer(xy[, 1], xy[, 1], `-`))
   dy <- abs(outer(xy[, 2], xy[, 2], `-`))
   sqrt(pmin(dx, size - dx)^2 + pmin(dy, size - dy)^2)
-}
-
-environment_field <- function(xy, spatial_scale = 50, temporal_scale = 500) {
-  # as in their code, the field itself is not on a torus
-  root <- t(chol(exp(-as.matrix(dist(xy)) / spatial_scale)))
-  rho <- exp(-1 / temporal_scale)
-  repeat {
-    z <- matrix(0, n_sites, n_steps)
-    z[, 200] <- root %*% rnorm(n_sites)
-    for (t in 201:n_steps) {
-      z[, t] <- rho * z[, t - 1] + sqrt(1 - rho^2) * (root %*% rnorm(n_sites))
-    }
-    z[, 1:199] <- z[, 200]
-    ranks <- matrix(ecdf(z[, 200:n_steps])(z), n_sites)
-    # their condition, applied before the conversion to ranks
-    first <- (z[, 200] - min(z)) / (max(z) - min(z))
-    if (max(first) - min(first) > 0.6) return(ranks)
-  }
 }
 
 competition <- function(type) {
@@ -88,7 +70,9 @@ one_landscape <- function(replicate) {
   kernel <- exp(-0.1 * torus_distances(xy))
   diag(kernel) <- 0
   kernel <- kernel / rowSums(kernel)
-  env <- environment_field(xy)
+  # as in their code, the field is not on a torus, and the environment is constant
+  # for the first 200 steps
+  env <- env_space_time(xy, n_steps = n_steps, burn_in = 200)
   optima <- runif(n_species)
   alphas <- lapply(c(equal = "equal", stabilising = "stabilising", mixed = "mixed"), competition)
   design <- expand.grid(dispersal = dispersal_rates, niche = names(breadths),

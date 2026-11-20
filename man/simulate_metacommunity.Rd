@@ -67,7 +67,8 @@ only where \code{pool} allows.}
 
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
-which conserves them. Spatially implicit landscapes are always multinomial.}
+which conserves them and is recommended for low dispersal (see Details). Spatially
+implicit landscapes are always multinomial.}
 
 \item{env}{Optional environmental axes of each site, a matrix or data frame with one row per
 site and one column per element of \code{traits} (such as the \code{env} of several landscapes on
@@ -180,7 +181,12 @@ than in mcomsimr, which conserves dispersers. With \code{immigration = "multinom
 the emigrants of each species at each site are instead distributed among the other
 sites multinomially, with the probabilities of the kernel, which conserves them. It
 costs about as much as the Poisson draw at low dispersal and up to 20 times more at high
-dispersal, where the two give nearly the same results.
+dispersal, where the two give nearly the same results. Use it for low dispersal (below
+about 0.01), especially with \code{extirpation} or an environment that changes in time
+(\code{env_time}), and for studies of long-term persistence: against mcomsimr with an
+environment from \code{\link[=env_space_time]{env_space_time()}}, the Poisson draw gave 16\% to 26\% lower local
+richness at dispersal 0.001 on a grid, and the multinomial draw 6\% or less, of either
+sign (see the validation article on the package website).
 }
 
 After dispersal, each population is lost with probability \code{extirpation},

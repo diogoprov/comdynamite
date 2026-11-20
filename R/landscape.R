@@ -332,6 +332,101 @@ env_over_time <- function(env, n_steps, rho = 0.9, sd = 5) {
   env + dev
 }
 
+#' Environment autocorrelated in space and time
+#'
+#' Simulates the changing environment of Thompson et al. (2020): a Gaussian random field over
+#' space and time with exponential covariance, held constant during a burn-in, rescaled to
+#' \[0, 1\] and converted to ranks. Unlike [env_over_time()], which gives each site its own
+#' AR(1) series, sites close together change together.
+#'
+#' The covariance between two site-steps is \eqn{\exp(-\sqrt{(d/a_s)^2 + (\Delta t/a_t)^2})},
+#' with \eqn{d} the distance between the sites, \eqn{\Delta t} the number of steps between
+#' them, and \eqn{a_s} and \eqn{a_t} the spatial and temporal scales. The authors' code
+#' (Meta_com_framework v1.0, Zenodo 10.5281/zenodo.3708350) draws this field with
+#' `RandomFields::RFsimulate(RMexp(scale = 500))` on coordinates multiplied by 10 and steps
+#' in units of one, which gives the defaults \eqn{a_s = 50} and \eqn{a_t = 500} for patches
+#' with coordinates between 1 and 100. RandomFields is no longer on CRAN, so the field is
+#' drawn here by the spectral method (random Fourier features): the sum of `n_features`
+#' cosine waves whose frequencies are drawn from the spectral density of the exponential
+#' covariance, a multivariate Student t with one degree of freedom. The covariance is exact
+#' in expectation, and the field is close to Gaussian for large `n_features`.
+#'
+#' As in their code, the field is drawn for the steps after the burn-in, the environment of
+#' the first step after it is repeated over the burn-in, the whole field is rescaled to
+#' \[0, 1\] and redrawn until the environment of that first step spans more than `min_range`,
+#' and the values of all sites and steps, burn-in included, are converted to ranks, so that
+#' the environment is uniform on \[0, 1\]. The field is not on a torus, even when the
+#' landscape is.
+#'
+#' @param landscape An `mc_landscape` with coordinates, from [landscape_grid()] or
+#'   [landscape_points()], or a two-column matrix or data frame of site coordinates.
+#' @param n_steps Number of steps, burn-in included.
+#' @param burn_in Number of initial steps with a constant environment.
+#' @param spatial_scale,temporal_scale Scales \eqn{a_s} (in units of the coordinates) and
+#'   \eqn{a_t} (in steps) of the exponential covariance.
+#' @param ranks If `TRUE`, convert the environment to ranks over all sites and steps, as in
+#'   their code; if `FALSE`, keep the rescaled field.
+#' @param min_range Minimum range of the rescaled environment at the first step after the
+#'   burn-in; the field is redrawn until it is exceeded. Use 0 to accept the first draw.
+#' @param n_features Number of cosine waves of the spectral method.
+#' @return Matrix with one row per site and one column per step, with values in \[0, 1\], for
+#'   the `env_time` argument of [simulate_metacommunity()]. Multiply it to put it on the scale
+#'   of the traits.
+#' @references Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R.,
+#'   Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity
+#'   framework linking local and regional scale community ecology. *Ecology Letters*, 23,
+#'   1314--1329. \doi{10.1111/ele.13568}
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' xy <- cbind(x = runif(30, 1, 100), y = runif(30, 1, 100))
+#' e <- env_space_time(xy, n_steps = 600, burn_in = 100)
+#' matplot(t(e[1:5, ]), type = "l", lty = 1, xlab = "step", ylab = "environment")
+#' @export
+env_space_time <- function(landscape, n_steps, burn_in = 200, spatial_scale = 50,
+                           temporal_scale = 500, ranks = TRUE, min_range = 0.6,
+                           n_features = 2000) {
+  xy <- if (inherits(landscape, "mc_landscape")) landscape$coords else landscape
+  if (is.null(xy)) stop("`landscape` has no coordinates")
+  xy <- as.matrix(xy)
+  if (ncol(xy) != 2 || !is.numeric(xy)) stop("coordinates must be a numeric matrix with two columns")
+  stopifnot(n_steps > burn_in, burn_in >= 0, spatial_scale > 0, temporal_scale > 0,
+            min_range >= 0, min_range < 1, n_features >= 1)
+  m <- nrow(xy)
+  steps <- (burn_in + 1):n_steps
+  # site-steps on the scale of the covariance, so that it is exp(-|h|)
+  p <- cbind(xy[rep(seq_len(m), length(steps)), , drop = FALSE] / spatial_scale,
+             rep(steps, each = m) / temporal_scale)
+  tries <- 0
+  repeat {
+    tries <- tries + 1
+    if (tries > 100) stop("no field met `min_range` in 100 draws; lower it")
+    z <- exp_field(p, n_features)
+    z <- (z - min(z)) / (max(z) - min(z))
+    first <- z[seq_len(m)]
+    if (max(first) - min(first) > min_range) break
+  }
+  env <- cbind(matrix(first, m, burn_in), matrix(z, m))
+  if (ranks) env[] <- stats::ecdf(env)(env)
+  unname(env)
+}
+
+# Gaussian field with covariance exp(-|h|) at the rows of `p` (points in any dimension), by
+# random Fourier features: frequencies from the spectral density of the exponential
+# covariance, a multivariate Student t with one degree of freedom. Unit variance.
+exp_field <- function(p, n_features) {
+  d <- ncol(p)
+  w <- matrix(stats::rnorm(d * n_features), n_features) / abs(stats::rnorm(n_features))
+  phase <- stats::runif(n_features, 0, 2 * pi)
+  z <- numeric(nrow(p))
+  for (s in seq(1, nrow(p), by = 20000)) {
+    i <- s:min(nrow(p), s + 19999)
+    arg <- p[i, , drop = FALSE] %*% t(w) + rep(phase, each = length(i))
+    z[i] <- rowSums(cos(arg))
+  }
+  z * sqrt(2 / n_features)
+}
+
 #' Pulse disturbance of the environment
 #'
 #' Sets the environment of some sites to a new value from step `start` for `duration` steps,

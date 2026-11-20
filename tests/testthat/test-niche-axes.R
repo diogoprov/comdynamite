@@ -90,3 +90,32 @@ test_that("landscape_grid gives several correlated axes, and simulations use the
                                       n_steps = 5, evolution = evolution_control(10)),
                "correlated axes")
 })
+
+test_that("the remaining checks of the new options", {
+  # unnamed species and mismatched sets of traits
+  tr <- data.frame(optimum = c(10, 40), sigma = c(5, 10))
+  expect_equal(rownames(competition_matrix(type = "trait", traits = tr)), c("sp1", "sp2"))
+  a <- data.frame(optimum = 1:2, sigma = 1, row.names = c("a", "b"))
+  b <- data.frame(optimum = 1:2, sigma = 1, row.names = c("a", "c"))
+  expect_error(competition_matrix(type = "trait", traits = list(a, b)), "different species")
+  # correlation matrices
+  tr2 <- list(species_traits(2), species_traits(2, rmax_range = c(1, 1)))
+  expect_error(niche_correlation(tr2, diag(3)), "2 x 2")
+  set.seed(8)
+  l <- landscape_grid(side = 4, n_axes = 2, axis_cor = matrix(c(1, -0.5, -0.5, 1), 2))
+  expect_equal(dim(l$env_axes), c(16, 2))
+  # speciation: axes from the landscape, and no correlated niche yet
+  set.seed(9)
+  l2 <- landscape_grid(side = 3, n_axes = 2)
+  one <- list(species_traits(1), species_traits(1, rmax_range = c(1, 1)))
+  ev <- evolution_control(genetic_var = diag(2) * 5, env_var = diag(2))
+  sim <- simulate_evolving_metacommunity(l2, one, dispersal = 0.1, n_steps = 3,
+                                         speciation = speciation_control(threshold = 50),
+                                         evolution = ev)
+  expect_s3_class(sim, "mc_evolving")
+  expect_error(simulate_evolving_metacommunity(l2, niche_correlation(one, diag(2)),
+                                               dispersal = 0.1, n_steps = 3,
+                                               speciation = speciation_control(threshold = 50),
+                                               evolution = ev),
+               "correlated axes")
+})
