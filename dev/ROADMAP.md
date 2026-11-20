@@ -70,6 +70,8 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    (iii) validação contra o mcomsimr com o ambiente mudando no tempo, que é o "Falta um
    ambiente que mude no tempo" da comparação da v0.2.0, com os mesmos testes KS das 80
    comparações; (iv) usar o gerador na vignette de validação no lugar do ambiente constante.
+   Feito em 2026-11-19 (PR #124): `env_space_time()`, validada contra o mcomsimr e usada na
+   vignette de validação; GIF em `data-raw/animation_env_space_time.R`, no artigo de validação.
 3. *Competição a partir da distância entre traits*: `competition_matrix(type = "trait")`, com
    o mesmo núcleo de sobreposição de nicho que o motor evolutivo já usa (v0.7.0, "Falta").
    Feito em 2026-11-19 (branch `bloco-a-itens-3-4`), com vários eixos pelo produto das
@@ -113,7 +115,7 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
    de citar resultados.
 
-Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. O item 2 está em andamento (2026-11-19): `env_space_time()` reproduz o campo de Thompson et al. (2020) e foi validada contra o mcomsimr com o ambiente mudando no tempo. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
+Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. Os itens 2, 3 e 4 foram feitos em 2026-11-19; o estudo (i) do item 1 foi feito em 2026-11-20 (200 réplicas, seis nulos: livre, toro, MSR, shift-rotate ad hoc, substituto paramétrico por postos e variograma de Viladomat et al. 2014; a Constant Moran permutation saiu porque Arthur 2024/2025 trata de nulos de redes). Nenhum nulo ficou entre 0,04 e 0,06 em todos os casos: todos ficam liberais quando o alcance se aproxima do tamanho da paisagem. O variograma foi o melhor (média 0,062, máximo 0,09), seguido do paramétrico (0,067, máximo 0,10); MSR falha na região em L (até 0,23) e o toro na grade com alcance 5 ou mais (0,10 a 0,14). Resultados em `vignettes/articles/whole-tree.Rmd`. Falta decidir (ii): implementar o variograma e o paramétrico como `null =` com o aviso sobre alcances grandes, já que o critério de 0,04 a 0,06 não foi atingido. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
 
 **Bloco B, especiação: comparação e experimentos.** Fase 4 (gen3sis, GPL, e MESS, sem
@@ -209,6 +211,23 @@ Thompson et al. (2020) e primeira autora do quadro multitrófico; o e-mail a ela
 pendente de decisão do usuário. Referências conferidas no OpenAlex em 2026-11-19 (só os
 metadados); ler os artigos antes de citar resultados.
 
+**Bloco J, artigo-vitrine de desenho de estudos de simulação (pedido em 2026-11-19).** Com
+as adições recentes (ambiente no espaço e no tempo, nicho em vários eixos, competição por
+traits, especiação, genética quantitativa, nulos com borda), falta um artigo longo no site que
+mostre como desenhar um estudo de simulação a partir do tipo de pergunta, servindo de vitrine
+do que o pacote faz. Plano: (i) organizar por pergunta, não por função, por exemplo: um método
+detecta o processo X (erro tipo I e poder, com `run_scenarios()` e nulos)?; como a dispersão e
+o nicho moldam alfa, beta e gama?; o que persiste sob ambiente que muda no tempo?; a evolução
+de traits ou a especiação altera o padrão filogenético esperado?; quais parâmetros os dados
+permitem estimar (ABC, `abc_recovery()`)?; (ii) em cada caso, o mesmo roteiro: pergunta,
+fatores e níveis, réplicas, estatísticas resumo, nulo ou referência, custo computacional e uma
+figura; (iii) apontar para os artigos que aprofundam cada caso (avaliação de métodos,
+replicações, genética quantitativa, mapa de aninhamento) em vez de repeti-los; (iv) resultados
+pré-computados em `data-raw/`, para o pkgdown não rodar simulações longas; (v) entrar na barra
+de navegação como porta de entrada da seção "Simulating data". Depende de a API do bloco A
+estar estável; recomendação: escrever depois do bloco A e antes da 1.0.0, e usar o texto
+também no preprint.
+
 **Limitações do manuscrito fora do escopo.** A segunda (estrutura de estágios, restrições
 metabólicas, paisagens que mudam em tempo geológico) não entra: o pacote fica no tempo
 ecológico e em paisagens estáticas, e o gen3sis e o BioGEEM cobrem o tempo profundo (ver
@@ -220,7 +239,7 @@ descrito na seção de métodos; só entra no pacote se tiver poder.
 **v1.0.0 (CRAN).** Depois do bloco A e da Fase 4, que são os que ainda mexem na API. Os blocos
 C a H são estudos e artigos que podem seguir depois do CRAN, sem mudar assinaturas. O bloco I
 muda o motor; se entrar antes do CRAN, adia a 1.0.0, e depois dele pode vir como função nova
-sem quebrar `simulate_metacommunity()`.
+sem quebrar `simulate_metacommunity()`. O bloco J (artigo-vitrine) entra antes da 1.0.0, depois do bloco A.
 
 ## Visão
 
