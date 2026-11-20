@@ -65,6 +65,7 @@ dispersal and niche breadth to shape scale-dependent diversity change in metacom
 Other landscapes:
 \code{\link[=dispersal_kernel]{dispersal_kernel()}},
 \code{\link[=env_over_time]{env_over_time()}},
+\code{\link[=env_space_time]{env_space_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
 \code{\link[=landscape_matrix]{landscape_matrix()}},

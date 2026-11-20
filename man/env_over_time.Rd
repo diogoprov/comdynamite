@@ -35,6 +35,7 @@ matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
 Other landscapes:
 \code{\link[=dispersal_kernel]{dispersal_kernel()}},
 \code{\link[=env_pulse]{env_pulse()}},
+\code{\link[=env_space_time]{env_space_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
 \code{\link[=landscape_matrix]{landscape_matrix()}},

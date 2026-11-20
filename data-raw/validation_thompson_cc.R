@@ -29,7 +29,7 @@ one_landscape_cc <- function(replicate) {
   kernel <- exp(-0.1 * torus_distances(xy))
   diag(kernel) <- 0
   kernel <- kernel / rowSums(kernel)
-  env <- environment_field(xy)
+  env <- env_space_time(xy, n_steps = n_steps, burn_in = 200)
   optima <- runif(n_species)
   alpha <- trade_off()
   design <- expand.grid(dispersal = dispersal_rates, niche = cc_breadths)
