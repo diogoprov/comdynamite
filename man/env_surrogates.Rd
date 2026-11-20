@@ -7,16 +7,20 @@
 env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
 }
 \arguments{
-\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.}
+\item{env}{Predictor, or matrix or data frame of predictors, with one row per site, such
+as an \code{env_time} matrix with one column per step. Or an \code{mc_landscape}, whose
+environment (or \code{env_axes}) is replaced, with the distances of the landscape.}
 
-\item{coords}{Matrix or data frame of coordinates with one row per site.}
+\item{coords}{Matrix or data frame of coordinates with one row per site. Not needed for a
+landscape.}
 
 \item{n}{Number of surrogates.}
 
 \item{method}{\code{"variogram"} or \code{"parametric"}.}
 }
 \value{
-List of \code{n} matrices with the dimensions and column names of \code{env}. For
+List of \code{n} matrices with the dimensions and column names of \code{env}, or of \code{n}
+landscapes when \code{env} is one. For
 \code{"parametric"}, \code{attr(, "rows")} is a matrix with one row per draw, giving for each site
 the row of \code{env} it received.
 }
@@ -51,6 +55,16 @@ torus on the grid. Both became liberal (0.08-0.10) when the range approached the
 landscape, when few independent patches of environment are left, so with broad fields p
 values near 0.05 deserve caution. These rates are for one predictor; with several, and in
 \code{\link[=node_test]{node_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}}, they were not checked.
+
+For simulations, \code{env_surrogates()} gives null environments: a landscape, or an \code{env_time}
+matrix, with the same spatial structure but no relation to the environment that shaped the
+observed communities. To ask whether a simulated pattern depends on where the environment
+is, rather than only on how much of it is autocorrelated, run the same simulation on the
+observed landscape and on its surrogates and compare a statistic. With \code{env_time},
+\code{"parametric"} moves the whole series of each site to another site, so the dynamics of each
+site are kept and only their place changes; \code{"variogram"} smooths each step on its own,
+which does not keep the temporal autocorrelation. Landscapes keep their own distances, such
+as those of a torus, though the exponential covariance may then not be positive definite.
 }
 \examples{
 set.seed(1)
@@ -59,6 +73,10 @@ field <- t(chol(exp(-as.matrix(dist(coords)) / 4))) \%*\% rnorm(144)
 draws <- env_surrogates(field, coords, n = 3)
 length(draws)
 cor(field, draws[[1]])
+# null landscapes for the simulator
+grid <- landscape_grid(10, env_range = c(0, 100))
+nulls <- env_surrogates(grid, n = 2, method = "parametric")
+cor(grid$env, nulls[[1]]$env)
 }
 \references{
 Viladomat, J., Mazumder, R., McInturff, A., McCauley, D. J., & Hastie, T. (2014). Assessing

@@ -30,11 +30,25 @@
 #' values near 0.05 deserve caution. These rates are for one predictor; with several, and in
 #' [node_test()] and [phylo_beta_test()], they were not checked.
 #'
-#' @param env Predictor, or matrix or data frame of predictors, with one row per site.
-#' @param coords Matrix or data frame of coordinates with one row per site.
+#' For simulations, `env_surrogates()` gives null environments: a landscape, or an `env_time`
+#' matrix, with the same spatial structure but no relation to the environment that shaped the
+#' observed communities. To ask whether a simulated pattern depends on where the environment
+#' is, rather than only on how much of it is autocorrelated, run the same simulation on the
+#' observed landscape and on its surrogates and compare a statistic. With `env_time`,
+#' `"parametric"` moves the whole series of each site to another site, so the dynamics of each
+#' site are kept and only their place changes; `"variogram"` smooths each step on its own,
+#' which does not keep the temporal autocorrelation. Landscapes keep their own distances, such
+#' as those of a torus, though the exponential covariance may then not be positive definite.
+#'
+#' @param env Predictor, or matrix or data frame of predictors, with one row per site, such
+#'   as an `env_time` matrix with one column per step. Or an `mc_landscape`, whose
+#'   environment (or `env_axes`) is replaced, with the distances of the landscape.
+#' @param coords Matrix or data frame of coordinates with one row per site. Not needed for a
+#'   landscape.
 #' @param n Number of surrogates.
 #' @param method `"variogram"` or `"parametric"`.
-#' @return List of `n` matrices with the dimensions and column names of `env`. For
+#' @return List of `n` matrices with the dimensions and column names of `env`, or of `n`
+#'   landscapes when `env` is one. For
 #'   `"parametric"`, `attr(, "rows")` is a matrix with one row per draw, giving for each site
 #'   the row of `env` it received.
 #' @references
@@ -50,16 +64,42 @@
 #' draws <- env_surrogates(field, coords, n = 3)
 #' length(draws)
 #' cor(field, draws[[1]])
+#' # null landscapes for the simulator
+#' grid <- landscape_grid(10, env_range = c(0, 100))
+#' nulls <- env_surrogates(grid, n = 2, method = "parametric")
+#' cor(grid$env, nulls[[1]]$env)
 #' @export
 env_surrogates <- function(env, coords, n = 99, method = c("variogram", "parametric")) {
   method <- match.arg(method)
-  env <- as.matrix(check_env(env, matrix(0, NROW(env), 1), collinear = TRUE))
+  if (inherits(env, "mc_landscape")) return(landscape_surrogates(env, n, method))
+  env <- surrogate_env(env)
   coords <- as.matrix(check_coords(coords))
-  stopifnot(nrow(coords) == nrow(env), n >= 1, n == round(n), nrow(env) >= 5)
+  stopifnot(nrow(coords) == nrow(env))
   d <- as.matrix(stats::dist(coords))
+  surrogates_from(env, d, n, method)
+}
+
+surrogate_env <- function(env) {
+  if (is.data.frame(env)) {
+    check_numeric_columns(env, "`env`", "Code factors as dummy variables.")
+  }
+  env <- as.matrix(env) * 1
+  if (!is.numeric(env)) stop("`env` is not numeric", call. = FALSE)
+  if (anyNA(env)) stop("`env` has missing values", call. = FALSE)
+  variable <- apply(env, 2, stats::var) > 0
+  if (!any(variable)) stop("`env` has no variation among sites", call. = FALSE)
+  env
+}
+
+surrogates_from <- function(env, d, n, method) {
+  stopifnot(nrow(d) == nrow(env), n >= 1, n == round(n), nrow(env) >= 5)
   if (any(d[upper.tri(d)] == 0)) stop("two sites share the same coordinates", call. = FALSE)
+  variable <- apply(env, 2, stats::var) > 0
   if (method == "parametric") {
-    reference <- if (ncol(env) == 1) env[, 1] else stats::prcomp(env, scale. = TRUE)$x[, 1]
+    reference <- if (sum(variable) == 1) env[, variable] else {
+      stats::prcomp(env[, variable, drop = FALSE], scale. = TRUE)$x[, 1]
+    }
+    # the fitted range is one whose covariance is positive definite
     root <- t(chol(exp(-d / fit_exponential_range(reference, d)) + diag(1e-8, nrow(d))))
     by_rank <- order(reference)
     rows <- t(replicate(n, by_rank[rank(drop(root %*% stats::rnorm(nrow(d))),
@@ -72,11 +112,40 @@ env_surrogates <- function(env, coords, n = 99, method = c("variogram", "paramet
   setup <- variogram_setup(d)
   lapply(seq_len(n), function(r) {
     moved <- sample.int(nrow(env))
-    out <- vapply(seq_len(ncol(env)), function(j) variogram_surrogate(env[, j], moved, setup),
-                  numeric(nrow(env)))
-    out <- matrix(out, nrow(env), dimnames = dimnames(env))
-    out
+    out <- vapply(seq_len(ncol(env)), function(j) {
+      if (!variable[j]) return(env[, j])
+      variogram_surrogate(env[, j], moved, setup)
+    }, numeric(nrow(env)))
+    matrix(out, nrow(env), dimnames = dimnames(env))
   })
+}
+
+# landscapes with the environment (and its axes) replaced, with the distances of the landscape,
+# so a torus or a network keeps its own geometry
+landscape_surrogates <- function(landscape, n, method) {
+  d <- landscape$dist
+  if (is.null(d)) {
+    if (is.null(landscape$coords)) {
+      stop("the landscape has neither distances nor coordinates", call. = FALSE)
+    }
+    d <- stats::dist(landscape$coords)
+  }
+  d <- as.matrix(d)
+  axes <- !is.null(landscape$env_axes)
+  env <- surrogate_env(if (axes) landscape$env_axes else landscape$env)
+  draws <- surrogates_from(env, d, n, method)
+  out <- lapply(draws, function(e) {
+    moved <- landscape
+    if (axes) {
+      moved$env_axes <- e
+      moved$env <- unname(e[, 1])
+    } else {
+      moved$env <- unname(e[, 1])
+    }
+    moved
+  })
+  attr(out, "rows") <- attr(draws, "rows")
+  out
 }
 
 # exponential range by maximum likelihood on normal scores, with the variance profiled out, over
@@ -87,10 +156,16 @@ fit_exponential_range <- function(x, d) {
   positive <- d[upper.tri(d)]
   candidates <- exp(seq(log(min(positive) / 2), log(max(positive) / 2), length.out = 25))
   loglik <- vapply(candidates, function(range) {
-    u <- chol(exp(-d / range) + diag(1e-8, nrow(d)))
+    # on a torus or a network, broad ranges may not give a valid covariance
+    u <- tryCatch(chol(exp(-d / range) + diag(1e-8, nrow(d))), error = function(e) NULL)
+    if (is.null(u)) return(-Inf)
     q <- backsolve(u, y, transpose = TRUE)
     -length(y) / 2 * log(sum(q^2) / length(y)) - sum(log(diag(u)))
   }, numeric(1))
+  if (all(loglik == -Inf)) {
+    stop("the exponential covariance is not positive definite with these distances", # nocov
+         call. = FALSE) # nocov
+  }
   candidates[which.max(loglik)]
 }
 

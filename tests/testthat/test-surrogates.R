@@ -78,3 +78,37 @@ test_that("the tests take surrogates as their null of sites", {
   expect_error(pcps_test(comm, tree, env, n_perm = 9, null = "parametric", coords = coords,
                          site_permutations = torus_permutations(6)), "either")
 })
+
+test_that("landscapes get surrogate environments with their own distances", {
+  set.seed(7)
+  land <- landscape_grid(8, env_range = c(0, 100))
+  nulls <- env_surrogates(land, n = 3, method = "parametric")
+  expect_length(nulls, 3)
+  expect_s3_class(nulls[[1]], "mc_landscape")
+  expect_equal(sort(nulls[[1]]$env), sort(land$env))
+  expect_equal(nulls[[2]]$env, land$env[attr(nulls, "rows")[2, ]])
+  expect_identical(nulls[[1]]$dispersal, land$dispersal)
+  axes <- landscape_grid(8, n_axes = 2, axis_cor = 0.5)
+  moved <- env_surrogates(axes, n = 2)
+  expect_equal(dim(moved[[1]]$env_axes), dim(axes$env_axes))
+  expect_equal(moved[[1]]$env, unname(moved[[1]]$env_axes[, 1]))
+  points <- landscape_points(as.matrix(expand.grid(1:6, 1:6)), env = runif(36), disp_scale = 2)
+  points$dist <- NULL
+  expect_length(env_surrogates(points, n = 1), 1)
+  expect_error(env_surrogates(landscape_implicit(10), n = 1), "neither distances")
+})
+
+test_that("an env_time matrix moves whole series with the parametric surrogate", {
+  set.seed(8)
+  coords <- as.matrix(expand.grid(1:6, 1:6))
+  series <- env_space_time(coords, n_steps = 30, burn_in = 5, spatial_scale = 3,
+                           temporal_scale = 10)
+  series[, 1] <- 0.5
+  draws <- env_surrogates(series, coords, n = 2, method = "parametric")
+  expect_equal(draws[[1]], series[attr(draws, "rows")[1, ], ])
+  smooth <- env_surrogates(series[, 1:4], coords, n = 1)
+  expect_equal(smooth[[1]][, 1], rep(0.5, 36))
+  expect_error(env_surrogates(matrix(1, 36, 2), coords), "no variation")
+  expect_error(env_surrogates(c(1:35, NA), coords), "missing values")
+  expect_error(env_surrogates(data.frame(a = letters[1:36]), coords), "dummy")
+})
