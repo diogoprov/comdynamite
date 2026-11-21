@@ -43,11 +43,13 @@ Other landscapes:
 \code{\link[=dispersal_kernel]{dispersal_kernel()}},
 \code{\link[=env_over_time]{env_over_time()}},
 \code{\link[=env_pulse]{env_pulse()}},
+\code{\link[=env_river]{env_river()}},
 \code{\link[=env_space_time]{env_space_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
 \code{\link[=landscape_points]{landscape_points()}},
 \code{\link[=landscape_river]{landscape_river()}},
+\code{\link[=river_covariance]{river_covariance()}},
 \code{\link[=river_network]{river_network()}}
 }
 \concept{landscapes}

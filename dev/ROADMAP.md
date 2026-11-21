@@ -105,7 +105,13 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    rede, pelos modelos tail-up de Ver Hoef et al. (2006, Environmental and Ecological
    Statistics, doi:10.1007/s10651-006-0022-8) e Ver Hoef & Peterson (2010, JASA,
    doi:10.1198/jasa.2009.ap08248), já que a exponencial com distância de rede não é sempre
-   positiva definida; (iii) um gerador de redes dendríticas, que entra no item (decisão do usuário em
+   positiva definida (correção em 2026-11-20, lendo Peterson & Ver Hoef 2010, Ecology, e Som
+   et al. 2014, Environmetrics, pelo conector da Wiley: a exponencial da distância ao longo do
+   canal é o modelo tail-down exponencial, que é válido; o que falha com distância de rede são
+   modelos como o esférico. Feito em 2026-11-20: `river_covariance()` com tail-up, tail-down,
+   euclidiano e pepita como componentes de variância, e `env_river()`; os textos de Ver Hoef et
+   al. 2006 e Ver Hoef & Peterson 2010 não estavam acessíveis, a fórmula do tail-up veio das
+   leituras secundárias e foi conferida pelos testes de positividade); (iii) um gerador de redes dendríticas, que entra no item (decisão do usuário em
    2026-11-19), para variar o tamanho e a forma da rede com réplicas; candidatos: optimal
    channel networks e árvores aleatórias com ordem de Strahler controlada; ler antes como os
    trabalhos de Altermatt e Carrara geram as redes; deve devolver coordenadas, a matriz de
