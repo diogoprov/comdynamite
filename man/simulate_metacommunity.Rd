@@ -168,7 +168,10 @@ at the last step), \code{history} (sites x species x recorded steps array, or
 \code{NULL}), and the \code{landscape}, \code{traits}, \code{alpha}, \code{dispersal}, \code{extirpation} and \code{pool}
 used, \code{env} when given, and \code{tree} when the traits came from \code{\link[=species_traits]{species_traits()}} with a
 tree, the colonisation history (\code{arrival}, \code{propagule}, \code{immigrants}, \code{migrant_load};
-see the section Colonisation history) and \code{n_steps}. With \code{evolution}, also \code{evolution}, a
+see the section Colonisation history), \code{n_steps}, and the settings \code{dispersal_time},
+\code{kernels} (rescaled), \code{kernel_step}, \code{kernel_group}, \code{dispersal_site},
+\code{disturbance_sensitivity} (one per species), \code{disturbance}, \code{recruitment}, \code{microsites} and
+\code{mortality}. With \code{evolution}, also \code{evolution}, a
 list with the genetic mean of the optimum in each population (\code{genetic}), the plastic part
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
 which mixes residents and immigrants), the genetic means and the environment at

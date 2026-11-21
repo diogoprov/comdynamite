@@ -85,7 +85,7 @@ env <- env_seasonal(base, period = 20, year_sd = 2,
 floods <- river_floods(river, n_steps = 2000, period = 20, size_effect = 1)
 ```
 
-```{r generic-plot, fig.alt = "Mean regional richness at the end and mean local richness of headwaters and other sites for the three ways of dispersing, with standard errors over replicates."}
+```{r generic-plot, fig.height = 6, fig.alt = "Mean regional richness at the end and mean local richness of headwaters and other sites for the three ways of dispersing, with standard errors over replicates."}
 long <- rbind(
   data.frame(gen[c("landscape", "branching")], response = "regional richness",
              value = gen$regional_end),
@@ -98,13 +98,14 @@ summ <- aggregate(value ~ landscape + branching + response, long,
 summ <- data.frame(summ[1:3], summ$value)
 summ$landscape <- factor(summ$landscape, c("euclidean", "river_symmetric", "river_downstream"),
                          c("straight line", "channel, symmetric", "channel, downstream"))
-ggplot(summ, aes(landscape, m, colour = factor(branching))) +
-  geom_pointrange(aes(ymin = m - 2 * se, ymax = m + 2 * se),
+summ$landscape <- factor(summ$landscape, rev(levels(summ$landscape)))
+ggplot(summ, aes(m, landscape, colour = factor(branching))) +
+  geom_pointrange(aes(xmin = m - 2 * se, xmax = m + 2 * se),
                   position = position_dodge(width = 0.4)) +
-  facet_wrap(~response, scales = "free_y") +
-  labs(x = NULL, y = "Species", colour = "branching") +
+  facet_wrap(~response, scales = "free_x", ncol = 1) +
+  labs(x = "Number of species", y = NULL, colour = "Branching") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+  theme(legend.position = "bottom")
 ```
 
 Dispersal along the channel lowered regional richness relative to the same kernel on
@@ -264,9 +265,10 @@ ggplot(lakes, aes(year, mean, colour = guild)) +
   geom_line() +
   facet_wrap(~model) +
   scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
-  labs(x = "Year after assembly", y = "Species per lake, share of normal pulse",
+  labs(x = "Year after assembly", y = "Species per lake (% of normal pulse)",
        colour = NULL) +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 The drought emptied the lakes year after year. With symmetric dispersal, in its third year
@@ -280,7 +282,7 @@ population and no route was longer for anyone. After 12 years, both models had l
 every species from the lakes. When the pulse returned, migrants refilled the lakes within one
 or two years, whereas sedentary species were still below the normal pulse 28 years later.
 
-```{r pantanal-guilds, fig.alt = "Regional loss of species of each guild at the end of the drought and at year 60, and under regulation at year 60, relative to the normal pulse, with two standard errors, for the full model and the model with guilds that differ only in emigration."}
+```{r pantanal-guilds, fig.height = 6, fig.alt = "Regional loss of species of each guild at the end of the drought and at year 60, and under regulation at year 60, relative to the normal pulse, with two standard errors, for the full model and the model with guilds that differ only in emigration."}
 guilds <- do.call(rbind, lapply(c("full", "emigration only"), function(model) {
   d <- if (model == "full") pan else res$pantanal_emigration
   rbind(cbind(series_diff(d, "guild_series", "drought", 32, "symmetric"),
@@ -292,13 +294,16 @@ guilds <- do.call(rbind, lapply(c("full", "emigration only"), function(model) {
 }))
 guilds$guild <- factor(guilds$guild, c("migrant", "intermediate", "sedentary"))
 guilds$model <- factor(guilds$model, c("emigration only", "full"))
-ggplot(guilds, aes(guild, mean, colour = model)) +
-  geom_hline(yintercept = 0, colour = "grey60") +
-  geom_pointrange(aes(ymin = mean - 2 * se, ymax = mean + 2 * se),
+guilds$guild <- factor(guilds$guild, rev(levels(guilds$guild)))
+ggplot(guilds, aes(mean, guild, colour = model)) +
+  geom_vline(xintercept = 0, colour = "grey60") +
+  geom_pointrange(aes(xmin = mean - 2 * se, xmax = mean + 2 * se),
                   position = position_dodge(width = 0.4)) +
-  facet_wrap(~when) +
-  labs(x = NULL, y = "Species in the network minus normal pulse", colour = NULL) +
-  theme_minimal()
+  facet_wrap(~when, ncol = 1) +
+  labs(x = "Difference in regional richness from the normal pulse (species)", y = NULL,
+       colour = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 Interestingly, the ranking reverses at the scale of the whole network. Relative to the normal
