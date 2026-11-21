@@ -109,7 +109,8 @@ given: it grows out of the dynamics. The community starts from the species of <c
 <span>  kernels <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  kernel_step <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  dispersal_site <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  disturbance_sensitivity <span class="op">=</span> <span class="fl">1</span></span>
+<span>  disturbance_sensitivity <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  kernel_group <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -198,7 +199,11 @@ stops with an error beyond it.</p></dd>
 frame with one row per site and one column per element of <code>traits</code>. The <code>genetic_var</code>
 and <code>env_var</code> of <code>evolution</code> are then covariance matrices (see the section Several traits
 of <code><a href="evolution_control.html">evolution_control()</a></code>); competition falls with the overlap of the niches on all axes,
-and new species inherit the matrices of their mother.</p></dd>
+and new species inherit the matrices of their mother. A list of <code>traits</code> from
+<code><a href="niche_correlation.html">niche_correlation()</a></code> gives the niche a correlation between its axes, in growth,
+selection and the overlap of niches; with one matrix per species, new species take the
+correlation of their mother, and <code>traits</code> in the output keeps the correlation of the
+extant species.</p></dd>
 
 
 <dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
@@ -241,6 +246,14 @@ disturbed: one value or one per species. 1 (the default) removes all the populat
 disturbed site, as without this argument; lower values let species that resist the
 disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
 keep their populations.</p></dd>
+
+
+<dt id="arg-kernel-group">kernel_group<a class="anchor" aria-label="anchor" href="#arg-kernel-group"></a></dt>
+<dd><p>Optional routes of dispersal by group of species, as in
+<code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>: one group per species at the start, given as a column name or
+index of a matrix <code>kernel_step</code> (steps x groups). New species stay in the group of their
+mother. The gene flow that keeps the populations of a species together follows the routes
+of its group. <code>NULL</code> (the default) for one route for all species.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -298,10 +311,12 @@ lineages (trait by trait) are arrays of sites x species x traits (with the recor
 steps as a fourth dimension in the histories), <code>genetic_var</code> and <code>env_var</code> hold one
 matrix per species and <code>plasticity</code> is a matrix of species x traits.</p></li>
 <li><p>The <code>landscape</code>, <code>dispersal</code>, <code>extirpation</code>, <code>speciation</code> and <code>n_steps</code> used, and
-<code>dispersal_time</code>, <code>kernels</code> (rescaled), <code>kernel_step</code>, <code>dispersal_site</code> and
-<code>disturbance_sensitivity</code> (one per species). New species take the emigration through
-time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
-follows the kernel of each step; fission by distance uses the kernel of <code>landscape</code>.</p></li>
+<code>dispersal_time</code>, <code>kernels</code> (rescaled), <code>kernel_step</code>, <code>dispersal_site</code>,
+<code>disturbance_sensitivity</code> and <code>kernel_group</code> (one per species; <code>NULL</code> without groups).
+New species take the emigration through time, the sensitivity to disturbance and the
+group of routes of their mother. The gene flow that keeps populations together follows
+the kernel of each step (that of the group of the species, with <code>kernel_group</code>);
+fission by distance uses the kernel of <code>landscape</code>.</p></li>
 </ul><p><code><a href="as_metacommunity.html">as_metacommunity()</a></code> turns it into an <code>mc_sim</code> for the other functions of the package.</p>
     </div>
     <div class="section level2">

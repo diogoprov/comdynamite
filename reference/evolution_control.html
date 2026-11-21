@@ -259,6 +259,17 @@ drift, the correlated response of Lande (1979). Founders draw their means from
 trait. The environment can change on every axis (<code>env_time</code> as a list of matrices), and
 <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> takes several traits in the same way. With \(G = 0\) the
 abundances are those without evolution for the same seed.</p>
+<p>A list of <code>traits</code> from <code><a href="niche_correlation.html">niche_correlation()</a></code> adds a correlation \(R\) between the
+axes of the niche of each species: \(\Omega = D R D\), with \(D\) the
+diagonal matrix of the niche breadths, takes the place of the diagonal matrix in the growth
+rate, in the response to selection and in the fitness of immigrants (<code>immigrant_selection</code>),
+so that the cost of the phenotypic variance, \(\sqrt{|\Omega| / |\Omega +
+P|}\), and the selection gradient, \((\Omega + P)^{-1}
+d\), come from the same Gaussian. With \(G = E = 0\) the
+growth rate is that of <code><a href="growth_rates.html">growth_rates()</a></code> with the same correlation, and with \(R\) the
+identity the results are those of independent axes for the same seed. With axes of
+infinite breadth, \(\Omega\) is the inverse of the block of \((D R
+D)^{-1}\) of the other axes.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>

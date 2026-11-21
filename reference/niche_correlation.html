@@ -107,6 +107,16 @@ definite.</p></dd>
     <p><code>traits</code>, with the attribute <code>niche_cor</code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>With <code>evolution</code> in <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> and in <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>,
+the correlation enters the matrix of Gaussian selection, \(\Omega = D R D\) with \(D\) the diagonal matrix of the breadths (see the section Several traits of
+<code><a href="evolution_control.html">evolution_control()</a></code>): growth, the response to selection, the selection of immigrants and
+the overlap of niches (<code>niche_overlap</code>, and <code>competition_matrix(type = "trait")</code>) all use
+it. New species take the correlation of their mother. An axis with an infinite breadth
+exerts no selection, whatever its correlation; a breadth of 0 cannot be combined with a
+correlation.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other species traits:
 <code><a href="arrival_ages.html">arrival_ages()</a></code>,

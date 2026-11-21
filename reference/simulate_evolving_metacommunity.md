@@ -40,7 +40,8 @@ simulate_evolving_metacommunity(
   kernels = NULL,
   kernel_step = NULL,
   dispersal_site = NULL,
-  disturbance_sensitivity = 1
+  disturbance_sensitivity = 1,
+  kernel_group = NULL
 )
 ```
 
@@ -136,7 +137,12 @@ simulate_evolving_metacommunity(
   covariance matrices (see the section Several traits of
   [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md));
   competition falls with the overlap of the niches on all axes, and new
-  species inherit the matrices of their mother.
+  species inherit the matrices of their mother. A list of `traits` from
+  [`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md)
+  gives the niche a correlation between its axes, in growth, selection
+  and the overlap of niches; with one matrix per species, new species
+  take the correlation of their mother, and `traits` in the output keeps
+  the correlation of the extant species.
 
 - disturbance:
 
@@ -184,6 +190,16 @@ simulate_evolving_metacommunity(
   of a disturbed site, as without this argument; lower values let
   species that resist the disturbance (for instance drought-tolerant or
   air-breathing fish when a lake dries out) keep their populations.
+
+- kernel_group:
+
+  Optional routes of dispersal by group of species, as in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md):
+  one group per species at the start, given as a column name or index of
+  a matrix `kernel_step` (steps x groups). New species stay in the group
+  of their mother. The gene flow that keeps the populations of a species
+  together follows the routes of its group. `NULL` (the default) for one
+  route for all species.
 
 ## Value
 
@@ -274,11 +290,13 @@ An `mc_evolving` object, a list with:
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
   `n_steps` used, and `dispersal_time`, `kernels` (rescaled),
-  `kernel_step`, `dispersal_site` and `disturbance_sensitivity` (one per
-  species). New species take the emigration through time and the
-  sensitivity to disturbance of their mother. The gene flow that keeps
-  populations together follows the kernel of each step; fission by
-  distance uses the kernel of `landscape`.
+  `kernel_step`, `dispersal_site`, `disturbance_sensitivity` and
+  `kernel_group` (one per species; `NULL` without groups). New species
+  take the emigration through time, the sensitivity to disturbance and
+  the group of routes of their mother. The gene flow that keeps
+  populations together follows the kernel of each step (that of the
+  group of the species, with `kernel_group`); fission by distance uses
+  the kernel of `landscape`.
 
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
 turns it into an `mc_sim` for the other functions of the package.

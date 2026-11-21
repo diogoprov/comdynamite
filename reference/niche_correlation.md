@@ -35,6 +35,23 @@ niche_correlation(traits, cor)
 
 `traits`, with the attribute `niche_cor`.
 
+## Details
+
+With `evolution` in
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+and in
+[`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md),
+the correlation enters the matrix of Gaussian selection, \\\Omega = D R
+D\\ with \\D\\ the diagonal matrix of the breadths (see the section
+Several traits of
+[`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)):
+growth, the response to selection, the selection of immigrants and the
+overlap of niches (`niche_overlap`, and
+`competition_matrix(type = "trait")`) all use it. New species take the
+correlation of their mother. An axis with an infinite breadth exerts no
+selection, whatever its correlation; a breadth of 0 cannot be combined
+with a correlation.
+
 ## See also
 
 Other species traits:

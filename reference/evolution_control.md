@@ -235,6 +235,22 @@ change on every axis (`env_time` as a list of matrices), and
 takes several traits in the same way. With \\G = 0\\ the abundances are
 those without evolution for the same seed.
 
+A list of `traits` from
+[`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md)
+adds a correlation \\R\\ between the axes of the niche of each species:
+\\\Omega = D R D\\, with \\D\\ the diagonal matrix of the niche
+breadths, takes the place of the diagonal matrix in the growth rate, in
+the response to selection and in the fitness of immigrants
+(`immigrant_selection`), so that the cost of the phenotypic variance,
+\\\sqrt{\|\Omega\| / \|\Omega + P\|}\\, and the selection gradient,
+\\(\Omega + P)^{-1} d\\, come from the same Gaussian. With \\G = E = 0\\
+the growth rate is that of
+[`growth_rates()`](https://provetelab.org/comdynamite/reference/growth_rates.md)
+with the same correlation, and with \\R\\ the identity the results are
+those of independent axes for the same seed. With axes of infinite
+breadth, \\\Omega\\ is the inverse of the block of \\(D R D)^{-1}\\ of
+the other axes.
+
 ## References
 
 Lande, R. (1976). Natural selection and random genetic drift in

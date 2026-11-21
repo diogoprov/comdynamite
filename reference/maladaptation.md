@@ -52,8 +52,11 @@ depend on `r_max` and it excludes the cost of the variance itself (the
 standing load). With several evolving traits (one per niche axis), \\d^2
 / (\sigma^2 + P)\\ becomes the squared Mahalanobis distance \\d^\top
 (\Omega + P)^{-1} d\\ over the axes with a finite niche breadth, which
-also counts the covariances among traits; axes with `sigma = Inf` add a
-deviation but no load. For evolving metacommunities
+also counts the covariances among traits, and the correlation between
+the axes of the niche when the traits come from
+[`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md)
+(\\\Omega = D R D\\); axes with `sigma = Inf` add a deviation but no
+load. For evolving metacommunities
 ([`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)),
 the population of a species in a site can hold several lineages: its
 phenotype is their mean weighted by abundance and \\P\\ adds the

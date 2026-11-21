@@ -69,8 +69,12 @@ Square matrix: element \[j, k\] is the effect of species k on species j.
   [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
   uses with `niche_overlap = TRUE`, so that with `inter_max = 1` two
   species with the same niche compete as one species. With a list of
-  traits (several axes), the overlap is the product over axes. Nothing
-  is random.
+  traits (several axes), the overlap is the product over axes, or, for
+  traits from
+  [`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md),
+  \\\exp(-d^\top (\Omega_j + \Omega_k)^{-1} d / 2)\\, with \\d\\ the
+  difference between the optima and \\\Omega\\ the covariance of each
+  niche. Nothing is random.
 
 ## Examples
 

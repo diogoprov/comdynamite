@@ -117,7 +117,10 @@ mc_dynamics(
   the section Several traits of
   [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)
   and
-  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md)).
+  [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md));
+  a correlation between the axes of the niche
+  ([`niche_correlation()`](https://provetelab.org/comdynamite/reference/niche_correlation.md))
+  enters growth and selection.
 
 - disturbance:
 
@@ -209,10 +212,9 @@ mc_dynamics(
   that step. For example, long-distance migrants and sedentary fish of
   the same river, each with a matrix for high and one for low water. A
   run in which every group uses the same matrix gives the same results
-  as a vector `kernel_step`. Not available with immigrant selection or
-  several traits under `evolution`, nor in
-  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md).
-  `NULL` (the default) for one route for all species.
+  as a vector `kernel_step`. With `evolution` (one or several traits,
+  with or without immigrant selection), gene flow follows the routes of
+  each species. `NULL` (the default) for one route for all species.
 
 - dispersal_site:
 

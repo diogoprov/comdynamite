@@ -111,7 +111,9 @@ $$1 - L = \exp\left(-\frac{d^2}{2 (\sigma^2 + P)}\right),$$
 so the load \(L\) goes from 0 (the mean phenotype matches the site) towards 1. It does
 not depend on <code>r_max</code> and it excludes the cost of the variance itself (the standing load).
 With several evolving traits (one per niche axis), \(d^2 / (\sigma^2 + P)\) becomes the squared Mahalanobis distance \(d^\top (\Omega + P)^{-1} d\) over the axes with a finite niche breadth, which also counts the covariances among
-traits; axes with <code>sigma = Inf</code> add a deviation but no load. For evolving metacommunities
+traits, and the correlation between the axes of the niche when the traits come from
+<code><a href="niche_correlation.html">niche_correlation()</a></code> (\(\Omega = D R D\)); axes with <code>sigma = Inf</code> add a
+deviation but no load. For evolving metacommunities
 (<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>), the population of a species in a site can hold
 several lineages: its phenotype is their mean weighted by abundance and \(P\) adds the
 variance among them, so the load is that of a single Gaussian population with that mean and

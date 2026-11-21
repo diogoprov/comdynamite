@@ -201,7 +201,8 @@ optimum within each population: selection by the local environment, drift, gene 
 founder sampling and plasticity. <code>NULL</code> (the default) keeps the optimum of each species in
 all its populations, as before. With a niche of several axes, one trait evolves per axis,
 with covariance matrices \(G\) and \(E\) (see the section Several traits of
-<code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>).</p></dd>
+<code><a href="evolution_control.html">evolution_control()</a></code> and <code><a href="genetic_matrices.html">genetic_matrices()</a></code>); a correlation between the axes of the
+niche (<code><a href="niche_correlation.html">niche_correlation()</a></code>) enters growth and selection.</p></dd>
 
 
 <dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
@@ -278,9 +279,9 @@ given as a column name or index of <code>kernel_step</code>, which is then a mat
 step and one column per group, holding the index or name of the matrix of <code>kernels</code> used
 by that group at that step. For example, long-distance migrants and sedentary fish of the
 same river, each with a matrix for high and one for low water. A run in which every group
-uses the same matrix gives the same results as a vector <code>kernel_step</code>. Not available with
-immigrant selection or several traits under <code>evolution</code>, nor in
-<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>. <code>NULL</code> (the default) for one route for all species.</p></dd>
+uses the same matrix gives the same results as a vector <code>kernel_step</code>. With <code>evolution</code>
+(one or several traits, with or without immigrant selection), gene flow follows the
+routes of each species. <code>NULL</code> (the default) for one route for all species.</p></dd>
 
 
 <dt id="arg-dispersal-site">dispersal_site<a class="anchor" aria-label="anchor" href="#arg-dispersal-site"></a></dt>

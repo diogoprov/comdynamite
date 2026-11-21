@@ -141,7 +141,9 @@ with \(q\) = <code>inter_max</code>, \(\theta\) the optima and \(\sigma\)
 the niche breadths of <code>traits</code>. The last factor is the overlap of two Gaussian niches, the
 kernel that <code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code> uses with <code>niche_overlap = TRUE</code>, so that
 with <code>inter_max = 1</code> two species with the same niche compete as one species. With a list
-of traits (several axes), the overlap is the product over axes. Nothing is random.</p></li>
+of traits (several axes), the overlap is the product over axes, or, for traits from
+<code><a href="niche_correlation.html">niche_correlation()</a></code>, \(\exp(-d^\top (\Omega_j + \Omega_k)^{-1} d / 2)\), with \(d\) the difference between the optima and
+\(\Omega\) the covariance of each niche. Nothing is random.</p></li>
 </ul></div>
 
     <div class="section level2">
