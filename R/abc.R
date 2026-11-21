@@ -41,7 +41,7 @@ abc_table <- function(prior, simulate, n, setup = NULL,
   stopifnot(is.function(simulate), length(n) == 1, n >= 1, length(seed) == 1)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   cell_seed(seed)
   parameters <- as.data.frame(lapply(prior, function(limits) stats::runif(n, limits[1], limits[2])))
   table <- run_scenarios(parameters, simulate, setup, summarise, n_rep = 1, seed = seed + 1)
@@ -214,7 +214,7 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   cell_seed(seed)
   test <- sort(sample.int(nrow(table), n_test))
   train <- table[-test, , drop = FALSE]
@@ -418,7 +418,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
   weights <- forest_weights(fit, values[fit$statistics])[, 1]
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   cell_seed(seed)
   drawn <- rows[sample.int(length(rows), n, replace = TRUE, prob = weights)]
   parameters <- as.data.frame(table)[drawn, fit$parameters, drop = FALSE]

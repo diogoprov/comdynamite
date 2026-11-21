@@ -6,6 +6,7 @@
 [![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
 [![Codecov test coverage](https://codecov.io/gh/diogoprov/comdynamite/graph/badge.svg)](https://app.codecov.io/gh/diogoprov/comdynamite)
+[![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 <!-- badges: end -->
 
 Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse
@@ -62,6 +63,17 @@ install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev",
                                           "https://cloud.r-project.org"))
 # or
 remotes::install_github("diogoprov/comdynamite")
+```
+
+The examples and articles draw trees with
+[treeshapesim](https://github.com/diogoprov/treeshapesim), which installs from the same
+r-universe repository. `trait_gradient_bayes()` fits its model in Stan through
+[cmdstanr](https://mc-stan.org/cmdstanr/), which is not on CRAN and also needs CmdStan:
+
+```r
+install.packages("cmdstanr", repos = c("https://stan-dev.r-universe.dev",
+                                       "https://cloud.r-project.org"))
+cmdstanr::install_cmdstan()
 ```
 
 ## Large analyses
@@ -143,6 +155,14 @@ metacommunities. R package. https://doi.org/10.5281/zenodo.23993533
 This DOI always points to the latest version; each release also has its own DOI
 on Zenodo. In R, `citation("comdynamite")` gives the entry with the installed
 version.
+
+## Contributing
+
+Bug reports, questions and suggestions are welcome as
+[issues](https://github.com/diogoprov/comdynamite/issues); see the
+[contributing guide](https://provetelab.org/comdynamite/CONTRIBUTING.html). Please note that the comdynamite project is
+released with a [Contributor Code of Conduct](https://provetelab.org/comdynamite/CODE_OF_CONDUCT.html). By contributing to
+this project, you agree to abide by its terms.
 
 ## References
 

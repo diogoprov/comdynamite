@@ -105,6 +105,7 @@ test_that("diagnostics flag poor convergence and divergences", {
 })
 
 test_that("trait_gradient_bayes() samples and builds the result", {
+  skip_on_cran()
   skip_if_not_installed("cmdstanr")
   skip_if_not_installed("posterior")
   d <- tgb_sim()

@@ -6,7 +6,7 @@
 \usage{
 animate_food_web(
   x,
-  file = "food_web.gif",
+  file = tempfile(fileext = ".gif"),
   frames = 100,
   delay = 0.08,
   width = 640,
@@ -17,7 +17,7 @@ animate_food_web(
 \arguments{
 \item{x}{Result of \code{\link[=food_web_dynamics]{food_web_dynamics()}}.}
 
-\item{file}{Path of the GIF to write.}
+\item{file}{Path of the GIF to write; by default a temporary file, whose path is returned.}
 
 \item{frames}{Number of frames, taken at evenly spaced rows of \code{x}; it cannot exceed the
 number of rows.}

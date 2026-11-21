@@ -1,8 +1,8 @@
 Package: comdynamite
 Title: Linking Traits, Phylogenies and Biogeography in Metacommunities
-Version: 0.10.0
+Version: 0.10.0.9000
 Authors@R: person("Diogo B.", "Provete", email = "dbprovete@gmail.com",
-    role = c("aut", "cre"))
+    role = c("aut", "cre"), comment = c(ORCID = "0000-0002-0097-0651"))
 Description: Methods that link traits, phylogenies, biogeography and
     metacommunities, to analyse data and to simulate it. Analyses include the
     node regression of Leibold et al. (2010) <doi:10.1111/j.1461-0248.2010.01523.x>,
@@ -19,6 +19,7 @@ Description: Methods that link traits, phylogenies, biogeography and
     published equations.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-GB
 Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 4.1.0)

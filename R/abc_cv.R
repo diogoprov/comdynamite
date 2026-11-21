@@ -28,7 +28,7 @@ spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 
   stopifnot(is.numeric(coords), nrow(coords) >= 2, length(k) == 1, k >= 2, k <= nrow(coords))
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   cell_seed(seed)
   if (method == "random") {
     return(sample(rep_len(seq_len(k), nrow(coords))))
@@ -144,7 +144,7 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   probs <- c((1 - level) / 2, (1 + level) / 2)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   out <- lapply(sort(unique(info$fold)), function(f) {
     train <- info[info$fold == f & info$part == "train", ]
     test <- info[info$fold == f & info$part == "test", ]

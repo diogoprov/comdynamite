@@ -58,11 +58,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Diogo B. Provete \email{dbprovete@gmail.com}
+\strong{Maintainer}: Diogo B. Provete \email{dbprovete@gmail.com} (\href{https://orcid.org/0000-0002-0097-0651}{ORCID})
 
 Authors:
 \itemize{
-  \item Diogo B. Provete \email{dbprovete@gmail.com}
+  \item Diogo B. Provete \email{dbprovete@gmail.com} (\href{https://orcid.org/0000-0002-0097-0651}{ORCID})
 }
 
 }

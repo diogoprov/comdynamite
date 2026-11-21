@@ -128,8 +128,13 @@ set.seed(9)
 tr <- treeshapesim::sim_tree_shape(30)
 reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
+# few random partitions, to keep the example quick
+damocles_partition_test(comm, tr, reg, n_rand = 4, vary = "gamma")
+\donttest{
+# random partitions and the parametric bootstrap refit the model many times
 damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
 damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
+}
 \dontshow{\}) # examplesIf}
 }
 \seealso{

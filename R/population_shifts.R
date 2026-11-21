@@ -616,6 +616,15 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
 #'   its profile).
 #' @param ... Not used.
 #' @return A ggplot object.
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
+#'                               competition_matrix(tree, "none"), n_steps = 100,
+#'                               seed_steps = 1:5)
+#' ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
+#' fit <- population_shifts(ind)
+#' plot(fit)
 #' @export
 plot.population_shifts <- function(x, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
