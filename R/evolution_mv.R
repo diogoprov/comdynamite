@@ -257,7 +257,7 @@ mv_immigrants_selected <- function(ev, em, za, pa, e, disp_matrix, cols) {
     src <- em[, s] > 0
     if (!any(src)) next
     w <- mv_fitness(ev, matrix(pa[src, s, ], sum(src)), e, cols[s])
-    flow <- disp_matrix[src, , drop = FALSE] * w * em[src, s]
+    flow <- species_kernel(disp_matrix, s)[src, , drop = FALSE] * w * em[src, s]
     lam[, s] <- colSums(flow)
     for (a in seq_len(ev$q)) {
       zi[, s, a] <- colSums(flow * za[src, s, a])

@@ -162,9 +162,9 @@
 #'   step and one column per group, holding the index or name of the matrix of `kernels` used
 #'   by that group at that step. For example, long-distance migrants and sedentary fish of the
 #'   same river, each with a matrix for high and one for low water. A run in which every group
-#'   uses the same matrix gives the same results as a vector `kernel_step`. Not available with
-#'   immigrant selection or several traits under `evolution`, nor in
-#'   [simulate_evolving_metacommunity()]. `NULL` (the default) for one route for all species.
+#'   uses the same matrix gives the same results as a vector `kernel_step`. With `evolution`
+#'   (one or several traits, with or without immigrant selection), gene flow follows the
+#'   routes of each species. `NULL` (the default) for one route for all species.
 #' @param dispersal_site Optional change of emigration among sites: a matrix with one row per
 #'   site and one column per step of multipliers of the emigration probability (probabilities
 #'   above 1 are set to 1), applied on top of `dispersal` and `dispersal_time`. For example, a
@@ -755,10 +755,6 @@ mc_step <- function(st, step) {
       if (!is.null(kernels)) {
         disp_matrix <- if (is.null(kernel_group)) kernels[[kernel_step[step]]] else
           structure(kernels[kernel_step[step, ]], group = kernel_group[alive])
-        if (is.list(disp_matrix) && (isTRUE(ev$imm_sel) || isTRUE(ev$mv))) {
-          stop("`kernel_group` is not available with immigrant selection or several traits",
-               call. = FALSE)
-        }
       }
       if (is.null(pool_from)) {
         em <- em_to <- matrix(stats::rbinom(m * k, n, p_go), m, k)
@@ -1212,6 +1208,12 @@ kernel_flow <- function(disp_matrix, x) {
     out[, cols] <- crossprod(disp_matrix[[g]], x[, cols, drop = FALSE])
   }
   out
+}
+
+# the dispersal matrix of species `s`: `disp_matrix` itself or, with one kernel per group of
+# species, that of the group of `s` (`group`: the group of each species)
+species_kernel <- function(disp_matrix, s, group = attr(disp_matrix, "group")) {
+  if (is.list(disp_matrix)) disp_matrix[[group[s]]] else disp_matrix
 }
 
 # D %*% x, by group as in kernel_flow()

@@ -237,6 +237,11 @@ print.mc_speciation <- function(x, ...) {
 #'   and `env_var` of `evolution` are then covariance matrices (see the section Several traits
 #'   of [evolution_control()]); competition falls with the overlap of the niches on all axes,
 #'   and new species inherit the matrices of their mother.
+#' @param kernel_group Optional routes of dispersal by group of species, as in
+#'   [simulate_metacommunity()]: one group per species at the start, given as a column name or
+#'   index of a matrix `kernel_step` (steps x groups). New species stay in the group of their
+#'   mother. The gene flow that keeps the populations of a species together follows the routes
+#'   of its group. `NULL` (the default) for one route for all species.
 #' @return An `mc_evolving` object, a list with:
 #'   * `abundance`: sites x extant species. With protracted speciation (`completion` of
 #'     [speciation_control()]), the species are the good species, each with the individuals
@@ -291,10 +296,12 @@ print.mc_speciation <- function(x, ...) {
 #'     steps as a fourth dimension in the histories), `genetic_var` and `env_var` hold one
 #'     matrix per species and `plasticity` is a matrix of species x traits.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used, and
-#'     `dispersal_time`, `kernels` (rescaled), `kernel_step`, `dispersal_site` and
-#'     `disturbance_sensitivity` (one per species). New species take the emigration through
-#'     time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
-#'     follows the kernel of each step; fission by distance uses the kernel of `landscape`.
+#'     `dispersal_time`, `kernels` (rescaled), `kernel_step`, `dispersal_site`,
+#'     `disturbance_sensitivity` and `kernel_group` (one per species; `NULL` without groups).
+#'     New species take the emigration through time, the sensitivity to disturbance and the
+#'     group of routes of their mother. The gene flow that keeps populations together follows
+#'     the kernel of each step (that of the group of the species, with `kernel_group`);
+#'     fission by distance uses the kernel of `landscape`.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
 #' @references Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
@@ -323,7 +330,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             max_species = 500, env = NULL, disturbance = 0,
                                             dispersal_time = NULL, kernels = NULL,
                                             kernel_step = NULL, dispersal_site = NULL,
-                                            disturbance_sensitivity = 1) {
+                                            disturbance_sensitivity = 1,
+                                            kernel_group = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
@@ -436,7 +444,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                immigration = immigration, evolution = evolution, disturbance = disturbance,
                dispersal_time = dispersal_time, kernels = kernels, kernel_step = kernel_step,
                dispersal_site = dispersal_site,
-               disturbance_sensitivity = disturbance_sensitivity)
+               disturbance_sensitivity = disturbance_sensitivity,
+               kernel_group = kernel_group)
   st <- do.call(mc_state, args)
   if (niche_overlap && competition == "phylo") st$competition_hook <- niche_crowding(st)
 
@@ -716,6 +725,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  dispersal_time = dispersal_time, kernels = st$kernels,
                  kernel_step = kernel_step, dispersal_site = dispersal_site,
                  disturbance_sensitivity = st$disturbance_sensitivity[sp_idx],
+                 kernel_group = if (is.numeric(kernel_group)) st$kernel_group[sp_idx] else
+                   colnames(kernel_step)[st$kernel_group[sp_idx]],
                  speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  env = if (several) as.data.frame(env) else NULL,
@@ -855,7 +866,7 @@ evolving_flow <- function(st, flow, disp_matrix) {
     if (!any(e > 0)) next
     # implicit landscapes: emigrants are pooled and reach each other site with weight equal
     # to the emigrants of the others, so a site sends e / (m - 1) to each other site
-    f <- if (!is.null(disp_matrix)) e * disp_matrix else {
+    f <- if (!is.null(disp_matrix)) e * species_kernel(disp_matrix, j, st$kernel_group) else {
       out <- matrix(e / (length(e) - 1), length(e), length(e))
       diag(out) <- 0
       out
@@ -908,8 +919,8 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
       if (length(src)) {
         weight <- f[src, a]
         if (!any(weight > 0)) {
-          weight <- st$n[src, c] *
-            (if (!is.null(st$disp_matrix)) st$disp_matrix[src, a] else 1)
+          kern <- species_kernel(st$disp_matrix, j, st$kernel_group)
+          weight <- st$n[src, c] * (if (!is.null(kern)) kern[src, a] else 1)
         }
         b <- src[which.max(weight)]
         d[a, ] <- d[b, ]
@@ -1133,6 +1144,8 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$dispersal <- grow_vec(st$dispersal)
   st$extirpation <- grow_vec(st$extirpation)
   st$disturbance_sensitivity <- grow_vec(st$disturbance_sensitivity)
+  # routes of dispersal by group of species: new species stay in the group of their mother
+  st$kernel_group <- grow_vec(st$kernel_group)
   # emigration through time (steps x species): new species take that of their mother
   if (!is.null(st$disp_prob_time)) {
     st$disp_prob_time <- cbind(st$disp_prob_time, st$disp_prob_time[, mothers, drop = FALSE])

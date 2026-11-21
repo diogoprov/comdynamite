@@ -279,7 +279,7 @@ immigrants_selected <- function(em, za, pa, e, width, disp_matrix, vg = NULL) {
     if (!any(src)) next
     # w[j, i]: fitness of the phenotype of source j in site i, relative to the optimum
     w <- exp(-outer(pa[src, s], e, "-")^2 / (2 * width[src, s]))
-    flow <- disp_matrix[src, , drop = FALSE] * w * em[src, s]
+    flow <- species_kernel(disp_matrix, s)[src, , drop = FALSE] * w * em[src, s]
     lam[, s] <- colSums(flow)
     zi[, s] <- colSums(flow * za[src, s])
     z2[, s] <- colSums(flow * za[src, s]^2)
