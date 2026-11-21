@@ -293,8 +293,16 @@ cidades). Itens:
 (i) partição eco-evolutiva no tempo: decompor a mudança da média da comunidade entre passos de
 uma simulação em sorting entre espécies, mudança dentro das espécies e covariância, e, como a
 simulação guarda as médias genéticas, separar a parte genética da plástica. `trait_flex()` faz
-a versão entre sítios; falta a temporal sobre `history`. Referências a conferir antes de citar:
-equação de Price, Ellner et al. (2011) e Govaert et al. (2016) [não verificadas]. Objetivo 2.
+a versão entre sítios; falta a temporal sobre `history`. Referência conferida no PDF: Ellner,
+Geber & Hairston (2011, Ecology Letters 14: 603-614, doi:10.1111/j.1461-0248.2011.01616.x),
+equação genótipo-fenótipo-ambiente (eqns 5 e 6): combina a abordagem de Hairston et al. (2005)
+com a equação de Price em tempo contínuo e divide a mudança de uma resposta ecológica X em
+evolução (Cov(m, z), mudança nas frequências de genótipos), mudança não herdável do trait
+(E[Δz], plasticidade ou estrutura etária) e ambiente; estende a interações entre espécies.
+Assume a "Population Mean Assumption" (X depende do trait só pela média). Na simulação, a
+média genética e a fenotípica são conhecidas, então dá para calcular os três termos e
+comparar com a versão retrospectiva (eqn 6), a que se aplica a dados de campo. Ainda não
+verificados: Hairston et al. (2005), Price (1970, 1972) e Govaert et al. (2016). Objetivo 2.
 (ii) artigo de gradiente de urbanização: sítios urbanos com menor variância ambiental e menor
 conectividade (`dispersal_site`, `kernels`), com `evolution`, medindo maladaptação,
 persistência e variância de traits ao longo do gradiente, para testar as hipóteses do projeto
