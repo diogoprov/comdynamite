@@ -970,7 +970,8 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
         weight <- f[src, a]
         if (!any(weight > 0)) {
           kern <- species_kernel(st$disp_matrix, j, st$kernel_group)
-          weight <- st$n[src, c] * (if (!is.null(kern)) kern[src, a] else 1)
+          toward <- if (is.null(kern)) 1 else kern[src, a]
+          weight <- st$n[src, c] * toward
         }
         b <- src[which.max(weight)]
         d[a, ] <- d[b, ]
