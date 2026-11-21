@@ -15,11 +15,11 @@ frame with a column \code{model}. Only the statistics shared by all models are u
 
 \item{statistics}{Names of the statistics. By default all statistics shared by the models.}
 
-\item{ntree}{Number of trees.}
+\item{ntree}{Number of trees. One whole number, 1 or more.}
 
-\item{lda}{Add the linear discriminant axes as predictors?}
+\item{lda}{Add the linear discriminant axes as predictors? \code{TRUE} or \code{FALSE}.}
 
-\item{ncores}{Number of threads.}
+\item{ncores}{Number of threads. One whole number, 1 or more.}
 
 \item{object}{An \code{mc_abc_choice}.}
 

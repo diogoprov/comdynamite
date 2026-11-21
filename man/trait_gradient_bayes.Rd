@@ -24,12 +24,16 @@ trait_gradient_bayes(
 \item{tree}{Phylogeny (\code{phylo}) with branch lengths; species not in it are left out.}
 
 \item{ou_alpha}{\code{NULL} for Brownian motion, or the strength \eqn{a} of an
-Ornstein-Uhlenbeck process, in units of 1 / branch length.}
+Ornstein-Uhlenbeck process, in units of 1 / branch length: one finite number greater
+than 0.}
 
-\item{lambda_prior}{The two shape parameters of the beta prior of both \eqn{\lambda}.}
+\item{lambda_prior}{The two shape parameters of the beta prior of both \eqn{\lambda}: two
+finite numbers greater than 0.}
 
 \item{chains, parallel_chains, iter_warmup, iter_sampling, adapt_delta, seed}{Passed to the
-\verb{$sample()} method of cmdstanr.}
+\verb{$sample()} method of cmdstanr. \code{chains}, \code{parallel_chains} and \code{iter_sampling} are each
+one whole number, 1 or more; \code{iter_warmup} one whole number, 0 or more; \code{adapt_delta} one
+number between 0 and 1, both excluded; \code{seed} one whole number, 0 or more, or \code{NULL}.}
 
 \item{...}{Further arguments to \verb{$sample()}, such as \code{max_treedepth} or \code{refresh}.}
 }

@@ -13,7 +13,7 @@ abc_diagnose(fit, newdata, coverage = 0.99)
 observation per row.}
 
 \item{coverage}{Central probability of the reference table within which a statistic counts
-as inside.}
+as inside. One number greater than 0 and less than 1.}
 }
 \value{
 A data frame with \code{observation}, \code{parameter}, \code{n_positive} (simulations with positive

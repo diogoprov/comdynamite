@@ -33,12 +33,12 @@ site.}
 and values of 1, -1 and 0.}
 
 \item{n_perm}{Number of permutations of sites, of species and of both. With
-\code{site_permutations}, only of species.}
+\code{site_permutations}, only of species. One whole number, 1 or more.}
 
-\item{cores}{Number of cores, with nodes run in parallel. Not available on Windows,
-where one core is used. For reproducible p-values with more than one core, call
-\code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}. Results still depend on the number of
-cores.}
+\item{cores}{One whole number, 1 or more: the number of cores, with nodes run in
+parallel. Not available on Windows, where one core is used. For reproducible p-values
+with more than one core, call \code{RNGkind("L'Ecuyer-CMRG")} before \code{set.seed()}. Results
+still depend on the number of cores.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row,
 for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites.}
@@ -55,8 +55,9 @@ within strata (see \code{\link[=env_surrogates]{env_surrogates()}}; their rates 
 error were checked in \code{\link[=pcps_test]{pcps_test()}}, not here). Surrogates need \code{coords}. They
 replace the permutations of sites, not those of the areas of \code{biogeography}.}
 
-\item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or
-\code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when it has them.}
+\item{coords}{Matrix of coordinates with one row per site, without missing or infinite
+values, for \code{null = "variogram"} or \code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when
+it has them.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per

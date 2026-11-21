@@ -28,12 +28,12 @@ the parameters.}
 \item{statistics}{Names of the statistics to check. By default those of \code{table} that did not
 enter \code{fit}, or all if every statistic did.}
 
-\item{n}{Number of draws from the posterior.}
+\item{n}{Number of draws from the posterior. One whole number, 2 or more.}
 
 \item{simulate, setup, summarise}{Optional functions to simulate new data, as in
 \code{\link[=abc_table]{abc_table()}}.}
 
-\item{seed}{Integer that sets all the seeds.}
+\item{seed}{Integer that sets all the seeds. One finite whole number.}
 }
 \value{
 A data frame with one row per statistic: \code{observed}, the median and the 5\% and 95\%

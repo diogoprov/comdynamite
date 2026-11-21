@@ -11,11 +11,13 @@
 #'
 #' @param x Result of [food_web_dynamics()].
 #' @param panels Panels to draw, in order: any of `"abundance"`, `"trait"` and `"rate"`.
-#' @param time Optional time at which to stop the curves; `NULL` draws the whole run.
-#' @param colours Colours of the resource, the consumer and the predator.
+#' @param time Optional time at which to stop the curves, one finite number; `NULL` draws
+#'   the whole run.
+#' @param colours Colours of the resource, the consumer and the predator, three strings.
 #' @param log_abundance Draw abundances as their base-10 logarithm (zeros are left out)?
-#' @param legend Draw the legend of the levels?
-#' @param linewidth Width of the lines.
+#'   `TRUE` or `FALSE`.
+#' @param legend Draw the legend of the levels? `TRUE` or `FALSE`.
+#' @param linewidth Width of the lines, one number greater than 0.
 #' @param col,lwd,... Deprecated: `col` is now `colours` and `lwd` is `linewidth`; graphical
 #'   arguments of base graphics are no longer used.
 #' @return A ggplot object.
@@ -42,9 +44,9 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
   if (length(colours) != 3) {
     stop("`colours` must give three colours, for R, N and P", call. = FALSE)
   }
-  if (!is.null(time) && (!is.numeric(time) || length(time) != 1 || !is.finite(time))) {
-    stop("`time` must be one number", call. = FALSE)
-  }
+  check_number(time, "time", null_ok = TRUE)
+  check_flag(log_abundance, "log_abundance")
+  check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   colours <- stats::setNames(unname(colours), c("Resource", "Consumer", "Predator"))
   levels <- c("R", "N", "P")[vapply(c("R", "N", "P"), function(l) any(x[[l]] > 0), logical(1))]
   if (length(levels) == 0) stop("every level is absent during the run", call. = FALSE)
@@ -97,11 +99,12 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #' package gifski.
 #'
 #' @param x Result of [food_web_dynamics()].
-#' @param file Path of the GIF to write; by default a temporary file, whose path is returned.
-#' @param frames Number of frames, taken at evenly spaced rows of `x`; it cannot exceed the
-#'   number of rows.
-#' @param delay Seconds between frames.
-#' @param width,height Size of the GIF in pixels.
+#' @param file Path of the GIF to write, one character string; by default a temporary file,
+#'   whose path is returned.
+#' @param frames Number of frames, taken at evenly spaced rows of `x`: one whole number, 2 or
+#'   more, that cannot exceed the number of rows.
+#' @param delay Seconds between frames, one number greater than 0.
+#' @param width,height Size of the GIF in pixels, each one whole number, 1 or more.
 #' @param ... Other arguments of [plot.food_web()], such as `panels` or `colours`.
 #' @return The path of the GIF, invisibly.
 #' @seealso [plot.food_web()]
@@ -122,13 +125,11 @@ animate_food_web <- function(x, file = tempfile(fileext = ".gif"), frames = 100,
     stop("`animate_food_web()` needs the package gifski: install.packages(\"gifski\")",
          call. = FALSE)
   }
-  if (!is.numeric(frames) || length(frames) != 1 || frames < 2 || frames > nrow(x)) {
-    stop("`frames` must be one number from 2 to the number of rows of `x` (", nrow(x), ")",
-         call. = FALSE)
-  }
-  if (!is.numeric(delay) || length(delay) != 1 || delay <= 0) {
-    stop("`delay` must be one positive number", call. = FALSE)
-  }
+  check_string(file, "file")
+  check_count(frames, "frames", min = 2, max = nrow(x))
+  check_number(delay, "delay", lower = 0, open = TRUE)
+  check_count(width, "width")
+  check_count(height, "height")
   rows <- unique(round(seq(1, nrow(x), length.out = frames)))
   need_ggplot("animate_food_web()")
   gifski::save_gif(for (r in rows) print(plot.food_web(x, time = x$time[r], ...)),

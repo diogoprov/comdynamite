@@ -26,7 +26,8 @@ matrix. For \code{"variance"}, a named list with the correlations of each regime
 
 \item{constraint}{Structure of the matrix or matrices; see Details.}
 
-\item{n_traits}{Number of traits, when neither \code{variance} nor \code{correlation} gives it.}
+\item{n_traits}{Number of traits, when neither \code{variance} nor \code{correlation} gives it: one
+whole number, 1 or more, or \code{NULL}.}
 
 \item{scale}{For \code{"proportional"}, the multiplier of each regime, named by regime.}
 

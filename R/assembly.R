@@ -45,7 +45,8 @@
 #' @param traits Numeric vector (one trait) or matrix (one column per trait),
 #'   with species names as names or row names. For example, the output of
 #'   [trait_ou()].
-#' @param size Number of species in the local community.
+#' @param size Number of species in the local community, one whole number between 1 and the
+#'   number of species in `traits`.
 #' @param rule Assembly rule.
 #' @param optimum For `rule = "filtering"`: the niche optimum, either
 #'   `"ancestral"` (the root state, 0 by default in [trait_ou()]),
@@ -54,8 +55,8 @@
 #'   trait.
 #' @param min_distance For `rule = "limiting_similarity"`: optional end point.
 #'   Removal stops as soon as no two remaining species are closer than this
-#'   (a limit to similarity), even if more than `size` species remain. In the units of
-#'   `distance`.
+#'   (a limit to similarity), even if more than `size` species remain. One finite number, 0 or
+#'   more, in the units of `distance`; `NULL` for none.
 #' @param distance How to measure distances in trait space: `"euclidean"`,
 #'   `"standardized"` or `"mahalanobis"`; see Details.
 #' @param trait_cov For `distance = "mahalanobis"`, an optional covariance matrix of the
@@ -104,15 +105,24 @@ assemble_community <- function(traits, size,
   x <- as.matrix(traits)
   if (!is.numeric(x)) stop("`traits` must be numeric (one column per trait)", call. = FALSE)
   if (anyNA(x)) stop("`traits` has missing values", call. = FALSE)
+  if (any(is.infinite(x))) stop("`traits` has infinite values", call. = FALSE)
   if (is.null(rownames(x))) {
     named <- if (is.null(dim(traits))) names(traits)
-    if (is.null(named)) warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
+    if (is.null(named)) {
+      warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
+    }
     rownames(x) <- named %||% paste0("sp", seq_len(nrow(x)))
   }
   sp <- rownames(x)
   n <- nrow(x)
-  if (!is.numeric(size) || length(size) != 1 || is.na(size) || size < 1 || size > n) {
-    stop("`size` must be one number between 1 and the ", n, " species of `traits`", call. = FALSE)
+  check_count(size, "size", min = 1, max = n)
+  check_number(min_distance, "min_distance", lower = 0, null_ok = TRUE)
+  if (!is.numeric(optimum) && !(is.character(optimum) && length(optimum) == 1)) {
+    stop("`optimum` must be \"ancestral\", \"derived\" or one number per trait",
+         call. = FALSE)
+  }
+  if (is.numeric(optimum) && !all(is.finite(optimum))) {
+    stop("`optimum` must hold finite numbers", call. = FALSE)
   }
   w <- trait_whitening(x, distance, trait_cov)  # Euclidean distances on x %*% w
   opt <- NULL

@@ -12,7 +12,7 @@
 \item{parm}{Names of the parameters, among the columns of the fit; by default all free
 parameters.}
 
-\item{level}{Confidence level.}
+\item{level}{Confidence level. One number greater than 0 and less than 1.}
 
 \item{...}{Not used.}
 }

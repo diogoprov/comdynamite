@@ -23,15 +23,15 @@ rate, or one per edge of \code{tree} in the order of \code{tree$edge}.}
 a root edge, the two edges leaving the root must have the same rates, which the root edge
 takes.}
 
-\item{n}{Number of communities to simulate.}
+\item{n}{Number of communities to simulate. One whole number, 1 or more.}
 
 \item{root}{State of the ancestor at the root, just before the first speciation (or at the
 start of the root edge): \code{"both"} draws absent or present with equal probabilities for each
 community, as in the simulations of Pigot & Etienne (2015); \code{"absent"} or \code{"present"} fix
 it.}
 
-\item{sympatry}{Probability, between 0 and 1, that a locally present ancestor leaves both
-daughters present at speciation; 0 (the default) is strictly allopatric speciation.}
+\item{sympatry}{Probability that a locally present ancestor leaves both daughters present at
+speciation, one number between 0 and 1; 0 (the default) is strictly allopatric speciation.}
 }
 \value{
 A matrix of zeros and ones with one row per community and one column per tip, named

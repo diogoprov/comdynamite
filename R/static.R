@@ -28,7 +28,8 @@
 #'   of them keeps abundances on the scale of the first.
 #' @param env Value of the gradient at each site, or a list or data frame with
 #'   one gradient per element, in the order of `traits`.
-#' @param incidence Return presences and absences instead of Poisson counts? A
+#' @param incidence Return presences and absences instead of Poisson counts (`TRUE` or
+#'   `FALSE`)? A
 #'   species is present where its count is positive. Only for
 #'   `sampling = "poisson"`.
 #' @param sampling How to obtain the data from the expected values: `"poisson"`
@@ -72,16 +73,24 @@
 simulate_static <- function(traits, env, incidence = FALSE,
                             sampling = c("poisson", "binomial", "expected")) {
   sampling <- match.arg(sampling)
+  check_flag(incidence, "incidence")
+  if (incidence && sampling != "poisson") {
+    stop("`incidence = TRUE` needs `sampling = \"poisson\"`", call. = FALSE)
+  }
   trait_list <- if (is.list(traits) && !is.data.frame(traits)) traits else list(traits)
   trait_list <- lapply(trait_list, as_traits)
   env_list <- if (is.list(env)) as.list(env) else list(env)
-  stopifnot(sampling == "poisson" || !incidence, length(trait_list) == length(env_list),
-            all(vapply(env_list, is.numeric, logical(1))),
-            length(unique(lengths(env_list))) == 1, length(env_list[[1]]) >= 1,
-            all(vapply(trait_list, function(x) all(x$r_max >= 0), logical(1))))
+  check_gradients(env_list, "env")
+  if (length(trait_list) != length(env_list)) {
+    stop("`traits` needs one set of traits per gradient of `env` (", length(env_list), ")",
+         call. = FALSE)
+  }
+  if (!all(vapply(trait_list, function(x) all(x$r_max >= 0), logical(1)))) {
+    stop("`traits` must have `r_max` of 0 or more", call. = FALSE)
+  }
   species <- rownames(trait_list[[1]])
   if (!all(vapply(trait_list, function(x) setequal(rownames(x), species), logical(1)))) {
-    stop("sets of traits have different species", call. = FALSE)
+    stop("sets of `traits` (one per gradient) have different species", call. = FALSE)
   }
   trait_list <- lapply(trait_list, function(x) x[species, , drop = FALSE])
   expected <- Reduce(`*`, Map(growth_rates, unname(env_list), trait_list))
@@ -120,16 +129,19 @@ simulate_static <- function(traits, env, incidence = FALSE,
 #' @param gradients Value of the gradient at each site, or a list or data frame
 #'   with one gradient per element, such as [logistic_gradients()]. Gradients are
 #'   centred.
-#' @param intercept_mean,intercept_sd Mean and standard deviation of `a`. Appendix C does
+#' @param intercept_mean,intercept_sd Mean and standard deviation of `a`, each one finite
+#'   number (the standard deviation 0 or more). Appendix C does
 #'   not give these values, and the defaults are those of the code of Ives & Helmus (2011).
-#' @param slope_sd Standard deviation of the slopes `b` among the species of the tree, as in
+#' @param slope_sd Standard deviation of the slopes `b` among the species of the tree, one
+#'   finite number, 0 or more, as in
 #'   the code of Ives & Helmus (2011). Appendix C does not give this value. The slopes are
 #'   rescaled to this sample standard deviation in each simulation, so with `lambda > 0` the
 #'   variance of the Brownian process behind them is larger than `slope_sd^2`; a model that
 #'   estimates that variance, such as a phylogenetic GLMM, should be compared with it and not
 #'   with `slope_sd^2` (see `data-raw/validation_pglmm.R`).
-#' @param lambda Pagel's lambda of the slopes.
-#' @param reduction Range of the uniform distribution of the site reduction.
+#' @param lambda Pagel's lambda of the slopes, one number between 0 and 1.
+#' @param reduction Range of the uniform distribution of the site reduction, two increasing
+#'   numbers between 0 and 1.
 #' @param draw Distribution of the value compared with each probability.
 #' @return List of class `mc_sim` with `abundance`, a 0/1 matrix with one row per
 #'   site and one column per species; `probability`, the matrix of probabilities;
@@ -154,11 +166,16 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
                               draw = c("uniform", "normal")) {
   draw <- match.arg(draw)
   check_tree(tree)
-  stopifnot(intercept_sd >= 0, slope_sd >= 0,
-            length(reduction) == 2)
+  check_number(intercept_mean, "intercept_mean")
+  check_number(intercept_sd, "intercept_sd", lower = 0)
+  check_number(slope_sd, "slope_sd", lower = 0)
+  check_number(lambda, "lambda", lower = 0, upper = 1)
+  if (!is.numeric(reduction) || length(reduction) != 2 || anyNA(reduction) ||
+        reduction[1] < 0 || reduction[2] > 1 || reduction[1] > reduction[2]) {
+    stop("`reduction` must be two increasing numbers between 0 and 1", call. = FALSE)
+  }
   grads <- if (is.list(gradients)) as.list(gradients) else list(gradients)
-  stopifnot(all(vapply(grads, is.numeric, logical(1))),
-            length(unique(lengths(grads))) == 1)
+  check_gradients(grads, "gradients")
   sp <- tree$tip.label
   k <- length(sp)
   n <- length(grads[[1]])
@@ -199,8 +216,8 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #'
 #' MEMs are rescaled to \[-15, 15\].
 #'
-#' @param scenario Number of the scenario, from 1 to 7.
-#' @param n_sites Number of sites.
+#' @param scenario Number of the scenario, one whole number from 1 to 7.
+#' @param n_sites Number of sites, one whole number, at least 4 (8 for scenarios 5 to 7).
 #' @return Data frame with one row per site: `x` and `y`, the gradients that
 #'   generate the data, and `x_test` and `y_test`, the ones to analyse.
 #' @references
@@ -213,7 +230,8 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
 #' head(logistic_gradients(6))
 #' @export
 logistic_gradients <- function(scenario, n_sites = 31) {
-  stopifnot(length(scenario) == 1, scenario %in% 1:7)
+  check_count(scenario, "scenario", min = 1, max = 7)
+  check_count(n_sites, "n_sites")
   minimum <- if (scenario >= 5) 8 else 4
   if (n_sites < minimum) {
     stop("scenario ", scenario, " needs at least ", minimum, " sites", call. = FALSE)
@@ -243,6 +261,21 @@ logistic_gradients <- function(scenario, n_sites = 31) {
     list(x, y)
   )
   data.frame(x = x, y = y, x_test = test[[1]], y_test = test[[2]])
+}
+
+# stops unless the gradients in the list `x` are numeric, finite and of the same length
+check_gradients <- function(x, name) {
+  ok <- length(x) >= 1 &&
+    all(vapply(x, function(g) is.numeric(g) && length(g) >= 1 && all(is.finite(g)),
+               logical(1)))
+  if (!ok) {
+    stop("`", name, "` must hold numeric gradients without missing or infinite values",
+         call. = FALSE)
+  }
+  if (length(unique(lengths(x))) != 1) {
+    stop("gradients of `", name, "` must have one value per site each", call. = FALSE)
+  }
+  invisible(x)
 }
 
 # Moran's eigenvector maps of a regular transect, from the broadest scale: the

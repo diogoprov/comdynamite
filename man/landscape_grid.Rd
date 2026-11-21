@@ -16,22 +16,23 @@ landscape_grid(
 )
 }
 \arguments{
-\item{side}{Number of cells per side.}
+\item{side}{Number of cells per side: one whole number, 2 or more.}
 
 \item{env_bandwidth}{Bandwidth (in cells) of the Gaussian kernel that
-smooths the environment. Larger values give smoother gradients.}
+smooths the environment: one number greater than 0. Larger values give smoother gradients.}
 
-\item{disp_scale}{Scale (in cells) of the dispersal kernel.}
+\item{disp_scale}{Scale (in cells) of the dispersal kernel: one number greater than 0.}
 
-\item{torus}{Wrap the grid as a torus?}
+\item{torus}{Wrap the grid as a torus? \code{TRUE} or \code{FALSE}.}
 
 \item{env_range}{Range of the uniform marginal distribution of the
-environment.}
+environment: two finite numbers, the first smaller.}
 
 \item{disp_shape}{Shape of the dispersal kernel, \code{"exponential"} (the default) or
 \code{"gaussian"}; see \code{\link[=dispersal_kernel]{dispersal_kernel()}}.}
 
-\item{n_axes}{Number of environmental axes. With more than one, each axis is a field
+\item{n_axes}{Number of environmental axes: one whole number, 1 or more. With more than one, each
+axis is a field
 smoothed in the same way, the axes are correlated by \code{axis_cor} before the conversion to
 ranks, and the landscape also holds \code{env_axes}, a matrix with one column per axis, which
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} uses with a list of traits when \code{env} is not given. The first

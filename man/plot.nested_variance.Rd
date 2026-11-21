@@ -9,8 +9,8 @@
 \arguments{
 \item{x}{Result of \code{\link[=nested_variance]{nested_variance()}}.}
 
-\item{min_label}{Smallest share labelled with its percentage inside the bar; 1 or more
-removes the labels.}
+\item{min_label}{Smallest share labelled with its percentage inside the bar: one number, 0
+or more; 1 or more removes the labels.}
 
 \item{colours}{Colours of the levels, one per row of \code{x} (the last for \code{within}), or \code{NULL}
 (the default) for the Okabe-Ito colours above and a light grey for \code{within}. With more

@@ -49,7 +49,8 @@ species.}
 
 \item{env}{Optional data frame, matrix or vector with one row per site.}
 
-\item{coords}{Optional matrix or data frame of coordinates with one row per site.}
+\item{coords}{Optional matrix or data frame of coordinates with one row per site, without
+missing or infinite values.}
 
 \item{areas}{Optional vector with the area or biogeographic event of each site, for
 \code{\link[=biogeography_matrix]{biogeography_matrix()}}.}

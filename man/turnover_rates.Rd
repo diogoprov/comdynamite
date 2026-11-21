@@ -18,13 +18,15 @@ turnover_rates(
 
 \item{tree}{The tree of the species in \code{x}; by default the one stored in \code{x}.}
 
-\item{sigma2}{Rate outside the stretch informed by the metacommunity.}
+\item{sigma2}{Rate outside the stretch informed by the metacommunity. One finite number
+greater than 0.}
 
 \item{k}{Increase of the rate, relative to \code{sigma2}, per unit of turnover (partners gained
-or lost per site and time step).}
+or lost per site and time step). One finite number, 0 or more.}
 
 \item{window}{Length of the end of each tip branch represented by the metacommunity, in the
-units of the branch lengths; \code{NULL} uses the whole tip branch. A window longer than a tip
+units of the branch lengths (one finite number greater than 0); \code{NULL} uses the whole tip
+branch. A window longer than a tip
 branch is cut to its length.}
 
 \item{partners}{\code{"all"} counts every other species as a partner; \code{"competitors"} counts only

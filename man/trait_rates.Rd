@@ -25,10 +25,11 @@ trait_rates(
 
 \item{model}{How rates vary among branches: \code{"shift"}, \code{"gbm"} or \code{"iid"}.}
 
-\item{sigma2}{Rate at the root (\code{"shift"}, \code{"gbm"}) or median rate (\code{"iid"}).}
+\item{sigma2}{Rate at the root (\code{"shift"}, \code{"gbm"}) or median rate (\code{"iid"}). One finite
+number greater than 0.}
 
 \item{shifts}{Number of shifts, for \code{"shift"} when neither \code{shift_edges} nor \code{shift_rate} is
-given.}
+given. One whole number, from 0 up to the number of branches.}
 
 \item{shift_size}{Multipliers of the rate at each shift, recycled to the number of shifts, or
 a function of the number of shifts that gives them. Values below 1 slow evolution down.}
@@ -36,18 +37,18 @@ a function of the number of shifts that gives them. Values below 1 slow evolutio
 \item{shift_edges}{Optional row numbers of \code{tree$edge} at whose start the shifts happen.}
 
 \item{shift_rate}{Optional rate of shifts per unit of branch length, for shifts as a Poisson
-process along the branches.}
+process along the branches. One finite number, 0 or more, or \code{NULL}.}
 
 \item{shift_branch}{Should a shift last only to the end of its branch, rather than pass to
-all branches descending from it?}
+all branches descending from it? \code{TRUE} or \code{FALSE}.}
 
 \item{relative}{Multiply the rate before each shift by \code{shift_size} (\code{TRUE}), or set the rate
-after it to \code{sigma2} times \code{shift_size} (\code{FALSE})?}
+after it to \code{sigma2} times \code{shift_size} (\code{FALSE})? \code{TRUE} or \code{FALSE}.}
 
 \item{rate_sd}{Standard deviation of the logarithm of the rate: per square root of time for
-\code{"gbm"} and among branches for \code{"iid"}.}
+\code{"gbm"} and among branches for \code{"iid"}. One finite number, 0 or more.}
 
-\item{root}{Trait value at the root.}
+\item{root}{Trait value at the root. One finite number.}
 
 \item{edge_rates}{Optional rate of each branch, in the order of the rows of \code{tree$edge}, such as
 those of \code{\link[=history_rates]{history_rates()}}. When given, \code{model} and its arguments are ignored.}

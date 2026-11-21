@@ -24,8 +24,8 @@ the environment, one value or one per species. For several traits (see the secti
 Several traits), a covariance matrix with one row and column per trait, or a list with
 one per species, such as from \code{\link[=genetic_matrices]{genetic_matrices()}}.}
 
-\item{ne_ratio}{Ratio of effective to census population size \eqn{\nu}{nu}; \code{Inf} turns drift
-off.}
+\item{ne_ratio}{Ratio of effective to census population size \eqn{\nu}{nu}: one number
+greater than 0; \code{Inf} turns drift off.}
 
 \item{plasticity}{Slope of the reaction norm b, one value or one per species: 0 for a fixed
 phenotype, 1 for a phenotype that tracks the environment fully around \eqn{E_0}{E0}. For
@@ -36,18 +36,19 @@ response of each trait is to its own axis.}
 value or one per species; for several traits, a covariance matrix (or one per species),
 which need not be proportional to \code{genetic_var}.}
 
-\item{steps_per_generation}{Time steps per generation \eqn{g}{g}; selection and drift per
-step are divided by it (at least 1); dispersal and demography are per step.}
+\item{steps_per_generation}{Time steps per generation \eqn{g}{g}: one number, 1 or more;
+selection and drift per step are divided by it; dispersal and demography are per step.}
 
 \item{founder}{Should populations founded at a step start from the sampled mean of their
-founders (\code{TRUE}) or from the mean of their source (\code{FALSE})?}
+founders (\code{TRUE}) or from the mean of their source (\code{FALSE})? \code{TRUE} or \code{FALSE}.}
 
 \item{env, traits}{The environment of each site (a vector, or a function of the step that
 returns one) and the traits of the species (from \code{\link[=species_traits]{species_traits()}}). Filled in by
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}; needed only with \code{\link[=mc_dynamics]{mc_dynamics()}}.}
 
 \item{immigrant_selection}{Should immigrants face viability selection in the site they reach
-before they mix with residents? With \code{FALSE} (the default), the immigrants from all sources
+before they mix with residents? \code{TRUE} or \code{FALSE}. With \code{FALSE} (the default), the immigrants
+from all sources
 join the population and the mean of the merged population is selected. With \code{TRUE}, the
 immigrants from each source arrive in proportion to the mean fitness of their source
 phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
@@ -70,18 +71,19 @@ variances of residents and immigrants by their numbers. The variance between the
 residents and immigrants (or of sources) is not added, as if selection removed it, since
 selection does not otherwise act on the variance; without this choice, gene flow between
 diverged populations inflates the variance without bound. \code{genetic_var} is then the
-variance of the populations at the start and of seeds. Needs a finite \code{ne_ratio}; one trait only.}
+variance of the populations at the start and of seeds. Needs a finite \code{ne_ratio}; one trait
+only.}
 
 \item{variance_selection}{With \code{mutation_var}, should stabilising selection also remove
-genetic variance? With \code{TRUE}, each generation loses \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 /
-(sigma^2 + G + VE)}, the reduction of the genetic variance by Gaussian selection of width
-\eqn{\sigma}{sigma} on a phenotype of variance \eqn{G + V_E}{G + VE} (Bulmer 1971). Under
-sexual reproduction most of this reduction is linkage disequilibrium, which recombination
-restores, so the full loss holds for clonal inheritance, as in the model of Urban & De
-Meester (2009); with mutation, the variance then settles near the balance between
-mutation and selection (Lande 1975; Turelli 1984) rather than at \eqn{2 N_e V_m}{2 Ne Vm},
-and standing variation is eroded instead of carrying a load. \code{FALSE} (the default) keeps
-the mutation-drift dynamics alone.}
+genetic variance? \code{TRUE} or \code{FALSE}. With \code{TRUE}, each generation loses
+\eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 / (sigma^2 + G + VE)}, the reduction of the genetic
+variance by Gaussian selection of width \eqn{\sigma}{sigma} on a phenotype of variance
+\eqn{G + V_E}{G + VE} (Bulmer 1971). Under sexual reproduction most of this reduction is
+linkage disequilibrium, which recombination restores, so the full loss holds for clonal
+inheritance, as in the model of Urban & De Meester (2009); with mutation, the variance
+then settles near the balance between mutation and selection (Lande 1975; Turelli 1984)
+rather than at \eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of
+carrying a load. \code{FALSE} (the default) keeps the mutation-drift dynamics alone.}
 }
 \value{
 An \code{mc_evolution} object, to pass as \code{evolution}.
@@ -171,8 +173,8 @@ growth, changes only through its genetic covariance with the selected traits and
 drift, the correlated response of Lande (1979). Founders draw their means from
 \eqn{N(\bar z_{in}, G / k)}{N(zbar_in, G / k)} plus the variance among their sources trait by
 trait. The environment can change on every axis (\code{env_time} as a list of matrices), and
-\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} takes several traits in the same way. With \eqn{G = 0}{G = 0} the
-abundances are those without evolution for the same seed.
+\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} takes several traits in the same way. With \eqn{G = 0}{G = 0}
+the abundances are those without evolution for the same seed.
 
 A list of \code{traits} from \code{\link[=niche_correlation]{niche_correlation()}} adds a correlation \eqn{R}{R} between the
 axes of the niche of each species: \eqn{\Omega = D R D}{Omega = D R D}, with \eqn{D}{D} the

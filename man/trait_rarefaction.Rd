@@ -24,17 +24,19 @@ trait_rarefaction(
 vector. The default gives the mean over sites of the three T-statistics of \code{\link[=tstats]{tstats()}} for
 the column \code{trait}.}
 
-\item{n}{Numbers of individuals per population; the default runs from 2 to the median size
-of the populations. With \code{cover}, a single number of individuals per population, or
-\code{NULL} (the default) to keep all of them.}
+\item{n}{Numbers of individuals per population (whole numbers, 1 or more); the default runs
+from 2 to the median size of the populations. With \code{cover}, one whole number of
+individuals per population, or \code{NULL} (the default) to keep all of them.}
 
-\item{cover}{Shares (0 to 1) of abundance covered by the species measured, for a rarefaction
-over species instead of individuals; \code{NULL} (the default) for a rarefaction over \code{n}.}
+\item{cover}{Shares (numbers greater than 0 and up to 1) of abundance covered by the species
+measured, for a rarefaction over species instead of individuals; \code{NULL} (the default) for a
+rarefaction over \code{n}.}
 
-\item{reps}{Number of subsamples for each level of effort. With \code{cover} and no \code{n} the
-subsamples are all equal, and a single one is computed.}
+\item{reps}{Number of subsamples for each level of effort (one whole number, 1 or more). With
+\code{cover} and no \code{n} the subsamples are all equal, and a single one is computed.}
 
-\item{level}{Coverage of the interval of the statistic over subsamples.}
+\item{level}{Coverage of the interval of the statistic over subsamples. One number between 0
+and 1, both excluded.}
 
 \item{min_n, site, species}{Passed to \code{\link[=subsample_individuals]{subsample_individuals()}}. With \code{min_n = 2} (the
 default) populations of one individual are left out, as in \code{\link[=tstats]{tstats()}} analyses.}

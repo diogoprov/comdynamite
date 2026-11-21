@@ -23,19 +23,22 @@ balanced tree with 32 species.}
 with one gradient per element, such as \code{\link[=logistic_gradients]{logistic_gradients()}}. Gradients are
 centred.}
 
-\item{intercept_mean, intercept_sd}{Mean and standard deviation of \code{a}. Appendix C does
+\item{intercept_mean, intercept_sd}{Mean and standard deviation of \code{a}, each one finite
+number (the standard deviation 0 or more). Appendix C does
 not give these values, and the defaults are those of the code of Ives & Helmus (2011).}
 
-\item{slope_sd}{Standard deviation of the slopes \code{b} among the species of the tree, as in
+\item{slope_sd}{Standard deviation of the slopes \code{b} among the species of the tree, one
+finite number, 0 or more, as in
 the code of Ives & Helmus (2011). Appendix C does not give this value. The slopes are
 rescaled to this sample standard deviation in each simulation, so with \code{lambda > 0} the
 variance of the Brownian process behind them is larger than \code{slope_sd^2}; a model that
 estimates that variance, such as a phylogenetic GLMM, should be compared with it and not
 with \code{slope_sd^2} (see \code{data-raw/validation_pglmm.R}).}
 
-\item{lambda}{Pagel's lambda of the slopes.}
+\item{lambda}{Pagel's lambda of the slopes, one number between 0 and 1.}
 
-\item{reduction}{Range of the uniform distribution of the site reduction.}
+\item{reduction}{Range of the uniform distribution of the site reduction, two increasing
+numbers between 0 and 1.}
 
 \item{draw}{Distribution of the value compared with each probability.}
 }

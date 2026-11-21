@@ -31,11 +31,12 @@ sample_individuals(
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}).}
 
 \item{n}{Number of individuals measured in each population, or all of them when the
-population is smaller. Ignored when \code{fraction} is given.}
+population is smaller. One whole number, 1 or more, or \code{Inf} for all individuals.
+Ignored when \code{fraction} is given.}
 
 \item{fraction}{Optional probability that each individual is measured, so that the number
 measured in a population is Binomial(abundance, \code{fraction}), proportional to abundance on
-average.}
+average. One number greater than 0 and up to 1, or \code{NULL}.}
 
 \item{local_adaptation}{Fraction (0 to 1) of the gap between the optimum of the species and
 the environment of the site that each population closes; one value or one per species
@@ -49,32 +50,34 @@ population; one value or one per species.}
 
 \item{displacement}{Strength of character displacement among the populations of a site
 (\code{c} in Details), relative to the selection that keeps each population near its mean
-without competitors; 0 (the default) for none.}
+without competitors; 0 (the default) for none. One finite number, 0 or more.}
 
 \item{displacement_width}{Width \code{w} of the Gaussian competition kernel of character
-displacement, in units of the trait. The default is the mean niche breadth (\code{sigma}) of
-the species.}
+displacement, in units of the trait: one number greater than 0 (\code{Inf} allowed). The
+default, \code{NULL}, is the mean niche breadth (\code{sigma}) of the species.}
 
-\item{step}{Recorded step to sample, as in \code{record_steps}; \code{NULL} (the default) uses the
-abundances at the last step. Several steps simulate collections on several dates: each
-date is sampled on its own (new individuals, drawn from the populations then), and the
-result gets a column \code{step}. The deviations of each population from \code{population_sd} (and
-\code{founder_sd}) are kept across dates, so populations change between dates only through
-the simulation. For evolving metacommunities, the records keep only the lineages extant at
-the end, so an earlier date misses species that died out later.}
+\item{step}{Recorded step to sample (one or more numbers), as in \code{record_steps}; \code{NULL} (the
+default) uses the abundances at the last step. Several steps simulate collections on several
+dates: each date is sampled on its own (new individuals, drawn from the populations then), and
+the result gets a column \code{step}. The deviations of each population from \code{population_sd} (and
+\code{founder_sd}) are kept across dates, so populations change between dates only through the
+simulation. For evolving metacommunities, the records keep only the lineages extant at the end,
+so an earlier date misses species that died out later.}
 
 \item{env}{Optional environment of each site at the sampled step, or, with several steps, a
 matrix with one column per step (a vector is used for every date). The default is the
 environment of the landscape for every date; give it for simulations with \code{env_time}. With \code{source = "evolution"} the environment comes from the
 simulation.}
 
-\item{cover}{Optional share (0 to 1) of the abundance of each site covered by the species
-measured: species are taken from the most abundant down until they reach \code{cover}, and the
-rest are not measured, as in field protocols that measure the species making up 80\% of the
+\item{cover}{Optional share of the abundance of each site covered by the species measured
+(one number greater than 0 and up to 1, or \code{NULL}): species are taken from the most
+abundant down until they reach \code{cover}, and the rest are not measured, as in field
+protocols that measure the species making up 80\% of the
 abundance (Pakeman & Quested 2007). \code{NULL} (the default) measures every species.}
 
 \item{min_n}{Populations with fewer individuals measured than \code{min_n} are left out, as when
-populations with a single individual are removed before computing T-statistics.}
+populations with a single individual are removed before computing T-statistics. One whole
+number, 1 or more.}
 
 \item{founder_sd}{Standard deviation of the founder deviation of a population founded by a
 single individual (\eqn{s_f}{s_f} in the section Founder effects and monopolization); the
@@ -115,12 +118,13 @@ same session, such as a difference between measurers or calibrations; it is adde
 \code{trait}, not to \code{population_mean}. 0 (the default) for none. What a session is depends on
 \code{session}. With a single step and \code{session = "step"}, there is one session, so the error
 is a constant added to every individual, which vanishes from any statistic centred on
-means (deviations from population means, variance components) and has no effect on them.}
+means (deviations from population means, variance components) and has no effect on them.
+One finite number, 0 or more.}
 
 \item{visits}{Number of visits to each site at each sampled step. Each visit samples its own
 individuals (\code{n} or \code{fraction} per population and visit) from the same populations, whose
 means do not change between visits of the same step, and the result gets a column
-\code{visit}. 1 (the default) for one.}
+\code{visit}. 1 (the default) for one. One whole number, 1 or more.}
 
 \item{session}{What shares the error of \code{session_sd}: \code{"step"} (the default), all the
 individuals of a date, at every site; or \code{"visit"}, the individuals of one visit to one

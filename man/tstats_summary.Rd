@@ -14,7 +14,8 @@ tstats_summary(x, level = 0.95)
 \eqn{\alpha = 1 - \mathrm{level}}{alpha = 1 - level}. A site can deviate only if
 \eqn{1 / (1 + \mathrm{n_perm}) < \alpha / 2}{1 / (1 + n_perm) < alpha / 2}, so \code{n_perm}
 must be at least \eqn{2 / \alpha}{2 / alpha}; a warning is given otherwise. Before 0.7.0
-\code{level} was the size (0.05); values below 0.5 are still read that way, with a warning.}
+\code{level} was the size (0.05); values below 0.5 are still read that way, with a warning.
+One number between 0 and 1, both excluded.}
 }
 \value{
 A list with two data frames. \code{traits} has one row per trait and statistic, with the

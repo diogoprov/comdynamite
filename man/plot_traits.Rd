@@ -33,13 +33,13 @@ of the edges (from \code{\link[=paint_regimes]{paint_regimes()}}) or a tree with
 \item{colours}{Colours of the regimes, named by regime or in the order of the sorted
 regimes; one colour when there are no regimes.}
 
-\item{tip_labels}{Should the tips be labelled?}
+\item{tip_labels}{\code{TRUE} or \code{FALSE}. Should the tips be labelled?}
 
-\item{legend}{Draw the legend of the regimes?}
+\item{legend}{\code{TRUE} or \code{FALSE}. Draw the legend of the regimes?}
 
-\item{point_size}{Size of the tips.}
+\item{point_size}{Size of the tips. One number greater than 0.}
 
-\item{linewidth}{Width of the branches.}
+\item{linewidth}{Width of the branches. One number greater than 0.}
 
 \item{labels, ...}{Deprecated: \code{labels} is now \code{tip_labels}; graphical arguments of base
 graphics are no longer used (modify the ggplot object instead).}

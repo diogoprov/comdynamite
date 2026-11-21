@@ -17,19 +17,21 @@ trait_gradient_test(
 \arguments{
 \item{x}{Result of \code{\link[=trait_gradient]{trait_gradient()}}.}
 
-\item{n_null}{Number of null communities.}
+\item{n_null}{Number of null communities. One whole number, 1 or more.}
 
 \item{null}{\code{"species"} (the default), \code{"phylo"}, \code{"bm"}, \code{"curveball"} or \code{"permute"}.}
 
 \item{burn_in, thin}{Trades of the curveball chain before the first null community and
 between null communities; by default 50 and 5 times the number of sites, so that each site
-takes part in about 10 trades between null communities.}
+takes part in about 10 trades between null communities. Each one whole number (0 or more
+for \code{burn_in}, 1 or more for \code{thin}) or \code{NULL}.}
 
 \item{tree}{Phylogeny (\code{phylo}) with branch lengths, for \code{null = "phylo"} and \code{"bm"}; every
 species of \code{x} must be a tip.}
 
 \item{phylo_k}{The constant \eqn{k \ge 1} of the phylogenetic permutations of
-\code{null = "phylo"}: closer to 1, more exchanges among relatives only.}
+\code{null = "phylo"}: closer to 1, more exchanges among relatives only. One finite number, 1
+or more.}
 }
 \value{
 An object of class \code{mc_trait_gradient_test}, a list with \code{statistics} (one row per

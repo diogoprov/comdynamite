@@ -47,8 +47,8 @@
 #' @inheritParams damocles_fit
 #' @param regimes,edge_covariate A list of configurations, each a vector with one value per edge
 #'   of `tree` in the order of `tree$edge` (see [damocles_fit()]). Give one of the two.
-#' @param cores Number of cores, with configurations fitted in parallel. Not available on
-#'   Windows, where one core is used.
+#' @param cores Number of cores, with configurations fitted in parallel. One whole number, 1 or
+#'   more. Not available on Windows, where one core is used.
 #' @return A list of class `mc_damocles_samples` with `samples`, a data frame with one row per
 #'   configuration (`n_par`, `loglik`, `delta_aic` against constant rates, and the
 #'   likelihood-ratio `statistic`, `df` and `p_value`), `constant`, the fit with constant rates,
@@ -82,6 +82,7 @@ damocles_samples <- function(comm, tree, regimes = NULL, edge_covariate = NULL,
                              root = c("both", "absent", "present"), sympatry = 0, cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
+  check_count(cores, "cores")
   if (is.null(regimes) == is.null(edge_covariate)) {
     stop("give a list of `regimes` or a list of `edge_covariate`", call. = FALSE)
   }
@@ -201,10 +202,11 @@ print.summary.mc_damocles_samples <- function(x, ...) {
 #'
 #' @param tree A rooted `phylo` tree.
 #' @param regimes Regime of each edge, in the order of `tree$edge`.
-#' @param tolerance Largest ratio between the sizes of a clade and its random replacement.
+#' @param tolerance Largest ratio between the sizes of a clade and its random replacement. One
+#'   number, 1 or more.
 #' @param max_overlap Largest Jaccard index between the edges of a clade and those of its
 #'   random replacement, and largest adjusted Rand index between `regimes` and the random
-#'   partition, between 0 and 1.
+#'   partition. One number between 0 and 1.
 #' @return A factor with one regime per edge, with the levels of `regimes`.
 #' @seealso [damocles_partition_test()], [clade_regimes()].
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -215,19 +217,14 @@ print.summary.mc_damocles_samples <- function(x, ...) {
 #' table(random_regimes(tr, reg))
 #' @export
 random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
-  if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
+  check_tree(tree, branch_lengths = FALSE)
   n_edge <- nrow(tree$edge)
   if (length(regimes) != n_edge || anyNA(regimes)) {
     stop("`regimes` needs one regime for each edge of `tree`, in the order of `tree$edge`, ",
          "with no missing values", call. = FALSE)
   }
-  if (length(tolerance) != 1 || !is.finite(tolerance) || tolerance < 1) {
-    stop("`tolerance` must be one number, 1 or more", call. = FALSE)
-  }
-  if (length(max_overlap) != 1 || !is.finite(max_overlap) || max_overlap < 0 ||
-      max_overlap > 1) {
-    stop("`max_overlap` must be one number between 0 and 1", call. = FALSE)
-  }
+  check_number(tolerance, "tolerance", lower = 1)
+  check_number(max_overlap, "max_overlap", 0, 1)
   regimes <- droplevels(factor(regimes))
   labels <- as.character(regimes)
   parent_edge <- match(tree$edge[, 1], tree$edge[, 2])
@@ -342,18 +339,19 @@ adjusted_rand <- function(a, b) {
 #' @inheritParams damocles_fit
 #' @param regimes Regime of each edge of `tree`, in the order of `tree$edge`, with two or more
 #'   regimes.
-#' @param n_rand Number of random partitions drawn; each distinct one is fitted once. 0 skips
-#'   the test against random partitions.
-#' @param n_boot Number of parametric bootstrap simulations under the constant rates estimated
-#'   (0, the default, skips the bootstrap).
+#' @param n_rand Number of random partitions drawn; each distinct one is fitted once. One whole
+#'   number, 0 or more; 0 skips the test against random partitions.
+#' @param n_boot Number of parametric bootstrap simulations under the constant rates estimated.
+#'   One whole number, 0 or more; 0, the default, skips the bootstrap.
 #' @param tolerance,max_overlap Passed to [random_regimes()]: random clades hold between
 #'   `1 / tolerance` and `tolerance` times as many edges as the clades of `regimes`, share
 #'   at most `max_overlap` of their edges with them (Jaccard index), and the whole random
-#'   partition agrees with `regimes` at most as much (adjusted Rand index).
+#'   partition agrees with `regimes` at most as much (adjusted Rand index). `tolerance` is one
+#'   number, 1 or more; `max_overlap` one number between 0 and 1.
 #' @param cores Number of cores, with random partitions and bootstrap simulations fitted in
-#'   parallel. Not available on
-#'   Windows, where one core is used. The random partitions and the simulated communities are
-#'   drawn before the fits, so the p-values do not depend on the number of cores.
+#'   parallel. One whole number, 1 or more. Not available on Windows, where one core is used.
+#'   The random partitions and the simulated communities are drawn before the fits, so the
+#'   p-values do not depend on the number of cores.
 #' @return A list of class `mc_damocles_partition` with the observed `statistic`, its degrees
 #'   of freedom `df`, the chi-squared p-value `p_chisq`, the p-value against random partitions
 #'   `p_random` (`NA` when no random partition could be drawn), the statistics of the distinct
@@ -380,12 +378,15 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0
                                     tolerance = 2, max_overlap = 0.25, cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
-  whole <- function(x) length(x) == 1 && is.finite(x) && x >= 0 && x == round(x)
-  if (!whole(n_rand)) stop("`n_rand` must be one whole number, 0 or more", call. = FALSE)
-  if (!whole(n_boot)) stop("`n_boot` must be one whole number, 0 or more", call. = FALSE)
+  check_count(n_rand, "n_rand", min = 0)
+  check_count(n_boot, "n_boot", min = 0)
   if (n_rand + n_boot == 0) {
     stop("`n_rand` or `n_boot` must be 1 or more", call. = FALSE)
   }
+  # random_regimes() runs inside tryCatch() below, so its arguments are checked here
+  check_number(tolerance, "tolerance", lower = 1)
+  check_number(max_overlap, "max_overlap", 0, 1)
+  check_count(cores, "cores")
   check_damocles_tree(tree)
   if (nlevels(droplevels(factor(regimes))) < 2) {
     stop("`regimes` needs two or more regimes", call. = FALSE)
@@ -505,9 +506,7 @@ damocles_subtree_edges <- function(tree) {
 }
 
 damocles_apply <- function(x, f, cores) {
-  if (length(cores) != 1 || !is.finite(cores) || cores < 1) {
-    stop("`cores` must be one whole number, 1 or more", call. = FALSE)
-  }
+  check_count(cores, "cores")
   workers <- if (.Platform$OS.type == "windows") 1L else as.integer(cores)
   if (workers > 1) parallel::mclapply(x, f, mc.cores = workers) else lapply(x, f)
 }

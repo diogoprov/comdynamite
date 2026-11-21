@@ -20,20 +20,24 @@ trait_gradient(
 \item{data}{Data frame with one row per individual or per population (species in a site),
 such as from \code{\link[=sample_individuals]{sample_individuals()}}. Rows of one population are averaged.}
 
-\item{trait}{Name of the column with trait values.}
+\item{trait}{Name of the column with trait values (finite or missing). One character string.}
 
-\item{site, species}{Names of the columns with the site and the species.}
+\item{site, species}{Names of the columns with the site and the species. Each one character
+string.}
 
 \item{abundance}{Name of the column with the abundance of the species in the site (one value
-per population), or \code{NULL} to weight each occurrence equally.}
+per population), or \code{NULL} to weight each occurrence equally. One character string or
+\code{NULL}.}
 
 \item{site_weights, species_weights}{\code{"abundance"} or \code{"occurrence"}: weights of the site
 means and of the species means and \eqn{\beta}. Both default to \code{"abundance"} when
 \code{abundance} is given.}
 
-\item{leave_one_out}{Leave the focal species out of the site means (the default).}
+\item{leave_one_out}{\code{TRUE} or \code{FALSE}. Leave the focal species out of the site means (the
+default).}
 
-\item{min_slope}{Smallest number of sites with measured values to fit the slope \eqn{b_i}.}
+\item{min_slope}{Smallest number of sites with measured values to fit the slope \eqn{b_i}.
+One whole number, 2 or more.}
 }
 \value{
 An object of class \code{mc_trait_gradient}, a list with

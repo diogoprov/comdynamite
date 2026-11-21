@@ -133,19 +133,24 @@
 #' @param individuals Data frame with one row per individual, such as from
 #'   [sample_individuals()].
 #' @param trait,site,species Names of the columns with the trait value, the site and the
-#'   species.
-#' @param env Names of one or more columns with the environment of the site.
-#' @param abundance Name of the column with the abundance of the population; not used with
-#'   `community`.
-#' @param width Width `w` of the competition kernel; `NULL` (the default) chooses it from the
+#'   species. One character string each.
+#' @param env Names of one or more columns with the environment of the site (a character
+#'   vector without repeats).
+#' @param abundance Name of the column with the abundance of the population (one character
+#'   string); not used with `community`, and may then be `NULL`.
+#' @param width Width `w` of the competition kernel (one or more finite numbers greater than 0);
+#'   `NULL` (the default) chooses it from the
 #'   grid described in the section on the width. `c` is estimated at that width, and the two
 #'   trade off when data are few.
-#' @param species_slopes Give each species its own slope on each environmental variable.
+#' @param species_slopes Give each species its own slope on each environmental variable? `TRUE`
+#'   or `FALSE`.
 #' @param community Optional matrix or data frame of abundances, sites in rows and species in
 #'   columns, so that species present but not measured also push (see the section on
 #'   competitors).
-#' @param nboot Number of parametric bootstrap simulations (0, the default, for none).
-#' @param level Confidence level of the bootstrap intervals.
+#' @param nboot Number of parametric bootstrap simulations (0, the default, for none). One whole
+#'   number, 0 or more.
+#' @param level Confidence level of the bootstrap intervals. One number between 0 and 1, both
+#'   excluded.
 #' @return An object of class `population_shifts`: a data frame with one row and the columns
 #'   `local_adaptation` (`h`; with several variables, `local_adaptation_<variable>`),
 #'   `displacement` (`c`), `width` (`w`), `r_squared` (of the fit within species),
@@ -176,20 +181,24 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
                               env = "env", abundance = "abundance", width = NULL,
                               species_slopes = FALSE, community = NULL, nboot = 0,
                               level = 0.95) {
-  stopifnot(is.data.frame(individuals), is.character(env), length(env) >= 1,
-            !anyDuplicated(env), is.logical(species_slopes), length(species_slopes) == 1,
-            !is.na(species_slopes), is.numeric(nboot), length(nboot) == 1, nboot >= 0,
-            nboot == round(nboot), is.numeric(level), length(level) == 1, level > 0,
-            level < 1)
-  if (!is.null(width)) stopifnot(is.numeric(width), length(width) >= 1, all(width > 0))
+  check_string(trait, "trait")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_column_names(env, "env")
+  if (anyDuplicated(env)) stop("`env` has repeated names", call. = FALSE)
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_flag(species_slopes, "species_slopes")
+  check_count(nboot, "nboot", min = 0)
+  check_number(level, "level", 0, 1, open = TRUE)
+  if (!is.null(width) && (!is.numeric(width) || length(width) == 0 ||
+                            !all(is.finite(width)) || any(width <= 0))) {
+    stop("`width` must be one or more finite numbers greater than 0, or NULL", call. = FALSE)
+  }
   if (is.null(community) && is.null(abundance)) {
     stop("give the `abundance` column or a `community` matrix", call. = FALSE)
   }
   columns <- c(trait, site, species, env, if (is.null(community)) abundance)
-  missing_columns <- setdiff(columns, names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
+  check_data_columns(individuals, columns)
   d <- individuals[stats::complete.cases(individuals[columns]), columns]
   env_cols <- paste0(".env", seq_along(env))
   names(d) <- c("trait", "site", "species", env_cols, if (is.null(community)) "abundance")

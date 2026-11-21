@@ -7,7 +7,8 @@
 fold_summarise(folds, summarise = function(x, shared) summary_stats(x))
 }
 \arguments{
-\item{folds}{Integer vector with the fold of each site, as from \code{\link[=spatial_folds]{spatial_folds()}}.}
+\item{folds}{Integer vector with the fold of each site, as from \code{\link[=spatial_folds]{spatial_folds()}}. One whole
+number per site, with at least two different folds.}
 
 \item{summarise}{Function of an \code{\link[=mc_data]{mc_data()}} object and \code{shared} that gives a named numeric
 vector. The default is \code{\link[=summary_stats]{summary_stats()}}.}

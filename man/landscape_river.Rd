@@ -25,14 +25,17 @@ the distance from the outlet along the channel rescaled to \code{env_range}, a g
 the lowlands to the headwaters.}
 
 \item{scale_down, scale_up}{Scales of the kernel for the distance travelled downstream and
-upstream, in the units of \code{length}.}
+upstream, in the units of \code{length}: each one number greater than 0, or \code{Inf} for no cost
+of travel in that direction.}
 
 \item{overland}{Share of emigrants that move in a straight line rather than along the
-channel (between 0 and 1).}
+channel: one number between 0 and 1.}
 
-\item{overland_scale}{Scale of the exponential kernel of straight-line dispersal.}
+\item{overland_scale}{Scale of the exponential kernel of straight-line dispersal: one number
+greater than 0.}
 
-\item{env_range}{Range of the environment when \code{env} is \code{NULL}.}
+\item{env_range}{Range of the environment when \code{env} is \code{NULL}: two finite numbers, the
+first smaller.}
 }
 \value{
 An \code{mc_landscape} object, as from \code{\link[=landscape_matrix]{landscape_matrix()}}, whose \code{dist} holds the

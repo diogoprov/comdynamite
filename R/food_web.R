@@ -28,6 +28,10 @@
 #'   constants are `eps_R` and `eps_N`, `eta_N` and `eta_P`, `kappa_R` and `kappa_P`. Traits
 #'   must then be positive.
 #'
+#' Every parameter is one finite number. The widths and half-saturation constants must be
+#' greater than 0, the optima (`zc_R`, `zf_N`, `zx_P`) and steepnesses (`alpha`, `rho`, `tau`)
+#' may take any sign, and all the others must be 0 or more.
+#'
 #' @param c0,gamma,zc_R Maximum intrinsic birth rate of the resource, the strength of
 #'   stabilizing selection on it and its optimum.
 #' @param d Density-dependent death rate of the resource.
@@ -153,19 +157,20 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
 #' @param params Parameters from [food_web_params()].
 #' @param attack Form of the attack coefficients: `"gaussian"`, `"logistic"` or
 #'   `"michaelis"`; see [food_web_params()].
-#' @param V Additive genetic variances of the three traits, one number or three; zero means a
-#'   trait that does not evolve.
+#' @param V Additive genetic variances of the three traits, one number or three, each 0 or
+#'   more; zero means a trait that does not evolve.
 #' @param omnivory Does the predator also feed on the resource (intraguild predation, with
-#'   `v0`, `w` and `u` of `params`)?
+#'   `v0`, `w` and `u` of `params`)? `TRUE` or `FALSE`.
 #' @param introductions Optional named numbers: the times at which levels `N` or `P` (or `R`)
 #'   appear, after the first time. Until then they are absent whatever `init` says.
-#' @param dt Step of the integration; the intervals between the times of `times` and of
-#'   `introductions` are divided into steps no longer than this.
-#' @param extinction Abundance below which a level is set to zero; McPeek's code has no such
-#'   threshold, so use 0 to compare with it.
-#' @param trait_floor Lowest value of the mean traits: a trait that falls below it relaxes back
-#'   at rate `trait_floor - z`. `NULL` uses 0 with `attack = "michaelis"`, where traits must be
-#'   positive, and no floor (`-Inf`) otherwise. McPeek's MATLAB code floors every trait at 0.
+#' @param dt Step of the integration, one finite number greater than 0; the intervals between the
+#'   times of `times` and of `introductions` are divided into steps no longer than this.
+#' @param extinction Abundance below which a level is set to zero, one finite number, 0 or more;
+#'   McPeek's code has no such threshold, so use 0 to compare with it.
+#' @param trait_floor Lowest value of the mean traits, one number or `-Inf`: a trait that falls
+#'   below it relaxes back at rate `trait_floor - z`. `NULL` uses 0 with `attack = "michaelis"`,
+#'   where traits must be positive, and no floor (`-Inf`) otherwise. McPeek's MATLAB code floors
+#'   every trait at 0.
 #' @return A data frame of class `food_web` with one row per time in `times` and columns
 #'   `time`; the abundances `R`, `N`, `P`; the mean traits `z_R`, `z_N`, `z_P`; the selection
 #'   gradients `grad_R`, `grad_N`, `grad_P` (\eqn{\partial \ln W / \partial z} at the mean, so

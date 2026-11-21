@@ -27,13 +27,13 @@ plot_trait_partition(
 \item{test}{Permutation test: \code{"max"} for the larger p-value of sites and species,
 \code{"site"} or \code{"species"}.}
 
-\item{level}{Significance level.}
+\item{level}{Significance level. One number between 0 and 1.}
 
 \item{colours}{Colour of significant segments.}
 
 \item{labels}{Names of the two sets of predictors.}
 
-\item{text_size}{Size of the text, in mm.}
+\item{text_size}{Size of the text, in mm. One number greater than 0.}
 
 \item{alpha}{Deprecated, use \code{level}.}
 

@@ -46,10 +46,10 @@
 #'   environment (or `env_axes`) is replaced, with the distances of the landscape.
 #' @param coords Matrix or data frame of coordinates with one row per site. Not needed for a
 #'   landscape.
-#' @param n Number of surrogates.
+#' @param n Number of surrogates, one whole number, 1 or more.
 #' @param method `"variogram"` or `"parametric"`.
-#' @param lonlat Are `coords` longitude and latitude in decimal degrees? Distances are then
-#'   great-circle distances in kilometres.
+#' @param lonlat Are `coords` longitude and latitude in decimal degrees (`TRUE` or `FALSE`)?
+#'   Distances are then great-circle distances in kilometres.
 #' @param strata Optional group of each site, such as the city or the basin where it lies.
 #'   Surrogates are drawn within each group on its own, so values never move between groups,
 #'   which have their own autocorrelation. Each group needs at least 5 sites; a group where
@@ -79,10 +79,15 @@
 env_surrogates <- function(env, coords, n = 99, method = c("variogram", "parametric"),
                            lonlat = FALSE, strata = NULL) {
   method <- match.arg(method)
+  check_count(n, "n")
   if (inherits(env, "mc_landscape")) return(landscape_surrogates(env, n, method))
+  check_flag(lonlat, "lonlat")
   env <- surrogate_env(env)
   coords <- as.matrix(check_coords(coords))
-  stopifnot(nrow(coords) == nrow(env), is.logical(lonlat), length(lonlat) == 1)
+  if (nrow(coords) != nrow(env)) {
+    stop("`coords` has ", nrow(coords), " rows and `env` has ", nrow(env), " sites",
+         call. = FALSE)
+  }
   distances <- function(rows) {
     if (lonlat) great_circle(coords[rows, , drop = FALSE]) else
       as.matrix(stats::dist(coords[rows, , drop = FALSE]))
@@ -102,7 +107,7 @@ env_surrogates <- function(env, coords, n = 99, method = c("variogram", "paramet
   rows <- matrix(seq_len(nrow(env)), n, nrow(env), byrow = TRUE)
   for (g in groups) {
     local <- env[g, , drop = FALSE]
-    if (any(apply(local, 2, stats::var) > 0)) {
+    if (!all(no_variance(local))) {
       draws <- surrogates_from(local, distances(g), n, method)
       for (r in seq_len(n)) out[[r]][g, ] <- draws[[r]]
       if (method == "parametric") rows[, g] <- matrix(g[attr(draws, "rows")], n)
@@ -120,15 +125,16 @@ surrogate_env <- function(env) {
   if (!is.numeric(env) && !is.logical(env)) stop("`env` is not numeric", call. = FALSE)
   env <- env * 1
   if (anyNA(env)) stop("`env` has missing values", call. = FALSE)
-  variable <- apply(env, 2, stats::var) > 0
-  if (!any(variable)) stop("`env` has no variation among sites", call. = FALSE)
+  if (any(is.infinite(env))) stop("`env` has infinite values", call. = FALSE)
+  if (all(no_variance(env))) stop("`env` has no variation among sites", call. = FALSE)
   env
 }
 
 surrogates_from <- function(env, d, n, method) {
-  stopifnot(nrow(d) == nrow(env), n >= 1, n == round(n), nrow(env) >= 5)
+  stopifnot("internal: one row of distances per site of `env`" = nrow(d) == nrow(env))
+  if (nrow(env) < 5) stop("surrogates need at least 5 sites in `env`", call. = FALSE)
   if (any(d[upper.tri(d)] == 0)) stop("two sites share the same coordinates", call. = FALSE)
-  variable <- apply(env, 2, stats::var) > 0
+  variable <- !no_variance(env)
   if (method == "parametric") {
     reference <- if (sum(variable) == 1) env[, variable] else {
       stats::prcomp(env[, variable, drop = FALSE], scale. = TRUE)$x[, 1]

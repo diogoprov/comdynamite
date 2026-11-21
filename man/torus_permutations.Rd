@@ -8,12 +8,14 @@ torus_permutations(side, symmetries = TRUE, n_perm = NULL)
 }
 \arguments{
 \item{side}{Number of cells per side, as in \code{\link[=landscape_grid]{landscape_grid()}}, or two numbers for a
-rectangular grid, the first for the coordinate that runs fastest.}
+rectangular grid, the first for the coordinate that runs fastest: one or two whole
+numbers, 2 or more.}
 
-\item{symmetries}{Combine the translations with the reflections and rotations of the grid?}
+\item{symmetries}{Combine the translations with the reflections and rotations of the grid?
+\code{TRUE} or \code{FALSE}.}
 
-\item{n_perm}{Number of permutations to keep, drawn without replacement. The default keeps
-all of them.}
+\item{n_perm}{Number of permutations to keep, drawn without replacement: one whole number,
+1 or more. The default, \code{NULL}, keeps all of them.}
 }
 \value{
 Integer matrix with one permutation of the site indices per row, excluding the

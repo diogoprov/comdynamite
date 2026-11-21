@@ -31,24 +31,25 @@ food_web_dynamics(
 \item{attack}{Form of the attack coefficients: \code{"gaussian"}, \code{"logistic"} or
 \code{"michaelis"}; see \code{\link[=food_web_params]{food_web_params()}}.}
 
-\item{V}{Additive genetic variances of the three traits, one number or three; zero means a
-trait that does not evolve.}
+\item{V}{Additive genetic variances of the three traits, one number or three, each 0 or
+more; zero means a trait that does not evolve.}
 
 \item{omnivory}{Does the predator also feed on the resource (intraguild predation, with
-\code{v0}, \code{w} and \code{u} of \code{params})?}
+\code{v0}, \code{w} and \code{u} of \code{params})? \code{TRUE} or \code{FALSE}.}
 
 \item{introductions}{Optional named numbers: the times at which levels \code{N} or \code{P} (or \code{R})
 appear, after the first time. Until then they are absent whatever \code{init} says.}
 
-\item{dt}{Step of the integration; the intervals between the times of \code{times} and of
-\code{introductions} are divided into steps no longer than this.}
+\item{dt}{Step of the integration, one finite number greater than 0; the intervals between the
+times of \code{times} and of \code{introductions} are divided into steps no longer than this.}
 
-\item{extinction}{Abundance below which a level is set to zero; McPeek's code has no such
-threshold, so use 0 to compare with it.}
+\item{extinction}{Abundance below which a level is set to zero, one finite number, 0 or more;
+McPeek's code has no such threshold, so use 0 to compare with it.}
 
-\item{trait_floor}{Lowest value of the mean traits: a trait that falls below it relaxes back
-at rate \code{trait_floor - z}. \code{NULL} uses 0 with \code{attack = "michaelis"}, where traits must be
-positive, and no floor (\code{-Inf}) otherwise. McPeek's MATLAB code floors every trait at 0.}
+\item{trait_floor}{Lowest value of the mean traits, one number or \code{-Inf}: a trait that falls
+below it relaxes back at rate \code{trait_floor - z}. \code{NULL} uses 0 with \code{attack = "michaelis"},
+where traits must be positive, and no floor (\code{-Inf}) otherwise. McPeek's MATLAB code floors
+every trait at 0.}
 }
 \value{
 A data frame of class \code{food_web} with one row per time in \code{times} and columns

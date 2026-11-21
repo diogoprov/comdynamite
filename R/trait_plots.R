@@ -10,8 +10,9 @@
 #'
 #' @param x Result of [tstats()] or [community_index()] with `n_perm > 0`.
 #' @param level Coverage of the outer null interval, and `1 - level` the size of the two-sided
-#'   test that defines `deviation`.
-#' @param inner Coverage of the inner null interval.
+#'   test that defines `deviation`. One number between 0 and 1, both excluded.
+#' @param inner Coverage of the inner null interval. One number between 0 and 1, smaller than
+#'   `level`.
 #' @return A data frame with one row per site, trait and statistic (for [community_index()],
 #'   `statistic` is the name of the index) and the columns `observed`, `null_median`, `null_low`,
 #'   `null_high`, `inner_low`, `inner_high`, `ses`, `p_low`, `p_high` and `deviation`
@@ -30,8 +31,9 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
   if (!is.data.frame(x) || is.null(null)) {
     stop("`x` must come from tstats() or community_index() with n_perm > 0", call. = FALSE)
   }
-  stopifnot(is.numeric(level), length(level) == 1, level > 0, level < 1,
-            is.numeric(inner), length(inner) == 1, inner > 0, inner < level)
+  check_number(level, "level", 0, 1, open = TRUE)
+  check_number(inner, "inner", 0, 1, open = TRUE)
+  if (inner >= level) stop("`inner` must be smaller than `level`", call. = FALSE)
   parts <- if (length(dim(null)) == 3) {
     lapply(dimnames(null)[[3]], function(stat) {
       list(statistic = stat, obs = x[[stat]], sims = matrix(null[, , stat], dim(null)[1]))
@@ -84,7 +86,8 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' @param x Result of [tstats()] or [community_index()] with `n_perm > 0`.
 #' @param type `"intervals"` or `"ses"`.
 #' @param level,inner Coverage of the outer and inner null intervals; `1 - level` is also the
-#'   size of the two-sided test (as in [tstats_summary()]).
+#'   size of the two-sided test (as in [tstats_summary()]). One number between 0 and 1 each,
+#'   `inner` smaller than `level`.
 #' @param statistics,traits,sites Subsets to draw; `NULL` (the default) draws all.
 #' @param order Order of the sites within each panel's axis: `"data"` (as in `x`), `"ses"` (by
 #'   the mean standardised effect size over the panels drawn) or `"observed"` (by the mean
@@ -92,12 +95,13 @@ null_intervals <- function(x, level = 0.95, inner = 0.5) {
 #' @param colours Three colours for sites below the null, within it and above it. The defaults
 #'   are blue, grey and vermillion of the Okabe-Ito palette.
 #' @param point_size,interval_width Size of the observed points and width of the thick inner
-#'   interval.
+#'   interval. One number greater than 0 each.
 #' @param hatch Hatch the area expected by chance; with `FALSE` it is drawn as a thin line
-#'   (`"intervals"`) or a grey band (`"ses"`).
-#' @param hatch_density Number of hatching lines across the width of a panel.
+#'   (`"intervals"`) or a grey band (`"ses"`). `TRUE` or `FALSE`.
+#' @param hatch_density Number of hatching lines across the width of a panel. One number
+#'   greater than 0.
 #' @param scales Passed to [ggplot2::facet_grid()]; `"free_x"` (the default) lets each
-#'   statistic keep its own range.
+#'   statistic keep its own range. One character string.
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @seealso [null_intervals()], [tstats_summary()], [plot.trait_flex()].
@@ -125,6 +129,11 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
   type <- match.arg(type)
   order <- match.arg(order)
   check_colours(colours, 3)
+  check_number(point_size, "point_size", lower = 0, open = TRUE)
+  check_number(interval_width, "interval_width", lower = 0, open = TRUE)
+  check_flag(hatch, "hatch")
+  check_number(hatch_density, "hatch_density", lower = 0, open = TRUE)
+  check_string(scales, "scales")
   d <- null_intervals(x, level, inner)
   for (arg in c("statistics", "traits", "sites")) {
     keep <- get(arg)
@@ -151,8 +160,6 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
   d$result <- factor(labels[ifelse(is.na(d$deviation), "none", d$deviation)], labels)
   d$tested <- !is.na(d$deviation)
   fill <- stats::setNames(colours, labels)
-  stopifnot(is.logical(hatch), length(hatch) == 1, !is.na(hatch),
-            is.numeric(hatch_density), length(hatch_density) == 1, hatch_density > 0)
   .data <- ggplot2::.data
   band <- stats::qnorm(1 - (1 - level) / 2)
   # spacing of the hatching lines: a fixed fraction of the range of each statistic (facet column)
@@ -284,13 +291,14 @@ hatch_lines <- function(rects, spacing) {
 #' above 0.7 over at least ten populations).
 #'
 #' @param individuals Data frame with one row per individual.
-#' @param trait Name of the column with the trait.
-#' @param site,species Names of the columns with the site and the species.
+#' @param trait Name of the column with the trait. One character string.
+#' @param site,species Names of the columns with the site and the species. One character
+#'   string each.
 #' @param abundance Name of a column with the abundance of each population (the same value
 #'   for all its individuals), or `NULL` to weight populations by the number of individuals
-#'   measured.
-#' @param bw Bandwidth of the kernel, or `NULL` for the rule above.
-#' @param n Number of points of the grid of trait values.
+#'   measured. One character string or `NULL`.
+#' @param bw Bandwidth of the kernel (one number greater than 0), or `NULL` for the rule above.
+#' @param n Number of points of the grid of trait values. One whole number, 2 or more.
 #' @return A data frame with the columns `site`, `species` (`NA` for communities), `level`
 #'   (`"population"` or `"community"`), `weight` (relative abundance of the population in the
 #'   site, 1 for communities), `trait` (grid value) and `density`. The bandwidth is in the
@@ -315,14 +323,15 @@ hatch_lines <- function(rects, spacing) {
 #' @export
 trait_densities <- function(individuals, trait = "trait", site = "site", species = "species",
                             abundance = NULL, bw = NULL, n = 512) {
-  stopifnot(is.data.frame(individuals), is.character(trait), length(trait) == 1,
-            length(n) == 1, n >= 2)
-  missing_columns <- setdiff(c(trait, site, species, abundance), names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
+  check_string(trait, "trait")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_number(bw, "bw", lower = 0, open = TRUE, null_ok = TRUE)
+  check_count(n, "n", min = 2)
+  check_data_columns(individuals, c(trait, site, species, abundance))
   z <- individuals[[trait]]
-  if (!is.numeric(z)) stop("trait `", trait, "` must be numeric", call. = FALSE)
+  check_numeric_traits(z, trait)
   keep <- !is.na(z)
   z <- z[keep]
   site_id <- as.character(individuals[[site]])[keep]
@@ -335,9 +344,7 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
     size
   } else {
     a <- individuals[[abundance]][keep]
-    if (anyNA(a) || any(tapply(a, pop, function(v) length(unique(v))) > 1)) {
-      stop("`abundance` must have one value, not missing, for each population", call. = FALSE)
-    }
+    check_population_abundance(a, pop)
     as.numeric(a[first])
   }
   pop_site <- site_id[first]
@@ -362,7 +369,6 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
     bw <- 0.9 * spread * mean(size)^(-1 / 5)
     check_spread_scale(z, pop)
   }
-  stopifnot(is.numeric(bw), length(bw) == 1, bw > 0)
   grid <- seq(min(z) - 3 * bw, max(z) + 3 * bw, length.out = n)
   densities <- vapply(split(z, factor(pop, pop_levels)), function(v) {
     rowMeans(matrix(stats::dnorm(grid, rep(v, each = n), bw), n))
@@ -424,10 +430,12 @@ check_spread_scale <- function(z, pop) {
 #'
 #' @inheritParams trait_densities
 #' @param sites Sites to draw; `NULL` (the default) draws all.
-#' @param weighted Scale the population densities by their relative abundances.
-#' @param community Draw the density of the community.
-#' @param rug Draw the individuals as a rug.
-#' @param alpha Transparency of the population densities (0, transparent, to 1, opaque).
+#' @param weighted Scale the population densities by their relative abundances? `TRUE` or
+#'   `FALSE`.
+#' @param community Draw the density of the community? `TRUE` or `FALSE`.
+#' @param rug Draw the individuals as a rug? `TRUE` or `FALSE`.
+#' @param alpha Transparency of the population densities: one number from 0 (transparent) to 1
+#'   (opaque).
 #' @param colours Colours of the species: unnamed, in the order of first appearance in
 #'   `individuals`, or named by species. `NULL` (the default) uses the Okabe-Ito palette for
 #'   up to seven species and [grDevices::hcl.colors()] (`"Dark 3"`) for more. With
@@ -435,7 +443,8 @@ check_spread_scale <- function(z, pop) {
 #' @param highlight Species to draw in colour, on top of the others, which are drawn in grey
 #'   and left out of the legend. Useful when a site holds many species, whose colours cannot
 #'   all be told apart.
-#' @param ncol,scales Passed to [ggplot2::facet_wrap()].
+#' @param ncol,scales Passed to [ggplot2::facet_wrap()]: one whole number (or `NULL`) and one
+#'   character string.
 #' @return A ggplot object.
 #' @seealso [trait_densities()], [tstats()].
 #' @family trait variation among individuals
@@ -455,7 +464,12 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot_population_traits() needs the package ggplot2", call. = FALSE) # nocov
   }
-  stopifnot(is.numeric(alpha), length(alpha) == 1, alpha >= 0, alpha <= 1)
+  check_number(alpha, "alpha", 0, 1)
+  check_flag(weighted, "weighted")
+  check_flag(community, "community")
+  check_flag(rug, "rug")
+  check_count(ncol, "ncol", null_ok = TRUE)
+  check_string(scales, "scales")
   d <- trait_densities(individuals, trait, site, species, abundance, bw, n)
   points <- individuals[!is.na(individuals[[trait]]), , drop = FALSE]
   points <- data.frame(site = as.character(points[[site]]),
@@ -472,7 +486,10 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   }
   species_levels <- unique(points$species)
   if (!is.null(highlight)) {
-    stopifnot(is.character(highlight), length(highlight) >= 1, !anyDuplicated(highlight))
+    if (!is.character(highlight) || length(highlight) == 0 || anyNA(highlight) ||
+          anyDuplicated(highlight)) {
+      stop("`highlight` must be names of species, each given once", call. = FALSE)
+    }
     unknown <- setdiff(highlight, species_levels)
     if (length(unknown) > 0) {
       stop("`highlight` has species not in the data: ", paste(unknown, collapse = ", "),

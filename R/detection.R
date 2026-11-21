@@ -10,9 +10,9 @@
 #' carries the same observation error as the data.
 #'
 #' @param x An `mc_sim` object or an [mc_data()] object with true abundances.
-#' @param detection Probability that an individual is detected in a visit: one number, or one
-#'   per species, named by species.
-#' @param visits Number of visits to each site.
+#' @param detection Probability that an individual is detected in a visit, between 0 and 1:
+#'   one number, or one per species, named by species.
+#' @param visits Number of visits to each site, one whole number, 1 or more.
 #' @param record `"counts"` for the largest count over visits or `"presence"` for detected at
 #'   least once (1) or not (0).
 #' @return An [mc_data()] object with the recorded `comm` and `series`, and the attribute
@@ -34,10 +34,13 @@
 #' @export
 observe_detection <- function(x, detection, visits = 3, record = c("counts", "presence")) {
   record <- match.arg(record)
+  if (!is.numeric(detection) || length(detection) == 0 || anyNA(detection) ||
+        any(detection < 0 | detection > 1)) {
+    stop("`detection` must hold probabilities between 0 and 1", call. = FALSE)
+  }
+  check_count(visits, "visits")
   data <- if (inherits(x, "mc_data")) x else as_mc_data(x)
   species <- colnames(data$comm)
-  stopifnot(is.numeric(detection), all(detection >= 0 & detection <= 1), length(visits) == 1,
-            visits >= 1)
   if (length(detection) == 1 && is.null(names(detection))) {
     detection <- stats::setNames(rep(detection, length(species)), species)
   } else {

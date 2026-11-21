@@ -45,13 +45,13 @@ trait_kurtosis(x, na.rm = FALSE)
 }
 \arguments{
 \item{x}{Numeric vector (one trait), matrix or data frame (traits in columns, individuals or
-species in rows) or a \code{dist} object.}
+species in rows) or a \code{dist} object, without infinite values.}
 
-\item{na.rm}{Drop missing values (rows with any missing value of a matrix) before the
-computation; with \code{FALSE} (the default) missing values give \code{NA}.}
+\item{na.rm}{\code{TRUE} or \code{FALSE}. Drop missing values (rows with any missing value of a
+matrix) before the computation; with \code{FALSE} (the default) missing values give \code{NA}.}
 
-\item{relative}{Divide by the range of the trait (one trait) or by the largest pairwise
-distance (several traits), as the \code{div_range} option of cati.}
+\item{relative}{\code{TRUE} or \code{FALSE}. Divide by the range of the trait (one trait) or by the
+largest pairwise distance (several traits), as the \code{div_range} option of cati.}
 }
 \value{
 A single number, or \code{NA} when there are too few values: two for the means, minima,

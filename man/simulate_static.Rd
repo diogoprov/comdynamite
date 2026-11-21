@@ -22,7 +22,8 @@ of them keeps abundances on the scale of the first.}
 \item{env}{Value of the gradient at each site, or a list or data frame with
 one gradient per element, in the order of \code{traits}.}
 
-\item{incidence}{Return presences and absences instead of Poisson counts? A
+\item{incidence}{Return presences and absences instead of Poisson counts (\code{TRUE} or
+\code{FALSE})? A
 species is present where its count is positive. Only for
 \code{sampling = "poisson"}.}
 

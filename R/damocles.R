@@ -27,9 +27,9 @@
 #' @param mu Rate of local extinction per lineage, one or one per edge. With rates per edge and
 #'   a root edge, the two edges leaving the root must have the same rates, which the root edge
 #'   takes.
-#' @param sympatry Probability, between 0 and 1, that a locally present ancestor leaves both
-#'   daughters present at speciation; 0 (the default) is strictly allopatric speciation.
-#' @param n Number of communities to simulate.
+#' @param sympatry Probability that a locally present ancestor leaves both daughters present at
+#'   speciation, one number between 0 and 1; 0 (the default) is strictly allopatric speciation.
+#' @param n Number of communities to simulate. One whole number, 1 or more.
 #' @param root State of the ancestor at the root, just before the first speciation (or at the
 #'   start of the root edge): `"both"` draws absent or present with equal probabilities for each
 #'   community, as in the simulations of Pigot & Etienne (2015); `"absent"` or `"present"` fix
@@ -53,9 +53,7 @@ simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent",
   check_damocles_tree(tree)
   rates <- damocles_edge_rates(tree, gamma, mu)
   check_sympatry(sympatry)
-  if (length(n) != 1 || !is.finite(n) || n < 1 || n != round(n)) {
-    stop("`n` must be one whole number, 1 or more", call. = FALSE)
-  }
+  check_count(n, "n")
   index <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
   tree <- ape::reorder.phylo(tree, "cladewise")
   gamma <- rates$gamma[index]
@@ -189,9 +187,9 @@ damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "p
 #' @rdname damocles_loglik
 #' @param start Optional starting rates, `c(gamma = , mu = )`; by default the optimisation
 #'   starts from four combinations of 0.2 and 2 divided by the height of the tree.
-#' @param shared If `TRUE`, one set of parameters shared by all communities, estimated from the
-#'   sum of their log-likelihoods; if `FALSE` (the default), separate parameters for each
-#'   community.
+#' @param shared `TRUE` or `FALSE`. If `TRUE`, one set of parameters shared by all
+#'   communities, estimated from the sum of their log-likelihoods; if `FALSE` (the default),
+#'   separate parameters for each community.
 #' @param sympatry In `damocles_loglik()`, the probability that a present ancestor leaves both
 #'   daughters present (see [simulate_damocles()]). In `damocles_fit()`, a fixed value, or
 #'   `NULL` to estimate it with the rates (shared or not, as they are).
@@ -212,7 +210,7 @@ damocles_fit <- function(comm, tree, root = c("both", "absent", "present"), star
                          vary = c("both", "gamma", "mu")) {
   root <- match.arg(root)
   vary <- match.arg(vary)
-  if (!isTRUE(shared) && !isFALSE(shared)) stop("`shared` must be TRUE or FALSE", call. = FALSE)
+  check_flag(shared, "shared")
   if (!is.null(sympatry)) check_sympatry(sympatry)
   check_damocles_tree(tree)
   presence <- damocles_presence(comm, tree)
@@ -299,16 +297,17 @@ print.mc_damocles_fit <- function(x, ...) {
 #' overdispersion.
 #'
 #' @inheritParams damocles_loglik
-#' @param n_sim Number of null communities of each model.
+#' @param n_sim Number of null communities of each model. One whole number, 2 or more.
 #' @param gamma,mu Rates of local colonisation and extinction used to simulate the null
 #'   communities, one value for all communities or one per community, or lists with one rate,
 #'   or one rate per edge of `tree`, per community; `NULL` (the default) estimates both with
 #'   [damocles_fit()], with `shared`, `sympatry`, `regimes`, `edge_covariate` and `vary` passed
 #'   on to it.
-#' @param shared When the rates are estimated, `TRUE` fits one pair shared by all communities
-#'   (see [damocles_fit()]) and `FALSE` (the default) one pair per community.
+#' @param shared `TRUE` or `FALSE`. When the rates are estimated, `TRUE` fits one pair shared
+#'   by all communities (see [damocles_fit()]) and `FALSE` (the default) one pair per community.
 #' @param sympatry Probability that a present ancestor leaves both daughters present, used in
-#'   the simulations (see [simulate_damocles()]); `NULL` estimates it with the rates.
+#'   the simulations (see [simulate_damocles()]): one number between 0 and 1, or `NULL` to
+#'   estimate it with the rates.
 #' @param root Prior on the state at the root, used both in the fit and in the simulations
 #'   (`"both"` draws the state of the root of each simulated community with equal
 #'   probabilities).
@@ -335,9 +334,8 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
   root <- match.arg(root)
   vary <- match.arg(vary)
   check_damocles_tree(tree)
-  if (length(n_sim) != 1 || !is.finite(n_sim) || n_sim < 2 || n_sim != round(n_sim)) {
-    stop("`n_sim` must be one whole number, 2 or more", call. = FALSE)
-  }
+  check_count(n_sim, "n_sim", min = 2)
+  check_flag(shared, "shared")
   presence <- damocles_presence(comm, tree)
   n_comm <- nrow(presence)
   if (xor(is.null(gamma), is.null(mu))) {
@@ -421,15 +419,21 @@ print.mc_damocles_test <- function(x, ...) {
 # --- internals ---------------------------------------------------------------------------
 
 check_damocles_tree <- function(tree) {
-  if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
-  if (is.null(tree$edge.length) || anyNA(tree$edge.length) || any(tree$edge.length < 0)) {
-    stop("`tree` needs branch lengths, zero or more", call. = FALSE)
-  }
+  check_branch_lengths(tree)
   if (!ape::is.rooted(tree) || !ape::is.binary(tree)) {
     stop("`tree` must be rooted and fully dichotomous; see ape::multi2di()", call. = FALSE)
   }
   if (is.null(tree$tip.label) || anyDuplicated(tree$tip.label)) {
     stop("`tree` needs different tip labels", call. = FALSE)
+  }
+  invisible(tree)
+}
+
+# stops unless `tree` is a phylo object with branch lengths, none missing or negative
+check_branch_lengths <- function(tree) {
+  check_tree(tree, branch_lengths = FALSE)
+  if (is.null(tree$edge.length) || anyNA(tree$edge.length) || any(tree$edge.length < 0)) {
+    stop("`tree` needs branch lengths, zero or more", call. = FALSE)
   }
   invisible(tree)
 }

@@ -32,10 +32,10 @@
 #' 2015).
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
-#' @param n_traits Number of traits. Taken from the rate matrices when `sigma2` gives them, or
-#'   else from the columns of `theta` when it is a matrix.
+#' @param n_traits Number of traits (one whole number, 1 or more). Taken from the rate matrices
+#'   when `sigma2` gives them, or else from the columns of `theta` when it is a matrix.
 #' @param alpha Strength of selection towards the optimum (0 = Brownian
-#'   motion).
+#'   motion). One finite number, 0 or more.
 #' @param sigma2 Rate of the stochastic (drift) component: one number for all traits, which
 #'   then evolve independently; a symmetric positive semidefinite rate matrix with one row and
 #'   column per trait, for correlated traits; or a named list or vector with a matrix or a
@@ -92,7 +92,10 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
                       regimes = NULL, root = 0) {
   check_tree(tree)
   check_count(n_traits, "n_traits")
-  if (!is.numeric(alpha) || any(alpha < 0)) stop("`alpha` must be 0 or more", call. = FALSE)
+  check_number(alpha, "alpha", lower = 0)
+  if (!is.numeric(theta) || length(theta) == 0 || !all(is.finite(theta))) {
+    stop("`theta` must be finite numbers", call. = FALSE)
+  }
   order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
   maps <- NULL
   if (inherits(regimes, "phylo")) {
@@ -116,7 +119,9 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
     if (is.null(regimes)) {
       reg <- rep("0", ne)
     } else {
-      stopifnot(length(regimes) == ne)
+      if (length(regimes) != ne) {
+        stop("`regimes` needs one regime per branch (", ne, ")", call. = FALSE)
+      }
       reg <- as.character(regimes)
     }
     maps <- lapply(seq_len(ne), function(e) stats::setNames(t[e], reg[e]))
@@ -177,8 +182,8 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
            call. = FALSE)
     }
   }
-  if (!is.numeric(root) || anyNA(root) || !length(root) %in% c(1, n_traits)) {
-    stop("`root` needs 1 or ", n_traits, " numbers", call. = FALSE)
+  if (!is.numeric(root) || !all(is.finite(root)) || !length(root) %in% c(1, n_traits)) {
+    stop("`root` needs 1 or ", n_traits, " numbers, all finite", call. = FALSE)
   }
   n_tip <- ape::Ntip(tree)
   x <- matrix(0, n_tip + tree$Nnode, n_traits)
@@ -241,7 +246,7 @@ matrix_root <- function(m) {
 #'   regime.
 #' @param stem Should the branch leading to each node also take the new
 #'   regime (the shift happens at the start of the stem rather than at the
-#'   node)?
+#'   node)? `TRUE` or `FALSE`.
 #' @return Character vector with the regime of each branch, in the order of
 #'   `tree$edge` after reordering it "cladewise" (the order [trait_ou()]
 #'   uses).
@@ -255,7 +260,12 @@ paint_regimes <- function(tree, nodes, stem = FALSE) {
   check_tree(tree, branch_lengths = FALSE)
   tree <- ape::reorder.phylo(tree, "cladewise")
   n_tip <- ape::Ntip(tree)
-  stopifnot(all(nodes > n_tip), all(nodes <= n_tip + tree$Nnode))
+  check_flag(stem, "stem")
+  if (!is.numeric(nodes) || anyNA(nodes) || any(nodes <= n_tip) ||
+        any(nodes > n_tip + tree$Nnode) || any(nodes != round(nodes))) {
+    stop("`nodes` must be numbers of internal nodes, from ", n_tip + 1, " to ",
+         n_tip + tree$Nnode, call. = FALSE)
+  }
   reg <- rep("0", nrow(tree$edge))
   for (k in seq_along(nodes)) {
     desc <- c(nodes[k], phangorn_descendants(tree, nodes[k]))

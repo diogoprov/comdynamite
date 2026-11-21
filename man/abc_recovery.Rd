@@ -23,15 +23,17 @@ the statistics.}
 
 \item{statistics}{Names of the statistics to use. By default all the others.}
 
-\item{n_test}{Number of pseudo-observations.}
+\item{n_test}{Number of pseudo-observations. One whole number, 2 or more and at least 11
+fewer than the rows of \code{table}.}
 
-\item{level}{Probability of the credible interval.}
+\item{level}{Probability of the credible interval. One number greater than 0 and less
+than 1.}
 
-\item{ntree}{Number of trees per forest.}
+\item{ntree}{Number of trees per forest. One whole number, 1 or more.}
 
-\item{ncores}{Number of threads for the forests.}
+\item{ncores}{Number of threads for the forests. One whole number, 1 or more.}
 
-\item{seed}{Integer for the choice of the pseudo-observations.}
+\item{seed}{Integer for the choice of the pseudo-observations. One finite whole number.}
 }
 \value{
 A data frame with one row per parameter: \code{n}, \code{r2} (1 minus the squared error over the

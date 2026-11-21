@@ -8,9 +8,9 @@
 #'
 #' @param coords Matrix or data frame with one row per site and the coordinates in columns, such
 #'   as `landscape$coords` or the `coords` of an [mc_data()].
-#' @param k Number of folds.
+#' @param k Number of folds. One whole number, from 2 up to the number of sites.
 #' @param method `"blocks"` for spatial blocks or `"random"`.
-#' @param seed Integer that sets the seed.
+#' @param seed Integer that sets the seed. One finite whole number.
 #' @return Integer vector with the fold of each site.
 #' @references
 #' Roberts, D. R., Bahn, V., Ciuti, S., Boyce, M. S., Elith, J., Guillera-Arroita, G., Hauenstein,
@@ -25,7 +25,13 @@
 spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 1) {
   method <- match.arg(method)
   coords <- as.matrix(coords)
-  stopifnot(is.numeric(coords), nrow(coords) >= 2, length(k) == 1, k >= 2, k <= nrow(coords))
+  if (!is.numeric(coords) || nrow(coords) < 2) {
+    stop("`coords` must be a numeric matrix with one row per site and at least two sites",
+         call. = FALSE)
+  }
+  if (any(!is.finite(coords))) stop("`coords` has missing or infinite values", call. = FALSE)
+  check_count(k, "k", min = 2, max = nrow(coords))
+  check_seed(seed)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()), add = TRUE)
@@ -48,7 +54,8 @@ spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 
 #' observed data before [abc_cv()]. The statistics are named `f1_train_alpha`,
 #' `f1_test_alpha` and so on.
 #'
-#' @param folds Integer vector with the fold of each site, as from [spatial_folds()].
+#' @param folds Integer vector with the fold of each site, as from [spatial_folds()]. One whole
+#'   number per site, with at least two different folds.
 #' @param summarise Function of an [mc_data()] object and `shared` that gives a named numeric
 #'   vector. The default is [summary_stats()].
 #' @return A function of `sim`, a simulation or an [mc_data()] object, and `shared`.
@@ -63,7 +70,12 @@ spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 
 #' by_fold(sim, list())
 #' @export
 fold_summarise <- function(folds, summarise = function(x, shared) summary_stats(x)) {
-  stopifnot(length(folds) >= 2, is.function(summarise))
+  if (is.factor(folds)) folds <- as.integer(folds)
+  if (!is.numeric(folds) || length(folds) < 2 || any(!is.finite(folds)) ||
+        any(folds != round(folds))) {
+    stop("`folds` must be whole numbers, one per site, as from spatial_folds()", call. = FALSE)
+  }
+  check_function_arg(summarise, "summarise")
   folds <- as.integer(folds)
   ids <- sort(unique(folds))
   if (length(ids) < 2) stop("`folds` needs at least two folds.", call. = FALSE)
@@ -97,11 +109,12 @@ fold_summarise <- function(folds, summarise = function(x, shared) summary_stats(
 #' @param parameters Names of the parameters. By default those of `table`.
 #' @param statistics Names of the statistics without the prefix, such as `"alpha"`. By default
 #'   all.
-#' @param level Probability of the predictive interval.
-#' @param n Number of draws from the posterior of each fold.
-#' @param ntree Number of trees per forest.
-#' @param ncores Number of threads for the forests.
-#' @param seed Integer that sets the seed.
+#' @param level Probability of the predictive interval. One number greater than 0 and less
+#'   than 1.
+#' @param n Number of draws from the posterior of each fold. One whole number, 2 or more.
+#' @param ntree Number of trees per forest. One whole number, 1 or more.
+#' @param ncores Number of threads for the forests. One whole number, 1 or more.
+#' @param seed Integer that sets the seed. One finite whole number.
 #' @return A data frame with one row per observed data set, fold and statistic: `observed`, the median and the
 #'   interval of the predicted statistic, `inside` (whether the observed value is in the
 #'   interval), `p` (two-sided posterior predictive p-value) and `z`, the observed value minus
@@ -123,7 +136,12 @@ fold_summarise <- function(folds, summarise = function(x, shared) summary_stats(
 #' @export
 abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level = 0.9,
                    n = 500, ntree = 500, ncores = 1, seed = 1) {
-  stopifnot(is.data.frame(table), length(level) == 1, level > 0, level < 1, n >= 2)
+  check_abc_table(table)
+  check_number(level, "level", 0, 1, open = TRUE)
+  check_count(n, "n", min = 2)
+  check_count(ntree, "ntree")
+  check_count(ncores, "ncores")
+  check_seed(seed)
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   pattern <- "^f([0-9]+)_(train|test)_(.+)$"

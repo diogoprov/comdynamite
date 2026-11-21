@@ -15,22 +15,24 @@
 #' than distances along the channel, and sites on neighbouring branches can be close in a
 #' straight line but far apart along the channel, as in real catchments.
 #'
-#' @param n_sites Number of sites (at least 2).
+#' @param n_sites Number of sites: one whole number, 2 or more.
 #' @param branching Probability that a new site starts a branch rather than extending a
-#'   headwater (between 0 and 1).
-#' @param reach_length Mean length of the reach between a site and its downstream neighbour.
+#'   headwater: one number between 0 and 1.
+#' @param reach_length Mean length of the reach between a site and its downstream neighbour:
+#'   one number greater than 0.
 #'   Lengths are drawn from an exponential distribution with this mean, or are all equal with
 #'   `fixed_length = TRUE`.
-#' @param fixed_length Logical: equal reach lengths.
+#' @param fixed_length Equal reach lengths? `TRUE` or `FALSE`.
 #' @param max_branches Largest number of branches that join at a confluence (2 for binary
-#'   confluences).
+#'   confluences): one whole number, 2 or more.
 #' @return A data frame with one row per site, the outlet first: `site`, `downstream` (row of
 #'   the downstream neighbour, `NA` at the outlet), `length` (of the reach to the downstream
 #'   neighbour, 0 at the outlet), `distance` (along the channel to the outlet), `magnitude`
 #'   (Shreve magnitude, the number of headwaters upstream of the site, itself included),
 #'   `upstream_length` (the length of channel upstream of the site, its own reach included, a
 #'   proxy for the catchment area, which describes the size of a river better than Strahler
-#'   order; Altermatt 2013), `order` (Strahler order), `headwater` (logical) and the coordinates `x` and `y`.
+#'   order; Altermatt 2013), `order` (Strahler order), `headwater` (logical) and the coordinates `x`
+#'   and `y`.
 #' @references Altermatt, F. (2013). Diversity in riverine metacommunities: a network
 #'   perspective. *Aquatic Ecology*, 47, 365--377. \doi{10.1007/s10452-013-9450-3}
 #'
@@ -49,9 +51,11 @@
 #' @export
 river_network <- function(n_sites, branching = 0.3, reach_length = 1, fixed_length = FALSE,
                           max_branches = 2) {
-  stopifnot(length(n_sites) == 1, n_sites >= 2, length(branching) == 1, branching >= 0,
-            branching <= 1, length(reach_length) == 1, reach_length > 0,
-            is.logical(fixed_length), length(max_branches) == 1, max_branches >= 2)
+  check_count(n_sites, "n_sites", min = 2)
+  check_number(branching, "branching", 0, 1)
+  check_number(reach_length, "reach_length", lower = 0, open = TRUE)
+  check_flag(fixed_length, "fixed_length")
+  check_count(max_branches, "max_branches", min = 2)
   n_sites <- as.integer(n_sites)
   downstream <- c(NA_integer_, rep(0L, n_sites - 1))
   children <- integer(n_sites)
@@ -93,11 +97,14 @@ river_network <- function(n_sites, branching = 0.3, reach_length = 1, fixed_leng
 #'   the distance from the outlet along the channel rescaled to `env_range`, a gradient from
 #'   the lowlands to the headwaters.
 #' @param scale_down,scale_up Scales of the kernel for the distance travelled downstream and
-#'   upstream, in the units of `length`.
+#'   upstream, in the units of `length`: each one number greater than 0, or `Inf` for no cost
+#'   of travel in that direction.
 #' @param overland Share of emigrants that move in a straight line rather than along the
-#'   channel (between 0 and 1).
-#' @param overland_scale Scale of the exponential kernel of straight-line dispersal.
-#' @param env_range Range of the environment when `env` is `NULL`.
+#'   channel: one number between 0 and 1.
+#' @param overland_scale Scale of the exponential kernel of straight-line dispersal: one number
+#'   greater than 0.
+#' @param env_range Range of the environment when `env` is `NULL`: two finite numbers, the
+#'   first smaller.
 #' @return An `mc_landscape` object, as from [landscape_matrix()], whose `dist` holds the
 #'   distances along the channel and which also keeps `network` (the network completed as in
 #'   [river_network()]) and `downstream` (sites x sites matrix of the distance travelled
@@ -125,14 +132,24 @@ river_network <- function(n_sites, branching = 0.3, reach_length = 1, fixed_leng
 landscape_river <- function(network = river_network(50), env = NULL, scale_down = 2,
                             scale_up = scale_down, overland = 0, overland_scale = 1,
                             env_range = c(0, 100)) {
-  stopifnot(is.data.frame(network), all(c("downstream", "length") %in% names(network)),
-            length(scale_down) == 1, scale_down > 0, length(scale_up) == 1, scale_up > 0,
-            length(overland) == 1, overland >= 0, overland <= 1, length(overland_scale) == 1,
-            overland_scale > 0, length(env_range) == 2, env_range[1] < env_range[2])
+  if (!is.data.frame(network) || !all(c("downstream", "length") %in% names(network))) {
+    stop("`network` must be a data frame with columns `downstream` and `length`",
+         call. = FALSE)
+  }
+  # an infinite scale removes the cost of travel in that direction
+  check_number(scale_down, "scale_down", lower = 0, open = c(TRUE, FALSE),
+               finite = FALSE)
+  check_number(scale_up, "scale_up", lower = 0, open = c(TRUE, FALSE),
+               finite = FALSE)
+  check_number(overland, "overland", 0, 1)
+  check_number(overland_scale, "overland_scale", lower = 0, open = TRUE)
+  check_env_range(env_range)
   xy <- if (all(c("x", "y") %in% names(network))) network[, c("x", "y")]
   net <- river_table(network$downstream, network$length)
   if (!is.null(xy)) {
-    stopifnot(is.numeric(xy$x), is.numeric(xy$y), all(is.finite(c(xy$x, xy$y))))
+    if (!is.numeric(xy$x) || !is.numeric(xy$y) || !all(is.finite(c(xy$x, xy$y)))) {
+      stop("columns `x` and `y` of `network` must be finite numbers", call. = FALSE)
+    }
     net$x <- xy$x
     net$y <- xy$y
   }
@@ -140,7 +157,10 @@ landscape_river <- function(network = river_network(50), env = NULL, scale_down 
   if (is.null(env)) {
     env <- net$distance / max(net$distance) * diff(env_range) + env_range[1]
   }
-  stopifnot(is.numeric(env), length(env) == m, all(is.finite(env)))
+  if (!is.numeric(env) || length(env) != m || !all(is.finite(env))) {
+    stop("`env` must be NULL or one finite number per site of `network` (", m, ")",
+         call. = FALSE)
+  }
   down <- river_downstream(net)
   w <- -down / scale_down - t(down) / scale_up
   diag(w) <- -Inf
@@ -277,7 +297,7 @@ river_downstream <- function(net) {
 #'   numeric vector with the partial sill (variance) and the range \eqn{\alpha}{alpha}, named
 #'   `sill` and `range` or in that order. Ranges are in the units of the reach lengths (tail-up
 #'   and tail-down) or of the coordinates (Euclidean).
-#' @param nugget Variance independent among sites.
+#' @param nugget Variance independent among sites: one number, 0 or more.
 #' @param weights Weights of the branches for the tail-up component: `"magnitude"`,
 #'   `"upstream_length"` or a positive numeric vector with one value per site.
 #' @return A symmetric sites x sites covariance matrix.
@@ -303,10 +323,8 @@ river_downstream <- function(net) {
 #' @export
 river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclidean = NULL,
                              nugget = 0, weights = "magnitude") {
-  if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
-    stop("`landscape` must come from landscape_river()", call. = FALSE)
-  }
-  stopifnot(length(nugget) == 1, is.finite(nugget), nugget >= 0)
+  check_river_landscape(landscape)
+  check_number(nugget, "nugget", lower = 0)
   net <- landscape$network
   m <- nrow(net)
   component <- function(x, name) {
@@ -350,11 +368,12 @@ river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclid
 #'
 #' @inheritParams river_covariance
 #' @param n_steps `NULL` (the default) for one value per site, or the number of steps of a
-#'   series.
+#'   series: one whole number, 1 or more.
 #' @param mean Mean of the environment (one value, or one per site, such as a gradient from
 #'   the outlet to the headwaters).
 #' @param temporal_scale Steps over which the correlation in time falls by a factor of
-#'   \eqn{e}{e} (the correlation between consecutive steps is \eqn{\exp(-1 /}{exp(-1 /}
+#'   \eqn{e}{e}, one number, 0 or more, or `Inf` (the correlation between consecutive steps is
+#'   \eqn{\exp(-1 /}{exp(-1 /}
 #'   `temporal_scale`)); `Inf` keeps the first draw at every step and 0 draws every step
 #'   anew.
 #' @param ... Components of the covariance, passed to [river_covariance()] (`tail_up`,
@@ -374,15 +393,18 @@ river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclid
 #' dim(series)
 #' @export
 env_river <- function(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf, ...) {
+  check_count(n_steps, "n_steps", null_ok = TRUE)
+  # Inf keeps the first draw at every step
+  check_number(temporal_scale, "temporal_scale", lower = 0, finite = FALSE)
   v <- river_covariance(landscape, ...)
   m <- nrow(v)
-  stopifnot(is.numeric(mean), length(mean) %in% c(1, m), all(is.finite(mean)),
-            length(temporal_scale) == 1, temporal_scale >= 0)
+  if (!is.numeric(mean) || !length(mean) %in% c(1, m) || !all(is.finite(mean))) {
+    stop("`mean` must be one finite number or one per site (", m, ")", call. = FALSE)
+  }
   ev <- eigen(v, symmetric = TRUE)
   root <- ev$vectors %*% diag(sqrt(pmax(ev$values, 0)), m)
   draw <- function() as.vector(root %*% stats::rnorm(m))
   if (is.null(n_steps)) return(mean + draw())
-  stopifnot(length(n_steps) == 1, n_steps >= 1)
   rho <- exp(-1 / temporal_scale)
   out <- matrix(0, m, n_steps)
   out[, 1] <- draw()
@@ -390,6 +412,14 @@ env_river <- function(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf,
     out[, s] <- if (rho == 1) out[, s - 1] else rho * out[, s - 1] + sqrt(1 - rho^2) * draw()
   }
   out + mean
+}
+
+# stops unless `landscape` comes from landscape_river()
+check_river_landscape <- function(landscape) {
+  if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
+    stop("`landscape` must come from landscape_river()", call. = FALSE)
+  }
+  invisible(landscape)
 }
 
 # additive function of the tail-up model: 1 at the outlet, and at each confluence the share of
@@ -435,17 +465,19 @@ river_additive <- function(net, weights) {
 #' [env_pulse()] on the sites and steps of the flood.
 #'
 #' @param landscape A landscape from [landscape_river()].
-#' @param n_steps Number of steps.
-#' @param period Steps per year.
-#' @param flood_steps Steps of the flood season in each year.
-#' @param start Step of the year at which the flood season begins.
-#' @param probability Probability of washout during a flood at the most exposed site (between
-#'   0 and 1).
-#' @param size_effect Exponent of the relative size of each site.
+#' @param n_steps Number of steps: one whole number, 1 or more.
+#' @param period Steps per year: one whole number, 1 or more.
+#' @param flood_steps Steps of the flood season in each year: one whole number, from 1 up to
+#'   `period`.
+#' @param start Step of the year at which the flood season begins: one whole number, from 1 up
+#'   to `period`.
+#' @param probability Probability of washout during a flood at the most exposed site: one
+#'   number between 0 and 1.
+#' @param size_effect Exponent of the relative size of each site: one finite number.
 #' @param size Size of each site: `"upstream_length"` (the default, a proxy for catchment
 #'   area and discharge), `"magnitude"` (Shreve magnitude) or a positive numeric vector with
 #'   one value per site.
-#' @param year_prob Probability that a flood happens in a year.
+#' @param year_prob Probability that a flood happens in a year: one number between 0 and 1.
 #' @return A matrix of probabilities with one row per site and one column per step, with an
 #'   attribute `flood_years`, the years in which a flood happened.
 #' @family landscapes
@@ -464,23 +496,19 @@ river_additive <- function(net, weights) {
 river_floods <- function(landscape, n_steps, period, flood_steps = 1, start = 1,
                          probability = 0.5, size_effect = 1, size = "upstream_length",
                          year_prob = 1) {
-  if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
-    stop("`landscape` must come from landscape_river()", call. = FALSE)
-  }
+  check_river_landscape(landscape)
   net <- landscape$network
   m <- nrow(net)
   check_count(n_steps, "n_steps")
   check_count(period, "period")
   check_count(flood_steps, "flood_steps")
   check_count(start, "start")
-  if (!is.finite(n_steps) || !is.finite(period) || flood_steps > period ||
-      start > period) {
-    stop("`n_steps` and `period` must be finite, and `flood_steps` and `start` at most ",
-         "`period`", call. = FALSE)
+  if (flood_steps > period || start > period) {
+    stop("`flood_steps` and `start` must be at most `period`", call. = FALSE)
   }
-  stopifnot(length(probability) == 1, probability >= 0, probability <= 1,
-            length(size_effect) == 1, is.finite(size_effect), length(year_prob) == 1,
-            year_prob >= 0, year_prob <= 1)
+  check_number(probability, "probability", 0, 1)
+  check_number(size_effect, "size_effect")
+  check_number(year_prob, "year_prob", 0, 1)
   w <- if (is.character(size)) {
     net[[match.arg(size, c("upstream_length", "magnitude"))]]
   } else size

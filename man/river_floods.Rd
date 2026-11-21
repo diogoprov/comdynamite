@@ -19,24 +19,26 @@ river_floods(
 \arguments{
 \item{landscape}{A landscape from \code{\link[=landscape_river]{landscape_river()}}.}
 
-\item{n_steps}{Number of steps.}
+\item{n_steps}{Number of steps: one whole number, 1 or more.}
 
-\item{period}{Steps per year.}
+\item{period}{Steps per year: one whole number, 1 or more.}
 
-\item{flood_steps}{Steps of the flood season in each year.}
+\item{flood_steps}{Steps of the flood season in each year: one whole number, from 1 up to
+\code{period}.}
 
-\item{start}{Step of the year at which the flood season begins.}
+\item{start}{Step of the year at which the flood season begins: one whole number, from 1 up
+to \code{period}.}
 
-\item{probability}{Probability of washout during a flood at the most exposed site (between
-0 and 1).}
+\item{probability}{Probability of washout during a flood at the most exposed site: one
+number between 0 and 1.}
 
-\item{size_effect}{Exponent of the relative size of each site.}
+\item{size_effect}{Exponent of the relative size of each site: one finite number.}
 
 \item{size}{Size of each site: \code{"upstream_length"} (the default, a proxy for catchment
 area and discharge), \code{"magnitude"} (Shreve magnitude) or a positive numeric vector with
 one value per site.}
 
-\item{year_prob}{Probability that a flood happens in a year.}
+\item{year_prob}{Probability that a flood happens in a year: one number between 0 and 1.}
 }
 \value{
 A matrix of probabilities with one row per site and one column per step, with an

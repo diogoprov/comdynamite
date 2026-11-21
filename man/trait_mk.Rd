@@ -19,16 +19,19 @@ trait_mk(
 \arguments{
 \item{tree}{A rooted \code{phylo} tree with branch lengths.}
 
-\item{q}{One rate for every change between states (the equal-rates model), or a square matrix
+\item{q}{One rate for every change between states (the equal-rates model; one finite number,
+0 or more), or a square matrix
 of rates from the state of each row to the state of each column, with the states as names;
 its diagonal is ignored.}
 
-\item{states}{Names of the states, when \code{q} is one rate.}
+\item{states}{Names of the states (two or more, all different), when \code{q} is one rate.}
 
-\item{root_state}{State at the root; \code{NULL} draws one with equal probabilities.}
+\item{root_state}{State at the root, one of the states; \code{NULL} draws one with equal
+probabilities.}
 
-\item{alpha}{Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
-\code{NULL} for none. Small values make rates more uneven among branches.}
+\item{alpha}{Shape (and rate) of the gamma distribution of the rate multiplier of each branch
+(one finite number greater than 0); \code{NULL} for none. Small values make rates more uneven
+among branches.}
 
 \item{edge_rates}{Optional multipliers of the rates of each branch, in the order of the rows of
 \code{tree$edge}, instead of drawing them with \code{alpha}.}
@@ -36,7 +39,8 @@ its diagonal is ignored.}
 \item{rate_classes}{Optional multipliers of the rates in each hidden class, such as
 \code{c(slow = 0.1, fast = 1)}; classes without names are called \code{R1}, \code{R2} and so on.}
 
-\item{class_switch}{Rate of moving from one hidden class to each other one.}
+\item{class_switch}{Rate of moving from one hidden class to each other one. One finite
+number, 0 or more.}
 
 \item{root}{Deprecated; use \code{root_state}.}
 }

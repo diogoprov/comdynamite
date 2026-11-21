@@ -9,8 +9,8 @@
 \arguments{
 \item{x}{Result of \code{\link[=trait_flex]{trait_flex()}}.}
 
-\item{relative}{If \code{TRUE} (the default), sums of squares are divided by the total sum of
-squares of each trait, so that traits on different scales can be compared.}
+\item{relative}{\code{TRUE} or \code{FALSE}. If \code{TRUE} (the default), sums of squares are divided by the
+total sum of squares of each trait, so that traits on different scales can be compared.}
 
 \item{colours}{Two colours, for the explained and the residual parts (only the first is
 used without a model). The default is the blue of the Okabe-Ito palette and a light grey,

@@ -16,7 +16,8 @@
 #' @param traits Optional data frame, matrix or named vector with one row per species, named by
 #'   species.
 #' @param env Optional data frame, matrix or vector with one row per site.
-#' @param coords Optional matrix or data frame of coordinates with one row per site.
+#' @param coords Optional matrix or data frame of coordinates with one row per site, without
+#'   missing or infinite values.
 #' @param areas Optional vector with the area or biogeographic event of each site, for
 #'   [biogeography_matrix()].
 #' @param series Optional array of sites x species x steps, such as the `history` of a
@@ -218,7 +219,10 @@ site_rows <- function(x, sites, name) {
 
 check_coords <- function(coords) {
   check_numeric_columns(coords, "`coords`", "Coordinates must be numbers.")
-  if (!is.numeric(as.matrix(coords))) stop("`coords` must be numbers", call. = FALSE)
+  values <- as.matrix(coords)
+  if (!is.numeric(values)) stop("`coords` must be numbers", call. = FALSE)
+  if (anyNA(values)) stop("`coords` has missing values", call. = FALSE)
+  if (any(is.infinite(values))) stop("`coords` has infinite values", call. = FALSE)
   coords
 }
 

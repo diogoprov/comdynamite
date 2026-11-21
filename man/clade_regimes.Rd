@@ -12,9 +12,10 @@ clade_regimes(tree, clades, background = "background", stem = FALSE)
 \item{clades}{A named list with, for each clade, a character vector of its tips or one node
 number (of \code{tree}, as in \code{tree$edge}) at its base.}
 
-\item{background}{Name of the regime of the edges outside every clade.}
+\item{background}{Name of the regime of the edges outside every clade. One character
+string.}
 
-\item{stem}{If \code{TRUE}, the stem edge of each clade belongs to it.}
+\item{stem}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, the stem edge of each clade belongs to it.}
 }
 \value{
 A factor with one regime per edge of \code{tree}, in the order of \code{tree$edge}, with the

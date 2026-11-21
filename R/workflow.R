@@ -14,8 +14,8 @@
 #'   replicate share, such as a list with `tree` and `landscape`.
 #' @param summarise Function of `sim` and `shared` that gives a named numeric vector. The default
 #'   is [summary_stats()], with `shared$tree` if there is one.
-#' @param n_rep Number of replicates.
-#' @param seed Integer that sets all the seeds.
+#' @param n_rep Number of replicates. One whole number, 1 or more.
+#' @param seed Integer that sets all the seeds. One finite whole number.
 #' @return Data frame with the columns of `scenarios`, `replicate` and the statistics.
 #' @family simulation studies
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -34,8 +34,14 @@
 run_scenarios <- function(scenarios, simulate, setup = NULL,
                           summarise = function(sim, shared) summary_stats(sim, shared$tree),
                           n_rep = 1, seed = 1) {
-  stopifnot(is.data.frame(scenarios), nrow(scenarios) >= 1, is.function(simulate), n_rep >= 1,
-            length(seed) == 1)
+  if (!is.data.frame(scenarios) || nrow(scenarios) < 1) {
+    stop("`scenarios` must be a data frame with at least one row", call. = FALSE)
+  }
+  check_function_arg(simulate, "simulate")
+  check_function_arg(setup, "setup", null_ok = TRUE)
+  check_function_arg(summarise, "summarise")
+  check_count(n_rep, "n_rep")
+  check_seed(seed)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()), add = TRUE)
@@ -72,7 +78,8 @@ cell_seed <- function(seed) {
 #'
 #' @param x An `mc_sim` object with `history`, from `record_steps` of
 #'   [simulate_metacommunity()], with at least four recorded steps.
-#' @param tolerance Largest relative change in a statistic that counts as settled.
+#' @param tolerance Largest relative change in a statistic that counts as settled. One number,
+#'   0 or more.
 #' @return Data frame with one row for `gamma`, the species in all sites, `alpha`, the mean
 #'   species per site, and `abundance`, the mean individuals per site, with their means in the
 #'   two halves (`early`, `late`), the relative `change` and whether it is `settled`, invisibly.
@@ -87,7 +94,10 @@ cell_seed <- function(seed) {
 #' suppressWarnings(equilibrium_check(sim))
 #' @export
 equilibrium_check <- function(x, tolerance = 0.05) {
-  stopifnot(inherits(x, "mc_sim"), tolerance >= 0)
+  if (!inherits(x, "mc_sim")) {
+    stop("`x` must be an `mc_sim` object from simulate_metacommunity()", call. = FALSE)
+  }
+  check_number(tolerance, "tolerance", lower = 0)
   steps <- if (is.null(x$history)) 0 else dim(x$history)[3]
   if (steps < 4) {
     stop("`x` needs at least four recorded steps: use `record_steps`", call. = FALSE)
@@ -113,7 +123,7 @@ equilibrium_check <- function(x, tolerance = 0.05) {
 #'
 #' @param x An `mc_sim` object.
 #' @param row.names,optional Not used.
-#' @param zeros Keep absences?
+#' @param zeros Keep absences? `TRUE` or `FALSE`.
 #' @param ... Not used.
 #' @return Data frame with `site`, `species`, `step` and `abundance`, from `history`, or from
 #'   `abundance` with `step` as `NA` if no steps were recorded. `tibble::as_tibble()` turns it
@@ -127,6 +137,7 @@ equilibrium_check <- function(x, tolerance = 0.05) {
 #' head(as.data.frame(sim))
 #' @export
 as.data.frame.mc_sim <- function(x, row.names = NULL, optional = FALSE, zeros = FALSE, ...) {
+  check_flag(zeros, "zeros")
   values <- x$history %||% x$abundance
   labels <- dimnames(values)
   steps <- if (is.null(x$history)) NA_integer_ else as.integer(sub("^step", "", labels[[3]]))

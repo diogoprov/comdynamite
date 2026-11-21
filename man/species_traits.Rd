@@ -22,33 +22,35 @@ species_traits(
 )
 }
 \arguments{
-\item{species}{A \code{phylo} tree, or the number of species for traits without
-phylogenetic structure.}
+\item{species}{A \code{phylo} tree, or the number of species (one whole number, 1 or more) for
+traits without phylogenetic structure.}
 
 \item{lambda}{Pagel's lambda of the optima (0 = no signal, 1 = Brownian
-motion). Ignored when \code{species} is a number.}
+motion): one number between 0 and 1. Ignored when \code{species} is a number.}
 
-\item{optima_range}{Range of the optima.}
+\item{optima_range}{Range of the optima: two finite numbers, the first not larger than the
+second.}
 
-\item{uniform_optima}{Give the optima evenly spaced values by rank?}
+\item{uniform_optima}{Give the optima evenly spaced values by rank? \code{TRUE} or \code{FALSE}.}
 
 \item{sigma_mean, sigma_sd}{Mean and standard deviation of the normal
-distribution (truncated at zero) of niche breadths.}
+distribution (truncated at zero) of niche breadths: one finite number each, \code{sigma_sd} 0
+or more.}
 
 \item{rmax_range}{Range of the uniform distribution of maximum growth
-rates.}
+rates: two finite numbers, 0 or more, the first not larger than the second.}
 
 \item{sigma_signal, rmax_signal}{Should niche breadth or maximum growth rate
-carry phylogenetic signal (Brownian motion)?}
+carry phylogenetic signal (Brownian motion)? \code{TRUE} or \code{FALSE} each.}
 
 \item{optima, sigma, r_max}{Optional values of each trait, named by species or in the order
 of the species, as a vector or a one-column matrix or data frame. They replace the values
 drawn for that trait.}
 
-\item{rescale_optima}{Rescale external optima to \code{optima_range}?}
+\item{rescale_optima}{Rescale external optima to \code{optima_range}? \code{TRUE} or \code{FALSE}.}
 
 \item{nodes}{Also give the optima at the internal nodes of the tree, as \code{\link[=trait_bm]{trait_bm()}} does?
-They are drawn after all other values, so the traits are the same as with
+\code{TRUE} or \code{FALSE}. They are drawn after all other values, so the traits are the same as with
 \code{nodes = FALSE} and the same seed, and rescaled as the optima of the tips, so they may fall
 outside \code{optima_range}. Not available with external optima or \code{uniform_optima}.}
 }

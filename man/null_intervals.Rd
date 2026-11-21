@@ -10,9 +10,10 @@ null_intervals(x, level = 0.95, inner = 0.5)
 \item{x}{Result of \code{\link[=tstats]{tstats()}} or \code{\link[=community_index]{community_index()}} with \code{n_perm > 0}.}
 
 \item{level}{Coverage of the outer null interval, and \code{1 - level} the size of the two-sided
-test that defines \code{deviation}.}
+test that defines \code{deviation}. One number between 0 and 1, both excluded.}
 
-\item{inner}{Coverage of the inner null interval.}
+\item{inner}{Coverage of the inner null interval. One number between 0 and 1, smaller than
+\code{level}.}
 }
 \value{
 A data frame with one row per site, trait and statistic (for \code{\link[=community_index]{community_index()}},

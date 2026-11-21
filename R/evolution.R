@@ -81,8 +81,8 @@
 #' drift, the correlated response of Lande (1979). Founders draw their means from
 #' \eqn{N(\bar z_{in}, G / k)}{N(zbar_in, G / k)} plus the variance among their sources trait by
 #' trait. The environment can change on every axis (`env_time` as a list of matrices), and
-#' [simulate_evolving_metacommunity()] takes several traits in the same way. With \eqn{G = 0}{G = 0} the
-#' abundances are those without evolution for the same seed.
+#' [simulate_evolving_metacommunity()] takes several traits in the same way. With \eqn{G = 0}{G = 0}
+#' the abundances are those without evolution for the same seed.
 #'
 #' A list of `traits` from [niche_correlation()] adds a correlation \eqn{R}{R} between the
 #' axes of the niche of each species: \eqn{\Omega = D R D}{Omega = D R D}, with \eqn{D}{D} the
@@ -100,8 +100,8 @@
 #'   the environment, one value or one per species. For several traits (see the section
 #'   Several traits), a covariance matrix with one row and column per trait, or a list with
 #'   one per species, such as from [genetic_matrices()].
-#' @param ne_ratio Ratio of effective to census population size \eqn{\nu}{nu}; `Inf` turns drift
-#'   off.
+#' @param ne_ratio Ratio of effective to census population size \eqn{\nu}{nu}: one number
+#'   greater than 0; `Inf` turns drift off.
 #' @param plasticity Slope of the reaction norm b, one value or one per species: 0 for a fixed
 #'   phenotype, 1 for a phenotype that tracks the environment fully around \eqn{E_0}{E0}. For
 #'   several traits, one value, one per trait or a matrix of species x traits; the plastic
@@ -109,12 +109,13 @@
 #' @param env_var Environmental (non-heritable) variance of the phenotype \eqn{V_E}{VE}, one
 #'   value or one per species; for several traits, a covariance matrix (or one per species),
 #'   which need not be proportional to `genetic_var`.
-#' @param steps_per_generation Time steps per generation \eqn{g}{g}; selection and drift per
-#'   step are divided by it (at least 1); dispersal and demography are per step.
+#' @param steps_per_generation Time steps per generation \eqn{g}{g}: one number, 1 or more;
+#'   selection and drift per step are divided by it; dispersal and demography are per step.
 #' @param founder Should populations founded at a step start from the sampled mean of their
-#'   founders (`TRUE`) or from the mean of their source (`FALSE`)?
+#'   founders (`TRUE`) or from the mean of their source (`FALSE`)? `TRUE` or `FALSE`.
 #' @param immigrant_selection Should immigrants face viability selection in the site they reach
-#'   before they mix with residents? With `FALSE` (the default), the immigrants from all sources
+#'   before they mix with residents? `TRUE` or `FALSE`. With `FALSE` (the default), the immigrants
+#'   from all sources
 #'   join the population and the mean of the merged population is selected. With `TRUE`, the
 #'   immigrants from each source arrive in proportion to the mean fitness of their source
 #'   phenotype in the new site, relative to a perfectly adapted population (the same Gaussian
@@ -136,17 +137,18 @@
 #'   residents and immigrants (or of sources) is not added, as if selection removed it, since
 #'   selection does not otherwise act on the variance; without this choice, gene flow between
 #'   diverged populations inflates the variance without bound. `genetic_var` is then the
-#'   variance of the populations at the start and of seeds. Needs a finite `ne_ratio`; one trait only.
+#'   variance of the populations at the start and of seeds. Needs a finite `ne_ratio`; one trait
+#'   only.
 #' @param variance_selection With `mutation_var`, should stabilising selection also remove
-#'   genetic variance? With `TRUE`, each generation loses \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 /
-#'   (sigma^2 + G + VE)}, the reduction of the genetic variance by Gaussian selection of width
-#'   \eqn{\sigma}{sigma} on a phenotype of variance \eqn{G + V_E}{G + VE} (Bulmer 1971). Under
-#'   sexual reproduction most of this reduction is linkage disequilibrium, which recombination
-#'   restores, so the full loss holds for clonal inheritance, as in the model of Urban & De
-#'   Meester (2009); with mutation, the variance then settles near the balance between
-#'   mutation and selection (Lande 1975; Turelli 1984) rather than at \eqn{2 N_e V_m}{2 Ne Vm},
-#'   and standing variation is eroded instead of carrying a load. `FALSE` (the default) keeps
-#'   the mutation-drift dynamics alone.
+#'   genetic variance? `TRUE` or `FALSE`. With `TRUE`, each generation loses
+#'   \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 / (sigma^2 + G + VE)}, the reduction of the genetic
+#'   variance by Gaussian selection of width \eqn{\sigma}{sigma} on a phenotype of variance
+#'   \eqn{G + V_E}{G + VE} (Bulmer 1971). Under sexual reproduction most of this reduction is
+#'   linkage disequilibrium, which recombination restores, so the full loss holds for clonal
+#'   inheritance, as in the model of Urban & De Meester (2009); with mutation, the variance
+#'   then settles near the balance between mutation and selection (Lande 1975; Turelli 1984)
+#'   rather than at \eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of
+#'   carrying a load. `FALSE` (the default) keeps the mutation-drift dynamics alone.
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -190,26 +192,33 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
   # several traits: covariance matrices (checked when the simulation starts)
   covariance <- function(v) is.matrix(v) || is.list(v)
-  stopifnot(covariance(genetic_var) || (is.numeric(genetic_var) && all(genetic_var >= 0)),
-            covariance(env_var) || (is.numeric(env_var) && all(env_var >= 0)),
-            is.numeric(ne_ratio), length(ne_ratio) == 1, ne_ratio > 0,
-            is.numeric(plasticity),
-            is.numeric(steps_per_generation), length(steps_per_generation) == 1,
-            steps_per_generation >= 1, is.logical(founder), length(founder) == 1,
-            is.logical(immigrant_selection), length(immigrant_selection) == 1,
-            !is.na(immigrant_selection))
+  variances <- function(v) is.numeric(v) && length(v) >= 1 && all(is.finite(v)) && all(v >= 0)
+  if (!covariance(genetic_var) && !variances(genetic_var)) {
+    stop("`genetic_var` must be one or more finite, non-negative numbers, or covariance ",
+         "matrices", call. = FALSE)
+  }
+  if (!covariance(env_var) && !variances(env_var)) {
+    stop("`env_var` must be one or more finite, non-negative numbers, or covariance matrices",
+         call. = FALSE)
+  }
+  # Inf turns drift off
+  check_number(ne_ratio, "ne_ratio", lower = 0, open = c(TRUE, FALSE),
+               finite = FALSE)
+  if (!is.numeric(plasticity) || length(plasticity) < 1 || !all(is.finite(plasticity))) {
+    stop("`plasticity` must be one or more finite numbers", call. = FALSE)
+  }
+  check_number(steps_per_generation, "steps_per_generation", lower = 1)
+  check_flag(founder, "founder")
+  check_flag(immigrant_selection, "immigrant_selection")
   if (!is.null(mutation_var)) {
-    if (!is.numeric(mutation_var) || any(is.na(mutation_var)) || any(mutation_var < 0)) {
-      stop("`mutation_var` must be one or more non-negative numbers", call. = FALSE)
+    if (!variances(mutation_var)) {
+      stop("`mutation_var` must be one or more finite, non-negative numbers", call. = FALSE)
     }
     if (!is.finite(ne_ratio)) {
       stop("`mutation_var` needs drift: a finite `ne_ratio`", call. = FALSE)
     }
   }
-  if (!is.logical(variance_selection) || length(variance_selection) != 1 ||
-      is.na(variance_selection)) {
-    stop("`variance_selection` must be TRUE or FALSE", call. = FALSE)
-  }
+  check_flag(variance_selection, "variance_selection")
   if (variance_selection && is.null(mutation_var)) {
     stop("`variance_selection` needs `mutation_var`", call. = FALSE)
   }

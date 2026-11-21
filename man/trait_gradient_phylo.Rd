@@ -23,10 +23,12 @@ name.}
 
 \item{models}{Which of \code{"white"}, \code{"BM"} and \code{"OU"} to fit.}
 
-\item{n_boot}{Number of bootstrap samples for the standard errors.}
+\item{n_boot}{Number of bootstrap samples for the standard errors. One whole number, 2 or
+more.}
 
 \item{min_sites}{Smallest number of sites of a species with a value (sites where it is
-alone do not count); species with fewer sites, or not in \code{tree}, are left out.}
+alone do not count); species with fewer sites, or not in \code{tree}, are left out. One whole
+number, 2 or more.}
 }
 \value{
 An object of class \code{mc_trait_gradient_phylo}, a list with \code{models} (one row per

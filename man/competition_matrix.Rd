@@ -13,15 +13,15 @@ competition_matrix(
 )
 }
 \arguments{
-\item{species}{A \code{phylo} tree, or the number of species (not for
+\item{species}{A \code{phylo} tree, or the number of species, one whole number, 1 or more (not for
 \code{type = "phylo"}); ignored for \code{type = "trait"}, where the species are those of \code{traits}.}
 
 \item{type}{Type of interspecific competition.}
 
 \item{inter_max}{Maximum interspecific coefficient, relative to
-intraspecific competition.}
+intraspecific competition, one finite number, 0 or more.}
 
-\item{scale}{Multiplier of all coefficients.}
+\item{scale}{Multiplier of all coefficients, one finite number greater than 0.}
 
 \item{traits}{For \code{type = "trait"}: a data frame from \code{\link[=species_traits]{species_traits()}}, or any data frame
 with columns \code{optimum} and \code{sigma}, or a list of them for a niche of several axes.}

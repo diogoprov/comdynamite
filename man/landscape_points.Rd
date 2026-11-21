@@ -19,9 +19,10 @@ With \code{lonlat = TRUE}, longitude and latitude in decimal degrees.}
 \item{env}{Numeric vector with the environment of each site.}
 
 \item{disp_scale}{Scale of the dispersal kernel, in the units of the distances
-(kilometres with \code{lonlat = TRUE}).}
+(kilometres with \code{lonlat = TRUE}): one number greater than 0.}
 
-\item{lonlat}{Are the coordinates longitude and latitude? Distances are then great-circle
+\item{lonlat}{Are the coordinates longitude and latitude? \code{TRUE} or \code{FALSE}. Distances are then
+great-circle
 distances in kilometres, with a spherical Earth of radius 6371 km; otherwise Euclidean.}
 
 \item{disp_shape}{Shape of the dispersal kernel, \code{"exponential"} (the default) or

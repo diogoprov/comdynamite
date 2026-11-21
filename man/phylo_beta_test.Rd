@@ -24,7 +24,7 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 \item{env}{Predictor, or matrix or data frame of predictors, with one row per
 site.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation
 per row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free
@@ -39,8 +39,9 @@ within strata (see \code{\link[=env_surrogates]{env_surrogates()}}; their rates 
 error were checked in \code{\link[=pcps_test]{pcps_test()}}, not here). Surrogates need \code{coords}; empty sites
 are then not allowed.}
 
-\item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or
-\code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when it has them.}
+\item{coords}{Matrix of coordinates with one row per site, without missing or infinite
+values, for \code{null = "variogram"} or \code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when
+it has them.}
 }
 \value{
 List of class \code{mc_phylo_beta} with \code{r2_adjusted}, the adjusted R2; \code{statistic},

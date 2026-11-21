@@ -20,16 +20,17 @@ the statistics.}
 
 \item{statistics}{Names of the statistics to use. By default all the others.}
 
-\item{ntree}{Number of trees per forest.}
+\item{ntree}{Number of trees per forest. One whole number, 1 or more.}
 
-\item{ncores}{Number of threads for the forests.}
+\item{ncores}{Number of threads for the forests. One whole number, 1 or more.}
 
 \item{object}{An \code{mc_abc_fit}.}
 
 \item{newdata}{Named numeric vector of observed statistics, as from \code{\link[=summary_stats]{summary_stats()}}, or a
 data frame with one observation per row.}
 
-\item{level}{Probability of the credible interval.}
+\item{level}{Probability of the credible interval. One number greater than 0 and less
+than 1.}
 
 \item{...}{Not used.}
 

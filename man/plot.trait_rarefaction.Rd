@@ -23,9 +23,9 @@ the lines. \code{NULL} (the default) marks the 80\% rule for \code{cover} and no
 
 \item{colours}{Colour of the line and band; the default is the blue of the Okabe-Ito palette.}
 
-\item{alpha}{Transparency of the band.}
+\item{alpha}{Transparency of the band. One number between 0 and 1.}
 
-\item{scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.}
+\item{scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}. One character string.}
 
 \item{...}{Not used.}
 

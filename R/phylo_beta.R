@@ -69,7 +69,7 @@ phylo_beta <- function(comm, tree) {
 #' @inheritParams phylo_beta
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
 #'   site.
-#' @param n_perm Number of permutations of sites and of species.
+#' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites. Empty sites are then allowed, because they are part of the
@@ -81,8 +81,9 @@ phylo_beta <- function(comm, tree) {
 #'   within strata (see [env_surrogates()]; their rates of type I
 #'   error were checked in [pcps_test()], not here). Surrogates need `coords`; empty sites
 #'   are then not allowed.
-#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
-#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
+#' @param coords Matrix of coordinates with one row per site, without missing or infinite
+#'   values, for `null = "variogram"` or `"parametric"`. Taken from an [mc_data()] object when
+#'   it has them.
 #' @return List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2; `statistic`,
 #'   the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`, the sites on the
 #'   principal coordinates of the predicted matrix, which the authors suggest
@@ -123,6 +124,8 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
     if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
+  check_count(n_perm, "n_perm")
+  if (!is.null(coords)) check_coords(coords)
   restricted <- !is.null(site_permutations)
   matched <- present_species(check_phylo_comm(comm, tree, allow_empty = restricted))
   comm <- matched$comm
@@ -132,7 +135,7 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
   env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
-  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  check_enough_sites(comm, env)
   env_basis <- function(x) qr.Q(qr(sweep(x, 2, colMeans(x))))
   basis <- env_basis(env)
   weights <- comm / rowSums(comm)

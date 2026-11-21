@@ -17,17 +17,18 @@ trait_densities(
 \arguments{
 \item{individuals}{Data frame with one row per individual.}
 
-\item{trait}{Name of the column with the trait.}
+\item{trait}{Name of the column with the trait. One character string.}
 
-\item{site, species}{Names of the columns with the site and the species.}
+\item{site, species}{Names of the columns with the site and the species. One character
+string each.}
 
 \item{abundance}{Name of a column with the abundance of each population (the same value
 for all its individuals), or \code{NULL} to weight populations by the number of individuals
-measured.}
+measured. One character string or \code{NULL}.}
 
-\item{bw}{Bandwidth of the kernel, or \code{NULL} for the rule above.}
+\item{bw}{Bandwidth of the kernel (one number greater than 0), or \code{NULL} for the rule above.}
 
-\item{n}{Number of points of the grid of trait values.}
+\item{n}{Number of points of the grid of trait values. One whole number, 2 or more.}
 }
 \value{
 A data frame with the columns \code{site}, \code{species} (\code{NA} for communities), \code{level}

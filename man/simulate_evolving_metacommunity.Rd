@@ -46,12 +46,12 @@ table).}
 \item{evolution}{Settings from \code{\link[=evolution_control]{evolution_control()}}; \code{NULL} keeps the optimum of each
 species fixed (\code{genetic_var = 0}), which rules out ecological speciation.}
 
-\item{dispersal}{Emigration probability, one value or one per species.}
+\item{dispersal}{Emigration probability, between 0 and 1: one value or one per species.}
 
-\item{extirpation}{Probability that a population is lost at each time step,
-one value or one per species.}
+\item{extirpation}{Probability that a population is lost at each time step, between 0 and
+1: one value or one per species.}
 
-\item{n_steps}{Number of time steps.}
+\item{n_steps}{Number of time steps, one whole number, 1 or more.}
 
 \item{competition}{\code{"phylo"} or \code{"none"}.}
 
@@ -59,26 +59,28 @@ one value or one per species.}
 competition within a species: between sisters just split (\code{inter_max}) and between
 distant species (\code{inter_min}); the overall scale (competition within a species); and the
 distance in generations over which the excess over \code{inter_min} decays by a factor of
-\eqn{e}{e}.}
+\eqn{e}{e}. Each one number: \code{inter_max} 0 or more, \code{inter_min} between 0 and \code{inter_max},
+\code{scale} greater than 0 and \code{distance_scale} greater than 0 (\code{Inf} for no decay).}
 
 \item{niche_overlap}{Should competition between species also fall with the difference of
-their phenotypes in each site?}
+their phenotypes in each site? \code{TRUE} or \code{FALSE}.}
 
 \item{initial}{Optional matrix (sites x species) of abundances at the start; by default
 Poisson(\code{seed_mean}) individuals of each species in every site.}
 
 \item{seed_mean}{Mean number of individuals of each species added to each
-site at each seeding step (and at the start).}
+site at each seeding step (and at the start), one finite number, 0 or more.}
 
-\item{record_steps}{Optional steps at which abundances are recorded.}
+\item{record_steps}{Optional steps at which abundances are recorded, a numeric vector
+without \code{NA}; steps outside 1 to \code{n_steps} are dropped.}
 
 \item{immigration}{How emigrants reach other sites on spatially explicit landscapes:
 \code{"poisson"} (the default, as in the code of Thompson et al. 2020) or \code{"multinomial"},
 which conserves them and is recommended for low dispersal (see Details). Spatially
 implicit landscapes are always multinomial.}
 
-\item{max_species}{Maximum number of species ever, including extinct ones; the simulation
-stops with an error beyond it.}
+\item{max_species}{Maximum number of species ever, including extinct ones (one whole number,
+1 or more); the simulation stops with an error beyond it.}
 
 \item{env}{For a list of \code{traits}: the environmental axes of each site, a matrix or data
 frame with one row per site and one column per element of \code{traits}. The \code{genetic_var}
@@ -116,11 +118,11 @@ above 1 are set to 1), applied on top of \code{dispersal} and \code{dispersal_ti
 dispersal pulse only in the floodplain at high water. \code{NULL} (the default) for the same
 emigration at every site.}
 
-\item{disturbance_sensitivity}{Probability that a population is lost when its site is
-disturbed: one value or one per species. 1 (the default) removes all the populations of a
-disturbed site, as without this argument; lower values let species that resist the
-disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
-keep their populations.}
+\item{disturbance_sensitivity}{Probability that a population is lost when its site is disturbed,
+between 0 and 1: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the disturbance
+(for instance drought-tolerant or air-breathing fish when a lake dries out) keep their
+populations.}
 
 \item{kernel_group}{Optional routes of dispersal by group of species, as in
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}: one group per species at the start, given as a column name or

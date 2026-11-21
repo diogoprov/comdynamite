@@ -26,23 +26,26 @@ plot_population_traits(
 \arguments{
 \item{individuals}{Data frame with one row per individual.}
 
-\item{trait}{Name of the column with the trait.}
+\item{trait}{Name of the column with the trait. One character string.}
 
-\item{site, species}{Names of the columns with the site and the species.}
+\item{site, species}{Names of the columns with the site and the species. One character
+string each.}
 
 \item{abundance}{Name of a column with the abundance of each population (the same value
 for all its individuals), or \code{NULL} to weight populations by the number of individuals
-measured.}
+measured. One character string or \code{NULL}.}
 
 \item{sites}{Sites to draw; \code{NULL} (the default) draws all.}
 
-\item{weighted}{Scale the population densities by their relative abundances.}
+\item{weighted}{Scale the population densities by their relative abundances? \code{TRUE} or
+\code{FALSE}.}
 
-\item{community}{Draw the density of the community.}
+\item{community}{Draw the density of the community? \code{TRUE} or \code{FALSE}.}
 
-\item{rug}{Draw the individuals as a rug.}
+\item{rug}{Draw the individuals as a rug? \code{TRUE} or \code{FALSE}.}
 
-\item{alpha}{Transparency of the population densities (0, transparent, to 1, opaque).}
+\item{alpha}{Transparency of the population densities: one number from 0 (transparent) to 1
+(opaque).}
 
 \item{colours}{Colours of the species: unnamed, in the order of first appearance in
 \code{individuals}, or named by species. \code{NULL} (the default) uses the Okabe-Ito palette for
@@ -53,11 +56,12 @@ up to seven species and \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors(
 and left out of the legend. Useful when a site holds many species, whose colours cannot
 all be told apart.}
 
-\item{bw}{Bandwidth of the kernel, or \code{NULL} for the rule above.}
+\item{bw}{Bandwidth of the kernel (one number greater than 0), or \code{NULL} for the rule above.}
 
-\item{n}{Number of points of the grid of trait values.}
+\item{n}{Number of points of the grid of trait values. One whole number, 2 or more.}
 
-\item{ncol, scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.}
+\item{ncol, scales}{Passed to \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}: one whole number (or \code{NULL}) and one
+character string.}
 }
 \value{
 A ggplot object.

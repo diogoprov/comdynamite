@@ -14,13 +14,15 @@ food_web_rates(x, tree, levels, sigma2 = 1, k = 1, window = NULL)
 \item{levels}{Trophic level of each tip, \code{"R"}, \code{"N"} or \code{"P"}, named by tip label or in the
 order of \code{tree$tip.label}.}
 
-\item{sigma2}{Rate outside the stretch informed by the metacommunity.}
+\item{sigma2}{Rate outside the stretch informed by the metacommunity. One finite number
+greater than 0.}
 
 \item{k}{Increase of the rate, relative to \code{sigma2}, per unit of speed (trait units per unit
-of time of the food web).}
+of time of the food web). One finite number, 0 or more.}
 
 \item{window}{Length of the end of each tip branch represented by the metacommunity, in the
-units of the branch lengths; \code{NULL} uses the whole tip branch. A window longer than a tip
+units of the branch lengths (one finite number greater than 0); \code{NULL} uses the whole tip
+branch. A window longer than a tip
 branch is cut to its length.}
 }
 \value{

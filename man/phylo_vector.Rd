@@ -26,11 +26,12 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 \item{env}{Numeric vector with the value of each site. The authors estimate one
 vector for each predictor.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
-\item{level}{Significance level of the global test and of the selection.}
+\item{level}{Significance level of the global test and of the selection. One number
+between 0 and 1, both excluded.}
 
-\item{n_sim}{Number of Brownian vectors.}
+\item{n_sim}{Number of Brownian vectors. One whole number, 1 or more.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per
 row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations.

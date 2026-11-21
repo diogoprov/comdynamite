@@ -28,15 +28,16 @@ forests are fitted once per fold for all rows.}
 \item{statistics}{Names of the statistics without the prefix, such as \code{"alpha"}. By default
 all.}
 
-\item{level}{Probability of the predictive interval.}
+\item{level}{Probability of the predictive interval. One number greater than 0 and less
+than 1.}
 
-\item{n}{Number of draws from the posterior of each fold.}
+\item{n}{Number of draws from the posterior of each fold. One whole number, 2 or more.}
 
-\item{ntree}{Number of trees per forest.}
+\item{ntree}{Number of trees per forest. One whole number, 1 or more.}
 
-\item{ncores}{Number of threads for the forests.}
+\item{ncores}{Number of threads for the forests. One whole number, 1 or more.}
 
-\item{seed}{Integer that sets the seed.}
+\item{seed}{Integer that sets the seed. One finite whole number.}
 }
 \value{
 A data frame with one row per observed data set, fold and statistic: \code{observed}, the median and the

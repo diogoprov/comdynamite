@@ -36,7 +36,7 @@ test_that("a burst follows each change and decays along descending branches", {
   h <- set_map(h, below[1], c(y = 0.5, x = 0.5))
   expect_equal(history_rates(h, "burst", burst = 4, decay = 0.2)[below[1]],
                1 + excess(0.5, 0.5) + excess(0, 0.5))
-  expect_error(history_rates(h, "burst", decay = 0), "positive")
+  expect_error(history_rates(h, "burst", decay = 0), "`decay`")
 })
 
 test_that("sympatry counts the lineages that share a state at each moment", {
@@ -52,7 +52,7 @@ test_that("sympatry counts the lineages that share a state at each moment", {
   rates <- history_rates(three, "sympatry", r = -0.5)
   # c is with one lineage, then with two
   expect_equal(rates[three$edge[, 2] == 3], (exp(-1) + exp(-1.5)) / 2)
-  expect_error(history_rates(three, "sympatry", r = NA), "one number")
+  expect_error(history_rates(three, "sympatry", r = NA), "`r`")
 })
 
 test_that("history rates feed trait_rates and are checked", {
@@ -65,7 +65,7 @@ test_that("history rates feed trait_rates and are checked", {
   expect_null(x$shifts)
   expect_error(trait_rates(h, edge_rates = 1:3), "one positive number")
   expect_error(history_rates(ape::rcoal(4)), "simmap")
-  expect_error(history_rates(h, sigma2 = 0), "positive number")
+  expect_error(history_rates(h, sigma2 = 0), "`sigma2`")
   zero <- fixed_history("((a:0,b:1):1,c:2);")
   expect_true(all(is.finite(history_rates(zero, "sympatry"))))
   expect_equal(history_rates(zero, "state", state_rates = c(x = 3, y = 1))[1:2], c(3, 3))

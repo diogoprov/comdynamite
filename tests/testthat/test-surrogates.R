@@ -45,7 +45,7 @@ test_that("variogram surrogates keep the autocorrelation and lose the values", {
 
 test_that("env_surrogates() checks its input", {
   x <- field_on(grid, 3, 1)
-  expect_error(env_surrogates(x, grid[-1, ]), "nrow")
+  expect_error(env_surrogates(x, grid[-1, ]), "`coords`")
   expect_error(env_surrogates(x, rbind(grid[-1, ], grid[1, , drop = FALSE])[c(144, 1:143), ][
     c(1, 1:143), ]), "same coordinates")
   expect_error(env_surrogates(x, grid, method = "torus"), "should be one of")

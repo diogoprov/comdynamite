@@ -10,11 +10,11 @@
 #'   limits of its uniform prior.
 #' @param simulate Function of `scenario`, a list with one value per parameter, and `shared`,
 #'   what `setup` returned, which gives a simulation. As in [run_scenarios()].
-#' @param n Number of simulations.
+#' @param n Number of simulations. One whole number, 1 or more.
 #' @param setup Optional function without arguments that gives what all simulations share.
 #' @param summarise Function of `sim` and `shared` that gives a named numeric vector. The default
 #'   is [summary_stats()], with `shared$tree` if there is one.
-#' @param seed Integer that sets all the seeds.
+#' @param seed Integer that sets all the seeds. One finite whole number.
 #' @return An `mc_abc_table`: a data frame with one row per simulation, the parameters and the
 #'   statistics, with the attributes `prior`, `parameters` and `statistics`.
 #' @family inference
@@ -38,7 +38,11 @@ abc_table <- function(prior, simulate, n, setup = NULL,
                       summarise = function(sim, shared) summary_stats(sim, shared$tree),
                       seed = 1) {
   check_prior(prior)
-  stopifnot(is.function(simulate), length(n) == 1, n >= 1, length(seed) == 1)
+  check_function_arg(simulate, "simulate")
+  check_function_arg(setup, "setup", null_ok = TRUE)
+  check_function_arg(summarise, "summarise")
+  check_count(n, "n")
+  check_seed(seed)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()), add = TRUE)
@@ -48,6 +52,43 @@ abc_table <- function(prior, simulate, n, setup = NULL,
   table$replicate <- NULL
   structure(table, class = c("mc_abc_table", "data.frame"), prior = prior,
             parameters = names(prior), statistics = setdiff(names(table), names(prior)))
+}
+
+# stops unless `table` is a data frame, such as an `mc_abc_table`
+check_abc_table <- function(table) {
+  if (!is.data.frame(table)) {
+    stop("`table` must be a data frame, such as one from abc_table()", call. = FALSE)
+  }
+  invisible(table)
+}
+
+# stops unless `x` is a fit from abc_fit(); `name` is the argument
+check_abc_fit <- function(x, name) {
+  if (!inherits(x, "mc_abc_fit")) {
+    stop("`", name, "` must be an `mc_abc_fit` from abc_fit()", call. = FALSE)
+  }
+  invisible(x)
+}
+
+# stops unless `seed` is one whole number that set.seed() takes as an integer, with room for
+# the offsets added to it for each cell
+check_seed <- function(seed, name = "seed") {
+  limit <- .Machine$integer.max / 2
+  if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed) || seed != round(seed) ||
+        abs(seed) > limit) {
+    stop("`", name, "` must be one whole number between ", -floor(limit), " and ", floor(limit),
+         call. = FALSE)
+  }
+  invisible(seed)
+}
+
+# stops unless `x` is a function (or NULL when `null_ok` is TRUE); `name` is the argument
+check_function_arg <- function(x, name, null_ok = FALSE) {
+  if (null_ok && is.null(x)) return(invisible(x))
+  if (!is.function(x)) {
+    stop("`", name, "` must be a function", if (null_ok) " or NULL", call. = FALSE)
+  }
+  invisible(x)
 }
 
 check_prior <- function(prior) {
@@ -78,8 +119,8 @@ check_prior <- function(prior) {
 #'   the statistics.
 #' @param parameters Names of the parameters to estimate. By default those of `table`.
 #' @param statistics Names of the statistics to use. By default all the others.
-#' @param ntree Number of trees per forest.
-#' @param ncores Number of threads for the forests.
+#' @param ntree Number of trees per forest. One whole number, 1 or more.
+#' @param ncores Number of threads for the forests. One whole number, 1 or more.
 #' @return An `mc_abc_fit`, a list with `forests` (one per parameter), `training`, `parameters`,
 #'   `statistics` and `prior`.
 #' @references
@@ -102,7 +143,9 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
   if (!requireNamespace("abcrf", quietly = TRUE)) {
     stop("abc_fit() needs the package abcrf.", call. = FALSE) # nocov
   }
-  stopifnot(is.data.frame(table))
+  check_abc_table(table)
+  check_count(ntree, "ntree")
+  check_count(ncores, "ncores")
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   statistics <- statistics %||% attr(table, "statistics") %||% setdiff(names(table), parameters)
@@ -133,13 +176,15 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #' @param object An `mc_abc_fit`.
 #' @param newdata Named numeric vector of observed statistics, as from [summary_stats()], or a
 #'   data frame with one observation per row.
-#' @param level Probability of the credible interval.
+#' @param level Probability of the credible interval. One number greater than 0 and less
+#'   than 1.
 #' @param ... Not used.
 #' @return For `predict()`, a data frame with `observation`, `parameter`, `estimate` (posterior
 #'   median), `low`, `high` and `mean`.
 #' @export
 predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
-  stopifnot(length(level) == 1, level > 0, level < 1)
+  check_number(level, "level", 0, 1, open = TRUE)
+  check_count(ncores, "ncores")
   observed <- observed_statistics(newdata, object$statistics)
   probs <- c((1 - level) / 2, (1 + level) / 2)
   out <- lapply(object$parameters, function(p) {
@@ -159,7 +204,7 @@ predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
 #' @param x An `mc_abc_fit`.
 #' @export
 abc_importance <- function(x) {
-  stopifnot(inherits(x, "mc_abc_fit"))
+  check_abc_fit(x, "x")
   out <- lapply(x$parameters, function(p) {
     imp <- x$forests[[p]]$model.rf$variable.importance
     data.frame(parameter = p, statistic = names(imp), importance = imp / sum(imp))
@@ -186,9 +231,11 @@ print.mc_abc_fit <- function(x, ...) {
 #' (Pontarp et al. 2019).
 #'
 #' @inheritParams abc_fit
-#' @param n_test Number of pseudo-observations.
-#' @param level Probability of the credible interval.
-#' @param seed Integer for the choice of the pseudo-observations.
+#' @param n_test Number of pseudo-observations. One whole number, 2 or more and at least 11
+#'   fewer than the rows of `table`.
+#' @param level Probability of the credible interval. One number greater than 0 and less
+#'   than 1.
+#' @param seed Integer for the choice of the pseudo-observations. One finite whole number.
 #' @return A data frame with one row per parameter: `n`, `r2` (1 minus the squared error over the
 #'   variance of the truth), `bias` and `width` (mean width of the interval) as fractions of the
 #'   prior range, and `coverage`, the fraction of intervals that contain the truth, with its
@@ -209,7 +256,16 @@ print.mc_abc_fit <- function(x, ...) {
 #' @export
 abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 200,
                          level = 0.9, ntree = 500, ncores = 1, seed = 1) {
-  stopifnot(is.data.frame(table), length(n_test) == 1, n_test >= 2, n_test < nrow(table) - 10)
+  check_abc_table(table)
+  check_count(n_test, "n_test", min = 2)
+  if (n_test >= nrow(table) - 10) {
+    stop("`n_test` must leave more than 10 rows of `table` (", nrow(table), " rows) to fit on",
+         call. = FALSE)
+  }
+  check_number(level, "level", 0, 1, open = TRUE)
+  check_count(ntree, "ntree")
+  check_count(ncores, "ncores")
+  check_seed(seed)
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
@@ -254,9 +310,9 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
 #' @param tables Named list of reference tables, one per model, as from [abc_table()], or a data
 #'   frame with a column `model`. Only the statistics shared by all models are used.
 #' @param statistics Names of the statistics. By default all statistics shared by the models.
-#' @param ntree Number of trees.
-#' @param lda Add the linear discriminant axes as predictors?
-#' @param ncores Number of threads.
+#' @param ntree Number of trees. One whole number, 1 or more.
+#' @param lda Add the linear discriminant axes as predictors? `TRUE` or `FALSE`.
+#' @param ncores Number of threads. One whole number, 1 or more.
 #' @return An `mc_abc_choice`, a list with `forest`, `training`, `statistics`, `models`,
 #'   `error` (out-of-bag error) and `confusion` (rows: true model; columns: chosen model).
 #' @references
@@ -276,6 +332,9 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
   if (!requireNamespace("abcrf", quietly = TRUE)) {
     stop("abc_choose() needs the package abcrf.", call. = FALSE) # nocov
   }
+  check_count(ntree, "ntree")
+  check_flag(lda, "lda")
+  check_count(ncores, "ncores")
   if (is.data.frame(tables)) {
     if (!"model" %in% names(tables)) stop("A data frame needs a column `model`.", call. = FALSE)
     model <- as.character(tables$model)
@@ -325,6 +384,8 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
 #'   column of votes per model.
 #' @export
 predict.mc_abc_choice <- function(object, newdata, ntree = 500, ncores = 1, ...) {
+  check_count(ntree, "ntree")
+  check_count(ncores, "ncores")
   observed <- observed_statistics(newdata, object$statistics)
   post <- stats::predict(object$forest, observed, object$training, ntree = ntree,
                          paral = ncores > 1, ncores = ncores)
@@ -378,10 +439,10 @@ observed_statistics <- function(newdata, statistics) {
 #'   the parameters.
 #' @param statistics Names of the statistics to check. By default those of `table` that did not
 #'   enter `fit`, or all if every statistic did.
-#' @param n Number of draws from the posterior.
+#' @param n Number of draws from the posterior. One whole number, 2 or more.
 #' @param simulate,setup,summarise Optional functions to simulate new data, as in
 #'   [abc_table()].
-#' @param seed Integer that sets all the seeds.
+#' @param seed Integer that sets all the seeds. One finite whole number.
 #' @return A data frame with one row per statistic: `observed`, the median and the 5% and 95%
 #'   quantiles of the predicted statistic, and `p`, the two-sided posterior predictive p-value
 #'   (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
@@ -402,7 +463,13 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
                     setup = NULL,
                     summarise = function(sim, shared) summary_stats(sim, shared$tree),
                     seed = 1) {
-  stopifnot(inherits(fit, "mc_abc_fit"), is.data.frame(table), length(n) == 1, n >= 2)
+  check_abc_fit(fit, "fit")
+  check_abc_table(table)
+  check_count(n, "n", min = 2)
+  check_function_arg(simulate, "simulate", null_ok = TRUE)
+  check_function_arg(setup, "setup", null_ok = TRUE)
+  check_function_arg(summarise, "summarise")
+  check_seed(seed)
   others <- setdiff(attr(table, "statistics") %||% setdiff(names(table), fit$parameters),
                     c(fit$statistics, fit$parameters))
   statistics <- statistics %||% (if (length(others)) others else fit$statistics)
@@ -464,7 +531,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
 #' @param newdata Named numeric vector of observed statistics or a data frame with one
 #'   observation per row.
 #' @param coverage Central probability of the reference table within which a statistic counts
-#'   as inside.
+#'   as inside. One number greater than 0 and less than 1.
 #' @return A data frame with `observation`, `parameter`, `n_positive` (simulations with positive
 #'   weight), `ess`, `khat`, `khat_threshold`, `n_outside` (statistics of the observation outside
 #'   the central `coverage` of the table) and `outside` (their names).
@@ -480,7 +547,8 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
 #' abc_diagnose(fit, data.frame(s1 = c(0.5, 3)))
 #' @export
 abc_diagnose <- function(fit, newdata, coverage = 0.99) {
-  stopifnot(inherits(fit, "mc_abc_fit"), length(coverage) == 1, coverage > 0, coverage < 1)
+  check_abc_fit(fit, "fit")
+  check_number(coverage, "coverage", 0, 1, open = TRUE)
   if (!requireNamespace("posterior", quietly = TRUE)) {
     stop("abc_diagnose() needs the package posterior.", call. = FALSE) # nocov
   }

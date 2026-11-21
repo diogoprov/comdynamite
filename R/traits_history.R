@@ -16,18 +16,22 @@
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
 #' @param root Deprecated; use `root_state`.
-#' @param q One rate for every change between states (the equal-rates model), or a square matrix
+#' @param q One rate for every change between states (the equal-rates model; one finite number,
+#'   0 or more), or a square matrix
 #'   of rates from the state of each row to the state of each column, with the states as names;
 #'   its diagonal is ignored.
-#' @param states Names of the states, when `q` is one rate.
-#' @param root_state State at the root; `NULL` draws one with equal probabilities.
-#' @param alpha Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
-#'   `NULL` for none. Small values make rates more uneven among branches.
+#' @param states Names of the states (two or more, all different), when `q` is one rate.
+#' @param root_state State at the root, one of the states; `NULL` draws one with equal
+#'   probabilities.
+#' @param alpha Shape (and rate) of the gamma distribution of the rate multiplier of each branch
+#'   (one finite number greater than 0); `NULL` for none. Small values make rates more uneven
+#'   among branches.
 #' @param edge_rates Optional multipliers of the rates of each branch, in the order of the rows of
 #'   `tree$edge`, instead of drawing them with `alpha`.
 #' @param rate_classes Optional multipliers of the rates in each hidden class, such as
 #'   `c(slow = 0.1, fast = 1)`; classes without names are called `R1`, `R2` and so on.
-#' @param class_switch Rate of moving from one hidden class to each other one.
+#' @param class_switch Rate of moving from one hidden class to each other one. One finite
+#'   number, 0 or more.
 #' @return The tree, reordered "cladewise", with class `c("simmap", "phylo")` and, as in
 #'   `phytools::sim.history()`: `maps`, a list with one element per edge giving the time spent in
 #'   each state in the order they occurred; `mapped.edge`, the total time in each state per edge;
@@ -66,13 +70,18 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
                      edge_rates = NULL, rate_classes = NULL, class_switch = 0.1, root = NULL) {
   check_tree(tree)
   root <- renamed_arg(root_state, root, "root_state", "root")
+  check_number(alpha, "alpha", lower = 0, open = TRUE, null_ok = TRUE)
+  check_number(class_switch, "class_switch", lower = 0)
   if (is.matrix(q)) {
     states <- rownames(q)
     if (is.null(states) || !identical(states, colnames(q))) {
       stop("`q` needs the same state names in its rows and columns", call. = FALSE)
     }
   } else {
-    stopifnot(length(q) == 1, length(states) >= 2, !anyDuplicated(states))
+    check_number(q, "q", lower = 0)
+    if (length(states) < 2 || anyNA(states) || anyDuplicated(states)) {
+      stop("`states` must be two or more different names of states", call. = FALSE)
+    }
     q <- matrix(q, length(states), length(states), dimnames = list(states, states))
   }
   diag(q) <- 0
@@ -82,9 +91,6 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
   }
   n_edge <- nrow(tree$edge)
   if (!is.null(alpha)) {
-    if (length(alpha) != 1 || !is.finite(alpha) || alpha <= 0) {
-      stop("`alpha` must be one positive number", call. = FALSE)
-    }
     edge_rates <- stats::rgamma(n_edge, shape = alpha, rate = alpha)
   }
   if (!is.null(edge_rates) &&
@@ -94,14 +100,14 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
   observed_q <- q
   diag(observed_q) <- -rowSums(q)
   root <- root %||% sample(states, 1)
-  if (!root %in% states) stop("`root_state` must be one of the states", call. = FALSE)
+  if (length(root) != 1 || !root %in% states) {
+    stop("`root_state` must be one of the states", call. = FALSE)
+  }
 
   if (!is.null(rate_classes)) {
-    if (!is.numeric(rate_classes) || length(rate_classes) < 2 || any(rate_classes < 0)) {
+    if (!is.numeric(rate_classes) || length(rate_classes) < 2 ||
+        !all(is.finite(rate_classes)) || any(rate_classes < 0)) {
       stop("`rate_classes` needs two or more multipliers, zero or more", call. = FALSE)
-    }
-    if (length(class_switch) != 1 || !is.finite(class_switch) || class_switch < 0) {
-      stop("`class_switch` must be one number, zero or more", call. = FALSE)
     }
     classes <- names(rate_classes) %||% paste0("R", seq_along(rate_classes))
     if (anyDuplicated(classes) || any(classes == "")) {

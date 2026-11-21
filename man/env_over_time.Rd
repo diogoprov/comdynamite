@@ -9,11 +9,11 @@ env_over_time(env, n_steps, rho = 0.9, sd = 5)
 \arguments{
 \item{env}{Environment of each site, e.g. the \code{env} of an \code{mc_landscape}.}
 
-\item{n_steps}{Number of time steps.}
+\item{n_steps}{Number of time steps: one whole number, 1 or more.}
 
-\item{rho}{Lag-one autocorrelation of the deviations, in [0, 1).}
+\item{rho}{Lag-one autocorrelation of the deviations: one number in [0, 1).}
 
-\item{sd}{Stationary standard deviation of the deviations.}
+\item{sd}{Stationary standard deviation of the deviations: one number, 0 or more.}
 }
 \value{
 Matrix with one row per site and one column per time step, for the

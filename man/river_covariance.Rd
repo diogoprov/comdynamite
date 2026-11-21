@@ -21,7 +21,7 @@ numeric vector with the partial sill (variance) and the range \eqn{\alpha}{alpha
 \code{sill} and \code{range} or in that order. Ranges are in the units of the reach lengths (tail-up
 and tail-down) or of the coordinates (Euclidean).}
 
-\item{nugget}{Variance independent among sites.}
+\item{nugget}{Variance independent among sites: one number, 0 or more.}
 
 \item{weights}{Weights of the branches for the tail-up component: \code{"magnitude"},
 \code{"upstream_length"} or a positive numeric vector with one value per site.}

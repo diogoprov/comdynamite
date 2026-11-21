@@ -21,9 +21,9 @@ plot_assembly(
 
 \item{colours}{Colours of the species kept and removed, and of the contours.}
 
-\item{species_labels}{Should the species be labelled?}
+\item{species_labels}{\code{TRUE} or \code{FALSE}. Should the species be labelled?}
 
-\item{point_size}{Size of the species.}
+\item{point_size}{Size of the species. One number greater than 0.}
 
 \item{labels, ...}{Deprecated: \code{labels} is now \code{species_labels}; graphical arguments of base
 graphics are no longer used. The aspect ratio is always 1, so that the contours of

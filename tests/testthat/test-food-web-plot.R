@@ -15,7 +15,7 @@ test_that("plot.food_web draws the panels and frames", {
   # a level absent during the whole run is left out
   y <- food_web_dynamics(seq(0, 100, by = 20), dt = 0.5)
   expect_ggplot(plot(y))
-  expect_error(plot(x, time = c(1, 2)), "one number")
+  expect_error(plot(x, time = c(1, 2)), "`time`")
   expect_error(plot(x, colours = "red"), "three colours")
   expect_error(plot(x, panels = "abundances"), "should be one of")
   z <- x
@@ -30,8 +30,8 @@ test_that("animate_food_web writes a GIF", {
   file <- tempfile(fileext = ".gif")
   expect_identical(animate_food_web(x, file, frames = 4, width = 200, height = 200), file)
   expect_true(file.size(file) > 0)
-  expect_error(animate_food_web(x, file, frames = 1000), "number of rows")
-  expect_error(animate_food_web(x, file, frames = 4, delay = 0), "positive")
+  expect_error(animate_food_web(x, file, frames = 1000), "`frames`")
+  expect_error(animate_food_web(x, file, frames = 4, delay = 0), "`delay`")
 })
 
 test_that("animate_food_web asks for gifski when it is missing", {

@@ -23,11 +23,11 @@ plot_phylo_beta(
 
 \item{tree}{The \code{phylo} object given to \code{\link[=phylo_beta_test]{phylo_beta_test()}}.}
 
-\item{axis}{Axis of \code{x$scores} that orders the sites.}
+\item{axis}{Axis of \code{x$scores} that orders the sites. One whole number, 1 or more.}
 
 \item{colours}{Colour of the largest value, with white for absences.}
 
-\item{text_size}{Size of the names of species, in mm.}
+\item{text_size}{Size of the names of species, in mm. One number greater than 0.}
 
 \item{col, cex, ...}{Deprecated: \code{col} is now \code{colours} and \code{cex} is \code{text_size}; arguments of
 \code{\link[graphics:image]{graphics::image()}} are no longer used.}

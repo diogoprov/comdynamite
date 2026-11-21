@@ -64,8 +64,8 @@ test_that("functions with a tree stop with a readable message on a bad tree", {
 test_that("other arguments are checked with their names", {
   set.seed(1)
   traits <- matrix(rnorm(10), 10, dimnames = list(paste0("sp", 1:10), NULL))
-  expect_error(assemble_community(traits, size = "a"), "`size` must be one number")
-  expect_error(assemble_community(traits, size = 11), "between 1 and the 10 species")
+  expect_error(assemble_community(traits, size = "a"), "`size` must be one whole number")
+  expect_error(assemble_community(traits, size = 11), "between 1 and 10")
   ind <- data.frame(site = rep(c("a", "b"), each = 6), species = rep(c("x", "y"), 6),
                     trait = rnorm(12))
   expect_error(tstats(ind, n_perm = -1), "`n_perm`")

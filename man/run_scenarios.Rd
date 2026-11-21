@@ -25,9 +25,9 @@ replicate share, such as a list with \code{tree} and \code{landscape}.}
 \item{summarise}{Function of \code{sim} and \code{shared} that gives a named numeric vector. The default
 is \code{\link[=summary_stats]{summary_stats()}}, with \code{shared$tree} if there is one.}
 
-\item{n_rep}{Number of replicates.}
+\item{n_rep}{Number of replicates. One whole number, 1 or more.}
 
-\item{seed}{Integer that sets all the seeds.}
+\item{seed}{Integer that sets all the seeds. One finite whole number.}
 }
 \value{
 Data frame with the columns of \code{scenarios}, \code{replicate} and the statistics.

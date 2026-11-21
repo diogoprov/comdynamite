@@ -15,24 +15,26 @@
 #' optima are rescaled to `optima_range`, or ranked with `uniform_optima`, unless
 #' `rescale_optima = FALSE`.
 #'
-#' @param species A `phylo` tree, or the number of species for traits without
-#'   phylogenetic structure.
+#' @param species A `phylo` tree, or the number of species (one whole number, 1 or more) for
+#'   traits without phylogenetic structure.
 #' @param lambda Pagel's lambda of the optima (0 = no signal, 1 = Brownian
-#'   motion). Ignored when `species` is a number.
-#' @param optima_range Range of the optima.
-#' @param uniform_optima Give the optima evenly spaced values by rank?
+#'   motion): one number between 0 and 1. Ignored when `species` is a number.
+#' @param optima_range Range of the optima: two finite numbers, the first not larger than the
+#'   second.
+#' @param uniform_optima Give the optima evenly spaced values by rank? `TRUE` or `FALSE`.
 #' @param sigma_mean,sigma_sd Mean and standard deviation of the normal
-#'   distribution (truncated at zero) of niche breadths.
+#'   distribution (truncated at zero) of niche breadths: one finite number each, `sigma_sd` 0
+#'   or more.
 #' @param rmax_range Range of the uniform distribution of maximum growth
-#'   rates.
+#'   rates: two finite numbers, 0 or more, the first not larger than the second.
 #' @param sigma_signal,rmax_signal Should niche breadth or maximum growth rate
-#'   carry phylogenetic signal (Brownian motion)?
+#'   carry phylogenetic signal (Brownian motion)? `TRUE` or `FALSE` each.
 #' @param optima,sigma,r_max Optional values of each trait, named by species or in the order
 #'   of the species, as a vector or a one-column matrix or data frame. They replace the values
 #'   drawn for that trait.
-#' @param rescale_optima Rescale external optima to `optima_range`?
+#' @param rescale_optima Rescale external optima to `optima_range`? `TRUE` or `FALSE`.
 #' @param nodes Also give the optima at the internal nodes of the tree, as [trait_bm()] does?
-#'   They are drawn after all other values, so the traits are the same as with
+#'   `TRUE` or `FALSE`. They are drawn after all other values, so the traits are the same as with
 #'   `nodes = FALSE` and the same seed, and rescaled as the optima of the tips, so they may fall
 #'   outside `optima_range`. Not available with external optima or `uniform_optima`.
 #' @return Data frame with columns `optimum`, `sigma` and `r_max`, one row per
@@ -53,12 +55,25 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
                            rmax_range = c(2, 8), sigma_signal = FALSE,
                            rmax_signal = FALSE, optima = NULL, sigma = NULL, r_max = NULL,
                            rescale_optima = TRUE, nodes = FALSE) {
+  check_number(lambda, "lambda", 0, 1)
+  check_range_pair(optima_range, "optima_range")
+  check_range_pair(rmax_range, "rmax_range", lower = 0)
+  check_number(sigma_mean, "sigma_mean")
+  check_number(sigma_sd, "sigma_sd", lower = 0)
+  if (sigma_sd == 0 && sigma_mean <= 0) {
+    stop("with `sigma_sd = 0`, `sigma_mean` must be greater than 0", call. = FALSE)
+  }
+  for (flag in c("uniform_optima", "sigma_signal", "rmax_signal", "rescale_optima", "nodes")) {
+    check_flag(get(flag), flag)
+  }
   if (inherits(species, "phylo")) {
     k <- ape::Ntip(species)
     sp <- species$tip.label
   } else {
-    if (!is.numeric(species) || length(species) != 1 || is.na(species) || species < 1) {
-      stop("`species` must be a `phylo` tree or the number of species", call. = FALSE)
+    if (!is.numeric(species) || length(species) != 1 || !is.finite(species) || species < 1 ||
+          species != round(species)) {
+      stop("`species` must be a `phylo` tree or the number of species (one whole number, 1 or ",
+           "more)", call. = FALSE)
     }
     if (sigma_signal || rmax_signal)
       stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`", call. = FALSE)
@@ -70,7 +85,7 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
          call. = FALSE)
   }
   given <- list(optima = external_trait(optima, sp, "optima"),
-                sigma = external_trait(sigma, sp, "sigma"),
+                sigma = external_trait(sigma, sp, "sigma", finite = FALSE),
                 r_max = external_trait(r_max, sp, "r_max"))
   if (!is.null(given$sigma) && any(given$sigma <= 0)) {
     stop("`sigma` must be positive", call. = FALSE)
@@ -118,11 +133,11 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #' where \eqn{C} is the phylogenetic covariance matrix of `tree`.
 #'
 #' @param tree A `phylo` tree with branch lengths.
-#' @param lambda Pagel's lambda, in \[0, 1\].
-#' @param nodes Also draw the values at the internal nodes? They are drawn after the tips,
-#'   given them, so the tips are the same as with `nodes = FALSE` and the same seed. Under
-#'   lambda, the nodes are those of the tree whose internal branches are multiplied by lambda
-#'   and whose terminal branches are lengthened to keep the tips where they were.
+#' @param lambda Pagel's lambda: one number between 0 and 1.
+#' @param nodes Also draw the values at the internal nodes? `TRUE` or `FALSE`. They are drawn after
+#'   the tips, given them, so the tips are the same as with `nodes = FALSE` and the same seed. Under
+#'   lambda, the nodes are those of the tree whose internal branches are multiplied by lambda and
+#'   whose terminal branches are lengthened to keep the tips where they were.
 #' @return Named numeric vector with the simulated trait value of each tip. With `nodes = TRUE`,
 #'   the attribute `nodes` holds the values at the internal nodes, named by their numbers in
 #'   `tree$edge`, the root first.
@@ -132,7 +147,9 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
 #' trait_bm(treeshapesim::sim_tree_shape(5), lambda = 0.5)
 #' @export
 trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
-  stopifnot(lambda >= 0, lambda <= 1)
+  check_tree(tree)
+  check_number(lambda, "lambda", 0, 1)
+  check_flag(nodes, "nodes")
   cv <- ape::vcv.phylo(tree)
   cv <- lambda * cv + (1 - lambda) * diag(diag(cv))
   x <- drop(crossprod(chol(cv), stats::rnorm(ape::Ntip(tree))))
@@ -358,7 +375,7 @@ niche_correlation <- function(traits, cor) {
 # traits of species_traits() as a data frame with names of species, also from a matrix or a
 # tibble, which has no row names
 # a trait given from outside, in the order of `species`; NULL when not given
-external_trait <- function(x, species, name) {
+external_trait <- function(x, species, name, finite = TRUE) {
   if (is.null(x)) return(NULL)
   if (!is.null(dim(x))) {
     if (ncol(x) != 1) stop("`", name, "` needs one column", call. = FALSE)
@@ -367,6 +384,7 @@ external_trait <- function(x, species, name) {
     x <- stats::setNames(if (is.data.frame(x)) x[[1]] else x[, 1], labels)
   }
   if (!is.numeric(x) || anyNA(x)) stop("`", name, "` must be numbers without NA", call. = FALSE)
+  if (finite && any(is.infinite(x))) stop("`", name, "` must be finite numbers", call. = FALSE)
   if (is.null(names(x))) {
     if (length(x) != length(species)) {
       stop("`", name, "` has ", length(x), " values and there are ", length(species), " species",
@@ -390,6 +408,16 @@ as_traits <- function(traits) {
   }
   if (.row_names_info(traits) < 0) rownames(traits) <- paste0("sp", seq_len(nrow(traits)))
   traits
+}
+
+# stops unless `x` is two finite numbers, the first not larger than the second, both `lower` or
+# more
+check_range_pair <- function(x, name, lower = -Inf) {
+  if (!is.numeric(x) || length(x) != 2 || !all(is.finite(x)) || x[1] > x[2] || any(x < lower)) {
+    stop("`", name, "` must be two finite numbers, the first not larger than the second",
+         if (is.finite(lower)) paste0(", both ", lower, " or more"), call. = FALSE)
+  }
+  invisible(x)
 }
 
 rank_to_marginal <- function(x, target) {

@@ -40,24 +40,26 @@ function of the time step that returns such a matrix.}
 \item{alpha}{Competition matrix from \code{\link[=competition_matrix]{competition_matrix()}}. Species are matched to the
 rows of \code{traits} by name, or by position if \code{alpha} has no names.}
 
-\item{dispersal}{Emigration probability, one value or one per species.}
+\item{dispersal}{Emigration probability, between 0 and 1: one value or one per species.}
 
-\item{n_steps}{Number of time steps.}
+\item{n_steps}{Number of time steps, one whole number, 1 or more.}
 
-\item{seed_steps}{Steps at which individuals are added during colonisation.}
+\item{seed_steps}{Steps at which individuals are added during colonisation, a numeric
+vector without \code{NA} (\code{numeric(0)} for none).}
 
 \item{seed_mean}{Mean number of individuals of each species added to each
-site at each seeding step (and at the start).}
+site at each seeding step (and at the start), one finite number, 0 or more.}
 
 \item{disp_matrix}{Row-stochastic dispersal matrix (sites x sites), or
 \code{NULL} for uniform dispersal.}
 
-\item{record_steps}{Optional steps at which abundances are recorded.}
+\item{record_steps}{Optional steps at which abundances are recorded, a numeric vector
+without \code{NA}; steps outside 1 to \code{n_steps} are dropped.}
 
 \item{sites, species}{Optional names of sites and species.}
 
-\item{extirpation}{Probability that a population is lost at each time step,
-one value or one per species.}
+\item{extirpation}{Probability that a population is lost at each time step, between 0 and
+1: one value or one per species.}
 
 \item{pool}{Optional matrix (sites x species), logical or 0/1, with the sites where each
 species can occur.}
@@ -105,18 +107,19 @@ while offspring outnumber the vacancies. Competition is through the shared micro
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}.}
 
 \item{microsites}{With \code{recruitment = "lottery"}, the number of microsites of each site (one
-value or one per site). \code{initial} must fit in them; seeds take vacant microsites by lottery
-with the residents. In the colonisation history, \code{immigrants} and the migrant load count
-immigrant recruits, and \code{propagule} the individuals of a new population after recruitment.}
+value or one per site), whole numbers, 1 or more. \code{initial} must fit in them; seeds take vacant
+microsites by lottery with the residents. In the colonisation history, \code{immigrants} and the
+migrant load count immigrant recruits, and \code{propagule} the individuals of a new population
+after recruitment.}
 
-\item{mortality}{With \code{recruitment = "lottery"}, the probability that an adult dies at each
-step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
-overlapping generations, with a generation time of about \code{1 / mortality} steps. With
-\code{evolution}, selection, mutation and the loss of variance to selection act on recruits, so
-that their effect per step scales with the share of recruits in the population; drift
-comes from the sampling of both survivors and recruits, so that it approaches that of a
-Moran model at low mortality; founders are sampled once, when they recruit;
-\code{steps_per_generation} must stay 1.}
+\item{mortality}{With \code{recruitment = "lottery"}, the probability that an adult dies at each step,
+whatever its phenotype, one number greater than 0 and up to 1: 1 (the default) for discrete
+generations, lower values for overlapping generations, with a generation time of about
+\code{1 / mortality} steps. With \code{evolution}, selection, mutation and the loss of variance to
+selection act on recruits, so that their effect per step scales with the share of recruits
+in the population; drift comes from the sampling of both survivors and recruits, so that it
+approaches that of a Moran model at low mortality; founders are sampled once, when they
+recruit; \code{steps_per_generation} must stay 1.}
 
 \item{dispersal_time}{Optional change of emigration through time: a vector with one
 multiplier of \code{dispersal} per step (probabilities above 1 are set to 1), or a matrix with
@@ -147,11 +150,11 @@ above 1 are set to 1), applied on top of \code{dispersal} and \code{dispersal_ti
 dispersal pulse only in the floodplain at high water. \code{NULL} (the default) for the same
 emigration at every site.}
 
-\item{disturbance_sensitivity}{Probability that a population is lost when its site is
-disturbed: one value or one per species. 1 (the default) removes all the populations of a
-disturbed site, as without this argument; lower values let species that resist the
-disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
-keep their populations.}
+\item{disturbance_sensitivity}{Probability that a population is lost when its site is disturbed,
+between 0 and 1: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the disturbance
+(for instance drought-tolerant or air-breathing fish when a lake dries out) keep their
+populations.}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},

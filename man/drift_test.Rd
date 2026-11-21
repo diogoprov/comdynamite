@@ -22,15 +22,17 @@ name the traits.}
 with one row and column per trait (for example, a known \eqn{G}{G}).}
 
 \item{correct}{Whether to subtract the sampling variance of the group means (needs groups
-with more than one individual).}
+with more than one individual): \code{TRUE} or \code{FALSE}.}
 
-\item{level}{The confidence level of the interval for the slope.}
+\item{level}{The confidence level of the interval for the slope: one number greater than 0
+and less than 1.}
 }
 \value{
 An object of class \code{drift_test}: a list with \code{slope}, its standard error \code{se}, the
 interval \code{conf_int}, the \code{statistic} (\eqn{t}{t}) and \code{p_value} of the test of slope 1, the
 \code{intercept} (the logarithm of the proportionality constant, an estimate of \eqn{\log(t /
-  N_e)}{log(t / Ne)} when \code{W} is \eqn{G}{G} and \code{correct = TRUE}), \code{df}, \code{n_groups}, \code{n_traits}, the matrix \code{W}
+  N_e)}{log(t / Ne)} when \code{W} is \eqn{G}{G} and \code{correct = TRUE}), \code{df}, \code{n_groups}, \code{n_traits},
+the matrix \code{W}
 and a data frame \code{components} with the \code{eigenvalue}, the expected \code{sampling} variance of
 the means (0 without correction) and the \code{between} variance (corrected) of each principal
 component. It has \code{print()} and \code{plot()} methods.
@@ -63,7 +65,8 @@ of \eqn{n}{n} individuals. Unless \eqn{P}{P} is proportional to \code{W}, this e
 slope (most with small groups and little divergence), so by default (\code{correct = TRUE}) the
 expected sampling variance on each component, \eqn{v_k^\top P v_k}{v_k' P v_k} times the mean of
 \eqn{1 / n}{1 / n} over groups, with \eqn{P}{P} the pooled covariance within groups, is
-subtracted from the variance among means before the regression. The regression treats each component as an independent
+subtracted from the variance among means before the regression. The regression treats each
+component as an independent
 observation, so with few traits the test has little power, and the slope has \eqn{q - 2}{q -
 2} degrees of freedom for \eqn{q}{q} traits.
 }

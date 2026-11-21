@@ -22,7 +22,8 @@ each area. Polygons can give it with \code{sf::st_join()} or \code{sf::st_inters
 \item{outside}{For \code{contrast = "others"}, sites outside all areas are left out of each
 event with \code{"zero"} or count as the other side with \code{"other"}.}
 
-\item{min_sites}{A warning is given for events with fewer sites on one side. This is a
+\item{min_sites}{One whole number, 0 or more. A warning is given for events with fewer sites
+on one side. This is a
 rule of thumb, not a value from the literature.}
 }
 \value{

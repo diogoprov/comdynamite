@@ -24,9 +24,9 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 \item{env}{Predictor, or matrix or data frame of predictors, with one row per
 site.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
-\item{squared}{Passed to \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}}.}
+\item{squared}{\code{TRUE} or \code{FALSE}, passed to \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}}.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation
 per row, for example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free

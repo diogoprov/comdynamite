@@ -29,11 +29,11 @@ and species of \code{comm} missing from the tree are dropped.}
 \item{regimes}{Regime of each edge of \code{tree}, in the order of \code{tree$edge}, with two or more
 regimes.}
 
-\item{n_rand}{Number of random partitions drawn; each distinct one is fitted once. 0 skips
-the test against random partitions.}
+\item{n_rand}{Number of random partitions drawn; each distinct one is fitted once. One whole
+number, 0 or more; 0 skips the test against random partitions.}
 
-\item{n_boot}{Number of parametric bootstrap simulations under the constant rates estimated
-(0, the default, skips the bootstrap).}
+\item{n_boot}{Number of parametric bootstrap simulations under the constant rates estimated.
+One whole number, 0 or more; 0, the default, skips the bootstrap.}
 
 \item{vary}{Which rates change among \code{regimes} or with \code{edge_covariate}: \code{"both"}, \code{"gamma"}
 or \code{"mu"}; the other one is a single rate for the whole tree.}
@@ -48,12 +48,13 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \item{tolerance, max_overlap}{Passed to \code{\link[=random_regimes]{random_regimes()}}: random clades hold between
 \code{1 / tolerance} and \code{tolerance} times as many edges as the clades of \code{regimes}, share
 at most \code{max_overlap} of their edges with them (Jaccard index), and the whole random
-partition agrees with \code{regimes} at most as much (adjusted Rand index).}
+partition agrees with \code{regimes} at most as much (adjusted Rand index). \code{tolerance} is one
+number, 1 or more; \code{max_overlap} one number between 0 and 1.}
 
 \item{cores}{Number of cores, with random partitions and bootstrap simulations fitted in
-parallel. Not available on
-Windows, where one core is used. The random partitions and the simulated communities are
-drawn before the fits, so the p-values do not depend on the number of cores.}
+parallel. One whole number, 1 or more. Not available on Windows, where one core is used.
+The random partitions and the simulated communities are drawn before the fits, so the
+p-values do not depend on the number of cores.}
 }
 \value{
 A list of class \code{mc_damocles_partition} with the observed \code{statistic}, its degrees

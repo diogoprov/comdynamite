@@ -29,6 +29,7 @@
 #'   \eqn{1 / (1 + \mathrm{n_perm}) < \alpha / 2}{1 / (1 + n_perm) < alpha / 2}, so `n_perm`
 #'   must be at least \eqn{2 / \alpha}{2 / alpha}; a warning is given otherwise. Before 0.7.0
 #'   `level` was the size (0.05); values below 0.5 are still read that way, with a warning.
+#'   One number between 0 and 1, both excluded.
 #' @return A list with two data frames. `traits` has one row per trait and statistic, with the
 #'   columns `trait`, `statistic`, `n_sites` (testable sites), `percent_low`, `percent_high`,
 #'   `mean_ses`, `p_mean_low`, `p_mean_high`, `sites_low` and `sites_high` (site names separated
@@ -50,7 +51,9 @@ tstats_summary <- function(x, level = 0.95) {
   if (!is.data.frame(x) || is.null(null)) {
     stop("`x` must come from tstats() with n_perm > 0", call. = FALSE)
   }
-  if (!is.numeric(level) || length(level) != 1 || is.na(level) || level <= 0 || level >= 1) {
+  # message kept as before (tests/testthat/test-checks.R matches it)
+  if (!is.numeric(level) || length(level) != 1 || !is.finite(level) || level <= 0 ||
+        level >= 1) {
     stop("`level` must be one number between 0 and 1", call. = FALSE)
   }
   if (level < 0.5) {
@@ -136,10 +139,12 @@ tstats_summary <- function(x, level = 0.95) {
 #' of that trait together, so that both community means use the same populations and weights.
 #'
 #' @param individuals Data frame with one row per individual.
-#' @param traits Names of the columns with trait values.
-#' @param site,species Names of the columns with the site and the species.
+#' @param traits Names of the columns with trait values (a character vector).
+#' @param site,species Names of the columns with the site and the species. One character
+#'   string each.
 #' @param abundance Name of a column with the abundance of each population (the same value
-#'   for all its individuals), or `NULL` to weight by the number of individuals measured.
+#'   for all its individuals), or `NULL` to weight by the number of individuals measured. One
+#'   character string or `NULL`.
 #' @param formula One-sided formula with variables of `env`, with an intercept; `~ 1` (the
 #'   default) gives the total sums of squares only. With several terms, `explained` is the sum
 #'   of squares of the whole model and `p` the p-value of its F test.
@@ -170,13 +175,14 @@ tstats_summary <- function(x, level = 0.95) {
 #' @export
 trait_flex <- function(individuals, traits = "trait", site = "site", species = "species",
                        abundance = NULL, formula = ~1, env = NULL) {
-  stopifnot(is.data.frame(individuals), is.character(traits), length(traits) >= 1)
-  needed <- c(traits, site, species, abundance)
-  missing_columns <- setdiff(needed, names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
+  check_column_names(traits, "traits")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_data_columns(individuals, c(traits, site, species, abundance))
+  if (!inherits(formula, "formula") || length(formula) != 2) {
+    stop("`formula` must be a one-sided formula, such as `~ moisture`", call. = FALSE)
   }
-  stopifnot(inherits(formula, "formula"), length(formula) == 2)
   if (attr(stats::terms(formula), "intercept") == 0) {
     stop("`formula` must keep the intercept: the sums of squares are taken around the mean",
          call. = FALSE)
@@ -218,7 +224,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
   site_means <- list()
   for (trait in traits) {
     z <- individuals[[trait]]
-    if (!is.numeric(z)) stop("trait `", trait, "` must be numeric", call. = FALSE)
+    check_numeric_traits(z, trait)
     keep <- !is.na(z)
     pop <- paste(site_id, species_id, sep = "\r")[keep]
     first <- !duplicated(pop)
@@ -273,8 +279,8 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
 #' community mean in opposite directions) is drawn below zero. Needs the package ggplot2.
 #'
 #' @param x Result of [trait_flex()].
-#' @param relative If `TRUE` (the default), sums of squares are divided by the total sum of
-#'   squares of each trait, so that traits on different scales can be compared.
+#' @param relative `TRUE` or `FALSE`. If `TRUE` (the default), sums of squares are divided by the
+#'   total sum of squares of each trait, so that traits on different scales can be compared.
 #' @param colours Two colours, for the explained and the residual parts (only the first is
 #'   used without a model). The default is the blue of the Okabe-Ito palette and a light grey,
 #'   as in [plot.nested_variance()].
@@ -296,7 +302,7 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of trait_flex() needs the package ggplot2", call. = FALSE) # nocov
   }
-  stopifnot(is.logical(relative), length(relative) == 1, !is.na(relative))
+  check_flag(relative, "relative")
   check_colours(colours, 2)
   dec <- x$decomposition
   components <- c("turnover", "intraspecific", "covariation", "total")
@@ -369,7 +375,7 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #' variance of that factor is estimated with very few degrees of freedom and is very uncertain.
 #'
 #' @param data Data frame with the traits and the factors.
-#' @param traits Names of the columns with trait values.
+#' @param traits Names of the columns with trait values (a character vector).
 #' @param factors Names of the columns with the nested factors, from the broadest level to the
 #'   finest.
 #' @param crossed Names of the columns of a second hierarchy of nested factors, from the
@@ -378,7 +384,8 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #'   nested hierarchy.
 #' @param interaction With `crossed`, whether to add a level for the combination of the finest
 #'   level of `factors` and the finest level of `crossed` (for instance the population, species
-#'   by site). Without it, differences among populations of a species go to `within`.
+#'   by site). Without it, differences among populations of a species go to `within`. `TRUE`
+#'   or `FALSE`.
 #' @return A data frame with one row per level and one for the variance within the finest level
 #'   (`within`), and one column per trait with the share of variance of each level. The
 #'   attribute `variance` holds the variances, `singular` whether each fit was singular and
@@ -410,13 +417,11 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #' nested_variance(d, "trait", c("region", "site"), crossed = "species")
 #' @export
 nested_variance <- function(data, traits, factors, crossed = NULL, interaction = TRUE) {
-  stopifnot(is.data.frame(data), is.character(traits), is.character(factors),
-            length(factors) >= 1, is.null(crossed) || is.character(crossed),
-            is.logical(interaction), length(interaction) == 1)
-  missing_columns <- setdiff(c(traits, factors, crossed), names(data))
-  if (length(missing_columns) > 0) {
-    stop("`data` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
+  check_column_names(traits, "traits")
+  check_column_names(factors, "factors")
+  if (!is.null(crossed)) check_column_names(crossed, "crossed")
+  check_flag(interaction, "interaction")
+  check_data_columns(data, c(traits, factors, crossed), "data")
   if (length(intersect(factors, crossed)) > 0) {
     stop("`factors` and `crossed` share ", paste(intersect(factors, crossed), collapse = ", "),
          call. = FALSE)
@@ -540,8 +545,8 @@ nested_variance_lme4 <- function(y, groups, levels) {
 #' and in black on light ones.
 #'
 #' @param x Result of [nested_variance()].
-#' @param min_label Smallest share labelled with its percentage inside the bar; 1 or more
-#'   removes the labels.
+#' @param min_label Smallest share labelled with its percentage inside the bar: one number, 0
+#'   or more; 1 or more removes the labels.
 #' @param colours Colours of the levels, one per row of `x` (the last for `within`), or `NULL`
 #'   (the default) for the Okabe-Ito colours above and a light grey for `within`. With more
 #'   than six factors, `colours` must be given.
@@ -565,7 +570,7 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot() of nested_variance() needs the package ggplot2", call. = FALSE) # nocov
   }
-  stopifnot(is.numeric(min_label), length(min_label) == 1)
+  check_number(min_label, "min_label", lower = 0, finite = FALSE)
   levels <- x$level
   traits <- setdiff(names(x), "level")
   long <- data.frame(level = factor(rep(levels, length(traits)), levels),
@@ -637,14 +642,16 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #'   `function(x, species) stats::var(tapply(x, species, mean))`; or a named list of such
 #'   functions, all computed on the same observed and randomised communities, such as
 #'   `list(variance = stats::var, MNND = mnnd, range = trait_range)`.
-#' @param traits Names of the columns with trait values.
-#' @param site,species Names of the columns with the site and the species.
+#' @param traits Names of the columns with trait values (a character vector).
+#' @param site,species Names of the columns with the site and the species. One character
+#'   string each.
 #' @param null Null model (see Details).
-#' @param n_perm Number of randomisations; 0 for the observed values only.
+#' @param n_perm Number of randomisations (one whole number, 0 or more); 0 or `NULL` for the
+#'   observed values only.
 #' @param nperm Deprecated; use `n_perm`.
 #' @param alternative Direction of the test: `"two.sided"` (the default), `"less"` or
 #'   `"greater"`.
-#' @param multivariate If `TRUE`, the index receives all traits at once.
+#' @param multivariate If `TRUE`, the index receives all traits at once. `TRUE` or `FALSE`.
 #' @return A data frame of class `community_index` with one row per site, trait (or
 #'   `"multivariate"` with `multivariate = TRUE`) and index, and the columns `site`, `trait`,
 #'   `index` (the name in the list, or the name of the function), `observed`, and with
@@ -689,14 +696,13 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
     stop("`index` must be a function or a list of functions with distinct names",
          call. = FALSE)
   }
-  stopifnot(is.data.frame(individuals), is.character(traits),
-            length(traits) >= 1, isTRUE(multivariate) || isFALSE(multivariate))
-  missing_columns <- setdiff(c(traits, site, species), names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
+  check_column_names(traits, "traits")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_flag(multivariate, "multivariate")
+  check_data_columns(individuals, c(traits, site, species))
+  check_count(n_perm, "n_perm", min = 0, null_ok = TRUE)
   n_perm <- if (is.null(n_perm)) 0 else n_perm
-  check_count(n_perm, "n_perm", min = 0)
   index_names <- names(index)
   n_index <- length(index)
   uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))
@@ -715,7 +721,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   sets <- if (multivariate) list(multivariate = traits) else stats::setNames(as.list(traits), traits)
   per_set <- lapply(names(sets), function(label) {
     values <- as.matrix(individuals[sets[[label]]])
-    if (!is.numeric(values)) stop("the columns in `traits` must be numeric", call. = FALSE)
+    check_numeric_traits(values)
     keep <- stats::complete.cases(values)
     values <- values[keep, , drop = FALSE]
     site_id <- site_all[keep]

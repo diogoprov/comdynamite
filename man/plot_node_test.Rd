@@ -31,13 +31,14 @@ See \code{\link[=node_test]{node_test()}} for what each one tests.}
 \item{type}{\code{"phylogram"}, as in the article, or \code{"fan"}, for very large trees, with the
 names of the variables along the radii so that they stay clear of the species.}
 
-\item{level}{Significance level.}
+\item{level}{Significance level. One number between 0 and 1.}
 
 \item{colours}{Colours of predictors and biogeographic events.}
 
-\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}).}
+\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}). One number greater
+than 0.}
 
-\item{legend}{Draw the legend?}
+\item{legend}{\code{TRUE} or \code{FALSE}. Draw the legend?}
 
 \item{alpha}{Deprecated, use \code{level}.}
 

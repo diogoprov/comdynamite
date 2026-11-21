@@ -26,8 +26,15 @@
 sim_shift_tree <- function(n_tips, n_shifts = 1, ratio = 2, lambda0 = 1, epsilon = 0.5,
                            min_fraction = 0.05, gsa_factor = 2, gsa_scale = 15,
                            max_tries = 10000) {
-  stopifnot(n_tips >= 8, n_shifts >= 0, ratio > 0, lambda0 > 0, epsilon >= 0, epsilon < 1,
-            gsa_factor > 1)
+  check_count(n_tips, "n_tips", min = 8)
+  check_count(n_shifts, "n_shifts", min = 0)
+  check_number(ratio, "ratio", lower = 0, open = c(TRUE, FALSE))
+  check_number(lambda0, "lambda0", lower = 0, open = c(TRUE, FALSE))
+  check_number(epsilon, "epsilon", 0, 1, open = c(FALSE, TRUE))
+  check_number(min_fraction, "min_fraction", 0, 1)
+  check_number(gsa_factor, "gsa_factor", lower = 1, open = c(TRUE, FALSE))
+  check_number(gsa_scale, "gsa_scale", lower = 0, open = c(TRUE, FALSE))
+  check_count(max_tries, "max_tries")
   for (try in seq_len(max_tries)) {
     sim <- shift_tree_once(n_tips, n_shifts, ratio, lambda0, epsilon, gsa_factor, gsa_scale)
     if (is.null(sim)) next

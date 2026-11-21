@@ -11,7 +11,7 @@ persistence(x, window = NULL, ...)
 abundances or presences.}
 
 \item{window}{Number of the last intervals (generations, or intervals between records) to
-use; \code{NULL} for all.}
+use, one whole number, 1 or more; \code{NULL} for all.}
 
 \item{...}{Unused.}
 }

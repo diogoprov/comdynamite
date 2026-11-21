@@ -52,7 +52,8 @@
 #'   environment that set growth by default; with a niche of several axes, the first axis.
 #' @param coords Optional matrix or data frame with one row per site and the coordinates in
 #'   columns.
-#' @param n_null Number of shuffles of species for `ses_mpd` and `ses_mntd`.
+#' @param n_null Number of shuffles of species for `ses_mpd` and `ses_mntd`. One whole number,
+#'   2 or more.
 #' @return Named numeric vector.
 #' @references Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for phylogenetic
 #'   signal in comparative data: behavioral traits are more labile. *Evolution*, 57, 717--745.
@@ -73,7 +74,7 @@
 #' round(summary_stats(sim, tree, n_null = 19), 3)
 #' @export
 summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NULL, n_null = 99) {
-  stopifnot(n_null >= 2)
+  check_count(n_null, "n_null", min = 2)
   series <- NULL
   if (inherits(x, "mc_data")) {
     tree <- tree %||% x$tree

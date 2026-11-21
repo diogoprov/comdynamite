@@ -11,11 +11,12 @@ random_regimes(tree, regimes, tolerance = 2, max_overlap = 0.25)
 
 \item{regimes}{Regime of each edge, in the order of \code{tree$edge}.}
 
-\item{tolerance}{Largest ratio between the sizes of a clade and its random replacement.}
+\item{tolerance}{Largest ratio between the sizes of a clade and its random replacement. One
+number, 1 or more.}
 
 \item{max_overlap}{Largest Jaccard index between the edges of a clade and those of its
 random replacement, and largest adjusted Rand index between \code{regimes} and the random
-partition, between 0 and 1.}
+partition. One number between 0 and 1.}
 }
 \value{
 A factor with one regime per edge, with the levels of \code{regimes}.
