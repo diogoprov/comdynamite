@@ -305,12 +305,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   out <- do.call(rbind, samples)
   attr(out, "traits") <- traits
   rownames(out) <- NULL
-  key <- if (session == "visit") {
-    paste(date, out$site, if (visits > 1) out$visit else 1)
-  } else {
-    date
-  }
-  session_shift(out, session_sd, key)
+  visit <- if (visits > 1) out$visit else 1
+  session_shift(out, session_sd, if (session == "visit") paste(date, out$site, visit) else date)
 }
 
 # adds to the traits a deviation of standard deviation `sd` shared by the individuals with the
