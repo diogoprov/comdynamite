@@ -26,6 +26,13 @@ test_that("the scalar checks refuse vectors, NA, infinite values and values out 
                "one finite number from 0 and less than 1")
   expect_error(check_number(2, "x", upper = 1), "one finite number, 1 or less")
   expect_silent(check_number(1, "x", 0, 1))
+  expect_error(check_number(1, "x", upper = 1, open = TRUE), "one finite number, less than 1")
+  expect_error(check_number(1, "x", 0, 1, open = TRUE),
+               "one finite number greater than 0 and less than 1")
+  expect_error(check_number(-Inf, "x", finite = FALSE, lower = 0), "one number, 0 or more")
+  expect_silent(check_sample_size(NULL, null_ok = TRUE))
+  expect_silent(check_sample_size(Inf))
+  expect_error(check_sample_size(0), "`n` must be one whole number")
   expect_silent(check_number(NULL, "x", null_ok = TRUE))
   expect_error(check_flag(NA, "plot"), "`plot` must be TRUE or FALSE")
   expect_error(check_flag(c(TRUE, FALSE), "plot"), "TRUE or FALSE")
