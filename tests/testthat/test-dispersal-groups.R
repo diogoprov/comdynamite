@@ -69,6 +69,15 @@ test_that("kernel_group works with pool_from and univariate evolution", {
   # sp2 flies only to site 3 from site 1, which is closed to it until step 50
   expect_equal(sim$abundance[2, "sp2"], 0)
   expect_equal(sim$abundance[3, "sp2"], 0)
+  set.seed(5)
+  multi <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
+                                  n_steps = 3, initial = start, seed_steps = numeric(0),
+                                  kernels = list(near, far),
+                                  kernel_step = cbind(rep(1, 3), rep(2, 3)),
+                                  kernel_group = 1:2, pool_from = open,
+                                  immigration = "multinomial")
+  expect_equal(multi$abundance[3, "sp2"], 0)
+  expect_gt(multi$abundance[2, "sp1"], 0)
   set.seed(6)
   ev <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
                                n_steps = 1, initial = start, seed_steps = numeric(0),
