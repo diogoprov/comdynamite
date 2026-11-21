@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- `sample_individuals(visits =, session =)`: several visits to each site at the same step,
+  with a column `visit`, and `session = "visit"` for a `session_sd` error shared by the
+  individuals of one visit to one site rather than by all sites on a date. The help now says
+  that with one step and `session = "step"` the error is a constant that vanishes from
+  centred statistics. Repeated steps in `step` are an error pointing to `visits`.
 - `anurans`: counts, one identification (*Scinax tymbamirim*, formerly *S. imbegue*), the
   depth of one pond, coordinates and urban cover as corrected by the collector in November
   2026. Urban cover is the share of MapBiomas Collection 9 urban pixels within 500 m, not 1 km
