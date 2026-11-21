@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.10.0
 
 - New article “Persistence in river networks under a flood pulse”: a
   generic study of how network topology, the direction of dispersal and

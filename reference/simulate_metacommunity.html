@@ -19,7 +19,7 @@ probability dispersal, and emigrants are redistributed among sites:"><meta prope
 
     <a class="navbar-brand me-2" href="../index.html">comdynamite</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.9.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -306,7 +306,10 @@ at the last step), <code>history</code> (sites x species x recorded steps array,
 <code>NULL</code>), and the <code>landscape</code>, <code>traits</code>, <code>alpha</code>, <code>dispersal</code>, <code>extirpation</code> and <code>pool</code>
 used, <code>env</code> when given, and <code>tree</code> when the traits came from <code><a href="species_traits.html">species_traits()</a></code> with a
 tree, the colonisation history (<code>arrival</code>, <code>propagule</code>, <code>immigrants</code>, <code>migrant_load</code>;
-see the section Colonisation history) and <code>n_steps</code>. With <code>evolution</code>, also <code>evolution</code>, a
+see the section Colonisation history), <code>n_steps</code>, and the settings <code>dispersal_time</code>,
+<code>kernels</code> (rescaled), <code>kernel_step</code>, <code>kernel_group</code>, <code>dispersal_site</code>,
+<code>disturbance_sensitivity</code> (one per species), <code>disturbance</code>, <code>recruitment</code>, <code>microsites</code> and
+<code>mortality</code>. With <code>evolution</code>, also <code>evolution</code>, a
 list with the genetic mean of the optimum in each population (<code>genetic</code>), the plastic part
 of its phenotype at the last step (<code>plastic</code>), the phenotype after dispersal (<code>phenotype</code>,
 which mixes residents and immigrants), the genetic means and the environment at

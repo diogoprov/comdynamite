@@ -85,13 +85,14 @@ summ <- aggregate(value ~ landscape + branching + response, long,
 summ <- data.frame(summ[1:3], summ$value)
 summ$landscape <- factor(summ$landscape, c("euclidean", "river_symmetric", "river_downstream"),
                          c("straight line", "channel, symmetric", "channel, downstream"))
-ggplot(summ, aes(landscape, m, colour = factor(branching))) +
-  geom_pointrange(aes(ymin = m - 2 * se, ymax = m + 2 * se),
+summ$landscape <- factor(summ$landscape, rev(levels(summ$landscape)))
+ggplot(summ, aes(m, landscape, colour = factor(branching))) +
+  geom_pointrange(aes(xmin = m - 2 * se, xmax = m + 2 * se),
                   position = position_dodge(width = 0.4)) +
-  facet_wrap(~response, scales = "free_y") +
-  labs(x = NULL, y = "Species", colour = "branching") +
+  facet_wrap(~response, scales = "free_x", ncol = 1) +
+  labs(x = "Number of species", y = NULL, colour = "Branching") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 20, hjust = 1))
+  theme(legend.position = "bottom")
 ```
 
 ![Mean regional richness at the end and mean local richness of
@@ -268,9 +269,10 @@ ggplot(lakes, aes(year, mean, colour = guild)) +
   geom_line() +
   facet_wrap(~model) +
   scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
-  labs(x = "Year after assembly", y = "Species per lake, share of normal pulse",
+  labs(x = "Year after assembly", y = "Species per lake (% of normal pulse)",
        colour = NULL) +
-  theme_minimal()
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ![Species of each guild per floodplain lake in November, as a share of
@@ -303,13 +305,16 @@ guilds <- do.call(rbind, lapply(c("full", "emigration only"), function(model) {
 }))
 guilds$guild <- factor(guilds$guild, c("migrant", "intermediate", "sedentary"))
 guilds$model <- factor(guilds$model, c("emigration only", "full"))
-ggplot(guilds, aes(guild, mean, colour = model)) +
-  geom_hline(yintercept = 0, colour = "grey60") +
-  geom_pointrange(aes(ymin = mean - 2 * se, ymax = mean + 2 * se),
+guilds$guild <- factor(guilds$guild, rev(levels(guilds$guild)))
+ggplot(guilds, aes(mean, guild, colour = model)) +
+  geom_vline(xintercept = 0, colour = "grey60") +
+  geom_pointrange(aes(xmin = mean - 2 * se, xmax = mean + 2 * se),
                   position = position_dodge(width = 0.4)) +
-  facet_wrap(~when) +
-  labs(x = NULL, y = "Species in the network minus normal pulse", colour = NULL) +
-  theme_minimal()
+  facet_wrap(~when, ncol = 1) +
+  labs(x = "Difference in regional richness from the normal pulse (species)", y = NULL,
+       colour = NULL) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ![Regional loss of species of each guild at the end of the drought and

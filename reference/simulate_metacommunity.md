@@ -262,23 +262,27 @@ the last step), `history` (sites x species x recorded steps array, or
 traits came from
 [`species_traits()`](https://provetelab.org/comdynamite/reference/species_traits.md)
 with a tree, the colonisation history (`arrival`, `propagule`,
-`immigrants`, `migrant_load`; see the section Colonisation history) and
-`n_steps`. With `evolution`, also `evolution`, a list with the genetic
-mean of the optimum in each population (`genetic`), the plastic part of
-its phenotype at the last step (`plastic`), the phenotype after
-dispersal (`phenotype`, which mixes residents and immigrants), the
-genetic means and the environment at `record_steps` (`history`,
-`environment_history`), the steps since the environment of each site
-last changed on any axis (`since_change`, a list with `end`, one value
-per site at the last step, and `history`, sites x recorded steps; 0 in
-the step of a change and the step itself where the environment never
-changed), the reference environment and the settings, and, with
-`mutation_var`, the genetic variance of each population at the last step
-(`genetic_variance`); `NA` where a population is absent. With several
-evolving traits, `genetic`, `plastic` and `phenotype` are arrays of
-sites x species x traits, `history` has the recorded steps as a fourth
-dimension, and `genetic_var`, `env_var` (one matrix per species) and
-`plasticity` (species x traits) are kept. With a niche of several axes,
+`immigrants`, `migrant_load`; see the section Colonisation history),
+`n_steps`, and the settings `dispersal_time`, `kernels` (rescaled),
+`kernel_step`, `kernel_group`, `dispersal_site`,
+`disturbance_sensitivity` (one per species), `disturbance`,
+`recruitment`, `microsites` and `mortality`. With `evolution`, also
+`evolution`, a list with the genetic mean of the optimum in each
+population (`genetic`), the plastic part of its phenotype at the last
+step (`plastic`), the phenotype after dispersal (`phenotype`, which
+mixes residents and immigrants), the genetic means and the environment
+at `record_steps` (`history`, `environment_history`), the steps since
+the environment of each site last changed on any axis (`since_change`, a
+list with `end`, one value per site at the last step, and `history`,
+sites x recorded steps; 0 in the step of a change and the step itself
+where the environment never changed), the reference environment and the
+settings, and, with `mutation_var`, the genetic variance of each
+population at the last step (`genetic_variance`); `NA` where a
+population is absent. With several evolving traits, `genetic`, `plastic`
+and `phenotype` are arrays of sites x species x traits, `history` has
+the recorded steps as a fourth dimension, and `genetic_var`, `env_var`
+(one matrix per species) and `plasticity` (species x traits) are kept.
+With a niche of several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while
