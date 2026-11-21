@@ -74,8 +74,10 @@ all its populations, as before. With a niche of several axes, one trait evolves 
 with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
 \code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
 
-\item{disturbance}{Probability that a site loses all its populations at each time step
-(one value; 0, the default, for none).}
+\item{disturbance}{Probability that a site loses all its populations at each time step:
+one value (0, the default, for none), or a matrix of sites x steps with the probability of
+each site at each step, for disturbances that vary in space and time, such as the
+seasonal floods of \code{\link[=river_floods]{river_floods()}}.}
 
 \item{pool_from}{Optional matrix (sites x species) with the first step at which each species
 can occur in each site (1 for the start), for example to open a new site to two species at

@@ -1,5 +1,9 @@
 # comdynamite (development version)
 
+- New `env_seasonal()` (a seasonal cycle with an amplitude per site and anomalies per year)
+  and `river_floods()` (washout probabilities by flood season, year and river size).
+  `disturbance` in `simulate_metacommunity()` and `simulate_evolving_metacommunity()` also
+  takes a matrix of probabilities per site and step.
 - New `river_covariance()` and `env_river()`: covariance of the environment along a river
   network as a sum of tail-up (flow-connected sites only, weighted by Shreve magnitude, length
   of channel upstream or any weight per site), tail-down and Euclidean exponential components

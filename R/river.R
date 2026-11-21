@@ -419,3 +419,83 @@ river_additive <- function(net, weights) {
   }
   af
 }
+
+#' Seasonal floods along a river network
+#'
+#' Probabilities that each site of a river network loses all its populations at each step
+#' because of floods, for `disturbance` in [simulate_metacommunity()]. Each period (a year)
+#' has a flood season of `flood_steps` steps, starting at step `start` of the period, and a
+#' flood happens in a given year with probability `year_prob`, so that years differ. During
+#' a flood, the probability of washout at a site is `probability` times its size relative to
+#' the largest site, raised to `size_effect`: positive values make floods harsher in large
+#' rivers, negative values in headwaters (flashier floods in small, steep streams), and 0 the
+#' same everywhere.
+#'
+#' Floods here remove populations; to change the environment during floods instead, use
+#' [env_pulse()] on the sites and steps of the flood.
+#'
+#' @param landscape A landscape from [landscape_river()].
+#' @param n_steps Number of steps.
+#' @param period Steps per year.
+#' @param flood_steps Steps of the flood season in each year.
+#' @param start Step of the year at which the flood season begins.
+#' @param probability Probability of washout during a flood at the largest site (between 0
+#'   and 1).
+#' @param size_effect Exponent of the relative size of each site.
+#' @param size Size of each site: `"upstream_length"` (the default, a proxy for catchment
+#'   area and discharge), `"magnitude"` (Shreve magnitude) or a positive numeric vector with
+#'   one value per site.
+#' @param year_prob Probability that a flood happens in a year.
+#' @return A matrix of probabilities with one row per site and one column per step, with an
+#'   attribute `flood_years`, the years in which a flood happened.
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' land <- landscape_river(river_network(30))
+#' floods <- river_floods(land, n_steps = 200, period = 20, flood_steps = 2,
+#'                        probability = 0.3, year_prob = 0.7)
+#' attr(floods, "flood_years")
+#' # the mainstem floods more than the headwaters
+#' tapply(apply(floods, 1, max), land$network$headwater, mean)
+#' traits <- data.frame(optimum = 50, sigma = 30, r_max = 3, row.names = "sp1")
+#' sim <- simulate_metacommunity(land, traits, matrix(0.05, dimnames = list("sp1", "sp1")),
+#'                               n_steps = 200, disturbance = floods)
+#' @export
+river_floods <- function(landscape, n_steps, period, flood_steps = 1, start = 1,
+                         probability = 0.5, size_effect = 1, size = "upstream_length",
+                         year_prob = 1) {
+  if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
+    stop("`landscape` must come from landscape_river()", call. = FALSE)
+  }
+  net <- landscape$network
+  m <- nrow(net)
+  check_count(n_steps, "n_steps")
+  check_count(period, "period")
+  check_count(flood_steps, "flood_steps")
+  check_count(start, "start")
+  if (!is.finite(n_steps) || !is.finite(period) || flood_steps > period ||
+      start > period) {
+    stop("`n_steps` and `period` must be finite, and `flood_steps` and `start` at most ",
+         "`period`", call. = FALSE)
+  }
+  stopifnot(length(probability) == 1, probability >= 0, probability <= 1,
+            length(size_effect) == 1, is.finite(size_effect), length(year_prob) == 1,
+            year_prob >= 0, year_prob <= 1)
+  w <- if (is.character(size)) {
+    net[[match.arg(size, c("upstream_length", "magnitude"))]]
+  } else size
+  if (!is.numeric(w) || length(w) != m || any(!is.finite(w)) || any(w <= 0)) {
+    stop("`size` must be \"upstream_length\", \"magnitude\" or one positive value per site",
+         call. = FALSE)
+  }
+  p <- probability * (w / max(w))^size_effect
+  p <- pmin(p, 1)
+  years <- seq_len(ceiling(n_steps / period))
+  flood <- years[stats::runif(length(years)) < year_prob]
+  steps <- unlist(lapply(flood, function(y) (y - 1) * period + start - 1 + seq_len(flood_steps)))
+  steps <- steps[steps <= n_steps]
+  out <- matrix(0, m, n_steps)
+  out[, steps] <- p
+  attr(out, "flood_years") <- flood
+  out
+}
