@@ -5,6 +5,10 @@
   list of surrogates as `null`.
 - The articles on clades and on the whole tree apply the restricted nulls to `daphniids` and
   `anurans` (`data-raw/real_data_nulls.R`).
+- `anurans`: counts, one identification (*Scinax tymbamirim*, formerly *S. imbegue*), the
+  depth of one pond, coordinates and urban cover as corrected by the collector in November
+  2026. Urban cover is the share of MapBiomas Collection 9 urban pixels within 500 m, not 1 km
+  as documented before.
 - New `env_surrogates()`: predictors with the same spatial autocorrelation as the observed
   ones, by variogram matching (Viladomat et al. 2014) or a parametric Gaussian field matched
   by rank. `pcps_test()`, `node_test()` and `phylo_beta_test()` take them with

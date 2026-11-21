@@ -1,10 +1,15 @@
-# Anurans of urban ponds in two Brazilian cities (data/anurans.rda), from the raw files of the
-# compendium of chapter 1 of the MSc dissertation of L. B. C. Menezes (unpublished). Set
-# ANURANS_RAW to the folder `data/raw` of that compendium. The tree is the TreePL-dated tree of
-# anurans of Portik et al. (2023, Mol. Phylogenet. Evol. 188: 107907), kept in `data/raw/legacy` of the
-# compendium, pruned to the species recorded.
-raw <- Sys.getenv("ANURANS_RAW", file.path(
-  "~/Library/CloudStorage/Box-Box/Meus Artigos/2026-Leandro Cap 1", "data", "raw"))
+# Anurans of urban ponds in two Brazilian cities (data/anurans.rda), from the compendium of
+# chapter 1 of the MSc dissertation of L. B. C. Menezes (unpublished). Set ANURANS_RAW to the folder
+# `data/derived/cleaned` of that compendium, which holds the counts, coordinates and environment as
+# corrected by the collector in November 2026, and ANURANS_TREE to the tree. The tree is the
+# TreePL-dated tree of anurans of Portik et al. (2023, Mol. Phylogenet. Evol. 188: 107907), kept in
+# `data/raw/legacy` of the compendium, pruned to the species recorded. Urban cover is the
+# proportion of MapBiomas Collection 9 pixels classified as urban area (class 24) within 500 m of
+# each pond in 2022 (Souza et al. 2020, Remote Sensing 12: 2735).
+compendium <- "~/Library/CloudStorage/Box-Box/Meus Artigos/2026-Leandro Cap 1"
+raw <- Sys.getenv("ANURANS_RAW", file.path(compendium, "data", "derived", "cleaned"))
+tree_file <- Sys.getenv("ANURANS_TREE", file.path(compendium, "data", "raw", "legacy",
+                                                  "TreePL-Rooted_Anura_bestTree.tre"))
 abundance <- read.delim(file.path(raw, "abundance.txt"), row.names = 1, check.names = FALSE)
 environment <- read.delim(file.path(raw, "environment.txt"))
 points <- read.delim(file.path(raw, "ponds_coord.txt"))
@@ -65,7 +70,7 @@ stopifnot(all(pool[, colnames(comm)][comm > 0] == 1))
 # L. luctator, split from it by Magalhães et al. (2020). Species of the pools missing from the tree
 # join it at the crown of their genus (or halfway along the branch of the only congener), and the
 # polytomies are resolved at random with branches of length zero.
-big <- ape::read.tree(file.path(raw, "legacy", "TreePL-Rooted_Anura_bestTree.tre"))
+big <- ape::read.tree(tree_file)
 labels <- unique(regional[!is.na(regional$tree_label) & regional$tree_label != "" &
                             regional$tree_label != regional$species, c("tree_label", "species")])
 labels$species[labels$tree_label == "Leptodactylus_latrans"] <- "Leptodactylus_luctator"

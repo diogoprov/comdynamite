@@ -194,7 +194,7 @@ above 0.1 in every case, as in the analysis of clades, since 13 species give per
 species little power. For the 40 ponds of `anurans`, in two cities, the surrogates were drawn
 within each city with great-circle distances (`env_surrogates(..., lonlat = TRUE,
 strata = city)`, passed to the tests as `null`), and compared with free permutations and with
-permutations within each city. No test came below 0.05 under any null (`p_site` 0.09 to 0.70),
+permutations within each city. No test came below 0.05 under any null (`p_site` 0.06 to 0.67),
 so in these ponds the nulls do not change the conclusion.
 
 ## References
