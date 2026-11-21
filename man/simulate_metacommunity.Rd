@@ -85,7 +85,8 @@ optimum within each population: selection by the local environment, drift, gene 
 founder sampling and plasticity. \code{NULL} (the default) keeps the optimum of each species in
 all its populations, as before. With a niche of several axes, one trait evolves per axis,
 with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
-\code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
+\code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}); a correlation between the axes of the
+niche (\code{\link[=niche_correlation]{niche_correlation()}}) enters growth and selection.}
 
 \item{disturbance}{Probability that a site is disturbed at each time step, losing all its
 populations unless \code{disturbance_sensitivity} is below 1:

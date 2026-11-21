@@ -79,8 +79,13 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
 4. *Nicho com correlação entre eixos* (matriz de largura por espécie) em `growth_rates()`, e
    paisagens que gerem vários eixos ambientais de uma vez em `landscape_grid()` (v0.7.0).
    Feito em 2026-11-19 (mesma branch): `niche_correlation()` (uma matriz para todas as
-   espécies ou uma por espécie) e `landscape_grid(n_axes, axis_cor)`, com `env_axes`. Falta:
-   nicho correlacionado com `evolution` e com especiação (hoje recusados).
+   espécies ou uma por espécie) e `landscape_grid(n_axes, axis_cor)`, com `env_axes`. Feito em
+   2026-11-21 (branch `versao-0.10.0`): nicho correlacionado com `evolution` e com
+   especiação, com Omega = D R D no crescimento, na resposta à seleção, na seleção de
+   imigrantes, na sobreposição de nicho (`niche_overlap` e `competition_matrix(type =
+   "trait")`) e em `maladaptation()`; as filhas herdam a correlação da mãe, e R = identidade
+   reproduz os eixos independentes bit a bit. Falta: `sigma = 0` com correlação (recusado) e
+   `mutation_var` com vários traits (já recusado antes).
 5. *Dispersão variável no tempo e filtragem de imigrantes com especiação e vários traits*:
    `dispersal_time`, `kernels` e `kernel_step` com `evolution`, e `immigrant_selection` com
    `speciation` e com G multivariada, hoje recusados (artigo "Dispersal and disturbance through

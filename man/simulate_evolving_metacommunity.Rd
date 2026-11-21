@@ -83,7 +83,11 @@ stops with an error beyond it.}
 frame with one row per site and one column per element of \code{traits}. The \code{genetic_var}
 and \code{env_var} of \code{evolution} are then covariance matrices (see the section Several traits
 of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
-and new species inherit the matrices of their mother.}
+and new species inherit the matrices of their mother. A list of \code{traits} from
+\code{\link[=niche_correlation]{niche_correlation()}} gives the niche a correlation between its axes, in growth,
+selection and the overlap of niches; with one matrix per species, new species take the
+correlation of their mother, and \code{traits} in the output keeps the correlation of the
+extant species.}
 
 \item{disturbance}{Probability that a site is disturbed at each time step, losing all its
 populations unless \code{disturbance_sensitivity} is below 1:

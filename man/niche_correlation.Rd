@@ -25,6 +25,16 @@ this correlation. A species with a positive correlation between two axes grows b
 both depart from its optima in the same direction, as a species that tolerates warm water
 only if it is also well oxygenated.
 }
+\details{
+With \code{evolution} in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} and in \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}},
+the correlation enters the matrix of Gaussian selection, \eqn{\Omega = D R D}{Omega = D R
+D} with \eqn{D}{D} the diagonal matrix of the breadths (see the section Several traits of
+\code{\link[=evolution_control]{evolution_control()}}): growth, the response to selection, the selection of immigrants and
+the overlap of niches (\code{niche_overlap}, and \code{competition_matrix(type = "trait")}) all use
+it. New species take the correlation of their mother. An axis with an infinite breadth
+exerts no selection, whatever its correlation; a breadth of 0 cannot be combined with a
+correlation.
+}
 \examples{
 set.seed(1)
 tr <- list(temperature = species_traits(2, optima = c(40, 60), sigma = c(10, 10),

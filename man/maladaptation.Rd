@@ -40,7 +40,9 @@ not depend on \code{r_max} and it excludes the cost of the variance itself (the 
 With several evolving traits (one per niche axis), \eqn{d^2 / (\sigma^2 + P)}{d^2 / (sigma^2
 + P)} becomes the squared Mahalanobis distance \eqn{d^\top (\Omega + P)^{-1} d}{d' (Omega +
 P)^-1 d} over the axes with a finite niche breadth, which also counts the covariances among
-traits; axes with \code{sigma = Inf} add a deviation but no load. For evolving metacommunities
+traits, and the correlation between the axes of the niche when the traits come from
+\code{\link[=niche_correlation]{niche_correlation()}} (\eqn{\Omega = D R D}{Omega = D R D}); axes with \code{sigma = Inf} add a
+deviation but no load. For evolving metacommunities
 (\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}), the population of a species in a site can hold
 several lineages: its phenotype is their mean weighted by abundance and \eqn{P}{P} adds the
 variance among them, so the load is that of a single Gaussian population with that mean and

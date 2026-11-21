@@ -190,7 +190,8 @@
 #'   founder sampling and plasticity. `NULL` (the default) keeps the optimum of each species in
 #'   all its populations, as before. With a niche of several axes, one trait evolves per axis,
 #'   with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
-#'   [evolution_control()] and [genetic_matrices()]).
+#'   [evolution_control()] and [genetic_matrices()]); a correlation between the axes of the
+#'   niche ([niche_correlation()]) enters growth and selection.
 #' @return An `mc_sim` object: a list with `abundance` (sites x species matrix
 #'   at the last step), `history` (sites x species x recorded steps array, or
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
@@ -304,10 +305,6 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   if (!is.null(evolution)) {
     if (!inherits(evolution, "mc_evolution")) {
       stop("`evolution` must come from `evolution_control()`", call. = FALSE)
-    }
-    if (several && !is.null(attr(trait_list, "niche_cor"))) {
-      stop("`evolution` does not yet take a niche with correlated axes (`niche_correlation()`)",
-           call. = FALSE)
     }
     mv <- is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
       is.matrix(evolution$env_var) || is.list(evolution$env_var)

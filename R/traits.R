@@ -220,7 +220,7 @@ correlated_growth <- function(axes, traits, cor, species) {
   q <- length(traits)
   env <- vapply(unname(as.list(axes)), function(e) as.numeric(unname(e)), numeric(length(axes[[1]])))
   env <- matrix(env, ncol = q)
-  cor_of <- if (is.list(cor)) function(j) cor[[species[j]]] else function(j) cor
+  cor <- niche_cor_species(cor, species, q)
   r <- matrix(0, nrow(env), length(species))
   for (j in seq_along(species)) {
     theta <- vapply(traits, function(x) x$optimum[j], numeric(1))
@@ -228,11 +228,65 @@ correlated_growth <- function(axes, traits, cor, species) {
     rmax <- prod(vapply(traits, function(x) x$r_max[j], numeric(1)))
     d <- sweep(sweep(env, 2, theta, "-"), 2, sigma, "/")
     d[, !is.finite(sigma)] <- 0
-    m <- rowSums((d %*% solve(cor_of(j))) * d)
+    m <- rowSums((d %*% solve(cor[[j]])) * d)
     r[, j] <- rmax * exp(-m / 2)
   }
   colnames(r) <- species
   r
+}
+
+# the correlation matrix of each species (a list in the order of `species`) from the attribute
+# of niche_correlation(); NULL without it
+niche_cor_species <- function(cor, species, q) {
+  if (is.null(cor)) return(NULL)
+  if (is.list(cor)) {
+    if (!all(species %in% names(cor))) {
+      stop("the correlation of the niche lacks matrices for ",
+           species_list(setdiff(species, names(cor))), call. = FALSE)
+    }
+    cor <- unname(cor[species])
+  } else {
+    cor <- rep(list(cor), length(species))
+  }
+  ok <- vapply(cor, function(m) is.matrix(m) && is.numeric(m) && identical(dim(m), c(q, q)) &&
+                 !anyNA(m), logical(1))
+  if (!all(ok)) {
+    stop("the correlation of the niche needs ", q, " x ", q, " matrices, from ",
+         "`niche_correlation()`", call. = FALSE)
+  }
+  lapply(cor, unname)
+}
+
+# covariance Omega of the Gaussian niche of one species on its axes with a finite breadth
+# `s`: D R D with D = diag(sigma) when all are finite; otherwise the inverse of that block of
+# the precision, the limit of an infinite breadth, as in correlated_growth()
+niche_omega <- function(sigma, cor, s = which(is.finite(sigma))) {
+  d <- diag(sigma[s], length(s))
+  r <- if (length(s) == length(sigma)) cor else solve(solve(cor)[s, s, drop = FALSE])
+  om <- d %*% r %*% d
+  (om + t(om)) / 2
+}
+
+# precision of the niche over all the axes, with zeros on those without a finite breadth
+niche_precision <- function(sigma, cor) {
+  s <- which(is.finite(sigma))
+  out <- matrix(0, length(sigma), length(sigma))
+  if (length(s)) out[s, s] <- solve(niche_omega(sigma, cor, s))
+  out
+}
+
+# the matrix M of the overlap exp(-d' M d / 2) of two Gaussian niches with precisions a and b
+# whose optima differ by d: (Omega_a + Omega_b)^-1 when both covariances exist
+niche_overlap_matrix <- function(a, b) {
+  u <- which(diag(a) > 0 | diag(b) > 0)
+  m <- matrix(0, nrow(a), ncol(a))
+  if (length(u)) {
+    au <- a[u, u, drop = FALSE]
+    bu <- b[u, u, drop = FALSE]
+    mu <- au %*% solve(au + bu, bu)
+    m[u, u] <- (mu + t(mu)) / 2
+  }
+  m
 }
 
 #' Correlation between the axes of a niche
@@ -243,6 +297,15 @@ correlated_growth <- function(axes, traits, cor, species) {
 #' this correlation. A species with a positive correlation between two axes grows best where
 #' both depart from its optima in the same direction, as a species that tolerates warm water
 #' only if it is also well oxygenated.
+#'
+#' With `evolution` in [simulate_metacommunity()] and in [simulate_evolving_metacommunity()],
+#' the correlation enters the matrix of Gaussian selection, \eqn{\Omega = D R D}{Omega = D R
+#' D} with \eqn{D}{D} the diagonal matrix of the breadths (see the section Several traits of
+#' [evolution_control()]): growth, the response to selection, the selection of immigrants and
+#' the overlap of niches (`niche_overlap`, and `competition_matrix(type = "trait")`) all use
+#' it. New species take the correlation of their mother. An axis with an infinite breadth
+#' exerts no selection, whatever its correlation; a breadth of 0 cannot be combined with a
+#' correlation.
 #'
 #' @param traits List of data frames from [species_traits()], one per axis, with the same
 #'   species.
