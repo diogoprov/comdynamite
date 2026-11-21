@@ -146,7 +146,9 @@ part of the phenotype (\code{plastic}), the variance among the lineages of a spe
 each site (\code{within_var}, 0 for species of one lineage), the environment of each site
 at the end (\code{environment}), the same genetic means, variance among lineages and
 environment at \code{record_steps} for the lineages extant at the end (\code{history},
-\code{within_history}, \code{environment_history}), the reference environment of plasticity
+\code{within_history}, \code{environment_history}), the steps since the environment of each site
+last changed (\code{since_change}, as in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}; the environment of
+this engine is fixed, so they equal the step), the reference environment of plasticity
 (\code{reference}), the genetic and environmental variances and the slope of plasticity of
 each species (\code{genetic_var}, \code{env_var}, \code{plasticity}) and the \code{settings}; otherwise
 \code{NULL}. With several traits, the genetic means, plastic parts and variances among

@@ -145,7 +145,10 @@ see the section Colonisation history) and \code{n_steps}. With \code{evolution},
 list with the genetic mean of the optimum in each population (\code{genetic}), the plastic part
 of its phenotype at the last step (\code{plastic}), the phenotype after dispersal (\code{phenotype},
 which mixes residents and immigrants), the genetic means and the environment at
-\code{record_steps} (\code{history}, \code{environment_history}), the reference environment and the
+\code{record_steps} (\code{history}, \code{environment_history}), the steps since the environment of each
+site last changed on any axis (\code{since_change}, a list with \code{end}, one value per site at
+the last step, and \code{history}, sites x recorded steps; 0 in the step of a change and the
+step itself where the environment never changed), the reference environment and the
 settings, and, with \code{mutation_var}, the genetic variance of each population at the last
 step (\code{genetic_variance}); \code{NA} where a population is absent. With several evolving traits, \code{genetic},
 \code{plastic} and \code{phenotype} are arrays of sites x species x traits, \code{history} has the

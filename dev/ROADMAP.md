@@ -91,7 +91,8 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    a dispersão variável no tempo com vários traits já funcionava, ao contrário do que o
    manuscrito diz; corrigir o texto na revisão.
 6. *Saída de "tempo desde a mudança"* no motor evolutivo, a única sugestão do ECY25-0086 feita
-   só em parte.
+   só em parte. Feito em 2026-11-20: `evolution$since_change` (fim e `record_steps`) e a
+   coluna `since_change` de `maladaptation()`.
 7. *Ambiente sazonal e correlacionado ao longo de redes fluviais* (pedido em 2026-11-19).
    Objetivo: investigar dinâmica e persistência de longo prazo em metacomunidades fluviais,
    como as de Altermatt (2013, Aquatic Ecology, doi:10.1007/s10452-013-9450-3) e Carrara et
