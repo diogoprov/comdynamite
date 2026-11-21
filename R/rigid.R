@@ -453,9 +453,10 @@ event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap
   rest <- setdiff(seq_len(n), moving)
   observed <- layout_key(event, seq_len(n))
   moves <- lapply(groups, landscape_moves, coords, landscape, outside)
-  perms <- vector("list", n_perm)
-  keys <- character(n_perm)
-  found <- 0
+  acc <- new.env(parent = emptyenv())
+  acc$perms <- vector("list", n_perm)
+  acc$keys <- character(n_perm)
+  acc$found <- 0
   # one try: the groups placed, or NULL when one does not fit after the others. With one
   # group `pick` is its move; with several, each group draws its own until they stay apart
   one_try <- function(pick) {
@@ -489,11 +490,11 @@ event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap
       permutation <- one_try(pick)
       if (is.null(permutation)) next
       key <- layout_key(event, permutation)
-      if (key == observed || key %in% keys[seq_len(found)]) next
-      found <<- found + 1
-      perms[[found]] <<- permutation
-      keys[found] <<- key
-      if (found == n_perm) break
+      if (key == observed || key %in% acc$keys[seq_len(acc$found)]) next
+      acc$found <- acc$found + 1
+      acc$perms[[acc$found]] <- permutation
+      acc$keys[acc$found] <- key
+      if (acc$found == n_perm) break
     }
   }
   if (length(groups) > 1) {
@@ -504,12 +505,12 @@ event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap
     rows <- nrow(moves[[1]])
     first <- sample.int(rows, min(rows, 2 * n_perm, max_tries))
     draw(first)
-    if (found < n_perm && rows > length(first)) {
+    if (acc$found < n_perm && rows > length(first)) {
       others <- setdiff(seq_len(rows), first)
       others <- others[sample.int(length(others), min(length(others), max_tries - length(first)))]
       draw(others)
     }
   }
-  if (found == 0) return(NULL)
-  structure(do.call(rbind, perms[seq_len(found)]), moves = vapply(moves, nrow, integer(1)))
+  if (acc$found == 0) return(NULL)
+  structure(do.call(rbind, acc$perms[seq_len(acc$found)]), moves = vapply(moves, nrow, integer(1)))
 }

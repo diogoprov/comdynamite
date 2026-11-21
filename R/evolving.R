@@ -855,17 +855,18 @@ niche_crowding <- function(st) {
 # is kept for each pair of species (indexed over all species ever)
 niche_crowding_correlated <- function(st) {
   cache <- new.env(parent = emptyenv())
-  precision <- list()
+  precision <- function(l) {
+    key <- paste0("precision", l)
+    if (is.null(cache[[key]])) {
+      cor <- st$ev$sel[[l]]$cor %||% diag(st$ev$q)
+      cache[[key]] <- niche_precision(st$ev$sigma[l, ], cor)
+    }
+    cache[[key]]
+  }
   overlap_matrix <- function(i, j) {
     key <- paste(i, j)
     if (is.null(cache[[key]])) {
-      for (l in c(i, j)) {
-        if (length(precision) < l || is.null(precision[[l]])) {
-          cor <- st$ev$sel[[l]]$cor %||% diag(st$ev$q)
-          precision[[l]] <<- niche_precision(st$ev$sigma[l, ], cor)
-        }
-      }
-      cache[[key]] <- niche_overlap_matrix(precision[[i]], precision[[j]])
+      cache[[key]] <- niche_overlap_matrix(precision(i), precision(j))
     }
     cache[[key]]
   }
@@ -1138,14 +1139,6 @@ evolving_partition <- function(idx, partition, disp_matrix) {
     if (any(side) && !all(side)) break
   }
   list(idx[!side], idx[side])
-}
-
-# species j (index over all species ever) buds: new species g takes `amounts[[g]]` individuals
-# (all, when NULL) in the sites `sites[[g]]`; see evolving_split_many()
-evolving_split <- function(st, j, sites, names_new, amounts = NULL, jump_var = 0,
-                           mutants = FALSE) {
-  evolving_split_many(st, list(list(j = j, sites = sites, amounts = amounts, names = names_new,
-                                    ids = st$k_all + seq_along(sites))), jump_var, mutants)
 }
 
 # several mothers bud at once: each element of `buds` has the mother `j` (index over all

@@ -38,7 +38,7 @@ run_scenarios <- function(scenarios, simulate, setup = NULL,
             length(seed) == 1)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
-    assign(".Random.seed", old, envir = globalenv()))
+    assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   n <- nrow(scenarios)
   shared <- lapply(seq_len(n_rep), function(r) {
     cell_seed(seed + r - 1)

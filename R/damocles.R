@@ -641,10 +641,11 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
 
 # rates of each edge (or one rate for all) and sympatry from the working parameters
 damocles_par_rates <- function(par, design) {
-  used <- 0
+  pos <- new.env(parent = emptyenv())
+  pos$used <- 0
   take <- function(n) {
-    value <- par[used + seq_len(n)]
-    used <<- used + n
+    value <- par[pos$used + seq_len(n)]
+    pos$used <- pos$used + n
     value
   }
   log_gamma <- take(design$n_gamma)

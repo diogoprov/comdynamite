@@ -97,7 +97,7 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #' package gifski.
 #'
 #' @param x Result of [food_web_dynamics()].
-#' @param file Path of the GIF to write.
+#' @param file Path of the GIF to write; by default a temporary file, whose path is returned.
 #' @param frames Number of frames, taken at evenly spaced rows of `x`; it cannot exceed the
 #'   number of rows.
 #' @param delay Seconds between frames.
@@ -115,7 +115,7 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #' }
 #' }
 #' @export
-animate_food_web <- function(x, file = "food_web.gif", frames = 100, delay = 0.08,
+animate_food_web <- function(x, file = tempfile(fileext = ".gif"), frames = 100, delay = 0.08,
                              width = 640, height = 640, ...) {
   check_food_web(x)
   if (!has_gifski()) {

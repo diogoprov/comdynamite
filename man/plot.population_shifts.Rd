@@ -23,3 +23,15 @@ deviation within populations, when it sets it) as a dotted line. A flat \eqn{R^2
 \code{w} is not identified, and estimates that change along it are then not to be trusted. With a
 bootstrap, the interval of \code{c} is drawn at the chosen width.
 }
+\examples{
+\dontshow{if (requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)) withAutoprint(\{ # examplesIf}
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(20)
+sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
+                              competition_matrix(tree, "none"), n_steps = 100,
+                              seed_steps = 1:5)
+ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
+fit <- population_shifts(ind)
+plot(fit)
+\dontshow{\}) # examplesIf}
+}

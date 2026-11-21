@@ -366,8 +366,13 @@ adjusted_rand <- function(a, b) {
 #' tr <- treeshapesim::sim_tree_shape(30)
 #' reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 #' comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
+#' # few random partitions, to keep the example quick
+#' damocles_partition_test(comm, tr, reg, n_rand = 4, vary = "gamma")
+#' \donttest{
+#' # random partitions and the parametric bootstrap refit the model many times
 #' damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
 #' damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
+#' }
 #' @export
 damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0,
                                     vary = c("both", "gamma", "mu"),

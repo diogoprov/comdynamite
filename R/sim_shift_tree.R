@@ -48,13 +48,15 @@ shift_tree_once <- function(n_tips, n_shifts, ratio, lambda0, epsilon, gsa_facto
   alive <- 1L
   # Segments of lineages that ended: from, to (node ids), start, end, regime, kind of end
   # (1 speciation or shift, 2 extinction). Node ids are the row numbers.
-  segments <- matrix(0, 64, 6)
-  n_seg <- 0L
+  acc <- new.env(parent = emptyenv())
+  acc$segments <- matrix(0, 64, 6)
+  acc$n <- 0L
   close <- function(i, time, kind) {
-    n_seg <<- n_seg + 1L
-    if (n_seg > nrow(segments)) segments <<- rbind(segments, matrix(0, nrow(segments), 6))
-    segments[n_seg, ] <<- c(from[i], n_seg, start[i], time, regime[i], kind)
-    n_seg
+    n <- acc$n + 1L
+    if (n > nrow(acc$segments)) acc$segments <- rbind(acc$segments, matrix(0, nrow(acc$segments), 6))
+    acc$segments[n, ] <- c(from[i], n, start[i], time, regime[i], kind)
+    acc$n <- n
+    n
   }
   rates <- lambda0
   t <- 0
@@ -102,7 +104,7 @@ shift_tree_once <- function(n_tips, n_shifts, ratio, lambda0, epsilon, gsa_facto
   k <- if (length(n_start) == 1) 1 else sample.int(length(n_start), 1, prob = n_end - n_start)
   cut <- stats::runif(1, n_start[k], n_end[k])
   for (i in alive) close(i, t, 1)
-  out <- shift_tree_cut(segments[seq_len(n_seg), , drop = FALSE], cut, rates)
+  out <- shift_tree_cut(acc$segments[seq_len(acc$n), , drop = FALSE], cut, rates)
   attr(out, "capped") <- phi > phi_ref
   out
 }

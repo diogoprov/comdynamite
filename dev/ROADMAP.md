@@ -1,8 +1,8 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-21. Versão atual: 0.10.0 (tag `v0.10.0`; release no GitHub e DOI
-pendentes de decisão do usuário), após a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
-conceito `10.5281/zenodo.23993533`).
+Atualizado em 2026-11-21. Versão atual: 0.10.0 (tag `v0.10.0`, release, DOI
+`10.5281/zenodo.24423302`), após a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
+conceito `10.5281/zenodo.23993533`). Em desenvolvimento: 0.10.0.9000.
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`,
 `v0.9.0` e `v0.10.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
@@ -13,13 +13,23 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    `env_surrogates()`, gerador de Thompson et al. 2020, competição por traits, nicho com eixos
    correlacionados, dispersão no tempo, tempo desde a mudança, ambiente sazonal e redes
    fluviais, dispersão e tolerância a distúrbio por espécie ou grupo) e traz o artigo de
-   persistência em redes fluviais com os cenários do Pantanal. Falta decidir a release no
-   GitHub (gera DOI no Zenodo). As duas pendências do bloco A entraram antes da tag: nicho
+   persistência em redes fluviais com os cenários do Pantanal. Release no GitHub com DOI
+   `10.5281/zenodo.24423302`. As duas pendências do bloco A entraram antes da tag: nicho
    correlacionado com `evolution` e com especiação (item 4) e `kernel_group` no motor evolutivo
    e com seleção de imigrantes ou vários traços (item 8). Restam decisões menores: `sigma = 0`
    com correlação e a fissão por distância pelo kernel do grupo. Próximo marco de código: a
    escolher entre os blocos B a J.
    A 0.9.0 saiu em 2026-11-18 (tag `v0.9.0`, release, DOI `10.5281/zenodo.24341231`).
+1b. **Padrões do rOpenSci (auditoria de 2026-11-21).** O pacote entra pela via de software
+   estatístico (categorias EA, RE e BS, 206 padrões a anotar com `srr`). Fase 1 (correções
+   rápidas: CONTRIBUTING, código de conduta, ORCID, badge, WORDLIST, `.lintr`, pkgcheck no CI,
+   falhas do pkgcheck) na 0.10.0.9000. Faltam: fase 2, decidir a atribuição do código
+   derivado de MATLAB (`node_test.R`, `phylo_gradient.R`, `food_web.R`); fase 3, validação de
+   entradas (escalares, `Inf`, NA, comparações de ponto flutuante, mensagens de
+   `stopifnot()`); fase 4, suíte estendida de testes (várias sementes, ruído, erro tipo I das
+   permutações, recuperação no modelo Bayesiano); fase 5, anotação `srr` e consulta prévia
+   aos editores, só depois da decisão do JBI (o guia não aceita submissão com manuscrito em
+   revisão em outro periódico).
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
    2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),

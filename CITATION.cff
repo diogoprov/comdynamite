@@ -2,10 +2,11 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 type: software
 title: "comdynamite: Linking Traits, Phylogenies and Biogeography in Metacommunities"
-version: 0.10.0
+version: 0.10.0.9000
 authors:
   - family-names: Provete
     given-names: Diogo B.
+    orcid: "https://orcid.org/0000-0002-0097-0651"
 license: MIT
 doi: 10.5281/zenodo.23993533
 repository-code: "https://github.com/diogoprov/comdynamite"

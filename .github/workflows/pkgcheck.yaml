@@ -1,0 +1,16 @@
+# rOpenSci pkgcheck, from https://github.com/ropensci-review-tools/pkgcheck-action
+name: pkgcheck
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  pkgcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ropensci-review-tools/pkgcheck-action@main
+        with:
+          post-to-issue: false
