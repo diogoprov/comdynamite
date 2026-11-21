@@ -28,8 +28,13 @@
 #'   the downstream neighbour, `NA` at the outlet), `length` (of the reach to the downstream
 #'   neighbour, 0 at the outlet), `distance` (along the channel to the outlet), `magnitude`
 #'   (Shreve magnitude, the number of headwaters upstream of the site, itself included),
-#'   `order` (Strahler order), `headwater` (logical) and the coordinates `x` and `y`.
-#' @references Rinaldo, A., Rigon, R., Banavar, J. R., Maritan, A., & Rodriguez-Iturbe, I.
+#'   `upstream_length` (the length of channel upstream of the site, its own reach included, a
+#'   proxy for the catchment area, which describes the size of a river better than Strahler
+#'   order; Altermatt 2013), `order` (Strahler order), `headwater` (logical) and the coordinates `x` and `y`.
+#' @references Altermatt, F. (2013). Diversity in riverine metacommunities: a network
+#'   perspective. *Aquatic Ecology*, 47, 365--377. \doi{10.1007/s10452-013-9450-3}
+#'
+#'   Rinaldo, A., Rigon, R., Banavar, J. R., Maritan, A., & Rodriguez-Iturbe, I.
 #'   (2014). Evolution and selection of river networks: Statics, dynamics, and complexity.
 #'   *Proceedings of the National Academy of Sciences*, 111, 2417--2424.
 #'   \doi{10.1073/pnas.1322700111}
@@ -191,11 +196,13 @@ river_table <- function(downstream, length) {
   for (s in ord[-1]) distance[s] <- distance[downstream[s]] + length[s]
   n_children <- lengths(children)
   magnitude <- as.numeric(n_children == 0)
+  upstream <- length
   order <- ifelse(n_children == 0, 1L, 0L)
   for (s in rev(ord)) {
     ch <- children[[s]]
     if (!base::length(ch)) next
     magnitude[s] <- sum(magnitude[ch])
+    upstream[s] <- upstream[s] + sum(upstream[ch])
     top <- max(order[ch])
     order[s] <- top + as.integer(sum(order[ch] == top) > 1)
   }
@@ -212,7 +219,8 @@ river_table <- function(downstream, length) {
   }
   angle <- (lo + hi) / 2
   data.frame(site = paste0("site", seq_len(m)), downstream = downstream, length = length,
-             distance = distance, magnitude = magnitude, order = as.integer(order),
+             distance = distance, magnitude = magnitude, upstream_length = upstream,
+             order = as.integer(order),
              headwater = n_children == 0, x = distance * cos(angle),
              y = distance * sin(angle), stringsAsFactors = FALSE)
 }

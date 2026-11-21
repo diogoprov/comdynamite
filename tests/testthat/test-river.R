@@ -26,6 +26,7 @@ test_that("Strahler order and magnitude follow their definitions", {
   expect_equal(tab$magnitude, c(3, 3, 1, 2, 1, 1))
   expect_equal(tab$order, c(2L, 2L, 1L, 2L, 1L, 1L))
   expect_equal(tab$distance, c(0, 1, 2, 2, 3, 3))
+  expect_equal(tab$upstream_length, c(5, 5, 1, 3, 1, 1))
 })
 
 test_that("landscape_river() splits distances into downstream and upstream parts", {

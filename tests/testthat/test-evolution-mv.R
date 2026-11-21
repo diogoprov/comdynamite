@@ -342,3 +342,29 @@ test_that("mutation_var is refused with several traits and in evolving simulatio
                                                                     mutation_var = 0.1)),
                "several traits")
 })
+
+test_that("since_change counts a change on any axis and passes to evolving metacommunities", {
+  set.seed(6)
+  s <- mv_setup()
+  n_steps <- 20
+  et <- lapply(as.data.frame(s$env), function(x) matrix(x, length(x), n_steps))
+  et$head[1:3, 11:20] <- et$head[1:3, 11:20] + 1
+  set.seed(1)
+  sim <- simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, env_time = et,
+                                dispersal = 0.02, n_steps = n_steps, record_steps = 15,
+                                evolution = evolution_control(diag(2)))
+  expect_identical(unname(sim$evolution$since_change$end), c(rep(9L, 3), rep(20L, 22)))
+  expect_identical(unname(sim$evolution$since_change$history[, "step15"]),
+                   c(rep(4L, 3), rep(15L, 22)))
+  m <- maladaptation(sim)
+  expect_identical(m$since_change, ifelse(m$site %in% rownames(sim$abundance)[1:3], 9L, 20L))
+  set.seed(1)
+  ls <- landscape_grid(4, disp_scale = 0.5)
+  ancestor <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp1")
+  evo <- simulate_evolving_metacommunity(
+    ls, ancestor, dispersal = 0.002, n_steps = 30,
+    speciation = speciation_control("geographic", threshold = 100),
+    evolution = evolution_control(genetic_var = 20))
+  expect_true(all(evo$evolution$since_change$end == 30L))
+  expect_true(all(maladaptation(evo)$since_change == 30L))
+})

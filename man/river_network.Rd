@@ -32,7 +32,9 @@ A data frame with one row per site, the outlet first: \code{site}, \code{downstr
 the downstream neighbour, \code{NA} at the outlet), \code{length} (of the reach to the downstream
 neighbour, 0 at the outlet), \code{distance} (along the channel to the outlet), \code{magnitude}
 (Shreve magnitude, the number of headwaters upstream of the site, itself included),
-\code{order} (Strahler order), \code{headwater} (logical) and the coordinates \code{x} and \code{y}.
+\code{upstream_length} (the length of channel upstream of the site, its own reach included, a
+proxy for the catchment area, which describes the size of a river better than Strahler
+order; Altermatt 2013), \code{order} (Strahler order), \code{headwater} (logical) and the coordinates \code{x} and \code{y}.
 }
 \description{
 Grows a branching river network site by site, from the outlet upwards, for
@@ -60,6 +62,9 @@ down <- !is.na(net$downstream)
 segments(net$x[down], net$y[down], net$x[net$downstream[down]], net$y[net$downstream[down]])
 }
 \references{
+Altermatt, F. (2013). Diversity in riverine metacommunities: a network
+perspective. \emph{Aquatic Ecology}, 47, 365--377. \doi{10.1007/s10452-013-9450-3}
+
 Rinaldo, A., Rigon, R., Banavar, J. R., Maritan, A., & Rodriguez-Iturbe, I.
 (2014). Evolution and selection of river networks: Statics, dynamics, and complexity.
 \emph{Proceedings of the National Academy of Sciences}, 111, 2417--2424.

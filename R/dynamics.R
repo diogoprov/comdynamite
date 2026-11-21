@@ -179,7 +179,10 @@
 #'   list with the genetic mean of the optimum in each population (`genetic`), the plastic part
 #'   of its phenotype at the last step (`plastic`), the phenotype after dispersal (`phenotype`,
 #'   which mixes residents and immigrants), the genetic means and the environment at
-#'   `record_steps` (`history`, `environment_history`), the reference environment and the
+#'   `record_steps` (`history`, `environment_history`), the steps since the environment of each
+#'   site last changed on any axis (`since_change`, a list with `end`, one value per site at
+#'   the last step, and `history`, sites x recorded steps; 0 in the step of a change and the
+#'   step itself where the environment never changed), the reference environment and the
 #'   settings, and, with `mutation_var`, the genetic variance of each population at the last
 #'   step (`genetic_variance`); `NA` where a population is absent. With several evolving traits, `genetic`,
 #'   `plastic` and `phenotype` are arrays of sites x species x traits, `history` has the
@@ -948,6 +951,7 @@ mc_finish <- function(st) {
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
                             environment = matrix(e_end, m, dimnames = list(sites, ev$axes)),
                             environment_history = env_history,
+                            since_change = since_change(ev$env, n_steps, record_steps, sites),
                             reference = stats::setNames(ev$ref, ev$axes),
                             genetic_var = stats::setNames(ev$G, species),
                             env_var = stats::setNames(ev$E, species),
@@ -971,6 +975,7 @@ mc_finish <- function(st) {
       }
       out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
                             environment = ev$env(n_steps), environment_history = env_history,
+                            since_change = since_change(ev$env, n_steps, record_steps, sites),
                             reference = ev$ref, genetic_variance = vg,
                             settings = structure(evolution[setdiff(names(evolution),
                                                                    c("env", "traits"))],
@@ -978,6 +983,23 @@ mc_finish <- function(st) {
     }
     out
   }), st)
+}
+
+# steps since the environment of each site last changed (on any axis), at the end and at the
+# recorded steps: 0 in a step where it changed, and the step itself where it never changed
+since_change <- function(env, n_steps, record_steps, sites) {
+  last <- rep(0L, length(sites))
+  before <- as.matrix(env(1))
+  steps <- sort(unique(as.integer(record_steps[record_steps <= n_steps])))
+  at <- matrix(NA_integer_, length(sites), length(steps))
+  if (length(steps)) dimnames(at) <- list(sites, step_label(steps))
+  for (s in seq_len(n_steps)) {
+    now <- as.matrix(env(s))
+    if (s > 1) last[rowSums(now != before) > 0] <- s
+    before <- now
+    if (s %in% steps) at[, step_label(s)] <- s - last
+  }
+  list(end = stats::setNames(as.integer(n_steps - last), sites), history = if (length(steps)) at)
 }
 
 # recruits of a lottery: in each site, `vacant` microsites are filled by a draw without

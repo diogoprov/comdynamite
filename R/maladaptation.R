@@ -22,6 +22,15 @@
 #' variance among them, so the load is that of a single Gaussian population with that mean and
 #' variance, an approximation of the mean load of the lineages.
 #'
+#' With an environment that changes in steps (`env_time`, for example annual series of urban
+#' cover or [env_pulse()]), `since_change` gives the time each population has had to respond to
+#' the last change. The decay of the load with this time separates a lag of genetic adaptation
+#' (the load falls over generations) from plasticity (it falls at once, in the step of the
+#' change). The environment counts as changed in a step whenever it differs from that of the
+#' step before, so a continuous trend (as in [env_space_time()]) resets it every step; round
+#' the environment to the resolution of interest before the simulation to count only larger
+#' changes.
+#'
 #' Maladaptation can come from gene flow (immigrants with the means of other sites; see also
 #' `migrant_load` in [simulate_metacommunity()]), drift and founder effects in small
 #' populations, a lag behind an environment that changes (`env_time`), genetic constraints
@@ -35,7 +44,9 @@
 #' @return A data frame with one row per population present: `step` (with several steps),
 #'   `site`, `species`, `abundance`, then `env`, `phenotype` and `deviation` (\eqn{E - \bar
 #'   p}{E - pbar}), or with several traits `env_<trait>`, `phenotype_<trait>` and
-#'   `deviation_<trait>` for each trait, then `distance` (\eqn{|d| / \sqrt{\sigma^2 + P}}{|d|
+#'   `deviation_<trait>` for each trait, then `since_change` (the steps since the environment
+#'   of the site last changed, `NA` for simulations made with older versions of the package),
+#'   then `distance` (\eqn{|d| / \sqrt{\sigma^2 + P}}{|d|
 #'   / sqrt(sigma^2 + P)}, or the Mahalanobis distance) and `load`.
 #' @family simulate metacommunities
 #' @examples
@@ -94,11 +105,25 @@ maladaptation_at <- function(x, step) {
   j <- (cell - 1) %/% length(sites) + 1
   out <- data.frame(site = sites[i], species = species[j], abundance = abundance[cell],
                     env = env[i], phenotype = state$mean[cell], deviation = deviation[cell],
-                    distance = distance[cell], load = 1 - exp(-distance[cell]^2 / 2),
                     stringsAsFactors = FALSE)
+  out$since_change <- steps_since_change(x, step)[i]
+  out$distance <- distance[cell]
+  out$load <- 1 - exp(-distance[cell]^2 / 2)
   out <- out[order(match(out$site, sites), match(out$species, species)), , drop = FALSE]
   rownames(out) <- NULL
   out
+}
+
+# steps since the environment of each site last changed, at the end or at a recorded step (NA
+# for simulations made before this output existed)
+steps_since_change <- function(x, step) {
+  sc <- x$evolution$since_change
+  n <- nrow(x$abundance)
+  if (is.null(sc)) return(rep(NA_integer_, n))
+  if (is.null(step)) return(unname(sc$end))
+  label <- step_label(step)
+  if (is.null(sc$history) || !label %in% colnames(sc$history)) return(rep(NA_integer_, n))
+  unname(sc$history[, label])
 }
 
 maladaptation_mv <- function(x, step) {
@@ -144,6 +169,7 @@ maladaptation_mv <- function(x, step) {
     out[[paste0("phenotype_", axes[a])]] <- phen[, a]
     out[[paste0("deviation_", axes[a])]] <- dev[, a]
   }
+  out$since_change <- steps_since_change(x, step)[i]
   out$distance <- distance
   out$load <- 1 - exp(-distance^2 / 2)
   ord <- order(match(out$site, sites), match(out$species, species))
