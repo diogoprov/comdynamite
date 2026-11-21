@@ -27,7 +27,10 @@ mc_dynamics(
   mortality = 1,
   dispersal_time = NULL,
   kernels = NULL,
-  kernel_step = NULL
+  kernel_step = NULL,
+  kernel_group = NULL,
+  dispersal_site = NULL,
+  disturbance_sensitivity = 1
 )
 }
 \arguments{
@@ -74,7 +77,8 @@ all its populations, as before. With a niche of several axes, one trait evolves 
 with covariance matrices \eqn{G}{G} and \eqn{E}{E} (see the section Several traits of
 \code{\link[=evolution_control]{evolution_control()}} and \code{\link[=genetic_matrices]{genetic_matrices()}}).}
 
-\item{disturbance}{Probability that a site loses all its populations at each time step:
+\item{disturbance}{Probability that a site is disturbed at each time step, losing all its
+populations unless \code{disturbance_sensitivity} is below 1:
 one value (0, the default, for none), or a matrix of sites x steps with the probability of
 each site at each step, for disturbances that vary in space and time, such as the
 seasonal floods of \code{\link[=river_floods]{river_floods()}}.}
@@ -126,6 +130,27 @@ and the diagonal is ignored), and \code{kernel_step} gives, for each step, the i
 the matrix used. For example, a matrix of connected ponds for flood steps and one of
 isolated ponds for dry steps. Only for spatially explicit landscapes; \code{NULL} (the
 default) keeps the dispersal matrix of \code{landscape}.}
+
+\item{kernel_group}{Optional routes of dispersal by group of species: one group per species,
+given as a column name or index of \code{kernel_step}, which is then a matrix with one row per
+step and one column per group, holding the index or name of the matrix of \code{kernels} used
+by that group at that step. For example, long-distance migrants and sedentary fish of the
+same river, each with a matrix for high and one for low water. A run in which every group
+uses the same matrix gives the same results as a vector \code{kernel_step}. Not available with
+immigrant selection or several traits under \code{evolution}, nor in
+\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}. \code{NULL} (the default) for one route for all species.}
+
+\item{dispersal_site}{Optional change of emigration among sites: a matrix with one row per
+site and one column per step of multipliers of the emigration probability (probabilities
+above 1 are set to 1), applied on top of \code{dispersal} and \code{dispersal_time}. For example, a
+dispersal pulse only in the floodplain at high water. \code{NULL} (the default) for the same
+emigration at every site.}
+
+\item{disturbance_sensitivity}{Probability that a population is lost when its site is
+disturbed: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the
+disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
+keep their populations.}
 }
 \value{
 List with \code{abundance}, \code{history}, the colonisation history (\code{arrival},

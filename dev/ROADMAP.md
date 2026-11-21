@@ -122,22 +122,15 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
    de citar resultados.
 8. *Dispersão e tolerância a distúrbio por espécie ou grupo de espécies* (pedido em
-   2026-11-20, a partir dos cenários do Pantanal do item 7d). Hoje só a probabilidade de
-   emigração varia por espécie (`dispersal` e `dispersal_time` com uma coluna por espécie). A
-   distância de dispersão não varia: `kernels` e o kernel da paisagem são comuns a todas as
-   espécies, de modo que migradores de longa distância e espécies sedentárias de lagoas
-   (white, gray e black fish, como em Junk 2005) só diferem em quanto emigram, não em
-   até onde vão. A tolerância a distúrbio também não varia: `disturbance` elimina todas as
-   populações do sítio, de modo que espécies resistentes à seca ou à hipóxia (ovos e sementes
-   resistentes, respiração aérea) não podem sobreviver à secagem de uma lagoa enquanto as
-   outras somem. Plano: (i) kernels por espécie ou por grupo (uma lista de matrizes, ou uma
-   escala por grupo aplicada à mesma matriz de distâncias), com cuidado com memória e tempo
-   quando há muitas espécies; (ii) distúrbio por espécie ou grupo, como uma matriz
-   sítios x passos e um vetor de sensibilidade por espécie (probabilidade de a população
-   sumir dado o distúrbio), mantendo o distúrbio de hoje como o caso de sensibilidade 1 para
-   todas; (iii) um pulso de dispersão por sítio, já que `dispersal_time` vale para todos os
-   sítios no mesmo passo e, nos cenários do Pantanal, aumenta também a emigração do planalto
-   na cheia da planície; (iv) refazer os cenários do Pantanal com as guildas.
+   2026-11-20, a partir dos cenários do Pantanal do item 7d, em que as guildas de peixes só
+   diferiam em quanto emigravam e a secagem de uma lagoa eliminava todas as populações). Feito
+   em 2026-11-20: `kernel_group` com `kernel_step` como matriz passos x grupos (cada grupo de
+   espécies segue o seu kernel em cada passo), `dispersal_site` (multiplicadores da emigração
+   por sítio e passo) e `disturbance_sensitivity` (probabilidade de a população sumir quando o
+   sítio é perturbado, uma por espécie). Os padrões reproduzem os resultados anteriores bit a
+   bit. Falta: `kernel_group` no motor evolutivo (o fluxo gênico de coesão e a fissão usam um
+   único kernel) e com seleção de imigrantes ou vários traços; refazer os cenários do Pantanal
+   com as guildas (item 7d).
 
 Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. Os itens 2, 3 e 4 foram feitos em 2026-11-19; o estudo (i) do item 1 foi feito em 2026-11-20 (200 réplicas, seis nulos: livre, toro, MSR, shift-rotate ad hoc, substituto paramétrico por postos e variograma de Viladomat et al. 2014; a Constant Moran permutation saiu porque Arthur 2024/2025 trata de nulos de redes). Nenhum nulo ficou entre 0,04 e 0,06 em todos os casos: todos ficam liberais quando o alcance se aproxima do tamanho da paisagem. O variograma foi o melhor (média 0,062, máximo 0,09), seguido do paramétrico (0,066, máximo 0,10); MSR falha na região em L (até 0,23) e o toro na grade com alcance 5 ou mais (0,10 a 0,14). Resultados em `vignettes/articles/whole-tree.Rmd`. (ii) feito em 2026-11-20 por decisão do usuário, apesar do critério de 0,04 a 0,06 não ter sido atingido: `env_surrogates()` e `null = "variogram"`/`"parametric"` em `pcps_test()`, `node_test()` e `phylo_beta_test()`, com o aviso sobre alcances grandes; o estudo foi rodado de novo com o código do pacote. (iii) feito em 2026-11-20: `env_surrogates()` aceita uma paisagem (devolve paisagens com `env` ou `env_axes` trocados, com as distâncias da paisagem, inclusive toro) e matrizes `env_time` (o paramétrico move a série inteira de cada sítio). Item 1 concluído. Nulos com borda aplicados a dados reais em 2026-11-20 (`data-raw/real_data_nulls.R`, dafnídeos e anuros, com `env_surrogates(lonlat, strata)`), fechando a pendência da v0.5.2. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
