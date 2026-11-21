@@ -395,7 +395,7 @@ check_spread_scale <- function(z, pop) {
   if (length(keep) < 10) return(invisible(NULL))
   centre <- tapply(z, pop, mean)[keep]
   spread <- tapply(z, pop, stats::sd)[keep]
-  if (stats::sd(spread) == 0) return(invisible(NULL))
+  if (no_variance(spread)) return(invisible(NULL))
   r <- stats::cor(centre, spread, method = "spearman")
   if (r > 0.7) {
     warning("the spread within populations rises with their mean (Spearman r = ",

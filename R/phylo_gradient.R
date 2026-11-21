@@ -421,7 +421,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
   if (anyNA(traits)) stop("`traits` has missing values", call. = FALSE)
-  if (any(apply(traits, 2, stats::var) == 0)) {
+  if (any(no_variance(traits))) {
     stop("traits without variance among the species with individuals", call. = FALSE)
   }
   env <- check_env(env, comm, collinear = TRUE)

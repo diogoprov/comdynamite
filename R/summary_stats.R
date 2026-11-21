@@ -189,7 +189,7 @@ bray_curtis <- function(comm) {
 
 safe_cor <- function(a, b) {
   usable <- is.finite(a) & is.finite(b)
-  if (sum(usable) < 3 || stats::sd(a[usable]) == 0 || stats::sd(b[usable]) == 0) return(NA_real_)
+  if (sum(usable) < 3 || no_variance(a[usable]) || no_variance(b[usable])) return(NA_real_)
   stats::cor(a[usable], b[usable])
 }
 
@@ -215,7 +215,7 @@ blomberg_k <- function(trait, tree) {
   if (length(shared) < 3) return(NA_real_)
   tree <- ape::keep.tip(tree, shared)
   x <- trait[tree$tip.label]
-  if (stats::var(x) == 0) return(NA_real_)
+  if (no_variance(x)) return(NA_real_)
   covariance <- ape::vcv(tree)
   inverse <- solve(covariance)
   n <- length(x)

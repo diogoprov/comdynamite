@@ -554,7 +554,7 @@ node_fit <- function(incidence, values, env) {
   site_weights <- rowSums(incidence)
   species_weights <- colSums(incidence)
   both_clades <- any(species_weights[values > 0] > 0) && any(species_weights[values < 0] > 0)
-  if (!both_clades || n < p + 2 || any(apply(env, 2, stats::var) == 0)) return(failed)
+  if (!both_clades || n < p + 2 || any(no_variance(env))) return(failed)
   standard <- weighted_standardise(matrix(values), species_weights)
   response <- drop(incidence %*% standard)
   predictors <- weighted_standardise(env, site_weights)

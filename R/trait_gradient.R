@@ -696,7 +696,7 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
   fits <- lapply(responses, function(r) {
     y <- data[[r]]
     v <- data[[paste0("se_", r)]]^2
-    if (stats::var(y) == 0) stop("`", r, "` does not vary among species", call. = FALSE)
+    if (no_variance(y)) stop("`", r, "` does not vary among species", call. = FALSE)
     do.call(rbind, lapply(models, function(m) {
       f <- gls_known_error(y, v, covs, m)
       data.frame(response = r, model = m, f, row.names = NULL)
