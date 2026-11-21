@@ -76,7 +76,9 @@ phylo_beta <- function(comm, tree) {
 #'   landscape: they leave the analysis but their predictors can reach occupied sites.
 #' @param null Null model of sites: `"permutation"` (free, or `site_permutations` when given),
 #'   or surrogates of the predictors with the same spatial autocorrelation, `"variogram"` or
-#'   `"parametric"`, for landscapes with edges (see [env_surrogates()]; their rates of type I
+#'   `"parametric"`, for landscapes with edges, or a list of surrogates from
+#'   [env_surrogates()], with one row per site (or per occupied site), for example drawn
+#'   within strata (see [env_surrogates()]; their rates of type I
 #'   error were checked in [pcps_test()], not here). Surrogates need `coords`; empty sites
 #'   are then not allowed.
 #' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or

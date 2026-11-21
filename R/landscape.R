@@ -140,17 +140,7 @@ landscape_points <- function(coords, env, disp_scale, lonlat = FALSE,
   stopifnot(is.numeric(coords), ncol(coords) == 2, nrow(coords) >= 2, all(is.finite(coords)),
             is.numeric(env), length(env) == nrow(coords), all(is.finite(env)),
             length(disp_scale) == 1, disp_scale > 0)
-  if (lonlat) {
-    radians <- coords * pi / 180
-    lon <- radians[, 1]
-    lat <- radians[, 2]
-    h <- sin(outer(lat, lat, "-") / 2)^2 +
-      outer(cos(lat), cos(lat)) * sin(outer(lon, lon, "-") / 2)^2
-    d <- 2 * 6371 * asin(sqrt(pmin(h, 1)))
-    d <- matrix(d, nrow(coords))
-  } else {
-    d <- as.matrix(stats::dist(coords))
-  }
+  d <- if (lonlat) great_circle(coords) else as.matrix(stats::dist(coords))
   dimnames(d) <- NULL
   coords <- as.data.frame(coords)
   rownames(coords) <- NULL
@@ -525,4 +515,14 @@ print.mc_landscape <- function(x, ...) {
   cat("<mc_landscape>", length(x$env), "sites;", type, "\n")
   cat("environment: ", paste(format(range(x$env), digits = 3), collapse = " to "), "\n")
   invisible(x)
+}
+
+# great-circle distances in kilometres between points given as longitude and latitude
+great_circle <- function(coords) {
+  radians <- as.matrix(coords) * pi / 180
+  lon <- radians[, 1]
+  lat <- radians[, 2]
+  h <- sin(outer(lat, lat, "-") / 2)^2 +
+    outer(cos(lat), cos(lat)) * sin(outer(lon, lon, "-") / 2)^2
+  matrix(2 * 6371 * asin(sqrt(pmin(h, 1))), nrow(radians))
 }

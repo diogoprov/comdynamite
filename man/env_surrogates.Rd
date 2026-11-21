@@ -4,7 +4,14 @@
 \alias{env_surrogates}
 \title{Spatial surrogates of predictors}
 \usage{
-env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
+env_surrogates(
+  env,
+  coords,
+  n = 99,
+  method = c("variogram", "parametric"),
+  lonlat = FALSE,
+  strata = NULL
+)
 }
 \arguments{
 \item{env}{Predictor, or matrix or data frame of predictors, with one row per site, such
@@ -17,6 +24,14 @@ landscape.}
 \item{n}{Number of surrogates.}
 
 \item{method}{\code{"variogram"} or \code{"parametric"}.}
+
+\item{lonlat}{Are \code{coords} longitude and latitude in decimal degrees? Distances are then
+great-circle distances in kilometres.}
+
+\item{strata}{Optional group of each site, such as the city or the basin where it lies.
+Surrogates are drawn within each group on its own, so values never move between groups,
+which have their own autocorrelation. Each group needs at least 5 sites; a group where
+the predictors do not vary keeps them.}
 }
 \value{
 List of \code{n} matrices with the dimensions and column names of \code{env}, or of \code{n}
@@ -28,7 +43,8 @@ the row of \code{env} it received.
 Draws predictors with the same spatial autocorrelation as the observed ones but no relation
 to anything else, as null models for tests in landscapes with edges, where
 \code{\link[=torus_permutations]{torus_permutations()}} do not apply or reject too often. They are the \code{null} options of
-\code{\link[=pcps_test]{pcps_test()}}, \code{\link[=node_test]{node_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}}, and also serve as null environments for
+\code{\link[=pcps_test]{pcps_test()}}, \code{\link[=node_test]{node_test()}} and \code{\link[=phylo_beta_test]{phylo_beta_test()}}, which also take the list returned
+here (for example drawn with \code{lonlat} or \code{strata}), and also serve as null environments for
 simulations.
 }
 \details{

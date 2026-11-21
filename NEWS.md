@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- `env_surrogates(lonlat =, strata =)`: great-circle distances, and surrogates drawn within
+  groups of sites such as cities. `pcps_test()`, `node_test()` and `phylo_beta_test()` take a
+  list of surrogates as `null`.
+- The articles on clades and on the whole tree apply the restricted nulls to `daphniids` and
+  `anurans` (`data-raw/real_data_nulls.R`).
 - `sample_individuals(visits =, session =)`: several visits to each site at the same step,
   with a column `visit`, and `session = "visit"` for a `session_sd` error shared by the
   individuals of one visit to one site rather than by all sites on a date. The help now says
