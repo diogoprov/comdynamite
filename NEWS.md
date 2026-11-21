@@ -1,5 +1,10 @@
 # comdynamite (development version)
 
+- The Description and the help pages now say that `node_test()`, `node_contrasts()`,
+  `phylo_vector()` and `trait_partition()` are translations of the MATLAB code in the
+  supplements of Leibold et al. (2010) and Peres-Neto et al. (2012), with credit to their
+  authors, and that `food_web_dynamics()` was written from the equations and only compared
+  with the MATLAB code of McPeek (2017).
 - Preparation for rOpenSci review: a contributing guide with the development stage of the
   package, a code of conduct, the ORCID of the author, a project status badge, British English
   as the language of the documentation (with `inst/WORDLIST`), a `.lintr` configuration and a

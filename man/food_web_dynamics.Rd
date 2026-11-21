@@ -104,10 +104,11 @@ predator on the consumer is written there with the trait of the resource; it is 
 function of the traits of the consumer and the predator, as box 3.1 defines it; with
 this reading the three-level panel A of figure 3.11 is reproduced closely.
 
-For the resource and the consumer, the implementation matches the MATLAB code of the
-resource-consumer models that McPeek (2017, \emph{The American Naturalist}) published as
-supplementary material: the same fitness functions, functional responses and selection
-gradients, and trajectories of figure 2 of that article (figure 3.2 of the book) within
+The implementation was written from the equations of the book and of McPeek (2017, \emph{The
+American Naturalist}); the MATLAB code of the resource-consumer models that McPeek published
+as supplementary material was only run to compare results, not translated. For the
+resource and the consumer the two agree: the same fitness functions, functional responses
+and selection gradients, and trajectories of figure 2 of that article (figure 3.2 of the book) within
 1e-4 of the author's \code{ode45} integration in continuous time, where one "iteration" of the
 book is one unit of time. That code floors the mean traits at zero (\code{trait_floor}) and has
 no extinction threshold. It has no predator, so the predator level rests on the equations

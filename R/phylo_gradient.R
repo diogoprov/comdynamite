@@ -38,8 +38,8 @@
 #'   when the global test is not significant or no eigenvector is retained;
 #'   `eigenvectors`; `eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
 #'   `pev` before combining gradients with `cbind()`, which drops a `NULL` without warning.
-#' @note Adapted from the MATLAB functions `TraitEnvCor`, `ModelSelectionStochastic` and
-#'   `PCoAWeigthed` in the supplement of Peres-Neto et al. (2012).
+#' @note Translated from the MATLAB functions `TraitEnvCor`, `ModelSelectionStochastic` and
+#'   `PCoAWeigthed` in the supplement of Peres-Neto et al. (2012), with credit to its authors.
 #' @section Article and original code:
 #' The functions `TraitEnvCor`, `ModelSelectionStochastic` and `PCoAWeigthed` and the
 #' script `ScriptDemo` of the supplement differ from the article and its appendices in the
@@ -305,8 +305,8 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   `NA` if predictors are collinear; `shared`, with `null`, `draws`, `p_env_space`, the
 #'   p-value of `env` against `space`, and `tested`; and `permutations`, whose `moved` is
 #'   `"together"` with free permutations and `"each set alone"` with `site_permutations`.
-#' @note Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
-#'   supplement of Peres-Neto et al. (2012).
+#' @note Translated from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny` in the
+#'   supplement of Peres-Neto et al. (2012), with credit to its authors.
 #' @section Article and original code:
 #' Raw and adjusted fractions of the total for the mean component agree with
 #' `PartitionRDATwoDataMatricesPhylogeny` of the supplement, checked in Octave. The code

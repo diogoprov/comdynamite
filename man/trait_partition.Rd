@@ -107,8 +107,8 @@ sites, and when that test is not significant at \code{level}, \code{b} is left u
 \code{shared$tested} is \code{FALSE}.
 }
 \note{
-Adapted from the MATLAB function \code{PartitionRDATwoDataMatricesPhylogeny} in the
-supplement of Peres-Neto et al. (2012).
+Translated from the MATLAB function \code{PartitionRDATwoDataMatricesPhylogeny} in the
+supplement of Peres-Neto et al. (2012), with credit to its authors.
 }
 \section{Simulations}{
 

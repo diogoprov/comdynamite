@@ -69,8 +69,8 @@ of the two are dropped with a warning. Species without individuals have no weigh
 are left out.
 }
 \note{
-Adapted from the MATLAB functions \code{TraitEnvCor}, \code{ModelSelectionStochastic} and
-\code{PCoAWeigthed} in the supplement of Peres-Neto et al. (2012).
+Translated from the MATLAB functions \code{TraitEnvCor}, \code{ModelSelectionStochastic} and
+\code{PCoAWeigthed} in the supplement of Peres-Neto et al. (2012), with credit to its authors.
 }
 \section{Article and original code}{
 

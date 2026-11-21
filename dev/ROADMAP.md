@@ -1466,8 +1466,13 @@ Objetivo: API estável e pacote no CRAN.
 - **Dependências do hub.** Decidido em 2026-11-07: `Imports` só com `ape` e pacotes base
   (`graphics`, `grDevices`, `parallel`, `stats`, `utils`); todo o resto em `Suggests`, chamado
   com `requireNamespace()`. O `purrr`, que só dava a barra de progresso, foi para `Suggests`.
-- **Código em MATLAB.** Os suplementos não trazem licença. Reimplementar a partir das
-  equações e citar; se for copiar a estrutura do código, falar com os autores.
+- **Código em MATLAB.** Os suplementos não trazem licença. Decidido em 2026-11-21 (fase 2 do
+  rOpenSci): pedir aos autores (Peres-Neto e Leibold) permissão para distribuir as traduções
+  sob MIT e perguntar se querem constar em `Authors@R` (`ctb` ou `cph`), e corrigir já a
+  redação (`DESCRIPTION` dizia que tudo vinha das equações publicadas). Se recusarem ou não
+  responderem, reescrever `node_test()`, `node_contrasts()`, `phylo_vector()` e
+  `trait_partition()` a partir dos artigos e apêndices, com o Octave só para conferir.
+  `food_web_dynamics()` foi escrito a partir das equações; o MATLAB de McPeek só foi rodado.
 - **Protocolo estático.** O texto de Peres-Neto et al. (2012) dá `h` entre 0,5 e 1 e usa
   **L** como abundância, sem Poisson nos trechos lidos (a etapa 1 não veio). O pcps-sim
   usa `h` entre 0 e 30 e Poisson, e o manuscrito atribui isso a Peres-Neto et al.
