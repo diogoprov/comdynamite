@@ -279,6 +279,37 @@ de navegação como porta de entrada da seção "Simulating data". Depende de a 
 estar estável; recomendação: escrever depois do bloco A e antes da 1.0.0, e usar o texto
 também no preprint.
 
+**Bloco K, projeto FUNDECT/CNPq "Reconciling phenotypic evolution with metacommunity theory"
+(pedido em 2026-11-21).** Objetivos em
+https://provetelab.org/projects.html#reconciling-phenotypic-evolution-with-metacommunity-theory:
+(1) urbanização e paisagem adaptativa de traits de várias dimensões do nicho; (2) contribuição
+relativa de ecologia e evolução para a divergência de traits; (3) variação intra e
+interespecífica e distribuição das espécies em gradientes de urbanização, em várias paisagens.
+O que já existe: `trait_flex()` (Lepš et al. 2011: turnover, variação intraespecífica e
+covariação da média ponderada da comunidade entre sítios, com regressão no ambiente),
+`trait_gradient()`, `population_shifts()`, `nested_variance()`, `maladaptation()`,
+`persistence()`, `dispersal_site`, `kernels` e o dataset `anurans` (cobertura urbana, duas
+cidades). Itens:
+(i) partição eco-evolutiva no tempo: decompor a mudança da média da comunidade entre passos de
+uma simulação em sorting entre espécies, mudança dentro das espécies e covariância, e, como a
+simulação guarda as médias genéticas, separar a parte genética da plástica. `trait_flex()` faz
+a versão entre sítios; falta a temporal sobre `history`. Referências a conferir antes de citar:
+equação de Price, Ellner et al. (2011) e Govaert et al. (2016) [não verificadas]. Objetivo 2.
+(ii) artigo de gradiente de urbanização: sítios urbanos com menor variância ambiental e menor
+conectividade (`dispersal_site`, `kernels`), com `evolution`, medindo maladaptação,
+persistência e variância de traits ao longo do gradiente, para testar as hipóteses do projeto
+(homogeneização e restrição da variação de traits; isolamento, menos fluxo gênico, fixação mais
+rápida, maladaptação e extinção local). Ancorar só nos dados públicos de `anurans`; resultados
+de manuscritos não publicados ficam fora. Objetivos 1 e 3.
+(iii) o item (i) do Bloco D (traits de indivíduos que afetam a dinâmica) serve ao objetivo 3;
+a análise intra e interespecífica em várias paisagens já é coberta por `trait_flex()` (com
+`city` em `env`), `trait_gradient()` e `nested_variance()`.
+(iv) opcional: estudo de recuperação de gradientes de seleção de Lande & Arnold (1983)
+[referência a conferir] a partir de indivíduos simulados, contra a paisagem adaptativa
+simulada (ótimos e `sigma`). Depende do item (i) do Bloco D, porque hoje os indivíduos são
+sorteados depois da simulação e não têm aptidão própria; no lado empírico, exige uma medida de
+aptidão junto da morfometria. Objetivo 1.
+
 **Limitações do manuscrito fora do escopo.** A segunda (estrutura de estágios, restrições
 metabólicas, paisagens que mudam em tempo geológico) não entra: o pacote fica no tempo
 ecológico e em paisagens estáticas, e o gen3sis e o BioGEEM cobrem o tempo profundo (ver
