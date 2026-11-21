@@ -236,7 +236,16 @@ print.mc_speciation <- function(x, ...) {
 #'   frame with one row per site and one column per element of `traits`. The `genetic_var`
 #'   and `env_var` of `evolution` are then covariance matrices (see the section Several traits
 #'   of [evolution_control()]); competition falls with the overlap of the niches on all axes,
-#'   and new species inherit the matrices of their mother.
+#'   and new species inherit the matrices of their mother. A list of `traits` from
+#'   [niche_correlation()] gives the niche a correlation between its axes, in growth,
+#'   selection and the overlap of niches; with one matrix per species, new species take the
+#'   correlation of their mother, and `traits` in the output keeps the correlation of the
+#'   extant species.
+#' @param kernel_group Optional routes of dispersal by group of species, as in
+#'   [simulate_metacommunity()]: one group per species at the start, given as a column name or
+#'   index of a matrix `kernel_step` (steps x groups). New species stay in the group of their
+#'   mother. The gene flow that keeps the populations of a species together follows the routes
+#'   of its group. `NULL` (the default) for one route for all species.
 #' @return An `mc_evolving` object, a list with:
 #'   * `abundance`: sites x extant species. With protracted speciation (`completion` of
 #'     [speciation_control()]), the species are the good species, each with the individuals
@@ -291,10 +300,12 @@ print.mc_speciation <- function(x, ...) {
 #'     steps as a fourth dimension in the histories), `genetic_var` and `env_var` hold one
 #'     matrix per species and `plasticity` is a matrix of species x traits.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used, and
-#'     `dispersal_time`, `kernels` (rescaled), `kernel_step`, `dispersal_site` and
-#'     `disturbance_sensitivity` (one per species). New species take the emigration through
-#'     time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
-#'     follows the kernel of each step; fission by distance uses the kernel of `landscape`.
+#'     `dispersal_time`, `kernels` (rescaled), `kernel_step`, `dispersal_site`,
+#'     `disturbance_sensitivity` and `kernel_group` (one per species; `NULL` without groups).
+#'     New species take the emigration through time, the sensitivity to disturbance and the
+#'     group of routes of their mother. The gene flow that keeps populations together follows
+#'     the kernel of each step (that of the group of the species, with `kernel_group`);
+#'     fission by distance uses the kernel of `landscape`.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
 #' @references Hagen, O., Flück, B., Fopp, F., Cabral, J. S., Hartig, F., Pontarp, M., Rangel,
@@ -323,7 +334,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             max_species = 500, env = NULL, disturbance = 0,
                                             dispersal_time = NULL, kernels = NULL,
                                             kernel_step = NULL, dispersal_site = NULL,
-                                            disturbance_sensitivity = 1) {
+                                            disturbance_sensitivity = 1,
+                                            kernel_group = NULL) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
@@ -340,10 +352,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   several <- is.list(traits) && !is.data.frame(traits)
   trait_list <- NULL
   if (several) {
-    if (!is.null(attr(traits, "niche_cor"))) {
-      stop("a niche with correlated axes (`niche_correlation()`) is not yet available with ",
-           "speciation", call. = FALSE)
-    }
+    niche_cor <- attr(traits, "niche_cor")
     trait_list <- lapply(traits, as_traits)
     if (is.null(env)) env <- landscape$env_axes
     if (is.null(env)) {
@@ -420,6 +429,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   sites <- paste0("site", seq_along(landscape$env))
   species0 <- rownames(traits)
   evolution$traits <- if (several) stats::setNames(trait_list, colnames(env)) else traits
+  # a correlation between the axes of the niche (niche_correlation()) goes with the traits
+  if (several) attr(evolution$traits, "niche_cor") <- niche_cor
   evolution$env <- if (several) env else landscape$env
   # time at which each pair of species at the start split, in generations before the start
   split0 <- matrix(0, k0, k0, dimnames = list(species0, species0))
@@ -436,7 +447,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                immigration = immigration, evolution = evolution, disturbance = disturbance,
                dispersal_time = dispersal_time, kernels = kernels, kernel_step = kernel_step,
                dispersal_site = dispersal_site,
-               disturbance_sensitivity = disturbance_sensitivity)
+               disturbance_sensitivity = disturbance_sensitivity,
+               kernel_group = kernel_group)
   st <- do.call(mc_state, args)
   if (niche_overlap && competition == "phylo") st$competition_hook <- niche_crowding(st)
 
@@ -640,6 +652,13 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx, a],
                  r_max = st$ev$r_axis[sp_idx, a], row.names = species)
     }), st$ev$axes)
+    # the correlation between the axes: the shared matrix, or that of each extant species
+    if (is.list(st$ev$niche_cor)) {
+      attr(traits_out, "niche_cor") <- stats::setNames(
+        lapply(st$ev$sel[sp_idx], function(s) s$cor), species)
+    } else if (!is.null(st$ev$niche_cor)) {
+      attr(traits_out, "niche_cor") <- st$ev$niche_cor
+    }
   } else {
     optimum <- vapply(members, function(l) mean(genetic[, l], na.rm = TRUE), numeric(1))
     traits_out <- data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx],
@@ -716,6 +735,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  dispersal_time = dispersal_time, kernels = st$kernels,
                  kernel_step = kernel_step, dispersal_site = dispersal_site,
                  disturbance_sensitivity = st$disturbance_sensitivity[sp_idx],
+                 kernel_group = if (is.numeric(kernel_group)) st$kernel_group[sp_idx] else
+                   colnames(kernel_step)[st$kernel_group[sp_idx]],
                  speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  env = if (several) as.data.frame(env) else NULL,
@@ -790,6 +811,7 @@ evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, s
 # crowding in each site with competition scaled by the overlap of the Gaussian niches of the
 # phenotypes p there (sites x alive species); the phylogenetic part is the alpha of the state
 niche_crowding <- function(st) {
+  if (isTRUE(st$ev$mv) && isTRUE(st$ev$correlated)) return(niche_crowding_correlated(st))
   if (isTRUE(st$ev$mv)) {
     return(function(n, p) {
       sigma2 <- st$ev$sigma[st$alive, , drop = FALSE]^2
@@ -827,6 +849,45 @@ niche_crowding <- function(st) {
   }
 }
 
+# the same with a correlation between the axes of the niches (niche_correlation()): the overlap
+# of the niches of two species is exp(-d' M d / 2), with d the difference of their phenotypes
+# and M = (Omega_i + Omega_j)^-1. The breadths and correlations of a species never change, so M
+# is kept for each pair of species (indexed over all species ever)
+niche_crowding_correlated <- function(st) {
+  cache <- new.env(parent = emptyenv())
+  precision <- list()
+  overlap_matrix <- function(i, j) {
+    key <- paste(i, j)
+    if (is.null(cache[[key]])) {
+      for (l in c(i, j)) {
+        if (length(precision) < l || is.null(precision[[l]])) {
+          cor <- st$ev$sel[[l]]$cor %||% diag(st$ev$q)
+          precision[[l]] <<- niche_precision(st$ev$sigma[l, ], cor)
+        }
+      }
+      cache[[key]] <- niche_overlap_matrix(precision[[i]], precision[[j]])
+    }
+    cache[[key]]
+  }
+  function(n, p) {
+    alive <- st$alive
+    at <- st$at
+    out <- sweep(n, 2, diag(at), "*")
+    here <- n > 0
+    for (a in seq_len(ncol(n) - 1L)) {
+      for (b in (a + 1L):ncol(n)) {
+        both <- here[, a] & here[, b]
+        if (!any(both)) next
+        d <- matrix(p[both, a, ] - p[both, b, ], sum(both))
+        overlap <- exp(-0.5 * rowSums((d %*% overlap_matrix(alive[a], alive[b])) * d))
+        out[both, b] <- out[both, b] + n[both, a] * at[a, b] * overlap
+        out[both, a] <- out[both, a] + n[both, b] * at[b, a] * overlap
+      }
+    }
+    out
+  }
+}
+
 # split times (by name, among alive species) after the species `names_new` bud from `mothers`
 # (one per new species) at generation `gen`: a new species shares the history of its mother up
 # to `gen`, and new species of the same mother split from each other at `gen`
@@ -855,7 +916,7 @@ evolving_flow <- function(st, flow, disp_matrix) {
     if (!any(e > 0)) next
     # implicit landscapes: emigrants are pooled and reach each other site with weight equal
     # to the emigrants of the others, so a site sends e / (m - 1) to each other site
-    f <- if (!is.null(disp_matrix)) e * disp_matrix else {
+    f <- if (!is.null(disp_matrix)) e * species_kernel(disp_matrix, j, st$kernel_group) else {
       out <- matrix(e / (length(e) - 1), length(e), length(e))
       diag(out) <- 0
       out
@@ -908,8 +969,9 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
       if (length(src)) {
         weight <- f[src, a]
         if (!any(weight > 0)) {
-          weight <- st$n[src, c] *
-            (if (!is.null(st$disp_matrix)) st$disp_matrix[src, a] else 1)
+          kern <- species_kernel(st$disp_matrix, j, st$kernel_group)
+          toward <- if (is.null(kern)) 1 else kern[src, a]
+          weight <- st$n[src, c] * toward
         }
         b <- src[which.max(weight)]
         d[a, ] <- d[b, ]
@@ -1133,6 +1195,8 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$dispersal <- grow_vec(st$dispersal)
   st$extirpation <- grow_vec(st$extirpation)
   st$disturbance_sensitivity <- grow_vec(st$disturbance_sensitivity)
+  # routes of dispersal by group of species: new species stay in the group of their mother
+  st$kernel_group <- grow_vec(st$kernel_group)
   # emigration through time (steps x species): new species take that of their mother
   if (!is.null(st$disp_prob_time)) {
     st$disp_prob_time <- cbind(st$disp_prob_time, st$disp_prob_time[, mothers, drop = FALSE])
@@ -1223,6 +1287,8 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$n <- cbind(st$n, new_n)
   # emigrants of this step stay aligned with the alive species (none for the new ones)
   if (!is.null(st$em)) st$em <- cbind(st$em, matrix(0, m, q))
+  # and so do their phenotypes, kept with immigrant selection
+  if (!is.null(st$pa_em)) st$pa_em <- grow_arr(st$pa_em, NA_real_)
   st$alive <- c(st$alive, new_ids)
   st$k_all <- st$k_all + q
   st$k <- length(st$alive)

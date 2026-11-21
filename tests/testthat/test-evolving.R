@@ -608,3 +608,22 @@ test_that("evolving_prune drops the phenotypes of emigrants with their species",
     expect_equal(dim(st$pa_em), if (three) c(2L, 1L, 2L) else c(2L, 1L))
   }
 })
+
+test_that("mothers emptied by point mutants leave with immigrant selection", {
+  # the phenotypes of the emigrants grow with the new species, so that the mother can be dropped
+  ls <- landscape_points(cbind(0:2, 0), env = rep(50, 3), disp_scale = 1)
+  anc <- data.frame(optimum = 50, sigma = 20, r_max = 2, row.names = "sp1")
+  flat <- data.frame(optimum = 0, sigma = 5, r_max = 1, row.names = "sp1")
+  init <- matrix(2L, 3, 1, dimnames = list(NULL, "sp1"))
+  for (several in c(FALSE, TRUE)) {
+    set.seed(1)
+    sim <- simulate_evolving_metacommunity(
+      ls, if (several) list(a = anc, b = flat) else anc, speciation_control("point", rate = 1),
+      env = if (several) cbind(a = rep(50, 3), b = 0),
+      evolution = evolution_control(if (several) diag(2) else 1, immigrant_selection = TRUE),
+      dispersal = 0.1, n_steps = 2, initial = init)
+    expect_equal(sim$species$fate[1], "extinct")
+    expect_equal(sim$species$end[1], 1)
+    expect_gt(ncol(sim$abundance), 1)
+  }
+})

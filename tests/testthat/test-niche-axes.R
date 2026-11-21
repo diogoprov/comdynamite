@@ -86,9 +86,10 @@ test_that("landscape_grid gives several correlated axes, and simulations use the
   s3 <- simulate_metacommunity(l, niche_correlation(tr, matrix(c(1, 0.9, 0.9, 1), 2)), a,
                                dispersal = 0.1, n_steps = 30)
   expect_false(isTRUE(all.equal(s1$abundance, s3$abundance)))
-  expect_error(simulate_metacommunity(l, niche_correlation(tr, diag(2)), a, dispersal = 0.1,
-                                      n_steps = 5, evolution = evolution_control(10)),
-               "correlated axes")
+  # with evolution: see test-niche-correlation-evolution.R
+  expect_s3_class(simulate_metacommunity(l, niche_correlation(tr, diag(2)), a, dispersal = 0.1,
+                                         n_steps = 5, evolution = evolution_control(10)),
+                  "mc_sim")
 })
 
 test_that("the remaining checks of the new options", {
@@ -104,7 +105,7 @@ test_that("the remaining checks of the new options", {
   set.seed(8)
   l <- landscape_grid(side = 4, n_axes = 2, axis_cor = matrix(c(1, -0.5, -0.5, 1), 2))
   expect_equal(dim(l$env_axes), c(16, 2))
-  # speciation: axes from the landscape, and no correlated niche yet
+  # speciation: axes from the landscape, also with a correlated niche
   set.seed(9)
   l2 <- landscape_grid(side = 3, n_axes = 2)
   one <- list(species_traits(1), species_traits(1, rmax_range = c(1, 1)))
@@ -113,9 +114,9 @@ test_that("the remaining checks of the new options", {
                                          speciation = speciation_control(threshold = 50),
                                          evolution = ev)
   expect_s3_class(sim, "mc_evolving")
-  expect_error(simulate_evolving_metacommunity(l2, niche_correlation(one, diag(2)),
-                                               dispersal = 0.1, n_steps = 3,
-                                               speciation = speciation_control(threshold = 50),
-                                               evolution = ev),
-               "correlated axes")
+  cor <- simulate_evolving_metacommunity(l2, niche_correlation(one, diag(2)),
+                                         dispersal = 0.1, n_steps = 3,
+                                         speciation = speciation_control(threshold = 50),
+                                         evolution = ev)
+  expect_s3_class(cor, "mc_evolving")
 })

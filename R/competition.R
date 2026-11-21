@@ -20,7 +20,10 @@
 #'   the niche breadths of `traits`. The last factor is the overlap of two Gaussian niches, the
 #'   kernel that [simulate_evolving_metacommunity()] uses with `niche_overlap = TRUE`, so that
 #'   with `inter_max = 1` two species with the same niche compete as one species. With a list
-#'   of traits (several axes), the overlap is the product over axes. Nothing is random.
+#'   of traits (several axes), the overlap is the product over axes, or, for traits from
+#'   [niche_correlation()], \eqn{\exp(-d^\top (\Omega_j + \Omega_k)^{-1} d / 2)}{exp(-d'
+#'   (Omega_j + Omega_k)^-1 d / 2)}, with \eqn{d}{d} the difference between the optima and
+#'   \eqn{\Omega}{Omega} the covariance of each niche. Nothing is random.
 #'
 #' @param species A `phylo` tree, or the number of species (not for
 #'   `type = "phylo"`); ignored for `type = "trait"`, where the species are those of `traits`.
@@ -66,6 +69,7 @@ competition_matrix <- function(species, type = c("none", "random", "phylo", "tra
 # competition by the overlap of Gaussian niches, 1 on the diagonal; product over axes
 trait_competition <- function(traits, inter_max) {
   if (is.null(traits)) stop("type = \"trait\" needs `traits`", call. = FALSE)
+  niche_cor <- if (is.list(traits) && !is.data.frame(traits)) attr(traits, "niche_cor")
   axes <- if (is.list(traits) && !is.data.frame(traits)) traits else list(traits)
   axes <- lapply(axes, function(x) {
     if (!all(c("optimum", "sigma") %in% names(x))) {
@@ -81,6 +85,28 @@ trait_competition <- function(traits, inter_max) {
       stop("sets of traits have different species", call. = FALSE)
     }
     axes <- lapply(axes, function(x) x[sp, , drop = FALSE])
+  }
+  if (!is.null(niche_cor)) {
+    # correlated axes: the overlap is exp(-d' (Omega_j + Omega_k)^-1 d / 2)
+    q <- length(axes)
+    cor <- niche_cor_species(niche_cor, sp, q)
+    sigma <- matrix(vapply(axes, function(x) x$sigma, numeric(length(sp))), length(sp), q)
+    optimum <- matrix(vapply(axes, function(x) x$optimum, numeric(length(sp))), length(sp), q)
+    if (any(sigma == 0)) {
+      stop("a niche breadth `sigma` of 0 is not available with correlated axes ",
+           "(`niche_correlation()`)", call. = FALSE)
+    }
+    precision <- lapply(seq_along(sp), function(j) niche_precision(sigma[j, ], cor[[j]]))
+    a <- diag(1, length(sp))
+    for (j in seq_along(sp)[-1]) {
+      for (k in seq_len(j - 1)) {
+        d <- optimum[j, ] - optimum[k, ]
+        m <- niche_overlap_matrix(precision[[j]], precision[[k]])
+        a[j, k] <- a[k, j] <- inter_max * exp(-0.5 * sum((d %*% m) * d))
+      }
+    }
+    dimnames(a) <- list(sp, sp)
+    return(a)
   }
   log_overlap <- 0
   for (x in axes) {

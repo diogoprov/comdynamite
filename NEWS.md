@@ -1,5 +1,29 @@
 # comdynamite 0.10.0
 
+- `kernel_group` (routes of dispersal by group of species) now works with immigrant
+  selection and with several evolving traits in `simulate_metacommunity()`, where the
+  immigrants of each species and the genes they carry follow the routes of its group, and in
+  `simulate_evolving_metacommunity()`, which takes one group per species at the start: new
+  species stay in the group of their mother, the gene flow that keeps the populations of a
+  species together follows the routes of its group, and the output has the group of each
+  species (`kernel_group`). A run in which every group uses the same matrix gives the same
+  results as a vector `kernel_step` (with several traits, up to rounding in the last digits).
+- Fixed: `simulate_evolving_metacommunity()` with point speciation and
+  `immigrant_selection = TRUE` stopped with an error ("logical subscript too long") when all
+  the individuals of a species became point mutants in the same generation. Runs that
+  finished before are unchanged.
+- A niche with correlated axes (`niche_correlation()`) now works with `evolution` in
+  `simulate_metacommunity()` and with speciation in `simulate_evolving_metacommunity()`,
+  which refused it. The matrix of Gaussian selection is `Omega = D R D`, with `D` the
+  diagonal matrix of the niche breadths and `R` the correlation of each species: the growth
+  rate, with the cost of the phenotypic variance `sqrt(|Omega| / |Omega + P|)`, the response
+  to selection `G (Omega + P)^-1 d`, the fitness of immigrants (`immigrant_selection`), the
+  overlap of niches (`niche_overlap`) and the load of `maladaptation()` all use it. A shared
+  correlation applies to new species, and with one matrix per species they take that of
+  their mother; `traits` in the output keeps the correlation of the extant species.
+  `competition_matrix(type = "trait")` also counts the correlation. With the identity, the
+  results are those of independent axes to the last bit. A niche breadth of 0 cannot be
+  combined with a correlation.
 - New article "Persistence in river networks under a flood pulse": a generic study of how
   network topology, the direction of dispersal and seasonal floods change regional richness
   and persistence, and scenarios inspired by the Pantanal (normal pulse, a 12-year drought and
@@ -67,8 +91,7 @@
   `simulate_evolving_metacommunity()`, with the product over axes for several axes.
 - New `niche_correlation()`: a correlation between the responses of a species to the axes of
   its niche, so that `growth_rates()` and `simulate_metacommunity()` use a multivariate
-  Gaussian niche (one matrix for all species or one per species). Not yet with `evolution`
-  or speciation.
+  Gaussian niche (one matrix for all species or one per species).
 - `landscape_grid(n_axes, axis_cor)`: several correlated environmental axes, in `env_axes`,
   which `simulate_metacommunity()` and `simulate_evolving_metacommunity()` use with a list of
   traits when `env` is not given. The first axis is the `env` of a single-axis grid with the

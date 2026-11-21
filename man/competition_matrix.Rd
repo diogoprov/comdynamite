@@ -53,7 +53,10 @@ with \eqn{q}{q} = \code{inter_max}, \eqn{\theta}{theta} the optima and \eqn{\sig
 the niche breadths of \code{traits}. The last factor is the overlap of two Gaussian niches, the
 kernel that \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} uses with \code{niche_overlap = TRUE}, so that
 with \code{inter_max = 1} two species with the same niche compete as one species. With a list
-of traits (several axes), the overlap is the product over axes. Nothing is random.
+of traits (several axes), the overlap is the product over axes, or, for traits from
+\code{\link[=niche_correlation]{niche_correlation()}}, \eqn{\exp(-d^\top (\Omega_j + \Omega_k)^{-1} d / 2)}{exp(-d'
+  (Omega_j + Omega_k)^-1 d / 2)}, with \eqn{d}{d} the difference between the optima and
+\eqn{\Omega}{Omega} the covariance of each niche. Nothing is random.
 }
 }
 \examples{

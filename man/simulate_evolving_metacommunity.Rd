@@ -29,7 +29,8 @@ simulate_evolving_metacommunity(
   kernels = NULL,
   kernel_step = NULL,
   dispersal_site = NULL,
-  disturbance_sensitivity = 1
+  disturbance_sensitivity = 1,
+  kernel_group = NULL
 )
 }
 \arguments{
@@ -83,7 +84,11 @@ stops with an error beyond it.}
 frame with one row per site and one column per element of \code{traits}. The \code{genetic_var}
 and \code{env_var} of \code{evolution} are then covariance matrices (see the section Several traits
 of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
-and new species inherit the matrices of their mother.}
+and new species inherit the matrices of their mother. A list of \code{traits} from
+\code{\link[=niche_correlation]{niche_correlation()}} gives the niche a correlation between its axes, in growth,
+selection and the overlap of niches; with one matrix per species, new species take the
+correlation of their mother, and \code{traits} in the output keeps the correlation of the
+extant species.}
 
 \item{disturbance}{Probability that a site is disturbed at each time step, losing all its
 populations unless \code{disturbance_sensitivity} is below 1:
@@ -116,6 +121,12 @@ disturbed: one value or one per species. 1 (the default) removes all the populat
 disturbed site, as without this argument; lower values let species that resist the
 disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
 keep their populations.}
+
+\item{kernel_group}{Optional routes of dispersal by group of species, as in
+\code{\link[=simulate_metacommunity]{simulate_metacommunity()}}: one group per species at the start, given as a column name or
+index of a matrix \code{kernel_step} (steps x groups). New species stay in the group of their
+mother. The gene flow that keeps the populations of a species together follows the routes
+of its group. \code{NULL} (the default) for one route for all species.}
 }
 \value{
 An \code{mc_evolving} object, a list with:
@@ -173,10 +184,12 @@ lineages (trait by trait) are arrays of sites x species x traits (with the recor
 steps as a fourth dimension in the histories), \code{genetic_var} and \code{env_var} hold one
 matrix per species and \code{plasticity} is a matrix of species x traits.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used, and
-\code{dispersal_time}, \code{kernels} (rescaled), \code{kernel_step}, \code{dispersal_site} and
-\code{disturbance_sensitivity} (one per species). New species take the emigration through
-time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
-follows the kernel of each step; fission by distance uses the kernel of \code{landscape}.
+\code{dispersal_time}, \code{kernels} (rescaled), \code{kernel_step}, \code{dispersal_site},
+\code{disturbance_sensitivity} and \code{kernel_group} (one per species; \code{NULL} without groups).
+New species take the emigration through time, the sensitivity to disturbance and the
+group of routes of their mother. The gene flow that keeps populations together follows
+the kernel of each step (that of the group of the species, with \code{kernel_group});
+fission by distance uses the kernel of \code{landscape}.
 }
 
 \code{\link[=as_metacommunity]{as_metacommunity()}} turns it into an \code{mc_sim} for the other functions of the package.
