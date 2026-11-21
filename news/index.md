@@ -3,6 +3,19 @@
 ## comdynamite (development version)
 
 - New
+  [`river_covariance()`](https://provetelab.org/comdynamite/reference/river_covariance.md)
+  and
+  [`env_river()`](https://provetelab.org/comdynamite/reference/env_river.md):
+  covariance of the environment along a river network as a sum of
+  tail-up (flow-connected sites only, weighted by Shreve magnitude,
+  length of channel upstream or any weight per site), tail-down and
+  Euclidean exponential components plus a nugget (Ver Hoef et al. 2006;
+  Ver Hoef & Peterson 2010; Peterson & Ver Hoef 2010), and Gaussian
+  fields drawn from it, fixed or as autoregressive series for
+  `env_time`.
+  [`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
+  also returns `upstream_length`, a proxy for catchment area.
+- New
   [`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
   and
   [`landscape_river()`](https://provetelab.org/comdynamite/reference/landscape_river.md):

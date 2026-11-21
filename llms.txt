@@ -272,6 +272,10 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Landscape on a river network
 - [`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
   : Random dendritic river network
+- [`river_covariance()`](https://provetelab.org/comdynamite/reference/river_covariance.md)
+  : Covariance of the environment along a river network
+- [`env_river()`](https://provetelab.org/comdynamite/reference/env_river.md)
+  : Environment along a river network
 - [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
   : Spatially implicit landscape
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
