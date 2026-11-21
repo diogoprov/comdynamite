@@ -321,8 +321,8 @@ evolution_growth <- function(p, e, sigma, r_max, v = 0) {
 immigrant_mean <- function(em, x, disp_matrix, fallback) {
   x[is.na(x)] <- 0
   if (!is.null(disp_matrix)) {
-    num <- crossprod(disp_matrix, em * x)
-    den <- crossprod(disp_matrix, em)
+    num <- kernel_flow(disp_matrix, em * x)
+    den <- kernel_flow(disp_matrix, em)
   } else {
     num <- sweep(-(em * x), 2, colSums(em * x), "+")
     den <- sweep(-em, 2, colSums(em), "+")

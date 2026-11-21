@@ -291,8 +291,9 @@ print.mc_speciation <- function(x, ...) {
 #'     steps as a fourth dimension in the histories), `genetic_var` and `env_var` hold one
 #'     matrix per species and `plasticity` is a matrix of species x traits.
 #'   * The `landscape`, `dispersal`, `extirpation`, `speciation` and `n_steps` used, and
-#'     `dispersal_time`, `kernels` (rescaled) and `kernel_step`. New species take the
-#'     emigration through time of their mother. The gene flow that keeps populations together
+#'     `dispersal_time`, `kernels` (rescaled), `kernel_step`, `dispersal_site` and
+#'     `disturbance_sensitivity` (one per species). New species take the emigration through
+#'     time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
 #'     follows the kernel of each step; fission by distance uses the kernel of `landscape`.
 #'
 #'   [as_metacommunity()] turns it into an `mc_sim` for the other functions of the package.
@@ -321,7 +322,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             immigration = c("poisson", "multinomial"),
                                             max_species = 500, env = NULL, disturbance = 0,
                                             dispersal_time = NULL, kernels = NULL,
-                                            kernel_step = NULL) {
+                                            kernel_step = NULL, dispersal_site = NULL,
+                                            disturbance_sensitivity = 1) {
   stopifnot(inherits(landscape, "mc_landscape"))
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
@@ -432,7 +434,9 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                disp_matrix = landscape$dispersal, record_steps = record_steps, sites = sites,
                species = species0, extirpation = extirpation, pool = NULL, initial = initial,
                immigration = immigration, evolution = evolution, disturbance = disturbance,
-               dispersal_time = dispersal_time, kernels = kernels, kernel_step = kernel_step)
+               dispersal_time = dispersal_time, kernels = kernels, kernel_step = kernel_step,
+               dispersal_site = dispersal_site,
+               disturbance_sensitivity = disturbance_sensitivity)
   st <- do.call(mc_state, args)
   if (niche_overlap && competition == "phylo") st$competition_hook <- niche_crowding(st)
 
@@ -710,7 +714,9 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                  alpha = alpha, landscape = landscape, dispersal = st$dispersal[sp_idx],
                  extirpation = st$extirpation[sp_idx], disturbance = disturbance,
                  dispersal_time = dispersal_time, kernels = st$kernels,
-                 kernel_step = kernel_step, speciation = speciation,
+                 kernel_step = kernel_step, dispersal_site = dispersal_site,
+                 disturbance_sensitivity = st$disturbance_sensitivity[sp_idx],
+                 speciation = speciation,
                  evolution = ev_out, series = series_df, ranges = ranges, n_steps = n_steps,
                  env = if (several) as.data.frame(env) else NULL,
                  generations = generations, history = history,
@@ -1126,6 +1132,7 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$z_history <- grow_hist(st$z_history, NA_real_)
   st$dispersal <- grow_vec(st$dispersal)
   st$extirpation <- grow_vec(st$extirpation)
+  st$disturbance_sensitivity <- grow_vec(st$disturbance_sensitivity)
   # emigration through time (steps x species): new species take that of their mother
   if (!is.null(st$disp_prob_time)) {
     st$disp_prob_time <- cbind(st$disp_prob_time, st$disp_prob_time[, mothers, drop = FALSE])

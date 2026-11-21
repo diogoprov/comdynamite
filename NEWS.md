@@ -1,5 +1,15 @@
 # comdynamite (development version)
 
+- Dispersal and disturbance by species or group of species in `simulate_metacommunity()`:
+  `kernel_group` gives each species a group, and a matrix `kernel_step` (steps x groups)
+  chooses the matrix of `kernels` that each group follows at each step, so that, for example,
+  long-distance migrants and sedentary fish of the same river follow different routes;
+  `dispersal_site` multiplies emigration site by site and step by step (a dispersal pulse only
+  where the floodplain floods); and `disturbance_sensitivity` (one value or one per species)
+  is the probability that a population is lost when its site is disturbed, so that resistant
+  species keep their populations. `dispersal_site` and `disturbance_sensitivity` also work in
+  `simulate_evolving_metacommunity()`, where new species take the sensitivity of their mother.
+  The defaults give the same results as before, to the last bit.
 - New `env_seasonal()` (a seasonal cycle with an amplitude per site and anomalies per year)
   and `river_floods()` (washout probabilities by flood season, year and river size).
   `disturbance` in `simulate_metacommunity()` and `simulate_evolving_metacommunity()` also

@@ -27,7 +27,9 @@ simulate_evolving_metacommunity(
   disturbance = 0,
   dispersal_time = NULL,
   kernels = NULL,
-  kernel_step = NULL
+  kernel_step = NULL,
+  dispersal_site = NULL,
+  disturbance_sensitivity = 1
 )
 }
 \arguments{
@@ -83,7 +85,8 @@ and \code{env_var} of \code{evolution} are then covariance matrices (see the sec
 of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
 and new species inherit the matrices of their mother.}
 
-\item{disturbance}{Probability that a site loses all its populations at each time step:
+\item{disturbance}{Probability that a site is disturbed at each time step, losing all its
+populations unless \code{disturbance_sensitivity} is below 1:
 one value (0, the default, for none), or a matrix of sites x steps with the probability of
 each site at each step, for disturbances that vary in space and time, such as the
 seasonal floods of \code{\link[=river_floods]{river_floods()}}.}
@@ -101,6 +104,18 @@ and the diagonal is ignored), and \code{kernel_step} gives, for each step, the i
 the matrix used. For example, a matrix of connected ponds for flood steps and one of
 isolated ponds for dry steps. Only for spatially explicit landscapes; \code{NULL} (the
 default) keeps the dispersal matrix of \code{landscape}.}
+
+\item{dispersal_site}{Optional change of emigration among sites: a matrix with one row per
+site and one column per step of multipliers of the emigration probability (probabilities
+above 1 are set to 1), applied on top of \code{dispersal} and \code{dispersal_time}. For example, a
+dispersal pulse only in the floodplain at high water. \code{NULL} (the default) for the same
+emigration at every site.}
+
+\item{disturbance_sensitivity}{Probability that a population is lost when its site is
+disturbed: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the
+disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
+keep their populations.}
 }
 \value{
 An \code{mc_evolving} object, a list with:
@@ -158,8 +173,9 @@ lineages (trait by trait) are arrays of sites x species x traits (with the recor
 steps as a fourth dimension in the histories), \code{genetic_var} and \code{env_var} hold one
 matrix per species and \code{plasticity} is a matrix of species x traits.
 \item The \code{landscape}, \code{dispersal}, \code{extirpation}, \code{speciation} and \code{n_steps} used, and
-\code{dispersal_time}, \code{kernels} (rescaled) and \code{kernel_step}. New species take the
-emigration through time of their mother. The gene flow that keeps populations together
+\code{dispersal_time}, \code{kernels} (rescaled), \code{kernel_step}, \code{dispersal_site} and
+\code{disturbance_sensitivity} (one per species). New species take the emigration through
+time and the sensitivity to disturbance of their mother. The gene flow that keeps populations together
 follows the kernel of each step; fission by distance uses the kernel of \code{landscape}.
 }
 
