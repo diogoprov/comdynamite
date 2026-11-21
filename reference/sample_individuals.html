@@ -91,7 +91,9 @@ T-statistics of Violle et al. (2012) (<code><a href="tstats.html">tstats()</a></
 <span>  monopolization <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  gene_flow <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  source <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"traits"</span>, <span class="st">"evolution"</span><span class="op">)</span>,</span>
-<span>  session_sd <span class="op">=</span> <span class="fl">0</span></span>
+<span>  session_sd <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  visits <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  session <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"step"</span>, <span class="st">"visit"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -215,15 +217,32 @@ attribute <code>"traits"</code>. <code>session_sd</code> shifts each trait on it
 
 
 <dt id="arg-session-sd">session_sd<a class="anchor" aria-label="anchor" href="#arg-session-sd"></a></dt>
-<dd><p>Standard deviation of an error shared by all individuals measured on the
-same date (<code>step</code>), such as a difference between measurers or calibrations; it is added to
-<code>trait</code>, not to <code>population_mean</code>. 0 (the default) for none.</p></dd>
+<dd><p>Standard deviation of an error shared by all individuals measured in the
+same session, such as a difference between measurers or calibrations; it is added to
+<code>trait</code>, not to <code>population_mean</code>. 0 (the default) for none. What a session is depends on
+<code>session</code>. With a single step and <code>session = "step"</code>, there is one session, so the error
+is a constant added to every individual, which vanishes from any statistic centred on
+means (deviations from population means, variance components) and has no effect on them.</p></dd>
+
+
+<dt id="arg-visits">visits<a class="anchor" aria-label="anchor" href="#arg-visits"></a></dt>
+<dd><p>Number of visits to each site at each sampled step. Each visit samples its own
+individuals (<code>n</code> or <code>fraction</code> per population and visit) from the same populations, whose
+means do not change between visits of the same step, and the result gets a column
+<code>visit</code>. 1 (the default) for one.</p></dd>
+
+
+<dt id="arg-session">session<a class="anchor" aria-label="anchor" href="#arg-session"></a></dt>
+<dd><p>What shares the error of <code>session_sd</code>: <code>"step"</code> (the default), all the
+individuals of a date, at every site; or <code>"visit"</code>, the individuals of one visit to one
+site at one step (every species measured then), as when each visit to a pond is a field
+session.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>Data frame with one row per individual and the columns <code>step</code> (with several steps),
-<code>site</code>, <code>species</code>,
+<code>visit</code> (with several visits), <code>site</code>, <code>species</code>,
 <code>individual</code> (its number within the population), <code>abundance</code> (of the population), <code>env</code>
 (of the site), <code>optimum</code> (of the species), <code>population_mean</code> (the expected value of the
 population, \(m_{ij}\) above, after character displacement) and

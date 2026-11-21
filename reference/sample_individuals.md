@@ -25,7 +25,9 @@ sample_individuals(
   monopolization = 0,
   gene_flow = 1,
   source = c("traits", "evolution"),
-  session_sd = 0
+  session_sd = 0,
+  visits = 1,
+  session = c("step", "visit")
 )
 ```
 
@@ -167,21 +169,41 @@ sample_individuals(
 
 - session_sd:
 
-  Standard deviation of an error shared by all individuals measured on
-  the same date (`step`), such as a difference between measurers or
+  Standard deviation of an error shared by all individuals measured in
+  the same session, such as a difference between measurers or
   calibrations; it is added to `trait`, not to `population_mean`. 0 (the
-  default) for none.
+  default) for none. What a session is depends on `session`. With a
+  single step and `session = "step"`, there is one session, so the error
+  is a constant added to every individual, which vanishes from any
+  statistic centred on means (deviations from population means, variance
+  components) and has no effect on them.
+
+- visits:
+
+  Number of visits to each site at each sampled step. Each visit samples
+  its own individuals (`n` or `fraction` per population and visit) from
+  the same populations, whose means do not change between visits of the
+  same step, and the result gets a column `visit`. 1 (the default) for
+  one.
+
+- session:
+
+  What shares the error of `session_sd`: `"step"` (the default), all the
+  individuals of a date, at every site; or `"visit"`, the individuals of
+  one visit to one site at one step (every species measured then), as
+  when each visit to a pond is a field session.
 
 ## Value
 
 Data frame with one row per individual and the columns `step` (with
-several steps), `site`, `species`, `individual` (its number within the
-population), `abundance` (of the population), `env` (of the site),
-`optimum` (of the species), `population_mean` (the expected value of the
-population, \\m\_{ij}\\ above, after character displacement) and
-`trait`, and with `founder_sd` or `monopolization` also `arrival` (the
-step at which the population was founded), before `trait`. Populations
-with no individual measured are absent.
+several steps), `visit` (with several visits), `site`, `species`,
+`individual` (its number within the population), `abundance` (of the
+population), `env` (of the site), `optimum` (of the species),
+`population_mean` (the expected value of the population, \\m\_{ij}\\
+above, after character displacement) and `trait`, and with `founder_sd`
+or `monopolization` also `arrival` (the step at which the population was
+founded), before `trait`. Populations with no individual measured are
+absent.
 
 ## Details
 
