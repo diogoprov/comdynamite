@@ -157,12 +157,15 @@ Shreve magnitude are the main channel and the others are floodplain lakes. The o
 the plateau. On the plateau, every site may be washed out in each month from December to March
 (probability 0.05, independently among sites and months). In the floodplain, from April to
 July, sites are also linked overland (half of the emigrants follow a kernel on straight-line
-distances among floodplain sites, through `kernels` and `kernel_step`), and from September to
-November floodplain lakes may dry out and lose all their populations (probability 0.03 per
+distances among floodplain sites, through `kernels` and `kernel_step`) and emigrate three
+times more (`dispersal_site`). In the other months, floodplain lakes are cut off from the river:
+they neither send nor receive emigrants until the next flood, as the lakes that Junk et al.
+(1989) describe as isolated for months or years and the dead arm of the Miranda in the dry
+season (Resende 2000). From September to November, lakes may also dry out (probability 0.03 per
 month, 0.15 during a drought); the main channel never dries. After 100 years of assembly under
 this regime, three regimes follow for 60 years: the pulse every year ("normal"), 12 years
-without the pulse and with harsher drying (years 21 to 32, "drought"), or no pulse from the
-first year, with neither lateral links, nor the lateral moves of high water, nor drying
+without the pulse and with harsher drying (years 21 to 32, "drought"), during which the lakes
+stay cut off, or no pulse from the first year, with lakes cut off for good but no drying
 ("regulated").
 
 ![Design of the scenarios. (a) A network of 50 sites split into plateau, main channel and floodplain lakes; the shaded area is linked overland at high water. (b) The hydrological year in monthly steps. (c) The three regimes after 100 years of assembly.](river_design.png)
@@ -173,44 +176,40 @@ The upper Paraguay basin holds about 340 fish species; among those compiled by F
 (2025), 17% occur only on the plateau and 14% only in the floodplain, and richness falls from
 about 250 species per altitude class below 400 m to about 100 above it. We used 40 species with
 optima evenly spaced along the gradient and calibrated niche breadth and competition so that,
-in a snapshot after assembly, about 17% of the species present occurred only on the plateau and
-17% only in the floodplain. Of the 101 species caught in the floodplain of the Miranda River,
+in a snapshot after assembly, about 20% of the species present occurred only on the plateau and
+15% only in the floodplain. Of the 101 species caught in the floodplain of the Miranda River,
 15% are long-distance migrants, 43% are sedentary species of lakes and 42% are intermediate
 (Resende & Palmeira 1999, cited by Junk 2005; we did not see the original). We split the 40
-species into these guilds, each spread along the gradient, and gave each guild a monthly
-emigration: migrants emigrate with probability 0.05, rising to 0.3 during the upstream
-spawning migration from October to April (the piracema; Alho 2008); intermediate and sedentary
-species emigrate with probabilities 0.03 and 0.01, tripled at high water, when fish move
-laterally into the flooded zone. Only the order and timing of these rates come from the
-literature. Tagged pacu, a migratory species, travelled up to 422 km in the Paraná River, and
-91% moved away from where they were released (Makrakis et al. 2007), but we found no tagging
-study from the Pantanal itself.
+species into these guilds, each spread along the gradient, and let the guilds differ in three
+ways, using the arguments `kernel_group`, `dispersal_site` and `disturbance_sensitivity`:
+
+- emigration through time (`dispersal_time`): migrants emigrate with probability 0.05 per
+  month, rising to 0.3 during the upstream spawning migration from October to April (the
+  piracema; Alho 2008), and intermediate and sedentary species with probabilities 0.03 and
+  0.01;
+- routes (`kernel_group`): migrants follow a channel kernel four times longer than the other
+  guilds, the same upstream and downstream, since the piracema is an active migration against
+  the current, whereas the other guilds follow symmetric or downstream-biased kernels. Tagged
+  pacu, a migratory species, travelled up to 422 km in the Paraná River, and 91% moved away
+  from where they were released (Makrakis et al. 2007), but we found no tagging study from the
+  Pantanal itself;
+- tolerance (`disturbance_sensitivity`): a disturbed site loses each population with
+  probability 1 for migrants, 0.85 for intermediate and 0.7 for sedentary species. Weighted by
+  the guild shares, about 19% of the species survive the drying of a lake, close to the 7 of 34
+  species (21%) that survived in a lagoon of the middle São Francisco River left unflooded for
+  three years, where migratory species were the most likely to disappear and most survivors
+  could breathe air (Pompeu & Godinho 2006).
+
+Only the order and timing of these rates, and the survival after drying, come from the
+literature; their values are assumptions. To see what the last two add, we also ran the
+scenarios with guilds that differ only in emigration through time, one kernel for all and all
+populations of a disturbed site lost (the "emigration only" model;
+`GUILD_MODEL=emigration`).
 
 The animation follows one replicate across the drought. In May, the floodplain of the normal
-regime is linked overland, whereas in the other two it is not; red crosses mark sites that lose
-all their populations to a spate or to drying.
+regime is linked overland, whereas in the other two it is not; red crosses mark disturbed sites.
 
-![Local richness month by month from year 17 to year 38 in one replicate, under the normal pulse, a drought from year 21 to year 32 and regulation from year 1. The shaded area is the floodplain linked overland at high water; red crosses mark sites that lost all their populations.](river_pulse.gif)
-
-```{r pantanal-trajectory, fig.alt = "Difference in regional richness between the drought or regulated regime and the normal pulse, year by year, with two standard errors, for symmetric and downstream-biased dispersal. The drought years are shaded."}
-traj <- do.call(rbind, lapply(c("symmetric", "downstream"), function(dir) {
-  normal <- do.call(rbind, pan$regional_series[pan$regime == "normal" & pan$direction == dir])
-  do.call(rbind, lapply(c("drought", "regulated"), function(g) {
-    other <- do.call(rbind, pan$regional_series[pan$regime == g & pan$direction == dir])
-    d <- other - normal
-    data.frame(direction = dir, regime = g, year = seq_len(ncol(d)), mean = colMeans(d),
-               se = apply(d, 2, sd) / sqrt(nrow(d)))
-  }))
-}))
-ggplot(traj, aes(year, mean, colour = regime, fill = regime)) +
-  annotate("rect", xmin = 20.5, xmax = 32.5, ymin = -Inf, ymax = Inf, alpha = 0.15) +
-  geom_hline(yintercept = 0, colour = "grey60") +
-  geom_ribbon(aes(ymin = mean - 2 * se, ymax = mean + 2 * se), alpha = 0.2, colour = NA) +
-  geom_line() +
-  facet_wrap(~direction) +
-  labs(x = "Year after assembly", y = "Regional richness minus normal pulse") +
-  theme_minimal()
-```
+![Local richness month by month from year 17 to year 38 in one replicate, under the normal pulse, a drought from year 21 to year 32 and regulation from year 1. The shaded area is the floodplain linked overland at high water; red crosses mark disturbed sites.](river_pulse.gif)
 
 ### What the pulse does
 
@@ -219,76 +218,119 @@ rd <- function(var, g, dir = "symmetric", digits = 2) fmt(regime_diff(var, g, di
 nm <- function(var, dir = "symmetric") {
   round(mean(pan[[var]][pan$regime == "normal" & pan$direction == dir]), 2)
 }
-guild_diff <- function(g, year, dir) {
-  a <- simplify2array(pan$guild_series[pan$regime == g & pan$direction == dir])
-  b <- simplify2array(pan$guild_series[pan$regime == "normal" & pan$direction == dir])
-  d <- a[year, , ] - b[year, , ]
-  data.frame(guild = rownames(d), mean = rowMeans(d), se = apply(d, 1, sd) / sqrt(ncol(d)))
+series_diff <- function(d, series, g, year, dir, relative = FALSE) {
+  a <- simplify2array(d[[series]][d$regime == g & d$direction == dir])
+  b <- simplify2array(d[[series]][d$regime == "normal" & d$direction == dir])
+  if (relative) {
+    return(data.frame(guild = dimnames(a)[[2]], mean = rowMeans(a[year, , ], na.rm = TRUE) /
+                        rowMeans(b[year, , ], na.rm = TRUE)))
+  }
+  x <- a[year, , ] - b[year, , ]
+  data.frame(guild = rownames(x), mean = rowMeans(x, na.rm = TRUE),
+             se = apply(x, 1, sd, na.rm = TRUE) / sqrt(ncol(x)))
 }
+kept <- function(d, year, dir = "symmetric") {
+  s <- series_diff(d, "lake_guild_series", "drought", year, dir, relative = TRUE)
+  stats::setNames(round(100 * s$mean), s$guild)
+}
+full23 <- kept(pan, 23)
+emig23 <- kept(res$pantanal_emigration, 23)
 ```
 
 Under the normal pulse, floodplain sites held more species at high water than at low water
 (`r nm("alpha_plain_high_pre")` against `r nm("alpha_plain_low_pre")` species per site with
 symmetric dispersal, in years 11 to 20) and were more alike (mean Jaccard dissimilarity
-`r nm("beta_plain_high_pre")` against `r nm("beta_plain_low_pre")`). Removing the pulse removed
-this alternation: at high water, floodplain sites of the regulated regime held
-`r rd("alpha_plain_high_pre", "regulated")` species fewer, and their dissimilarity was
-`r rd("beta_plain_high_pre", "regulated", digits = 3)` higher. Thus, in the model, the lateral
-links of high water homogenise the floodplain, and the dry season differentiates it again.
-Regulation also lowered occupancy (`r rd("occupancy", "regulated", digits = 3)`) and slowed
-turnover (`r rd("tau", "regulated")`), and the regulated metacommunity ended the 60 years with
-`r rd("regional_end", "regulated")` species fewer than the normal one.
+`r nm("beta_plain_high_pre")` against `r nm("beta_plain_low_pre")`). Thus, in the model, the
+lateral links of high water homogenise the floodplain, and the isolation of the dry season
+differentiates it again. Removing the pulse for good cut the lakes off from the river.
+Relative to the normal pulse (paired differences, mean ± standard error), floodplain sites of
+the regulated regime changed by `r rd("alpha_plain_high_pre", "regulated")` species at high
+water, their dissimilarity by `r rd("beta_plain_high_pre", "regulated", digits = 3)` and
+occupancy by `r rd("occupancy", "regulated", digits = 3)`, and regional richness at the end of
+the 60 years changed by `r rd("regional_end", "regulated")` species.
 
-The drought lowered regional richness by `r rd("regional_drought_min", "drought")` species at
-its worst with symmetric dispersal, and by
-`r rd("regional_drought_min", "drought", "downstream")` with a downstream bias. Interestingly,
-the pulse came back but the species did not: 28 years after the drought, the deficit was still
-`r rd("regional_end", "drought")` species (mean of years 51 to 60). This follows from the
-closed metacommunity, in which a species extinct in the whole network cannot be rescued from
-outside, so the size of the deficit is an upper bound for a basin open to immigration.
+```{r pantanal-lakes, fig.alt = "Species of each guild per floodplain lake in November, as a share of the normal pulse, during and after the drought (shaded), for the full model and the model in which guilds differ only in emigration."}
+lakes <- do.call(rbind, lapply(c("full", "emigration only"), function(model) {
+  d <- if (model == "full") pan else res$pantanal_emigration
+  do.call(rbind, lapply(18:60, function(y) {
+    cbind(series_diff(d, "lake_guild_series", "drought", y, "symmetric", relative = TRUE),
+          year = y, model = model)
+  }))
+}))
+lakes$guild <- factor(lakes$guild, c("migrant", "intermediate", "sedentary"))
+lakes$model <- factor(lakes$model, c("emigration only", "full"))
+ggplot(lakes, aes(year, mean, colour = guild)) +
+  annotate("rect", xmin = 20.5, xmax = 32.5, ymin = -Inf, ymax = Inf, alpha = 0.15) +
+  geom_line() +
+  facet_wrap(~model) +
+  scale_y_continuous(labels = function(x) paste0(round(100 * x), "%")) +
+  labs(x = "Year after assembly", y = "Species per lake, share of normal pulse",
+       colour = NULL) +
+  theme_minimal()
+```
 
-```{r pantanal-guilds, fig.alt = "Loss of species of each guild at the end of the drought and at year 60, relative to the normal pulse, with two standard errors."}
-guilds <- do.call(rbind, lapply(c("symmetric", "downstream"), function(dir) {
-  rbind(cbind(guild_diff("drought", 32, dir), when = "drought, year 32", direction = dir),
-        cbind(guild_diff("drought", 60, dir), when = "drought, year 60", direction = dir),
-        cbind(guild_diff("regulated", 60, dir), when = "regulated, year 60", direction = dir))
+The drought emptied the lakes year after year. With symmetric dispersal, in its third year
+(year 23, the length of the São Francisco study), the lakes of the full model kept
+`r full23[["migrant"]]`% of their migrant species, `r full23[["intermediate"]]`% of the
+intermediate and `r full23[["sedentary"]]`% of the sedentary ones, relative to the normal pulse,
+which is the ranking seen by Pompeu & Godinho (2006). In the model with guilds that differ only
+in emigration, the three guilds lost alike (`r emig23[["migrant"]]`%,
+`r emig23[["intermediate"]]`% and `r emig23[["sedentary"]]`%), since a dried lake lost every
+population and no route was longer for anyone. After 12 years, both models had lost almost
+every species from the lakes. When the pulse returned, migrants refilled the lakes within one
+or two years, whereas sedentary species were still below the normal pulse 28 years later.
+
+```{r pantanal-guilds, fig.alt = "Regional loss of species of each guild at the end of the drought and at year 60, and under regulation at year 60, relative to the normal pulse, with two standard errors, for the full model and the model with guilds that differ only in emigration."}
+guilds <- do.call(rbind, lapply(c("full", "emigration only"), function(model) {
+  d <- if (model == "full") pan else res$pantanal_emigration
+  rbind(cbind(series_diff(d, "guild_series", "drought", 32, "symmetric"),
+              when = "drought, year 32", model = model),
+        cbind(series_diff(d, "guild_series", "drought", 60, "symmetric"),
+              when = "drought, year 60", model = model),
+        cbind(series_diff(d, "guild_series", "regulated", 60, "symmetric"),
+              when = "regulated, year 60", model = model))
 }))
 guilds$guild <- factor(guilds$guild, c("migrant", "intermediate", "sedentary"))
-ggplot(guilds, aes(guild, mean, colour = direction)) +
+guilds$model <- factor(guilds$model, c("emigration only", "full"))
+ggplot(guilds, aes(guild, mean, colour = model)) +
   geom_hline(yintercept = 0, colour = "grey60") +
   geom_pointrange(aes(ymin = mean - 2 * se, ymax = mean + 2 * se),
                   position = position_dodge(width = 0.4)) +
   facet_wrap(~when) +
-  labs(x = NULL, y = "Species minus normal pulse") +
+  labs(x = NULL, y = "Species in the network minus normal pulse", colour = NULL) +
   theme_minimal()
 ```
 
-Surprisingly, the species lost to the drought were sedentary or intermediate; no migrant was
-lost. In the model, migrants emigrate a lot every piracema and recolonise the lakes that dried,
-whereas sedentary species, once extinct in a part of the floodplain, come back slowly. This is
-the opposite of what was seen in three lagoons of the middle São Francisco River that were not
-flooded for three years: only 7 of the 34 species of one lagoon survived, most of them able to
-breathe air, and migratory species were far more likely to disappear (Pompeu & Godinho 2006).
-Lagoons cut off in a dry year of the upper Paraná floodplain even held more species than
-connected ones (Petry et al. 2003). The difference seems to lie in what the simulator lacks: a
-dried lake loses all its populations at once, whatever their tolerance, and every species
-travels the same distances. Species that resist drought or hypoxia, and migrants that need
-long, connected routes to complete their life cycle, would reverse the ranking. These two
-extensions, dispersal kernels and sensitivity to disturbance per species or guild, are in the
-roadmap.
+Interestingly, the ranking reverses at the scale of the whole network. Relative to the normal
+pulse (paired differences, mean ± standard error), the drought changed regional richness by
+`r rd("regional_drought_min", "drought")` species at its worst with symmetric dispersal
+(`r rd("regional_drought_min", "drought", "downstream")` with a downstream bias), and the
+species lost from the network were sedentary or intermediate, not migrants. The pulse came back
+but these species did not: 28 years after the drought, the difference was still
+`r rd("regional_end", "drought")` species (mean of years 51 to 60). Migrants vanish first from
+the lakes but persist in the main channel, from which they emigrate often enough to come back,
+whereas sedentary species, once extinct in every lake of a part of the floodplain, seem to have
+no source near enough. The same ranking appeared under regulation and in the model with guilds
+that differ only in emigration, so it seems to follow from emigration through time rather than
+from routes or tolerance; tolerance only made the regional loss of sedentary species smaller.
+As a result, the guild that a survey of isolated lagoons would call the most vulnerable is the
+least likely to be lost from the basin, and the guild that resists drying best is the one whose
+losses last. The metacommunity is closed, so a species extinct in the whole network cannot be
+rescued from outside, and these losses are upper bounds for a basin open to immigration.
 
 ## Limitations
 
 The scenarios are inspired by the Pantanal, not fitted to it. The network is random, not the
-drainage of the upper Paraguay; the rates of spates, drying and emigration are assumptions
-whose order and timing, but not values, come from the literature; and the guild shares come
-from one river, through a secondary citation. Beyond the two missing extensions above, the
-dispersal pulse of `dispersal_time` applies to every site in the same step, so that at high
-water plateau species also emigrate more, and part of the loss of plateau richness under
-regulation may come from this rather than from the floodplain. The metacommunity is closed, so
-losses are permanent. Finally, the environment changes along the gradient from the outlet to
-the headwaters but not with the flood itself; flooding acts only through connectivity and
-disturbance.
+drainage of the upper Paraguay; the rates of spates, drying and emigration, the length of the
+migrant kernel and the sensitivities are assumptions whose order and timing, but not values,
+come from the literature; the survival after drying was matched to one lagoon of another basin;
+and the guild shares come from one river, through a secondary citation. One sensitivity per
+species applies to every disturbance, so that spates on the plateau spare sedentary species as
+drying does in the lakes. The piracema raises the emigration of migrants at every site, plateau
+included, and the dispersal pulse of high water applies to all guilds in the floodplain. The
+metacommunity is closed, so losses are permanent. Finally, the environment changes along the
+gradient from the outlet to the headwaters but not with the flood itself; flooding acts only
+through connectivity, emigration and disturbance.
 
 ## References
 

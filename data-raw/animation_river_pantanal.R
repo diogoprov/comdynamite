@@ -39,10 +39,13 @@ p_net <- ggplot() +
 months <- month.abb
 cal <- rbind(
   data.frame(process = "plateau: spates (washout 0.05 per site and month)", month = rain),
-  data.frame(process = "migrants: piracema (emigration 0.05 to 0.3)", month = piracema),
-  data.frame(process = "floodplain: overland links; others emigrate 3x", month = high),
+  data.frame(process = "migrants: piracema (emigration 0.05 to 0.3, long kernel)",
+             month = piracema),
+  data.frame(process = "floodplain: overland links, emigration x 3", month = high),
+  data.frame(process = "floodplain lakes: cut off from the river", month = setdiff(1:12, high)),
   data.frame(process = "floodplain lakes: drying (0.03; 0.15 in drought)", month = low))
-cal_cols <- stats::setNames(c("#B07A3B", "#7B4FA0", "#1F5FA8", "#E3A33B"), unique(cal$process))
+cal_cols <- stats::setNames(c("#B07A3B", "#7B4FA0", "#1F5FA8", "grey55", "#E3A33B"),
+                            unique(cal$process))
 cal$process <- factor(cal$process, rev(unique(cal$process)))
 p_cal <- ggplot(cal, aes(factor(month, 1:12, months), process, fill = process)) +
   geom_tile(colour = "white", height = 0.7) +
@@ -56,23 +59,23 @@ p_cal <- ggplot(cal, aes(factor(month, 1:12, months), process, fill = process)) 
 reg <- rbind(
   data.frame(regime = "normal", start = -10, end = 60, pulse = "annual pulse"),
   data.frame(regime = "drought", start = c(-10, 20, 32), end = c(20, 32, 60),
-             pulse = c("annual pulse", "no pulse, harsher drying", "annual pulse")),
+             pulse = c("annual pulse", "no pulse, lakes cut off, harsher drying", "annual pulse")),
   data.frame(regime = "regulated", start = c(-10, 0), end = c(0, 60),
-             pulse = c("annual pulse", "no pulse, no drying")))
+             pulse = c("annual pulse", "no pulse, lakes cut off, no drying")))
 reg$regime <- factor(reg$regime, c("regulated", "drought", "normal"))
 p_reg <- ggplot(reg, aes(xmin = start, xmax = end, ymin = as.numeric(regime) - 0.3,
                          ymax = as.numeric(regime) + 0.3, fill = pulse)) +
   geom_rect() +
   geom_vline(xintercept = 0, linetype = 2) +
   scale_y_continuous(breaks = 1:3, labels = levels(reg$regime)) +
-  scale_fill_manual(values = c("annual pulse" = "#1F5FA8", "no pulse, harsher drying" = "#E3A33B",
-                               "no pulse, no drying" = "grey60"), name = NULL) +
+  scale_fill_manual(values = c("annual pulse" = "#1F5FA8", "no pulse, lakes cut off, harsher drying" = "#E3A33B",
+                               "no pulse, lakes cut off, no drying" = "grey60"), name = NULL) +
   labs(title = "c  Regimes", x = "Year (after 100 years of assembly)", y = NULL) +
   base_theme +
   theme(panel.grid.minor = element_blank(), legend.position = "bottom")
 
 design <- p_net + (p_cal / p_reg) + plot_layout(widths = c(1, 1.5))
-ggsave("vignettes/articles/river_design.png", design, width = 12, height = 6.5, dpi = 110)
+ggsave("vignettes/articles/river_design.png", design, width = 13, height = 7, dpi = 110)
 
 # animation: local richness month by month from year 17 to year 38, across the drought
 frames <- burn_years * period + seq(16 * period + 1, 38 * period)
@@ -114,7 +117,8 @@ p_anim <- ggplot() +
   scale_fill_viridis_c(limits = c(0, 16), name = "Species per site") +
   coord_equal() +
   labs(title = "{labels[as.integer(current_frame)]}",
-       subtitle = "Blue: floodplain linked overland at high water. Red cross: site lost all populations (spate or drying).") +
+       subtitle = paste("Blue: floodplain linked overland at high water; lakes are cut off from the river",
+                         "at other times. Red cross: disturbed site (spate or drying).")) +
   base_theme +
   theme(axis.text = element_blank(), axis.title = element_blank(), panel.grid = element_blank(),
         legend.position = "bottom", plot.subtitle = element_text(size = 9)) +

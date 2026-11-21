@@ -117,7 +117,11 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    trabalhos de Altermatt e Carrara geram as redes; deve devolver coordenadas, a matriz de
    distâncias ao longo do canal e a direção do fluxo, para alimentar `landscape_matrix()` e a
    covariância de (ii), aceitando também redes reais. (iii) feito em 2026-11-20: `river_network()` (crescimento aleatório com `branching`, ordem de Strahler e magnitude de Shreve) e `landscape_river()` (kernel com escalas a jusante e a montante, dispersão por terra opcional, aceita redes do OCNet ou reais; OCNet é GPL-3, fica fora das dependências). Os textos completos de Altermatt e Carrara não estavam acessíveis (PMC só com resumo); as referências entram só como contexto; (iv) estudo de persistência de longo prazo com
-   cheias sazonais, com a dispersão a favor e contra a corrente. A lição do piloto sazonal
+   cheias sazonais, com a dispersão a favor e contra a corrente. (iv) feito em 2026-11-21: artigo
+   `vignettes/articles/river-persistence.Rmd`, com o estudo genérico (topologia, direção da
+   dispersão, cheias) e cenários inspirados no Pantanal (pulso normal, seca de 12 anos,
+   regulação; guildas com rotas e tolerância à secagem do item 8, calibradas por Pompeu &
+   Godinho 2006; lagoas isoladas fora da cheia), com GIF e esquema do desenho. A lição do piloto sazonal
    (issue #97) vale aqui: o gerador serve para dinâmica e persistência, não para inferência
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes
    de citar resultados.
@@ -129,8 +133,8 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    por sítio e passo) e `disturbance_sensitivity` (probabilidade de a população sumir quando o
    sítio é perturbado, uma por espécie). Os padrões reproduzem os resultados anteriores bit a
    bit. Falta: `kernel_group` no motor evolutivo (o fluxo gênico de coesão e a fissão usam um
-   único kernel) e com seleção de imigrantes ou vários traços; refazer os cenários do Pantanal
-   com as guildas (item 7d).
+   único kernel) e com seleção de imigrantes ou vários traços. Cenários do Pantanal refeitos com as
+   guildas em 2026-11-21 (item 7, iv).
 
 Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. Os itens 2, 3 e 4 foram feitos em 2026-11-19; o estudo (i) do item 1 foi feito em 2026-11-20 (200 réplicas, seis nulos: livre, toro, MSR, shift-rotate ad hoc, substituto paramétrico por postos e variograma de Viladomat et al. 2014; a Constant Moran permutation saiu porque Arthur 2024/2025 trata de nulos de redes). Nenhum nulo ficou entre 0,04 e 0,06 em todos os casos: todos ficam liberais quando o alcance se aproxima do tamanho da paisagem. O variograma foi o melhor (média 0,062, máximo 0,09), seguido do paramétrico (0,066, máximo 0,10); MSR falha na região em L (até 0,23) e o toro na grade com alcance 5 ou mais (0,10 a 0,14). Resultados em `vignettes/articles/whole-tree.Rmd`. (ii) feito em 2026-11-20 por decisão do usuário, apesar do critério de 0,04 a 0,06 não ter sido atingido: `env_surrogates()` e `null = "variogram"`/`"parametric"` em `pcps_test()`, `node_test()` e `phylo_beta_test()`, com o aviso sobre alcances grandes; o estudo foi rodado de novo com o código do pacote. (iii) feito em 2026-11-20: `env_surrogates()` aceita uma paisagem (devolve paisagens com `env` ou `env_axes` trocados, com as distâncias da paisagem, inclusive toro) e matrizes `env_time` (o paramétrico move a série inteira de cada sítio). Item 1 concluído. Nulos com borda aplicados a dados reais em 2026-11-20 (`data-raw/real_data_nulls.R`, dafnídeos e anuros, com `env_surrogates(lonlat, strata)`), fechando a pendência da v0.5.2. O 2 é o mais curto e fecha uma validação antiga; o 1 é um
 estudo de validade com resultado incerto e pode virar artigo próprio se nenhum nulo passar.
