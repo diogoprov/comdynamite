@@ -27,8 +27,8 @@ river_floods(
 
 \item{start}{Step of the year at which the flood season begins.}
 
-\item{probability}{Probability of washout during a flood at the largest site (between 0
-and 1).}
+\item{probability}{Probability of washout during a flood at the most exposed site (between
+0 and 1).}
 
 \item{size_effect}{Exponent of the relative size of each site.}
 
@@ -47,10 +47,10 @@ Probabilities that each site of a river network loses all its populations at eac
 because of floods, for \code{disturbance} in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}. Each period (a year)
 has a flood season of \code{flood_steps} steps, starting at step \code{start} of the period, and a
 flood happens in a given year with probability \code{year_prob}, so that years differ. During
-a flood, the probability of washout at a site is \code{probability} times its size relative to
-the largest site, raised to \code{size_effect}: positive values make floods harsher in large
-rivers, negative values in headwaters (flashier floods in small, steep streams), and 0 the
-same everywhere.
+a flood, the probability of washout at a site is proportional to its size relative to the
+largest site raised to \code{size_effect}, scaled so that the most exposed site has probability
+\code{probability}: positive values make floods harsher in large rivers, negative values in
+headwaters (flashier floods in small, steep streams), and 0 the same everywhere.
 }
 \details{
 Floods here remove populations; to change the environment during floods instead, use

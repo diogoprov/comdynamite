@@ -426,10 +426,10 @@ river_additive <- function(net, weights) {
 #' because of floods, for `disturbance` in [simulate_metacommunity()]. Each period (a year)
 #' has a flood season of `flood_steps` steps, starting at step `start` of the period, and a
 #' flood happens in a given year with probability `year_prob`, so that years differ. During
-#' a flood, the probability of washout at a site is `probability` times its size relative to
-#' the largest site, raised to `size_effect`: positive values make floods harsher in large
-#' rivers, negative values in headwaters (flashier floods in small, steep streams), and 0 the
-#' same everywhere.
+#' a flood, the probability of washout at a site is proportional to its size relative to the
+#' largest site raised to `size_effect`, scaled so that the most exposed site has probability
+#' `probability`: positive values make floods harsher in large rivers, negative values in
+#' headwaters (flashier floods in small, steep streams), and 0 the same everywhere.
 #'
 #' Floods here remove populations; to change the environment during floods instead, use
 #' [env_pulse()] on the sites and steps of the flood.
@@ -439,8 +439,8 @@ river_additive <- function(net, weights) {
 #' @param period Steps per year.
 #' @param flood_steps Steps of the flood season in each year.
 #' @param start Step of the year at which the flood season begins.
-#' @param probability Probability of washout during a flood at the largest site (between 0
-#'   and 1).
+#' @param probability Probability of washout during a flood at the most exposed site (between
+#'   0 and 1).
 #' @param size_effect Exponent of the relative size of each site.
 #' @param size Size of each site: `"upstream_length"` (the default, a proxy for catchment
 #'   area and discharge), `"magnitude"` (Shreve magnitude) or a positive numeric vector with
@@ -488,8 +488,8 @@ river_floods <- function(landscape, n_steps, period, flood_steps = 1, start = 1,
     stop("`size` must be \"upstream_length\", \"magnitude\" or one positive value per site",
          call. = FALSE)
   }
-  p <- probability * (w / max(w))^size_effect
-  p <- pmin(p, 1)
+  rel <- (w / max(w))^size_effect
+  p <- probability * rel / max(rel)
   years <- seq_len(ceiling(n_steps / period))
   flood <- years[stats::runif(length(years)) < year_prob]
   steps <- unlist(lapply(flood, function(y) (y - 1) * period + start - 1 + seq_len(flood_steps)))

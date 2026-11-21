@@ -30,8 +30,10 @@ test_that("river_floods() gives washout probabilities by season, year and river 
   expect_equal(flat[, 1], rep(0.2, 4))
   head <- river_floods(land, n_steps = 10, period = 10, size_effect = -1, size = "magnitude",
                        probability = 0.5)
-  expect_true(all(head[, 1] <= 1))
+  expect_equal(max(head[, 1]), 0.5)
   expect_gt(head[3, 1], head[1, 1])
+  mag <- land$network$magnitude
+  expect_equal(head[, 1], 0.5 * (1 / mag) / max(1 / mag))
   set.seed(2)
   some <- river_floods(land, n_steps = 1000, period = 10, year_prob = 0.3)
   expect_equal(length(attr(some, "flood_years")) / 100, 0.3, tolerance = 0.25)
