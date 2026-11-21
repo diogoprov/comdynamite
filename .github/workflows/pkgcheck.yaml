@@ -1,8 +1,9 @@
 # rOpenSci pkgcheck, from https://github.com/ropensci-review-tools/pkgcheck-action
 name: pkgcheck
 
+# Run by hand (Actions > pkgcheck > Run workflow) before a release or a submission: it takes
+# about 40 minutes, and the action can fail in its own summary step without a package problem.
 on:
-  pull_request:
   workflow_dispatch:
 
 permissions: read-all

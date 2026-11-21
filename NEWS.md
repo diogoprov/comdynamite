@@ -3,7 +3,7 @@
 - Preparation for rOpenSci review: a contributing guide with the development stage of the
   package, a code of conduct, the ORCID of the author, a project status badge, British English
   as the language of the documentation (with `inst/WORDLIST`), a `.lintr` configuration and a
-  pkgcheck workflow. The README explains how to install treeshapesim and cmdstanr.
+  pkgcheck workflow (run by hand). The README explains how to install treeshapesim and cmdstanr.
 - `animate_food_web()` writes to a temporary file by default instead of `food_web.gif` in the
   working directory; the path is returned as before.
 - Examples added for `plot.population_shifts()` and `pp_check()` on `trait_gradient_bayes()`;
