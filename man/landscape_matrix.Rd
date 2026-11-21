@@ -46,6 +46,8 @@ Other landscapes:
 \code{\link[=env_space_time]{env_space_time()}},
 \code{\link[=landscape_grid]{landscape_grid()}},
 \code{\link[=landscape_implicit]{landscape_implicit()}},
-\code{\link[=landscape_points]{landscape_points()}}
+\code{\link[=landscape_points]{landscape_points()}},
+\code{\link[=landscape_river]{landscape_river()}},
+\code{\link[=river_network]{river_network()}}
 }
 \concept{landscapes}

@@ -32,6 +32,8 @@ reference:
   contents:
   - landscape_points
   - landscape_matrix
+  - landscape_river
+  - river_network
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel

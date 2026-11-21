@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- New `river_network()` and `landscape_river()`: random dendritic river networks grown site by
+  site (or any network given by downstream neighbours and reach lengths, such as an optimal
+  channel network or a real river), and landscapes on them with dispersal along the channel
+  whose scales differ downstream and upstream, plus an optional share of straight-line
+  (overland) dispersal. The landscape keeps the network, the distances along the channel and
+  the distance travelled downstream between every pair of sites.
 - Simulations with `evolution` record the steps since the environment of each site last
   changed (`evolution$since_change`, at the end and at `record_steps`), and `maladaptation()`
   gains a column `since_change`, to follow the lag load after a change in `env_time`.
