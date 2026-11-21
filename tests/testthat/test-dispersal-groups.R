@@ -69,6 +69,15 @@ test_that("kernel_group works with pool_from and univariate evolution", {
   # sp2 flies only to site 3 from site 1, which is closed to it until step 50
   expect_equal(sim$abundance[2, "sp2"], 0)
   expect_equal(sim$abundance[3, "sp2"], 0)
+  set.seed(5)
+  multi <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
+                                  n_steps = 3, initial = start, seed_steps = numeric(0),
+                                  kernels = list(near, far),
+                                  kernel_step = cbind(rep(1, 3), rep(2, 3)),
+                                  kernel_group = 1:2, pool_from = open,
+                                  immigration = "multinomial")
+  expect_equal(multi$abundance[3, "sp2"], 0)
+  expect_gt(multi$abundance[2, "sp1"], 0)
   set.seed(6)
   ev <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
                                n_steps = 1, initial = start, seed_steps = numeric(0),
@@ -165,4 +174,26 @@ test_that("the evolving engine takes dispersal_site and disturbance_sensitivity"
   expect_gt(nrow(tough$events), 0)
   expect_length(tough$disturbance_sensitivity, ncol(tough$abundance))
   expect_true(all(tough$disturbance_sensitivity == 0.2))
+})
+
+test_that("the remaining checks of the new arguments", {
+  # groups as a factor
+  set.seed(13)
+  sim <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
+                                n_steps = 1, initial = start, seed_steps = numeric(0),
+                                kernels = list(near = near, far = far),
+                                kernel_step = cbind(walkers = "near", fliers = "far"),
+                                kernel_group = factor(c("walkers", "fliers")))
+  expect_equal(sim$abundance[2, "sp2"], 0)
+  # one site cannot take a dispersal pulse
+  expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0, n_steps = 2,
+                           dispersal_site = matrix(1, 1, 2)), "two sites")
+  # groups need one route for every species, which immigrant selection does not have
+  expect_error(simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2),
+                                      dispersal = 0.2, n_steps = 1, initial = start,
+                                      seed_steps = numeric(0), kernels = list(near, far),
+                                      kernel_step = cbind(1, 2), kernel_group = 1:2,
+                                      evolution = evolution_control(10,
+                                                                    immigrant_selection = TRUE)),
+               "immigrant selection")
 })
