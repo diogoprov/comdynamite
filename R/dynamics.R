@@ -103,7 +103,8 @@
 #' @param dispersal Emigration probability, one value or one per species.
 #' @param extirpation Probability that a population is lost at each time step,
 #'   one value or one per species.
-#' @param disturbance Probability that a site loses all its populations at each time step:
+#' @param disturbance Probability that a site is disturbed at each time step, losing all its
+#'   populations unless `disturbance_sensitivity` is below 1:
 #'   one value (0, the default, for none), or a matrix of sites x steps with the probability of
 #'   each site at each step, for disturbances that vary in space and time, such as the
 #'   seasonal floods of [river_floods()].
@@ -156,6 +157,24 @@
 #'   the matrix used. For example, a matrix of connected ponds for flood steps and one of
 #'   isolated ponds for dry steps. Only for spatially explicit landscapes; `NULL` (the
 #'   default) keeps the dispersal matrix of `landscape`.
+#' @param kernel_group Optional routes of dispersal by group of species: one group per species,
+#'   given as a column name or index of `kernel_step`, which is then a matrix with one row per
+#'   step and one column per group, holding the index or name of the matrix of `kernels` used
+#'   by that group at that step. For example, long-distance migrants and sedentary fish of the
+#'   same river, each with a matrix for high and one for low water. A run in which every group
+#'   uses the same matrix gives the same results as a vector `kernel_step`. Not available with
+#'   immigrant selection or several traits under `evolution`, nor in
+#'   [simulate_evolving_metacommunity()]. `NULL` (the default) for one route for all species.
+#' @param dispersal_site Optional change of emigration among sites: a matrix with one row per
+#'   site and one column per step of multipliers of the emigration probability (probabilities
+#'   above 1 are set to 1), applied on top of `dispersal` and `dispersal_time`. For example, a
+#'   dispersal pulse only in the floodplain at high water. `NULL` (the default) for the same
+#'   emigration at every site.
+#' @param disturbance_sensitivity Probability that a population is lost when its site is
+#'   disturbed: one value or one per species. 1 (the default) removes all the populations of a
+#'   disturbed site, as without this argument; lower values let species that resist the
+#'   disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
+#'   keep their populations.
 #' @param mortality With `recruitment = "lottery"`, the probability that an adult dies at each
 #'   step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
 #'   overlapping generations, with a generation time of about `1 / mortality` steps. With
@@ -233,7 +252,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    recruitment = c("beverton_holt", "lottery"),
                                    microsites = NULL, mortality = 1,
                                    dispersal_time = NULL, kernels = NULL,
-                                   kernel_step = NULL) {
+                                   kernel_step = NULL, kernel_group = NULL,
+                                   dispersal_site = NULL, disturbance_sensitivity = 1) {
   stopifnot(inherits(landscape, "mc_landscape"))
   immigration <- match.arg(immigration)
   recruitment <- match.arg(recruitment)
@@ -316,12 +336,16 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                      disturbance = disturbance, pool_from = pool_from,
                      recruitment = recruitment, microsites = microsites, mortality = mortality,
                      dispersal_time = dispersal_time, kernels = kernels,
-                     kernel_step = kernel_step)
+                     kernel_step = kernel_step, kernel_group = kernel_group,
+                     dispersal_site = dispersal_site,
+                     disturbance_sensitivity = disturbance_sensitivity)
   tree <- attr(traits, "tree")
   if (several) traits <- trait_list
   structure(c(out, list(landscape = landscape, env = env, traits = traits, alpha = alpha,
                         dispersal = dispersal, dispersal_time = dispersal_time,
                         kernels = kernels, kernel_step = kernel_step,
+                        kernel_group = kernel_group, dispersal_site = dispersal_site,
+                        disturbance_sensitivity = disturbance_sensitivity,
                         extirpation = extirpation,
                         disturbance = disturbance, pool = out$pool, tree = tree,
                         recruitment = recruitment,
@@ -384,7 +408,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
                         evolution = NULL, disturbance = 0, pool_from = NULL,
                         recruitment = c("beverton_holt", "lottery"), microsites = NULL,
                         mortality = 1, dispersal_time = NULL, kernels = NULL,
-                        kernel_step = NULL) {
+                        kernel_step = NULL, kernel_group = NULL, dispersal_site = NULL,
+                        disturbance_sensitivity = 1) {
   # the state lives in this frame; the preparation, each step and the end are evaluated in it, so
   # that simulate_evolving_metacommunity() can run the same steps and change species in between
   mc_setup(environment())
@@ -436,7 +461,25 @@ mc_setup <- function(st) {
     if (!is.null(disp_prob_time) && m == 1 && any(disp_prob_time > 0)) {
       stop("dispersal needs at least two sites", call. = FALSE)
     }
-    kernels <- kernels_by_step(kernels, kernel_step, n_steps, m, disp_matrix)
+    kernels <- kernels_by_step(kernels, kernel_step, n_steps, m, disp_matrix, kernel_group)
+    kernel_group <- kernel_groups(kernel_group, kernel_step, k_all)
+    if (!is.null(dispersal_site)) {
+      if (!is.matrix(dispersal_site) || !is.numeric(dispersal_site) ||
+          nrow(dispersal_site) != m || ncol(dispersal_site) < n_steps ||
+          anyNA(dispersal_site) || any(dispersal_site < 0) || any(!is.finite(dispersal_site))) {
+        stop("`dispersal_site` must be a matrix of multipliers of emigration (0 or more) with ",
+             "one row per site (", m, ") and one column per step (", n_steps, ")",
+             call. = FALSE)
+      }
+      if (m == 1) stop("dispersal needs at least two sites", call. = FALSE)
+    }
+    if (!is.numeric(disturbance_sensitivity) || anyNA(disturbance_sensitivity) ||
+        any(disturbance_sensitivity < 0) || any(disturbance_sensitivity > 1) ||
+        !length(disturbance_sensitivity) %in% c(1, k_all)) {
+      stop("`disturbance_sensitivity` must be one probability between 0 and 1, or one per ",
+           "species (", k_all, ")", call. = FALSE)
+    }
+    disturbance_sensitivity <- rep_len(as.numeric(disturbance_sensitivity), k_all)
     sites <- sites %||% rownames(r1) %||% paste0("site", seq_len(m))
     species <- species %||% colnames(r1) %||% paste0("sp", seq_len(k_all))
     if (!is.null(pool)) {
@@ -704,9 +747,18 @@ mc_step <- function(st, step) {
       # phenotypes of the emigrants, for the fitness of immigrants in the speciation engine
       if (isTRUE(ev$imm_sel)) pa_em <- pa
       if (!is.null(disp_prob_time)) p_em <- rep(disp_prob_time[step, alive], each = m)
-      if (!is.null(kernels)) disp_matrix <- kernels[[kernel_step[step]]]
+      p_go <- if (is.null(dispersal_site)) p_em else
+        pmin(p_em * rep(dispersal_site[, step], k), 1)
+      if (!is.null(kernels)) {
+        disp_matrix <- if (is.null(kernel_group)) kernels[[kernel_step[step]]] else
+          structure(kernels[kernel_step[step, ]], group = kernel_group[alive])
+        if (is.list(disp_matrix) && (isTRUE(ev$imm_sel) || isTRUE(ev$mv))) {
+          stop("`kernel_group` is not available with immigrant selection or several traits",
+               call. = FALSE)
+        }
+      }
       if (is.null(pool_from)) {
-        em <- em_to <- matrix(stats::rbinom(m * k, n, p_em), m, k)
+        em <- em_to <- matrix(stats::rbinom(m * k, n, p_go), m, k)
         open_to <- NULL
       } else {
         # sites not yet open through `pool_from` are not destinations: the emigrants that would
@@ -714,8 +766,8 @@ mc_step <- function(st, step) {
         open_to <- pool_from[, alive, drop = FALSE] <= step
         share <- if (is.null(disp_matrix)) {
           (matrix(colSums(open_to), m, k, byrow = TRUE) - open_to) / (m - 1)
-        } else disp_matrix %*% open_to
-        em <- matrix(stats::rbinom(m * k, n, p_em * share), m, k)
+        } else kernel_product(disp_matrix, open_to)
+        em <- matrix(stats::rbinom(m * k, n, p_go * share), m, k)
         em_to <- ifelse(share > 0, em / share, 0)
       }
       tot <- colSums(em)
@@ -737,7 +789,7 @@ mc_step <- function(st, step) {
                                      disp_matrix, g_src)
           imm <- matrix(stats::rpois(m * k, sel$lambda), m, k)
         } else if (!is.null(disp_matrix)) {
-          imm <- matrix(stats::rpois(m * k, crossprod(disp_matrix, em_to)), m, k)
+          imm <- matrix(stats::rpois(m * k, kernel_flow(disp_matrix, em_to)), m, k)
         } else {
           w <- sweep(-em, 2, tot, "+")
           if (!is.null(open_to)) w[!open_to] <- 0
@@ -848,7 +900,18 @@ mc_step <- function(st, step) {
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
       p_dist <- if (is.matrix(disturbance)) disturbance[, step] else disturbance
-      if (any(p_dist > 0)) n[stats::runif(m) < p_dist, ] <- 0L
+      if (any(p_dist > 0)) {
+        hit <- stats::runif(m) < p_dist
+        if (all(disturbance_sensitivity == 1)) {
+          n[hit, ] <- 0L
+        } else if (any(hit)) {
+          # each population of a disturbed site is lost with the sensitivity of its species
+          sub <- n[hit, , drop = FALSE]
+          sub[stats::runif(length(sub)) < rep(disturbance_sensitivity[alive], each = sum(hit))] <-
+            0L
+          n[hit, ] <- sub
+        }
+      }
       if (!is.null(inside)) n[!inside] <- 0L
       if (isTRUE(ev$mv)) {
         if (any(fixed_z[alive])) {
@@ -1056,7 +1119,8 @@ dispersal_by_step <- function(dispersal_time, dispersal, n_steps, k) {
 
 # dispersal matrices to switch among, checked and made row-stochastic with a zero diagonal;
 # NULL when the matrix of the landscape holds at every step
-kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix) {
+kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix,
+                            kernel_group = NULL) {
   if (is.null(kernels) && is.null(kernel_step)) return(NULL)
   if (is.null(kernels) || is.null(kernel_step)) {
     stop("`kernels` and `kernel_step` go together", call. = FALSE)
@@ -1097,14 +1161,80 @@ kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix) {
     stop("`kernel_step` must give, for each step, the index or name of one of `kernels`",
          call. = FALSE)
   }
-  if (length(kernel_step) < n_steps) {
-    stop("`kernel_step` needs one value per step (", n_steps, ")", call. = FALSE)
+  if (is.matrix(kernel_step) != !is.null(kernel_group)) {
+    stop("a matrix `kernel_step` (steps x groups) goes with `kernel_group`, and a vector ",
+         "without it", call. = FALSE)
+  }
+  if (NROW(kernel_step) < n_steps) {
+    stop("`kernel_step` needs one value per step (one row per step with `kernel_group`; ",
+         n_steps, " steps)", call. = FALSE)
   }
   kernels
 }
 
+# the column of a matrix `kernel_step` used by each species, from `kernel_group` (names of the
+# columns or their indices); NULL without groups
+kernel_groups <- function(kernel_group, kernel_step, k) {
+  if (is.null(kernel_group)) return(NULL)
+  if (!is.matrix(kernel_step)) {
+    stop("`kernel_group` needs `kernels` and a matrix `kernel_step` (steps x groups)",
+         call. = FALSE)
+  }
+  if (length(kernel_group) != k || anyNA(kernel_group)) {
+    stop("`kernel_group` needs one group per species (", k, ")", call. = FALSE)
+  }
+  if (is.factor(kernel_group)) kernel_group <- as.character(kernel_group)
+  if (is.character(kernel_group)) {
+    if (is.null(colnames(kernel_step)) || !all(kernel_group %in% colnames(kernel_step))) {
+      stop("a character `kernel_group` must hold column names of `kernel_step`", call. = FALSE)
+    }
+    return(match(kernel_group, colnames(kernel_step)))
+  }
+  if (!is.numeric(kernel_group) || any(kernel_group != round(kernel_group)) ||
+      any(kernel_group < 1) || any(kernel_group > ncol(kernel_step))) {
+    stop("`kernel_group` must give, for each species, a column of `kernel_step`", call. = FALSE)
+  }
+  as.integer(kernel_group)
+}
+
+# expected immigrants (sites x species) from emigrants `x` (sites x species): t(D) %*% x, or,
+# with one kernel per group of species (a list with attribute `group`), each species through
+# the kernel of its group
+kernel_flow <- function(disp_matrix, x) {
+  if (!is.list(disp_matrix)) return(crossprod(disp_matrix, x))
+  group <- attr(disp_matrix, "group")
+  out <- matrix(0, ncol(disp_matrix[[1]]), ncol(x))
+  for (g in unique(group)) {
+    cols <- which(group == g)
+    out[, cols] <- crossprod(disp_matrix[[g]], x[, cols, drop = FALSE])
+  }
+  out
+}
+
+# D %*% x, by group as in kernel_flow()
+kernel_product <- function(disp_matrix, x) {
+  if (!is.list(disp_matrix)) return(disp_matrix %*% x)
+  group <- attr(disp_matrix, "group")
+  out <- matrix(0, nrow(disp_matrix[[1]]), ncol(x))
+  for (g in unique(group)) {
+    cols <- which(group == g)
+    out[, cols] <- disp_matrix[[g]] %*% x[, cols, drop = FALSE]
+  }
+  out
+}
+
 # multinomially, with the probabilities of the rows of `disp_matrix`
 place_emigrants <- function(em, disp_matrix, open_to = NULL) {
+  if (is.list(disp_matrix)) {
+    group <- attr(disp_matrix, "group")
+    out <- matrix(0L, nrow(em), ncol(em))
+    for (g in unique(group)) {
+      cols <- which(group == g)
+      out[, cols] <- place_emigrants(em[, cols, drop = FALSE], disp_matrix[[g]],
+                                     if (!is.null(open_to)) open_to[, cols, drop = FALSE])
+    }
+    return(out)
+  }
   m <- nrow(em)
   immigrants <- matrix(0L, m, ncol(em))
   for (cell in which(em > 0)) {
