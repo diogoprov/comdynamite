@@ -281,7 +281,9 @@ print.mc_speciation <- function(x, ...) {
 #'     each site (`within_var`, 0 for species of one lineage), the environment of each site
 #'     at the end (`environment`), the same genetic means, variance among lineages and
 #'     environment at `record_steps` for the lineages extant at the end (`history`,
-#'     `within_history`, `environment_history`), the reference environment of plasticity
+#'     `within_history`, `environment_history`), the steps since the environment of each site
+#'     last changed (`since_change`, as in [simulate_metacommunity()]; the environment of
+#'     this engine is fixed, so they equal the step), the reference environment of plasticity
 #'     (`reference`), the genetic and environmental variances and the slope of plasticity of
 #'     each species (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
 #'     `NULL`. With several traits, the genetic means, plastic parts and variances among
@@ -694,6 +696,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     ev_out <- list(genetic = wmean, plastic = plastic, within_var = within,
                    history = z_hist, within_history = within_hist,
                    environment = st$ev$env(n_steps), environment_history = env_hist,
+                   since_change = out$evolution$since_change,
                    reference = out$evolution$reference,
                    genetic_var = stats::setNames(st$ev$g[sp_idx], species),
                    env_var = stats::setNames(st$ev$ve[sp_idx], species),
@@ -1308,7 +1311,8 @@ evolving_state_mv <- function(st, out, lineage_ab, genetic, members, species, ex
   environment <- matrix(e_end, st$m, dimnames = list(sites, ev$axes))
   list(genetic = now$genetic, plastic = plastic, within_var = now$within, history = z_hist,
        within_history = within_hist, environment = environment,
-       environment_history = env_hist, reference = stats::setNames(ev$ref, ev$axes),
+       environment_history = env_hist, since_change = out$evolution$since_change,
+       reference = stats::setNames(ev$ref, ev$axes),
        genetic_var = stats::setNames(ev$G[sp_idx], species),
        env_var = stats::setNames(ev$E[sp_idx], species),
        plasticity = matrix(ev$b[sp_idx, , drop = FALSE], length(species), length(ev$axes),

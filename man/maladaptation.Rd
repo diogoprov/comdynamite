@@ -17,7 +17,9 @@ maladaptation(x, step = NULL)
 A data frame with one row per population present: \code{step} (with several steps),
 \code{site}, \code{species}, \code{abundance}, then \code{env}, \code{phenotype} and \code{deviation} (\eqn{E - \bar
   p}{E - pbar}), or with several traits \verb{env_<trait>}, \verb{phenotype_<trait>} and
-\verb{deviation_<trait>} for each trait, then \code{distance} (\eqn{|d| / \sqrt{\sigma^2 + P}}{|d|
+\verb{deviation_<trait>} for each trait, then \code{since_change} (the steps since the environment
+of the site last changed, \code{NA} for simulations made with older versions of the package),
+then \code{distance} (\eqn{|d| / \sqrt{\sigma^2 + P}}{|d|
   / sqrt(sigma^2 + P)}, or the Mahalanobis distance) and \code{load}.
 }
 \description{
@@ -43,6 +45,15 @@ traits; axes with \code{sigma = Inf} add a deviation but no load. For evolving m
 several lineages: its phenotype is their mean weighted by abundance and \eqn{P}{P} adds the
 variance among them, so the load is that of a single Gaussian population with that mean and
 variance, an approximation of the mean load of the lineages.
+
+With an environment that changes in steps (\code{env_time}, for example annual series of urban
+cover or \code{\link[=env_pulse]{env_pulse()}}), \code{since_change} gives the time each population has had to respond to
+the last change. The decay of the load with this time separates a lag of genetic adaptation
+(the load falls over generations) from plasticity (it falls at once, in the step of the
+change). The environment counts as changed in a step whenever it differs from that of the
+step before, so a continuous trend (as in \code{\link[=env_space_time]{env_space_time()}}) resets it every step; round
+the environment to the resolution of interest before the simulation to count only larger
+changes.
 
 Maladaptation can come from gene flow (immigrants with the means of other sites; see also
 \code{migrant_load} in \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}), drift and founder effects in small

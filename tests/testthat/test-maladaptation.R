@@ -14,7 +14,7 @@ test_that("maladaptation() gives the lag load of every population", {
                                   record_steps = c(30, 60))
   m <- maladaptation(fixed)
   expect_named(m, c("site", "species", "abundance", "env", "phenotype", "deviation",
-                    "distance", "load"))
+                    "since_change", "distance", "load"))
   expect_true(all(m$abundance > 0))
   theta <- s$tr[m$species, "optimum"]
   width <- s$tr[m$species, "sigma"]^2 + 2
@@ -116,4 +116,36 @@ test_that("a niche of infinite breadth exerts no selection", {
                                                               founder = FALSE))
   z <- sim$evolution$genetic
   expect_equal(unname(z[, "sp1"][!is.na(z[, "sp1"])]), rep(45, sum(!is.na(z[, "sp1"]))))
+})
+
+test_that("since_change counts the steps since the environment of each site last changed", {
+  set.seed(1)
+  land <- landscape_grid(4, disp_scale = 0.3)
+  traits <- data.frame(optimum = 50, sigma = 15, r_max = 4, row.names = "sp1")
+  alpha <- matrix(0.05, dimnames = list("sp1", "sp1"))
+  env_time <- matrix(land$env, 16, 60)
+  env_time[1:8, 31:60] <- env_time[1:8, 31:60] + 20
+  env_time[9, 41] <- env_time[9, 41] + 1
+  sim <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 60,
+                                env_time = env_time, record_steps = c(30, 31, 45),
+                                evolution = evolution_control(genetic_var = 4))
+  sc <- sim$evolution$since_change
+  expect_identical(unname(sc$end), c(rep(29L, 8), 18L, rep(60L, 7)))
+  expect_identical(unname(sc$history[, "step30"]), rep(30L, 16))
+  expect_identical(unname(sc$history[, "step31"]), c(rep(0L, 8), rep(31L, 8)))
+  expect_identical(unname(sc$history[, "step45"]), c(rep(14L, 8), 3L, rep(45L, 7)))
+  m <- maladaptation(sim, step = c(31, 45))
+  sites <- match(m$site, rownames(sim$abundance))
+  expect_identical(m$since_change[m$step == 31], unname(sc$history[sites[m$step == 31],
+                                                                    "step31"]))
+  expect_identical(maladaptation(sim)$since_change,
+                   unname(sc$end[match(maladaptation(sim)$site, names(sc$end))]))
+  # without env_time the environment never changes; older objects give NA
+  still <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 20,
+                                  evolution = evolution_control(genetic_var = 4))
+  expect_true(all(maladaptation(still)$since_change == 20L))
+  still$evolution$since_change <- NULL
+  expect_true(all(is.na(maladaptation(still)$since_change)))
+  # the last step, not recorded, is the end
+  expect_identical(maladaptation(sim, step = 60), maladaptation(sim))
 })
