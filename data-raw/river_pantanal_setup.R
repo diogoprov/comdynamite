@@ -12,7 +12,11 @@
 #   floodplain sites are also linked overland (lateral connectivity) and non-migratory species
 #   emigrate more (lateral moves into the flooded zone);
 # - low water from September to November: floodplain lakes may dry out (lose all populations)
-#   with probability `drying`; the main channel is a permanent refuge.
+#   with probability `drying`; the main channel is a permanent refuge;
+# - outside high water, floodplain lakes are cut off from the river: they neither send nor
+#   receive migrants until the next flood (lakes isolated for months or years and connected only
+#   at high water, Junk et al. 1989; a dead arm of the Miranda isolated in the dry season until
+#   the next flood, Resende 2000). In a drought they stay cut off for 12 years.
 # Regimes after 100 years of assembly under the normal pulse:
 # - "normal": the pulse every year;
 # - "drought": 12 years without the pulse (as in 1962-1973 at Ladario), with harsher drying of
@@ -69,6 +73,24 @@ guild <- factor(rep(names(counts), counts)[order(keys)], names(guild_share))
 emigration <- rbind(base = c(migrant = 0.05, intermediate = 0.03, sedentary = 0.01),
                     moving = c(migrant = 0.3, intermediate = 0.1, sedentary = 0.03))
 piracema <- c(10:12, 1:4)
+# GUILD_MODEL = "full" (the default) also gives the guilds their own routes and tolerances:
+# - migrants follow a channel kernel four times longer than the others, the same upstream and
+#   downstream whatever `direction`, since the piracema is an active upstream migration;
+#   the other guilds follow the kernel of `direction`;
+# - the lateral pulse of high water is confined to floodplain sites (`dispersal_site`, emigration
+#   three times higher there, for all guilds);
+# - a disturbed site loses each population with the sensitivity of its guild: 1 for migrants,
+#   0.85 for intermediate and 0.7 for sedentary species, so that, weighted by the guild shares,
+#   about 19% of the species survive the drying of a lake, close to the 7 of 34 species (21%)
+#   that survived years without flooding in a lagoon of the middle Sao Francisco, where
+#   migratory species were the most likely to disappear and most survivors breathe air (Pompeu &
+#   Godinho 2006). The same sensitivity applies to the spates of the plateau.
+# GUILD_MODEL = "emigration" keeps the earlier model, in which guilds differ only in emigration
+# through time (one kernel for all, all populations of a disturbed site lost, the lateral pulse
+# in every site).
+guild_model <- match.arg(Sys.getenv("GUILD_MODEL", "full"), c("full", "emigration"))
+sensitivity <- c(migrant = 1, intermediate = 0.85, sedentary = 0.7)
+migrant_scale <- 4 * scale_down
 
 # network, zones, environment and shared uniforms of one replicate
 pantanal_setup <- function(rep) {
@@ -107,9 +129,20 @@ pantanal_schedule <- function(s, regime) {
   disp <- matrix(emigration["base", g], n_steps, n_species, byrow = TRUE)
   mig <- g == "migrant"
   disp[s$month %in% piracema, mig] <- emigration["moving", "migrant"]
-  disp[flood_on, !mig] <- rep(emigration["moving", g[!mig]], each = sum(flood_on))
-  list(kernel_step = ifelse(flood_on, 2L, 1L), dispersal_time = disp,
-       disturbance = hit * 1, flood_on = flood_on)
+  # lakes cut off outside high water: no emigrants from them (and no immigrants, through the
+  # kernels of low water)
+  site <- matrix(1, n_sites, n_steps)
+  site[s$lakes, !flood_on] <- 0
+  if (guild_model == "emigration") {
+    disp[flood_on, !mig] <- rep(emigration["moving", g[!mig]], each = sum(flood_on))
+    return(list(kernel_step = ifelse(flood_on, 2L, 1L), dispersal_time = disp,
+                disturbance = hit * 1, flood_on = flood_on, dispersal_site = site))
+  }
+  site[s$plain, flood_on] <- 3
+  list(kernel_step = cbind(resident = ifelse(flood_on, 2L, 1L),
+                           migrant = ifelse(flood_on, 4L, 3L)),
+       dispersal_time = disp, disturbance = hit * 1, flood_on = flood_on,
+       dispersal_site = site)
 }
 
 # dispersal matrices at low water (channel only) and high water (channel plus overland links
@@ -117,6 +150,7 @@ pantanal_schedule <- function(s, regime) {
 pantanal_kernels <- function(s, direction) {
   land <- landscape_river(s$net, scale_down = scale_down,
                           scale_up = if (direction == "symmetric") scale_down else scale_down / 4)
+  mig <- landscape_river(s$net, scale_down = migrant_scale)$dispersal
   straight <- dispersal_kernel(as.matrix(stats::dist(s$net[, c("x", "y")])), 1)
   straight[!s$plain, ] <- 0
   straight[, !s$plain] <- 0
@@ -124,7 +158,18 @@ pantanal_kernels <- function(s, direction) {
   lat <- straight / pmax(rowSums(straight), 1e-300)
   k_high <- land$dispersal
   k_high[s$plain, ] <- (1 - overland) * land$dispersal[s$plain, ] + overland * lat[s$plain, ]
-  list(landscape = land, kernels = list(low = land$dispersal, high = k_high))
+  # at low water, no site sends migrants to a lake (rows rescaled by the engine)
+  cut_off <- function(k) {
+    k[, s$lakes] <- 0
+    k
+  }
+  if (guild_model == "emigration") {
+    return(list(landscape = land, kernels = list(low = cut_off(land$dispersal), high = k_high)))
+  }
+  mig_high <- mig
+  mig_high[s$plain, ] <- (1 - overland) * mig[s$plain, ] + overland * lat[s$plain, ]
+  list(landscape = land, kernels = list(low = cut_off(land$dispersal), high = k_high,
+                                        migrant_low = cut_off(mig), migrant_high = mig_high))
 }
 
 pantanal_run <- function(s, direction, regime, record_steps) {
@@ -136,5 +181,11 @@ pantanal_run <- function(s, direction, regime, record_steps) {
                          n_steps = n_steps,
                          env_time = s$env, disturbance = sched$disturbance,
                          dispersal_time = sched$dispersal_time, kernels = k$kernels,
-                         kernel_step = sched$kernel_step, record_steps = record_steps)
+                         kernel_step = sched$kernel_step,
+                         kernel_group = if (guild_model == "full")
+                           ifelse(guild == "migrant", "migrant", "resident"),
+                         dispersal_site = sched$dispersal_site,
+                         disturbance_sensitivity = if (guild_model == "full")
+                           unname(sensitivity[as.character(guild)]) else 1,
+                         record_steps = record_steps)
 }

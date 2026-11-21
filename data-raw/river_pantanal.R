@@ -57,6 +57,12 @@ one_replicate <- function(rep) {
     out$occupancy <- mean(pers$occupancy[ok])
     out$tau <- mean(pers$tau[ok])
     out$regional_series <- list(regional)
+    # mean number of species of each guild per floodplain lake in November (low water), the
+    # scale of lagoon surveys
+    out$lake_guild_series <- list(vapply(levels(guild), function(k) {
+      vapply(which(rec_month == 11), function(t) mean(rowSums(h[s$lakes, guild == k, t])),
+             numeric(1))
+    }, numeric(years)))
     out$guild_series <- list(vapply(levels(guild), function(k) {
       vapply(which(rec_month == 12), function(t) sum(colSums(h[, guild == k, t]) > 0),
              numeric(1))
@@ -79,9 +85,12 @@ saveRDS(list(results = res, summary = summary_tab, cells = cells,
                              period = period, burn_years = burn_years, years = years,
                              drought_years = drought_years, scale_down = scale_down,
                              overland = overland, emigration = emigration, guild = guild,
+                             guild_model = guild_model, sensitivity = sensitivity,
+                             migrant_scale = migrant_scale,
                              traits = traits, alpha_inter = alpha[1, 2], high = high,
                              low = low, rain = rain, spate = spate, drying = drying,
                              minutes = elapsed)),
-        "data-raw/river_pantanal.rds", version = 2)
+        if (guild_model == "full") "data-raw/river_pantanal.rds" else
+          "data-raw/river_pantanal_emigration.rds", version = 2)
 print(t(summary_tab), digits = 3)
 cat("minutes:", round(elapsed, 1), "\n")
