@@ -77,3 +77,66 @@ test_that("bad networks give errors", {
                "positive")
   expect_error(landscape_river(data.frame(downstream = NA, length = 0)), "at least 2")
 })
+
+test_that("river_covariance() builds valid tail-up, tail-down and Euclidean components", {
+  set.seed(4)
+  for (b in c(0.2, 0.6, 1)) {
+    land <- landscape_river(river_network(60, branching = b))
+    for (w in c("magnitude", "upstream_length")) {
+      v <- river_covariance(land, tail_up = c(2, 3), weights = w)
+      expect_true(isSymmetric(v))
+      expect_equal(diag(v), rep(2, 60))
+      expect_gt(min(eigen(v, symmetric = TRUE, only.values = TRUE)$values), -1e-10)
+      unconnected <- land$downstream > 0 & t(land$downstream) > 0
+      expect_true(all(v[unconnected] == 0))
+    }
+    v <- river_covariance(land, tail_down = c(1, 3), euclidean = c(0.5, 2), nugget = 0.1)
+    expect_gt(min(eigen(v, symmetric = TRUE, only.values = TRUE)$values), 0)
+    expect_equal(diag(v), rep(1.6, 60))
+  }
+  # with Shreve weights the additive function is the magnitude over that of the outlet
+  af <- comdynamite:::river_additive(land$network, "magnitude")
+  expect_equal(af, land$network$magnitude / land$network$magnitude[1])
+  # hand example: 1 <- 2 <- (3, 4); 4 <- (5, 6)
+  net <- data.frame(downstream = c(NA, 1, 2, 2, 4, 4), length = c(0, 1, 2, 1, 1, 3))
+  small <- landscape_river(net)
+  v <- river_covariance(small, tail_up = c(sill = 1, range = 2))
+  expect_equal(v[5, 1], exp(-3 / 2) * sqrt(1 / 3))
+  expect_equal(v[3, 4], 0)
+  expect_equal(v[4, 2], exp(-1 / 2) * sqrt(2 / 3))
+  v2 <- river_covariance(small, tail_up = c(range = 2, sill = 1), weights = c(1, 1, 1, 3, 1, 1))
+  expect_equal(v2[4, 2], exp(-1 / 2) * sqrt(3 / 4))
+  expect_equal(river_covariance(small, tail_down = c(1, 2))[3, 5], exp(-4 / 2))
+})
+
+test_that("env_river() draws fields and series with the covariance asked for", {
+  set.seed(5)
+  land <- landscape_river(river_network(15))
+  v <- river_covariance(land, tail_up = c(1, 4), nugget = 0.2)
+  draws <- replicate(4000, env_river(land, tail_up = c(1, 4), nugget = 0.2))
+  expect_lt(max(abs(stats::cov(t(draws)) - v)), 0.12)
+  e <- env_river(land, mean = 10, tail_down = c(1, 2))
+  expect_length(e, 15)
+  s <- env_river(land, n_steps = 3000, tail_up = c(1, 4), temporal_scale = 10)
+  expect_equal(dim(s), c(15, 3000))
+  lag1 <- mean(vapply(1:15, function(i) stats::cor(s[i, -1], s[i, -3000]), numeric(1)))
+  expect_equal(lag1, exp(-1 / 10), tolerance = 0.05)
+  still <- env_river(land, n_steps = 5, euclidean = c(1, 2))
+  expect_true(all(still == still[, 1]))
+  free <- env_river(land, n_steps = 2000, nugget = 1, temporal_scale = 0)
+  expect_lt(abs(stats::cor(free[1, -1], free[1, -2000])), 0.1)
+  sim <- simulate_metacommunity(land, data.frame(optimum = 0, sigma = 2, r_max = 3,
+                                                 row.names = "sp1"),
+                                matrix(0.05, dimnames = list("sp1", "sp1")), n_steps = 20,
+                                env_time = env_river(land, n_steps = 20, tail_up = c(1, 4)))
+  expect_equal(nrow(sim$abundance), 15)
+})
+
+test_that("river_covariance() checks its arguments", {
+  land <- landscape_river(data.frame(downstream = c(NA, 1, 1), length = c(0, 1, 1)))
+  expect_error(river_covariance(landscape_grid(3)), "landscape_river")
+  expect_error(river_covariance(land), "at least one")
+  expect_error(river_covariance(land, tail_up = 1), "two positive")
+  expect_error(river_covariance(land, tail_up = c(1, 1), weights = c(1, -1, 1)), "weights")
+  expect_error(river_covariance(land, tail_up = c(1, 1), weights = "area"))
+})

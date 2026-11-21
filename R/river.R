@@ -244,3 +244,178 @@ river_downstream <- function(net) {
   for (s in ord) meet[below[[s]], below[[s]]] <- net$distance[s]
   net$distance - meet
 }
+
+#' Covariance of the environment along a river network
+#'
+#' Covariance among the sites of a river network as a sum of exponential components, the
+#' variance-component approach of Peterson and Ver Hoef (2010) for stream networks:
+#'
+#' * `tail_up`: correlation only between flow-connected sites (one downstream of the other),
+#'   \eqn{\sigma^2 \exp(-h / \alpha) \sqrt{A_u / A_d}}{sigma^2 exp(-h / alpha) sqrt(A_u / A_d)},
+#'   where \eqn{h}{h} is the distance along the channel and \eqn{A_u}{A_u} and \eqn{A_d}{A_d}
+#'   are the additive function at the upstream and downstream site (Ver Hoef et al. 2006). It
+#'   suits variables carried by the flow, such as water chemistry or temperature, which mix at
+#'   confluences in proportion to the flow of each branch.
+#' * `tail_down`: correlation between all sites, \eqn{\sigma^2 \exp(-h / \alpha)}{sigma^2
+#'   exp(-h / alpha)}, which for the exponential model is the same for flow-connected and
+#'   flow-unconnected pairs at the same distance along the channel (Ver Hoef and Peterson
+#'   2010). It suits processes that spread up and down the channel.
+#' * `euclidean`: \eqn{\sigma^2 \exp(-d / \alpha)}{sigma^2 exp(-d / alpha)} with the
+#'   straight-line distance \eqn{d}{d}, for drivers of the terrestrial landscape and the
+#'   atmosphere, such as climate or land use, that ignore the channel.
+#'
+#' The additive function comes from weights of the branches: at each confluence the
+#' moving average of the tail-up model splits among the branches upstream in proportion to
+#' their weights, and the additive function of a site is the product of these shares down to
+#' the outlet, which keeps the variance equal at all sites. With `weights = "magnitude"` (the
+#' default) the shares follow the Shreve magnitude, with `"upstream_length"` the length of
+#' channel upstream (a proxy for catchment area or discharge), and a numeric vector gives
+#' any other positive measure per site, such as discharge.
+#'
+#' @param landscape A landscape from [landscape_river()].
+#' @param tail_up,tail_down,euclidean `NULL` (the default) to leave the component out, or a
+#'   numeric vector with the partial sill (variance) and the range \eqn{\alpha}{alpha}, named
+#'   `sill` and `range` or in that order. Ranges are in the units of the reach lengths (tail-up
+#'   and tail-down) or of the coordinates (Euclidean).
+#' @param nugget Variance independent among sites.
+#' @param weights Weights of the branches for the tail-up component: `"magnitude"`,
+#'   `"upstream_length"` or a positive numeric vector with one value per site.
+#' @return A symmetric sites x sites covariance matrix.
+#' @references Peterson, E. E., & Ver Hoef, J. M. (2010). A mixed-model moving-average approach
+#'   to geostatistical modeling in stream networks. *Ecology*, 91, 644--651.
+#'   \doi{10.1890/08-1668.1}
+#'
+#'   Ver Hoef, J. M., Peterson, E., & Theobald, D. (2006). Spatial statistical models that use
+#'   flow and stream distance. *Environmental and Ecological Statistics*, 13, 449--464.
+#'   \doi{10.1007/s10651-006-0022-8}
+#'
+#'   Ver Hoef, J. M., & Peterson, E. E. (2010). A moving average approach for spatial
+#'   statistical models of stream networks. *Journal of the American Statistical
+#'   Association*, 105, 6--18. \doi{10.1198/jasa.2009.ap08248}
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' land <- landscape_river(river_network(30))
+#' v <- river_covariance(land, tail_up = c(sill = 1, range = 5), nugget = 0.1)
+#' # flow-unconnected sites are uncorrelated under the tail-up model
+#' unconnected <- land$downstream > 0 & t(land$downstream) > 0
+#' range(v[unconnected])
+#' @export
+river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclidean = NULL,
+                             nugget = 0, weights = "magnitude") {
+  if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
+    stop("`landscape` must come from landscape_river()", call. = FALSE)
+  }
+  stopifnot(length(nugget) == 1, is.finite(nugget), nugget >= 0)
+  net <- landscape$network
+  m <- nrow(net)
+  component <- function(x, name) {
+    if (is.null(x)) return(NULL)
+    if (!is.numeric(x) || length(x) != 2 || any(!is.finite(x)) || any(x <= 0)) {
+      stop("`", name, "` must be NULL or two positive numbers, the sill and the range",
+           call. = FALSE)
+    }
+    if (!is.null(names(x)) && all(c("sill", "range") %in% names(x))) x <- x[c("sill", "range")]
+    unname(x)
+  }
+  tail_up <- component(tail_up, "tail_up")
+  tail_down <- component(tail_down, "tail_down")
+  euclidean <- component(euclidean, "euclidean")
+  if (is.null(tail_up) && is.null(tail_down) && is.null(euclidean) && nugget == 0) {
+    stop("give at least one component or a nugget", call. = FALSE)
+  }
+  out <- diag(nugget, m)
+  h <- landscape$dist
+  if (!is.null(tail_down)) out <- out + tail_down[1] * exp(-h / tail_down[2])
+  if (!is.null(euclidean)) {
+    d <- unname(as.matrix(stats::dist(landscape$coords)))
+    out <- out + euclidean[1] * exp(-d / euclidean[2])
+  }
+  if (!is.null(tail_up)) {
+    af <- river_additive(net, weights)
+    down <- landscape$downstream
+    connected <- down == 0 | t(down) == 0
+    ratio <- outer(af, af, pmin) / outer(af, af, pmax)
+    out <- out + tail_up[1] * exp(-h / tail_up[2]) * sqrt(ratio) * connected
+  }
+  out
+}
+
+#' Environment along a river network
+#'
+#' Draws environments for the sites of a river network from a Gaussian field with the
+#' covariance of [river_covariance()], for [simulate_metacommunity()]: a single value per site
+#' or, with `n_steps`, a series that changes in time as a first-order autoregressive process
+#' with the same spatial covariance at every step, as `env_time`.
+#'
+#' @inheritParams river_covariance
+#' @param n_steps `NULL` (the default) for one value per site, or the number of steps of a
+#'   series.
+#' @param mean Mean of the environment (one value, or one per site, such as a gradient from
+#'   the outlet to the headwaters).
+#' @param temporal_scale Steps over which the correlation in time falls by a factor of
+#'   \eqn{e}{e} (the correlation between consecutive steps is \eqn{\exp(-1 /}{exp(-1 /}
+#'   `temporal_scale`)); `Inf` keeps the first draw at every step and 0 draws every step
+#'   anew.
+#' @param ... Components of the covariance, passed to [river_covariance()] (`tail_up`,
+#'   `tail_down`, `euclidean`, `nugget` and `weights`).
+#' @return A numeric vector with one value per site, or with `n_steps` a matrix of sites x
+#'   steps.
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' land <- landscape_river(river_network(40))
+#' # water temperature: carried by the flow, warmer towards the outlet
+#' temp <- env_river(land, tail_up = c(4, 10), mean = 25 - land$network$distance / 2)
+#' land$env <- temp
+#' # a series that changes over about 50 steps, for env_time
+#' series <- env_river(land, n_steps = 200, tail_up = c(4, 10), nugget = 0.5,
+#'                     mean = 25 - land$network$distance / 2, temporal_scale = 50)
+#' dim(series)
+#' @export
+env_river <- function(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf, ...) {
+  v <- river_covariance(landscape, ...)
+  m <- nrow(v)
+  stopifnot(is.numeric(mean), length(mean) %in% c(1, m), all(is.finite(mean)),
+            length(temporal_scale) == 1, temporal_scale >= 0)
+  ev <- eigen(v, symmetric = TRUE)
+  root <- ev$vectors %*% diag(sqrt(pmax(ev$values, 0)), m)
+  draw <- function() as.vector(root %*% stats::rnorm(m))
+  if (is.null(n_steps)) return(mean + draw())
+  stopifnot(length(n_steps) == 1, n_steps >= 1)
+  rho <- exp(-1 / temporal_scale)
+  out <- matrix(0, m, n_steps)
+  out[, 1] <- draw()
+  if (n_steps > 1) for (s in 2:n_steps) {
+    out[, s] <- if (rho == 1) out[, s - 1] else rho * out[, s - 1] + sqrt(1 - rho^2) * draw()
+  }
+  out + mean
+}
+
+# additive function of the tail-up model: 1 at the outlet, and at each confluence the share of
+# each branch upstream in proportion to its weight, multiplied down to the outlet
+river_additive <- function(net, weights) {
+  m <- nrow(net)
+  w <- if (is.character(weights)) {
+    weights <- match.arg(weights, c("magnitude", "upstream_length"))
+    net[[weights]]
+  } else weights
+  if (!is.numeric(w) || length(w) != m || any(!is.finite(w)) || any(w <= 0)) {
+    stop("`weights` must be \"magnitude\", \"upstream_length\" or one positive value per site",
+         call. = FALSE)
+  }
+  outlet <- which(is.na(net$downstream))
+  children <- split(seq_len(m)[-outlet], factor(net$downstream[-outlet], levels = seq_len(m)))
+  af <- numeric(m)
+  af[outlet] <- 1
+  ord <- outlet
+  i <- 1
+  while (i <= length(ord)) {
+    s <- ord[i]
+    ch <- children[[s]]
+    if (length(ch)) af[ch] <- af[s] * w[ch] / sum(w[ch])
+    ord <- c(ord, ch)
+    i <- i + 1
+  }
+  af
+}

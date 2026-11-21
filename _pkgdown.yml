@@ -34,6 +34,8 @@ reference:
   - landscape_matrix
   - landscape_river
   - river_network
+  - river_covariance
+  - env_river
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel

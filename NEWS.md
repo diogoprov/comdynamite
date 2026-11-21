@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- New `river_covariance()` and `env_river()`: covariance of the environment along a river
+  network as a sum of tail-up (flow-connected sites only, weighted by Shreve magnitude, length
+  of channel upstream or any weight per site), tail-down and Euclidean exponential components
+  plus a nugget (Ver Hoef et al. 2006; Ver Hoef & Peterson 2010; Peterson & Ver Hoef 2010),
+  and Gaussian fields drawn from it, fixed or as autoregressive series for `env_time`.
+  `river_network()` also returns `upstream_length`, a proxy for catchment area.
 - New `river_network()` and `landscape_river()`: random dendritic river networks grown site by
   site (or any network given by downstream neighbours and reach lengths, such as an optimal
   channel network or a real river), and landscapes on them with dispersal along the channel
