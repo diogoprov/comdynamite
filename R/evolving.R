@@ -1236,6 +1236,8 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   st$n <- cbind(st$n, new_n)
   # emigrants of this step stay aligned with the alive species (none for the new ones)
   if (!is.null(st$em)) st$em <- cbind(st$em, matrix(0, m, q))
+  # and so do their phenotypes, kept with immigrant selection
+  if (!is.null(st$pa_em)) st$pa_em <- grow_arr(st$pa_em, NA_real_)
   st$alive <- c(st$alive, new_ids)
   st$k_all <- st$k_all + q
   st$k <- length(st$alive)

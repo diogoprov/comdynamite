@@ -272,7 +272,10 @@ test_that("the evolving engine takes kernel_group: same matrix, same run", {
                 speciation_control("fission", rate = 0.05),
                 speciation_control("point", rate = 0.002))
   for (sp in modes) same(run(sp, groups = TRUE), run(sp))
-  for (sp in modes[1:3]) same(run(sp, several = TRUE, groups = TRUE), run(sp, several = TRUE))
+  # a lower rate of point mutation with several traits, to stay below `max_species`
+  modes[[4]] <- speciation_control("point", rate = 0.0005)
+  for (sp in modes) same(run(sp, several = TRUE, groups = TRUE), run(sp, several = TRUE))
+  expect_gt(nrow(run(modes[[4]], several = TRUE, groups = TRUE)$events), 0)
   # without groups, no groups in the output
   expect_null(run(modes[[3]])$kernel_group)
   # new species stay in the group of their mother

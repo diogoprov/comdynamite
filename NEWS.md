@@ -8,6 +8,10 @@
   species together follows the routes of its group, and the output has the group of each
   species (`kernel_group`). A run in which every group uses the same matrix gives the same
   results as a vector `kernel_step`, to the last bit.
+- Fixed: `simulate_evolving_metacommunity()` with point speciation and
+  `immigrant_selection = TRUE` stopped with an error ("logical subscript too long") when all
+  the individuals of a species became point mutants in the same generation. Runs that
+  finished before are unchanged.
 - New article "Persistence in river networks under a flood pulse": a generic study of how
   network topology, the direction of dispersal and seasonal floods change regional richness
   and persistence, and scenarios inspired by the Pantanal (normal pulse, a 12-year drought and
