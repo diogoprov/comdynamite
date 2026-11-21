@@ -140,8 +140,14 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    espécies segue o seu kernel em cada passo), `dispersal_site` (multiplicadores da emigração
    por sítio e passo) e `disturbance_sensitivity` (probabilidade de a população sumir quando o
    sítio é perturbado, uma por espécie). Os padrões reproduzem os resultados anteriores bit a
-   bit. Falta: `kernel_group` no motor evolutivo (o fluxo gênico de coesão e a fissão usam um
-   único kernel) e com seleção de imigrantes ou vários traços. Cenários do Pantanal refeitos com as
+   bit. Feito em 2026-11-21: `kernel_group` com seleção de imigrantes e com vários traços
+   (os imigrantes e os genes de cada espécie seguem o kernel do seu grupo) e no motor
+   evolutivo (`simulate_evolving_metacommunity(kernel_group = )`: um grupo por espécie
+   inicial, as filhas ficam no grupo da mãe, o fluxo gênico de coesão segue o kernel do grupo
+   e a saída devolve o grupo de cada espécie). Com todos os grupos na mesma matriz, o
+   resultado é idêntico bit a bit ao de um `kernel_step` vetorial. Falta: a fissão por
+   distância continua usando o kernel de `landscape` para todos os grupos (como já fazia com
+   `kernels`); decidir se deve seguir o kernel do grupo. Cenários do Pantanal refeitos com as
    guildas em 2026-11-21 (item 7, iv).
 
 Ordem sugerida para o que falta: 2, 1, 3, 4, 6, 7. Os itens 2, 3 e 4 foram feitos em 2026-11-19; o estudo (i) do item 1 foi feito em 2026-11-20 (200 réplicas, seis nulos: livre, toro, MSR, shift-rotate ad hoc, substituto paramétrico por postos e variograma de Viladomat et al. 2014; a Constant Moran permutation saiu porque Arthur 2024/2025 trata de nulos de redes). Nenhum nulo ficou entre 0,04 e 0,06 em todos os casos: todos ficam liberais quando o alcance se aproxima do tamanho da paisagem. O variograma foi o melhor (média 0,062, máximo 0,09), seguido do paramétrico (0,066, máximo 0,10); MSR falha na região em L (até 0,23) e o toro na grade com alcance 5 ou mais (0,10 a 0,14). Resultados em `vignettes/articles/whole-tree.Rmd`. (ii) feito em 2026-11-20 por decisão do usuário, apesar do critério de 0,04 a 0,06 não ter sido atingido: `env_surrogates()` e `null = "variogram"`/`"parametric"` em `pcps_test()`, `node_test()` e `phylo_beta_test()`, com o aviso sobre alcances grandes; o estudo foi rodado de novo com o código do pacote. (iii) feito em 2026-11-20: `env_surrogates()` aceita uma paisagem (devolve paisagens com `env` ou `env_axes` trocados, com as distâncias da paisagem, inclusive toro) e matrizes `env_time` (o paramétrico move a série inteira de cada sítio). Item 1 concluído. Nulos com borda aplicados a dados reais em 2026-11-20 (`data-raw/real_data_nulls.R`, dafnídeos e anuros, com `env_surrogates(lonlat, strata)`), fechando a pendência da v0.5.2. O 2 é o mais curto e fecha uma validação antiga; o 1 é um

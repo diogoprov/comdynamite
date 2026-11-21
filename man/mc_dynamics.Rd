@@ -136,9 +136,9 @@ given as a column name or index of \code{kernel_step}, which is then a matrix wi
 step and one column per group, holding the index or name of the matrix of \code{kernels} used
 by that group at that step. For example, long-distance migrants and sedentary fish of the
 same river, each with a matrix for high and one for low water. A run in which every group
-uses the same matrix gives the same results as a vector \code{kernel_step}. Not available with
-immigrant selection or several traits under \code{evolution}, nor in
-\code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}}. \code{NULL} (the default) for one route for all species.}
+uses the same matrix gives the same results as a vector \code{kernel_step}. With \code{evolution}
+(one or several traits, with or without immigrant selection), gene flow follows the
+routes of each species. \code{NULL} (the default) for one route for all species.}
 
 \item{dispersal_site}{Optional change of emigration among sites: a matrix with one row per
 site and one column per step of multipliers of the emigration probability (probabilities

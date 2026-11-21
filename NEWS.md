@@ -1,5 +1,13 @@
 # comdynamite 0.10.0
 
+- `kernel_group` (routes of dispersal by group of species) now works with immigrant
+  selection and with several evolving traits in `simulate_metacommunity()`, where the
+  immigrants of each species and the genes they carry follow the routes of its group, and in
+  `simulate_evolving_metacommunity()`, which takes one group per species at the start: new
+  species stay in the group of their mother, the gene flow that keeps the populations of a
+  species together follows the routes of its group, and the output has the group of each
+  species (`kernel_group`). A run in which every group uses the same matrix gives the same
+  results as a vector `kernel_step`, to the last bit.
 - New article "Persistence in river networks under a flood pulse": a generic study of how
   network topology, the direction of dispersal and seasonal floods change regional richness
   and persistence, and scenarios inspired by the Pantanal (normal pulse, a 12-year drought and
