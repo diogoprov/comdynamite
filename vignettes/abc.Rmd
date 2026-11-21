@@ -40,6 +40,7 @@ the rest runs here.
 library(comdynamite)
 library(ggplot2)
 res <- readRDS("abc.rds")
+prob <- function(p) if (round(p, 2) >= 1) "> 0.99" else round(p, 2)
 ```
 
 ## The data and the simulator
@@ -177,7 +178,7 @@ print(res$chosen, digits = 2)
 The out-of-bag error shows that the two models are easy to tell apart when one of them is true.
 For the observed data, `r res$chosen$votes_phylogenetic` of the 500 trees vote for the model
 with phylogenetic competition, and the posterior probability of that model is
-`r round(res$chosen$probability, 2)`.
+`r prob(res$chosen$probability)`.
 
 ## The posterior
 
@@ -216,6 +217,11 @@ statistics lie within the range of the reference table and how many rows carry t
 print(res$diagnose, digits = 2)
 ```
 
+The weight is spread over enough rows for every parameter, but one observed statistic, the
+standardised MPD of Campo Grande, lies outside the central 99% of the reference table: few
+simulations under the priors produced ponds with species as closely related as the observed ones. The
+posterior predictive check below shows the same misfit from another angle.
+
 A posterior predictive check compares the observed statistics with those of the simulations
 drawn from the posterior. It is most telling for statistics left out of the fit, so we fitted a
 second set of forests without the phylogenetic statistics and checked those:
@@ -225,15 +231,19 @@ print(res$ppc_phylo, digits = 2)
 ```
 
 ```{r ppc-values, include = FALSE}
-pp <- function(x, stat) round(x$p[x$statistic == stat], 3)
+pp <- function(x, stat) {
+  p <- x$p[x$statistic == stat]
+  n <- x$n[x$statistic == stat]
+  if (p == 0) paste0("p < ", signif(1 / n, 1)) else paste0("p = ", round(p, 3))
+}
 im <- function(p) p[p$parameter == "inter_max", ]
 ```
 
-The model chosen with a posterior probability of `r round(res$chosen$probability, 2)` fails
+The model chosen with a posterior probability of `r prob(res$chosen$probability)` fails
 here. With competition among close relatives, the simulated ponds hold species more distantly
 related than expected from the regional pool (standardised MPD above zero), whereas in the
 observed ponds the species are as related as, or more related than, random draws from the pool.
-The observed MPD is in the lower tail in both cities (p = `r pp(res$ppc_phylo, "cg_ses_mpd")` in
+The observed MPD is in the lower tail in both cities (`r pp(res$ppc_phylo, "cg_ses_mpd")` in
 Campo Grande and `r pp(res$ppc_phylo, "sjc_ses_mpd")` in São José dos Campos). With all the
 statistics in the fit, the forests pull the posterior towards the observed MPD and the misfit
 is milder:
@@ -293,7 +303,8 @@ print(res$cv_summary, digits = 2)
 With only four folds, these fractions are coarse, but most statistics of the ponds left out are
 predicted. The exceptions repeat the posterior predictive check: the standardised MPD of the
 ponds left out falls below the prediction in most folds, so the misfit is not confined to a part
-of either city. Distance decay misses in two folds, once above and once below the prediction;
+of either city. The link between composition and the environment is also below the
+prediction in two folds. Distance decay misses in two folds, once above and once below the prediction;
 it rests on few pairs of ponds within half a city, so these misses may be noise, but they may
 also mean that a single exponential kernel for both cities is too simple a description of
 space.
