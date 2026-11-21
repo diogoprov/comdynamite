@@ -18,8 +18,8 @@
 #' @param branch_lengths Use the branch lengths of `tree`?
 #' @return Matrix with one row per tip and one column per node, named by the node
 #'   numbers of `tree`.
-#' @note Adapted from the MATLAB function `CreateNodeContrasts` in the supplement of
-#'   Leibold et al. (2010).
+#' @note Translated from the MATLAB function `CreateNodeContrasts` in the supplement of
+#'   Leibold et al. (2010), with credit to its authors.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical
@@ -197,8 +197,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   four matrices for the events, or `NULL`; and `permutations`, the numbers of
 #'   permutations, per event for `area_permutations`, and whether those of sites were free or
 #'   restricted.
-#' @note Adapted from the MATLAB function `MetacommunityPhylogenetics` in the supplement of
-#'   Leibold et al. (2010), with the differences listed in Details.
+#' @note Translated from the MATLAB function `MetacommunityPhylogenetics` in the supplement of
+#'   Leibold et al. (2010), with credit to its authors and with the differences listed in
+#'   Details.
 #' @references
 #' Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity
 #' phylogenetics: separating the roles of environmental filters and historical

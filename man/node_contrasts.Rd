@@ -33,8 +33,8 @@ to 1. The supplement proposes this coding for trees in which all species are equ
 distant from the root.
 }
 \note{
-Adapted from the MATLAB function \code{CreateNodeContrasts} in the supplement of
-Leibold et al. (2010).
+Translated from the MATLAB function \code{CreateNodeContrasts} in the supplement of
+Leibold et al. (2010), with credit to its authors.
 }
 \examples{
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))

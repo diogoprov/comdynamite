@@ -149,8 +149,9 @@ Sites are matched by name when \code{comm}, \code{env} and \code{biogeography} a
 otherwise by position.
 }
 \note{
-Adapted from the MATLAB function \code{MetacommunityPhylogenetics} in the supplement of
-Leibold et al. (2010), with the differences listed in Details.
+Translated from the MATLAB function \code{MetacommunityPhylogenetics} in the supplement of
+Leibold et al. (2010), with credit to its authors and with the differences listed in
+Details.
 }
 \examples{
 # daphniids of Leibold et al. (2010)
