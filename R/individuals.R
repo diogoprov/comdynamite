@@ -122,16 +122,19 @@
 #' @param x An `mc_sim` object from [simulate_metacommunity()] (or an `mc_evolving` one from
 #'   [simulate_evolving_metacommunity()]).
 #' @param n Number of individuals measured in each population, or all of them when the
-#'   population is smaller. Ignored when `fraction` is given.
+#'   population is smaller. One whole number, 1 or more, or `Inf` for all individuals.
+#'   Ignored when `fraction` is given.
 #' @param fraction Optional probability that each individual is measured, so that the number
 #'   measured in a population is Binomial(abundance, `fraction`), proportional to abundance on
-#'   average.
-#' @param cover Optional share (0 to 1) of the abundance of each site covered by the species
-#'   measured: species are taken from the most abundant down until they reach `cover`, and the
-#'   rest are not measured, as in field protocols that measure the species making up 80% of the
+#'   average. One number greater than 0 and up to 1, or `NULL`.
+#' @param cover Optional share of the abundance of each site covered by the species measured
+#'   (one number greater than 0 and up to 1, or `NULL`): species are taken from the most
+#'   abundant down until they reach `cover`, and the rest are not measured, as in field
+#'   protocols that measure the species making up 80% of the
 #'   abundance (Pakeman & Quested 2007). `NULL` (the default) measures every species.
 #' @param min_n Populations with fewer individuals measured than `min_n` are left out, as when
-#'   populations with a single individual are removed before computing T-statistics.
+#'   populations with a single individual are removed before computing T-statistics. One whole
+#'   number, 1 or more.
 #' @param local_adaptation Fraction (0 to 1) of the gap between the optimum of the species and
 #'   the environment of the site that each population closes; one value or one per species
 #'   (named by species, or in their order). The same holds for the two standard deviations.
@@ -141,17 +144,17 @@
 #'   population; one value or one per species.
 #' @param displacement Strength of character displacement among the populations of a site
 #'   (`c` in Details), relative to the selection that keeps each population near its mean
-#'   without competitors; 0 (the default) for none.
+#'   without competitors; 0 (the default) for none. One finite number, 0 or more.
 #' @param displacement_width Width `w` of the Gaussian competition kernel of character
-#'   displacement, in units of the trait. The default is the mean niche breadth (`sigma`) of
-#'   the species.
-#' @param step Recorded step to sample, as in `record_steps`; `NULL` (the default) uses the
-#'   abundances at the last step. Several steps simulate collections on several dates: each
-#'   date is sampled on its own (new individuals, drawn from the populations then), and the
-#'   result gets a column `step`. The deviations of each population from `population_sd` (and
-#'   `founder_sd`) are kept across dates, so populations change between dates only through
-#'   the simulation. For evolving metacommunities, the records keep only the lineages extant at
-#'   the end, so an earlier date misses species that died out later.
+#'   displacement, in units of the trait: one number greater than 0 (`Inf` allowed). The
+#'   default, `NULL`, is the mean niche breadth (`sigma`) of the species.
+#' @param step Recorded step to sample (one or more numbers), as in `record_steps`; `NULL` (the
+#'   default) uses the abundances at the last step. Several steps simulate collections on several
+#'   dates: each date is sampled on its own (new individuals, drawn from the populations then), and
+#'   the result gets a column `step`. The deviations of each population from `population_sd` (and
+#'   `founder_sd`) are kept across dates, so populations change between dates only through the
+#'   simulation. For evolving metacommunities, the records keep only the lineages extant at the end,
+#'   so an earlier date misses species that died out later.
 #' @param env Optional environment of each site at the sampled step, or, with several steps, a
 #'   matrix with one column per step (a vector is used for every date). The default is the
 #'   environment of the landscape for every date; give it for simulations with `env_time`. With `source = "evolution"` the environment comes from the
@@ -174,10 +177,11 @@
 #'   `session`. With a single step and `session = "step"`, there is one session, so the error
 #'   is a constant added to every individual, which vanishes from any statistic centred on
 #'   means (deviations from population means, variance components) and has no effect on them.
+#'   One finite number, 0 or more.
 #' @param visits Number of visits to each site at each sampled step. Each visit samples its own
 #'   individuals (`n` or `fraction` per population and visit) from the same populations, whose
 #'   means do not change between visits of the same step, and the result gets a column
-#'   `visit`. 1 (the default) for one.
+#'   `visit`. 1 (the default) for one. One whole number, 1 or more.
 #' @param session What shares the error of `session_sd`: `"step"` (the default), all the
 #'   individuals of a date, at every site; or `"visit"`, the individuals of one visit to one
 #'   site at one step (every species measured then), as when each visit to a pond is a field
@@ -259,15 +263,23 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
   }
   source <- match.arg(source)
-  stopifnot(is.numeric(session_sd), length(session_sd) == 1, session_sd >= 0)
+  check_number(session_sd, "session_sd", lower = 0)
   session <- match.arg(session)
-  stopifnot(length(visits) == 1, visits >= 1, visits == round(visits))
+  check_count(visits, "visits")
+  check_sample_size(n)
+  check_number(fraction, "fraction", 0, 1, open = c(TRUE, FALSE), null_ok = TRUE)
+  check_number(cover, "cover", 0, 1, open = c(TRUE, FALSE), null_ok = TRUE)
+  check_count(min_n, "min_n")
+  check_number(displacement, "displacement", lower = 0)
+  check_number(displacement_width, "displacement_width", lower = 0, open = TRUE,
+               finite = FALSE, null_ok = TRUE)
+  if (!is.null(step) && (!is.numeric(step) || length(step) == 0 || anyNA(step))) {
+    stop("`step` must be recorded steps (numbers) or NULL", call. = FALSE)
+  }
   if (anyDuplicated(step)) {
     stop("`step` has repeated steps: for several visits to each site at the same step, use ",
          "`visits`", call. = FALSE)
   }
-  stopifnot(length(n) == 1, n >= 1, n == round(n), length(min_n) == 1, min_n >= 1,
-            min_n == round(min_n))
   if (is.matrix(env) && ncol(env) == 1 && length(step) <= 1) env <- env[, 1]
   if (is.matrix(env) && ncol(env) != max(1, length(step))) {
     stop("`env` as a matrix needs one column per step (", max(1, length(step)), ")",
@@ -347,10 +359,7 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     if (is.null(x$evolution$genetic)) {
       stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
     }
-    if (!is.null(env)) {
-      stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
-           "leave `env` as NULL", call. = FALSE)
-    }
+    check_no_env(env)
     env <- evolved_environment(x, step)
     if (any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
         any(founder_sd != 0) || any(monopolization != 0)) {
@@ -390,11 +399,10 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (historical) {
     history <- arrival_terms(x, step, sites, species, mono, flow)
   }
+  # `n`, `fraction`, `cover` and `min_n` were checked by sample_individuals()
   if (is.null(fraction)) {
-    stopifnot(length(n) == 1, n >= 1, n == round(n))
     measured <- pmin(abundance, n)
   } else {
-    stopifnot(length(fraction) == 1, fraction > 0, fraction <= 1)
     measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
                        nrow(abundance), dimnames = dimnames(abundance))
   }
@@ -402,7 +410,6 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), k), cover)
     measured[!dominant] <- 0
   }
-  stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
   measured[measured < min_n] <- 0
   theta <- niche$traits[species, "optimum"]
   if (source == "evolution") {
@@ -428,10 +435,12 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     founder[is.na(founder)] <- 0
     pop_mean <- pop_mean + founder
   }
-  stopifnot(is.numeric(displacement), length(displacement) == 1, displacement >= 0)
   if (displacement > 0) {
     width <- displacement_width %||% mean(niche$traits$sigma)
-    stopifnot(is.numeric(width), length(width) == 1, width > 0)
+    if (is.na(width) || width <= 0) {
+      stop("the mean niche breadth is not a positive number: give `displacement_width`",
+           call. = FALSE)
+    }
     for (i in seq_along(sites)) {
       present <- which(abundance[i, ] > 0)
       if (length(present) < 2) next
@@ -548,13 +557,15 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'
 #' @param individuals Data frame with one row per individual, such as from
 #'   [sample_individuals()].
-#' @param traits Names of the columns with trait values.
+#' @param traits Names of the columns with trait values (a character vector).
 #' @param site,species Names of the columns with the site and the species of each individual.
+#'   One character string each.
 #' @param method `"base"` (the default), computed in base R, or `"cati"` for [cati::Tstats()];
 #'   it needs the package cati.
 #' @param nperm Deprecated; use `n_perm`.
-#' @param n_perm Number of randomisations of the null models; 0 or `NULL` for the observed
-#'   values only, much faster in simulation studies with many replicates.
+#' @param n_perm Number of randomisations of the null models (one whole number, 0 or more); 0
+#'   or `NULL` for the observed values only, much faster in simulation studies with many
+#'   replicates.
 #' @param alternative Direction of the test of `method = "base"`: `"less"` (the default),
 #'   `"greater"` or `"two.sided"`.
 #' @param null_ip Null model of `T_IP.IC` for `method = "base"`: `"site"` (the default), trait
@@ -606,18 +617,17 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   method <- match.arg(method)
   alternative <- match.arg(alternative)
   null_ip <- match.arg(null_ip)
-  stopifnot(is.data.frame(individuals), is.character(traits), length(traits) >= 1)
-  missing_columns <- setdiff(c(traits, site, species), names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
+  check_column_names(traits, "traits")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_data_columns(individuals, c(traits, site, species))
+  check_count(n_perm, "n_perm", min = 0, null_ok = TRUE)
   values <- as.matrix(individuals[traits])
-  if (!is.numeric(values)) stop("the columns in `traits` must be numeric", call. = FALSE)
+  check_numeric_traits(values)
   site_id <- as.character(individuals[[site]])
   species_id <- as.character(individuals[[species]])
   if (method == "cati") return(tstats_cati(values, site_id, species_id, n_perm, ...))
   n_perm <- if (is.null(n_perm)) 0 else n_perm
-  check_count(n_perm, "n_perm", min = 0)
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
   site_levels <- unique(site_id)
   per_trait <- lapply(traits, function(trait) {
@@ -886,8 +896,7 @@ evolved_at <- function(ev, step) {
   label <- step_label(step)
   if (is.null(ev$history) || !label %in% dimnames(ev$history)[[3]] ||
       is.null(ev$environment_history)) {
-    stop("the evolutionary state was not recorded at step ", step,
-         ": use `record_steps` (with this version of the package)", call. = FALSE)
+    stop_not_recorded(step)
   }
   z <- ev$history[, , label]
   z <- matrix(z, dim(ev$history)[1], dimnames = dimnames(ev$history)[1:2])
@@ -914,8 +923,7 @@ evolved_environment <- function(x, step) {
   if (is.null(step)) return(ev$environment)
   label <- step_label(step)
   if (is.null(ev$environment_history) || !label %in% colnames(ev$environment_history)) {
-    stop("the evolutionary state was not recorded at step ", step,
-         ": use `record_steps` (with this version of the package)", call. = FALSE)
+    stop_not_recorded(step)
   }
   unname(ev$environment_history[, label])
 }
@@ -939,7 +947,7 @@ mv_populations <- function(x, step = NULL) {
   } else {
     label <- step_label(step)
     if (is.null(ev$history) || !label %in% dimnames(ev$history)[[4]]) {
-      stop("the evolutionary state was not recorded at step ", step, call. = FALSE) # nocov
+      stop_not_recorded(step, advice = FALSE) # nocov
     }
     z <- ev$history[, , , label, drop = FALSE]
     z <- array(z, dim(z)[1:3], dimnames(ev$genetic))
@@ -966,10 +974,7 @@ mv_populations <- function(x, step = NULL) {
 # phenotype of each individual is drawn from N(population mean, G + E), with the population
 # mean the genetic mean plus the plastic response at the sampled step; one column per trait
 individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecific_sd, fixed) {
-  if (!is.null(env)) {
-    stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
-         "leave `env` as NULL", call. = FALSE)
-  }
+  check_no_env(env)
   if (any(fixed != 0)) {
     stop("with `source = \"evolution\"`, population means come from the simulation: ",
          "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
@@ -994,7 +999,6 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
   if (is.null(fraction)) {
     measured <- pmin(abundance, n)
   } else {
-    stopifnot(length(fraction) == 1, fraction > 0, fraction <= 1)
     measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
                        nrow(abundance), dimnames = dimnames(abundance))
   }
@@ -1045,7 +1049,7 @@ step_label <- function(step) paste0("step", format(step, scientific = FALSE, tri
 
 sampled_abundance <- function(x, step) {
   if (is.null(step)) return(x$abundance)
-  stopifnot(length(step) == 1)
+  stopifnot("internal: one step at a time" = length(step) == 1)
   if (is.null(x$history)) stop("`x` has no recorded steps: use `record_steps`", call. = FALSE)
   label <- step_label(step)
   if (!label %in% dimnames(x$history)[[3]]) {
@@ -1056,6 +1060,7 @@ sampled_abundance <- function(x, step) {
 
 per_species <- function(value, species, name) {
   if (!is.numeric(value) || anyNA(value)) stop("`", name, "` must be numbers", call. = FALSE)
+  if (any(is.infinite(value))) stop("`", name, "` must be finite", call. = FALSE)
   if (length(value) == 1 && is.null(names(value))) return(rep(value, length(species)))
   if (!is.null(names(value))) {
     if (!all(species %in% names(value))) {
@@ -1069,4 +1074,58 @@ per_species <- function(value, species, name) {
          call. = FALSE)
   }
   value
+}
+
+# stops unless `x` is a data frame with the columns `columns`; `name` is the argument
+check_data_columns <- function(x, columns, name = "individuals") {
+  if (!is.data.frame(x)) stop("`", name, "` must be a data frame", call. = FALSE)
+  missing_columns <- setdiff(columns, names(x))
+  if (length(missing_columns) > 0) {
+    stop("`", name, "` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
+  }
+  invisible(x)
+}
+
+# stops unless `x` holds one or more names of columns
+check_column_names <- function(x, name) {
+  if (!is.character(x) || length(x) == 0 || anyNA(x)) {
+    stop("`", name, "` must be one or more column names", call. = FALSE)
+  }
+  invisible(x)
+}
+
+# stops unless `n` is one whole number, 1 or more, or Inf (all the individuals)
+check_sample_size <- function(n, name = "n", null_ok = FALSE) {
+  if (null_ok && is.null(n)) return(invisible(n))
+  if (is.numeric(n) && length(n) == 1 && isTRUE(n == Inf)) return(invisible(n))
+  check_count(n, name)
+}
+
+# stops because the evolutionary state of a simulation was not kept at `step`
+stop_not_recorded <- function(step, advice = TRUE) {
+  stop("the evolutionary state was not recorded at step ", step,
+       if (advice) ": use `record_steps` (with this version of the package)", call. = FALSE)
+}
+
+# with `source = "evolution"` the environment comes from the simulation
+check_no_env <- function(env) {
+  if (!is.null(env)) {
+    stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
+         "leave `env` as NULL", call. = FALSE)
+  }
+}
+
+# stops unless the trait values (a vector or a matrix) are numeric; `trait` names a single one
+check_numeric_traits <- function(values, trait = NULL) {
+  if (is.numeric(values)) return(invisible(values))
+  if (is.null(trait)) stop("the columns in `traits` must be numeric", call. = FALSE)
+  stop("trait `", trait, "` must be numeric", call. = FALSE)
+}
+
+# stops unless the abundance `a` of each individual is the same within its population `pop`
+check_population_abundance <- function(a, pop) {
+  if (anyNA(a) || any(tapply(a, pop, function(v) length(unique(v))) > 1)) {
+    stop("`abundance` must have one value, not missing, for each population", call. = FALSE)
+  }
+  invisible(a)
 }

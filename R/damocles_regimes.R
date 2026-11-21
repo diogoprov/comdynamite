@@ -15,8 +15,9 @@
 #' @param tree A rooted `phylo` tree.
 #' @param clades A named list with, for each clade, a character vector of its tips or one node
 #'   number (of `tree`, as in `tree$edge`) at its base.
-#' @param background Name of the regime of the edges outside every clade.
-#' @param stem If `TRUE`, the stem edge of each clade belongs to it.
+#' @param background Name of the regime of the edges outside every clade. One character
+#'   string.
+#' @param stem `TRUE` or `FALSE`. If `TRUE`, the stem edge of each clade belongs to it.
 #' @return A factor with one regime per edge of `tree`, in the order of `tree$edge`, with the
 #'   regimes that occur as levels: `background` first, then the clades.
 #' @seealso [damocles_fit()], [damocles_lrt()].
@@ -29,13 +30,15 @@
 #' table(reg)
 #' @export
 clade_regimes <- function(tree, clades, background = "background", stem = FALSE) {
-  if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
+  check_tree(tree, branch_lengths = FALSE)
+  check_string(background, "background")
+  check_flag(stem, "stem")
   if (!is.list(clades) || length(clades) == 0 || is.null(names(clades)) ||
       any(names(clades) == "") || anyDuplicated(names(clades))) {
     stop("`clades` must be a list of tip labels with different names", call. = FALSE)
   }
-  if (length(background) != 1 || background %in% names(clades)) {
-    stop("`background` must be one name, different from the names of `clades`", call. = FALSE)
+  if (background %in% names(clades)) {
+    stop("`background` must differ from the names of `clades`", call. = FALSE)
   }
   n_tip <- ape::Ntip(tree)
   out <- rep(background, nrow(tree$edge))
@@ -133,7 +136,7 @@ damocles_lrt <- function(null, alternative) {
 #' @param object A fit of class `mc_damocles_fit`.
 #' @param parm Names of the parameters, among the columns of the fit; by default all free
 #'   parameters.
-#' @param level Confidence level.
+#' @param level Confidence level. One number greater than 0 and less than 1.
 #' @param ... Not used.
 #' @return A data frame with the community (`"shared"` for shared parameters), the parameter,
 #'   its estimate and the lower and upper bounds.
@@ -147,15 +150,13 @@ damocles_lrt <- function(null, alternative) {
 #' confint(fit)
 #' @exportS3Method stats::confint
 confint.mc_damocles_fit <- function(object, parm = NULL, level = 0.95, ...) {
+  check_number(level, "level", 0, 1, open = TRUE)
   info <- attr(object, "damocles")
   design <- info$design
   parm <- parm %||% design$names
   unknown <- setdiff(parm, design$names)
   if (length(unknown) > 0) {
     stop("not free parameters of the fit: ", paste(unknown, collapse = ", "), call. = FALSE)
-  }
-  if (length(level) != 1 || !is.finite(level) || level <= 0 || level >= 1) {
-    stop("`level` must be one number between 0 and 1", call. = FALSE)
   }
   post <- damocles_postorder(info$tree)
   groups <- if (info$shared) list(seq_len(nrow(info$presence))) else

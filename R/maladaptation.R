@@ -41,8 +41,8 @@
 #'
 #' @param x A simulation from [simulate_metacommunity()] or
 #'   [simulate_evolving_metacommunity()] run with `evolution`.
-#' @param step `NULL` (the default) for the last step, or one or more steps kept with
-#'   `record_steps`.
+#' @param step `NULL` (the default) for the last step, or one or more steps (numbers, none
+#'   missing or infinite) kept with `record_steps`.
 #' @return A data frame with one row per population present: `step` (with several steps),
 #'   `site`, `species`, `abundance`, then `env`, `phenotype` and `deviation` (\eqn{E - \bar
 #'   p}{E - pbar}), or with several traits `env_<trait>`, `phenotype_<trait>` and
@@ -68,7 +68,7 @@ maladaptation <- function(x, step = NULL) {
   if (!inherits(x, "mc_sim") || is.null(x$evolution$genetic)) {
     stop("`x` must be a simulation run with `evolution`", call. = FALSE)
   }
-  if (!is.null(step) && (!is.numeric(step) || !length(step) || anyNA(step))) {
+  if (!is.null(step) && (!is.numeric(step) || !length(step) || any(!is.finite(step)))) {
     stop("`step` must be NULL or recorded steps", call. = FALSE)
   }
   if (length(step) > 1) {

@@ -42,6 +42,16 @@ correlated traits from \code{\link[=rate_matrix]{rate_matrix()}}.
 }
 }
 
+\section{Arguments}{
+
+Arguments that choose among options, such as \code{method}, \code{null} or \code{model}, are matched by
+\code{\link[=match.arg]{match.arg()}} and are case-sensitive: \code{null = "variogram"} works and \code{null = "Variogram"}
+stops with the list of valid options. Each scalar argument is checked for its length, type
+and range before any computation, and missing or infinite values in \code{comm}, \code{env} and the
+other data inputs stop the function with a message that names the argument; remove or
+impute missing values before the analysis.
+}
+
 \section{Where to start}{
 
 The articles at \url{https://provetelab.org/comdynamite/articles/} go through each question.

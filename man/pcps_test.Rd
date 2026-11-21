@@ -24,9 +24,10 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 
 \item{env}{Predictor, or matrix or data frame of predictors, with one row per site.}
 
-\item{axes}{Principal coordinates to test, in order of eigenvalue.}
+\item{axes}{Principal coordinates to test, in order of eigenvalue: a vector of distinct
+whole numbers, 1 or more.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row, for
 example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Empty
@@ -40,8 +41,9 @@ or surrogates of the predictors with the same spatial autocorrelation, \code{"va
 within strata (see \code{\link[=env_surrogates]{env_surrogates()}}, which gives their
 rates of type I error). Surrogates need \code{coords}; empty sites are then not allowed.}
 
-\item{coords}{Matrix of coordinates with one row per site, for \code{null = "variogram"} or
-\code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when it has them.}
+\item{coords}{Matrix of coordinates with one row per site, without missing or infinite
+values, for \code{null = "variogram"} or \code{"parametric"}. Taken from an \code{\link[=mc_data]{mc_data()}} object when
+it has them.}
 }
 \value{
 List of class \code{mc_pcps} with \code{tests}, a data frame with one row for all the

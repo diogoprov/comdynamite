@@ -11,7 +11,7 @@
 
 \item{resp}{\code{"sitemean"} or \code{"trait"}.}
 
-\item{ndraws}{Number of posterior draws to plot.}
+\item{ndraws}{Number of posterior draws to plot. One whole number, 1 or more.}
 
 \item{...}{Further arguments to \code{\link[bayesplot:ppc_dens_overlay]{bayesplot::ppc_dens_overlay()}}.}
 }

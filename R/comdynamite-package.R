@@ -26,6 +26,14 @@
 #'     correlated traits from [rate_matrix()].
 #' }
 #'
+#' @section Arguments:
+#' Arguments that choose among options, such as `method`, `null` or `model`, are matched by
+#' [match.arg()] and are case-sensitive: `null = "variogram"` works and `null = "Variogram"`
+#' stops with the list of valid options. Each scalar argument is checked for its length, type
+#' and range before any computation, and missing or infinite values in `comm`, `env` and the
+#' other data inputs stop the function with a message that names the argument; remove or
+#' impute missing values before the analysis.
+#'
 #' @section Where to start:
 #' The articles at <https://provetelab.org/comdynamite/articles/> go through each question.
 #' "Preparing your data" shows the format that the analyses expect.

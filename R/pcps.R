@@ -36,8 +36,9 @@
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per site.
-#' @param axes Principal coordinates to test, in order of eigenvalue.
-#' @param n_perm Number of permutations of sites and of species.
+#' @param axes Principal coordinates to test, in order of eigenvalue: a vector of distinct
+#'   whole numbers, 1 or more.
+#' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation per row, for
 #'   example from [torus_permutations()], to use instead of free permutations of sites. Empty
 #'   sites are then allowed: they leave the analysis but their predictors can reach occupied
@@ -48,8 +49,9 @@
 #'   [env_surrogates()], with one row per site (or per occupied site), for example drawn
 #'   within strata (see [env_surrogates()], which gives their
 #'   rates of type I error). Surrogates need `coords`; empty sites are then not allowed.
-#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
-#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
+#' @param coords Matrix of coordinates with one row per site, without missing or infinite
+#'   values, for `null = "variogram"` or `"parametric"`. Taken from an [mc_data()] object when
+#'   it has them.
 #' @return List of class `mc_pcps` with `tests`, a data frame with one row for all the
 #'   dissimilarity (`whole`) and one for each axis, and the columns `share`, the share of the
 #'   positive eigenvalues; `r2`; `statistic`, the F statistic; `p_site`, `p_species` and
@@ -94,6 +96,12 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
     if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
+  check_count(n_perm, "n_perm")
+  if (!is.numeric(axes) || length(axes) < 1 || any(!is.finite(axes)) || any(axes < 1) ||
+        any(axes != round(axes)) || anyDuplicated(axes) > 0) {
+    stop("`axes` must be distinct whole numbers, 1 or more", call. = FALSE)
+  }
+  if (!is.null(coords)) check_coords(coords)
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
                              minimum = 3)
   comm <- matched$comm
@@ -103,8 +111,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
   env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
-  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1, is.numeric(axes), length(axes) >= 1,
-            axes >= 1, axes == round(axes), !anyDuplicated(axes))
+  check_enough_sites(comm, env)
 
   weights <- comm / rowSums(comm)
   belonging <- fuzzy_belonging(tree)
@@ -208,18 +215,19 @@ pcps_fit <- function(gower, scores, env) {
 #' Debastiani & Duarte (2014), which shows which lineages go with which sites.
 #'
 #' @param x Result of [pcps_test()].
-#' @param axes The two principal coordinates to draw.
+#' @param axes The two principal coordinates to draw: two different whole numbers.
 #' @param env Predictor that colours the sites: a column number or name of the predictors given
 #'   to [pcps_test()], or `NULL` for no colour.
-#' @param species Draw the species as arrows.
-#' @param species_labels Write the names of the species at the arrows or stars.
-#' @param clades Optional grouping of the species into clades: a single number k, which cuts
+#' @param species `TRUE` or `FALSE`. Draw the species as arrows.
+#' @param species_labels `TRUE` or `FALSE`. Write the names of the species at the arrows or stars.
+#' @param clades Optional grouping of the species into clades: one whole number k, which cuts
 #'   the tree into its k deepest clades by splitting, one at a time, the clade whose crown is
 #'   nearest the root; or a vector of clade names named by species, such as families, in which
 #'   species left out are drawn in grey without a clade. Each clade with at least three species
 #'   gets its convex hull.
-#' @param palette Name of a palette of [grDevices::hcl.colors()] for the predictor.
-#' @param point_size Size of the site points.
+#' @param palette One character string, the name of a palette of [grDevices::hcl.colors()] for
+#'   the predictor.
+#' @param point_size Size of the site points. One number greater than 0.
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @seealso [pcps_test()].
@@ -249,8 +257,10 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
       any(axes != round(axes)) || axes[1] == axes[2]) {
     stop("`axes` must be two different axes between 1 and ", n_axes, call. = FALSE)
   }
-  stopifnot(is.logical(species), length(species) == 1, !is.na(species),
-            is.logical(species_labels), length(species_labels) == 1, !is.na(species_labels))
+  check_flag(species, "species")
+  check_flag(species_labels, "species_labels")
+  check_string(palette, "palette")
+  check_number(point_size, "point_size", lower = 0, open = TRUE)
   axis_label <- function(a) sprintf("PCPS %d (%.1f%%)", a, 100 * x$share[a])
   sites <- data.frame(a1 = x$scores[, axes[1]], a2 = x$scores[, axes[2]])
   colour_name <- NULL

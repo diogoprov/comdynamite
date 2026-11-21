@@ -17,14 +17,15 @@ animate_food_web(
 \arguments{
 \item{x}{Result of \code{\link[=food_web_dynamics]{food_web_dynamics()}}.}
 
-\item{file}{Path of the GIF to write; by default a temporary file, whose path is returned.}
+\item{file}{Path of the GIF to write, one character string; by default a temporary file,
+whose path is returned.}
 
-\item{frames}{Number of frames, taken at evenly spaced rows of \code{x}; it cannot exceed the
-number of rows.}
+\item{frames}{Number of frames, taken at evenly spaced rows of \code{x}: one whole number, 2 or
+more, that cannot exceed the number of rows.}
 
-\item{delay}{Seconds between frames.}
+\item{delay}{Seconds between frames, one number greater than 0.}
 
-\item{width, height}{Size of the GIF in pixels.}
+\item{width, height}{Size of the GIF in pixels, each one whole number, 1 or more.}
 
 \item{...}{Other arguments of \code{\link[=plot.food_web]{plot.food_web()}}, such as \code{panels} or \code{colours}.}
 }

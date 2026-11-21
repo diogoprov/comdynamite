@@ -15,21 +15,24 @@ genetic_matrices(
 )
 }
 \arguments{
-\item{species}{Names of the species, or their number.}
+\item{species}{Names of the species, or their number (one whole number, 1 or more).}
 
-\item{n_traits}{Number of traits (axes). Ignored when \code{P} is given.}
+\item{n_traits}{Number of traits (axes): one whole number, 1 or more. Ignored when \code{P} is
+given.}
 
 \item{family}{One of \code{"proportional"}, \code{"independent"} and \code{"shared"}.}
 
 \item{P}{Phenotypic covariance matrix, symmetric and positive definite. By default, unit
 variances with a common correlation \code{correlation}.}
 
-\item{correlation}{Correlation between all pairs of traits in the default \code{P}.}
+\item{correlation}{Correlation between all pairs of traits in the default \code{P}: one number
+greater than -1 / (\code{n_traits} - 1) and less than 1.}
 
-\item{heritability}{Share \eqn{h^2}{h2} of the phenotypic variance that is additive genetic,
-between 0 and 1.}
+\item{heritability}{Share \eqn{h^2}{h2} of the phenotypic variance that is additive genetic:
+one number between 0 and 1.}
 
-\item{divergence}{Standard deviation (on the log scale) of the differences among species.}
+\item{divergence}{Standard deviation (on the log scale) of the differences among species:
+one number, 0 or more.}
 }
 \value{
 A list with \code{genetic_var} and \code{env_var}, each a named list of one matrix per species,

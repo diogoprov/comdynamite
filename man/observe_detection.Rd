@@ -9,10 +9,10 @@ observe_detection(x, detection, visits = 3, record = c("counts", "presence"))
 \arguments{
 \item{x}{An \code{mc_sim} object or an \code{\link[=mc_data]{mc_data()}} object with true abundances.}
 
-\item{detection}{Probability that an individual is detected in a visit: one number, or one
-per species, named by species.}
+\item{detection}{Probability that an individual is detected in a visit, between 0 and 1:
+one number, or one per species, named by species.}
 
-\item{visits}{Number of visits to each site.}
+\item{visits}{Number of visits to each site, one whole number, 1 or more.}
 
 \item{record}{\code{"counts"} for the largest count over visits or \code{"presence"} for detected at
 least once (1) or not (0).}

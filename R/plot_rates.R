@@ -9,14 +9,15 @@
 #'
 #' @param tree A `phylo` object with branch lengths, or a result of [trait_rates()], which
 #'   carries its tree and rates.
-#' @param rates Rate of each branch, in the order of the rows of `tree$edge`, or a result of
+#' @param rates Rate of each branch (finite, or `NA`), in the order of the rows of `tree$edge`,
+#'   or a result of
 #'   [trait_rates()], whose `edge_rates` are used. Left out when `tree` is a result of
 #'   [trait_rates()].
-#' @param log Colour by the logarithm of the rate (the default), since rates are multiplicative.
-#'   Needs positive rates; use `FALSE` for estimates that can be negative.
-#' @param palette Name of a palette of [grDevices::hcl.colors()].
-#' @param tip_labels Draw the names of the tips.
-#' @param linewidth Width of the branches.
+#' @param log `TRUE` or `FALSE`. Colour by the logarithm of the rate (the default), since rates
+#'   are multiplicative. Needs positive rates; use `FALSE` for estimates that can be negative.
+#' @param palette One character string, the name of a palette of [grDevices::hcl.colors()].
+#' @param tip_labels `TRUE` or `FALSE`. Draw the names of the tips.
+#' @param linewidth Width of the branches. One number greater than 0.
 #' @param title Title of the plot, or `NULL`.
 #' @return A ggplot object.
 #' @seealso [trait_rates()], [history_rates()], [turnover_rates()].
@@ -46,9 +47,11 @@ plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_
     stop("`rates` must have one value per branch (", nrow(tree$edge), "), in the order of ",
          "the rows of `tree$edge`", call. = FALSE)
   }
-  stopifnot(is.logical(log), length(log) == 1, !is.na(log),
-            is.logical(tip_labels), length(tip_labels) == 1, !is.na(tip_labels),
-            is.character(palette), length(palette) == 1)
+  if (any(is.infinite(rates))) stop("`rates` has infinite values", call. = FALSE)
+  check_flag(log, "log")
+  check_flag(tip_labels, "tip_labels")
+  check_string(palette, "palette")
+  check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   rates <- as.numeric(rates)
   if (log && any(rates <= 0, na.rm = TRUE)) {
     stop("`log = TRUE` needs positive rates; use `log = FALSE`", call. = FALSE)

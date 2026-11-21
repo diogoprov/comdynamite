@@ -20,13 +20,13 @@
 \item{traits}{The two traits to draw (names or numbers); with more traits, the ellipse is
 that of the marginal covariance of the two.}
 
-\item{level}{Number of standard deviations of the ellipse.}
+\item{level}{Number of standard deviations of the ellipse. One number greater than 0.}
 
 \item{colours}{Colours of the regimes, in the order of the regimes.}
 
-\item{legend}{Draw the legend of the regimes?}
+\item{legend}{\code{TRUE} or \code{FALSE}. Draw the legend of the regimes?}
 
-\item{linewidth}{Width of the ellipses.}
+\item{linewidth}{Width of the ellipses. One number greater than 0.}
 
 \item{...}{Not used.}
 }

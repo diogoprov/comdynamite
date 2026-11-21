@@ -5,6 +5,7 @@ check_comm <- function(comm) {
   check_numeric_columns(comm, "`comm`", "Move names of sites to row names.")
   comm <- as.matrix(comm) * 1
   if (anyNA(comm)) stop("`comm` has missing values", call. = FALSE)
+  if (any(is.infinite(comm))) stop("`comm` has infinite values", call. = FALSE)
   if (any(comm < 0)) stop("`comm` has negative values", call. = FALSE)
   comm
 }
@@ -23,12 +24,75 @@ check_tree <- function(tree, branch_lengths = TRUE, name = "`tree`") {
   invisible(tree)
 }
 
-# stops unless `x` is one whole number of at least `min`
-check_count <- function(x, name, min = 1) {
-  if (!is.numeric(x) || length(x) != 1 || is.na(x) || x != round(x) || x < min) {
-    stop("`", name, "` must be one whole number, ", min, " or more", call. = FALSE)
+# stops unless `x` is one finite whole number between `min` and `max`; NULL passes when
+# `null_ok` is TRUE
+check_count <- function(x, name, min = 1, max = Inf, null_ok = FALSE) {
+  if (null_ok && is.null(x)) return(invisible(x))
+  if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x != round(x) || x < min ||
+        x > max) {
+    range <- if (is.finite(max)) paste0(" between ", min, " and ", max) else
+      paste0(", ", min, " or more")
+    stop("`", name, "` must be one whole number", range, call. = FALSE)
   }
   invisible(x)
+}
+
+# stops unless `x` is one number (not NA) between `lower` and `upper`, which are excluded when
+# `open` is TRUE (or a pair of logicals for each end); infinite values pass only when
+# `finite` is FALSE, and NULL only when `null_ok` is TRUE
+check_number <- function(x, name, lower = -Inf, upper = Inf, open = FALSE, finite = TRUE,
+                         null_ok = FALSE) {
+  if (null_ok && is.null(x)) return(invisible(x))
+  open <- rep_len(open, 2)
+  ok <- is.numeric(x) && length(x) == 1 && !is.na(x) && (!finite || is.finite(x)) &&
+    (if (open[1]) x > lower else x >= lower) && (if (open[2]) x < upper else x <= upper)
+  if (!ok) stop("`", name, "` must be ", number_range(lower, upper, open, finite),
+                call. = FALSE)
+  invisible(x)
+}
+
+# the range of `check_number()` in words
+number_range <- function(lower, upper, open, finite) {
+  kind <- if (finite) "one finite number" else "one number"
+  low <- if (open[1]) "greater than " else ""
+  high <- if (open[2]) "less than " else ""
+  if (is.finite(lower) && is.finite(upper)) {
+    if (!any(open)) return(paste0(kind, " between ", lower, " and ", upper))
+    return(paste0(kind, " ", if (open[1]) "greater than " else "from ", lower, " and ",
+                  if (open[2]) "less than " else "up to ", upper))
+  }
+  if (is.finite(lower)) return(paste0(kind, ", ", if (open[1]) low else "", lower,
+                                      if (open[1]) "" else " or more"))
+  if (is.finite(upper)) return(paste0(kind, ", ", if (open[2]) high else "", upper,
+                                      if (open[2]) "" else " or less"))
+  kind
+}
+
+# stops unless `x` is one TRUE or FALSE
+check_flag <- function(x, name) {
+  if (!is.logical(x) || length(x) != 1 || is.na(x)) {
+    stop("`", name, "` must be TRUE or FALSE", call. = FALSE)
+  }
+  invisible(x)
+}
+
+# stops unless `x` is one character string (not NA); NULL passes when `null_ok` is TRUE
+check_string <- function(x, name, null_ok = FALSE) {
+  if (null_ok && is.null(x)) return(invisible(x))
+  if (!is.character(x) || length(x) != 1 || is.na(x)) {
+    stop("`", name, "` must be one character string", call. = FALSE)
+  }
+  invisible(x)
+}
+
+# TRUE for columns (or a vector) whose spread is zero up to rounding error, which `var(x) == 0`
+# misses when the values carry floating-point noise
+no_variance <- function(x) {
+  x <- as.matrix(x)
+  apply(x, 2, function(column) {
+    scale <- max(1, abs(column), na.rm = TRUE)
+    diff(range(column, na.rm = TRUE)) <= sqrt(.Machine$double.eps) * scale
+  })
 }
 
 check_env <- function(env, comm, name = "`env`", collinear = FALSE) {
@@ -42,8 +106,9 @@ check_env <- function(env, comm, name = "`env`", collinear = FALSE) {
     stop(name, " has missing values in ", sum(!stats::complete.cases(env)), " sites. Remove them ",
          "from ", name, " and `comm`", call. = FALSE)
   }
+  if (any(is.infinite(env))) stop(name, " has infinite values", call. = FALSE)
   labels <- colnames(env) %||% seq_len(ncol(env))
-  constant <- apply(env, 2, stats::var) == 0
+  constant <- no_variance(env)
   if (any(constant)) {
     stop("predictors without variance in ", name, ": ", paste(labels[constant], collapse = ", "),
          call. = FALSE)

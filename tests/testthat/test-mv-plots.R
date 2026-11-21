@@ -66,5 +66,5 @@ test_that("old arguments of the plots still work, with a warning", {
   expect_ggplot(plot_traits(x, tr4, legend = "topleft"))
   expect_ggplot(plot_traits(x, tr4, legend = NULL))
   expect_error(plot_traits(x, tr4, legend = NA), "TRUE or FALSE")
-  expect_error(plot(rate_matrix(c(1, 2)), level = -1), "positive")
+  expect_error(plot(rate_matrix(c(1, 2)), level = -1), "`level`")
 })

@@ -24,42 +24,46 @@ speciation_control(
 \item{mode}{\code{"geographic"}, \code{"ecological"}, \code{"point"} or \code{"fission"}.}
 
 \item{threshold}{For \code{"geographic"} and \code{"ecological"}: divergence in generations, or
-difference of genetic means in units of the environment, that separates groups; \code{Inf}
-turns speciation off. With several traits (one per niche axis), the difference of two
+difference of genetic means in units of the environment, that separates groups: one
+number greater than 0; \code{Inf} turns speciation off. With several traits (one per niche axis),
+the difference of two
 populations in \code{"ecological"} is the Mahalanobis distance of their genetic means under
 the phenotypic matrix of the species, \eqn{\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
 z}}{sqrt(dz' P^-1 dz)}, so \code{threshold} is in units of phenotypic standard deviations.}
 
-\item{rate}{For \code{"point"}: probability per individual per generation; for \code{"fission"}: rate
-per species per generation.}
+\item{rate}{For \code{"point"}: probability per individual per generation, one number between 0
+and 1; for \code{"fission"}: rate per species per generation, one finite number, 0 or more.}
 
 \item{divergence}{For \code{"geographic"}: \code{"cluster"} or \code{"gradual"}.}
 
 \item{migration_min}{For \code{divergence = "cluster"}: migration rate per generation that links
-two populations. Where clusters form depends on dispersal, the kernel and abundances: the
-rate of the strongest link of each population should straddle it. In the design of
+two populations, one number greater than 0 (\code{Inf} links none). Where clusters form
+depends on dispersal, the kernel and abundances: the rate of the strongest link of each
+population should straddle it. In the design of
 \code{data-raw/evolving_migration_min.R} (strongest links with median 0.006), species did not
 split at all at 0.002 or below and split almost as with no links at 0.02 or above.}
 
 \item{reset_generations}{For \code{divergence = "cluster"}: generations in a row in the same
-cluster after which divergence returns to 0.}
+cluster after which divergence returns to 0; one whole number, 1 or more.}
 
-\item{homogenization}{For \code{divergence = "gradual"}: reduction of divergence per migrant.}
+\item{homogenization}{For \code{divergence = "gradual"}: reduction of divergence per migrant;
+one number, 0 or more.}
 
 \item{min_generations}{For \code{"ecological"}: generations in a row of difference and reduced
-gene flow before groups split.}
+gene flow before groups split; one whole number, 1 or more.}
 
 \item{migration_max}{For \code{"ecological"}: migration rate per generation below which gene flow
-counts as reduced.}
+counts as reduced; one number, 0 or more (\code{Inf} for no limit on gene flow).}
 
 \item{partition}{For \code{"fission"}: \code{"spatial"} or \code{"random"}.}
 
-\item{jump_var}{Variance of the shift of the genetic mean of each new species. With several
-traits, one value (independent shifts of that variance on every trait) or a covariance
+\item{jump_var}{Variance of the shift of the genetic mean of each new species: one number, 0
+or more. With several traits, one value (independent shifts of that variance on every trait) or
+a covariance
 matrix with one row and column per trait (for instance proportional to \eqn{G}{G}).}
 
-\item{completion}{Time to complete speciation, in generations (fixed or mean); 0 for
-instantaneous speciation.}
+\item{completion}{Time to complete speciation, in generations (fixed or mean): one number,
+0 or more; 0 for instantaneous speciation.}
 
 \item{completion_dist}{\code{"fixed"} or \code{"exponential"}.}
 }

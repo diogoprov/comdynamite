@@ -30,10 +30,7 @@
 #' @export
 dr_rates <- function(tree, per = c("tip", "edge")) {
   per <- match.arg(per)
-  if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
-  if (is.null(tree$edge.length) || anyNA(tree$edge.length) || any(tree$edge.length < 0)) {
-    stop("`tree` needs branch lengths, zero or more", call. = FALSE)
-  }
+  check_branch_lengths(tree)
   n_tip <- ape::Ntip(tree)
   parent_edge <- integer(n_tip + tree$Nnode)
   parent_edge[tree$edge[, 2]] <- seq_len(nrow(tree$edge))

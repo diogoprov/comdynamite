@@ -41,9 +41,9 @@ test_that("shifts are inherited by descendants unless they change one branch", {
   expect_error(trait_rates(tree, "shift", shift_edges = 1, shift_size = -1), "positive multiplier")
   expect_error(trait_rates(tree, "shift", shift_edges = 1, shift_size = function(n) 1:2),
                "one positive multiplier")
-  expect_error(trait_rates(tree, "shift", shift_rate = -1), "zero or more")
-  expect_error(trait_rates(tree, sigma2 = 0), "positive number")
-  expect_error(trait_rates(tree, rate_sd = -1), "zero or more")
+  expect_error(trait_rates(tree, "shift", shift_rate = -1), "`shift_rate`")
+  expect_error(trait_rates(tree, sigma2 = 0), "`sigma2`")
+  expect_error(trait_rates(tree, rate_sd = -1), "`rate_sd`")
 })
 
 test_that("the log rate of gbm is Brownian motion and tips follow the rates", {
@@ -82,7 +82,7 @@ test_that("trait_mk varies rates among branches", {
   stopped <- trait_mk(tree, q = 5, root_state = "1", edge_rates = rep(0, 28))
   expect_true(all(stopped$states == "1"))
   expect_error(trait_mk(tree, alpha = 1, edge_rates = rates), "not both")
-  expect_error(trait_mk(tree, alpha = 0), "positive number")
+  expect_error(trait_mk(tree, alpha = 0), "`alpha`")
   expect_error(trait_mk(tree, edge_rates = 1:3), "per row")
   # mean of the gamma multipliers is 1
   pair <- ape::read.tree(text = "(a:1,b:1);")
@@ -115,7 +115,7 @@ test_that("hidden rate classes give an observed and a hidden history", {
   expect_true(all(unnamed$classes %in% c("R1", "R2")))
   expect_error(trait_mk(tree, rate_classes = 1), "two or more")
   expect_error(trait_mk(tree, rate_classes = c(a = 1, a = 2)), "different names")
-  expect_error(trait_mk(tree, rate_classes = c(1, 2), class_switch = -1), "zero or more")
+  expect_error(trait_mk(tree, rate_classes = c(1, 2), class_switch = -1), "`class_switch`")
   skip_if_not_installed("phytools")
   expect_equal(sum(phytools::countSimmap(h)$N), sum(vapply(h$maps, length, integer(1)) - 1))
 })

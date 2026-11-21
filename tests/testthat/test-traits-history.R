@@ -77,7 +77,7 @@ test_that("trait_mk follows the rates and checks its arguments", {
   absorbing <- trait_mk(tree, q, root_state = "b")
   expect_true(all(absorbing$states == "b"))
   expect_error(trait_mk(tree, matrix(1, 2, 2)), "same state names")
-  expect_error(trait_mk(tree, -1), "zero or more")
+  expect_error(trait_mk(tree, -1), "`q`")
   expect_error(trait_mk(tree, 1, root_state = "w"), "one of the states")
   expect_true(trait_mk(tree, 1)$states[[1]] %in% c("0", "1"))
   three <- matrix(1, 3, 3, dimnames = list(letters[1:3], letters[1:3]))

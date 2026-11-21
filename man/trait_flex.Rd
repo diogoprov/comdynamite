@@ -17,12 +17,14 @@ trait_flex(
 \arguments{
 \item{individuals}{Data frame with one row per individual.}
 
-\item{traits}{Names of the columns with trait values.}
+\item{traits}{Names of the columns with trait values (a character vector).}
 
-\item{site, species}{Names of the columns with the site and the species.}
+\item{site, species}{Names of the columns with the site and the species. One character
+string each.}
 
 \item{abundance}{Name of a column with the abundance of each population (the same value
-for all its individuals), or \code{NULL} to weight by the number of individuals measured.}
+for all its individuals), or \code{NULL} to weight by the number of individuals measured. One
+character string or \code{NULL}.}
 
 \item{formula}{One-sided formula with variables of \code{env}, with an intercept; \code{~ 1} (the
 default) gives the total sums of squares only. With several terms, \code{explained} is the sum

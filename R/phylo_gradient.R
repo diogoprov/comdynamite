@@ -24,10 +24,11 @@
 #' @param predictor Deprecated, use `env`.
 #' @param env Numeric vector with the value of each site. The authors estimate one
 #'   vector for each predictor.
-#' @param level Significance level of the global test and of the selection.
+#' @param level Significance level of the global test and of the selection. One number
+#'   between 0 and 1, both excluded.
 #' @param alpha Deprecated, use `level`.
-#' @param n_sim Number of Brownian vectors.
-#' @param n_perm Number of permutations of sites and of species.
+#' @param n_sim Number of Brownian vectors. One whole number, 1 or more.
+#' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation per
 #'   row, for example from [torus_permutations()], to use instead of free permutations.
 #'   Empty sites are then allowed: they leave the analysis but their values can reach
@@ -115,12 +116,14 @@ phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_s
     warning("`predictor` is deprecated, use `env`", call. = FALSE)
     env <- predictor
   }
+  check_count(n_perm, "n_perm")
+  check_count(n_sim, "n_sim")
+  check_number(level, "level", lower = 0, upper = 1, open = TRUE)
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)))
   comm <- matched$comm
   tree <- matched$tree
   landscape_env <- check_env(env, comm)
   if (ncol(landscape_env) != 1) stop("`env` must be a single variable", call. = FALSE)
-  stopifnot(n_perm >= 1, n_sim >= 1, level > 0, level < 1)
   check_permutations(site_permutations, comm)
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
@@ -280,7 +283,7 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   `space`, the article uses Moran's eigenvector maps, which `adespatial::dbmem()` gives.
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
-#' @param n_perm Number of permutations of sites and of species.
+#' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation per row, for
 #'   example from [torus_permutations()], to use instead of free permutations of sites. Each
 #'   set of predictors is then moved alone in its tests (see Details). Empty sites are
@@ -289,10 +292,11 @@ print.mc_phylo_vector <- function(x, ...) {
 #'   untested, `"msr"` replaces `env` by Moran spectral randomisations built from `coords`
 #'   with `adespatial::msr()`, and `"sites"` moves `env` alone with `site_permutations`, for a
 #'   complete grid. `"msr"` needs the package adespatial.
-#' @param coords Matrix of site coordinates with one row per site of `comm`, for
-#'   `shared_null = "msr"`. The spatial weights are those of `adespatial::dbmem()`.
+#' @param coords Matrix of site coordinates with one row per site of `comm`, without missing or
+#'   infinite values, for `shared_null = "msr"`. The spatial weights are those of
+#'   `adespatial::dbmem()`.
 #' @param level Significance level of the test of `env` against `space` that decides whether
-#'   `b` is tested.
+#'   `b` is tested. One number between 0 and 1, both excluded.
 #' @seealso [plot_trait_partition()]
 #' @return List of class `mc_trait_partition` with `fractions`, a data frame with one row
 #'   for each of `abc`, `ab`, `bc`, `a`, `b`, `c` and `d`, and the columns `r2`,
@@ -416,12 +420,15 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)
   traits <- as.matrix(traits)
   if (!is.numeric(traits)) stop("`traits` is not numeric", call. = FALSE)
-  stopifnot(n_perm >= 1, level > 0, level < 1)
+  if (any(is.infinite(traits))) stop("`traits` has infinite values", call. = FALSE)
+  check_count(n_perm, "n_perm")
+  check_number(level, "level", lower = 0, upper = 1, open = TRUE)
+  if (!is.null(coords)) check_coords(coords)
   comm <- check_species_comm(comm, rownames(traits), "`traits`", !is.null(site_permutations))
   comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
   if (anyNA(traits)) stop("`traits` has missing values", call. = FALSE)
-  if (any(apply(traits, 2, stats::var) == 0)) {
+  if (any(no_variance(traits))) {
     stop("traits without variance among the species with individuals", call. = FALSE)
   }
   env <- check_env(env, comm, collinear = TRUE)

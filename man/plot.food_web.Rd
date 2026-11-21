@@ -22,15 +22,17 @@
 
 \item{panels}{Panels to draw, in order: any of \code{"abundance"}, \code{"trait"} and \code{"rate"}.}
 
-\item{time}{Optional time at which to stop the curves; \code{NULL} draws the whole run.}
+\item{time}{Optional time at which to stop the curves, one finite number; \code{NULL} draws
+the whole run.}
 
-\item{colours}{Colours of the resource, the consumer and the predator.}
+\item{colours}{Colours of the resource, the consumer and the predator, three strings.}
 
-\item{log_abundance}{Draw abundances as their base-10 logarithm (zeros are left out)?}
+\item{log_abundance}{Draw abundances as their base-10 logarithm (zeros are left out)?
+\code{TRUE} or \code{FALSE}.}
 
-\item{legend}{Draw the legend of the levels?}
+\item{legend}{Draw the legend of the levels? \code{TRUE} or \code{FALSE}.}
 
-\item{linewidth}{Width of the lines.}
+\item{linewidth}{Width of the lines, one number greater than 0.}
 
 \item{col, lwd, ...}{Deprecated: \code{col} is now \code{colours} and \code{lwd} is \code{linewidth}; graphical
 arguments of base graphics are no longer used.}

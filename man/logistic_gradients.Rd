@@ -7,9 +7,9 @@
 logistic_gradients(scenario, n_sites = 31)
 }
 \arguments{
-\item{scenario}{Number of the scenario, from 1 to 7.}
+\item{scenario}{Number of the scenario, one whole number from 1 to 7.}
 
-\item{n_sites}{Number of sites.}
+\item{n_sites}{Number of sites, one whole number, at least 4 (8 for scenarios 5 to 7).}
 }
 \value{
 Data frame with one row per site: \code{x} and \code{y}, the gradients that

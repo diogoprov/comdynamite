@@ -19,20 +19,23 @@ env_space_time(
 \item{landscape}{An \code{mc_landscape} with coordinates, from \code{\link[=landscape_grid]{landscape_grid()}} or
 \code{\link[=landscape_points]{landscape_points()}}, or a two-column matrix or data frame of site coordinates.}
 
-\item{n_steps}{Number of steps, burn-in included.}
+\item{n_steps}{Number of steps, burn-in included: one whole number, larger than \code{burn_in}.}
 
-\item{burn_in}{Number of initial steps with a constant environment.}
+\item{burn_in}{Number of initial steps with a constant environment: one whole number, 0 or
+more.}
 
 \item{spatial_scale, temporal_scale}{Scales \eqn{a_s} (in units of the coordinates) and
-\eqn{a_t} (in steps) of the exponential covariance.}
+\eqn{a_t} (in steps) of the exponential covariance: each one number greater than 0.}
 
-\item{ranks}{If \code{TRUE}, convert the environment to ranks over all sites and steps, as in
-their code; if \code{FALSE}, keep the rescaled field.}
+\item{ranks}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, convert the environment to ranks over all sites and
+steps, as in their code; if \code{FALSE}, keep the rescaled field.}
 
 \item{min_range}{Minimum range of the rescaled environment at the first step after the
-burn-in; the field is redrawn until it is exceeded. Use 0 to accept the first draw.}
+burn-in; the field is redrawn until it is exceeded: one number in [0, 1). Use 0 to accept
+the first draw.}
 
-\item{n_features}{Number of cosine waves of the spectral method.}
+\item{n_features}{Number of cosine waves of the spectral method: one whole number, 1 or
+more.}
 }
 \value{
 Matrix with one row per site and one column per step, with values in [0, 1], for

@@ -123,7 +123,7 @@ test_that("profile intervals cover the estimate and flag unbounded rates", {
                   level = 0.99)
   expect_true(wide$lower >= 0 && wide$upper <= 1)
   expect_error(confint(fit, "beta_gamma"), "not free parameters")
-  expect_error(confint(fit, level = 2), "between 0 and 1")
+  expect_error(confint(fit, level = 2), "`level`")
   flat <- confint(damocles_fit(c(stats::setNames(rep(1, 30), tree$tip.label)), tree), "mu")
   expect_true(flat$lower == 0 || is.infinite(flat$upper))
 })

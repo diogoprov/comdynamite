@@ -27,18 +27,20 @@ matrix with \code{multivariate = TRUE}) and optionally of their species (an argu
 functions, all computed on the same observed and randomised communities, such as
 \code{list(variance = stats::var, MNND = mnnd, range = trait_range)}.}
 
-\item{traits}{Names of the columns with trait values.}
+\item{traits}{Names of the columns with trait values (a character vector).}
 
-\item{site, species}{Names of the columns with the site and the species.}
+\item{site, species}{Names of the columns with the site and the species. One character
+string each.}
 
 \item{null}{Null model (see Details).}
 
-\item{n_perm}{Number of randomisations; 0 for the observed values only.}
+\item{n_perm}{Number of randomisations (one whole number, 0 or more); 0 or \code{NULL} for the
+observed values only.}
 
 \item{alternative}{Direction of the test: \code{"two.sided"} (the default), \code{"less"} or
 \code{"greater"}.}
 
-\item{multivariate}{If \code{TRUE}, the index receives all traits at once.}
+\item{multivariate}{If \code{TRUE}, the index receives all traits at once. \code{TRUE} or \code{FALSE}.}
 
 \item{nperm}{Deprecated; use \code{n_perm}.}
 }

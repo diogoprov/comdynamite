@@ -19,24 +19,25 @@
 \arguments{
 \item{x}{Result of \code{\link[=pcps_test]{pcps_test()}}.}
 
-\item{axes}{The two principal coordinates to draw.}
+\item{axes}{The two principal coordinates to draw: two different whole numbers.}
 
 \item{env}{Predictor that colours the sites: a column number or name of the predictors given
 to \code{\link[=pcps_test]{pcps_test()}}, or \code{NULL} for no colour.}
 
-\item{species}{Draw the species as arrows.}
+\item{species}{\code{TRUE} or \code{FALSE}. Draw the species as arrows.}
 
-\item{species_labels}{Write the names of the species at the arrows or stars.}
+\item{species_labels}{\code{TRUE} or \code{FALSE}. Write the names of the species at the arrows or stars.}
 
-\item{clades}{Optional grouping of the species into clades: a single number k, which cuts
+\item{clades}{Optional grouping of the species into clades: one whole number k, which cuts
 the tree into its k deepest clades by splitting, one at a time, the clade whose crown is
 nearest the root; or a vector of clade names named by species, such as families, in which
 species left out are drawn in grey without a clade. Each clade with at least three species
 gets its convex hull.}
 
-\item{palette}{Name of a palette of \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}} for the predictor.}
+\item{palette}{One character string, the name of a palette of \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}} for
+the predictor.}
 
-\item{point_size}{Size of the site points.}
+\item{point_size}{Size of the site points. One number greater than 0.}
 
 \item{...}{Not used.}
 }

@@ -20,11 +20,12 @@
 #'   See [node_test()] for what each one tests.
 #' @param type `"phylogram"`, as in the article, or `"fan"`, for very large trees, with the
 #'   names of the variables along the radii so that they stay clear of the species.
-#' @param level Significance level.
+#' @param level Significance level. One number between 0 and 1.
 #' @param alpha Deprecated, use `level`.
 #' @param colours Colours of predictors and biogeographic events.
-#' @param text_size Size of the text, in mm (as in [ggplot2::geom_text()]).
-#' @param legend Draw the legend?
+#' @param text_size Size of the text, in mm (as in [ggplot2::geom_text()]). One number greater
+#'   than 0.
+#' @param legend `TRUE` or `FALSE`. Draw the legend?
 #' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size` (in mm,
 #'   about 3.5 times the old value); arguments of [ape::plot.phylo()] are no longer used.
 #' @return A ggplot object, with the table of symbols in the attribute `marks`: one row per
@@ -62,6 +63,8 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   colours <- renamed_arg(colours, col, "colours", "col")
   if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
   legend <- legend_flag(legend)
+  check_number(level, "level", lower = 0, upper = 1)
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
   if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
   check_tree(tree, branch_lengths = FALSE)
   check_colours(colours, 2)
@@ -196,6 +199,8 @@ plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
   level <- deprecated_level(level, alpha)
   colours <- renamed_arg(colours, col, "colours", "col")
   if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  check_number(level, "level", lower = 0, upper = 1)
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
   if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
   check_colours(colours, 2)
   test <- match.arg(test)
@@ -276,11 +281,11 @@ node_marks <- function(x, test, alpha) {
 #'   `"r2_component"` for the share of the mean or variance component.
 #' @param test Permutation test: `"max"` for the larger p-value of sites and species,
 #'   `"site"` or `"species"`.
-#' @param level Significance level.
+#' @param level Significance level. One number between 0 and 1.
 #' @param alpha Deprecated, use `level`.
 #' @param colours Colour of significant segments.
 #' @param labels Names of the two sets of predictors.
-#' @param text_size Size of the text, in mm.
+#' @param text_size Size of the text, in mm. One number greater than 0.
 #' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments of
 #'   [graphics::plot.window()] are no longer used.
 #' @return A ggplot object, with the rows of `x$fractions` for `a`, `b`, `c` and `d` in the
@@ -312,6 +317,8 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   level <- deprecated_level(level, alpha)
   colours <- renamed_arg(colours, col, "colours", "col")
   if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  check_number(level, "level", lower = 0, upper = 1)
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
   if (!inherits(x, "mc_trait_partition")) {
     stop("`x` must come from trait_partition()", call. = FALSE)
   }
@@ -397,9 +404,9 @@ fraction_positions <- function(edges, width) {
 #' @param x Result of [phylo_beta_test()].
 #' @param comm The community matrix given to [phylo_beta_test()].
 #' @param tree The `phylo` object given to [phylo_beta_test()].
-#' @param axis Axis of `x$scores` that orders the sites.
+#' @param axis Axis of `x$scores` that orders the sites. One whole number, 1 or more.
 #' @param colours Colour of the largest value, with white for absences.
-#' @param text_size Size of the names of species, in mm.
+#' @param text_size Size of the names of species, in mm. One number greater than 0.
 #' @param col,cex,... Deprecated: `col` is now `colours` and `cex` is `text_size`; arguments of
 #'   [graphics::image()] are no longer used.
 #' @return A ggplot object, with the ordered matrix in the attribute `ordered`.
@@ -425,6 +432,8 @@ plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_s
   need_ggplot("plot_phylo_beta()")
   colours <- renamed_arg(colours, col, "colours", "col")
   if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
+  check_count(axis, "axis")
   if (!inherits(x, "mc_phylo_beta")) stop("`x` must come from phylo_beta_test()", call. = FALSE)
   check_tree(tree, branch_lengths = FALSE)
   check_colours(colours, 1)

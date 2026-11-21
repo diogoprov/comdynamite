@@ -23,11 +23,12 @@ plot_node_heatmap(
 species, \code{"site"} for sites alone, or \code{"joint"} for the permutation of the article.
 See \code{\link[=node_test]{node_test()}} for what each one tests.}
 
-\item{level}{Significance level.}
+\item{level}{Significance level. One number between 0 and 1.}
 
 \item{colours}{Colours of negative and positive values.}
 
-\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}).}
+\item{text_size}{Size of the text, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}). One number greater
+than 0.}
 
 \item{alpha}{Deprecated, use \code{level}.}
 

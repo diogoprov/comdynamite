@@ -23,26 +23,31 @@ population_shifts(
 \code{\link[=sample_individuals]{sample_individuals()}}.}
 
 \item{trait, site, species}{Names of the columns with the trait value, the site and the
-species.}
+species. One character string each.}
 
-\item{env}{Names of one or more columns with the environment of the site.}
+\item{env}{Names of one or more columns with the environment of the site (a character
+vector without repeats).}
 
-\item{abundance}{Name of the column with the abundance of the population; not used with
-\code{community}.}
+\item{abundance}{Name of the column with the abundance of the population (one character
+string); not used with \code{community}, and may then be \code{NULL}.}
 
-\item{width}{Width \code{w} of the competition kernel; \code{NULL} (the default) chooses it from the
+\item{width}{Width \code{w} of the competition kernel (one or more finite numbers greater than 0);
+\code{NULL} (the default) chooses it from the
 grid described in the section on the width. \code{c} is estimated at that width, and the two
 trade off when data are few.}
 
-\item{species_slopes}{Give each species its own slope on each environmental variable.}
+\item{species_slopes}{Give each species its own slope on each environmental variable? \code{TRUE}
+or \code{FALSE}.}
 
 \item{community}{Optional matrix or data frame of abundances, sites in rows and species in
 columns, so that species present but not measured also push (see the section on
 competitors).}
 
-\item{nboot}{Number of parametric bootstrap simulations (0, the default, for none).}
+\item{nboot}{Number of parametric bootstrap simulations (0, the default, for none). One whole
+number, 0 or more.}
 
-\item{level}{Confidence level of the bootstrap intervals.}
+\item{level}{Confidence level of the bootstrap intervals. One number between 0 and 1, both
+excluded.}
 }
 \value{
 An object of class \code{population_shifts}: a data frame with one row and the columns

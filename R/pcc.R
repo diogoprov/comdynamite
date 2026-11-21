@@ -4,9 +4,9 @@
 #' step of the phylogenetic community composition of Peres-Neto & Kembel (2015).
 #'
 #' @param tree A `phylo` object.
-#' @param squared Use \eqn{-\mathrm{PD}^2 / 2}{-PD^2 / 2}, as in a classic principal coordinate
-#'   analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the form printed by Peres-Neto &
-#'   Kembel (2015)?
+#' @param squared `TRUE` or `FALSE`. Use \eqn{-\mathrm{PD}^2 / 2}{-PD^2 / 2}, as in a classic
+#'   principal coordinate analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the form
+#'   printed by Peres-Neto & Kembel (2015)?
 #' @return Matrix with one row per tip and one column per positive eigenvalue.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
@@ -20,6 +20,7 @@
 #' @export
 phylo_eigenvectors <- function(tree, squared = FALSE) {
   check_tree(tree)
+  check_flag(squared, "squared")
   pd <- ape::cophenetic.phylo(tree)[tree$tip.label, tree$tip.label]
   b <- -0.5 * if (squared) pd^2 else pd
   b <- sweep(b, 1, rowMeans(b))
@@ -53,8 +54,8 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per
 #'   site.
-#' @param n_perm Number of permutations of sites and of species.
-#' @param squared Passed to [phylo_eigenvectors()].
+#' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
+#' @param squared `TRUE` or `FALSE`, passed to [phylo_eigenvectors()].
 #' @param site_permutations Optional matrix of site indices with one permutation
 #'   per row, for example from [torus_permutations()], to use instead of free
 #'   permutations of sites. Empty sites are then allowed, because they are part of the
@@ -87,6 +88,8 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
     if (missing(env)) env <- data_part(comm, "env")
     comm <- comm$comm
   }
+  check_count(n_perm, "n_perm")
+  check_flag(squared, "squared")
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
                              minimum = 3)
   comm <- matched$comm
@@ -96,7 +99,7 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
   draws <- site_draws(comm, n_perm, site_permutations)
   comm <- comm[draws$occupied, , drop = FALSE]
   env <- check_env(landscape_env[draws$occupied, , drop = FALSE], comm)
-  stopifnot(nrow(comm) > ncol(env) + 1, n_perm >= 1)
+  check_enough_sites(comm, env)
   vectors <- phylo_eigenvectors(tree, squared = squared)
   observed <- pcc_r2(comm, vectors, env)
   statistic <- stats::var(observed)
@@ -145,4 +148,12 @@ pcc_r2 <- function(comm, vectors, env) {
 weighted_standardise <- function(x, w) {
   centred <- sweep(x, 2, colSums(w * x) / sum(w))
   sweep(centred, 2, sqrt(colSums(w * centred^2) / sum(w)), "/")
+}
+
+# a regression on the predictors needs more occupied sites than predictors plus one
+check_enough_sites <- function(comm, env) {
+  if (nrow(comm) <= ncol(env) + 1) {
+    stop("`comm` needs more occupied sites (", nrow(comm), ") than predictors in `env` plus ",
+         "one (", ncol(env) + 1, ")", call. = FALSE)
+  }
 }

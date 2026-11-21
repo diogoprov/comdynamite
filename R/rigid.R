@@ -81,10 +81,10 @@
 #'   the rows of `biogeography`. Distances are Euclidean, so they should be projected.
 #' @param biogeography Matrix of biogeographic events with one row per site and values of 1,
 #'   -1 and 0, as given to [node_test()].
-#' @param n_perm Largest number of permutations. Fewer are returned when fewer distinct
-#'   placements of the event exist.
-#' @param gap A moved site counts as inside the landscape when it is closer than `gap` to a
-#'   site, or in a hole narrower than twice `gap` between sites (four times `gap` off a
+#' @param n_perm Largest number of permutations, one whole number, 1 or more. Fewer are
+#'   returned when fewer distinct placements of the event exist.
+#' @param gap One positive number, or `NULL` for the default. A moved site counts as inside
+#'   the landscape when it is closer than `gap` to a site, or in a hole narrower than twice `gap` between sites (four times `gap` off a
 #'   lattice, where sites leave larger voids between neighbours), but not beyond an edge. A
 #'   site that lands inside but not on a site goes to the nearest free site within twice
 #'   `gap`. The default is the median distance from a site to its fourth nearest site: the
@@ -92,14 +92,15 @@
 #'   the spacing of sparse sites, so that holes count as inside. It is not the `gap` of
 #'   [patch_permutations()], which is 1.5 times this one by default.
 #' @param outside Largest fraction of the sites of an event that may land outside the
-#'   landscape in a move. Those sites go to the nearest free site within twice `gap`, and the
-#'   move is dropped when one has none.
+#'   landscape in a move, one number between 0 and 1. Those sites go to the nearest free site
+#'   within twice `gap`, and the move is dropped when one has none.
 #' @param independent Distance beyond which parts of an event move independently of each
-#'   other, while staying at least that far apart. The default, `Inf`, moves the whole event
-#'   together and assumes nothing about the range of autocorrelation.
+#'   other, while staying at least that far apart. One positive number, which may be `Inf`.
+#'   The default, `Inf`, moves the whole event together and assumes nothing about the range of
+#'   autocorrelation.
 #' @param max_tries Largest number of moves tried: of the enumerated moves of one part, in
 #'   random order, when placements fail or repeat a layout, or of the combinations of several
-#'   independent parts, which cannot all be enumerated.
+#'   independent parts, which cannot all be enumerated. One whole number, 1 or more.
 #' @return List with one integer matrix per event, each with one permutation per row and the
 #'   names of the sites as column names, for `area_permutations` in [node_test()]. Rows only
 #'   move the sites of that event, so they should not be used as `site_permutations`.
@@ -119,10 +120,14 @@
 #' @export
 rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, outside = 0.1,
                                independent = Inf, max_tries = 20 * n_perm) {
+  check_count(n_perm, "n_perm")
+  check_number(gap, "gap", lower = 0, open = c(TRUE, FALSE), null_ok = TRUE)
+  check_number(outside, "outside", 0, 1)
+  check_number(independent, "independent", lower = 0, open = c(TRUE, FALSE), finite = FALSE)
+  check_count(max_tries, "max_tries")
   check_event_coords(coords, biogeography)
   coords <- as.matrix(coords)
   biogeography <- as.matrix(biogeography)
-  stopifnot(n_perm >= 1, outside >= 0, outside <= 1, independent > 0, max_tries >= 1)
   n <- nrow(coords)
   distances <- as.matrix(stats::dist(coords))
   if (is.null(gap)) {
@@ -132,7 +137,6 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
            "give `gap`", call. = FALSE)
     }
   }
-  stopifnot(gap > 0)
   # strictly closer than `gap`, so that a site one step beyond a regular grid is outside
   gap <- gap * (1 - 1e-6)
   landscape <- landscape_of(coords, gap)

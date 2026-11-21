@@ -25,14 +25,14 @@
 #'   (Omega_j + Omega_k)^-1 d / 2)}, with \eqn{d}{d} the difference between the optima and
 #'   \eqn{\Omega}{Omega} the covariance of each niche. Nothing is random.
 #'
-#' @param species A `phylo` tree, or the number of species (not for
+#' @param species A `phylo` tree, or the number of species, one whole number, 1 or more (not for
 #'   `type = "phylo"`); ignored for `type = "trait"`, where the species are those of `traits`.
 #' @param type Type of interspecific competition.
 #' @param traits For `type = "trait"`: a data frame from [species_traits()], or any data frame
 #'   with columns `optimum` and `sigma`, or a list of them for a niche of several axes.
 #' @param inter_max Maximum interspecific coefficient, relative to
-#'   intraspecific competition.
-#' @param scale Multiplier of all coefficients.
+#'   intraspecific competition, one finite number, 0 or more.
+#' @param scale Multiplier of all coefficients, one finite number greater than 0.
 #' @return Square matrix: element \[j, k\] is the effect of species k on
 #'   species j.
 #' @examplesIf requireNamespace("treeshapesim", quietly = TRUE)
@@ -45,11 +45,15 @@
 competition_matrix <- function(species, type = c("none", "random", "phylo", "trait"),
                                inter_max = 0.1, scale = 0.05, traits = NULL) {
   type <- match.arg(type)
-  stopifnot(inter_max >= 0, scale > 0)
+  check_number(inter_max, "inter_max", lower = 0)
+  check_number(scale, "scale", lower = 0, open = TRUE)
   if (type == "trait") return(scale * trait_competition(traits, inter_max))
   if (!is.null(traits)) stop("`traits` is used only with type = \"trait\"", call. = FALSE)
   is_tree <- inherits(species, "phylo")
-  if (type == "phylo" && !is_tree) stop("type = \"phylo\" needs a 'phylo' tree as `species`", call. = FALSE)
+  if (type == "phylo" && !is_tree) {
+    stop("type = \"phylo\" needs a 'phylo' tree as `species`", call. = FALSE)
+  }
+  if (!is_tree) check_count(species, "species")
   sp <- if (is_tree) species$tip.label else paste0("sp", seq_len(species))
   k <- length(sp)
   a <- matrix(0, k, k, dimnames = list(sp, sp))
@@ -82,7 +86,7 @@ trait_competition <- function(traits, inter_max) {
     sp <- paste0("sp", seq_len(nrow(axes[[1]])))
   } else if (length(axes) > 1) {
     if (!all(vapply(axes, function(x) setequal(rownames(x), sp), logical(1)))) {
-      stop("sets of traits have different species", call. = FALSE)
+      stop("sets of `traits` (one per axis) have different species", call. = FALSE)
     }
     axes <- lapply(axes, function(x) x[sp, , drop = FALSE])
   }

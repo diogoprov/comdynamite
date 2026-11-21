@@ -31,7 +31,8 @@
 \item{type}{\code{"intervals"} or \code{"ses"}.}
 
 \item{level, inner}{Coverage of the outer and inner null intervals; \code{1 - level} is also the
-size of the two-sided test (as in \code{\link[=tstats_summary]{tstats_summary()}}).}
+size of the two-sided test (as in \code{\link[=tstats_summary]{tstats_summary()}}). One number between 0 and 1 each,
+\code{inner} smaller than \code{level}.}
 
 \item{statistics, traits, sites}{Subsets to draw; \code{NULL} (the default) draws all.}
 
@@ -43,15 +44,16 @@ observed value).}
 are blue, grey and vermillion of the Okabe-Ito palette.}
 
 \item{point_size, interval_width}{Size of the observed points and width of the thick inner
-interval.}
+interval. One number greater than 0 each.}
 
 \item{hatch}{Hatch the area expected by chance; with \code{FALSE} it is drawn as a thin line
-(\code{"intervals"}) or a grey band (\code{"ses"}).}
+(\code{"intervals"}) or a grey band (\code{"ses"}). \code{TRUE} or \code{FALSE}.}
 
-\item{hatch_density}{Number of hatching lines across the width of a panel.}
+\item{hatch_density}{Number of hatching lines across the width of a panel. One number
+greater than 0.}
 
 \item{scales}{Passed to \code{\link[ggplot2:facet_grid]{ggplot2::facet_grid()}}; \code{"free_x"} (the default) lets each
-statistic keep its own range.}
+statistic keep its own range. One character string.}
 
 \item{...}{Not used.}
 }

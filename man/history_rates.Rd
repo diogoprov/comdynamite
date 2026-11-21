@@ -22,18 +22,19 @@ history_rates(
 \item{model}{\code{"state"}, \code{"burst"} or \code{"sympatry"}.}
 
 \item{sigma2}{Rate before any change of state (\code{"burst"}) or scale of the rate
-(\code{"sympatry"}).}
+(\code{"sympatry"}). One finite number greater than 0.}
 
 \item{state_rates}{For \code{"state"}, the rate in each state, named by state.}
 
 \item{burst, decay}{For \code{"burst"}, the relative increase of the rate at each change of state
-and the time scale of its decay.}
+(one finite number, 0 or more) and the time scale of its decay (one finite number greater
+than 0).}
 
 \item{r}{For \code{"sympatry"}, the change in the logarithm of the rate per lineage in the same
-state.}
+state. One finite number.}
 
 \item{overlap}{For \code{"sympatry"}, count the lineages whose state shares an area (states such
-as \code{"A+B"}, split at \code{"+"}) rather than those in the same state.}
+as \code{"A+B"}, split at \code{"+"}) rather than those in the same state. \code{TRUE} or \code{FALSE}.}
 }
 \value{
 Numeric vector with the rate of each branch, in the order of the rows of

@@ -34,7 +34,8 @@ environment that set growth by default; with a niche of several axes, the first 
 \item{coords}{Optional matrix or data frame with one row per site and the coordinates in
 columns.}
 
-\item{n_null}{Number of shuffles of species for \code{ses_mpd} and \code{ses_mntd}.}
+\item{n_null}{Number of shuffles of species for \code{ses_mpd} and \code{ses_mntd}. One whole number,
+2 or more.}
 }
 \value{
 Named numeric vector.

@@ -128,6 +128,7 @@ region_pool <- function(history, regions) {
 #' @family species traits
 #' @export
 arrival_ages <- function(history, x, regions) {
+  history_states(history)  # stops unless `history` is a simmap tree
   d <- if (inherits(x, c("mc_sim", "mc_data"))) as_mc_data(x) else mc_data(x)
   regions <- as.character(site_rows(regions, rownames(d$comm), "`regions`"))
   edge <- history$edge

@@ -121,7 +121,7 @@ test_that("trait_rarefaction over cover with a fixed n keeps the replicates", {
   expect_equal(attr(r, "by"), "cover")
   expect_equal(nrow(attr(r, "values")[[1]]), 3)
   expect_equal(r$reps, c(3, 3))
-  expect_error(trait_rarefaction(ind, cover = 0.5, n = 1.5), "round")
+  expect_error(trait_rarefaction(ind, cover = 0.5, n = 1.5), "`n`")
 })
 
 test_that("the default statistic of trait_rarefaction runs no permutations", {

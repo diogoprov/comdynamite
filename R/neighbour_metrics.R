@@ -35,11 +35,11 @@
 #' between observed and null communities.
 #'
 #' @param x Numeric vector (one trait), matrix or data frame (traits in columns, individuals or
-#'   species in rows) or a `dist` object.
-#' @param relative Divide by the range of the trait (one trait) or by the largest pairwise
-#'   distance (several traits), as the `div_range` option of cati.
-#' @param na.rm Drop missing values (rows with any missing value of a matrix) before the
-#'   computation; with `FALSE` (the default) missing values give `NA`.
+#'   species in rows) or a `dist` object, without infinite values.
+#' @param relative `TRUE` or `FALSE`. Divide by the range of the trait (one trait) or by the
+#'   largest pairwise distance (several traits), as the `div_range` option of cati.
+#' @param na.rm `TRUE` or `FALSE`. Drop missing values (rows with any missing value of a
+#'   matrix) before the computation; with `FALSE` (the default) missing values give `NA`.
 #' @return A single number, or `NA` when there are too few values: two for the means, minima,
 #'   maxima, the minimum spanning tree and the range, three for the standard deviations and
 #'   coefficients of variation, four for the kurtosis. `nn_distances()` returns a vector with
@@ -147,6 +147,7 @@ cvnd <- function(x, na.rm = FALSE) {
 #' @rdname neighbour_metrics
 #' @export
 mst_length <- function(x, relative = FALSE, na.rm = FALSE) {
+  check_flag(relative, "relative")
   edges <- mst_edges(x, na.rm)
   if (length(edges) == 0 || anyNA(edges)) return(NA_real_)
   sum(edges) / if (relative) metric_scale(x, na.rm) else 1
@@ -183,7 +184,9 @@ trait_kurtosis <- function(x, na.rm = FALSE) {
 # checks the input of the metrics and drops missing values when asked; returns NULL when a
 # missing value remains (the metric is then NA)
 metric_input <- function(x, na.rm) {
+  check_flag(na.rm, "na.rm")
   if (inherits(x, "dist")) {
+    if (any(is.infinite(x))) stop("`x` has infinite distances", call. = FALSE)
     if (anyNA(x)) {
       if (na.rm) stop("a `dist` object with missing values cannot be used", call. = FALSE)
       return(NULL)
@@ -193,6 +196,7 @@ metric_input <- function(x, na.rm) {
   if (is.data.frame(x)) x <- as.matrix(x)
   if (length(dim(x)) > 2) stop("`x` must be a vector, a matrix or a dist object", call. = FALSE)
   if (!is.numeric(x)) stop("`x` must be numeric, a numeric matrix or a dist object", call. = FALSE)
+  no_infinite_trait(x)
   if (is.matrix(x) && ncol(x) == 1) x <- as.vector(x)
   if (is.matrix(x)) {
     complete <- stats::complete.cases(x)
@@ -222,6 +226,7 @@ metric_scale <- function(x, na.rm) {
 }
 
 nn_summary <- function(x, f, min_n, relative, na.rm) {
+  check_flag(relative, "relative")
   clean <- metric_input(x, na.rm)
   if (is.null(clean) || n_values(clean) < min_n) return(NA_real_)
   value <- f(nn_distances(clean))
@@ -230,6 +235,7 @@ nn_summary <- function(x, f, min_n, relative, na.rm) {
 }
 
 pair_summary <- function(x, f, relative, na.rm) {
+  check_flag(relative, "relative")
   clean <- metric_input(x, na.rm)
   if (is.null(clean) || n_values(clean) < 2) return(NA_real_)
   d <- as.vector(metric_dist(clean))
@@ -252,6 +258,7 @@ mst_edges <- function(x, na.rm) {
 }
 
 single_trait <- function(x, na.rm) {
+  check_flag(na.rm, "na.rm")
   if (inherits(x, "dist") || (is.matrix(x) && ncol(x) > 1) ||
       (is.data.frame(x) && ncol(x) > 1)) {
     stop("this metric takes a single trait", call. = FALSE)
@@ -261,6 +268,12 @@ single_trait <- function(x, na.rm) {
     stop("`x` must be a numeric vector or a one-column matrix", call. = FALSE)
   }
   x <- as.vector(x)
+  no_infinite_trait(x)
   if (na.rm) x <- x[!is.na(x)]
   x
+}
+
+# Inf among the trait values would make every distance metric meaningless
+no_infinite_trait <- function(x) {
+  if (any(is.infinite(x))) stop("`x` has infinite values", call. = FALSE)
 }

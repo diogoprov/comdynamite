@@ -20,14 +20,14 @@ limits of its uniform prior.}
 \item{simulate}{Function of \code{scenario}, a list with one value per parameter, and \code{shared},
 what \code{setup} returned, which gives a simulation. As in \code{\link[=run_scenarios]{run_scenarios()}}.}
 
-\item{n}{Number of simulations.}
+\item{n}{Number of simulations. One whole number, 1 or more.}
 
 \item{setup}{Optional function without arguments that gives what all simulations share.}
 
 \item{summarise}{Function of \code{sim} and \code{shared} that gives a named numeric vector. The default
 is \code{\link[=summary_stats]{summary_stats()}}, with \code{shared$tree} if there is one.}
 
-\item{seed}{Integer that sets all the seeds.}
+\item{seed}{Integer that sets all the seeds. One finite whole number.}
 }
 \value{
 An \code{mc_abc_table}: a data frame with one row per simulation, the parameters and the

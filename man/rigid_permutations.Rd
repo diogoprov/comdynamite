@@ -21,11 +21,11 @@ the rows of \code{biogeography}. Distances are Euclidean, so they should be proj
 \item{biogeography}{Matrix of biogeographic events with one row per site and values of 1,
 -1 and 0, as given to \code{\link[=node_test]{node_test()}}.}
 
-\item{n_perm}{Largest number of permutations. Fewer are returned when fewer distinct
-placements of the event exist.}
+\item{n_perm}{Largest number of permutations, one whole number, 1 or more. Fewer are
+returned when fewer distinct placements of the event exist.}
 
-\item{gap}{A moved site counts as inside the landscape when it is closer than \code{gap} to a
-site, or in a hole narrower than twice \code{gap} between sites (four times \code{gap} off a
+\item{gap}{One positive number, or \code{NULL} for the default. A moved site counts as inside
+the landscape when it is closer than \code{gap} to a site, or in a hole narrower than twice \code{gap} between sites (four times \code{gap} off a
 lattice, where sites leave larger voids between neighbours), but not beyond an edge. A
 site that lands inside but not on a site goes to the nearest free site within twice
 \code{gap}. The default is the median distance from a site to its fourth nearest site: the
@@ -34,16 +34,17 @@ the spacing of sparse sites, so that holes count as inside. It is not the \code{
 \code{\link[=patch_permutations]{patch_permutations()}}, which is 1.5 times this one by default.}
 
 \item{outside}{Largest fraction of the sites of an event that may land outside the
-landscape in a move. Those sites go to the nearest free site within twice \code{gap}, and the
-move is dropped when one has none.}
+landscape in a move, one number between 0 and 1. Those sites go to the nearest free site
+within twice \code{gap}, and the move is dropped when one has none.}
 
 \item{independent}{Distance beyond which parts of an event move independently of each
-other, while staying at least that far apart. The default, \code{Inf}, moves the whole event
-together and assumes nothing about the range of autocorrelation.}
+other, while staying at least that far apart. One positive number, which may be \code{Inf}.
+The default, \code{Inf}, moves the whole event together and assumes nothing about the range of
+autocorrelation.}
 
 \item{max_tries}{Largest number of moves tried: of the enumerated moves of one part, in
 random order, when placements fail or repeat a layout, or of the combinations of several
-independent parts, which cannot all be enumerated.}
+independent parts, which cannot all be enumerated. One whole number, 1 or more.}
 }
 \value{
 List with one integer matrix per event, each with one permutation per row and the

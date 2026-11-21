@@ -10,11 +10,11 @@ spatial_folds(coords, k = 5, method = c("blocks", "random"), seed = 1)
 \item{coords}{Matrix or data frame with one row per site and the coordinates in columns, such
 as \code{landscape$coords} or the \code{coords} of an \code{\link[=mc_data]{mc_data()}}.}
 
-\item{k}{Number of folds.}
+\item{k}{Number of folds. One whole number, from 2 up to the number of sites.}
 
 \item{method}{\code{"blocks"} for spatial blocks or \code{"random"}.}
 
-\item{seed}{Integer that sets the seed.}
+\item{seed}{Integer that sets the seed. One finite whole number.}
 }
 \value{
 Integer vector with the fold of each site.

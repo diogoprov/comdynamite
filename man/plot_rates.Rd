@@ -18,18 +18,19 @@ plot_rates(
 \item{tree}{A \code{phylo} object with branch lengths, or a result of \code{\link[=trait_rates]{trait_rates()}}, which
 carries its tree and rates.}
 
-\item{rates}{Rate of each branch, in the order of the rows of \code{tree$edge}, or a result of
+\item{rates}{Rate of each branch (finite, or \code{NA}), in the order of the rows of \code{tree$edge},
+or a result of
 \code{\link[=trait_rates]{trait_rates()}}, whose \code{edge_rates} are used. Left out when \code{tree} is a result of
 \code{\link[=trait_rates]{trait_rates()}}.}
 
-\item{log}{Colour by the logarithm of the rate (the default), since rates are multiplicative.
-Needs positive rates; use \code{FALSE} for estimates that can be negative.}
+\item{log}{\code{TRUE} or \code{FALSE}. Colour by the logarithm of the rate (the default), since rates
+are multiplicative. Needs positive rates; use \code{FALSE} for estimates that can be negative.}
 
-\item{palette}{Name of a palette of \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}.}
+\item{palette}{One character string, the name of a palette of \code{\link[grDevices:hcl.colors]{grDevices::hcl.colors()}}.}
 
-\item{tip_labels}{Draw the names of the tips.}
+\item{tip_labels}{\code{TRUE} or \code{FALSE}. Draw the names of the tips.}
 
-\item{linewidth}{Width of the branches.}
+\item{linewidth}{Width of the branches. One number greater than 0.}
 
 \item{title}{Title of the plot, or \code{NULL}.}
 }

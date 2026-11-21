@@ -21,15 +21,17 @@ tstats(
 \item{individuals}{Data frame with one row per individual, such as from
 \code{\link[=sample_individuals]{sample_individuals()}}.}
 
-\item{traits}{Names of the columns with trait values.}
+\item{traits}{Names of the columns with trait values (a character vector).}
 
-\item{site, species}{Names of the columns with the site and the species of each individual.}
+\item{site, species}{Names of the columns with the site and the species of each individual.
+One character string each.}
 
 \item{method}{\code{"base"} (the default), computed in base R, or \code{"cati"} for \code{\link[cati:Tstats]{cati::Tstats()}};
 it needs the package cati.}
 
-\item{n_perm}{Number of randomisations of the null models; 0 or \code{NULL} for the observed
-values only, much faster in simulation studies with many replicates.}
+\item{n_perm}{Number of randomisations of the null models (one whole number, 0 or more); 0
+or \code{NULL} for the observed values only, much faster in simulation studies with many
+replicates.}
 
 \item{alternative}{Direction of the test of \code{method = "base"}: \code{"less"} (the default),
 \code{"greater"} or \code{"two.sided"}.}

@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- Input validation (rOpenSci standards G2 and G3): every scalar argument of the exported
+  functions is checked for its length, type and range before any computation, with a message
+  that names the argument, and the help pages say what each one accepts. Infinite values in
+  `comm`, `env`, coordinates and traits stop the function, except where `Inf` has a meaning
+  (no drift with `ne_ratio = Inf`, no speciation with `threshold = Inf`, a permanent change
+  with `env_pulse(duration = Inf)`, sampling all individuals with `n = Inf`). Checks of zero
+  variance tolerate rounding error. The `stopifnot()` calls on user input became messages that
+  say what is expected. Some inputs that were silently truncated or gave `NA` results now stop:
+  fractional counts (such as `species = 2.5` in `species_traits()`), `NA` or `Inf` in `env` of
+  `simulate_static()`, character folds in `fold_summarise()`, `seed` beyond about 1e9 in the
+  ABC functions, and parameters that a model ignores but that were out of range. The package
+  help page says that arguments that choose among options are case-sensitive.
 - The Description and the help pages now say that `node_test()`, `node_contrasts()`,
   `phylo_vector()` and `trait_partition()` are translations of the MATLAB code in the
   supplements of Leibold et al. (2010) and Peres-Neto et al. (2012), with credit to their

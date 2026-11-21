@@ -100,23 +100,25 @@
 #'   ...
 #' @param alpha Competition matrix from [competition_matrix()]. Species are matched to the
 #'   rows of `traits` by name, or by position if `alpha` has no names.
-#' @param dispersal Emigration probability, one value or one per species.
-#' @param extirpation Probability that a population is lost at each time step,
-#'   one value or one per species.
+#' @param dispersal Emigration probability, between 0 and 1: one value or one per species.
+#' @param extirpation Probability that a population is lost at each time step, between 0 and
+#'   1: one value or one per species.
 #' @param disturbance Probability that a site is disturbed at each time step, losing all its
 #'   populations unless `disturbance_sensitivity` is below 1:
 #'   one value (0, the default, for none), or a matrix of sites x steps with the probability of
 #'   each site at each step, for disturbances that vary in space and time, such as the
 #'   seasonal floods of [river_floods()].
-#' @param n_steps Number of time steps.
+#' @param n_steps Number of time steps, one whole number, 1 or more.
 #' @param env_time Optional matrix (sites x `n_steps`) with the environment at
 #'   each step, e.g. from [env_over_time()]. If `NULL`, the environment of the
 #'   landscape is constant. With `env` (several axes), a list with one such matrix per column
 #'   of `env` (matched by name when named), or an array of sites x steps x axes.
-#' @param seed_steps Steps at which individuals are added during colonisation.
+#' @param seed_steps Steps at which individuals are added during colonisation, a numeric
+#'   vector without `NA` (`numeric(0)` for none).
 #' @param seed_mean Mean number of individuals of each species added to each
-#'   site at each seeding step (and at the start).
-#' @param record_steps Optional steps at which abundances are recorded.
+#'   site at each seeding step (and at the start), one finite number, 0 or more.
+#' @param record_steps Optional steps at which abundances are recorded, a numeric vector
+#'   without `NA`; steps outside 1 to `n_steps` are dropped.
 #' @param immigration How emigrants reach other sites on spatially explicit landscapes:
 #'   `"poisson"` (the default, as in the code of Thompson et al. 2020) or `"multinomial"`,
 #'   which conserves them and is recommended for low dispersal (see Details). Spatially
@@ -142,9 +144,10 @@
 #'   `alpha` is not used. One trait at most with `evolution`; not available in
 #'   [simulate_evolving_metacommunity()].
 #' @param microsites With `recruitment = "lottery"`, the number of microsites of each site (one
-#'   value or one per site). `initial` must fit in them; seeds take vacant microsites by lottery
-#'   with the residents. In the colonisation history, `immigrants` and the migrant load count
-#'   immigrant recruits, and `propagule` the individuals of a new population after recruitment.
+#'   value or one per site), whole numbers, 1 or more. `initial` must fit in them; seeds take vacant
+#'   microsites by lottery with the residents. In the colonisation history, `immigrants` and the
+#'   migrant load count immigrant recruits, and `propagule` the individuals of a new population
+#'   after recruitment.
 #' @param dispersal_time Optional change of emigration through time: a vector with one
 #'   multiplier of `dispersal` per step (probabilities above 1 are set to 1), or a matrix with
 #'   one row per step and one column, or one per species, of emigration probabilities. For
@@ -170,19 +173,19 @@
 #'   above 1 are set to 1), applied on top of `dispersal` and `dispersal_time`. For example, a
 #'   dispersal pulse only in the floodplain at high water. `NULL` (the default) for the same
 #'   emigration at every site.
-#' @param disturbance_sensitivity Probability that a population is lost when its site is
-#'   disturbed: one value or one per species. 1 (the default) removes all the populations of a
-#'   disturbed site, as without this argument; lower values let species that resist the
-#'   disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
-#'   keep their populations.
-#' @param mortality With `recruitment = "lottery"`, the probability that an adult dies at each
-#'   step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
-#'   overlapping generations, with a generation time of about `1 / mortality` steps. With
-#'   `evolution`, selection, mutation and the loss of variance to selection act on recruits, so
-#'   that their effect per step scales with the share of recruits in the population; drift
-#'   comes from the sampling of both survivors and recruits, so that it approaches that of a
-#'   Moran model at low mortality; founders are sampled once, when they recruit;
-#'   `steps_per_generation` must stay 1.
+#' @param disturbance_sensitivity Probability that a population is lost when its site is disturbed,
+#'   between 0 and 1: one value or one per species. 1 (the default) removes all the populations of a
+#'   disturbed site, as without this argument; lower values let species that resist the disturbance
+#'   (for instance drought-tolerant or air-breathing fish when a lake dries out) keep their
+#'   populations.
+#' @param mortality With `recruitment = "lottery"`, the probability that an adult dies at each step,
+#'   whatever its phenotype, one number greater than 0 and up to 1: 1 (the default) for discrete
+#'   generations, lower values for overlapping generations, with a generation time of about
+#'   `1 / mortality` steps. With `evolution`, selection, mutation and the loss of variance to
+#'   selection act on recruits, so that their effect per step scales with the share of recruits
+#'   in the population; drift comes from the sampling of both survivors and recruits, so that it
+#'   approaches that of a Moran model at low mortality; founders are sampled once, when they
+#'   recruit; `steps_per_generation` must stay 1.
 #' @param initial Optional matrix (sites x species) of abundances or 0/1 presences at the start,
 #'   only where `pool` allows.
 #' @param evolution Optional settings from [evolution_control()] for the evolution of the niche
@@ -258,7 +261,11 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    dispersal_time = NULL, kernels = NULL,
                                    kernel_step = NULL, kernel_group = NULL,
                                    dispersal_site = NULL, disturbance_sensitivity = 1) {
-  stopifnot(inherits(landscape, "mc_landscape"))
+  if (!inherits(landscape, "mc_landscape")) {
+    stop("`landscape` must be an `mc_landscape` object, such as one from ",
+         "`landscape_implicit()` or `landscape_grid()`", call. = FALSE)
+  }
+  check_count(n_steps, "n_steps")
   immigration <- match.arg(immigration)
   recruitment <- match.arg(recruitment)
   several <- is.list(traits) && !is.data.frame(traits)
@@ -302,13 +309,16 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
   } else if (is.null(env_time)) {
     growth_rates(stats::setNames(landscape$env, sites), traits)
   } else {
-    stopifnot(nrow(env_time) == length(landscape$env), ncol(env_time) >= n_steps)
+    if (!is.matrix(env_time) || !is.numeric(env_time) ||
+          nrow(env_time) != length(landscape$env) || ncol(env_time) < n_steps) {
+      stop("`env_time` must be a numeric matrix with one row per site (",
+           length(landscape$env), ") and at least `n_steps` (", n_steps, ") columns",
+           call. = FALSE)
+    }
     function(step) growth_rates(stats::setNames(env_time[, step], sites), traits)
   }
   if (!is.null(evolution)) {
-    if (!inherits(evolution, "mc_evolution")) {
-      stop("`evolution` must come from `evolution_control()`", call. = FALSE)
-    }
+    check_evolution(evolution)
     mv <- is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
       is.matrix(evolution$env_var) || is.list(evolution$env_var)
     if (several || mv) {
@@ -421,15 +431,38 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
 mc_setup <- function(st) {
   eval(quote({
     immigration <- match.arg(immigration)
+    check_count(n_steps, "n_steps")
+    check_number(seed_mean, "seed_mean", lower = 0)
+    if (!is.numeric(seed_steps) || anyNA(seed_steps)) {
+      stop("`seed_steps` must be numbers of steps without NA (`numeric(0)` for none)",
+           call. = FALSE)
+    }
+    if (!is.null(record_steps) && (!is.numeric(record_steps) || anyNA(record_steps))) {
+      stop("`record_steps` must be `NULL` or numbers of steps without NA", call. = FALSE)
+    }
     r_fun <- if (is.function(r)) r else function(step) r
     r1 <- r_fun(1)
+    if (!is.matrix(r1) || !is.numeric(r1)) {
+      stop("`r` must be a numeric matrix of sites x species, or a function of the step that ",
+           "returns one", call. = FALSE)
+    }
     m <- nrow(r1)
     k_all <- ncol(r1)
-    stopifnot(all(dim(alpha) == k_all), n_steps >= 1)
-    if (!is.null(disp_matrix)) stopifnot(all(dim(disp_matrix) == m))
+    # one species may come with a single number, as `alpha[sp, sp]` gives
+    one_value <- k_all == 1 && is.null(dim(alpha)) && length(alpha) == 1
+    if (!is.numeric(alpha) ||
+          !(one_value || identical(as.integer(dim(alpha)), c(k_all, k_all)))) {
+      stop("`alpha` must be a numeric matrix with one row and one column per species (",
+           k_all, ")", call. = FALSE)
+    }
+    if (!is.null(disp_matrix) && !identical(as.integer(dim(disp_matrix)), c(m, m))) {
+      stop("`disp_matrix` must be a matrix with one row and one column per site (", m, ")",
+           call. = FALSE)
+    }
+    probabilities_per_species(dispersal, "dispersal", k_all)
+    probabilities_per_species(extirpation, "extirpation", k_all)
     dispersal <- rep_len(dispersal, k_all)
     extirpation <- rep_len(extirpation, k_all)
-    stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
     if (!is.numeric(disturbance) || anyNA(disturbance) || any(disturbance < 0) ||
         any(disturbance > 1) ||
         !(length(disturbance) == 1 ||
@@ -459,7 +492,7 @@ mc_setup <- function(st) {
     # emigration probabilities at each step (steps x species), from `dispersal_time`
     disp_prob_time <- dispersal_by_step(dispersal_time, dispersal, n_steps, k_all)
     if (!is.null(disp_prob_time) && m == 1 && any(disp_prob_time > 0)) {
-      stop("dispersal needs at least two sites", call. = FALSE)
+      stop("`dispersal_time` needs at least two sites", call. = FALSE)
     }
     kernels <- kernels_by_step(kernels, kernel_step, n_steps, m, disp_matrix, kernel_group)
     kernel_group <- kernel_groups(kernel_group, kernel_step, k_all)
@@ -471,7 +504,7 @@ mc_setup <- function(st) {
              "one row per site (", m, ") and one column per step (", n_steps, ")",
              call. = FALSE)
       }
-      if (m == 1) stop("dispersal needs at least two sites", call. = FALSE)
+      if (m == 1) stop("`dispersal_site` needs at least two sites", call. = FALSE)
     }
     if (!is.numeric(disturbance_sensitivity) || anyNA(disturbance_sensitivity) ||
         any(disturbance_sensitivity < 0) || any(disturbance_sensitivity > 1) ||
@@ -535,9 +568,7 @@ mc_setup <- function(st) {
     last_seed <- max(c(0, seed_steps))
     competition_hook <- NULL
     ev <- if (!is.null(evolution)) {
-      if (!inherits(evolution, "mc_evolution")) {
-        stop("`evolution` must come from `evolution_control()`", call. = FALSE)
-      }
+      check_evolution(evolution)
       if (evolution_is_mv(evolution)) evolution_state_mv(evolution, m, k_all, species) else
         evolution_state(evolution, m, k_all, species)
     }
@@ -605,6 +636,23 @@ mc_setup <- function(st) {
     present <- matrix(FALSE, m, k_all)
   }), st)
   invisible(st)
+}
+
+# stops unless `evolution` is a set of settings from evolution_control()
+check_evolution <- function(evolution) {
+  if (!inherits(evolution, "mc_evolution")) {
+    stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+  }
+  invisible(evolution)
+}
+
+# stops unless `x` holds probabilities between 0 and 1, one value or one per species (`k`)
+probabilities_per_species <- function(x, name, k) {
+  if (!is.numeric(x) || anyNA(x) || any(x < 0 | x > 1) || !length(x) %in% c(1, k)) {
+    stop("`", name, "` must be one probability between 0 and 1, or one per species (", k, ")",
+         call. = FALSE)
+  }
+  invisible(x)
 }
 
 # one time step of mc_dynamics(), evaluated in the state `st`

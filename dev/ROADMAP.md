@@ -23,8 +23,8 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 1b. **Padrões do rOpenSci (auditoria de 2026-11-21).** O pacote entra pela via de software
    estatístico (categorias EA, RE e BS, 206 padrões a anotar com `srr`). Fase 1 (correções
    rápidas: CONTRIBUTING, código de conduta, ORCID, badge, WORDLIST, `.lintr`, pkgcheck no CI,
-   falhas do pkgcheck) na 0.10.0.9000. Faltam: fase 2, decidir a atribuição do código
-   derivado de MATLAB (`node_test.R`, `phylo_gradient.R`, `food_web.R`); fase 3, validação de
+   falhas do pkgcheck) na 0.10.0.9000. Fase 2 (atribuição do código derivado de MATLAB) no PR #142, com o
+   e-mail aos autores enviado em 2026-11-21. Faltam: fase 3, validação de
    entradas (escalares, `Inf`, NA, comparações de ponto flutuante, mensagens de
    `stopifnot()`); fase 4, suíte estendida de testes (várias sementes, ruído, erro tipo I das
    permutações, recuperação no modelo Bayesiano); fase 5, anotação `srr` e consulta prévia
@@ -1477,7 +1477,8 @@ Objetivo: API estável e pacote no CRAN.
 - **Código em MATLAB.** Os suplementos não trazem licença. Decidido em 2026-11-21 (fase 2 do
   rOpenSci): pedir aos autores (Peres-Neto e Leibold) permissão para distribuir as traduções
   sob MIT e perguntar se querem constar em `Authors@R` (`ctb` ou `cph`), e corrigir já a
-  redação (`DESCRIPTION` dizia que tudo vinha das equações publicadas). Se recusarem ou não
+  redação (`DESCRIPTION` dizia que tudo vinha das equações publicadas). E-mail enviado em
+  2026-11-21; aguardando resposta. Se recusarem ou não
   responderem, reescrever `node_test()`, `node_contrasts()`, `phylo_vector()` e
   `trait_partition()` a partir dos artigos e apêndices, com o Octave só para conferir.
   `food_web_dynamics()` foi escrito a partir das equações; o MATLAB de McPeek só foi rodado.

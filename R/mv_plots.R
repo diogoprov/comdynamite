@@ -19,10 +19,10 @@
 #'   [trait_mk()]). `NULL` draws every branch in one colour.
 #' @param colours Colours of the regimes, named by regime or in the order of the sorted
 #'   regimes; one colour when there are no regimes.
-#' @param tip_labels Should the tips be labelled?
-#' @param legend Draw the legend of the regimes?
-#' @param point_size Size of the tips.
-#' @param linewidth Width of the branches.
+#' @param tip_labels `TRUE` or `FALSE`. Should the tips be labelled?
+#' @param legend `TRUE` or `FALSE`. Draw the legend of the regimes?
+#' @param point_size Size of the tips. One number greater than 0.
+#' @param linewidth Width of the branches. One number greater than 0.
 #' @param labels,... Deprecated: `labels` is now `tip_labels`; graphical arguments of base
 #'   graphics are no longer used (modify the ggplot object instead).
 #' @return A ggplot object.
@@ -45,6 +45,9 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
   need_ggplot("plot_traits()")
   tip_labels <- renamed_arg(tip_labels, labels, "tip_labels", "labels")
   legend <- legend_flag(legend)
+  check_flag(tip_labels, "tip_labels")
+  check_number(point_size, "point_size", lower = 0, open = TRUE)
+  check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   x <- as.matrix(x)
   if (!is.numeric(x) || is.null(rownames(x))) {
     stop("`x` must be a numeric matrix with tip labels as row names", call. = FALSE)
@@ -139,10 +142,10 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
 #' @param x A `rate_matrix` object from [rate_matrix()].
 #' @param traits The two traits to draw (names or numbers); with more traits, the ellipse is
 #'   that of the marginal covariance of the two.
-#' @param level Number of standard deviations of the ellipse.
+#' @param level Number of standard deviations of the ellipse. One number greater than 0.
 #' @param colours Colours of the regimes, in the order of the regimes.
-#' @param legend Draw the legend of the regimes?
-#' @param linewidth Width of the ellipses.
+#' @param legend `TRUE` or `FALSE`. Draw the legend of the regimes?
+#' @param linewidth Width of the ellipses. One number greater than 0.
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @seealso [rate_matrix()], [plot_traits()].
@@ -159,9 +162,8 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL, leg
   ms <- if (is.list(x)) lapply(unclass(x), unclass) else list(rates = unclass(x))
   if (ncol(ms[[1]]) < 2) stop("a rate matrix of one trait has no ellipse", call. = FALSE)
   if (length(traits) != 2) stop("`traits` must name two traits", call. = FALSE)
-  if (!is.numeric(level) || length(level) != 1 || !(level > 0)) {
-    stop("`level` must be one positive number", call. = FALSE)
-  }
+  check_number(level, "level", lower = 0, open = TRUE)
+  check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   cols <- unlist(regime_colours(names(ms), colours))
   ells <- do.call(rbind, lapply(names(ms), function(k) {
     e <- ellipse_points(ms[[k]][traits, traits, drop = FALSE], level)
@@ -201,8 +203,8 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL, leg
 #' @param x An `mc_assembly` object from [assemble_community()].
 #' @param traits The two traits to draw (names or numbers).
 #' @param colours Colours of the species kept and removed, and of the contours.
-#' @param species_labels Should the species be labelled?
-#' @param point_size Size of the species.
+#' @param species_labels `TRUE` or `FALSE`. Should the species be labelled?
+#' @param point_size Size of the species. One number greater than 0.
 #' @param labels,... Deprecated: `labels` is now `species_labels`; graphical arguments of base
 #'   graphics are no longer used. The aspect ratio is always 1, so that the contours of
 #'   Euclidean distances are circles.
@@ -223,6 +225,8 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
                           species_labels = FALSE, point_size = 2, ..., labels = NULL) {
   need_ggplot("plot_assembly()")
   species_labels <- renamed_arg(species_labels, labels, "species_labels", "labels")
+  check_flag(species_labels, "species_labels")
+  check_number(point_size, "point_size", lower = 0, open = TRUE)
   if (!inherits(x, "mc_assembly")) {
     stop("`x` must be the output of assemble_community()", call. = FALSE)
   }

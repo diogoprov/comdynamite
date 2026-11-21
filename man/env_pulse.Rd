@@ -18,18 +18,21 @@ env_pulse(
 \item{env}{Environment of each site (a vector, e.g. the \code{env} of an \code{mc_landscape}), or a
 matrix (sites x steps) with the environment at each step, e.g. from \code{\link[=env_over_time]{env_over_time()}}.}
 
-\item{n_steps}{Number of time steps. Taken from \code{env} when it is a matrix.}
+\item{n_steps}{Number of time steps: one whole number, 1 or more. Taken from \code{env} when it
+is a matrix.}
 
 \item{sites}{Disturbed sites: indices or a logical vector with one value per site. With no
 site (e.g. \code{integer(0)}), \code{env} is returned unchanged, as an undisturbed control.}
 
-\item{start}{First disturbed step.}
+\item{start}{First disturbed step: one whole number, 1 or more.}
 
-\item{duration}{Number of disturbed steps of each pulse; \code{Inf} for a permanent change.}
+\item{duration}{Number of disturbed steps of each pulse: one whole number, 1 or more, or
+\code{Inf} for a permanent change.}
 
 \item{value}{Environment of the disturbed sites: one value, or one per disturbed site.}
 
-\item{every}{Optional period of recurrent pulses: a new pulse starts every \code{every} steps
+\item{every}{Optional period of recurrent pulses (one whole number, 1 or more): a new pulse
+starts every \code{every} steps
 after \code{start} until the last step, so that the frequency of disturbance is \code{1 / every}.
 \code{NULL} (the default) for a single pulse. Needs a finite \code{duration} shorter than \code{every}.}
 }

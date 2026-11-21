@@ -17,11 +17,11 @@ trait_ou(
 \arguments{
 \item{tree}{A rooted \code{phylo} tree with branch lengths.}
 
-\item{n_traits}{Number of traits. Taken from the rate matrices when \code{sigma2} gives them, or
-else from the columns of \code{theta} when it is a matrix.}
+\item{n_traits}{Number of traits (one whole number, 1 or more). Taken from the rate matrices
+when \code{sigma2} gives them, or else from the columns of \code{theta} when it is a matrix.}
 
 \item{alpha}{Strength of selection towards the optimum (0 = Brownian
-motion).}
+motion). One finite number, 0 or more.}
 
 \item{sigma2}{Rate of the stochastic (drift) component: one number for all traits, which
 then evolve independently; a symmetric positive semidefinite rate matrix with one row and

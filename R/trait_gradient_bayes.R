@@ -111,10 +111,14 @@
 #' @param x Result of [trait_gradient()].
 #' @param tree Phylogeny (`phylo`) with branch lengths; species not in it are left out.
 #' @param ou_alpha `NULL` for Brownian motion, or the strength \eqn{a} of an
-#'   Ornstein-Uhlenbeck process, in units of 1 / branch length.
-#' @param lambda_prior The two shape parameters of the beta prior of both \eqn{\lambda}.
+#'   Ornstein-Uhlenbeck process, in units of 1 / branch length: one finite number greater
+#'   than 0.
+#' @param lambda_prior The two shape parameters of the beta prior of both \eqn{\lambda}: two
+#'   finite numbers greater than 0.
 #' @param chains,parallel_chains,iter_warmup,iter_sampling,adapt_delta,seed Passed to the
-#'   `$sample()` method of cmdstanr.
+#'   `$sample()` method of cmdstanr. `chains`, `parallel_chains` and `iter_sampling` are each
+#'   one whole number, 1 or more; `iter_warmup` one whole number, 0 or more; `adapt_delta` one
+#'   number between 0 and 1, both excluded; `seed` one whole number, 0 or more, or `NULL`.
 #' @param ... Further arguments to `$sample()`, such as `max_treedepth` or `refresh`.
 #' @return An object of class `mc_trait_gradient_bayes`, a list with
 #'   \describe{
@@ -153,6 +157,17 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
   if (!inherits(x, "mc_trait_gradient")) {
     stop("`x` must come from trait_gradient()", call. = FALSE)
   }
+  check_number(ou_alpha, "ou_alpha", lower = 0, open = TRUE, null_ok = TRUE)
+  check_count(chains, "chains")
+  check_count(parallel_chains, "parallel_chains")
+  check_count(iter_warmup, "iter_warmup", min = 0)
+  check_count(iter_sampling, "iter_sampling")
+  check_number(adapt_delta, "adapt_delta", lower = 0, upper = 1, open = TRUE)
+  check_count(seed, "seed", min = 0, null_ok = TRUE)
+  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || any(!is.finite(lambda_prior)) ||
+      any(lambda_prior <= 0)) {
+    stop("`lambda_prior` must be two positive finite numbers", call. = FALSE)
+  }
   for (pkg in c("cmdstanr", "posterior")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       stop("trait_gradient_bayes() needs the package ", pkg, # nocov
@@ -160,10 +175,6 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
     }
   }
   check_tree(tree)
-  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || anyNA(lambda_prior) ||
-      any(lambda_prior <= 0)) {
-    stop("`lambda_prior` must be two positive numbers", call. = FALSE)
-  }
   model <- tg_bayes_data(x, tree, ou_alpha, lambda_prior)
   if (model$kish < 0.7) {
     warning("the weights leave an effective sample of ", round(100 * model$kish),
@@ -260,9 +271,7 @@ tg_bayes_data <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)) {
 phylo_correlation <- function(tree, species, ou_alpha = NULL) {
   shared <- ape::vcv(tree)[species, species]
   if (is.null(ou_alpha)) return(stats::cov2cor(shared))
-  if (!is.numeric(ou_alpha) || length(ou_alpha) != 1 || is.na(ou_alpha) || !(ou_alpha > 0)) {
-    stop("`ou_alpha` must be NULL or one positive number", call. = FALSE)
-  }
+  check_number(ou_alpha, "ou_alpha", lower = 0, open = TRUE)
   d <- diag(shared)
   cov <- exp(-ou_alpha * (outer(d, d, "+") - 2 * shared)) * -expm1(-2 * ou_alpha * shared) /
     (2 * ou_alpha)
@@ -340,7 +349,7 @@ print.mc_trait_gradient_bayes <- function(x, ...) {
 #'
 #' @param object Result of [trait_gradient_bayes()].
 #' @param resp `"sitemean"` or `"trait"`.
-#' @param ndraws Number of posterior draws to plot.
+#' @param ndraws Number of posterior draws to plot. One whole number, 1 or more.
 #' @param ... Further arguments to [bayesplot::ppc_dens_overlay()].
 #' @return A ggplot object from bayesplot.
 #' @examplesIf interactive() && requireNamespace("cmdstanr", quietly = TRUE) && requireNamespace("bayesplot", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
@@ -357,6 +366,7 @@ print.mc_trait_gradient_bayes <- function(x, ...) {
 pp_check.mc_trait_gradient_bayes <- function(object, resp = c("sitemean", "trait"),
                                              ndraws = 50, ...) {
   resp <- match.arg(resp)
+  check_count(ndraws, "ndraws")
   p <- object$data
   if (resp == "sitemean") {
     y <- p$site_mean[!is.na(p$site_mean)]

@@ -13,9 +13,10 @@ the rows of \code{biogeography}.}
 \item{biogeography}{Matrix of biogeographic events with one row per site and values of 1,
 -1 and 0, as given to \code{\link[=node_test]{node_test()}}.}
 
-\item{n_perm}{Number of permutations.}
+\item{n_perm}{Number of permutations, one whole number, 1 or more.}
 
-\item{gap}{Largest distance between neighbouring sites of a patch. The default, 1.5 times
+\item{gap}{Largest distance between neighbouring sites of a patch, one finite number
+greater than 0. The default (\code{NULL}), 1.5 times
 the median distance from a site to its fourth nearest site, joins diagonal neighbours in
 a full grid where most sites are not on an edge, and the four nearest sites are one step
 away, and grows with the spacing of sparse sites, where it follows the distance between

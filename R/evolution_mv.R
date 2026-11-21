@@ -359,15 +359,18 @@ mv_flow <- function(ev, za, pa, n, em, imm, disp_matrix, cols, sel = NULL) {
 #' `divergence` sets how much species differ: the standard deviation of the log of the scale
 #' factor of `P` (`"proportional"`) or of the eigenvalues (`"independent"` and `"shared"`).
 #'
-#' @param species Names of the species, or their number.
-#' @param n_traits Number of traits (axes). Ignored when `P` is given.
+#' @param species Names of the species, or their number (one whole number, 1 or more).
+#' @param n_traits Number of traits (axes): one whole number, 1 or more. Ignored when `P` is
+#'   given.
 #' @param family One of `"proportional"`, `"independent"` and `"shared"`.
 #' @param P Phenotypic covariance matrix, symmetric and positive definite. By default, unit
 #'   variances with a common correlation `correlation`.
-#' @param correlation Correlation between all pairs of traits in the default `P`.
-#' @param heritability Share \eqn{h^2}{h2} of the phenotypic variance that is additive genetic,
-#'   between 0 and 1.
-#' @param divergence Standard deviation (on the log scale) of the differences among species.
+#' @param correlation Correlation between all pairs of traits in the default `P`: one number
+#'   greater than -1 / (`n_traits` - 1) and less than 1.
+#' @param heritability Share \eqn{h^2}{h2} of the phenotypic variance that is additive genetic:
+#'   one number between 0 and 1.
+#' @param divergence Standard deviation (on the log scale) of the differences among species:
+#'   one number, 0 or more.
 #' @return A list with `genetic_var` and `env_var`, each a named list of one matrix per species,
 #'   ready for `evolution_control(genetic_var = m$genetic_var, env_var = m$env_var)`.
 #' @references
@@ -394,16 +397,19 @@ genetic_matrices <- function(species, n_traits = 2,
                              family = c("proportional", "independent", "shared"), P = NULL,
                              correlation = 0, heritability = 0.5, divergence = 0) {
   family <- match.arg(family)
-  if (is.numeric(species) && length(species) == 1) species <- paste0("sp", seq_len(species))
+  if (is.numeric(species) && length(species) == 1) {
+    check_count(species, "species")
+    species <- paste0("sp", seq_len(species))
+  }
   species <- as.character(species)
-  stopifnot(length(species) >= 1, !anyDuplicated(species),
-            is.numeric(heritability), length(heritability) == 1, heritability >= 0,
-            heritability <= 1, is.numeric(divergence), length(divergence) == 1,
-            divergence >= 0)
+  if (length(species) < 1 || anyNA(species) || anyDuplicated(species)) {
+    stop("`species` must be distinct names of species, or their number", call. = FALSE)
+  }
+  check_number(heritability, "heritability", 0, 1)
+  check_number(divergence, "divergence", lower = 0)
   if (is.null(P)) {
-    stopifnot(is.numeric(n_traits), length(n_traits) == 1, n_traits >= 1,
-              n_traits == round(n_traits), is.numeric(correlation), length(correlation) == 1,
-              correlation > -1 / max(n_traits - 1, 1), correlation < 1)
+    check_count(n_traits, "n_traits")
+    check_number(correlation, "correlation", -1 / max(n_traits - 1, 1), 1, open = TRUE)
     P <- matrix(correlation, n_traits, n_traits)
     diag(P) <- 1
   }

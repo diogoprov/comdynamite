@@ -26,7 +26,8 @@
 #' slope (most with small groups and little divergence), so by default (`correct = TRUE`) the
 #' expected sampling variance on each component, \eqn{v_k^\top P v_k}{v_k' P v_k} times the mean of
 #' \eqn{1 / n}{1 / n} over groups, with \eqn{P}{P} the pooled covariance within groups, is
-#' subtracted from the variance among means before the regression. The regression treats each component as an independent
+#' subtracted from the variance among means before the regression. The regression treats each
+#' component as an independent
 #' observation, so with few traits the test has little power, and the slope has \eqn{q - 2}{q -
 #' 2} degrees of freedom for \eqn{q}{q} traits.
 #'
@@ -41,12 +42,14 @@
 #' @param W `NULL` (the default) for the pooled covariance within groups, or a covariance matrix
 #'   with one row and column per trait (for example, a known \eqn{G}{G}).
 #' @param correct Whether to subtract the sampling variance of the group means (needs groups
-#'   with more than one individual).
-#' @param level The confidence level of the interval for the slope.
+#'   with more than one individual): `TRUE` or `FALSE`.
+#' @param level The confidence level of the interval for the slope: one number greater than 0
+#'   and less than 1.
 #' @return An object of class `drift_test`: a list with `slope`, its standard error `se`, the
 #'   interval `conf_int`, the `statistic` (\eqn{t}{t}) and `p_value` of the test of slope 1, the
 #'   `intercept` (the logarithm of the proportionality constant, an estimate of \eqn{\log(t /
-#'   N_e)}{log(t / Ne)} when `W` is \eqn{G}{G} and `correct = TRUE`), `df`, `n_groups`, `n_traits`, the matrix `W`
+#'   N_e)}{log(t / Ne)} when `W` is \eqn{G}{G} and `correct = TRUE`), `df`, `n_groups`, `n_traits`,
+#'   the matrix `W`
 #'   and a data frame `components` with the `eigenvalue`, the expected `sampling` variance of
 #'   the means (0 without correction) and the `between` variance (corrected) of each principal
 #'   component. It has `print()` and `plot()` methods.
@@ -95,18 +98,15 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
   if (!is.matrix(x) || !is.numeric(x)) {
     stop("`x` must be a data frame or a numeric matrix", call. = FALSE)
   }
+  if (any(is.infinite(x))) stop("`x` has infinite values", call. = FALSE)
   if (is.null(colnames(x))) colnames(x) <- paste0("trait", seq_len(ncol(x)))
   q <- ncol(x)
   if (q < 3) stop("the test needs at least three traits", call. = FALSE)
   if (length(group) != nrow(x)) {
     stop("`group` must have one value per row of `x` or name a column", call. = FALSE)
   }
-  if (!is.logical(correct) || length(correct) != 1 || is.na(correct)) {
-    stop("`correct` must be TRUE or FALSE", call. = FALSE)
-  }
-  if (!is.numeric(level) || length(level) != 1 || is.na(level) || level <= 0 || level >= 1) {
-    stop("`level` must be a number between 0 and 1", call. = FALSE)
-  }
+  check_flag(correct, "correct")
+  check_number(level, "level", 0, 1, open = TRUE)
   keep <- stats::complete.cases(x) & !is.na(group)
   x <- x[keep, , drop = FALSE]
   group <- factor(group[keep])
@@ -127,8 +127,10 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
     W <- P
   } else {
     W <- as.matrix(if (is.data.frame(W)) data.matrix(W) else W)
-    if (!is.numeric(W) || !identical(dim(W), c(q, q)) || !isSymmetric(unname(W))) {
-      stop("`W` must be a symmetric matrix with one row and column per trait", call. = FALSE)
+    if (!is.numeric(W) || !identical(dim(W), c(q, q)) || !all(is.finite(W)) ||
+          !isSymmetric(unname(W))) {
+      stop("`W` must be a symmetric matrix of finite numbers with one row and column per trait",
+           call. = FALSE)
     }
     if (!is.null(rownames(W)) && !is.null(colnames(W))) {
       if (!setequal(rownames(W), colnames(x)) || !setequal(colnames(W), colnames(x))) {

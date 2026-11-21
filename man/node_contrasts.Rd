@@ -9,10 +9,10 @@ node_contrasts(tree, cherries = TRUE, branch_lengths = FALSE)
 \arguments{
 \item{tree}{A \code{phylo} object with dichotomous nodes.}
 
-\item{cherries}{Keep nodes that join two tips? The article tests them (its Figure 3),
-but the function \code{CreateNodeContrasts} of the authors leaves them out.}
+\item{cherries}{\code{TRUE} or \code{FALSE}. Keep nodes that join two tips? The article tests them
+(its Figure 3), but the function \code{CreateNodeContrasts} of the authors leaves them out.}
 
-\item{branch_lengths}{Use the branch lengths of \code{tree}?}
+\item{branch_lengths}{\code{TRUE} or \code{FALSE}. Use the branch lengths of \code{tree}?}
 }
 \value{
 Matrix with one row per tip and one column per node, named by the node

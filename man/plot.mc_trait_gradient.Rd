@@ -21,11 +21,11 @@
 
 \item{type}{\code{"gradient"} or \code{"beta_alpha"}.}
 
-\item{species_labels}{Write the names of species in \code{type = "beta_alpha"}.}
+\item{species_labels}{\code{TRUE} or \code{FALSE}. Write the names of species in \code{type = "beta_alpha"}.}
 
 \item{colour}{Colour of the species lines and means.}
 
-\item{point_size}{Size of the points.}
+\item{point_size}{Size of the points. One number greater than 0.}
 
 \item{...}{Not used.}
 }

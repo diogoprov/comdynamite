@@ -7,9 +7,10 @@
 landscape_implicit(n_sites, env_range = c(0, 100))
 }
 \arguments{
-\item{n_sites}{Number of sites.}
+\item{n_sites}{Number of sites: one whole number, 2 or more.}
 
-\item{env_range}{Range of the uniform distribution of the environment.}
+\item{env_range}{Range of the uniform distribution of the environment: two finite numbers,
+the first smaller.}
 }
 \value{
 An \code{mc_landscape} object: a list with \code{env} (one value per site),

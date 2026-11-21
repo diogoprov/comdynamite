@@ -10,7 +10,8 @@ dispersal_kernel(dist, scale, shape = c("exponential", "gaussian"))
 \item{dist}{Square matrix of distances among sites.}
 
 \item{scale}{Scale of the kernel, in the units of \code{dist}: the mean distance of the
-exponential kernel and the standard deviation of the Gaussian one.}
+exponential kernel and the standard deviation of the Gaussian one. One number greater
+than 0.}
 
 \item{shape}{\code{"exponential"} (the default) or \code{"gaussian"}.}
 }

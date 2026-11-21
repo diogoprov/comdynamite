@@ -10,7 +10,8 @@ equilibrium_check(x, tolerance = 0.05)
 \item{x}{An \code{mc_sim} object with \code{history}, from \code{record_steps} of
 \code{\link[=simulate_metacommunity]{simulate_metacommunity()}}, with at least four recorded steps.}
 
-\item{tolerance}{Largest relative change in a statistic that counts as settled.}
+\item{tolerance}{Largest relative change in a statistic that counts as settled. One number,
+0 or more.}
 }
 \value{
 Data frame with one row for \code{gamma}, the species in all sites, \code{alpha}, the mean

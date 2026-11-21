@@ -44,8 +44,9 @@
 #'   the rows of `biogeography`.
 #' @param biogeography Matrix of biogeographic events with one row per site and values of 1,
 #'   -1 and 0, as given to [node_test()].
-#' @param n_perm Number of permutations.
-#' @param gap Largest distance between neighbouring sites of a patch. The default, 1.5 times
+#' @param n_perm Number of permutations, one whole number, 1 or more.
+#' @param gap Largest distance between neighbouring sites of a patch, one finite number
+#'   greater than 0. The default (`NULL`), 1.5 times
 #'   the median distance from a site to its fourth nearest site, joins diagonal neighbours in
 #'   a full grid where most sites are not on an edge, and the four nearest sites are one step
 #'   away, and grows with the spacing of sparse sites, where it follows the distance between
@@ -66,9 +67,10 @@
 #' @export
 patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
   check_event_coords(coords, biogeography)
+  check_count(n_perm, "n_perm")
+  check_number(gap, "gap", lower = 0, open = TRUE, null_ok = TRUE)
   coords <- as.matrix(coords)
   biogeography <- as.matrix(biogeography)
-  stopifnot(n_perm >= 1)
   distances <- as.matrix(stats::dist(coords))
   if (is.null(gap)) {
     gap <- 1.5 * neighbour_distance(distances, 4)
@@ -77,7 +79,6 @@ patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
            "give `gap`", call. = FALSE)
     }
   }
-  stopifnot(gap > 0)
   sites <- rownames(biogeography)
   events <- lapply(seq_len(ncol(biogeography)), function(e) {
     groups <- c(area_patches(biogeography[, e] == 1, distances, gap),
@@ -97,8 +98,9 @@ check_event_coords <- function(coords, biogeography) {
   check_numeric_columns(coords, "`coords`", "Keep only the two coordinates.")
   coords <- as.matrix(coords)
   biogeography <- as.matrix(biogeography)
-  if (!is.numeric(coords) || ncol(coords) != 2 || anyNA(coords)) {
-    stop("`coords` needs two numeric columns without missing values", call. = FALSE)
+  if (!is.numeric(coords) || ncol(coords) != 2 || anyNA(coords) || any(is.infinite(coords))) {
+    stop("`coords` needs two numeric columns without missing or infinite values",
+         call. = FALSE)
   }
   if (nrow(coords) != nrow(biogeography)) {
     stop("`coords` has ", nrow(coords), " rows and `biogeography` has ", nrow(biogeography),

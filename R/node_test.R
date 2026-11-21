@@ -13,9 +13,9 @@
 #' distant from the root.
 #'
 #' @param tree A `phylo` object with dichotomous nodes.
-#' @param cherries Keep nodes that join two tips? The article tests them (its Figure 3),
-#'   but the function `CreateNodeContrasts` of the authors leaves them out.
-#' @param branch_lengths Use the branch lengths of `tree`?
+#' @param cherries `TRUE` or `FALSE`. Keep nodes that join two tips? The article tests them
+#'   (its Figure 3), but the function `CreateNodeContrasts` of the authors leaves them out.
+#' @param branch_lengths `TRUE` or `FALSE`. Use the branch lengths of `tree`?
 #' @return Matrix with one row per tip and one column per node, named by the node
 #'   numbers of `tree`.
 #' @note Translated from the MATLAB function `CreateNodeContrasts` in the supplement of
@@ -35,6 +35,8 @@
 #' @export
 node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
   check_tree(tree, branch_lengths = FALSE)
+  check_flag(cherries, "cherries")
+  check_flag(branch_lengths, "branch_lengths")
   if (branch_lengths && is.null(tree$edge.length)) {
     stop("`tree` has no branch lengths", call. = FALSE)
   }
@@ -168,7 +170,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' @param biogeography Optional matrix of biogeographic events with one row per site
 #'   and values of 1, -1 and 0.
 #' @param n_perm Number of permutations of sites, of species and of both. With
-#'   `site_permutations`, only of species.
+#'   `site_permutations`, only of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation per row,
 #'   for example from [torus_permutations()], to use instead of free permutations of sites.
 #' @param area_permutations Optional list with one matrix per event, from
@@ -181,12 +183,13 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   within strata (see [env_surrogates()]; their rates of type I
 #'   error were checked in [pcps_test()], not here). Surrogates need `coords`. They
 #'   replace the permutations of sites, not those of the areas of `biogeography`.
-#' @param coords Matrix of coordinates with one row per site, for `null = "variogram"` or
-#'   `"parametric"`. Taken from an [mc_data()] object when it has them.
-#' @param cores Number of cores, with nodes run in parallel. Not available on Windows,
-#'   where one core is used. For reproducible p-values with more than one core, call
-#'   `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results still depend on the number of
-#'   cores.
+#' @param coords Matrix of coordinates with one row per site, without missing or infinite
+#'   values, for `null = "variogram"` or `"parametric"`. Taken from an [mc_data()] object when
+#'   it has them.
+#' @param cores One whole number, 1 or more: the number of cores, with nodes run in
+#'   parallel. Not available on Windows, where one core is used. For reproducible p-values
+#'   with more than one core, call `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results
+#'   still depend on the number of cores.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
 #'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `r2_weighted`, `statistic`,
 #'   `p_site`, `p_species`, `p_max`, `p_joint`, `n_draws`, the valid draws of sites, since a
@@ -237,13 +240,19 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
     if (is.null(coords)) coords <- comm$coords
     comm <- comm$comm
   }
+  check_count(n_perm, "n_perm")
+  check_count(cores, "cores")
+  if (!is.null(coords)) check_coords(coords)
   if (inherits(nodes, "phylo")) {
     stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
   }
   comm <- check_comm(comm)
   nodes <- as.matrix(nodes)
+  if (!is.numeric(nodes) || any(!is.finite(nodes))) {
+    stop("`nodes` must be a numeric matrix without missing or infinite values, as from ",
+         "`node_contrasts()`", call. = FALSE)
+  }
   env <- check_env(env, comm)
-  stopifnot(n_perm >= 1, cores >= 1)
   check_permutations(site_permutations, comm)
   if (!is.null(biogeography)) biogeography <- check_biogeography(biogeography, comm)
   check_area_permutations(area_permutations, biogeography, comm)
@@ -367,7 +376,8 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
 #'   `"others"` for one event per area.
 #' @param outside For `contrast = "others"`, sites outside all areas are left out of each
 #'   event with `"zero"` or count as the other side with `"other"`.
-#' @param min_sites A warning is given for events with fewer sites on one side. This is a
+#' @param min_sites One whole number, 0 or more. A warning is given for events with fewer sites
+#'   on one side. This is a
 #'   rule of thumb, not a value from the literature.
 #' @return Matrix with one row per site and one column per event, with values of 1, -1 and 0.
 #' @references
@@ -393,6 +403,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
 biogeography_matrix <- function(area, contrast = "others", outside = c("zero", "other"),
                                 min_sites = 5) {
   outside <- match.arg(outside)
+  check_count(min_sites, "min_sites", min = 0)
   member <- area_membership(area)
   inside <- if (outside == "zero") rowSums(member) > 0 else rep(TRUE, nrow(member))
   sides <- function(first, second) {
@@ -554,7 +565,7 @@ node_fit <- function(incidence, values, env) {
   site_weights <- rowSums(incidence)
   species_weights <- colSums(incidence)
   both_clades <- any(species_weights[values > 0] > 0) && any(species_weights[values < 0] > 0)
-  if (!both_clades || n < p + 2 || any(apply(env, 2, stats::var) == 0)) return(failed)
+  if (!both_clades || n < p + 2 || any(no_variance(env))) return(failed)
   standard <- weighted_standardise(matrix(values), species_weights)
   response <- drop(incidence %*% standard)
   predictors <- weighted_standardise(env, site_weights)

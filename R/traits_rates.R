@@ -30,21 +30,22 @@
 #'
 #' @param tree A rooted `phylo` tree with branch lengths.
 #' @param model How rates vary among branches: `"shift"`, `"gbm"` or `"iid"`.
-#' @param sigma2 Rate at the root (`"shift"`, `"gbm"`) or median rate (`"iid"`).
+#' @param sigma2 Rate at the root (`"shift"`, `"gbm"`) or median rate (`"iid"`). One finite
+#'   number greater than 0.
 #' @param shifts Number of shifts, for `"shift"` when neither `shift_edges` nor `shift_rate` is
-#'   given.
+#'   given. One whole number, from 0 up to the number of branches.
 #' @param shift_size Multipliers of the rate at each shift, recycled to the number of shifts, or
 #'   a function of the number of shifts that gives them. Values below 1 slow evolution down.
 #' @param shift_edges Optional row numbers of `tree$edge` at whose start the shifts happen.
 #' @param shift_rate Optional rate of shifts per unit of branch length, for shifts as a Poisson
-#'   process along the branches.
+#'   process along the branches. One finite number, 0 or more, or `NULL`.
 #' @param shift_branch Should a shift last only to the end of its branch, rather than pass to
-#'   all branches descending from it?
+#'   all branches descending from it? `TRUE` or `FALSE`.
 #' @param relative Multiply the rate before each shift by `shift_size` (`TRUE`), or set the rate
-#'   after it to `sigma2` times `shift_size` (`FALSE`)?
+#'   after it to `sigma2` times `shift_size` (`FALSE`)? `TRUE` or `FALSE`.
 #' @param rate_sd Standard deviation of the logarithm of the rate: per square root of time for
-#'   `"gbm"` and among branches for `"iid"`.
-#' @param root Trait value at the root.
+#'   `"gbm"` and among branches for `"iid"`. One finite number, 0 or more.
+#' @param root Trait value at the root. One finite number.
 #' @param root_value Deprecated; use `root`.
 #' @param edge_rates Optional rate of each branch, in the order of the rows of `tree$edge`, such as
 #'   those of [history_rates()]. When given, `model` and its arguments are ignored.
@@ -103,36 +104,33 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
   root_value <- renamed_arg(root, root_value, "root", "root_value")
   check_tree(tree)
   model <- if (is.null(edge_rates)) match.arg(model) else "given"
-  if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
-    stop("`sigma2` must be one positive number", call. = FALSE)
-  }
-  if (length(rate_sd) != 1 || !is.finite(rate_sd) || rate_sd < 0) {
-    stop("`rate_sd` must be one number, zero or more", call. = FALSE)
-  }
+  check_number(sigma2, "sigma2", lower = 0, open = TRUE)
+  check_number(rate_sd, "rate_sd", lower = 0)
+  check_number(root_value, "root")
+  check_number(shift_rate, "shift_rate", lower = 0, null_ok = TRUE)
+  check_flag(shift_branch, "shift_branch")
+  check_flag(relative, "relative")
   n_tip <- ape::Ntip(tree)
   n_edge <- nrow(tree$edge)
+  check_count(shifts, "shifts", min = 0, max = n_edge)
   cladewise <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)  # parents first
   root <- n_tip + 1
   node_rate <- NULL
   shift_table <- NULL
 
   if (model == "given") {
-    if (!is.numeric(edge_rates) || length(edge_rates) != n_edge || anyNA(edge_rates) ||
-        any(edge_rates <= 0)) {
+    if (!is.numeric(edge_rates) || length(edge_rates) != n_edge ||
+        !all(is.finite(edge_rates)) || any(edge_rates <= 0)) {
       stop("`edge_rates` needs one positive number per row of `tree$edge`", call. = FALSE)
     }
     edge_rate <- unname(edge_rates)
   } else if (model == "shift") {
     if (!is.null(shift_rate)) {
-      if (length(shift_rate) != 1 || !is.finite(shift_rate) || shift_rate < 0) {
-        stop("`shift_rate` must be one number, zero or more", call. = FALSE)
-      }
       n_shifts <- stats::rpois(1, shift_rate * sum(tree$edge.length))
       shift_edges <- sample.int(n_edge, n_shifts, replace = TRUE, prob = tree$edge.length)
       position <- stats::runif(n_shifts) * tree$edge.length[shift_edges]
     } else {
       if (is.null(shift_edges)) {
-        stopifnot(length(shifts) == 1, shifts >= 0, shifts <= n_edge)
         shift_edges <- if (shifts == 0) integer(0) else {
           sample.int(n_edge, shifts, prob = tree$edge.length)
         }
@@ -148,8 +146,8 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
     size <- if (is.function(shift_size)) shift_size(n_shifts) else {
       rep_len(shift_size, n_shifts)
     }
-    if (n_shifts > 0 && (!is.numeric(size) || length(size) != n_shifts || anyNA(size) ||
-                         any(size <= 0))) {
+    if (n_shifts > 0 && (!is.numeric(size) || length(size) != n_shifts ||
+                         !all(is.finite(size)) || any(size <= 0))) {
       stop("`shift_size` must give one positive multiplier per shift", call. = FALSE)
     }
     at_node <- rep(sigma2, n_tip + tree$Nnode)
@@ -226,14 +224,15 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
 #'   [trait_mk()] or phytools.
 #' @param model `"state"`, `"burst"` or `"sympatry"`.
 #' @param sigma2 Rate before any change of state (`"burst"`) or scale of the rate
-#'   (`"sympatry"`).
+#'   (`"sympatry"`). One finite number greater than 0.
 #' @param state_rates For `"state"`, the rate in each state, named by state.
 #' @param burst,decay For `"burst"`, the relative increase of the rate at each change of state
-#'   and the time scale of its decay.
+#'   (one finite number, 0 or more) and the time scale of its decay (one finite number greater
+#'   than 0).
 #' @param r For `"sympatry"`, the change in the logarithm of the rate per lineage in the same
-#'   state.
+#'   state. One finite number.
 #' @param overlap For `"sympatry"`, count the lineages whose state shares an area (states such
-#'   as `"A+B"`, split at `"+"`) rather than those in the same state.
+#'   as `"A+B"`, split at `"+"`) rather than those in the same state. `TRUE` or `FALSE`.
 #' @return Numeric vector with the rate of each branch, in the order of the rows of
 #'   `history$edge`.
 #' @references Drury, J., Clavel, J., Manceau, M., & Morlon, H. (2016). Estimating the effect of
@@ -267,9 +266,11 @@ history_rates <- function(history, model = c("state", "burst", "sympatry"), sigm
     stop("`history` must be a tree with a history of class `simmap`", call. = FALSE)
   }
   model <- match.arg(model)
-  if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
-    stop("`sigma2` must be one positive number", call. = FALSE)
-  }
+  check_number(sigma2, "sigma2", lower = 0, open = TRUE)
+  check_number(burst, "burst", lower = 0)
+  check_number(decay, "decay", lower = 0, open = TRUE)
+  check_number(r, "r")
+  check_flag(overlap, "overlap")
   maps <- history$maps
   lengths <- history$edge.length
   states <- unique(unlist(lapply(maps, names), use.names = FALSE))
@@ -286,15 +287,9 @@ history_rates <- function(history, model = c("state", "burst", "sympatry"), sigm
       vapply(maps, function(m) sum(m * state_rates[names(m)]), numeric(1))
     },
     burst = {
-      if (length(burst) != 1 || !is.finite(burst) || burst < 0 ||
-          length(decay) != 1 || !is.finite(decay) || decay <= 0) {
-        stop("`burst` must be zero or more and `decay` positive", call. = FALSE)
-      }
       burst_integral(history, burst, decay) * sigma2
     },
     sympatry = {
-      if (length(r) != 1 || !is.finite(r)) stop("`r` must be one number", call. = FALSE)
-      stopifnot(is.logical(overlap), length(overlap) == 1, !is.na(overlap))
       sympatry_integral(history, r, overlap) * sigma2
     })
   rate <- integral / lengths
@@ -440,11 +435,13 @@ partner_turnover <- function(x, partners = c("all", "competitors")) {
 #'
 #' @param x An `mc_sim` object with `history`, that is, run with `record_steps`.
 #' @param tree The tree of the species in `x`; by default the one stored in `x`.
-#' @param sigma2 Rate outside the stretch informed by the metacommunity.
+#' @param sigma2 Rate outside the stretch informed by the metacommunity. One finite number
+#'   greater than 0.
 #' @param k Increase of the rate, relative to `sigma2`, per unit of turnover (partners gained
-#'   or lost per site and time step).
+#'   or lost per site and time step). One finite number, 0 or more.
 #' @param window Length of the end of each tip branch represented by the metacommunity, in the
-#'   units of the branch lengths; `NULL` uses the whole tip branch. A window longer than a tip
+#'   units of the branch lengths (one finite number greater than 0); `NULL` uses the whole tip
+#'   branch. A window longer than a tip
 #'   branch is cut to its length.
 #' @inheritParams partner_turnover
 #' @return Numeric vector with the rate of each branch, in the order of the rows of
@@ -477,15 +474,9 @@ turnover_rates <- function(x, tree = x$tree, sigma2 = 1, k = 1, window = NULL,
 }
 
 check_tip_window <- function(sigma2, k, window) {
-  if (length(sigma2) != 1 || !is.finite(sigma2) || sigma2 <= 0) {
-    stop("`sigma2` must be one positive number", call. = FALSE)
-  }
-  if (length(k) != 1 || !is.finite(k) || k < 0) {
-    stop("`k` must be one number, zero or more", call. = FALSE)
-  }
-  if (!is.null(window) && (length(window) != 1 || !is.finite(window) || window <= 0)) {
-    stop("`window` must be one positive number or `NULL`", call. = FALSE)
-  }
+  check_number(sigma2, "sigma2", lower = 0, open = TRUE)
+  check_number(k, "k", lower = 0)
+  check_number(window, "window", lower = 0, open = TRUE, null_ok = TRUE)
 }
 
 # rate sigma2 * (1 + k * value) over the last `window` of each tip branch, sigma2 elsewhere;
@@ -522,7 +513,7 @@ tip_window_rates <- function(tree, value, sigma2, k, window) {
 #' @param levels Trophic level of each tip, `"R"`, `"N"` or `"P"`, named by tip label or in the
 #'   order of `tree$tip.label`.
 #' @param k Increase of the rate, relative to `sigma2`, per unit of speed (trait units per unit
-#'   of time of the food web).
+#'   of time of the food web). One finite number, 0 or more.
 #' @inheritParams turnover_rates
 #' @return Numeric vector with the rate of each branch, in the order of the rows of
 #'   `tree$edge`, with the speed of each level as attribute `"speed"`.

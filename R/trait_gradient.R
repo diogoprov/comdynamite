@@ -50,15 +50,19 @@
 #'
 #' @param data Data frame with one row per individual or per population (species in a site),
 #'   such as from [sample_individuals()]. Rows of one population are averaged.
-#' @param trait Name of the column with trait values.
-#' @param site,species Names of the columns with the site and the species.
+#' @param trait Name of the column with trait values (finite or missing). One character string.
+#' @param site,species Names of the columns with the site and the species. Each one character
+#'   string.
 #' @param abundance Name of the column with the abundance of the species in the site (one value
-#'   per population), or `NULL` to weight each occurrence equally.
+#'   per population), or `NULL` to weight each occurrence equally. One character string or
+#'   `NULL`.
 #' @param site_weights,species_weights `"abundance"` or `"occurrence"`: weights of the site
 #'   means and of the species means and \eqn{\beta}. Both default to `"abundance"` when
 #'   `abundance` is given.
-#' @param leave_one_out Leave the focal species out of the site means (the default).
+#' @param leave_one_out `TRUE` or `FALSE`. Leave the focal species out of the site means (the
+#'   default).
 #' @param min_slope Smallest number of sites with measured values to fit the slope \eqn{b_i}.
+#'   One whole number, 2 or more.
 #' @return An object of class `mc_trait_gradient`, a list with
 #'   \describe{
 #'     \item{species}{one row per species: `species`, `n_sites`, `n_alone` (sites where the
@@ -99,11 +103,15 @@ trait_gradient <- function(data, trait = "trait", site = "site", species = "spec
                            min_slope = 3) {
   site_weights <- match.arg(site_weights, c("abundance", "occurrence"))
   species_weights <- match.arg(species_weights, c("abundance", "occurrence"))
+  check_string(trait, "trait")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_flag(leave_one_out, "leave_one_out")
   pops <- tg_populations(data, trait, site, species, abundance)
   if ("abundance" %in% c(site_weights, species_weights) && is.null(abundance)) {
     stop("weights by abundance need the column `abundance`", call. = FALSE)
   }
-  stopifnot(is.logical(leave_one_out), length(leave_one_out) == 1, !is.na(leave_one_out))
   check_count(min_slope, "min_slope", min = 2)
   settings <- list(trait = trait, site_weights = site_weights,
                    species_weights = species_weights, leave_one_out = leave_one_out,
@@ -124,6 +132,9 @@ tg_populations <- function(data, trait, site, species, abundance) {
     stop("`data` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
   }
   if (!is.numeric(data[[trait]])) stop("`", trait, "` must be numeric", call. = FALSE)
+  if (any(is.infinite(data[[trait]]))) {
+    stop("`", trait, "` has infinite values", call. = FALSE)
+  }
   key <- paste(data[[site]], data[[species]], sep = "\r")
   first <- !duplicated(key)
   index <- match(key, key[first])
@@ -134,8 +145,8 @@ tg_populations <- function(data, trait, site, species, abundance) {
                      abundance = 1, trait = as.vector(values), stringsAsFactors = FALSE)
   if (!is.null(abundance)) {
     a <- data[[abundance]]
-    if (!is.numeric(a) || anyNA(a) || any(a < 0)) {
-      stop("`", abundance, "` must be numbers, 0 or more, without missing values",
+    if (!is.numeric(a) || any(!is.finite(a)) || any(a < 0)) {
+      stop("`", abundance, "` must be finite numbers, 0 or more, without missing values",
            call. = FALSE)
     }
     differs <- tapply(a, index, function(v) diff(range(v)) > 0)
@@ -387,15 +398,17 @@ trait_gradient_weights <- function(data, abundance, ...) {
 #' has no phylogenetic structure, and loses power for the variance of \eqn{\beta}.
 #'
 #' @param x Result of [trait_gradient()].
-#' @param n_null Number of null communities.
+#' @param n_null Number of null communities. One whole number, 1 or more.
 #' @param null `"species"` (the default), `"phylo"`, `"bm"`, `"curveball"` or `"permute"`.
 #' @param burn_in,thin Trades of the curveball chain before the first null community and
 #'   between null communities; by default 50 and 5 times the number of sites, so that each site
-#'   takes part in about 10 trades between null communities.
+#'   takes part in about 10 trades between null communities. Each one whole number (0 or more
+#'   for `burn_in`, 1 or more for `thin`) or `NULL`.
 #' @param tree Phylogeny (`phylo`) with branch lengths, for `null = "phylo"` and `"bm"`; every
 #'   species of `x` must be a tip.
 #' @param phylo_k The constant \eqn{k \ge 1} of the phylogenetic permutations of
-#'   `null = "phylo"`: closer to 1, more exchanges among relatives only.
+#'   `null = "phylo"`: closer to 1, more exchanges among relatives only. One finite number, 1
+#'   or more.
 #' @return An object of class `mc_trait_gradient_test`, a list with `statistics` (one row per
 #'   statistic: `observed`, `null_mean`, `null_sd`, `ses` and `p`), `species` (one row per
 #'   species: observed \eqn{\beta} with `ses_beta` and `p_beta`, and with `null = "species"`,
@@ -459,9 +472,7 @@ trait_gradient_test <- function(x, n_null = 999,
     if (length(absent) > 0) {
       stop("species of `x` not in `tree`: ", paste(absent, collapse = ", "), call. = FALSE)
     }
-    if (!is.numeric(phylo_k) || length(phylo_k) != 1 || is.na(phylo_k) || phylo_k < 1) {
-      stop("`phylo_k` must be one number, 1 or more", call. = FALSE)
-    }
+    check_number(phylo_k, "phylo_k", lower = 1)
     shared <- ape::vcv(ape::keep.tip(tree, species_ids))[species_ids, species_ids]
   } else {
     phylo_k <- NULL
@@ -644,9 +655,11 @@ print.mc_trait_gradient_test <- function(x, ...) {
 #'   name.
 #' @param responses Which of `"beta"`, `"alpha"` and `"mean"` to model.
 #' @param models Which of `"white"`, `"BM"` and `"OU"` to fit.
-#' @param n_boot Number of bootstrap samples for the standard errors.
+#' @param n_boot Number of bootstrap samples for the standard errors. One whole number, 2 or
+#'   more.
 #' @param min_sites Smallest number of sites of a species with a value (sites where it is
-#'   alone do not count); species with fewer sites, or not in `tree`, are left out.
+#'   alone do not count); species with fewer sites, or not in `tree`, are left out. One whole
+#'   number, 2 or more.
 #' @return An object of class `mc_trait_gradient_phylo`, a list with `models` (one row per
 #'   response and model: `response`, `model`, `mu`, `sigma2`, `a`, `half_life` (\eqn{\ln 2 / a},
 #'   in units of branch length), `at_bound` (an OU fit with \eqn{a} at a bound), `loglik`,
@@ -696,7 +709,7 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
   fits <- lapply(responses, function(r) {
     y <- data[[r]]
     v <- data[[paste0("se_", r)]]^2
-    if (stats::var(y) == 0) stop("`", r, "` does not vary among species", call. = FALSE)
+    if (no_variance(y)) stop("`", r, "` does not vary among species", call. = FALSE)
     do.call(rbind, lapply(models, function(m) {
       f <- gls_known_error(y, v, covs, m)
       data.frame(response = r, model = m, f, row.names = NULL)
@@ -816,9 +829,9 @@ print.mc_trait_gradient_phylo <- function(x, ...) {
 #'
 #' @param x Result of [trait_gradient()] or [trait_gradient_test()].
 #' @param type `"gradient"` or `"beta_alpha"`.
-#' @param species_labels Write the names of species in `type = "beta_alpha"`.
+#' @param species_labels `TRUE` or `FALSE`. Write the names of species in `type = "beta_alpha"`.
 #' @param colour Colour of the species lines and means.
-#' @param point_size Size of the points.
+#' @param point_size Size of the points. One number greater than 0.
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @seealso [trait_gradient()], [trait_gradient_test()]
@@ -842,6 +855,8 @@ plot.mc_trait_gradient <- function(x, type = c("gradient", "beta_alpha"),
   .data <- ggplot2::.data
   type <- match.arg(type)
   check_colours(colour, 1)
+  check_flag(species_labels, "species_labels")
+  check_number(point_size, "point_size", lower = 0, open = TRUE)
   s <- x$species
   if (type == "beta_alpha") {
     p <- ggplot2::ggplot(s, ggplot2::aes(x = .data$beta, y = .data$alpha)) +

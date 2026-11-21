@@ -10,13 +10,14 @@ env_river(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf, ...)
 \item{landscape}{A landscape from \code{\link[=landscape_river]{landscape_river()}}.}
 
 \item{n_steps}{\code{NULL} (the default) for one value per site, or the number of steps of a
-series.}
+series: one whole number, 1 or more.}
 
 \item{mean}{Mean of the environment (one value, or one per site, such as a gradient from
 the outlet to the headwaters).}
 
 \item{temporal_scale}{Steps over which the correlation in time falls by a factor of
-\eqn{e}{e} (the correlation between consecutive steps is \eqn{\exp(-1 /}{exp(-1 /}
+\eqn{e}{e}, one number, 0 or more, or \code{Inf} (the correlation between consecutive steps is
+\eqn{\exp(-1 /}{exp(-1 /}
 \code{temporal_scale})); \code{Inf} keeps the first draw at every step and 0 draws every step
 anew.}
 

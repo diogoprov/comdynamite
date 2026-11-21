@@ -63,32 +63,36 @@
 #'
 #' @param mode `"geographic"`, `"ecological"`, `"point"` or `"fission"`.
 #' @param threshold For `"geographic"` and `"ecological"`: divergence in generations, or
-#'   difference of genetic means in units of the environment, that separates groups; `Inf`
-#'   turns speciation off. With several traits (one per niche axis), the difference of two
+#'   difference of genetic means in units of the environment, that separates groups: one
+#'   number greater than 0; `Inf` turns speciation off. With several traits (one per niche axis),
+#'   the difference of two
 #'   populations in `"ecological"` is the Mahalanobis distance of their genetic means under
 #'   the phenotypic matrix of the species, \eqn{\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
 #'   z}}{sqrt(dz' P^-1 dz)}, so `threshold` is in units of phenotypic standard deviations.
-#' @param rate For `"point"`: probability per individual per generation; for `"fission"`: rate
-#'   per species per generation.
+#' @param rate For `"point"`: probability per individual per generation, one number between 0
+#'   and 1; for `"fission"`: rate per species per generation, one finite number, 0 or more.
 #' @param divergence For `"geographic"`: `"cluster"` or `"gradual"`.
 #' @param migration_min For `divergence = "cluster"`: migration rate per generation that links
-#'   two populations. Where clusters form depends on dispersal, the kernel and abundances: the
-#'   rate of the strongest link of each population should straddle it. In the design of
+#'   two populations, one number greater than 0 (`Inf` links none). Where clusters form
+#'   depends on dispersal, the kernel and abundances: the rate of the strongest link of each
+#'   population should straddle it. In the design of
 #'   `data-raw/evolving_migration_min.R` (strongest links with median 0.006), species did not
 #'   split at all at 0.002 or below and split almost as with no links at 0.02 or above.
 #' @param reset_generations For `divergence = "cluster"`: generations in a row in the same
-#'   cluster after which divergence returns to 0.
-#' @param homogenization For `divergence = "gradual"`: reduction of divergence per migrant.
+#'   cluster after which divergence returns to 0; one whole number, 1 or more.
+#' @param homogenization For `divergence = "gradual"`: reduction of divergence per migrant;
+#'   one number, 0 or more.
 #' @param min_generations For `"ecological"`: generations in a row of difference and reduced
-#'   gene flow before groups split.
+#'   gene flow before groups split; one whole number, 1 or more.
 #' @param migration_max For `"ecological"`: migration rate per generation below which gene flow
-#'   counts as reduced.
+#'   counts as reduced; one number, 0 or more (`Inf` for no limit on gene flow).
 #' @param partition For `"fission"`: `"spatial"` or `"random"`.
-#' @param jump_var Variance of the shift of the genetic mean of each new species. With several
-#'   traits, one value (independent shifts of that variance on every trait) or a covariance
+#' @param jump_var Variance of the shift of the genetic mean of each new species: one number, 0
+#'   or more. With several traits, one value (independent shifts of that variance on every trait) or
+#'   a covariance
 #'   matrix with one row and column per trait (for instance proportional to \eqn{G}{G}).
-#' @param completion Time to complete speciation, in generations (fixed or mean); 0 for
-#'   instantaneous speciation.
+#' @param completion Time to complete speciation, in generations (fixed or mean): one number,
+#'   0 or more; 0 for instantaneous speciation.
 #' @param completion_dist `"fixed"` or `"exponential"`.
 #' @return An `mc_speciation` object.
 #' @references Etienne, R. S., & Rosindell, J. (2012). Prolonging the past counteracts the pull
@@ -128,22 +132,34 @@ speciation_control <- function(mode = c("geographic", "ecological", "point", "fi
   divergence <- match.arg(divergence)
   partition <- match.arg(partition)
   completion_dist <- match.arg(completion_dist)
-  one <- function(x) is.numeric(x) && length(x) == 1
   if (mode %in% c("geographic", "ecological")) {
     if (missing(threshold)) stop("`threshold` is needed", call. = FALSE)
-    stopifnot(one(threshold), threshold > 0)
+    # Inf turns speciation off
+    check_number(threshold, "threshold", lower = 0, open = c(TRUE, FALSE),
+                 finite = FALSE)
     rate <- NA_real_
   } else {
     if (missing(rate)) stop("`rate` is needed", call. = FALSE)
-    stopifnot(one(rate), rate >= 0, mode == "fission" || rate <= 1)
+    # a probability per individual for "point", a rate per species for "fission"
+    check_number(rate, "rate", 0, if (mode == "point") 1 else Inf)
     threshold <- NA_real_
   }
-  stopifnot(one(migration_min), migration_min > 0, one(reset_generations),
-            reset_generations >= 1, one(homogenization), homogenization >= 0,
-            one(min_generations), min_generations >= 1, one(migration_max), migration_max >= 0,
-            (is.matrix(jump_var) && is.numeric(jump_var) && !anyNA(jump_var)) ||
-              (one(jump_var) && jump_var >= 0), one(completion),
-            completion >= 0)
+  # infinite migration rates are valid limits: no links (`migration_min`) or no guard on gene
+  # flow (`migration_max`)
+  check_number(migration_min, "migration_min", lower = 0, open = c(TRUE, FALSE),
+               finite = FALSE)
+  check_count(reset_generations, "reset_generations")
+  check_number(homogenization, "homogenization", lower = 0)
+  check_count(min_generations, "min_generations")
+  check_number(migration_max, "migration_max", lower = 0, finite = FALSE)
+  if (is.matrix(jump_var)) {
+    if (!is.numeric(jump_var) || !all(is.finite(jump_var))) {
+      stop("a matrix `jump_var` must hold finite numbers", call. = FALSE)
+    }
+  } else {
+    check_number(jump_var, "jump_var", lower = 0)
+  }
+  check_number(completion, "completion", lower = 0)
   structure(list(mode = mode, threshold = threshold, rate = rate, divergence = divergence,
                  migration_min = migration_min, reset_generations = reset_generations,
                  homogenization = homogenization, min_generations = min_generations,
@@ -225,13 +241,14 @@ print.mc_speciation <- function(x, ...) {
 #'   competition within a species: between sisters just split (`inter_max`) and between
 #'   distant species (`inter_min`); the overall scale (competition within a species); and the
 #'   distance in generations over which the excess over `inter_min` decays by a factor of
-#'   \eqn{e}{e}.
+#'   \eqn{e}{e}. Each one number: `inter_max` 0 or more, `inter_min` between 0 and `inter_max`,
+#'   `scale` greater than 0 and `distance_scale` greater than 0 (`Inf` for no decay).
 #' @param niche_overlap Should competition between species also fall with the difference of
-#'   their phenotypes in each site?
+#'   their phenotypes in each site? `TRUE` or `FALSE`.
 #' @param initial Optional matrix (sites x species) of abundances at the start; by default
 #'   Poisson(`seed_mean`) individuals of each species in every site.
-#' @param max_species Maximum number of species ever, including extinct ones; the simulation
-#'   stops with an error beyond it.
+#' @param max_species Maximum number of species ever, including extinct ones (one whole number,
+#'   1 or more); the simulation stops with an error beyond it.
 #' @param env For a list of `traits`: the environmental axes of each site, a matrix or data
 #'   frame with one row per site and one column per element of `traits`. The `genetic_var`
 #'   and `env_var` of `evolution` are then covariance matrices (see the section Several traits
@@ -336,7 +353,10 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
                                             kernel_step = NULL, dispersal_site = NULL,
                                             disturbance_sensitivity = 1,
                                             kernel_group = NULL) {
-  stopifnot(inherits(landscape, "mc_landscape"))
+  if (!inherits(landscape, "mc_landscape")) {
+    stop("`landscape` must be an `mc_landscape`, such as one from `landscape_grid()`",
+         call. = FALSE)
+  }
   if (!inherits(speciation, "mc_speciation")) {
     stop("`speciation` must come from `speciation_control()`", call. = FALSE)
   }
@@ -346,8 +366,15 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
          call. = FALSE)
   }
   immigration <- match.arg(immigration)
-  stopifnot(inter_max >= 0, inter_min >= 0, inter_min <= inter_max, scale > 0,
-            distance_scale > 0, max_species >= 1, is.logical(niche_overlap))
+  check_count(n_steps, "n_steps")
+  check_number(inter_max, "inter_max", lower = 0)
+  check_number(inter_min, "inter_min", 0, inter_max)
+  check_number(scale, "scale", lower = 0, open = TRUE)
+  # an infinite scale keeps competition between species at `inter_max`
+  check_number(distance_scale, "distance_scale", lower = 0, open = c(TRUE, FALSE),
+               finite = FALSE)
+  check_flag(niche_overlap, "niche_overlap")
+  check_count(max_species, "max_species")
   # several niche axes: one trait per axis, evolving with covariance matrices
   several <- is.list(traits) && !is.data.frame(traits)
   trait_list <- NULL

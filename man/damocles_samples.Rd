@@ -39,8 +39,8 @@ or \code{"mu"}; the other one is a single rate for the whole tree.}
 daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{damocles_fit()}, a fixed value, or
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
-\item{cores}{Number of cores, with configurations fitted in parallel. Not available on
-Windows, where one core is used.}
+\item{cores}{Number of cores, with configurations fitted in parallel. One whole number, 1 or
+more. Not available on Windows, where one core is used.}
 
 \item{object}{A result of \code{damocles_samples()}.}
 

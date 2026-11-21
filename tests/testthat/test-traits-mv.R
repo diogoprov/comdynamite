@@ -57,7 +57,7 @@ test_that("rate_matrix checks its inputs", {
                "only with constraint")
   expect_error(rate_matrix(1, correlation = list(a = 0.5), n_traits = 2),
                "only with constraint \"variance\"")
-  expect_error(rate_matrix(1, n_traits = 0), "one positive number")
+  expect_error(rate_matrix(1, n_traits = 0), "`n_traits`")
   expect_error(rate_matrix(1, correlation = 0.5, constraint = "equaldiagonal", n_traits = 2),
                "no correlations")
   expect_error(rate_matrix(c(1, 2), constraint = "equaldiagonal"), "one variance")

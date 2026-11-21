@@ -9,7 +9,7 @@ nested_variance(data, traits, factors, crossed = NULL, interaction = TRUE)
 \arguments{
 \item{data}{Data frame with the traits and the factors.}
 
-\item{traits}{Names of the columns with trait values.}
+\item{traits}{Names of the columns with trait values (a character vector).}
 
 \item{factors}{Names of the columns with the nested factors, from the broadest level to the
 finest.}
@@ -21,7 +21,8 @@ nested hierarchy.}
 
 \item{interaction}{With \code{crossed}, whether to add a level for the combination of the finest
 level of \code{factors} and the finest level of \code{crossed} (for instance the population, species
-by site). Without it, differences among populations of a species go to \code{within}.}
+by site). Without it, differences among populations of a species go to \code{within}. \code{TRUE}
+or \code{FALSE}.}
 }
 \value{
 A data frame with one row per level and one for the variance within the finest level

@@ -11,7 +11,7 @@
 
 \item{row.names, optional}{Not used.}
 
-\item{zeros}{Keep absences?}
+\item{zeros}{Keep absences? \code{TRUE} or \code{FALSE}.}
 
 \item{...}{Not used.}
 }

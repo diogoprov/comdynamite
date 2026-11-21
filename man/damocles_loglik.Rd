@@ -51,9 +51,9 @@ daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). I
 \item{start}{Optional starting rates, \code{c(gamma = , mu = )}; by default the optimisation
 starts from four combinations of 0.2 and 2 divided by the height of the tree.}
 
-\item{shared}{If \code{TRUE}, one set of parameters shared by all communities, estimated from the
-sum of their log-likelihoods; if \code{FALSE} (the default), separate parameters for each
-community.}
+\item{shared}{\code{TRUE} or \code{FALSE}. If \code{TRUE}, one set of parameters shared by all
+communities, estimated from the sum of their log-likelihoods; if \code{FALSE} (the default),
+separate parameters for each community.}
 
 \item{regimes}{Optional regime of each edge of \code{tree}, in the order of \code{tree$edge} (a factor
 or character vector), such as from \code{\link[=clade_regimes]{clade_regimes()}} or from a configuration of rate shifts

@@ -22,7 +22,8 @@ assemble_community(
 with species names as names or row names. For example, the output of
 \code{\link[=trait_ou]{trait_ou()}}.}
 
-\item{size}{Number of species in the local community.}
+\item{size}{Number of species in the local community, one whole number between 1 and the
+number of species in \code{traits}.}
 
 \item{rule}{Assembly rule.}
 
@@ -34,8 +35,8 @@ trait.}
 
 \item{min_distance}{For \code{rule = "limiting_similarity"}: optional end point.
 Removal stops as soon as no two remaining species are closer than this
-(a limit to similarity), even if more than \code{size} species remain. In the units of
-\code{distance}.}
+(a limit to similarity), even if more than \code{size} species remain. One finite number, 0 or
+more, in the units of \code{distance}; \code{NULL} for none.}
 
 \item{distance}{How to measure distances in trait space: \code{"euclidean"},
 \code{"standardized"} or \code{"mahalanobis"}; see Details.}

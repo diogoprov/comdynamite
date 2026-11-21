@@ -9,16 +9,17 @@ env_seasonal(env, n_steps = NULL, period, amplitude, phase = 0, year_sd = 0)
 \arguments{
 \item{env}{Environment of each site (a vector), or a matrix (sites x steps).}
 
-\item{n_steps}{Number of steps. Taken from \code{env} when it is a matrix.}
+\item{n_steps}{Number of steps: one whole number, 1 or more. Taken from \code{env} when it is a
+matrix.}
 
-\item{period}{Steps per cycle (a year).}
+\item{period}{Steps per cycle (a year): one number greater than 0.}
 
-\item{amplitude}{Amplitude of the cycle: one value, or one per site.}
+\item{amplitude}{Amplitude of the cycle: one finite value, or one per site.}
 
-\item{phase}{Step at which the cycle crosses its mean on the way up.}
+\item{phase}{Step at which the cycle crosses its mean on the way up: one finite number.}
 
 \item{year_sd}{Standard deviation of an anomaly drawn for each year (each block of \code{period}
-steps) and added to all sites; 0 (the default) for none.}
+steps) and added to all sites: one number, 0 or more; 0 (the default) for none.}
 }
 \value{
 Matrix with one row per site and one column per step, for \code{env_time} in

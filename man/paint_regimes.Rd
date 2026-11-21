@@ -14,7 +14,7 @@ regime.}
 
 \item{stem}{Should the branch leading to each node also take the new
 regime (the shift happens at the start of the stem rather than at the
-node)?}
+node)? \code{TRUE} or \code{FALSE}.}
 }
 \value{
 Character vector with the regime of each branch, in the order of

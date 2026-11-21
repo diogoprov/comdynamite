@@ -26,7 +26,7 @@ and species of \code{comm} missing from the tree are dropped.}
 
 \item{tree}{A rooted, fully dichotomous \code{phylo} tree with branch lengths.}
 
-\item{n_sim}{Number of null communities of each model.}
+\item{n_sim}{Number of null communities of each model. One whole number, 2 or more.}
 
 \item{gamma, mu}{Rates of local colonisation and extinction used to simulate the null
 communities, one value for all communities or one per community, or lists with one rate,
@@ -38,11 +38,12 @@ on to it.}
 (\code{"both"} draws the state of the root of each simulated community with equal
 probabilities).}
 
-\item{shared}{When the rates are estimated, \code{TRUE} fits one pair shared by all communities
-(see \code{\link[=damocles_fit]{damocles_fit()}}) and \code{FALSE} (the default) one pair per community.}
+\item{shared}{\code{TRUE} or \code{FALSE}. When the rates are estimated, \code{TRUE} fits one pair shared
+by all communities (see \code{\link[=damocles_fit]{damocles_fit()}}) and \code{FALSE} (the default) one pair per community.}
 
 \item{sympatry}{Probability that a present ancestor leaves both daughters present, used in
-the simulations (see \code{\link[=simulate_damocles]{simulate_damocles()}}); \code{NULL} estimates it with the rates.}
+the simulations (see \code{\link[=simulate_damocles]{simulate_damocles()}}): one number between 0 and 1, or \code{NULL} to
+estimate it with the rates.}
 
 \item{regimes}{Optional regime of each edge of \code{tree}, in the order of \code{tree$edge} (a factor
 or character vector), such as from \code{\link[=clade_regimes]{clade_regimes()}} or from a configuration of rate shifts

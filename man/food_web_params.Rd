@@ -108,6 +108,10 @@ attack coefficient on its own, as
 constants are \code{eps_R} and \code{eps_N}, \code{eta_N} and \code{eta_P}, \code{kappa_R} and \code{kappa_P}. Traits
 must then be positive.
 }
+
+Every parameter is one finite number. The widths and half-saturation constants must be
+greater than 0, the optima (\code{zc_R}, \code{zf_N}, \code{zx_P}) and steepnesses (\code{alpha}, \code{rho}, \code{tau})
+may take any sign, and all the others must be 0 or more.
 }
 \examples{
 p <- food_web_params(c0 = 10, d = 0.2)

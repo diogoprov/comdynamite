@@ -15,17 +15,22 @@
 #' `min_n` individuals are removed.
 #'
 #' @param individuals Data frame with one row per individual.
-#' @param n Number of individuals drawn from each population, or `NULL` to keep all.
-#' @param fraction Probability that each individual is kept; used when `n` is `NULL`.
-#' @param cover Share (0 to 1) of the abundance of each site covered by the species kept, from
-#'   the most abundant down (Pakeman & Quested 2007), or `NULL` to keep every species.
-#'   Abundances are those of the `abundance` column, or the numbers of individuals in the data.
-#'   Species tied in abundance are taken in the order of the data, and populations with an
-#'   abundance of zero are never kept.
-#' @param min_n Minimum number of individuals of a population after sampling.
-#' @param site,species Names of the columns with the site and the species.
+#' @param n Number of individuals drawn from each population (one whole number, 1 or more), or
+#'   `NULL` to keep all.
+#' @param fraction Probability that each individual is kept (one number greater than 0 and up
+#'   to 1); used when `n` is `NULL`.
+#' @param cover One number greater than 0 and up to 1: the share of the abundance of each site
+#'   covered by the species kept, from the most abundant down (Pakeman & Quested 2007), or `NULL` to
+#'   keep every species. Abundances are those of the `abundance` column, or the numbers of
+#'   individuals in the data. Species tied in abundance are taken in the order of the data, and
+#'   populations with an abundance of zero are never kept.
+#' @param min_n Minimum number of individuals of a population after sampling. One whole
+#'   number, 1 or more.
+#' @param site,species Names of the columns with the site and the species. One character
+#'   string each.
 #' @param abundance Name of a column with the abundance of each population (the same value for
-#'   all its individuals), or `NULL` to use the numbers of individuals in the data.
+#'   all its individuals), or `NULL` to use the numbers of individuals in the data. One
+#'   character string or `NULL`.
 #' @return The rows of `individuals` kept, in their original order.
 #' @references Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what
 #'   proportion of the species need to be measured? *Applied Vegetation Science*, 10, 91--96.
@@ -44,12 +49,14 @@
 subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover = NULL,
                                   min_n = 1, site = "site", species = "species",
                                   abundance = NULL) {
-  stopifnot(is.data.frame(individuals))
-  missing_columns <- setdiff(c(site, species, abundance), names(individuals))
-  if (length(missing_columns) > 0) {
-    stop("`individuals` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
-  }
-  stopifnot(length(min_n) == 1, min_n >= 1, min_n == round(min_n))
+  check_string(site, "site")
+  check_string(species, "species")
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_data_columns(individuals, c(site, species, abundance))
+  check_sample_size(n, null_ok = TRUE)
+  check_number(fraction, "fraction", 0, 1, open = c(TRUE, FALSE), null_ok = TRUE)
+  check_number(cover, "cover", 0, 1, open = c(TRUE, FALSE), null_ok = TRUE)
+  check_count(min_n, "min_n")
   site_id <- as.character(individuals[[site]])
   pop <- paste(site_id, as.character(individuals[[species]]), sep = "\r")
   pop_levels <- unique(pop)
@@ -61,23 +68,18 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
       tabulate(pop_index, length(pop_levels))
     } else {
       a <- individuals[[abundance]]
-      if (anyNA(a) || any(tapply(a, pop_index, function(v) length(unique(v))) > 1)) {
-        stop("`abundance` must have one value, not missing, for each population",
-             call. = FALSE)
-      }
+      check_population_abundance(a, pop_index)
       as.numeric(a[first])
     }
     dominant <- dominant_species(size, match(site_id[first], unique(site_id)), cover)
     keep <- dominant[pop_index]
   }
   if (!is.null(n)) {
-    stopifnot(length(n) == 1, n >= 1, n == round(n))
     chosen <- unlist(lapply(split(which(keep), pop_index[keep]), function(i) {
       if (length(i) <= n) i else i[sample.int(length(i), n)]
     }), use.names = FALSE)
     keep <- seq_along(keep) %in% chosen
   } else if (!is.null(fraction)) {
-    stopifnot(length(fraction) == 1, fraction > 0, fraction <= 1)
     keep <- keep & stats::runif(length(keep)) < fraction
   }
   size_kept <- tabulate(pop_index[keep], length(pop_levels))
@@ -102,16 +104,18 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
 #' @param statistic Function of a data frame of individuals that returns a named numeric
 #'   vector. The default gives the mean over sites of the three T-statistics of [tstats()] for
 #'   the column `trait`.
-#' @param n Numbers of individuals per population; the default runs from 2 to the median size
-#'   of the populations. With `cover`, a single number of individuals per population, or
-#'   `NULL` (the default) to keep all of them.
-#' @param cover Shares (0 to 1) of abundance covered by the species measured, for a rarefaction
-#'   over species instead of individuals; `NULL` (the default) for a rarefaction over `n`.
+#' @param n Numbers of individuals per population (whole numbers, 1 or more); the default runs
+#'   from 2 to the median size of the populations. With `cover`, one whole number of
+#'   individuals per population, or `NULL` (the default) to keep all of them.
+#' @param cover Shares (numbers greater than 0 and up to 1) of abundance covered by the species
+#'   measured, for a rarefaction over species instead of individuals; `NULL` (the default) for a
+#'   rarefaction over `n`.
 #' @param abundance Name of a column with the abundance of each population, used with `cover`
 #'   (passed to [subsample_individuals()]).
-#' @param reps Number of subsamples for each level of effort. With `cover` and no `n` the
-#'   subsamples are all equal, and a single one is computed.
-#' @param level Coverage of the interval of the statistic over subsamples.
+#' @param reps Number of subsamples for each level of effort (one whole number, 1 or more). With
+#'   `cover` and no `n` the subsamples are all equal, and a single one is computed.
+#' @param level Coverage of the interval of the statistic over subsamples. One number between 0
+#'   and 1, both excluded.
 #' @param min_n,site,species Passed to [subsample_individuals()]. With `min_n = 2` (the
 #'   default) populations of one individual are left out, as in [tstats()] analyses.
 #' @return A data frame of class `trait_rarefaction` with the columns `effort` (`n` or
@@ -134,15 +138,19 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
 trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = NULL,
                               reps = 20, level = 0.95, min_n = 2, site = "site",
                               species = "species", abundance = NULL) {
-  stopifnot(is.data.frame(individuals), length(reps) == 1, reps >= 1,
-            is.numeric(level), length(level) == 1, level > 0, level < 1)
+  check_string(site, "site")
+  check_string(species, "species")
+  check_data_columns(individuals, c(site, species))
+  check_count(reps, "reps")
+  check_number(level, "level", 0, 1, open = TRUE)
+  check_count(min_n, "min_n")
   if (is.null(statistic)) {
     statistic <- function(d) {
       t <- tstats(d, site = site, species = species, n_perm = 0)
       colMeans(t[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)
     }
   }
-  stopifnot(is.function(statistic))
+  if (!is.function(statistic)) stop("`statistic` must be a function or NULL", call. = FALSE)
   by <- if (is.null(cover)) "n" else "cover"
   if (by == "n") {
     if (is.null(n)) {
@@ -154,8 +162,11 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
     }
     effort <- sort(unique(n))
   } else {
-    stopifnot(is.numeric(cover), all(cover > 0 & cover <= 1))
-    if (!is.null(n)) stopifnot(length(n) == 1, n >= 1, n == round(n))
+    if (!is.numeric(cover) || length(cover) == 0 || anyNA(cover) ||
+          any(cover <= 0 | cover > 1)) {
+      stop("`cover` must be numbers greater than 0 and up to 1", call. = FALSE)
+    }
+    check_sample_size(n, null_ok = TRUE)
     if (is.null(n)) reps <- 1
     effort <- sort(unique(cover))
   }
@@ -209,8 +220,8 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
 #'   `FALSE` draws no line.
 #' @param colours Colour of the line and band; the default is the blue of the Okabe-Ito palette.
 #' @param colour Deprecated; use `colours`, as in the other plots.
-#' @param alpha Transparency of the band.
-#' @param scales Passed to [ggplot2::facet_wrap()].
+#' @param alpha Transparency of the band. One number between 0 and 1.
+#' @param scales Passed to [ggplot2::facet_wrap()]. One character string.
 #' @param ... Not used.
 #' @return A ggplot object.
 #' @references Pakeman, R. J., & Quested, H. M. (2007). Sampling plant functional traits: what
@@ -242,7 +253,11 @@ plot.trait_rarefaction <- function(x, reference = NULL, colours = "#0072B2", alp
   } else if (isFALSE(reference)) {
     reference <- numeric(0)
   }
-  stopifnot(is.numeric(reference))
+  if (!is.numeric(reference) || anyNA(reference)) {
+    stop("`reference` must be numbers, NULL or FALSE", call. = FALSE)
+  }
+  check_number(alpha, "alpha", 0, 1)
+  check_string(scales, "scales")
   d <- as.data.frame(unclass(x))
   d$statistic <- factor(d$statistic, unique(d$statistic))
   .data <- ggplot2::.data
@@ -275,7 +290,8 @@ plot.trait_rarefaction <- function(x, reference = NULL, colours = "#0072B2", alp
 # TRUE for the populations of the most abundant species of each site that together reach
 # `cover` of its abundance (the species that crosses the threshold is included)
 dominant_species <- function(abundance, site, cover) {
-  stopifnot(is.numeric(cover), length(cover) == 1, cover > 0, cover <= 1)
+  stopifnot("internal: `cover` must be one number in (0, 1]" =
+              is.numeric(cover) && length(cover) == 1 && cover > 0 && cover <= 1)
   keep <- logical(length(abundance))
   for (i in split(seq_along(abundance), site)) {
     i <- i[abundance[i] > 0]

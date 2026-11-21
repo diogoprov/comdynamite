@@ -32,7 +32,7 @@ order, and those in only one of the two are dropped with a warning.}
 \item{component}{\code{"mean"} for the composition of sites or \code{"variance"} for their
 dispersion.}
 
-\item{n_perm}{Number of permutations of sites and of species.}
+\item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
 \item{site_permutations}{Optional matrix of site indices with one permutation per row, for
 example from \code{\link[=torus_permutations]{torus_permutations()}}, to use instead of free permutations of sites. Each
@@ -44,11 +44,12 @@ untested, \code{"msr"} replaces \code{env} by Moran spectral randomisations buil
 with \code{adespatial::msr()}, and \code{"sites"} moves \code{env} alone with \code{site_permutations}, for a
 complete grid. \code{"msr"} needs the package adespatial.}
 
-\item{coords}{Matrix of site coordinates with one row per site of \code{comm}, for
-\code{shared_null = "msr"}. The spatial weights are those of \code{adespatial::dbmem()}.}
+\item{coords}{Matrix of site coordinates with one row per site of \code{comm}, without missing or
+infinite values, for \code{shared_null = "msr"}. The spatial weights are those of
+\code{adespatial::dbmem()}.}
 
 \item{level}{Significance level of the test of \code{env} against \code{space} that decides whether
-\code{b} is tested.}
+\code{b} is tested. One number between 0 and 1, both excluded.}
 }
 \value{
 List of class \code{mc_trait_partition} with \code{fractions}, a data frame with one row

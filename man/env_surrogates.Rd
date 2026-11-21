@@ -21,12 +21,12 @@ environment (or \code{env_axes}) is replaced, with the distances of the landscap
 \item{coords}{Matrix or data frame of coordinates with one row per site. Not needed for a
 landscape.}
 
-\item{n}{Number of surrogates.}
+\item{n}{Number of surrogates, one whole number, 1 or more.}
 
 \item{method}{\code{"variogram"} or \code{"parametric"}.}
 
-\item{lonlat}{Are \code{coords} longitude and latitude in decimal degrees? Distances are then
-great-circle distances in kilometres.}
+\item{lonlat}{Are \code{coords} longitude and latitude in decimal degrees (\code{TRUE} or \code{FALSE})?
+Distances are then great-circle distances in kilometres.}
 
 \item{strata}{Optional group of each site, such as the city or the basin where it lies.
 Surrogates are drawn within each group on its own, so values never move between groups,

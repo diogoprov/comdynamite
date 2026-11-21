@@ -10,8 +10,8 @@ maladaptation(x, step = NULL)
 \item{x}{A simulation from \code{\link[=simulate_metacommunity]{simulate_metacommunity()}} or
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} run with \code{evolution}.}
 
-\item{step}{\code{NULL} (the default) for the last step, or one or more steps kept with
-\code{record_steps}.}
+\item{step}{\code{NULL} (the default) for the last step, or one or more steps (numbers, none
+missing or infinite) kept with \code{record_steps}.}
 }
 \value{
 A data frame with one row per population present: \code{step} (with several steps),
