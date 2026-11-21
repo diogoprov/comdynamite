@@ -14,10 +14,11 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    correlacionados, dispersão no tempo, tempo desde a mudança, ambiente sazonal e redes
    fluviais, dispersão e tolerância a distúrbio por espécie ou grupo) e traz o artigo de
    persistência em redes fluviais com os cenários do Pantanal. Falta decidir a release no
-   GitHub (gera DOI no Zenodo). Pendências do bloco A que ficam para depois: nicho correlacionado
-   com `evolution` e com especiação (item 4) e `kernel_group` no motor evolutivo e com seleção
-   de imigrantes ou vários traços (item 8). Próximo marco de
-   código: a escolher entre os blocos B a J.
+   GitHub (gera DOI no Zenodo). As duas pendências do bloco A entraram antes da tag: nicho
+   correlacionado com `evolution` e com especiação (item 4) e `kernel_group` no motor evolutivo
+   e com seleção de imigrantes ou vários traços (item 8). Restam decisões menores: `sigma = 0`
+   com correlação e a fissão por distância pelo kernel do grupo. Próximo marco de código: a
+   escolher entre os blocos B a J.
    A 0.9.0 saiu em 2026-11-18 (tag `v0.9.0`, release, DOI `10.5281/zenodo.24341231`).
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
@@ -87,8 +88,13 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
 4. *Nicho com correlação entre eixos* (matriz de largura por espécie) em `growth_rates()`, e
    paisagens que gerem vários eixos ambientais de uma vez em `landscape_grid()` (v0.7.0).
    Feito em 2026-11-19 (mesma branch): `niche_correlation()` (uma matriz para todas as
-   espécies ou uma por espécie) e `landscape_grid(n_axes, axis_cor)`, com `env_axes`. Falta:
-   nicho correlacionado com `evolution` e com especiação (hoje recusados).
+   espécies ou uma por espécie) e `landscape_grid(n_axes, axis_cor)`, com `env_axes`. Feito em
+   2026-11-21 (branch `versao-0.10.0`): nicho correlacionado com `evolution` e com
+   especiação, com Omega = D R D no crescimento, na resposta à seleção, na seleção de
+   imigrantes, na sobreposição de nicho (`niche_overlap` e `competition_matrix(type =
+   "trait")`) e em `maladaptation()`; as filhas herdam a correlação da mãe, e R = identidade
+   reproduz os eixos independentes bit a bit. Falta: `sigma = 0` com correlação (recusado) e
+   `mutation_var` com vários traits (já recusado antes).
 5. *Dispersão variável no tempo e filtragem de imigrantes com especiação e vários traits*:
    `dispersal_time`, `kernels` e `kernel_step` com `evolution`, e `immigrant_selection` com
    `speciation` e com G multivariada, hoje recusados (artigo "Dispersal and disturbance through

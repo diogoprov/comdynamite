@@ -236,7 +236,11 @@ print.mc_speciation <- function(x, ...) {
 #'   frame with one row per site and one column per element of `traits`. The `genetic_var`
 #'   and `env_var` of `evolution` are then covariance matrices (see the section Several traits
 #'   of [evolution_control()]); competition falls with the overlap of the niches on all axes,
-#'   and new species inherit the matrices of their mother.
+#'   and new species inherit the matrices of their mother. A list of `traits` from
+#'   [niche_correlation()] gives the niche a correlation between its axes, in growth,
+#'   selection and the overlap of niches; with one matrix per species, new species take the
+#'   correlation of their mother, and `traits` in the output keeps the correlation of the
+#'   extant species.
 #' @param kernel_group Optional routes of dispersal by group of species, as in
 #'   [simulate_metacommunity()]: one group per species at the start, given as a column name or
 #'   index of a matrix `kernel_step` (steps x groups). New species stay in the group of their
@@ -348,10 +352,7 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   several <- is.list(traits) && !is.data.frame(traits)
   trait_list <- NULL
   if (several) {
-    if (!is.null(attr(traits, "niche_cor"))) {
-      stop("a niche with correlated axes (`niche_correlation()`) is not yet available with ",
-           "speciation", call. = FALSE)
-    }
+    niche_cor <- attr(traits, "niche_cor")
     trait_list <- lapply(traits, as_traits)
     if (is.null(env)) env <- landscape$env_axes
     if (is.null(env)) {
@@ -428,6 +429,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   sites <- paste0("site", seq_along(landscape$env))
   species0 <- rownames(traits)
   evolution$traits <- if (several) stats::setNames(trait_list, colnames(env)) else traits
+  # a correlation between the axes of the niche (niche_correlation()) goes with the traits
+  if (several) attr(evolution$traits, "niche_cor") <- niche_cor
   evolution$env <- if (several) env else landscape$env
   # time at which each pair of species at the start split, in generations before the start
   split0 <- matrix(0, k0, k0, dimnames = list(species0, species0))
@@ -649,6 +652,13 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
       data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx, a],
                  r_max = st$ev$r_axis[sp_idx, a], row.names = species)
     }), st$ev$axes)
+    # the correlation between the axes: the shared matrix, or that of each extant species
+    if (is.list(st$ev$niche_cor)) {
+      attr(traits_out, "niche_cor") <- stats::setNames(
+        lapply(st$ev$sel[sp_idx], function(s) s$cor), species)
+    } else if (!is.null(st$ev$niche_cor)) {
+      attr(traits_out, "niche_cor") <- st$ev$niche_cor
+    }
   } else {
     optimum <- vapply(members, function(l) mean(genetic[, l], na.rm = TRUE), numeric(1))
     traits_out <- data.frame(optimum = unname(optimum), sigma = st$ev$sigma[sp_idx],
@@ -801,6 +811,7 @@ evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, s
 # crowding in each site with competition scaled by the overlap of the Gaussian niches of the
 # phenotypes p there (sites x alive species); the phylogenetic part is the alpha of the state
 niche_crowding <- function(st) {
+  if (isTRUE(st$ev$mv) && isTRUE(st$ev$correlated)) return(niche_crowding_correlated(st))
   if (isTRUE(st$ev$mv)) {
     return(function(n, p) {
       sigma2 <- st$ev$sigma[st$alive, , drop = FALSE]^2
@@ -833,6 +844,45 @@ niche_crowding <- function(st) {
       d2 <- outer(p[s, here], p[s, here], "-")^2
       overlap <- exp(-ifelse(w > 0, d2 / (2 * w), ifelse(d2 > 0, Inf, 0)))
       out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * overlap)
+    }
+    out
+  }
+}
+
+# the same with a correlation between the axes of the niches (niche_correlation()): the overlap
+# of the niches of two species is exp(-d' M d / 2), with d the difference of their phenotypes
+# and M = (Omega_i + Omega_j)^-1. The breadths and correlations of a species never change, so M
+# is kept for each pair of species (indexed over all species ever)
+niche_crowding_correlated <- function(st) {
+  cache <- new.env(parent = emptyenv())
+  precision <- list()
+  overlap_matrix <- function(i, j) {
+    key <- paste(i, j)
+    if (is.null(cache[[key]])) {
+      for (l in c(i, j)) {
+        if (length(precision) < l || is.null(precision[[l]])) {
+          cor <- st$ev$sel[[l]]$cor %||% diag(st$ev$q)
+          precision[[l]] <<- niche_precision(st$ev$sigma[l, ], cor)
+        }
+      }
+      cache[[key]] <- niche_overlap_matrix(precision[[i]], precision[[j]])
+    }
+    cache[[key]]
+  }
+  function(n, p) {
+    alive <- st$alive
+    at <- st$at
+    out <- sweep(n, 2, diag(at), "*")
+    here <- n > 0
+    for (a in seq_len(ncol(n) - 1L)) {
+      for (b in (a + 1L):ncol(n)) {
+        both <- here[, a] & here[, b]
+        if (!any(both)) next
+        d <- matrix(p[both, a, ] - p[both, b, ], sum(both))
+        overlap <- exp(-0.5 * rowSums((d %*% overlap_matrix(alive[a], alive[b])) * d))
+        out[both, b] <- out[both, b] + n[both, a] * at[a, b] * overlap
+        out[both, a] <- out[both, a] + n[both, b] * at[b, a] * overlap
+      }
     }
     out
   }

@@ -16,7 +16,9 @@
 #' With several evolving traits (one per niche axis), \eqn{d^2 / (\sigma^2 + P)}{d^2 / (sigma^2
 #' + P)} becomes the squared Mahalanobis distance \eqn{d^\top (\Omega + P)^{-1} d}{d' (Omega +
 #' P)^-1 d} over the axes with a finite niche breadth, which also counts the covariances among
-#' traits; axes with `sigma = Inf` add a deviation but no load. For evolving metacommunities
+#' traits, and the correlation between the axes of the niche when the traits come from
+#' [niche_correlation()] (\eqn{\Omega = D R D}{Omega = D R D}); axes with `sigma = Inf` add a
+#' deviation but no load. For evolving metacommunities
 #' ([simulate_evolving_metacommunity()]), the population of a species in a site can hold
 #' several lineages: its phenotype is their mean weighted by abundance and \eqn{P}{P} adds the
 #' variance among them, so the load is that of a single Gaussian population with that mean and
@@ -136,6 +138,11 @@ maladaptation_mv <- function(x, step) {
   species <- colnames(abundance)
   sigma <- vapply(x$traits, function(t) as_traits(t)[species, "sigma"], numeric(length(species)))
   sigma <- matrix(sigma, length(species), q)
+  # Omega of each species on its selected axes: diagonal, or D R D with niche_correlation()
+  cor <- niche_cor_species(attr(x$traits, "niche_cor"), species, q)
+  omega <- function(k, s) {
+    if (is.null(cor)) diag(sigma[k, s]^2, length(s)) else niche_omega(sigma[k, ], cor[[k]], s)
+  }
   present <- abundance > 0 & !is.na(state$mean[, , 1])
   cell <- which(present)
   i <- (cell - 1) %% length(sites) + 1
@@ -151,13 +158,13 @@ maladaptation_mv <- function(x, step) {
     p <- ev$genetic_var[[g]] + ev$env_var[[g]]
     d <- dev[rows, s, drop = FALSE]
     if (is.null(state$within)) {
-      A <- solve(diag(sigma[k, s]^2, length(s)) + p[s, s, drop = FALSE])
+      A <- solve(omega(k, s) + p[s, s, drop = FALSE])
       distance[rows] <- sqrt(rowSums((d %*% A) * d))
     } else {
       # the variance among lineages in each site adds to the diagonal of P
       w <- matrix(state$within, ncol = q)[cell[rows], , drop = FALSE]
       for (r in seq_along(rows)) {
-        A <- solve(diag(sigma[k, s]^2 + w[r, s], length(s)) + p[s, s, drop = FALSE])
+        A <- solve(omega(k, s) + diag(w[r, s], length(s)) + p[s, s, drop = FALSE])
         distance[rows[r]] <- sqrt(sum((d[r, ] %*% A) * d[r, ]))
       }
     }

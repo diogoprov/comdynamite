@@ -64,6 +64,7 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   if (!is.null(evolution$mutation_var)) {
     stop("`mutation_var` is not yet available with several traits", call. = FALSE)
   }
+  niche_cor <- attr(evolution$traits, "niche_cor")
   traits <- lapply(evolution$traits, as_traits)
   q <- length(traits)
   axes <- names(evolution$traits) %||% paste0("axis", seq_len(q))
@@ -110,14 +111,34 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
          call. = FALSE)
   }
   dimnames(b) <- NULL
+  # the correlation between the axes of the niche of each species (niche_correlation()); a
+  # species whose matrix is the identity follows the code of independent axes, to the last bit
+  cor <- niche_cor_species(niche_cor, sp, q)
+  correlated <- vapply(cor, function(m) any(m[row(m) != col(m)] != 0), logical(1))
+  if (any(correlated) && any(sigma == 0)) {
+    stop("a niche breadth `sigma` of 0 is not available with correlated axes ",
+         "(`niche_correlation()`)", call. = FALSE)
+  }
   # selection on the axes with a finite niche breadth: the response of each population is
   # K (E - p), K = G[, S] (Omega + P)[S, S]^-1, and growth falls with the Mahalanobis distance
   sel <- lapply(seq_len(k_all), function(j) {
     om <- sigma[j, ]^2
     s <- which(is.finite(om))
     p <- G[[j]] + E[[j]]
+    # `cor` and `correlated` are kept for the species that descend from this one
+    rj <- if (length(cor)) list(cor = cor[[j]], correlated = correlated[j])
     if (!length(s)) {
-      return(list(s = s, A = matrix(0, 0, 0), K = matrix(0, q, 0), c = r_max[j]))
+      return(c(list(s = s, A = matrix(0, 0, 0), K = matrix(0, q, 0), c = r_max[j]), rj))
+    }
+    if (isTRUE(rj$correlated)) {
+      # Omega = D R D on the selected axes, in place of the diagonal matrix of the breadths
+      Om <- niche_omega(sigma[j, ], rj$cor, s)
+      Q <- Om + p[s, s, drop = FALSE]
+      A <- solve(Q)
+      logc <- 0.5 * as.numeric(determinant(Om)$modulus - determinant(Q)$modulus)
+      return(c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A,
+                    c = r_max[j] * exp(logc), diagonal = FALSE, width = om + diag(p),
+                    om = om, r_axis = r_axis[j, ]), rj))
     }
     Q <- diag(om[s], length(s)) + p[s, s, drop = FALSE]
     if (any(diag(Q) <= 0)) {
@@ -128,8 +149,8 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     # growth_rates(), so that G = E = 0 gives the same numbers to the last bit
     diagonal <- all(Q[row(Q) != col(Q)] == 0)
     logc <- 0.5 * (sum(log(om[s])) - as.numeric(determinant(Q)$modulus))
-    list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
-         diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ])
+    c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
+           diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ]), rj)
   })
   env_now <- if (is.function(evolution$env)) {
     function(step) {
@@ -145,7 +166,8 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
        sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
        L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
        nu = evolution$ne_ratio, per = evolution$steps_per_generation,
-       founder = evolution$founder, imm_sel = isTRUE(evolution$immigrant_selection))
+       founder = evolution$founder, imm_sel = isTRUE(evolution$immigrant_selection),
+       niche_cor = niche_cor, correlated = any(correlated))
 }
 
 # phenotypes: genetic means plus the plastic response to the environment e (sites x traits)

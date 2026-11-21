@@ -173,6 +173,18 @@ drift, the correlated response of Lande (1979). Founders draw their means from
 trait. The environment can change on every axis (\code{env_time} as a list of matrices), and
 \code{\link[=simulate_evolving_metacommunity]{simulate_evolving_metacommunity()}} takes several traits in the same way. With \eqn{G = 0}{G = 0} the
 abundances are those without evolution for the same seed.
+
+A list of \code{traits} from \code{\link[=niche_correlation]{niche_correlation()}} adds a correlation \eqn{R}{R} between the
+axes of the niche of each species: \eqn{\Omega = D R D}{Omega = D R D}, with \eqn{D}{D} the
+diagonal matrix of the niche breadths, takes the place of the diagonal matrix in the growth
+rate, in the response to selection and in the fitness of immigrants (\code{immigrant_selection}),
+so that the cost of the phenotypic variance, \eqn{\sqrt{|\Omega| / |\Omega +
+P|}}{sqrt(|Omega| / |Omega + P|)}, and the selection gradient, \eqn{(\Omega + P)^{-1}
+d}{(Omega + P)^-1 d}, come from the same Gaussian. With \eqn{G = E = 0}{G = E = 0} the
+growth rate is that of \code{\link[=growth_rates]{growth_rates()}} with the same correlation, and with \eqn{R}{R} the
+identity the results are those of independent axes for the same seed. With axes of
+infinite breadth, \eqn{\Omega}{Omega} is the inverse of the block of \eqn{(D R
+D)^{-1}}{(D R D)^-1} of the other axes.
 }
 
 \examples{
