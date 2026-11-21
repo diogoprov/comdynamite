@@ -109,7 +109,7 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    channel networks e árvores aleatórias com ordem de Strahler controlada; ler antes como os
    trabalhos de Altermatt e Carrara geram as redes; deve devolver coordenadas, a matriz de
    distâncias ao longo do canal e a direção do fluxo, para alimentar `landscape_matrix()` e a
-   covariância de (ii), aceitando também redes reais; (iv) estudo de persistência de longo prazo com
+   covariância de (ii), aceitando também redes reais. (iii) feito em 2026-11-20: `river_network()` (crescimento aleatório com `branching`, ordem de Strahler e magnitude de Shreve) e `landscape_river()` (kernel com escalas a jusante e a montante, dispersão por terra opcional, aceita redes do OCNet ou reais; OCNet é GPL-3, fica fora das dependências). Os textos completos de Altermatt e Carrara não estavam acessíveis (PMC só com resumo); as referências entram só como contexto; (iv) estudo de persistência de longo prazo com
    cheias sazonais, com a dispersão a favor e contra a corrente. A lição do piloto sazonal
    (issue #97) vale aqui: o gerador serve para dinâmica e persistência, não para inferência
    com poucos sítios. Referências conferidas no OpenAlex em 2026-11-19; ler os artigos antes

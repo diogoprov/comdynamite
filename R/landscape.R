@@ -509,6 +509,8 @@ new_landscape <- function(env, coords, dist, dispersal, torus = NA) {
 #' @export
 print.mc_landscape <- function(x, ...) {
   type <- if (is.null(x$dispersal)) "spatially implicit, uniform dispersal" else
+    if (!is.null(x$network)) paste0("river network (", sum(x$network$headwater),
+                                    " headwaters)") else
     if (isTRUE(x$matrix)) "dispersal matrix" else
     paste0(if (isTRUE(x$points)) "points" else "grid", if (isTRUE(x$torus)) " (torus)" else "",
            ", exponential dispersal kernel")
