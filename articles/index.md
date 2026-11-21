@@ -31,6 +31,8 @@
   assemble](https://provetelab.org/comdynamite/articles/watching-assembly.md):
 - [Dispersal and disturbance through
   time](https://provetelab.org/comdynamite/articles/dispersal-disturbance.md):
+- [Persistence in river networks under a flood
+  pulse](https://provetelab.org/comdynamite/articles/river-persistence.md):
 - [Quantitative genetics in the
   metacommunity](https://provetelab.org/comdynamite/articles/quantitative-genetics.md):
 

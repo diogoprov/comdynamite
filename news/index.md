@@ -2,6 +2,12 @@
 
 ## comdynamite (development version)
 
+- New article “Persistence in river networks under a flood pulse”: a
+  generic study of how network topology, the direction of dispersal and
+  seasonal floods change regional richness and persistence, and
+  scenarios inspired by the Pantanal (normal pulse, a 12-year drought
+  and regulation) with fish guilds that differ in emigration, routes and
+  tolerance to drying.
 - Dispersal and disturbance by species or group of species in
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md):
   `kernel_group` gives each species a group, and a matrix `kernel_step`
