@@ -352,4 +352,9 @@ test_that("the gene flow that keeps populations together follows the kernel of e
     upd <- evolving_divergence(st, list(NULL, d), list(NULL, zero), list(NULL, zero), sp)
     expect_equal(upd$divergence[[2]][3, 1:2], if (g == 1) c(1, 8) else c(8, 1))
   }
+  # without a dispersal matrix (implicit landscape), the largest population sends it
+  st <- list2env(list(k = 1, alive = 2L, n = matrix(c(50, 100, 5), 3, 1), disp_matrix = NULL,
+                      kernel_group = NULL, ev = NULL))
+  upd <- evolving_divergence(st, list(NULL, d), list(NULL, zero), list(NULL, zero), sp)
+  expect_equal(upd$divergence[[2]][3, 1:2], c(8, 1))
 })
