@@ -32,23 +32,26 @@ trait_mk(
 
 - q:
 
-  One rate for every change between states (the equal-rates model), or a
-  square matrix of rates from the state of each row to the state of each
-  column, with the states as names; its diagonal is ignored.
+  One rate for every change between states (the equal-rates model; one
+  finite number, 0 or more), or a square matrix of rates from the state
+  of each row to the state of each column, with the states as names; its
+  diagonal is ignored.
 
 - states:
 
-  Names of the states, when `q` is one rate.
+  Names of the states (two or more, all different), when `q` is one
+  rate.
 
 - root_state:
 
-  State at the root; `NULL` draws one with equal probabilities.
+  State at the root, one of the states; `NULL` draws one with equal
+  probabilities.
 
 - alpha:
 
   Shape (and rate) of the gamma distribution of the rate multiplier of
-  each branch; `NULL` for none. Small values make rates more uneven
-  among branches.
+  each branch (one finite number greater than 0); `NULL` for none. Small
+  values make rates more uneven among branches.
 
 - edge_rates:
 
@@ -63,7 +66,8 @@ trait_mk(
 
 - class_switch:
 
-  Rate of moving from one hidden class to each other one.
+  Rate of moving from one hidden class to each other one. One finite
+  number, 0 or more.
 
 - root:
 

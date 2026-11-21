@@ -122,7 +122,7 @@ dispersion.</p></dd>
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Number of permutations of sites and of species.</p></dd>
+<dd><p>Number of permutations of sites and of species. One whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
@@ -140,13 +140,14 @@ complete grid. <code>"msr"</code> needs the package adespatial.</p></dd>
 
 
 <dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
-<dd><p>Matrix of site coordinates with one row per site of <code>comm</code>, for
-<code>shared_null = "msr"</code>. The spatial weights are those of <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>.</p></dd>
+<dd><p>Matrix of site coordinates with one row per site of <code>comm</code>, without missing or
+infinite values, for <code>shared_null = "msr"</code>. The spatial weights are those of
+<code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code>.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
 <dd><p>Significance level of the test of <code>env</code> against <code>space</code> that decides whether
-<code>b</code> is tested.</p></dd>
+<code>b</code> is tested. One number between 0 and 1, both excluded.</p></dd>
 
 </dl></div>
     <div class="section level2">

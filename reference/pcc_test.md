@@ -45,11 +45,12 @@ pcc_test(
 
 - n_perm:
 
-  Number of permutations of sites and of species.
+  Number of permutations of sites and of species. One whole number, 1 or
+  more.
 
 - squared:
 
-  Passed to
+  `TRUE` or `FALSE`, passed to
   [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md).
 
 - site_permutations:

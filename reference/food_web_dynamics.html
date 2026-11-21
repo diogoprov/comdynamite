@@ -141,13 +141,13 @@ traits and the attack coefficients take one of the three forms of <code><a href=
 
 
 <dt id="arg-v">V<a class="anchor" aria-label="anchor" href="#arg-v"></a></dt>
-<dd><p>Additive genetic variances of the three traits, one number or three; zero means a
-trait that does not evolve.</p></dd>
+<dd><p>Additive genetic variances of the three traits, one number or three, each 0 or
+more; zero means a trait that does not evolve.</p></dd>
 
 
 <dt id="arg-omnivory">omnivory<a class="anchor" aria-label="anchor" href="#arg-omnivory"></a></dt>
 <dd><p>Does the predator also feed on the resource (intraguild predation, with
-<code>v0</code>, <code>w</code> and <code>u</code> of <code>params</code>)?</p></dd>
+<code>v0</code>, <code>w</code> and <code>u</code> of <code>params</code>)? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-introductions">introductions<a class="anchor" aria-label="anchor" href="#arg-introductions"></a></dt>
@@ -156,19 +156,20 @@ appear, after the first time. Until then they are absent whatever <code>init</co
 
 
 <dt id="arg-dt">dt<a class="anchor" aria-label="anchor" href="#arg-dt"></a></dt>
-<dd><p>Step of the integration; the intervals between the times of <code>times</code> and of
-<code>introductions</code> are divided into steps no longer than this.</p></dd>
+<dd><p>Step of the integration, one finite number greater than 0; the intervals between the
+times of <code>times</code> and of <code>introductions</code> are divided into steps no longer than this.</p></dd>
 
 
 <dt id="arg-extinction">extinction<a class="anchor" aria-label="anchor" href="#arg-extinction"></a></dt>
-<dd><p>Abundance below which a level is set to zero; McPeek's code has no such
-threshold, so use 0 to compare with it.</p></dd>
+<dd><p>Abundance below which a level is set to zero, one finite number, 0 or more;
+McPeek's code has no such threshold, so use 0 to compare with it.</p></dd>
 
 
 <dt id="arg-trait-floor">trait_floor<a class="anchor" aria-label="anchor" href="#arg-trait-floor"></a></dt>
-<dd><p>Lowest value of the mean traits: a trait that falls below it relaxes back
-at rate <code>trait_floor - z</code>. <code>NULL</code> uses 0 with <code>attack = "michaelis"</code>, where traits must be
-positive, and no floor (<code>-Inf</code>) otherwise. McPeek's MATLAB code floors every trait at 0.</p></dd>
+<dd><p>Lowest value of the mean traits, one number or <code>-Inf</code>: a trait that falls
+below it relaxes back at rate <code>trait_floor - z</code>. <code>NULL</code> uses 0 with <code>attack = "michaelis"</code>,
+where traits must be positive, and no floor (<code>-Inf</code>) otherwise. McPeek's MATLAB code floors
+every trait at 0.</p></dd>
 
 </dl></div>
     <div class="section level2">

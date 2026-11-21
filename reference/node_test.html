@@ -126,14 +126,14 @@ and values of 1, -1 and 0.</p></dd>
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
 <dd><p>Number of permutations of sites, of species and of both. With
-<code>site_permutations</code>, only of species.</p></dd>
+<code>site_permutations</code>, only of species. One whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
-<dd><p>Number of cores, with nodes run in parallel. Not available on Windows,
-where one core is used. For reproducible p-values with more than one core, call
-<code>RNGkind("L'Ecuyer-CMRG")</code> before <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. Results still depend on the number of
-cores.</p></dd>
+<dd><p>One whole number, 1 or more: the number of cores, with nodes run in
+parallel. Not available on Windows, where one core is used. For reproducible p-values
+with more than one core, call <code>RNGkind("L'Ecuyer-CMRG")</code> before <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>. Results
+still depend on the number of cores.</p></dd>
 
 
 <dt id="arg-site-permutations">site_permutations<a class="anchor" aria-label="anchor" href="#arg-site-permutations"></a></dt>
@@ -158,8 +158,9 @@ replace the permutations of sites, not those of the areas of <code>biogeography<
 
 
 <dt id="arg-coords">coords<a class="anchor" aria-label="anchor" href="#arg-coords"></a></dt>
-<dd><p>Matrix of coordinates with one row per site, for <code>null = "variogram"</code> or
-<code>"parametric"</code>. Taken from an <code><a href="mc_data.html">mc_data()</a></code> object when it has them.</p></dd>
+<dd><p>Matrix of coordinates with one row per site, without missing or infinite
+values, for <code>null = "variogram"</code> or <code>"parametric"</code>. Taken from an <code><a href="mc_data.html">mc_data()</a></code> object when
+it has them.</p></dd>
 
 </dl></div>
     <div class="section level2">

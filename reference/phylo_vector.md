@@ -44,15 +44,17 @@ phylo_vector(
 
 - n_perm:
 
-  Number of permutations of sites and of species.
+  Number of permutations of sites and of species. One whole number, 1 or
+  more.
 
 - level:
 
-  Significance level of the global test and of the selection.
+  Significance level of the global test and of the selection. One number
+  between 0 and 1, both excluded.
 
 - n_sim:
 
-  Number of Brownian vectors.
+  Number of Brownian vectors. One whole number, 1 or more.
 
 - site_permutations:
 

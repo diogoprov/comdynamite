@@ -119,13 +119,13 @@ the rows of <code>biogeography</code>. Distances are Euclidean, so they should b
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Largest number of permutations. Fewer are returned when fewer distinct
-placements of the event exist.</p></dd>
+<dd><p>Largest number of permutations, one whole number, 1 or more. Fewer are
+returned when fewer distinct placements of the event exist.</p></dd>
 
 
 <dt id="arg-gap">gap<a class="anchor" aria-label="anchor" href="#arg-gap"></a></dt>
-<dd><p>A moved site counts as inside the landscape when it is closer than <code>gap</code> to a
-site, or in a hole narrower than twice <code>gap</code> between sites (four times <code>gap</code> off a
+<dd><p>One positive number, or <code>NULL</code> for the default. A moved site counts as inside
+the landscape when it is closer than <code>gap</code> to a site, or in a hole narrower than twice <code>gap</code> between sites (four times <code>gap</code> off a
 lattice, where sites leave larger voids between neighbours), but not beyond an edge. A
 site that lands inside but not on a site goes to the nearest free site within twice
 <code>gap</code>. The default is the median distance from a site to its fourth nearest site: the
@@ -136,20 +136,21 @@ the spacing of sparse sites, so that holes count as inside. It is not the <code>
 
 <dt id="arg-outside">outside<a class="anchor" aria-label="anchor" href="#arg-outside"></a></dt>
 <dd><p>Largest fraction of the sites of an event that may land outside the
-landscape in a move. Those sites go to the nearest free site within twice <code>gap</code>, and the
-move is dropped when one has none.</p></dd>
+landscape in a move, one number between 0 and 1. Those sites go to the nearest free site
+within twice <code>gap</code>, and the move is dropped when one has none.</p></dd>
 
 
 <dt id="arg-independent">independent<a class="anchor" aria-label="anchor" href="#arg-independent"></a></dt>
 <dd><p>Distance beyond which parts of an event move independently of each
-other, while staying at least that far apart. The default, <code>Inf</code>, moves the whole event
-together and assumes nothing about the range of autocorrelation.</p></dd>
+other, while staying at least that far apart. One positive number, which may be <code>Inf</code>.
+The default, <code>Inf</code>, moves the whole event together and assumes nothing about the range of
+autocorrelation.</p></dd>
 
 
 <dt id="arg-max-tries">max_tries<a class="anchor" aria-label="anchor" href="#arg-max-tries"></a></dt>
 <dd><p>Largest number of moves tried: of the enumerated moves of one part, in
 random order, when placements fail or repeat a layout, or of the combinations of several
-independent parts, which cannot all be enumerated.</p></dd>
+independent parts, which cannot all be enumerated. One whole number, 1 or more.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -51,25 +51,27 @@ trait_rarefaction(
 
 - n:
 
-  Numbers of individuals per population; the default runs from 2 to the
-  median size of the populations. With `cover`, a single number of
-  individuals per population, or `NULL` (the default) to keep all of
-  them.
+  Numbers of individuals per population (whole numbers, 1 or more); the
+  default runs from 2 to the median size of the populations. With
+  `cover`, one whole number of individuals per population, or `NULL`
+  (the default) to keep all of them.
 
 - cover:
 
-  Shares (0 to 1) of abundance covered by the species measured, for a
-  rarefaction over species instead of individuals; `NULL` (the default)
-  for a rarefaction over `n`.
+  Shares (numbers greater than 0 and up to 1) of abundance covered by
+  the species measured, for a rarefaction over species instead of
+  individuals; `NULL` (the default) for a rarefaction over `n`.
 
 - reps:
 
-  Number of subsamples for each level of effort. With `cover` and no `n`
-  the subsamples are all equal, and a single one is computed.
+  Number of subsamples for each level of effort (one whole number, 1 or
+  more). With `cover` and no `n` the subsamples are all equal, and a
+  single one is computed.
 
 - level:
 
-  Coverage of the interval of the statistic over subsamples.
+  Coverage of the interval of the statistic over subsamples. One number
+  between 0 and 1, both excluded.
 
 - min_n, site, species:
 

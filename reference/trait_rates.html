@@ -105,12 +105,13 @@ the rates that generated the data. Three models of how rates vary are available:
 
 
 <dt id="arg-sigma-">sigma2<a class="anchor" aria-label="anchor" href="#arg-sigma-"></a></dt>
-<dd><p>Rate at the root (<code>"shift"</code>, <code>"gbm"</code>) or median rate (<code>"iid"</code>).</p></dd>
+<dd><p>Rate at the root (<code>"shift"</code>, <code>"gbm"</code>) or median rate (<code>"iid"</code>). One finite
+number greater than 0.</p></dd>
 
 
 <dt id="arg-shifts">shifts<a class="anchor" aria-label="anchor" href="#arg-shifts"></a></dt>
 <dd><p>Number of shifts, for <code>"shift"</code> when neither <code>shift_edges</code> nor <code>shift_rate</code> is
-given.</p></dd>
+given. One whole number, from 0 up to the number of branches.</p></dd>
 
 
 <dt id="arg-shift-size">shift_size<a class="anchor" aria-label="anchor" href="#arg-shift-size"></a></dt>
@@ -124,26 +125,26 @@ a function of the number of shifts that gives them. Values below 1 slow evolutio
 
 <dt id="arg-shift-rate">shift_rate<a class="anchor" aria-label="anchor" href="#arg-shift-rate"></a></dt>
 <dd><p>Optional rate of shifts per unit of branch length, for shifts as a Poisson
-process along the branches.</p></dd>
+process along the branches. One finite number, 0 or more, or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-shift-branch">shift_branch<a class="anchor" aria-label="anchor" href="#arg-shift-branch"></a></dt>
 <dd><p>Should a shift last only to the end of its branch, rather than pass to
-all branches descending from it?</p></dd>
+all branches descending from it? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-relative">relative<a class="anchor" aria-label="anchor" href="#arg-relative"></a></dt>
 <dd><p>Multiply the rate before each shift by <code>shift_size</code> (<code>TRUE</code>), or set the rate
-after it to <code>sigma2</code> times <code>shift_size</code> (<code>FALSE</code>)?</p></dd>
+after it to <code>sigma2</code> times <code>shift_size</code> (<code>FALSE</code>)? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-rate-sd">rate_sd<a class="anchor" aria-label="anchor" href="#arg-rate-sd"></a></dt>
 <dd><p>Standard deviation of the logarithm of the rate: per square root of time for
-<code>"gbm"</code> and among branches for <code>"iid"</code>.</p></dd>
+<code>"gbm"</code> and among branches for <code>"iid"</code>. One finite number, 0 or more.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>
-<dd><p>Trait value at the root.</p></dd>
+<dd><p>Trait value at the root. One finite number.</p></dd>
 
 
 <dt id="arg-edge-rates">edge_rates<a class="anchor" aria-label="anchor" href="#arg-edge-rates"></a></dt>

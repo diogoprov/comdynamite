@@ -35,31 +35,35 @@ env_space_time(
 
 - n_steps:
 
-  Number of steps, burn-in included.
+  Number of steps, burn-in included: one whole number, larger than
+  `burn_in`.
 
 - burn_in:
 
-  Number of initial steps with a constant environment.
+  Number of initial steps with a constant environment: one whole number,
+  0 or more.
 
 - spatial_scale, temporal_scale:
 
   Scales \\a_s\\ (in units of the coordinates) and \\a_t\\ (in steps) of
-  the exponential covariance.
+  the exponential covariance: each one number greater than 0.
 
 - ranks:
 
-  If `TRUE`, convert the environment to ranks over all sites and steps,
-  as in their code; if `FALSE`, keep the rescaled field.
+  `TRUE` or `FALSE`. If `TRUE`, convert the environment to ranks over
+  all sites and steps, as in their code; if `FALSE`, keep the rescaled
+  field.
 
 - min_range:
 
   Minimum range of the rescaled environment at the first step after the
-  burn-in; the field is redrawn until it is exceeded. Use 0 to accept
-  the first draw.
+  burn-in; the field is redrawn until it is exceeded: one number in \[0,
+  1). Use 0 to accept the first draw.
 
 - n_features:
 
-  Number of cosine waves of the spectral method.
+  Number of cosine waves of the spectral method: one whole number, 1 or
+  more.
 
 ## Value
 

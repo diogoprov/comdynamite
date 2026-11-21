@@ -41,7 +41,7 @@ plot_node_heatmap(
 
 - level:
 
-  Significance level.
+  Significance level. One number between 0 and 1.
 
 - colours:
 
@@ -51,6 +51,7 @@ plot_node_heatmap(
 
   Size of the text, in mm (as in
   [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)).
+  One number greater than 0.
 
 - alpha:
 

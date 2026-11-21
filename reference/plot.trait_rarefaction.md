@@ -45,12 +45,13 @@ plot(
 
 - alpha:
 
-  Transparency of the band.
+  Transparency of the band. One number between 0 and 1.
 
 - scales:
 
   Passed to
   [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+  One character string.
 
 - ...:
 

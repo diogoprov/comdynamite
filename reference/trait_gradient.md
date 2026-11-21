@@ -40,16 +40,19 @@ trait_gradient(
 
 - trait:
 
-  Name of the column with trait values.
+  Name of the column with trait values (finite or missing). One
+  character string.
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. Each one character
+  string.
 
 - abundance:
 
   Name of the column with the abundance of the species in the site (one
   value per population), or `NULL` to weight each occurrence equally.
+  One character string or `NULL`.
 
 - site_weights, species_weights:
 
@@ -59,12 +62,13 @@ trait_gradient(
 
 - leave_one_out:
 
-  Leave the focal species out of the site means (the default).
+  `TRUE` or `FALSE`. Leave the focal species out of the site means (the
+  default).
 
 - min_slope:
 
   Smallest number of sites with measured values to fit the slope
-  \\b_i\\.
+  \\b_i\\. One whole number, 2 or more.
 
 ## Value
 

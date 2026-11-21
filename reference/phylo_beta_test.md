@@ -44,7 +44,8 @@ phylo_beta_test(
 
 - n_perm:
 
-  Number of permutations of sites and of species.
+  Number of permutations of sites and of species. One whole number, 1 or
+  more.
 
 - site_permutations:
 
@@ -71,8 +72,9 @@ phylo_beta_test(
 
 - coords:
 
-  Matrix of coordinates with one row per site, for `null = "variogram"`
-  or `"parametric"`. Taken from an
+  Matrix of coordinates with one row per site, without missing or
+  infinite values, for `null = "variogram"` or `"parametric"`. Taken
+  from an
   [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
   object when it has them.
 

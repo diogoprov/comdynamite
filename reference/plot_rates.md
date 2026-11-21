@@ -34,30 +34,30 @@ plot_rates(
 
 - rates:
 
-  Rate of each branch, in the order of the rows of `tree$edge`, or a
-  result of
+  Rate of each branch (finite, or `NA`), in the order of the rows of
+  `tree$edge`, or a result of
   [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md),
   whose `edge_rates` are used. Left out when `tree` is a result of
   [`trait_rates()`](https://provetelab.org/comdynamite/reference/trait_rates.md).
 
 - log:
 
-  Colour by the logarithm of the rate (the default), since rates are
-  multiplicative. Needs positive rates; use `FALSE` for estimates that
-  can be negative.
+  `TRUE` or `FALSE`. Colour by the logarithm of the rate (the default),
+  since rates are multiplicative. Needs positive rates; use `FALSE` for
+  estimates that can be negative.
 
 - palette:
 
-  Name of a palette of
+  One character string, the name of a palette of
   [`grDevices::hcl.colors()`](https://rdrr.io/r/grDevices/palettes.html).
 
 - tip_labels:
 
-  Draw the names of the tips.
+  `TRUE` or `FALSE`. Draw the names of the tips.
 
 - linewidth:
 
-  Width of the branches.
+  Width of the branches. One number greater than 0.
 
 - title:
 

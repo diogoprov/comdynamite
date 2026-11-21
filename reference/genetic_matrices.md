@@ -24,11 +24,12 @@ genetic_matrices(
 
 - species:
 
-  Names of the species, or their number.
+  Names of the species, or their number (one whole number, 1 or more).
 
 - n_traits:
 
-  Number of traits (axes). Ignored when `P` is given.
+  Number of traits (axes): one whole number, 1 or more. Ignored when `P`
+  is given.
 
 - family:
 
@@ -41,17 +42,18 @@ genetic_matrices(
 
 - correlation:
 
-  Correlation between all pairs of traits in the default `P`.
+  Correlation between all pairs of traits in the default `P`: one number
+  greater than -1 / (`n_traits` - 1) and less than 1.
 
 - heritability:
 
-  Share \\h^2\\ of the phenotypic variance that is additive genetic,
-  between 0 and 1.
+  Share \\h^2\\ of the phenotypic variance that is additive genetic: one
+  number between 0 and 1.
 
 - divergence:
 
   Standard deviation (on the log scale) of the differences among
-  species.
+  species: one number, 0 or more.
 
 ## Value
 

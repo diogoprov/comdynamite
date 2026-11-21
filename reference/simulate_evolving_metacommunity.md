@@ -73,16 +73,16 @@ simulate_evolving_metacommunity(
 
 - dispersal:
 
-  Emigration probability, one value or one per species.
+  Emigration probability, between 0 and 1: one value or one per species.
 
 - extirpation:
 
-  Probability that a population is lost at each time step, one value or
-  one per species.
+  Probability that a population is lost at each time step, between 0 and
+  1: one value or one per species.
 
 - n_steps:
 
-  Number of time steps.
+  Number of time steps, one whole number, 1 or more.
 
 - competition:
 
@@ -94,12 +94,14 @@ simulate_evolving_metacommunity(
   between sisters just split (`inter_max`) and between distant species
   (`inter_min`); the overall scale (competition within a species); and
   the distance in generations over which the excess over `inter_min`
-  decays by a factor of \\e\\.
+  decays by a factor of \\e\\. Each one number: `inter_max` 0 or more,
+  `inter_min` between 0 and `inter_max`, `scale` greater than 0 and
+  `distance_scale` greater than 0 (`Inf` for no decay).
 
 - niche_overlap:
 
   Should competition between species also fall with the difference of
-  their phenotypes in each site?
+  their phenotypes in each site? `TRUE` or `FALSE`.
 
 - initial:
 
@@ -110,11 +112,12 @@ simulate_evolving_metacommunity(
 - seed_mean:
 
   Mean number of individuals of each species added to each site at each
-  seeding step (and at the start).
+  seeding step (and at the start), one finite number, 0 or more.
 
 - record_steps:
 
-  Optional steps at which abundances are recorded.
+  Optional steps at which abundances are recorded, a numeric vector
+  without `NA`; steps outside 1 to `n_steps` are dropped.
 
 - immigration:
 
@@ -126,8 +129,8 @@ simulate_evolving_metacommunity(
 
 - max_species:
 
-  Maximum number of species ever, including extinct ones; the simulation
-  stops with an error beyond it.
+  Maximum number of species ever, including extinct ones (one whole
+  number, 1 or more); the simulation stops with an error beyond it.
 
 - env:
 
@@ -185,11 +188,12 @@ simulate_evolving_metacommunity(
 
 - disturbance_sensitivity:
 
-  Probability that a population is lost when its site is disturbed: one
-  value or one per species. 1 (the default) removes all the populations
-  of a disturbed site, as without this argument; lower values let
-  species that resist the disturbance (for instance drought-tolerant or
-  air-breathing fish when a lake dries out) keep their populations.
+  Probability that a population is lost when its site is disturbed,
+  between 0 and 1: one value or one per species. 1 (the default) removes
+  all the populations of a disturbed site, as without this argument;
+  lower values let species that resist the disturbance (for instance
+  drought-tolerant or air-breathing fish when a lake dries out) keep
+  their populations.
 
 - kernel_group:
 

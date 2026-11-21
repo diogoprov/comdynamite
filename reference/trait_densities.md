@@ -27,25 +27,28 @@ trait_densities(
 
 - trait:
 
-  Name of the column with the trait.
+  Name of the column with the trait. One character string.
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. One character
+  string each.
 
 - abundance:
 
   Name of a column with the abundance of each population (the same value
   for all its individuals), or `NULL` to weight populations by the
-  number of individuals measured.
+  number of individuals measured. One character string or `NULL`.
 
 - bw:
 
-  Bandwidth of the kernel, or `NULL` for the rule above.
+  Bandwidth of the kernel (one number greater than 0), or `NULL` for the
+  rule above.
 
 - n:
 
-  Number of points of the grid of trait values.
+  Number of points of the grid of trait values. One whole number, 2 or
+  more.
 
 ## Value
 

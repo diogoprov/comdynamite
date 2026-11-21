@@ -104,17 +104,19 @@ community is stable (McPeek 2017; scenario 5 of the notes on branch rates).</p>
 
 
 <dt id="arg-sigma-">sigma2<a class="anchor" aria-label="anchor" href="#arg-sigma-"></a></dt>
-<dd><p>Rate outside the stretch informed by the metacommunity.</p></dd>
+<dd><p>Rate outside the stretch informed by the metacommunity. One finite number
+greater than 0.</p></dd>
 
 
 <dt id="arg-k">k<a class="anchor" aria-label="anchor" href="#arg-k"></a></dt>
 <dd><p>Increase of the rate, relative to <code>sigma2</code>, per unit of turnover (partners gained
-or lost per site and time step).</p></dd>
+or lost per site and time step). One finite number, 0 or more.</p></dd>
 
 
 <dt id="arg-window">window<a class="anchor" aria-label="anchor" href="#arg-window"></a></dt>
 <dd><p>Length of the end of each tip branch represented by the metacommunity, in the
-units of the branch lengths; <code>NULL</code> uses the whole tip branch. A window longer than a tip
+units of the branch lengths (one finite number greater than 0); <code>NULL</code> uses the whole tip
+branch. A window longer than a tip
 branch is cut to its length.</p></dd>
 
 

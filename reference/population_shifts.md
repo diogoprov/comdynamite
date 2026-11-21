@@ -34,25 +34,29 @@ population_shifts(
 - trait, site, species:
 
   Names of the columns with the trait value, the site and the species.
+  One character string each.
 
 - env:
 
-  Names of one or more columns with the environment of the site.
+  Names of one or more columns with the environment of the site (a
+  character vector without repeats).
 
 - abundance:
 
-  Name of the column with the abundance of the population; not used with
-  `community`.
+  Name of the column with the abundance of the population (one character
+  string); not used with `community`, and may then be `NULL`.
 
 - width:
 
-  Width `w` of the competition kernel; `NULL` (the default) chooses it
-  from the grid described in the section on the width. `c` is estimated
-  at that width, and the two trade off when data are few.
+  Width `w` of the competition kernel (one or more finite numbers
+  greater than 0); `NULL` (the default) chooses it from the grid
+  described in the section on the width. `c` is estimated at that width,
+  and the two trade off when data are few.
 
 - species_slopes:
 
-  Give each species its own slope on each environmental variable.
+  Give each species its own slope on each environmental variable? `TRUE`
+  or `FALSE`.
 
 - community:
 
@@ -63,10 +67,12 @@ population_shifts(
 - nboot:
 
   Number of parametric bootstrap simulations (0, the default, for none).
+  One whole number, 0 or more.
 
 - level:
 
-  Confidence level of the bootstrap intervals.
+  Confidence level of the bootstrap intervals. One number between 0 and
+  1, both excluded.
 
 ## Value
 

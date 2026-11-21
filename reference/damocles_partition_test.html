@@ -120,13 +120,13 @@ regimes.</p></dd>
 
 
 <dt id="arg-n-rand">n_rand<a class="anchor" aria-label="anchor" href="#arg-n-rand"></a></dt>
-<dd><p>Number of random partitions drawn; each distinct one is fitted once. 0 skips
-the test against random partitions.</p></dd>
+<dd><p>Number of random partitions drawn; each distinct one is fitted once. One whole
+number, 0 or more; 0 skips the test against random partitions.</p></dd>
 
 
 <dt id="arg-n-boot">n_boot<a class="anchor" aria-label="anchor" href="#arg-n-boot"></a></dt>
-<dd><p>Number of parametric bootstrap simulations under the constant rates estimated
-(0, the default, skips the bootstrap).</p></dd>
+<dd><p>Number of parametric bootstrap simulations under the constant rates estimated.
+One whole number, 0 or more; 0, the default, skips the bootstrap.</p></dd>
 
 
 <dt id="arg-vary">vary<a class="anchor" aria-label="anchor" href="#arg-vary"></a></dt>
@@ -149,14 +149,15 @@ daughters present (see <code><a href="simulate_damocles.html">simulate_damocles(
 <dd><p>Passed to <code><a href="random_regimes.html">random_regimes()</a></code>: random clades hold between
 <code>1 / tolerance</code> and <code>tolerance</code> times as many edges as the clades of <code>regimes</code>, share
 at most <code>max_overlap</code> of their edges with them (Jaccard index), and the whole random
-partition agrees with <code>regimes</code> at most as much (adjusted Rand index).</p></dd>
+partition agrees with <code>regimes</code> at most as much (adjusted Rand index). <code>tolerance</code> is one
+number, 1 or more; <code>max_overlap</code> one number between 0 and 1.</p></dd>
 
 
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores, with random partitions and bootstrap simulations fitted in
-parallel. Not available on
-Windows, where one core is used. The random partitions and the simulated communities are
-drawn before the fits, so the p-values do not depend on the number of cores.</p></dd>
+parallel. One whole number, 1 or more. Not available on Windows, where one core is used.
+The random partitions and the simulated communities are drawn before the fits, so the
+p-values do not depend on the number of cores.</p></dd>
 
 </dl></div>
     <div class="section level2">

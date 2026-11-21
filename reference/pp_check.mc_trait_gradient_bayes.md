@@ -24,7 +24,7 @@ pp_check(object, resp = c("sitemean", "trait"), ndraws = 50, ...)
 
 - ndraws:
 
-  Number of posterior draws to plot.
+  Number of posterior draws to plot. One whole number, 1 or more.
 
 - ...:
 

@@ -18,15 +18,15 @@ trait_bm(tree, lambda = 1, nodes = FALSE)
 
 - lambda:
 
-  Pagel's lambda, in \[0, 1\].
+  Pagel's lambda: one number between 0 and 1.
 
 - nodes:
 
-  Also draw the values at the internal nodes? They are drawn after the
-  tips, given them, so the tips are the same as with `nodes = FALSE` and
-  the same seed. Under lambda, the nodes are those of the tree whose
-  internal branches are multiplied by lambda and whose terminal branches
-  are lengthened to keep the tips where they were.
+  Also draw the values at the internal nodes? `TRUE` or `FALSE`. They
+  are drawn after the tips, given them, so the tips are the same as with
+  `nodes = FALSE` and the same seed. Under lambda, the nodes are those
+  of the tree whose internal branches are multiplied by lambda and whose
+  terminal branches are lengthened to keep the tips where they were.
 
 ## Value
 

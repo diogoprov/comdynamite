@@ -46,17 +46,20 @@ trait_kurtosis(x, na.rm = FALSE)
 - x:
 
   Numeric vector (one trait), matrix or data frame (traits in columns,
-  individuals or species in rows) or a `dist` object.
+  individuals or species in rows) or a `dist` object, without infinite
+  values.
 
 - na.rm:
 
-  Drop missing values (rows with any missing value of a matrix) before
-  the computation; with `FALSE` (the default) missing values give `NA`.
+  `TRUE` or `FALSE`. Drop missing values (rows with any missing value of
+  a matrix) before the computation; with `FALSE` (the default) missing
+  values give `NA`.
 
 - relative:
 
-  Divide by the range of the trait (one trait) or by the largest
-  pairwise distance (several traits), as the `div_range` option of cati.
+  `TRUE` or `FALSE`. Divide by the range of the trait (one trait) or by
+  the largest pairwise distance (several traits), as the `div_range`
+  option of cati.
 
 ## Value
 

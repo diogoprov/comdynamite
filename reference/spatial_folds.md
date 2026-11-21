@@ -23,7 +23,7 @@ spatial_folds(coords, k = 5, method = c("blocks", "random"), seed = 1)
 
 - k:
 
-  Number of folds.
+  Number of folds. One whole number, from 2 up to the number of sites.
 
 - method:
 
@@ -31,7 +31,7 @@ spatial_folds(coords, k = 5, method = c("blocks", "random"), seed = 1)
 
 - seed:
 
-  Integer that sets the seed.
+  Integer that sets the seed. One finite whole number.
 
 ## Value
 

@@ -27,7 +27,8 @@ dispersal_kernel(dist, scale, shape = c("exponential", "gaussian"))
 - scale:
 
   Scale of the kernel, in the units of `dist`: the mean distance of the
-  exponential kernel and the standard deviation of the Gaussian one.
+  exponential kernel and the standard deviation of the Gaussian one. One
+  number greater than 0.
 
 - shape:
 

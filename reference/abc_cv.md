@@ -56,23 +56,25 @@ abc_cv(
 
 - level:
 
-  Probability of the predictive interval.
+  Probability of the predictive interval. One number greater than 0 and
+  less than 1.
 
 - n:
 
-  Number of draws from the posterior of each fold.
+  Number of draws from the posterior of each fold. One whole number, 2
+  or more.
 
 - ntree:
 
-  Number of trees per forest.
+  Number of trees per forest. One whole number, 1 or more.
 
 - ncores:
 
-  Number of threads for the forests.
+  Number of threads for the forests. One whole number, 1 or more.
 
 - seed:
 
-  Integer that sets the seed.
+  Integer that sets the seed. One finite whole number.
 
 ## Value
 

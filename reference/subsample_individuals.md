@@ -32,35 +32,38 @@ subsample_individuals(
 
 - n:
 
-  Number of individuals drawn from each population, or `NULL` to keep
-  all.
+  Number of individuals drawn from each population (one whole number, 1
+  or more), or `NULL` to keep all.
 
 - fraction:
 
-  Probability that each individual is kept; used when `n` is `NULL`.
+  Probability that each individual is kept (one number greater than 0
+  and up to 1); used when `n` is `NULL`.
 
 - cover:
 
-  Share (0 to 1) of the abundance of each site covered by the species
-  kept, from the most abundant down (Pakeman & Quested 2007), or `NULL`
-  to keep every species. Abundances are those of the `abundance` column,
-  or the numbers of individuals in the data. Species tied in abundance
-  are taken in the order of the data, and populations with an abundance
-  of zero are never kept.
+  One number greater than 0 and up to 1: the share of the abundance of
+  each site covered by the species kept, from the most abundant down
+  (Pakeman & Quested 2007), or `NULL` to keep every species. Abundances
+  are those of the `abundance` column, or the numbers of individuals in
+  the data. Species tied in abundance are taken in the order of the
+  data, and populations with an abundance of zero are never kept.
 
 - min_n:
 
-  Minimum number of individuals of a population after sampling.
+  Minimum number of individuals of a population after sampling. One
+  whole number, 1 or more.
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. One character
+  string each.
 
 - abundance:
 
   Name of a column with the abundance of each population (the same value
   for all its individuals), or `NULL` to use the numbers of individuals
-  in the data.
+  in the data. One character string or `NULL`.
 
 ## Value
 

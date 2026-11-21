@@ -113,16 +113,20 @@ standard error, here the uncertainty of \(\beta\) enters the model directly.</p>
 
 <dt id="arg-ou-alpha">ou_alpha<a class="anchor" aria-label="anchor" href="#arg-ou-alpha"></a></dt>
 <dd><p><code>NULL</code> for Brownian motion, or the strength \(a\) of an
-Ornstein-Uhlenbeck process, in units of 1 / branch length.</p></dd>
+Ornstein-Uhlenbeck process, in units of 1 / branch length: one finite number greater
+than 0.</p></dd>
 
 
 <dt id="arg-lambda-prior">lambda_prior<a class="anchor" aria-label="anchor" href="#arg-lambda-prior"></a></dt>
-<dd><p>The two shape parameters of the beta prior of both \(\lambda\).</p></dd>
+<dd><p>The two shape parameters of the beta prior of both \(\lambda\): two
+finite numbers greater than 0.</p></dd>
 
 
 <dt id="arg-chains-parallel-chains-iter-warmup-iter-sampling-adapt-delta-seed">chains, parallel_chains, iter_warmup, iter_sampling, adapt_delta, seed<a class="anchor" aria-label="anchor" href="#arg-chains-parallel-chains-iter-warmup-iter-sampling-adapt-delta-seed"></a></dt>
 <dd><p>Passed to the
-<code>$sample()</code> method of cmdstanr.</p></dd>
+<code>$sample()</code> method of cmdstanr. <code>chains</code>, <code>parallel_chains</code> and <code>iter_sampling</code> are each
+one whole number, 1 or more; <code>iter_warmup</code> one whole number, 0 or more; <code>adapt_delta</code> one
+number between 0 and 1, both excluded; <code>seed</code> one whole number, 0 or more, or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

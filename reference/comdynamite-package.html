@@ -117,6 +117,17 @@ landscape with edges.</p></li>
 correlated traits from <code><a href="rate_matrix.html">rate_matrix()</a></code>.</p></li>
 </ul></div>
     <div class="section level2">
+    <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
+
+
+<p>Arguments that choose among options, such as <code>method</code>, <code>null</code> or <code>model</code>, are matched by
+<code><a href="https://rdrr.io/r/base/match.arg.html" class="external-link">match.arg()</a></code> and are case-sensitive: <code>null = "variogram"</code> works and <code>null = "Variogram"</code>
+stops with the list of valid options. Each scalar argument is checked for its length, type
+and range before any computation, and missing or infinite values in <code>comm</code>, <code>env</code> and the
+other data inputs stop the function with a message that names the argument; remove or
+impute missing values before the analysis.</p>
+    </div>
+    <div class="section level2">
     <h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a></h2>
 
 

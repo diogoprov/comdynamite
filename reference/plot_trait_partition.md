@@ -46,7 +46,7 @@ plot_trait_partition(
 
 - level:
 
-  Significance level.
+  Significance level. One number between 0 and 1.
 
 - colours:
 
@@ -58,7 +58,7 @@ plot_trait_partition(
 
 - text_size:
 
-  Size of the text, in mm.
+  Size of the text, in mm. One number greater than 0.
 
 - alpha:
 

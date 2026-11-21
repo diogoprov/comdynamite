@@ -22,8 +22,8 @@ plot(x, min_label = 0.05, colours = NULL, ...)
 
 - min_label:
 
-  Smallest share labelled with its percentage inside the bar; 1 or more
-  removes the labels.
+  Smallest share labelled with its percentage inside the bar: one
+  number, 0 or more; 1 or more removes the labels.
 
 - colours:
 

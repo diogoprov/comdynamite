@@ -120,17 +120,17 @@ matrix of traits of each site.</p>
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>Numeric vector (one trait), matrix or data frame (traits in columns, individuals or
-species in rows) or a <code>dist</code> object.</p></dd>
+species in rows) or a <code>dist</code> object, without infinite values.</p></dd>
 
 
 <dt id="arg-na-rm">na.rm<a class="anchor" aria-label="anchor" href="#arg-na-rm"></a></dt>
-<dd><p>Drop missing values (rows with any missing value of a matrix) before the
-computation; with <code>FALSE</code> (the default) missing values give <code>NA</code>.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Drop missing values (rows with any missing value of a
+matrix) before the computation; with <code>FALSE</code> (the default) missing values give <code>NA</code>.</p></dd>
 
 
 <dt id="arg-relative">relative<a class="anchor" aria-label="anchor" href="#arg-relative"></a></dt>
-<dd><p>Divide by the range of the trait (one trait) or by the largest pairwise
-distance (several traits), as the <code>div_range</code> option of cati.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Divide by the range of the trait (one trait) or by the
+largest pairwise distance (several traits), as the <code>div_range</code> option of cati.</p></dd>
 
 </dl></div>
     <div class="section level2">

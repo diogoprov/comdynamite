@@ -26,6 +26,7 @@ paint_regimes(tree, nodes, stem = FALSE)
 
   Should the branch leading to each node also take the new regime (the
   shift happens at the start of the stem rather than at the node)?
+  `TRUE` or `FALSE`.
 
 ## Value
 

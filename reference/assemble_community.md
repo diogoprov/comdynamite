@@ -32,7 +32,8 @@ print(x, ...)
 
 - size:
 
-  Number of species in the local community.
+  Number of species in the local community, one whole number between 1
+  and the number of species in `traits`.
 
 - rule:
 
@@ -50,8 +51,8 @@ print(x, ...)
 
   For `rule = "limiting_similarity"`: optional end point. Removal stops
   as soon as no two remaining species are closer than this (a limit to
-  similarity), even if more than `size` species remain. In the units of
-  `distance`.
+  similarity), even if more than `size` species remain. One finite
+  number, 0 or more, in the units of `distance`; `NULL` for none.
 
 - distance:
 

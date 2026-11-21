@@ -28,12 +28,12 @@ observe_detection(x, detection, visits = 3, record = c("counts", "presence"))
 
 - detection:
 
-  Probability that an individual is detected in a visit: one number, or
-  one per species, named by species.
+  Probability that an individual is detected in a visit, between 0 and
+  1: one number, or one per species, named by species.
 
 - visits:
 
-  Number of visits to each site.
+  Number of visits to each site, one whole number, 1 or more.
 
 - record:
 

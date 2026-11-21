@@ -105,11 +105,12 @@ the rows of <code>biogeography</code>.</p></dd>
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Number of permutations.</p></dd>
+<dd><p>Number of permutations, one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-gap">gap<a class="anchor" aria-label="anchor" href="#arg-gap"></a></dt>
-<dd><p>Largest distance between neighbouring sites of a patch. The default, 1.5 times
+<dd><p>Largest distance between neighbouring sites of a patch, one finite number
+greater than 0. The default (<code>NULL</code>), 1.5 times
 the median distance from a site to its fourth nearest site, joins diagonal neighbours in
 a full grid where most sites are not on an edge, and the four nearest sites are one step
 away, and grows with the spacing of sparse sites, where it follows the distance between

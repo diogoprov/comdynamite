@@ -40,7 +40,8 @@ plot(x, ...)
 
 - species_labels:
 
-  Write the names of species in `type = "beta_alpha"`.
+  `TRUE` or `FALSE`. Write the names of species in
+  `type = "beta_alpha"`.
 
 - colour:
 
@@ -48,7 +49,7 @@ plot(x, ...)
 
 - point_size:
 
-  Size of the points.
+  Size of the points. One number greater than 0.
 
 - ...:
 

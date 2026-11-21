@@ -59,19 +59,19 @@ plot_traits(
 
 - tip_labels:
 
-  Should the tips be labelled?
+  `TRUE` or `FALSE`. Should the tips be labelled?
 
 - legend:
 
-  Draw the legend of the regimes?
+  `TRUE` or `FALSE`. Draw the legend of the regimes?
 
 - point_size:
 
-  Size of the tips.
+  Size of the tips. One number greater than 0.
 
 - linewidth:
 
-  Width of the branches.
+  Width of the branches. One number greater than 0.
 
 - labels, ...:
 

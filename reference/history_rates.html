@@ -108,7 +108,7 @@ by time. Three models link the history to the rate:</p>
 
 <dt id="arg-sigma-">sigma2<a class="anchor" aria-label="anchor" href="#arg-sigma-"></a></dt>
 <dd><p>Rate before any change of state (<code>"burst"</code>) or scale of the rate
-(<code>"sympatry"</code>).</p></dd>
+(<code>"sympatry"</code>). One finite number greater than 0.</p></dd>
 
 
 <dt id="arg-state-rates">state_rates<a class="anchor" aria-label="anchor" href="#arg-state-rates"></a></dt>
@@ -117,17 +117,18 @@ by time. Three models link the history to the rate:</p>
 
 <dt id="arg-burst-decay">burst, decay<a class="anchor" aria-label="anchor" href="#arg-burst-decay"></a></dt>
 <dd><p>For <code>"burst"</code>, the relative increase of the rate at each change of state
-and the time scale of its decay.</p></dd>
+(one finite number, 0 or more) and the time scale of its decay (one finite number greater
+than 0).</p></dd>
 
 
 <dt id="arg-r">r<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
 <dd><p>For <code>"sympatry"</code>, the change in the logarithm of the rate per lineage in the same
-state.</p></dd>
+state. One finite number.</p></dd>
 
 
 <dt id="arg-overlap">overlap<a class="anchor" aria-label="anchor" href="#arg-overlap"></a></dt>
 <dd><p>For <code>"sympatry"</code>, count the lineages whose state shares an area (states such
-as <code>"A+B"</code>, split at <code>"+"</code>) rather than those in the same state.</p></dd>
+as <code>"A+B"</code>, split at <code>"+"</code>) rather than those in the same state. <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

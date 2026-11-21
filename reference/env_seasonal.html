@@ -99,24 +99,25 @@ added with <code><a href="env_pulse.html">env_pulse()</a></code> or, as losses o
 
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
-<dd><p>Number of steps. Taken from <code>env</code> when it is a matrix.</p></dd>
+<dd><p>Number of steps: one whole number, 1 or more. Taken from <code>env</code> when it is a
+matrix.</p></dd>
 
 
 <dt id="arg-period">period<a class="anchor" aria-label="anchor" href="#arg-period"></a></dt>
-<dd><p>Steps per cycle (a year).</p></dd>
+<dd><p>Steps per cycle (a year): one number greater than 0.</p></dd>
 
 
 <dt id="arg-amplitude">amplitude<a class="anchor" aria-label="anchor" href="#arg-amplitude"></a></dt>
-<dd><p>Amplitude of the cycle: one value, or one per site.</p></dd>
+<dd><p>Amplitude of the cycle: one finite value, or one per site.</p></dd>
 
 
 <dt id="arg-phase">phase<a class="anchor" aria-label="anchor" href="#arg-phase"></a></dt>
-<dd><p>Step at which the cycle crosses its mean on the way up.</p></dd>
+<dd><p>Step at which the cycle crosses its mean on the way up: one finite number.</p></dd>
 
 
 <dt id="arg-year-sd">year_sd<a class="anchor" aria-label="anchor" href="#arg-year-sd"></a></dt>
 <dd><p>Standard deviation of an anomaly drawn for each year (each block of <code>period</code>
-steps) and added to all sites; 0 (the default) for none.</p></dd>
+steps) and added to all sites: one number, 0 or more; 0 (the default) for none.</p></dd>
 
 </dl></div>
     <div class="section level2">

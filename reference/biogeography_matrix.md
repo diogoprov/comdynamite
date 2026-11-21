@@ -40,8 +40,9 @@ biogeography_matrix(
 
 - min_sites:
 
-  A warning is given for events with fewer sites on one side. This is a
-  rule of thumb, not a value from the literature.
+  One whole number, 0 or more. A warning is given for events with fewer
+  sites on one side. This is a rule of thumb, not a value from the
+  literature.
 
 ## Value
 

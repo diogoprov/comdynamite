@@ -103,7 +103,8 @@ with species names as names or row names. For example, the output of
 
 
 <dt id="arg-size">size<a class="anchor" aria-label="anchor" href="#arg-size"></a></dt>
-<dd><p>Number of species in the local community.</p></dd>
+<dd><p>Number of species in the local community, one whole number between 1 and the
+number of species in <code>traits</code>.</p></dd>
 
 
 <dt id="arg-rule">rule<a class="anchor" aria-label="anchor" href="#arg-rule"></a></dt>
@@ -121,8 +122,8 @@ trait.</p></dd>
 <dt id="arg-min-distance">min_distance<a class="anchor" aria-label="anchor" href="#arg-min-distance"></a></dt>
 <dd><p>For <code>rule = "limiting_similarity"</code>: optional end point.
 Removal stops as soon as no two remaining species are closer than this
-(a limit to similarity), even if more than <code>size</code> species remain. In the units of
-<code>distance</code>.</p></dd>
+(a limit to similarity), even if more than <code>size</code> species remain. One finite number, 0 or
+more, in the units of <code>distance</code>; <code>NULL</code> for none.</p></dd>
 
 
 <dt id="arg-distance">distance<a class="anchor" aria-label="anchor" href="#arg-distance"></a></dt>

@@ -23,8 +23,9 @@ competition_matrix(
 
 - species:
 
-  A `phylo` tree, or the number of species (not for `type = "phylo"`);
-  ignored for `type = "trait"`, where the species are those of `traits`.
+  A `phylo` tree, or the number of species, one whole number, 1 or more
+  (not for `type = "phylo"`); ignored for `type = "trait"`, where the
+  species are those of `traits`.
 
 - type:
 
@@ -33,11 +34,11 @@ competition_matrix(
 - inter_max:
 
   Maximum interspecific coefficient, relative to intraspecific
-  competition.
+  competition, one finite number, 0 or more.
 
 - scale:
 
-  Multiplier of all coefficients.
+  Multiplier of all coefficients, one finite number greater than 0.
 
 - traits:
 

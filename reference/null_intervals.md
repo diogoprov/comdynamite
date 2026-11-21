@@ -31,11 +31,13 @@ null_intervals(x, level = 0.95, inner = 0.5)
 - level:
 
   Coverage of the outer null interval, and `1 - level` the size of the
-  two-sided test that defines `deviation`.
+  two-sided test that defines `deviation`. One number between 0 and 1,
+  both excluded.
 
 - inner:
 
-  Coverage of the inner null interval.
+  Coverage of the inner null interval. One number between 0 and 1,
+  smaller than `level`.
 
 ## Value
 

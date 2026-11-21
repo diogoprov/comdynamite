@@ -144,6 +144,11 @@ form chosen in
   half-saturation constants are `eps_R` and `eps_N`, `eta_N` and
   `eta_P`, `kappa_R` and `kappa_P`. Traits must then be positive.
 
+Every parameter is one finite number. The widths and half-saturation
+constants must be greater than 0, the optima (`zc_R`, `zf_N`, `zx_P`)
+and steepnesses (`alpha`, `rho`, `tau`) may take any sign, and all the
+others must be 0 or more.
+
 ## References
 
 McPeek, M. A. (2017). *Evolutionary Community Ecology*. Princeton

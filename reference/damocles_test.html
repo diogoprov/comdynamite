@@ -118,7 +118,7 @@ and species of <code>comm</code> missing from the tree are dropped.</p></dd>
 
 
 <dt id="arg-n-sim">n_sim<a class="anchor" aria-label="anchor" href="#arg-n-sim"></a></dt>
-<dd><p>Number of null communities of each model.</p></dd>
+<dd><p>Number of null communities of each model. One whole number, 2 or more.</p></dd>
 
 
 <dt id="arg-gamma-mu">gamma, mu<a class="anchor" aria-label="anchor" href="#arg-gamma-mu"></a></dt>
@@ -136,13 +136,14 @@ probabilities).</p></dd>
 
 
 <dt id="arg-shared">shared<a class="anchor" aria-label="anchor" href="#arg-shared"></a></dt>
-<dd><p>When the rates are estimated, <code>TRUE</code> fits one pair shared by all communities
-(see <code><a href="damocles_loglik.html">damocles_fit()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. When the rates are estimated, <code>TRUE</code> fits one pair shared
+by all communities (see <code><a href="damocles_loglik.html">damocles_fit()</a></code>) and <code>FALSE</code> (the default) one pair per community.</p></dd>
 
 
 <dt id="arg-sympatry">sympatry<a class="anchor" aria-label="anchor" href="#arg-sympatry"></a></dt>
 <dd><p>Probability that a present ancestor leaves both daughters present, used in
-the simulations (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>); <code>NULL</code> estimates it with the rates.</p></dd>
+the simulations (see <code><a href="simulate_damocles.html">simulate_damocles()</a></code>): one number between 0 and 1, or <code>NULL</code> to
+estimate it with the rates.</p></dd>
 
 
 <dt id="arg-regimes">regimes<a class="anchor" aria-label="anchor" href="#arg-regimes"></a></dt>

@@ -91,11 +91,12 @@ matrix \(E\) per species, for the evolution of several traits (one per niche axi
 
 
 <dl><dt id="arg-species">species<a class="anchor" aria-label="anchor" href="#arg-species"></a></dt>
-<dd><p>Names of the species, or their number.</p></dd>
+<dd><p>Names of the species, or their number (one whole number, 1 or more).</p></dd>
 
 
 <dt id="arg-n-traits">n_traits<a class="anchor" aria-label="anchor" href="#arg-n-traits"></a></dt>
-<dd><p>Number of traits (axes). Ignored when <code>P</code> is given.</p></dd>
+<dd><p>Number of traits (axes): one whole number, 1 or more. Ignored when <code>P</code> is
+given.</p></dd>
 
 
 <dt id="arg-family">family<a class="anchor" aria-label="anchor" href="#arg-family"></a></dt>
@@ -108,16 +109,18 @@ variances with a common correlation <code>correlation</code>.</p></dd>
 
 
 <dt id="arg-correlation">correlation<a class="anchor" aria-label="anchor" href="#arg-correlation"></a></dt>
-<dd><p>Correlation between all pairs of traits in the default <code>P</code>.</p></dd>
+<dd><p>Correlation between all pairs of traits in the default <code>P</code>: one number
+greater than -1 / (<code>n_traits</code> - 1) and less than 1.</p></dd>
 
 
 <dt id="arg-heritability">heritability<a class="anchor" aria-label="anchor" href="#arg-heritability"></a></dt>
-<dd><p>Share \(h^2\) of the phenotypic variance that is additive genetic,
-between 0 and 1.</p></dd>
+<dd><p>Share \(h^2\) of the phenotypic variance that is additive genetic:
+one number between 0 and 1.</p></dd>
 
 
 <dt id="arg-divergence">divergence<a class="anchor" aria-label="anchor" href="#arg-divergence"></a></dt>
-<dd><p>Standard deviation (on the log scale) of the differences among species.</p></dd>
+<dd><p>Standard deviation (on the log scale) of the differences among species:
+one number, 0 or more.</p></dd>
 
 </dl></div>
     <div class="section level2">

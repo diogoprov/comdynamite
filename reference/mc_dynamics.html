@@ -117,20 +117,21 @@ rows of <code>traits</code> by name, or by position if <code>alpha</code> has no
 
 
 <dt id="arg-dispersal">dispersal<a class="anchor" aria-label="anchor" href="#arg-dispersal"></a></dt>
-<dd><p>Emigration probability, one value or one per species.</p></dd>
+<dd><p>Emigration probability, between 0 and 1: one value or one per species.</p></dd>
 
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
-<dd><p>Number of time steps.</p></dd>
+<dd><p>Number of time steps, one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-seed-steps">seed_steps<a class="anchor" aria-label="anchor" href="#arg-seed-steps"></a></dt>
-<dd><p>Steps at which individuals are added during colonisation.</p></dd>
+<dd><p>Steps at which individuals are added during colonisation, a numeric
+vector without <code>NA</code> (<code>numeric(0)</code> for none).</p></dd>
 
 
 <dt id="arg-seed-mean">seed_mean<a class="anchor" aria-label="anchor" href="#arg-seed-mean"></a></dt>
 <dd><p>Mean number of individuals of each species added to each
-site at each seeding step (and at the start).</p></dd>
+site at each seeding step (and at the start), one finite number, 0 or more.</p></dd>
 
 
 <dt id="arg-disp-matrix">disp_matrix<a class="anchor" aria-label="anchor" href="#arg-disp-matrix"></a></dt>
@@ -139,7 +140,8 @@ site at each seeding step (and at the start).</p></dd>
 
 
 <dt id="arg-record-steps">record_steps<a class="anchor" aria-label="anchor" href="#arg-record-steps"></a></dt>
-<dd><p>Optional steps at which abundances are recorded.</p></dd>
+<dd><p>Optional steps at which abundances are recorded, a numeric vector
+without <code>NA</code>; steps outside 1 to <code>n_steps</code> are dropped.</p></dd>
 
 
 <dt id="arg-sites-species">sites, species<a class="anchor" aria-label="anchor" href="#arg-sites-species"></a></dt>
@@ -147,8 +149,8 @@ site at each seeding step (and at the start).</p></dd>
 
 
 <dt id="arg-extirpation">extirpation<a class="anchor" aria-label="anchor" href="#arg-extirpation"></a></dt>
-<dd><p>Probability that a population is lost at each time step,
-one value or one per species.</p></dd>
+<dd><p>Probability that a population is lost at each time step, between 0 and
+1: one value or one per species.</p></dd>
 
 
 <dt id="arg-pool">pool<a class="anchor" aria-label="anchor" href="#arg-pool"></a></dt>
@@ -212,20 +214,21 @@ while offspring outnumber the vacancies. Competition is through the shared micro
 
 <dt id="arg-microsites">microsites<a class="anchor" aria-label="anchor" href="#arg-microsites"></a></dt>
 <dd><p>With <code>recruitment = "lottery"</code>, the number of microsites of each site (one
-value or one per site). <code>initial</code> must fit in them; seeds take vacant microsites by lottery
-with the residents. In the colonisation history, <code>immigrants</code> and the migrant load count
-immigrant recruits, and <code>propagule</code> the individuals of a new population after recruitment.</p></dd>
+value or one per site), whole numbers, 1 or more. <code>initial</code> must fit in them; seeds take vacant
+microsites by lottery with the residents. In the colonisation history, <code>immigrants</code> and the
+migrant load count immigrant recruits, and <code>propagule</code> the individuals of a new population
+after recruitment.</p></dd>
 
 
 <dt id="arg-mortality">mortality<a class="anchor" aria-label="anchor" href="#arg-mortality"></a></dt>
-<dd><p>With <code>recruitment = "lottery"</code>, the probability that an adult dies at each
-step, whatever its phenotype: 1 (the default) for discrete generations, lower values for
-overlapping generations, with a generation time of about <code>1 / mortality</code> steps. With
-<code>evolution</code>, selection, mutation and the loss of variance to selection act on recruits, so
-that their effect per step scales with the share of recruits in the population; drift
-comes from the sampling of both survivors and recruits, so that it approaches that of a
-Moran model at low mortality; founders are sampled once, when they recruit;
-<code>steps_per_generation</code> must stay 1.</p></dd>
+<dd><p>With <code>recruitment = "lottery"</code>, the probability that an adult dies at each step,
+whatever its phenotype, one number greater than 0 and up to 1: 1 (the default) for discrete
+generations, lower values for overlapping generations, with a generation time of about
+<code>1 / mortality</code> steps. With <code>evolution</code>, selection, mutation and the loss of variance to
+selection act on recruits, so that their effect per step scales with the share of recruits
+in the population; drift comes from the sampling of both survivors and recruits, so that it
+approaches that of a Moran model at low mortality; founders are sampled once, when they
+recruit; <code>steps_per_generation</code> must stay 1.</p></dd>
 
 
 <dt id="arg-dispersal-time">dispersal_time<a class="anchor" aria-label="anchor" href="#arg-dispersal-time"></a></dt>
@@ -266,11 +269,11 @@ emigration at every site.</p></dd>
 
 
 <dt id="arg-disturbance-sensitivity">disturbance_sensitivity<a class="anchor" aria-label="anchor" href="#arg-disturbance-sensitivity"></a></dt>
-<dd><p>Probability that a population is lost when its site is
-disturbed: one value or one per species. 1 (the default) removes all the populations of a
-disturbed site, as without this argument; lower values let species that resist the
-disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
-keep their populations.</p></dd>
+<dd><p>Probability that a population is lost when its site is disturbed,
+between 0 and 1: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the disturbance
+(for instance drought-tolerant or air-breathing fish when a lake dries out) keep their
+populations.</p></dd>
 
 </dl></div>
     <div class="section level2">

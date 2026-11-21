@@ -44,42 +44,44 @@ rigid_permutations(
 
 - n_perm:
 
-  Largest number of permutations. Fewer are returned when fewer distinct
-  placements of the event exist.
+  Largest number of permutations, one whole number, 1 or more. Fewer are
+  returned when fewer distinct placements of the event exist.
 
 - gap:
 
-  A moved site counts as inside the landscape when it is closer than
-  `gap` to a site, or in a hole narrower than twice `gap` between sites
-  (four times `gap` off a lattice, where sites leave larger voids
-  between neighbours), but not beyond an edge. A site that lands inside
-  but not on a site goes to the nearest free site within twice `gap`.
-  The default is the median distance from a site to its fourth nearest
-  site: the step of a full grid, where it makes a site just beyond the
-  edge count as outside, and the spacing of sparse sites, so that holes
-  count as inside. It is not the `gap` of
+  One positive number, or `NULL` for the default. A moved site counts as
+  inside the landscape when it is closer than `gap` to a site, or in a
+  hole narrower than twice `gap` between sites (four times `gap` off a
+  lattice, where sites leave larger voids between neighbours), but not
+  beyond an edge. A site that lands inside but not on a site goes to the
+  nearest free site within twice `gap`. The default is the median
+  distance from a site to its fourth nearest site: the step of a full
+  grid, where it makes a site just beyond the edge count as outside, and
+  the spacing of sparse sites, so that holes count as inside. It is not
+  the `gap` of
   [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md),
   which is 1.5 times this one by default.
 
 - outside:
 
   Largest fraction of the sites of an event that may land outside the
-  landscape in a move. Those sites go to the nearest free site within
-  twice `gap`, and the move is dropped when one has none.
+  landscape in a move, one number between 0 and 1. Those sites go to the
+  nearest free site within twice `gap`, and the move is dropped when one
+  has none.
 
 - independent:
 
   Distance beyond which parts of an event move independently of each
-  other, while staying at least that far apart. The default, `Inf`,
-  moves the whole event together and assumes nothing about the range of
-  autocorrelation.
+  other, while staying at least that far apart. One positive number,
+  which may be `Inf`. The default, `Inf`, moves the whole event together
+  and assumes nothing about the range of autocorrelation.
 
 - max_tries:
 
   Largest number of moves tried: of the enumerated moves of one part, in
   random order, when placements fail or repeat a layout, or of the
   combinations of several independent parts, which cannot all be
-  enumerated.
+  enumerated. One whole number, 1 or more.
 
 ## Value
 

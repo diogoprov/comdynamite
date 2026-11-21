@@ -125,23 +125,25 @@ the column <code>trait</code>.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>Numbers of individuals per population; the default runs from 2 to the median size
-of the populations. With <code>cover</code>, a single number of individuals per population, or
-<code>NULL</code> (the default) to keep all of them.</p></dd>
+<dd><p>Numbers of individuals per population (whole numbers, 1 or more); the default runs
+from 2 to the median size of the populations. With <code>cover</code>, one whole number of
+individuals per population, or <code>NULL</code> (the default) to keep all of them.</p></dd>
 
 
 <dt id="arg-cover">cover<a class="anchor" aria-label="anchor" href="#arg-cover"></a></dt>
-<dd><p>Shares (0 to 1) of abundance covered by the species measured, for a rarefaction
-over species instead of individuals; <code>NULL</code> (the default) for a rarefaction over <code>n</code>.</p></dd>
+<dd><p>Shares (numbers greater than 0 and up to 1) of abundance covered by the species
+measured, for a rarefaction over species instead of individuals; <code>NULL</code> (the default) for a
+rarefaction over <code>n</code>.</p></dd>
 
 
 <dt id="arg-reps">reps<a class="anchor" aria-label="anchor" href="#arg-reps"></a></dt>
-<dd><p>Number of subsamples for each level of effort. With <code>cover</code> and no <code>n</code> the
-subsamples are all equal, and a single one is computed.</p></dd>
+<dd><p>Number of subsamples for each level of effort (one whole number, 1 or more). With
+<code>cover</code> and no <code>n</code> the subsamples are all equal, and a single one is computed.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Coverage of the interval of the statistic over subsamples.</p></dd>
+<dd><p>Coverage of the interval of the statistic over subsamples. One number between 0
+and 1, both excluded.</p></dd>
 
 
 <dt id="arg-min-n-site-species">min_n, site, species<a class="anchor" aria-label="anchor" href="#arg-min-n-site-species"></a></dt>

@@ -33,7 +33,7 @@ trait_gradient_test(
 
 - n_null:
 
-  Number of null communities.
+  Number of null communities. One whole number, 1 or more.
 
 - null:
 
@@ -45,7 +45,8 @@ trait_gradient_test(
   Trades of the curveball chain before the first null community and
   between null communities; by default 50 and 5 times the number of
   sites, so that each site takes part in about 10 trades between null
-  communities.
+  communities. Each one whole number (0 or more for `burn_in`, 1 or more
+  for `thin`) or `NULL`.
 
 - tree:
 
@@ -56,6 +57,7 @@ trait_gradient_test(
 
   The constant \\k \ge 1\\ of the phylogenetic permutations of
   `null = "phylo"`: closer to 1, more exchanges among relatives only.
+  One finite number, 1 or more.
 
 ## Value
 

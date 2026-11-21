@@ -30,11 +30,12 @@ tstats(
 
 - traits:
 
-  Names of the columns with trait values.
+  Names of the columns with trait values (a character vector).
 
 - site, species:
 
   Names of the columns with the site and the species of each individual.
+  One character string each.
 
 - method:
 
@@ -44,9 +45,9 @@ tstats(
 
 - n_perm:
 
-  Number of randomisations of the null models; 0 or `NULL` for the
-  observed values only, much faster in simulation studies with many
-  replicates.
+  Number of randomisations of the null models (one whole number, 0 or
+  more); 0 or `NULL` for the observed values only, much faster in
+  simulation studies with many replicates.
 
 - alternative:
 

@@ -51,11 +51,12 @@ drift_test(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95)
 - correct:
 
   Whether to subtract the sampling variance of the group means (needs
-  groups with more than one individual).
+  groups with more than one individual): `TRUE` or `FALSE`.
 
 - level:
 
-  The confidence level of the interval for the slope.
+  The confidence level of the interval for the slope: one number greater
+  than 0 and less than 1.
 
 ## Value
 

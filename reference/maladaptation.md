@@ -23,8 +23,8 @@ maladaptation(x, step = NULL)
 
 - step:
 
-  `NULL` (the default) for the last step, or one or more steps kept with
-  `record_steps`.
+  `NULL` (the default) for the last step, or one or more steps (numbers,
+  none missing or infinite) kept with `record_steps`.
 
 ## Value
 

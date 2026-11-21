@@ -36,7 +36,8 @@ plot(
 
 - level:
 
-  Number of standard deviations of the ellipse.
+  Number of standard deviations of the ellipse. One number greater than
+  0.
 
 - colours:
 
@@ -44,11 +45,11 @@ plot(
 
 - legend:
 
-  Draw the legend of the regimes?
+  `TRUE` or `FALSE`. Draw the legend of the regimes?
 
 - linewidth:
 
-  Width of the ellipses.
+  Width of the ellipses. One number greater than 0.
 
 - ...:
 

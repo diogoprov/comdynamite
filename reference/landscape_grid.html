@@ -101,25 +101,25 @@ probabilities from <code><a href="dispersal_kernel.html">dispersal_kernel()</a><
 
 
 <dl><dt id="arg-side">side<a class="anchor" aria-label="anchor" href="#arg-side"></a></dt>
-<dd><p>Number of cells per side.</p></dd>
+<dd><p>Number of cells per side: one whole number, 2 or more.</p></dd>
 
 
 <dt id="arg-env-bandwidth">env_bandwidth<a class="anchor" aria-label="anchor" href="#arg-env-bandwidth"></a></dt>
 <dd><p>Bandwidth (in cells) of the Gaussian kernel that
-smooths the environment. Larger values give smoother gradients.</p></dd>
+smooths the environment: one number greater than 0. Larger values give smoother gradients.</p></dd>
 
 
 <dt id="arg-disp-scale">disp_scale<a class="anchor" aria-label="anchor" href="#arg-disp-scale"></a></dt>
-<dd><p>Scale (in cells) of the dispersal kernel.</p></dd>
+<dd><p>Scale (in cells) of the dispersal kernel: one number greater than 0.</p></dd>
 
 
 <dt id="arg-torus">torus<a class="anchor" aria-label="anchor" href="#arg-torus"></a></dt>
-<dd><p>Wrap the grid as a torus?</p></dd>
+<dd><p>Wrap the grid as a torus? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-env-range">env_range<a class="anchor" aria-label="anchor" href="#arg-env-range"></a></dt>
 <dd><p>Range of the uniform marginal distribution of the
-environment.</p></dd>
+environment: two finite numbers, the first smaller.</p></dd>
 
 
 <dt id="arg-disp-shape">disp_shape<a class="anchor" aria-label="anchor" href="#arg-disp-shape"></a></dt>
@@ -128,7 +128,8 @@ environment.</p></dd>
 
 
 <dt id="arg-n-axes">n_axes<a class="anchor" aria-label="anchor" href="#arg-n-axes"></a></dt>
-<dd><p>Number of environmental axes. With more than one, each axis is a field
+<dd><p>Number of environmental axes: one whole number, 1 or more. With more than one, each
+axis is a field
 smoothed in the same way, the axes are correlated by <code>axis_cor</code> before the conversion to
 ranks, and the landscape also holds <code>env_axes</code>, a matrix with one column per axis, which
 <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code> uses with a list of traits when <code>env</code> is not given. The first

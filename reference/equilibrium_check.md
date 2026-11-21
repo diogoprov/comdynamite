@@ -23,7 +23,8 @@ equilibrium_check(x, tolerance = 0.05)
 
 - tolerance:
 
-  Largest relative change in a statistic that counts as settled.
+  Largest relative change in a statistic that counts as settled. One
+  number, 0 or more.
 
 ## Value
 

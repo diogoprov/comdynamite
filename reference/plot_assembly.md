@@ -36,11 +36,11 @@ plot_assembly(
 
 - species_labels:
 
-  Should the species be labelled?
+  `TRUE` or `FALSE`. Should the species be labelled?
 
 - point_size:
 
-  Size of the species.
+  Size of the species. One number greater than 0.
 
 - labels, ...:
 

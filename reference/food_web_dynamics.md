@@ -64,13 +64,13 @@ food_web_dynamics(
 
 - V:
 
-  Additive genetic variances of the three traits, one number or three;
-  zero means a trait that does not evolve.
+  Additive genetic variances of the three traits, one number or three,
+  each 0 or more; zero means a trait that does not evolve.
 
 - omnivory:
 
   Does the predator also feed on the resource (intraguild predation,
-  with `v0`, `w` and `u` of `params`)?
+  with `v0`, `w` and `u` of `params`)? `TRUE` or `FALSE`.
 
 - introductions:
 
@@ -80,20 +80,23 @@ food_web_dynamics(
 
 - dt:
 
-  Step of the integration; the intervals between the times of `times`
-  and of `introductions` are divided into steps no longer than this.
+  Step of the integration, one finite number greater than 0; the
+  intervals between the times of `times` and of `introductions` are
+  divided into steps no longer than this.
 
 - extinction:
 
-  Abundance below which a level is set to zero; McPeek's code has no
-  such threshold, so use 0 to compare with it.
+  Abundance below which a level is set to zero, one finite number, 0 or
+  more; McPeek's code has no such threshold, so use 0 to compare with
+  it.
 
 - trait_floor:
 
-  Lowest value of the mean traits: a trait that falls below it relaxes
-  back at rate `trait_floor - z`. `NULL` uses 0 with
-  `attack = "michaelis"`, where traits must be positive, and no floor
-  (`-Inf`) otherwise. McPeek's MATLAB code floors every trait at 0.
+  Lowest value of the mean traits, one number or `-Inf`: a trait that
+  falls below it relaxes back at rate `trait_floor - z`. `NULL` uses 0
+  with `attack = "michaelis"`, where traits must be positive, and no
+  floor (`-Inf`) otherwise. McPeek's MATLAB code floors every trait at
+  0.
 
 ## Value
 

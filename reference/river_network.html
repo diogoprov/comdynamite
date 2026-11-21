@@ -104,27 +104,28 @@ the downstream neighbour and the length of the reach of each site.</p>
 
 
 <dl><dt id="arg-n-sites">n_sites<a class="anchor" aria-label="anchor" href="#arg-n-sites"></a></dt>
-<dd><p>Number of sites (at least 2).</p></dd>
+<dd><p>Number of sites: one whole number, 2 or more.</p></dd>
 
 
 <dt id="arg-branching">branching<a class="anchor" aria-label="anchor" href="#arg-branching"></a></dt>
 <dd><p>Probability that a new site starts a branch rather than extending a
-headwater (between 0 and 1).</p></dd>
+headwater: one number between 0 and 1.</p></dd>
 
 
 <dt id="arg-reach-length">reach_length<a class="anchor" aria-label="anchor" href="#arg-reach-length"></a></dt>
-<dd><p>Mean length of the reach between a site and its downstream neighbour.
+<dd><p>Mean length of the reach between a site and its downstream neighbour:
+one number greater than 0.
 Lengths are drawn from an exponential distribution with this mean, or are all equal with
 <code>fixed_length = TRUE</code>.</p></dd>
 
 
 <dt id="arg-fixed-length">fixed_length<a class="anchor" aria-label="anchor" href="#arg-fixed-length"></a></dt>
-<dd><p>Logical: equal reach lengths.</p></dd>
+<dd><p>Equal reach lengths? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-max-branches">max_branches<a class="anchor" aria-label="anchor" href="#arg-max-branches"></a></dt>
 <dd><p>Largest number of branches that join at a confluence (2 for binary
-confluences).</p></dd>
+confluences): one whole number, 2 or more.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -135,7 +136,8 @@ neighbour, 0 at the outlet), <code>distance</code> (along the channel to the out
 (Shreve magnitude, the number of headwaters upstream of the site, itself included),
 <code>upstream_length</code> (the length of channel upstream of the site, its own reach included, a
 proxy for the catchment area, which describes the size of a river better than Strahler
-order; Altermatt 2013), <code>order</code> (Strahler order), <code>headwater</code> (logical) and the coordinates <code>x</code> and <code>y</code>.</p>
+order; Altermatt 2013), <code>order</code> (Strahler order), <code>headwater</code> (logical) and the coordinates <code>x</code>
+and <code>y</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

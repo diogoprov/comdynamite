@@ -40,7 +40,7 @@ history_rates(
 - sigma2:
 
   Rate before any change of state (`"burst"`) or scale of the rate
-  (`"sympatry"`).
+  (`"sympatry"`). One finite number greater than 0.
 
 - state_rates:
 
@@ -49,18 +49,19 @@ history_rates(
 - burst, decay:
 
   For `"burst"`, the relative increase of the rate at each change of
-  state and the time scale of its decay.
+  state (one finite number, 0 or more) and the time scale of its decay
+  (one finite number greater than 0).
 
 - r:
 
   For `"sympatry"`, the change in the logarithm of the rate per lineage
-  in the same state.
+  in the same state. One finite number.
 
 - overlap:
 
   For `"sympatry"`, count the lineages whose state shares an area
   (states such as `"A+B"`, split at `"+"`) rather than those in the same
-  state.
+  state. `TRUE` or `FALSE`.
 
 ## Value
 

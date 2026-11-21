@@ -36,7 +36,7 @@ abc_table(
 
 - n:
 
-  Number of simulations.
+  Number of simulations. One whole number, 1 or more.
 
 - setup:
 
@@ -52,7 +52,7 @@ abc_table(
 
 - seed:
 
-  Integer that sets all the seeds.
+  Integer that sets all the seeds. One finite whole number.
 
 ## Value
 

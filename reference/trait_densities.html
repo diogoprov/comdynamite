@@ -95,25 +95,26 @@ populations weighted by their relative abundances, so that both integrate to one
 
 
 <dt id="arg-trait">trait<a class="anchor" aria-label="anchor" href="#arg-trait"></a></dt>
-<dd><p>Name of the column with the trait.</p></dd>
+<dd><p>Name of the column with the trait. One character string.</p></dd>
 
 
 <dt id="arg-site-species">site, species<a class="anchor" aria-label="anchor" href="#arg-site-species"></a></dt>
-<dd><p>Names of the columns with the site and the species.</p></dd>
+<dd><p>Names of the columns with the site and the species. One character
+string each.</p></dd>
 
 
 <dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
 <dd><p>Name of a column with the abundance of each population (the same value
 for all its individuals), or <code>NULL</code> to weight populations by the number of individuals
-measured.</p></dd>
+measured. One character string or <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-bw">bw<a class="anchor" aria-label="anchor" href="#arg-bw"></a></dt>
-<dd><p>Bandwidth of the kernel, or <code>NULL</code> for the rule above.</p></dd>
+<dd><p>Bandwidth of the kernel (one number greater than 0), or <code>NULL</code> for the rule above.</p></dd>
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>Number of points of the grid of trait values.</p></dd>
+<dd><p>Number of points of the grid of trait values. One whole number, 2 or more.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -33,12 +33,14 @@ trait_ou(
 
 - n_traits:
 
-  Number of traits. Taken from the rate matrices when `sigma2` gives
-  them, or else from the columns of `theta` when it is a matrix.
+  Number of traits (one whole number, 1 or more). Taken from the rate
+  matrices when `sigma2` gives them, or else from the columns of `theta`
+  when it is a matrix.
 
 - alpha:
 
-  Strength of selection towards the optimum (0 = Brownian motion).
+  Strength of selection towards the optimum (0 = Brownian motion). One
+  finite number, 0 or more.
 
 - sigma2:
 

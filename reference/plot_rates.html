@@ -99,26 +99,27 @@ carries its tree and rates.</p></dd>
 
 
 <dt id="arg-rates">rates<a class="anchor" aria-label="anchor" href="#arg-rates"></a></dt>
-<dd><p>Rate of each branch, in the order of the rows of <code>tree$edge</code>, or a result of
+<dd><p>Rate of each branch (finite, or <code>NA</code>), in the order of the rows of <code>tree$edge</code>,
+or a result of
 <code><a href="trait_rates.html">trait_rates()</a></code>, whose <code>edge_rates</code> are used. Left out when <code>tree</code> is a result of
 <code><a href="trait_rates.html">trait_rates()</a></code>.</p></dd>
 
 
 <dt id="arg-log">log<a class="anchor" aria-label="anchor" href="#arg-log"></a></dt>
-<dd><p>Colour by the logarithm of the rate (the default), since rates are multiplicative.
-Needs positive rates; use <code>FALSE</code> for estimates that can be negative.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Colour by the logarithm of the rate (the default), since rates
+are multiplicative. Needs positive rates; use <code>FALSE</code> for estimates that can be negative.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
-<dd><p>Name of a palette of <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code>.</p></dd>
+<dd><p>One character string, the name of a palette of <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code>.</p></dd>
 
 
 <dt id="arg-tip-labels">tip_labels<a class="anchor" aria-label="anchor" href="#arg-tip-labels"></a></dt>
-<dd><p>Draw the names of the tips.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Draw the names of the tips.</p></dd>
 
 
 <dt id="arg-linewidth">linewidth<a class="anchor" aria-label="anchor" href="#arg-linewidth"></a></dt>
-<dd><p>Width of the branches.</p></dd>
+<dd><p>Width of the branches. One number greater than 0.</p></dd>
 
 
 <dt id="arg-title">title<a class="anchor" aria-label="anchor" href="#arg-title"></a></dt>

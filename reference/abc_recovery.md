@@ -40,23 +40,26 @@ abc_recovery(
 
 - n_test:
 
-  Number of pseudo-observations.
+  Number of pseudo-observations. One whole number, 2 or more and at
+  least 11 fewer than the rows of `table`.
 
 - level:
 
-  Probability of the credible interval.
+  Probability of the credible interval. One number greater than 0 and
+  less than 1.
 
 - ntree:
 
-  Number of trees per forest.
+  Number of trees per forest. One whole number, 1 or more.
 
 - ncores:
 
-  Number of threads for the forests.
+  Number of threads for the forests. One whole number, 1 or more.
 
 - seed:
 
-  Integer for the choice of the pseudo-observations.
+  Integer for the choice of the pseudo-observations. One finite whole
+  number.
 
 ## Value
 

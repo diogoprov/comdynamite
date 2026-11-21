@@ -30,21 +30,21 @@ animate_food_web(
 
 - file:
 
-  Path of the GIF to write; by default a temporary file, whose path is
-  returned.
+  Path of the GIF to write, one character string; by default a temporary
+  file, whose path is returned.
 
 - frames:
 
-  Number of frames, taken at evenly spaced rows of `x`; it cannot exceed
-  the number of rows.
+  Number of frames, taken at evenly spaced rows of `x`: one whole
+  number, 2 or more, that cannot exceed the number of rows.
 
 - delay:
 
-  Seconds between frames.
+  Seconds between frames, one number greater than 0.
 
 - width, height:
 
-  Size of the GIF in pixels.
+  Size of the GIF in pixels, each one whole number, 1 or more.
 
 - ...:
 

@@ -27,17 +27,17 @@ torus_permutations(side, symmetries = TRUE, n_perm = NULL)
   Number of cells per side, as in
   [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
   or two numbers for a rectangular grid, the first for the coordinate
-  that runs fastest.
+  that runs fastest: one or two whole numbers, 2 or more.
 
 - symmetries:
 
   Combine the translations with the reflections and rotations of the
-  grid?
+  grid? `TRUE` or `FALSE`.
 
 - n_perm:
 
-  Number of permutations to keep, drawn without replacement. The default
-  keeps all of them.
+  Number of permutations to keep, drawn without replacement: one whole
+  number, 1 or more. The default, `NULL`, keeps all of them.
 
 ## Value
 

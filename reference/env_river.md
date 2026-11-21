@@ -25,7 +25,7 @@ env_river(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf, ...)
 - n_steps:
 
   `NULL` (the default) for one value per site, or the number of steps of
-  a series.
+  a series: one whole number, 1 or more.
 
 - mean:
 
@@ -34,10 +34,10 @@ env_river(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf, ...)
 
 - temporal_scale:
 
-  Steps over which the correlation in time falls by a factor of \\e\\
-  (the correlation between consecutive steps is \\\exp(-1 /\\
-  `temporal_scale`)); `Inf` keeps the first draw at every step and 0
-  draws every step anew.
+  Steps over which the correlation in time falls by a factor of \\e\\,
+  one number, 0 or more, or `Inf` (the correlation between consecutive
+  steps is \\\exp(-1 /\\ `temporal_scale`)); `Inf` keeps the first draw
+  at every step and 0 draws every step anew.
 
 - ...:
 

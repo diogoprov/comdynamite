@@ -27,24 +27,26 @@ landscape_grid(
 
 - side:
 
-  Number of cells per side.
+  Number of cells per side: one whole number, 2 or more.
 
 - env_bandwidth:
 
   Bandwidth (in cells) of the Gaussian kernel that smooths the
-  environment. Larger values give smoother gradients.
+  environment: one number greater than 0. Larger values give smoother
+  gradients.
 
 - disp_scale:
 
-  Scale (in cells) of the dispersal kernel.
+  Scale (in cells) of the dispersal kernel: one number greater than 0.
 
 - torus:
 
-  Wrap the grid as a torus?
+  Wrap the grid as a torus? `TRUE` or `FALSE`.
 
 - env_range:
 
-  Range of the uniform marginal distribution of the environment.
+  Range of the uniform marginal distribution of the environment: two
+  finite numbers, the first smaller.
 
 - disp_shape:
 
@@ -54,10 +56,11 @@ landscape_grid(
 
 - n_axes:
 
-  Number of environmental axes. With more than one, each axis is a field
-  smoothed in the same way, the axes are correlated by `axis_cor` before
-  the conversion to ranks, and the landscape also holds `env_axes`, a
-  matrix with one column per axis, which
+  Number of environmental axes: one whole number, 1 or more. With more
+  than one, each axis is a field smoothed in the same way, the axes are
+  correlated by `axis_cor` before the conversion to ranks, and the
+  landscape also holds `env_axes`, a matrix with one column per axis,
+  which
   [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   uses with a list of traits when `env` is not given. The first axis is
   `env`, the same as with `n_axes = 1` and the same seed.

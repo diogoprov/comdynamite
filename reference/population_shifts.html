@@ -101,26 +101,29 @@ how far co-occurring species push them apart, by fitting both terms of the model
 
 <dt id="arg-trait-site-species">trait, site, species<a class="anchor" aria-label="anchor" href="#arg-trait-site-species"></a></dt>
 <dd><p>Names of the columns with the trait value, the site and the
-species.</p></dd>
+species. One character string each.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Names of one or more columns with the environment of the site.</p></dd>
+<dd><p>Names of one or more columns with the environment of the site (a character
+vector without repeats).</p></dd>
 
 
 <dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
-<dd><p>Name of the column with the abundance of the population; not used with
-<code>community</code>.</p></dd>
+<dd><p>Name of the column with the abundance of the population (one character
+string); not used with <code>community</code>, and may then be <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-width">width<a class="anchor" aria-label="anchor" href="#arg-width"></a></dt>
-<dd><p>Width <code>w</code> of the competition kernel; <code>NULL</code> (the default) chooses it from the
+<dd><p>Width <code>w</code> of the competition kernel (one or more finite numbers greater than 0);
+<code>NULL</code> (the default) chooses it from the
 grid described in the section on the width. <code>c</code> is estimated at that width, and the two
 trade off when data are few.</p></dd>
 
 
 <dt id="arg-species-slopes">species_slopes<a class="anchor" aria-label="anchor" href="#arg-species-slopes"></a></dt>
-<dd><p>Give each species its own slope on each environmental variable.</p></dd>
+<dd><p>Give each species its own slope on each environmental variable? <code>TRUE</code>
+or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-community">community<a class="anchor" aria-label="anchor" href="#arg-community"></a></dt>
@@ -130,11 +133,13 @@ competitors).</p></dd>
 
 
 <dt id="arg-nboot">nboot<a class="anchor" aria-label="anchor" href="#arg-nboot"></a></dt>
-<dd><p>Number of parametric bootstrap simulations (0, the default, for none).</p></dd>
+<dd><p>Number of parametric bootstrap simulations (0, the default, for none). One whole
+number, 0 or more.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>Confidence level of the bootstrap intervals.</p></dd>
+<dd><p>Confidence level of the bootstrap intervals. One number between 0 and 1, both
+excluded.</p></dd>
 
 </dl></div>
     <div class="section level2">

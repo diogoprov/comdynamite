@@ -135,20 +135,23 @@ the lowlands to the headwaters.</p></dd>
 
 <dt id="arg-scale-down-scale-up">scale_down, scale_up<a class="anchor" aria-label="anchor" href="#arg-scale-down-scale-up"></a></dt>
 <dd><p>Scales of the kernel for the distance travelled downstream and
-upstream, in the units of <code>length</code>.</p></dd>
+upstream, in the units of <code>length</code>: each one number greater than 0, or <code>Inf</code> for no cost
+of travel in that direction.</p></dd>
 
 
 <dt id="arg-overland">overland<a class="anchor" aria-label="anchor" href="#arg-overland"></a></dt>
 <dd><p>Share of emigrants that move in a straight line rather than along the
-channel (between 0 and 1).</p></dd>
+channel: one number between 0 and 1.</p></dd>
 
 
 <dt id="arg-overland-scale">overland_scale<a class="anchor" aria-label="anchor" href="#arg-overland-scale"></a></dt>
-<dd><p>Scale of the exponential kernel of straight-line dispersal.</p></dd>
+<dd><p>Scale of the exponential kernel of straight-line dispersal: one number
+greater than 0.</p></dd>
 
 
 <dt id="arg-env-range">env_range<a class="anchor" aria-label="anchor" href="#arg-env-range"></a></dt>
-<dd><p>Range of the environment when <code>env</code> is <code>NULL</code>.</p></dd>
+<dd><p>Range of the environment when <code>env</code> is <code>NULL</code>: two finite numbers, the
+first smaller.</p></dd>
 
 </dl></div>
     <div class="section level2">

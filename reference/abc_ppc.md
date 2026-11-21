@@ -47,7 +47,7 @@ abc_ppc(
 
 - n:
 
-  Number of draws from the posterior.
+  Number of draws from the posterior. One whole number, 2 or more.
 
 - simulate, setup, summarise:
 
@@ -56,7 +56,7 @@ abc_ppc(
 
 - seed:
 
-  Integer that sets all the seeds.
+  Integer that sets all the seeds. One finite whole number.
 
 ## Value
 

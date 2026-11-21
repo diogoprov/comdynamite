@@ -100,22 +100,25 @@ history against which reconstructions can be compared, for example by <code><a h
 
 
 <dt id="arg-q">q<a class="anchor" aria-label="anchor" href="#arg-q"></a></dt>
-<dd><p>One rate for every change between states (the equal-rates model), or a square matrix
+<dd><p>One rate for every change between states (the equal-rates model; one finite number,
+0 or more), or a square matrix
 of rates from the state of each row to the state of each column, with the states as names;
 its diagonal is ignored.</p></dd>
 
 
 <dt id="arg-states">states<a class="anchor" aria-label="anchor" href="#arg-states"></a></dt>
-<dd><p>Names of the states, when <code>q</code> is one rate.</p></dd>
+<dd><p>Names of the states (two or more, all different), when <code>q</code> is one rate.</p></dd>
 
 
 <dt id="arg-root-state">root_state<a class="anchor" aria-label="anchor" href="#arg-root-state"></a></dt>
-<dd><p>State at the root; <code>NULL</code> draws one with equal probabilities.</p></dd>
+<dd><p>State at the root, one of the states; <code>NULL</code> draws one with equal
+probabilities.</p></dd>
 
 
 <dt id="arg-alpha">alpha<a class="anchor" aria-label="anchor" href="#arg-alpha"></a></dt>
-<dd><p>Shape (and rate) of the gamma distribution of the rate multiplier of each branch;
-<code>NULL</code> for none. Small values make rates more uneven among branches.</p></dd>
+<dd><p>Shape (and rate) of the gamma distribution of the rate multiplier of each branch
+(one finite number greater than 0); <code>NULL</code> for none. Small values make rates more uneven
+among branches.</p></dd>
 
 
 <dt id="arg-edge-rates">edge_rates<a class="anchor" aria-label="anchor" href="#arg-edge-rates"></a></dt>
@@ -129,7 +132,8 @@ its diagonal is ignored.</p></dd>
 
 
 <dt id="arg-class-switch">class_switch<a class="anchor" aria-label="anchor" href="#arg-class-switch"></a></dt>
-<dd><p>Rate of moving from one hidden class to each other one.</p></dd>
+<dd><p>Rate of moving from one hidden class to each other one. One finite
+number, 0 or more.</p></dd>
 
 
 <dt id="arg-root">root<a class="anchor" aria-label="anchor" href="#arg-root"></a></dt>

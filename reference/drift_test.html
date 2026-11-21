@@ -124,11 +124,12 @@ with one row and column per trait (for example, a known \(G\)).</p></dd>
 
 <dt id="arg-correct">correct<a class="anchor" aria-label="anchor" href="#arg-correct"></a></dt>
 <dd><p>Whether to subtract the sampling variance of the group means (needs groups
-with more than one individual).</p></dd>
+with more than one individual): <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
-<dd><p>The confidence level of the interval for the slope.</p></dd>
+<dd><p>The confidence level of the interval for the slope: one number greater than 0
+and less than 1.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -136,7 +137,8 @@ with more than one individual).</p></dd>
     <p>An object of class <code>drift_test</code>: a list with <code>slope</code>, its standard error <code>se</code>, the
 interval <code>conf_int</code>, the <code>statistic</code> (\(t\)) and <code>p_value</code> of the test of slope 1, the
 <code>intercept</code> (the logarithm of the proportionality constant, an estimate of \(\log(t /
-  N_e)\) when <code>W</code> is \(G\) and <code>correct = TRUE</code>), <code>df</code>, <code>n_groups</code>, <code>n_traits</code>, the matrix <code>W</code>
+  N_e)\) when <code>W</code> is \(G\) and <code>correct = TRUE</code>), <code>df</code>, <code>n_groups</code>, <code>n_traits</code>,
+the matrix <code>W</code>
 and a data frame <code>components</code> with the <code>eigenvalue</code>, the expected <code>sampling</code> variance of
 the means (0 without correction) and the <code>between</code> variance (corrected) of each principal
 component. It has <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p>
@@ -157,7 +159,8 @@ of \(n\) individuals. Unless \(P\) is proportional to <code>W</code>, this error
 slope (most with small groups and little divergence), so by default (<code>correct = TRUE</code>) the
 expected sampling variance on each component, \(v_k^\top P v_k\) times the mean of
 \(1 / n\) over groups, with \(P\) the pooled covariance within groups, is
-subtracted from the variance among means before the regression. The regression treats each component as an independent
+subtracted from the variance among means before the regression. The regression treats each
+component as an independent
 observation, so with few traits the test has little power, and the slope has \(q - 2\) degrees of freedom for \(q\) traits.</p>
     </div>
     <div class="section level2">

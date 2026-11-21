@@ -27,17 +27,18 @@ trait_flex(
 
 - traits:
 
-  Names of the columns with trait values.
+  Names of the columns with trait values (a character vector).
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. One character
+  string each.
 
 - abundance:
 
   Name of a column with the abundance of each population (the same value
   for all its individuals), or `NULL` to weight by the number of
-  individuals measured.
+  individuals measured. One character string or `NULL`.
 
 - formula:
 

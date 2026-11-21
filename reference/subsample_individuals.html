@@ -102,32 +102,37 @@ result depends on sampling effort, alone or through <code><a href="trait_rarefac
 
 
 <dt id="arg-n">n<a class="anchor" aria-label="anchor" href="#arg-n"></a></dt>
-<dd><p>Number of individuals drawn from each population, or <code>NULL</code> to keep all.</p></dd>
+<dd><p>Number of individuals drawn from each population (one whole number, 1 or more), or
+<code>NULL</code> to keep all.</p></dd>
 
 
 <dt id="arg-fraction">fraction<a class="anchor" aria-label="anchor" href="#arg-fraction"></a></dt>
-<dd><p>Probability that each individual is kept; used when <code>n</code> is <code>NULL</code>.</p></dd>
+<dd><p>Probability that each individual is kept (one number greater than 0 and up
+to 1); used when <code>n</code> is <code>NULL</code>.</p></dd>
 
 
 <dt id="arg-cover">cover<a class="anchor" aria-label="anchor" href="#arg-cover"></a></dt>
-<dd><p>Share (0 to 1) of the abundance of each site covered by the species kept, from
-the most abundant down (Pakeman &amp; Quested 2007), or <code>NULL</code> to keep every species.
-Abundances are those of the <code>abundance</code> column, or the numbers of individuals in the data.
-Species tied in abundance are taken in the order of the data, and populations with an
-abundance of zero are never kept.</p></dd>
+<dd><p>One number greater than 0 and up to 1: the share of the abundance of each site
+covered by the species kept, from the most abundant down (Pakeman &amp; Quested 2007), or <code>NULL</code> to
+keep every species. Abundances are those of the <code>abundance</code> column, or the numbers of
+individuals in the data. Species tied in abundance are taken in the order of the data, and
+populations with an abundance of zero are never kept.</p></dd>
 
 
 <dt id="arg-min-n">min_n<a class="anchor" aria-label="anchor" href="#arg-min-n"></a></dt>
-<dd><p>Minimum number of individuals of a population after sampling.</p></dd>
+<dd><p>Minimum number of individuals of a population after sampling. One whole
+number, 1 or more.</p></dd>
 
 
 <dt id="arg-site-species">site, species<a class="anchor" aria-label="anchor" href="#arg-site-species"></a></dt>
-<dd><p>Names of the columns with the site and the species.</p></dd>
+<dd><p>Names of the columns with the site and the species. One character
+string each.</p></dd>
 
 
 <dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
 <dd><p>Name of a column with the abundance of each population (the same value for
-all its individuals), or <code>NULL</code> to use the numbers of individuals in the data.</p></dd>
+all its individuals), or <code>NULL</code> to use the numbers of individuals in the data. One
+character string or <code>NULL</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

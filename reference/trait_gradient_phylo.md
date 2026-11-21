@@ -44,13 +44,14 @@ trait_gradient_phylo(
 
 - n_boot:
 
-  Number of bootstrap samples for the standard errors.
+  Number of bootstrap samples for the standard errors. One whole number,
+  2 or more.
 
 - min_sites:
 
   Smallest number of sites of a species with a value (sites where it is
   alone do not count); species with fewer sites, or not in `tree`, are
-  left out.
+  left out. One whole number, 2 or more.
 
 ## Value
 

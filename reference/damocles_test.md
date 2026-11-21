@@ -46,7 +46,7 @@ damocles_test(
 
 - n_sim:
 
-  Number of null communities of each model.
+  Number of null communities of each model. One whole number, 2 or more.
 
 - gamma, mu:
 
@@ -66,8 +66,8 @@ damocles_test(
 
 - shared:
 
-  When the rates are estimated, `TRUE` fits one pair shared by all
-  communities (see
+  `TRUE` or `FALSE`. When the rates are estimated, `TRUE` fits one pair
+  shared by all communities (see
   [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md))
   and `FALSE` (the default) one pair per community.
 
@@ -75,8 +75,8 @@ damocles_test(
 
   Probability that a present ancestor leaves both daughters present,
   used in the simulations (see
-  [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md));
-  `NULL` estimates it with the rates.
+  [`simulate_damocles()`](https://provetelab.org/comdynamite/reference/simulate_damocles.md)):
+  one number between 0 and 1, or `NULL` to estimate it with the rates.
 
 - regimes:
 

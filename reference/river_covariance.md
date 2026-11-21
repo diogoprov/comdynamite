@@ -34,7 +34,7 @@ river_covariance(
 
 - nugget:
 
-  Variance independent among sites.
+  Variance independent among sites: one number, 0 or more.
 
 - weights:
 

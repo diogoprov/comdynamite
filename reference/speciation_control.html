@@ -114,16 +114,17 @@ of length zero), so that the tree stays binary.</p>
 
 <dt id="arg-threshold">threshold<a class="anchor" aria-label="anchor" href="#arg-threshold"></a></dt>
 <dd><p>For <code>"geographic"</code> and <code>"ecological"</code>: divergence in generations, or
-difference of genetic means in units of the environment, that separates groups; <code>Inf</code>
-turns speciation off. With several traits (one per niche axis), the difference of two
+difference of genetic means in units of the environment, that separates groups: one
+number greater than 0; <code>Inf</code> turns speciation off. With several traits (one per niche axis),
+the difference of two
 populations in <code>"ecological"</code> is the Mahalanobis distance of their genetic means under
 the phenotypic matrix of the species, \(\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar
 z}\), so <code>threshold</code> is in units of phenotypic standard deviations.</p></dd>
 
 
 <dt id="arg-rate">rate<a class="anchor" aria-label="anchor" href="#arg-rate"></a></dt>
-<dd><p>For <code>"point"</code>: probability per individual per generation; for <code>"fission"</code>: rate
-per species per generation.</p></dd>
+<dd><p>For <code>"point"</code>: probability per individual per generation, one number between 0
+and 1; for <code>"fission"</code>: rate per species per generation, one finite number, 0 or more.</p></dd>
 
 
 <dt id="arg-divergence">divergence<a class="anchor" aria-label="anchor" href="#arg-divergence"></a></dt>
@@ -132,29 +133,31 @@ per species per generation.</p></dd>
 
 <dt id="arg-migration-min">migration_min<a class="anchor" aria-label="anchor" href="#arg-migration-min"></a></dt>
 <dd><p>For <code>divergence = "cluster"</code>: migration rate per generation that links
-two populations. Where clusters form depends on dispersal, the kernel and abundances: the
-rate of the strongest link of each population should straddle it. In the design of
+two populations, one number greater than 0 (<code>Inf</code> links none). Where clusters form
+depends on dispersal, the kernel and abundances: the rate of the strongest link of each
+population should straddle it. In the design of
 <code>data-raw/evolving_migration_min.R</code> (strongest links with median 0.006), species did not
 split at all at 0.002 or below and split almost as with no links at 0.02 or above.</p></dd>
 
 
 <dt id="arg-reset-generations">reset_generations<a class="anchor" aria-label="anchor" href="#arg-reset-generations"></a></dt>
 <dd><p>For <code>divergence = "cluster"</code>: generations in a row in the same
-cluster after which divergence returns to 0.</p></dd>
+cluster after which divergence returns to 0; one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-homogenization">homogenization<a class="anchor" aria-label="anchor" href="#arg-homogenization"></a></dt>
-<dd><p>For <code>divergence = "gradual"</code>: reduction of divergence per migrant.</p></dd>
+<dd><p>For <code>divergence = "gradual"</code>: reduction of divergence per migrant;
+one number, 0 or more.</p></dd>
 
 
 <dt id="arg-min-generations">min_generations<a class="anchor" aria-label="anchor" href="#arg-min-generations"></a></dt>
 <dd><p>For <code>"ecological"</code>: generations in a row of difference and reduced
-gene flow before groups split.</p></dd>
+gene flow before groups split; one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-migration-max">migration_max<a class="anchor" aria-label="anchor" href="#arg-migration-max"></a></dt>
 <dd><p>For <code>"ecological"</code>: migration rate per generation below which gene flow
-counts as reduced.</p></dd>
+counts as reduced; one number, 0 or more (<code>Inf</code> for no limit on gene flow).</p></dd>
 
 
 <dt id="arg-partition">partition<a class="anchor" aria-label="anchor" href="#arg-partition"></a></dt>
@@ -162,14 +165,15 @@ counts as reduced.</p></dd>
 
 
 <dt id="arg-jump-var">jump_var<a class="anchor" aria-label="anchor" href="#arg-jump-var"></a></dt>
-<dd><p>Variance of the shift of the genetic mean of each new species. With several
-traits, one value (independent shifts of that variance on every trait) or a covariance
+<dd><p>Variance of the shift of the genetic mean of each new species: one number, 0
+or more. With several traits, one value (independent shifts of that variance on every trait) or
+a covariance
 matrix with one row and column per trait (for instance proportional to \(G\)).</p></dd>
 
 
 <dt id="arg-completion">completion<a class="anchor" aria-label="anchor" href="#arg-completion"></a></dt>
-<dd><p>Time to complete speciation, in generations (fixed or mean); 0 for
-instantaneous speciation.</p></dd>
+<dd><p>Time to complete speciation, in generations (fixed or mean): one number,
+0 or more; 0 for instantaneous speciation.</p></dd>
 
 
 <dt id="arg-completion-dist">completion_dist<a class="anchor" aria-label="anchor" href="#arg-completion-dist"></a></dt>

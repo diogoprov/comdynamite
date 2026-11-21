@@ -49,13 +49,15 @@ damocles_partition_test(
 
 - n_rand:
 
-  Number of random partitions drawn; each distinct one is fitted once. 0
-  skips the test against random partitions.
+  Number of random partitions drawn; each distinct one is fitted once.
+  One whole number, 0 or more; 0 skips the test against random
+  partitions.
 
 - n_boot:
 
   Number of parametric bootstrap simulations under the constant rates
-  estimated (0, the default, skips the bootstrap).
+  estimated. One whole number, 0 or more; 0, the default, skips the
+  bootstrap.
 
 - vary:
 
@@ -88,13 +90,16 @@ damocles_partition_test(
   many edges as the clades of `regimes`, share at most `max_overlap` of
   their edges with them (Jaccard index), and the whole random partition
   agrees with `regimes` at most as much (adjusted Rand index).
+  `tolerance` is one number, 1 or more; `max_overlap` one number between
+  0 and 1.
 
 - cores:
 
   Number of cores, with random partitions and bootstrap simulations
-  fitted in parallel. Not available on Windows, where one core is used.
-  The random partitions and the simulated communities are drawn before
-  the fits, so the p-values do not depend on the number of cores.
+  fitted in parallel. One whole number, 1 or more. Not available on
+  Windows, where one core is used. The random partitions and the
+  simulated communities are drawn before the fits, so the p-values do
+  not depend on the number of cores.
 
 ## Value
 

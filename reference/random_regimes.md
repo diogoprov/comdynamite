@@ -33,12 +33,13 @@ random_regimes(tree, regimes, tolerance = 2, max_overlap = 0.25)
 - tolerance:
 
   Largest ratio between the sizes of a clade and its random replacement.
+  One number, 1 or more.
 
 - max_overlap:
 
   Largest Jaccard index between the edges of a clade and those of its
   random replacement, and largest adjusted Rand index between `regimes`
-  and the random partition, between 0 and 1.
+  and the random partition. One number between 0 and 1.
 
 ## Value
 

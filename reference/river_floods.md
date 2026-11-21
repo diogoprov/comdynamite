@@ -37,28 +37,30 @@ river_floods(
 
 - n_steps:
 
-  Number of steps.
+  Number of steps: one whole number, 1 or more.
 
 - period:
 
-  Steps per year.
+  Steps per year: one whole number, 1 or more.
 
 - flood_steps:
 
-  Steps of the flood season in each year.
+  Steps of the flood season in each year: one whole number, from 1 up to
+  `period`.
 
 - start:
 
-  Step of the year at which the flood season begins.
+  Step of the year at which the flood season begins: one whole number,
+  from 1 up to `period`.
 
 - probability:
 
-  Probability of washout during a flood at the most exposed site
-  (between 0 and 1).
+  Probability of washout during a flood at the most exposed site: one
+  number between 0 and 1.
 
 - size_effect:
 
-  Exponent of the relative size of each site.
+  Exponent of the relative size of each site: one finite number.
 
 - size:
 
@@ -68,7 +70,8 @@ river_floods(
 
 - year_prob:
 
-  Probability that a flood happens in a year.
+  Probability that a flood happens in a year: one number between 0 and
+  1.
 
 ## Value
 

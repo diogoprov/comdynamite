@@ -36,7 +36,8 @@ env_pulse(
 
 - n_steps:
 
-  Number of time steps. Taken from `env` when it is a matrix.
+  Number of time steps: one whole number, 1 or more. Taken from `env`
+  when it is a matrix.
 
 - sites:
 
@@ -46,11 +47,12 @@ env_pulse(
 
 - start:
 
-  First disturbed step.
+  First disturbed step: one whole number, 1 or more.
 
 - duration:
 
-  Number of disturbed steps of each pulse; `Inf` for a permanent change.
+  Number of disturbed steps of each pulse: one whole number, 1 or more,
+  or `Inf` for a permanent change.
 
 - value:
 
@@ -59,10 +61,11 @@ env_pulse(
 
 - every:
 
-  Optional period of recurrent pulses: a new pulse starts every `every`
-  steps after `start` until the last step, so that the frequency of
-  disturbance is `1 / every`. `NULL` (the default) for a single pulse.
-  Needs a finite `duration` shorter than `every`.
+  Optional period of recurrent pulses (one whole number, 1 or more): a
+  new pulse starts every `every` steps after `start` until the last
+  step, so that the frequency of disturbance is `1 / every`. `NULL` (the
+  default) for a single pulse. Needs a finite `duration` shorter than
+  `every`.
 
 ## Value
 

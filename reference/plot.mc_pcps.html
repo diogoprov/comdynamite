@@ -104,7 +104,7 @@ Debastiani &amp; Duarte (2014), which shows which lineages go with which sites.<
 
 
 <dt id="arg-axes">axes<a class="anchor" aria-label="anchor" href="#arg-axes"></a></dt>
-<dd><p>The two principal coordinates to draw.</p></dd>
+<dd><p>The two principal coordinates to draw: two different whole numbers.</p></dd>
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
@@ -113,15 +113,15 @@ to <code><a href="pcps_test.html">pcps_test()</a></code>, or <code>NULL</code> f
 
 
 <dt id="arg-species">species<a class="anchor" aria-label="anchor" href="#arg-species"></a></dt>
-<dd><p>Draw the species as arrows.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Draw the species as arrows.</p></dd>
 
 
 <dt id="arg-species-labels">species_labels<a class="anchor" aria-label="anchor" href="#arg-species-labels"></a></dt>
-<dd><p>Write the names of the species at the arrows or stars.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Write the names of the species at the arrows or stars.</p></dd>
 
 
 <dt id="arg-clades">clades<a class="anchor" aria-label="anchor" href="#arg-clades"></a></dt>
-<dd><p>Optional grouping of the species into clades: a single number k, which cuts
+<dd><p>Optional grouping of the species into clades: one whole number k, which cuts
 the tree into its k deepest clades by splitting, one at a time, the clade whose crown is
 nearest the root; or a vector of clade names named by species, such as families, in which
 species left out are drawn in grey without a clade. Each clade with at least three species
@@ -129,11 +129,12 @@ gets its convex hull.</p></dd>
 
 
 <dt id="arg-palette">palette<a class="anchor" aria-label="anchor" href="#arg-palette"></a></dt>
-<dd><p>Name of a palette of <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code> for the predictor.</p></dd>
+<dd><p>One character string, the name of a palette of <code><a href="https://rdrr.io/r/grDevices/palettes.html" class="external-link">grDevices::hcl.colors()</a></code> for
+the predictor.</p></dd>
 
 
 <dt id="arg-point-size">point_size<a class="anchor" aria-label="anchor" href="#arg-point-size"></a></dt>
-<dd><p>Size of the site points.</p></dd>
+<dd><p>Size of the site points. One number greater than 0.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

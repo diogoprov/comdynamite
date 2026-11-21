@@ -21,7 +21,7 @@ nested_variance(data, traits, factors, crossed = NULL, interaction = TRUE)
 
 - traits:
 
-  Names of the columns with trait values.
+  Names of the columns with trait values (a character vector).
 
 - factors:
 
@@ -40,7 +40,7 @@ nested_variance(data, traits, factors, crossed = NULL, interaction = TRUE)
   With `crossed`, whether to add a level for the combination of the
   finest level of `factors` and the finest level of `crossed` (for
   instance the population, species by site). Without it, differences
-  among populations of a species go to `within`.
+  among populations of a species go to `within`. `TRUE` or `FALSE`.
 
 ## Value
 

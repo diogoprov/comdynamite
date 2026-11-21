@@ -33,7 +33,7 @@ confint(object, parm = NULL, level = 0.95, ...)
 
 - level:
 
-  Confidence level.
+  Confidence level. One number greater than 0 and less than 1.
 
 - ...:
 

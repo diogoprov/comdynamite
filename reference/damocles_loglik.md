@@ -85,9 +85,9 @@ damocles_fit(
 
 - shared:
 
-  If `TRUE`, one set of parameters shared by all communities, estimated
-  from the sum of their log-likelihoods; if `FALSE` (the default),
-  separate parameters for each community.
+  `TRUE` or `FALSE`. If `TRUE`, one set of parameters shared by all
+  communities, estimated from the sum of their log-likelihoods; if
+  `FALSE` (the default), separate parameters for each community.
 
 - regimes:
 

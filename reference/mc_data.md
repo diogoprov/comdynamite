@@ -66,7 +66,8 @@ as.data.frame(x, row.names = NULL, optional = FALSE, ...)
 
 - coords:
 
-  Optional matrix or data frame of coordinates with one row per site.
+  Optional matrix or data frame of coordinates with one row per site,
+  without missing or infinite values.
 
 - areas:
 

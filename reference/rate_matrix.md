@@ -45,7 +45,8 @@ print(x, ...)
 
 - n_traits:
 
-  Number of traits, when neither `variance` nor `correlation` gives it.
+  Number of traits, when neither `variance` nor `correlation` gives it:
+  one whole number, 1 or more, or `NULL`.
 
 - scale:
 

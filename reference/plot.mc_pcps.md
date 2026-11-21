@@ -35,7 +35,7 @@ plot(
 
 - axes:
 
-  The two principal coordinates to draw.
+  The two principal coordinates to draw: two different whole numbers.
 
 - env:
 
@@ -46,30 +46,31 @@ plot(
 
 - species:
 
-  Draw the species as arrows.
+  `TRUE` or `FALSE`. Draw the species as arrows.
 
 - species_labels:
 
-  Write the names of the species at the arrows or stars.
+  `TRUE` or `FALSE`. Write the names of the species at the arrows or
+  stars.
 
 - clades:
 
-  Optional grouping of the species into clades: a single number k, which
-  cuts the tree into its k deepest clades by splitting, one at a time,
-  the clade whose crown is nearest the root; or a vector of clade names
-  named by species, such as families, in which species left out are
-  drawn in grey without a clade. Each clade with at least three species
-  gets its convex hull.
+  Optional grouping of the species into clades: one whole number k,
+  which cuts the tree into its k deepest clades by splitting, one at a
+  time, the clade whose crown is nearest the root; or a vector of clade
+  names named by species, such as families, in which species left out
+  are drawn in grey without a clade. Each clade with at least three
+  species gets its convex hull.
 
 - palette:
 
-  Name of a palette of
+  One character string, the name of a palette of
   [`grDevices::hcl.colors()`](https://rdrr.io/r/grDevices/palettes.html)
   for the predictor.
 
 - point_size:
 
-  Size of the site points.
+  Size of the site points. One number greater than 0.
 
 - ...:
 

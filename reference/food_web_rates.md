@@ -33,18 +33,20 @@ food_web_rates(x, tree, levels, sigma2 = 1, k = 1, window = NULL)
 
 - sigma2:
 
-  Rate outside the stretch informed by the metacommunity.
+  Rate outside the stretch informed by the metacommunity. One finite
+  number greater than 0.
 
 - k:
 
   Increase of the rate, relative to `sigma2`, per unit of speed (trait
-  units per unit of time of the food web).
+  units per unit of time of the food web). One finite number, 0 or more.
 
 - window:
 
   Length of the end of each tip branch represented by the metacommunity,
-  in the units of the branch lengths; `NULL` uses the whole tip branch.
-  A window longer than a tip branch is cut to its length.
+  in the units of the branch lengths (one finite number greater than 0);
+  `NULL` uses the whole tip branch. A window longer than a tip branch is
+  cut to its length.
 
 ## Value
 

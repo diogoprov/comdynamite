@@ -39,11 +39,11 @@ abc_importance(x)
 
 - ntree:
 
-  Number of trees per forest.
+  Number of trees per forest. One whole number, 1 or more.
 
 - ncores:
 
-  Number of threads for the forests.
+  Number of threads for the forests. One whole number, 1 or more.
 
 - object:
 
@@ -57,7 +57,8 @@ abc_importance(x)
 
 - level:
 
-  Probability of the credible interval.
+  Probability of the credible interval. One number greater than 0 and
+  less than 1.
 
 - ...:
 

@@ -15,11 +15,12 @@ landscape_implicit(n_sites, env_range = c(0, 100))
 
 - n_sites:
 
-  Number of sites.
+  Number of sites: one whole number, 2 or more.
 
 - env_range:
 
-  Range of the uniform distribution of the environment.
+  Range of the uniform distribution of the environment: two finite
+  numbers, the first smaller.
 
 ## Value
 

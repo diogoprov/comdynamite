@@ -19,12 +19,13 @@ node_contrasts(tree, cherries = TRUE, branch_lengths = FALSE)
 
 - cherries:
 
-  Keep nodes that join two tips? The article tests them (its Figure 3),
-  but the function `CreateNodeContrasts` of the authors leaves them out.
+  `TRUE` or `FALSE`. Keep nodes that join two tips? The article tests
+  them (its Figure 3), but the function `CreateNodeContrasts` of the
+  authors leaves them out.
 
 - branch_lengths:
 
-  Use the branch lengths of `tree`?
+  `TRUE` or `FALSE`. Use the branch lengths of `tree`?
 
 ## Value
 

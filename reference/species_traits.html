@@ -113,36 +113,38 @@ keeps their marginal distribution.</p>
 
 
 <dl><dt id="arg-species">species<a class="anchor" aria-label="anchor" href="#arg-species"></a></dt>
-<dd><p>A <code>phylo</code> tree, or the number of species for traits without
-phylogenetic structure.</p></dd>
+<dd><p>A <code>phylo</code> tree, or the number of species (one whole number, 1 or more) for
+traits without phylogenetic structure.</p></dd>
 
 
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
 <dd><p>Pagel's lambda of the optima (0 = no signal, 1 = Brownian
-motion). Ignored when <code>species</code> is a number.</p></dd>
+motion): one number between 0 and 1. Ignored when <code>species</code> is a number.</p></dd>
 
 
 <dt id="arg-optima-range">optima_range<a class="anchor" aria-label="anchor" href="#arg-optima-range"></a></dt>
-<dd><p>Range of the optima.</p></dd>
+<dd><p>Range of the optima: two finite numbers, the first not larger than the
+second.</p></dd>
 
 
 <dt id="arg-uniform-optima">uniform_optima<a class="anchor" aria-label="anchor" href="#arg-uniform-optima"></a></dt>
-<dd><p>Give the optima evenly spaced values by rank?</p></dd>
+<dd><p>Give the optima evenly spaced values by rank? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-sigma-mean-sigma-sd">sigma_mean, sigma_sd<a class="anchor" aria-label="anchor" href="#arg-sigma-mean-sigma-sd"></a></dt>
 <dd><p>Mean and standard deviation of the normal
-distribution (truncated at zero) of niche breadths.</p></dd>
+distribution (truncated at zero) of niche breadths: one finite number each, <code>sigma_sd</code> 0
+or more.</p></dd>
 
 
 <dt id="arg-rmax-range">rmax_range<a class="anchor" aria-label="anchor" href="#arg-rmax-range"></a></dt>
 <dd><p>Range of the uniform distribution of maximum growth
-rates.</p></dd>
+rates: two finite numbers, 0 or more, the first not larger than the second.</p></dd>
 
 
 <dt id="arg-sigma-signal-rmax-signal">sigma_signal, rmax_signal<a class="anchor" aria-label="anchor" href="#arg-sigma-signal-rmax-signal"></a></dt>
 <dd><p>Should niche breadth or maximum growth rate
-carry phylogenetic signal (Brownian motion)?</p></dd>
+carry phylogenetic signal (Brownian motion)? <code>TRUE</code> or <code>FALSE</code> each.</p></dd>
 
 
 <dt id="arg-optima-sigma-r-max">optima, sigma, r_max<a class="anchor" aria-label="anchor" href="#arg-optima-sigma-r-max"></a></dt>
@@ -152,12 +154,12 @@ drawn for that trait.</p></dd>
 
 
 <dt id="arg-rescale-optima">rescale_optima<a class="anchor" aria-label="anchor" href="#arg-rescale-optima"></a></dt>
-<dd><p>Rescale external optima to <code>optima_range</code>?</p></dd>
+<dd><p>Rescale external optima to <code>optima_range</code>? <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-nodes">nodes<a class="anchor" aria-label="anchor" href="#arg-nodes"></a></dt>
 <dd><p>Also give the optima at the internal nodes of the tree, as <code><a href="trait_bm.html">trait_bm()</a></code> does?
-They are drawn after all other values, so the traits are the same as with
+<code>TRUE</code> or <code>FALSE</code>. They are drawn after all other values, so the traits are the same as with
 <code>nodes = FALSE</code> and the same seed, and rescaled as the optima of the tips, so they may fall
 outside <code>optima_range</code>. Not available with external optima or <code>uniform_optima</code>.</p></dd>
 

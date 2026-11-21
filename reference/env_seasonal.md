@@ -28,24 +28,27 @@ env_seasonal(env, n_steps = NULL, period, amplitude, phase = 0, year_sd = 0)
 
 - n_steps:
 
-  Number of steps. Taken from `env` when it is a matrix.
+  Number of steps: one whole number, 1 or more. Taken from `env` when it
+  is a matrix.
 
 - period:
 
-  Steps per cycle (a year).
+  Steps per cycle (a year): one number greater than 0.
 
 - amplitude:
 
-  Amplitude of the cycle: one value, or one per site.
+  Amplitude of the cycle: one finite value, or one per site.
 
 - phase:
 
-  Step at which the cycle crosses its mean on the way up.
+  Step at which the cycle crosses its mean on the way up: one finite
+  number.
 
 - year_sd:
 
   Standard deviation of an anomaly drawn for each year (each block of
-  `period` steps) and added to all sites; 0 (the default) for none.
+  `period` steps) and added to all sites: one number, 0 or more; 0 (the
+  default) for none.
 
 ## Value
 

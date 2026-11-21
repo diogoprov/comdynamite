@@ -28,11 +28,13 @@ clade_regimes(tree, clades, background = "background", stem = FALSE)
 
 - background:
 
-  Name of the regime of the edges outside every clade.
+  Name of the regime of the edges outside every clade. One character
+  string.
 
 - stem:
 
-  If `TRUE`, the stem edge of each clade belongs to it.
+  `TRUE` or `FALSE`. If `TRUE`, the stem edge of each clade belongs to
+  it.
 
 ## Value
 

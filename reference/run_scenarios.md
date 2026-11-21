@@ -46,11 +46,11 @@ run_scenarios(
 
 - n_rep:
 
-  Number of replicates.
+  Number of replicates. One whole number, 1 or more.
 
 - seed:
 
-  Integer that sets all the seeds.
+  Integer that sets all the seeds. One finite whole number.
 
 ## Value
 

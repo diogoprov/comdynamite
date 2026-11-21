@@ -25,9 +25,9 @@ plot(x, relative = TRUE, colours = c("#0072B2", "grey80"), ...)
 
 - relative:
 
-  If `TRUE` (the default), sums of squares are divided by the total sum
-  of squares of each trait, so that traits on different scales can be
-  compared.
+  `TRUE` or `FALSE`. If `TRUE` (the default), sums of squares are
+  divided by the total sum of squares of each trait, so that traits on
+  different scales can be compared.
 
 - colours:
 

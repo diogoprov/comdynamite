@@ -20,15 +20,16 @@ env_over_time(env, n_steps, rho = 0.9, sd = 5)
 
 - n_steps:
 
-  Number of time steps.
+  Number of time steps: one whole number, 1 or more.
 
 - rho:
 
-  Lag-one autocorrelation of the deviations, in \[0, 1).
+  Lag-one autocorrelation of the deviations: one number in \[0, 1).
 
 - sd:
 
-  Stationary standard deviation of the deviations.
+  Stationary standard deviation of the deviations: one number, 0 or
+  more.
 
 ## Value
 

@@ -55,7 +55,8 @@ trait_partition(
 
 - n_perm:
 
-  Number of permutations of sites and of species.
+  Number of permutations of sites and of species. One whole number, 1 or
+  more.
 
 - site_permutations:
 
@@ -78,14 +79,15 @@ trait_partition(
 
 - coords:
 
-  Matrix of site coordinates with one row per site of `comm`, for
-  `shared_null = "msr"`. The spatial weights are those of
+  Matrix of site coordinates with one row per site of `comm`, without
+  missing or infinite values, for `shared_null = "msr"`. The spatial
+  weights are those of
   [`adespatial::dbmem()`](http://adeverse.github.io/adespatial/reference/dbmem.md).
 
 - level:
 
   Significance level of the test of `env` against `space` that decides
-  whether `b` is tested.
+  whether `b` is tested. One number between 0 and 1, both excluded.
 
 ## Value
 

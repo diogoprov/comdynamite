@@ -57,7 +57,8 @@ summary_stats(
 
 - n_null:
 
-  Number of shuffles of species for `ses_mpd` and `ses_mntd`.
+  Number of shuffles of species for `ses_mpd` and `ses_mntd`. One whole
+  number, 2 or more.
 
 ## Value
 

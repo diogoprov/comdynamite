@@ -39,23 +39,25 @@ plot(
 
 - time:
 
-  Optional time at which to stop the curves; `NULL` draws the whole run.
+  Optional time at which to stop the curves, one finite number; `NULL`
+  draws the whole run.
 
 - colours:
 
-  Colours of the resource, the consumer and the predator.
+  Colours of the resource, the consumer and the predator, three strings.
 
 - log_abundance:
 
   Draw abundances as their base-10 logarithm (zeros are left out)?
+  `TRUE` or `FALSE`.
 
 - legend:
 
-  Draw the legend of the levels?
+  Draw the legend of the levels? `TRUE` or `FALSE`.
 
 - linewidth:
 
-  Width of the lines.
+  Width of the lines, one number greater than 0.
 
 - col, lwd, ...:
 

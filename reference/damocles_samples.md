@@ -76,8 +76,8 @@ summary(object, probs = c(0.05, 0.5, 0.95), ...)
 
 - cores:
 
-  Number of cores, with configurations fitted in parallel. Not available
-  on Windows, where one core is used.
+  Number of cores, with configurations fitted in parallel. One whole
+  number, 1 or more. Not available on Windows, where one core is used.
 
 - object:
 

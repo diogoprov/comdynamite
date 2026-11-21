@@ -100,30 +100,33 @@ AR(1) series, sites close together change together.</p>
 
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
-<dd><p>Number of steps, burn-in included.</p></dd>
+<dd><p>Number of steps, burn-in included: one whole number, larger than <code>burn_in</code>.</p></dd>
 
 
 <dt id="arg-burn-in">burn_in<a class="anchor" aria-label="anchor" href="#arg-burn-in"></a></dt>
-<dd><p>Number of initial steps with a constant environment.</p></dd>
+<dd><p>Number of initial steps with a constant environment: one whole number, 0 or
+more.</p></dd>
 
 
 <dt id="arg-spatial-scale-temporal-scale">spatial_scale, temporal_scale<a class="anchor" aria-label="anchor" href="#arg-spatial-scale-temporal-scale"></a></dt>
 <dd><p>Scales \(a_s\) (in units of the coordinates) and
-\(a_t\) (in steps) of the exponential covariance.</p></dd>
+\(a_t\) (in steps) of the exponential covariance: each one number greater than 0.</p></dd>
 
 
 <dt id="arg-ranks">ranks<a class="anchor" aria-label="anchor" href="#arg-ranks"></a></dt>
-<dd><p>If <code>TRUE</code>, convert the environment to ranks over all sites and steps, as in
-their code; if <code>FALSE</code>, keep the rescaled field.</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. If <code>TRUE</code>, convert the environment to ranks over all sites and
+steps, as in their code; if <code>FALSE</code>, keep the rescaled field.</p></dd>
 
 
 <dt id="arg-min-range">min_range<a class="anchor" aria-label="anchor" href="#arg-min-range"></a></dt>
 <dd><p>Minimum range of the rescaled environment at the first step after the
-burn-in; the field is redrawn until it is exceeded. Use 0 to accept the first draw.</p></dd>
+burn-in; the field is redrawn until it is exceeded: one number in [0, 1). Use 0 to accept
+the first draw.</p></dd>
 
 
 <dt id="arg-n-features">n_features<a class="anchor" aria-label="anchor" href="#arg-n-features"></a></dt>
-<dd><p>Number of cosine waves of the spectral method.</p></dd>
+<dd><p>Number of cosine waves of the spectral method: one whole number, 1 or
+more.</p></dd>
 
 </dl></div>
     <div class="section level2">

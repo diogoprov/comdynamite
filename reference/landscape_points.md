@@ -33,13 +33,13 @@ landscape_points(
 - disp_scale:
 
   Scale of the dispersal kernel, in the units of the distances
-  (kilometres with `lonlat = TRUE`).
+  (kilometres with `lonlat = TRUE`): one number greater than 0.
 
 - lonlat:
 
-  Are the coordinates longitude and latitude? Distances are then
-  great-circle distances in kilometres, with a spherical Earth of radius
-  6371 km; otherwise Euclidean.
+  Are the coordinates longitude and latitude? `TRUE` or `FALSE`.
+  Distances are then great-circle distances in kilometres, with a
+  spherical Earth of radius 6371 km; otherwise Euclidean.
 
 - disp_shape:
 

@@ -40,8 +40,8 @@ evolution_control(
 
 - ne_ratio:
 
-  Ratio of effective to census population size \\\nu\\; `Inf` turns
-  drift off.
+  Ratio of effective to census population size \\\nu\\: one number
+  greater than 0; `Inf` turns drift off.
 
 - plasticity:
 
@@ -59,13 +59,15 @@ evolution_control(
 
 - steps_per_generation:
 
-  Time steps per generation \\g\\; selection and drift per step are
-  divided by it (at least 1); dispersal and demography are per step.
+  Time steps per generation \\g\\: one number, 1 or more; selection and
+  drift per step are divided by it; dispersal and demography are per
+  step.
 
 - founder:
 
   Should populations founded at a step start from the sampled mean of
   their founders (`TRUE`) or from the mean of their source (`FALSE`)?
+  `TRUE` or `FALSE`.
 
 - env, traits:
 
@@ -80,13 +82,13 @@ evolution_control(
 - immigrant_selection:
 
   Should immigrants face viability selection in the site they reach
-  before they mix with residents? With `FALSE` (the default), the
-  immigrants from all sources join the population and the mean of the
-  merged population is selected. With `TRUE`, the immigrants from each
-  source arrive in proportion to the mean fitness of their source
-  phenotype in the new site, relative to a perfectly adapted population
-  (the same Gaussian as the growth rate, with the variance of the
-  phenotypes), so that maladapted immigrants are filtered source by
+  before they mix with residents? `TRUE` or `FALSE`. With `FALSE` (the
+  default), the immigrants from all sources join the population and the
+  mean of the merged population is selected. With `TRUE`, the immigrants
+  from each source arrive in proportion to the mean fitness of their
+  source phenotype in the new site, relative to a perfectly adapted
+  population (the same Gaussian as the growth rate, with the variance of
+  the phenotypes), so that maladapted immigrants are filtered source by
   source, as individuals are in an individual-based model, and the mean
   and variance of the immigrants are those of the survivors. With
   several traits, the fitness is the multivariate Gaussian of the growth
@@ -118,16 +120,17 @@ evolution_control(
 - variance_selection:
 
   With `mutation_var`, should stabilising selection also remove genetic
-  variance? With `TRUE`, each generation loses \\G^2 / (\sigma^2 + G +
-  V_E)\\, the reduction of the genetic variance by Gaussian selection of
-  width \\\sigma\\ on a phenotype of variance \\G + V_E\\ (Bulmer 1971).
-  Under sexual reproduction most of this reduction is linkage
-  disequilibrium, which recombination restores, so the full loss holds
-  for clonal inheritance, as in the model of Urban & De Meester (2009);
-  with mutation, the variance then settles near the balance between
-  mutation and selection (Lande 1975; Turelli 1984) rather than at \\2
-  N_e V_m\\, and standing variation is eroded instead of carrying a
-  load. `FALSE` (the default) keeps the mutation-drift dynamics alone.
+  variance? `TRUE` or `FALSE`. With `TRUE`, each generation loses \\G^2
+  / (\sigma^2 + G + V_E)\\, the reduction of the genetic variance by
+  Gaussian selection of width \\\sigma\\ on a phenotype of variance
+  \\G + V_E\\ (Bulmer 1971). Under sexual reproduction most of this
+  reduction is linkage disequilibrium, which recombination restores, so
+  the full loss holds for clonal inheritance, as in the model of Urban &
+  De Meester (2009); with mutation, the variance then settles near the
+  balance between mutation and selection (Lande 1975; Turelli 1984)
+  rather than at \\2 N_e V_m\\, and standing variation is eroded instead
+  of carrying a load. `FALSE` (the default) keeps the mutation-drift
+  dynamics alone.
 
 ## Value
 

@@ -30,27 +30,28 @@ river_network(
 
 - n_sites:
 
-  Number of sites (at least 2).
+  Number of sites: one whole number, 2 or more.
 
 - branching:
 
   Probability that a new site starts a branch rather than extending a
-  headwater (between 0 and 1).
+  headwater: one number between 0 and 1.
 
 - reach_length:
 
-  Mean length of the reach between a site and its downstream neighbour.
-  Lengths are drawn from an exponential distribution with this mean, or
-  are all equal with `fixed_length = TRUE`.
+  Mean length of the reach between a site and its downstream neighbour:
+  one number greater than 0. Lengths are drawn from an exponential
+  distribution with this mean, or are all equal with
+  `fixed_length = TRUE`.
 
 - fixed_length:
 
-  Logical: equal reach lengths.
+  Equal reach lengths? `TRUE` or `FALSE`.
 
 - max_branches:
 
   Largest number of branches that join at a confluence (2 for binary
-  confluences).
+  confluences): one whole number, 2 or more.
 
 ## Value
 

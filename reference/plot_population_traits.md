@@ -41,17 +41,18 @@ plot_population_traits(
 
 - trait:
 
-  Name of the column with the trait.
+  Name of the column with the trait. One character string.
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. One character
+  string each.
 
 - abundance:
 
   Name of a column with the abundance of each population (the same value
   for all its individuals), or `NULL` to weight populations by the
-  number of individuals measured.
+  number of individuals measured. One character string or `NULL`.
 
 - sites:
 
@@ -59,20 +60,21 @@ plot_population_traits(
 
 - weighted:
 
-  Scale the population densities by their relative abundances.
+  Scale the population densities by their relative abundances? `TRUE` or
+  `FALSE`.
 
 - community:
 
-  Draw the density of the community.
+  Draw the density of the community? `TRUE` or `FALSE`.
 
 - rug:
 
-  Draw the individuals as a rug.
+  Draw the individuals as a rug? `TRUE` or `FALSE`.
 
 - alpha:
 
-  Transparency of the population densities (0, transparent, to 1,
-  opaque).
+  Transparency of the population densities: one number from 0
+  (transparent) to 1 (opaque).
 
 - colours:
 
@@ -91,16 +93,19 @@ plot_population_traits(
 
 - bw:
 
-  Bandwidth of the kernel, or `NULL` for the rule above.
+  Bandwidth of the kernel (one number greater than 0), or `NULL` for the
+  rule above.
 
 - n:
 
-  Number of points of the grid of trait values.
+  Number of points of the grid of trait values. One whole number, 2 or
+  more.
 
 - ncol, scales:
 
   Passed to
-  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html).
+  [`ggplot2::facet_wrap()`](https://ggplot2.tidyverse.org/reference/facet_wrap.html):
+  one whole number (or `NULL`) and one character string.
 
 ## Value
 

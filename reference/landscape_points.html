@@ -99,11 +99,12 @@ With <code>lonlat = TRUE</code>, longitude and latitude in decimal degrees.</p><
 
 <dt id="arg-disp-scale">disp_scale<a class="anchor" aria-label="anchor" href="#arg-disp-scale"></a></dt>
 <dd><p>Scale of the dispersal kernel, in the units of the distances
-(kilometres with <code>lonlat = TRUE</code>).</p></dd>
+(kilometres with <code>lonlat = TRUE</code>): one number greater than 0.</p></dd>
 
 
 <dt id="arg-lonlat">lonlat<a class="anchor" aria-label="anchor" href="#arg-lonlat"></a></dt>
-<dd><p>Are the coordinates longitude and latitude? Distances are then great-circle
+<dd><p>Are the coordinates longitude and latitude? <code>TRUE</code> or <code>FALSE</code>. Distances are then
+great-circle
 distances in kilometres, with a spherical Earth of radius 6371 km; otherwise Euclidean.</p></dd>
 
 

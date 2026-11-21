@@ -21,7 +21,7 @@ as.data.frame(x, row.names = NULL, optional = FALSE, zeros = FALSE, ...)
 
 - zeros:
 
-  Keep absences?
+  Keep absences? `TRUE` or `FALSE`.
 
 - ...:
 

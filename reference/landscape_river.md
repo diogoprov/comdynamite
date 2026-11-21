@@ -50,20 +50,23 @@ landscape_river(
 - scale_down, scale_up:
 
   Scales of the kernel for the distance travelled downstream and
-  upstream, in the units of `length`.
+  upstream, in the units of `length`: each one number greater than 0, or
+  `Inf` for no cost of travel in that direction.
 
 - overland:
 
   Share of emigrants that move in a straight line rather than along the
-  channel (between 0 and 1).
+  channel: one number between 0 and 1.
 
 - overland_scale:
 
-  Scale of the exponential kernel of straight-line dispersal.
+  Scale of the exponential kernel of straight-line dispersal: one number
+  greater than 0.
 
 - env_range:
 
-  Range of the environment when `env` is `NULL`.
+  Range of the environment when `env` is `NULL`: two finite numbers, the
+  first smaller.
 
 ## Value
 

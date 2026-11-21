@@ -26,7 +26,7 @@ persistence(x, window = NULL, ...)
 - window:
 
   Number of the last intervals (generations, or intervals between
-  records) to use; `NULL` for all.
+  records) to use, one whole number, 1 or more; `NULL` for all.
 
 - ...:
 

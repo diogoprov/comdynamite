@@ -35,15 +35,15 @@ predict(object, newdata, ntree = 500, ncores = 1, ...)
 
 - ntree:
 
-  Number of trees.
+  Number of trees. One whole number, 1 or more.
 
 - lda:
 
-  Add the linear discriminant axes as predictors?
+  Add the linear discriminant axes as predictors? `TRUE` or `FALSE`.
 
 - ncores:
 
-  Number of threads.
+  Number of threads. One whole number, 1 or more.
 
 - object:
 

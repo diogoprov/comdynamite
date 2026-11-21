@@ -37,12 +37,14 @@ trait_rates(
 
 - sigma2:
 
-  Rate at the root (`"shift"`, `"gbm"`) or median rate (`"iid"`).
+  Rate at the root (`"shift"`, `"gbm"`) or median rate (`"iid"`). One
+  finite number greater than 0.
 
 - shifts:
 
   Number of shifts, for `"shift"` when neither `shift_edges` nor
-  `shift_rate` is given.
+  `shift_rate` is given. One whole number, from 0 up to the number of
+  branches.
 
 - shift_size:
 
@@ -57,26 +59,29 @@ trait_rates(
 - shift_rate:
 
   Optional rate of shifts per unit of branch length, for shifts as a
-  Poisson process along the branches.
+  Poisson process along the branches. One finite number, 0 or more, or
+  `NULL`.
 
 - shift_branch:
 
   Should a shift last only to the end of its branch, rather than pass to
-  all branches descending from it?
+  all branches descending from it? `TRUE` or `FALSE`.
 
 - relative:
 
   Multiply the rate before each shift by `shift_size` (`TRUE`), or set
-  the rate after it to `sigma2` times `shift_size` (`FALSE`)?
+  the rate after it to `sigma2` times `shift_size` (`FALSE`)? `TRUE` or
+  `FALSE`.
 
 - rate_sd:
 
   Standard deviation of the logarithm of the rate: per square root of
-  time for `"gbm"` and among branches for `"iid"`.
+  time for `"gbm"` and among branches for `"iid"`. One finite number, 0
+  or more.
 
 - root:
 
-  Trait value at the root.
+  Trait value at the root. One finite number.
 
 - edge_rates:
 

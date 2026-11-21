@@ -34,18 +34,21 @@ turnover_rates(
 
 - sigma2:
 
-  Rate outside the stretch informed by the metacommunity.
+  Rate outside the stretch informed by the metacommunity. One finite
+  number greater than 0.
 
 - k:
 
   Increase of the rate, relative to `sigma2`, per unit of turnover
-  (partners gained or lost per site and time step).
+  (partners gained or lost per site and time step). One finite number, 0
+  or more.
 
 - window:
 
   Length of the end of each tip branch represented by the metacommunity,
-  in the units of the branch lengths; `NULL` uses the whole tip branch.
-  A window longer than a tip branch is cut to its length.
+  in the units of the branch lengths (one finite number greater than 0);
+  `NULL` uses the whole tip branch. A window longer than a tip branch is
+  cut to its length.
 
 - partners:
 

@@ -54,13 +54,14 @@ node_test(
 - n_perm:
 
   Number of permutations of sites, of species and of both. With
-  `site_permutations`, only of species.
+  `site_permutations`, only of species. One whole number, 1 or more.
 
 - cores:
 
-  Number of cores, with nodes run in parallel. Not available on Windows,
-  where one core is used. For reproducible p-values with more than one
-  core, call `RNGkind("L'Ecuyer-CMRG")` before
+  One whole number, 1 or more: the number of cores, with nodes run in
+  parallel. Not available on Windows, where one core is used. For
+  reproducible p-values with more than one core, call
+  `RNGkind("L'Ecuyer-CMRG")` before
   [`set.seed()`](https://rdrr.io/r/base/Random.html). Results still
   depend on the number of cores.
 
@@ -97,8 +98,9 @@ node_test(
 
 - coords:
 
-  Matrix of coordinates with one row per site, for `null = "variogram"`
-  or `"parametric"`. Taken from an
+  Matrix of coordinates with one row per site, without missing or
+  infinite values, for `null = "variogram"` or `"parametric"`. Taken
+  from an
   [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
   object when it has them.
 

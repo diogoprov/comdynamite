@@ -48,8 +48,9 @@ simulate_static(
 
 - incidence:
 
-  Return presences and absences instead of Poisson counts? A species is
-  present where its count is positive. Only for `sampling = "poisson"`.
+  Return presences and absences instead of Poisson counts (`TRUE` or
+  `FALSE`)? A species is present where its count is positive. Only for
+  `sampling = "poisson"`.
 
 - sampling:
 

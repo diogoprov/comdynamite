@@ -42,16 +42,22 @@ trait_gradient_bayes(
 - ou_alpha:
 
   `NULL` for Brownian motion, or the strength \\a\\ of an
-  Ornstein-Uhlenbeck process, in units of 1 / branch length.
+  Ornstein-Uhlenbeck process, in units of 1 / branch length: one finite
+  number greater than 0.
 
 - lambda_prior:
 
-  The two shape parameters of the beta prior of both \\\lambda\\.
+  The two shape parameters of the beta prior of both \\\lambda\\: two
+  finite numbers greater than 0.
 
 - chains, parallel_chains, iter_warmup, iter_sampling, adapt_delta,
   seed:
 
-  Passed to the `$sample()` method of cmdstanr.
+  Passed to the `$sample()` method of cmdstanr. `chains`,
+  `parallel_chains` and `iter_sampling` are each one whole number, 1 or
+  more; `iter_warmup` one whole number, 0 or more; `adapt_delta` one
+  number between 0 and 1, both excluded; `seed` one whole number, 0 or
+  more, or `NULL`.
 
 - ...:
 

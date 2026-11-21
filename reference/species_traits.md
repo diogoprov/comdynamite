@@ -34,35 +34,37 @@ species_traits(
 
 - species:
 
-  A `phylo` tree, or the number of species for traits without
-  phylogenetic structure.
+  A `phylo` tree, or the number of species (one whole number, 1 or more)
+  for traits without phylogenetic structure.
 
 - lambda:
 
-  Pagel's lambda of the optima (0 = no signal, 1 = Brownian motion).
-  Ignored when `species` is a number.
+  Pagel's lambda of the optima (0 = no signal, 1 = Brownian motion): one
+  number between 0 and 1. Ignored when `species` is a number.
 
 - optima_range:
 
-  Range of the optima.
+  Range of the optima: two finite numbers, the first not larger than the
+  second.
 
 - uniform_optima:
 
-  Give the optima evenly spaced values by rank?
+  Give the optima evenly spaced values by rank? `TRUE` or `FALSE`.
 
 - sigma_mean, sigma_sd:
 
   Mean and standard deviation of the normal distribution (truncated at
-  zero) of niche breadths.
+  zero) of niche breadths: one finite number each, `sigma_sd` 0 or more.
 
 - rmax_range:
 
-  Range of the uniform distribution of maximum growth rates.
+  Range of the uniform distribution of maximum growth rates: two finite
+  numbers, 0 or more, the first not larger than the second.
 
 - sigma_signal, rmax_signal:
 
   Should niche breadth or maximum growth rate carry phylogenetic signal
-  (Brownian motion)?
+  (Brownian motion)? `TRUE` or `FALSE` each.
 
 - optima, sigma, r_max:
 
@@ -72,16 +74,17 @@ species_traits(
 
 - rescale_optima:
 
-  Rescale external optima to `optima_range`?
+  Rescale external optima to `optima_range`? `TRUE` or `FALSE`.
 
 - nodes:
 
   Also give the optima at the internal nodes of the tree, as
   [`trait_bm()`](https://provetelab.org/comdynamite/reference/trait_bm.md)
-  does? They are drawn after all other values, so the traits are the
-  same as with `nodes = FALSE` and the same seed, and rescaled as the
-  optima of the tips, so they may fall outside `optima_range`. Not
-  available with external optima or `uniform_optima`.
+  does? `TRUE` or `FALSE`. They are drawn after all other values, so the
+  traits are the same as with `nodes = FALSE` and the same seed, and
+  rescaled as the optima of the tips, so they may fall outside
+  `optima_range`. Not available with external optima or
+  `uniform_optima`.
 
 ## Value
 

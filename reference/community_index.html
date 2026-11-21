@@ -107,11 +107,12 @@ functions, all computed on the same observed and randomised communities, such as
 
 
 <dt id="arg-traits">traits<a class="anchor" aria-label="anchor" href="#arg-traits"></a></dt>
-<dd><p>Names of the columns with trait values.</p></dd>
+<dd><p>Names of the columns with trait values (a character vector).</p></dd>
 
 
 <dt id="arg-site-species">site, species<a class="anchor" aria-label="anchor" href="#arg-site-species"></a></dt>
-<dd><p>Names of the columns with the site and the species.</p></dd>
+<dd><p>Names of the columns with the site and the species. One character
+string each.</p></dd>
 
 
 <dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
@@ -119,7 +120,8 @@ functions, all computed on the same observed and randomised communities, such as
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
-<dd><p>Number of randomisations; 0 for the observed values only.</p></dd>
+<dd><p>Number of randomisations (one whole number, 0 or more); 0 or <code>NULL</code> for the
+observed values only.</p></dd>
 
 
 <dt id="arg-alternative">alternative<a class="anchor" aria-label="anchor" href="#arg-alternative"></a></dt>
@@ -128,7 +130,7 @@ functions, all computed on the same observed and randomised communities, such as
 
 
 <dt id="arg-multivariate">multivariate<a class="anchor" aria-label="anchor" href="#arg-multivariate"></a></dt>
-<dd><p>If <code>TRUE</code>, the index receives all traits at once.</p></dd>
+<dd><p>If <code>TRUE</code>, the index receives all traits at once. <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>

@@ -41,7 +41,7 @@ plot_phylo_beta(
 
 - axis:
 
-  Axis of `x$scores` that orders the sites.
+  Axis of `x$scores` that orders the sites. One whole number, 1 or more.
 
 - colours:
 
@@ -49,7 +49,7 @@ plot_phylo_beta(
 
 - text_size:
 
-  Size of the names of species, in mm.
+  Size of the names of species, in mm. One number greater than 0.
 
 - col, cex, ...:
 

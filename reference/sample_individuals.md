@@ -43,13 +43,15 @@ sample_individuals(
 - n:
 
   Number of individuals measured in each population, or all of them when
-  the population is smaller. Ignored when `fraction` is given.
+  the population is smaller. One whole number, 1 or more, or `Inf` for
+  all individuals. Ignored when `fraction` is given.
 
 - fraction:
 
   Optional probability that each individual is measured, so that the
   number measured in a population is Binomial(abundance, `fraction`),
-  proportional to abundance on average.
+  proportional to abundance on average. One number greater than 0 and up
+  to 1, or `NULL`.
 
 - local_adaptation:
 
@@ -72,25 +74,27 @@ sample_individuals(
 
   Strength of character displacement among the populations of a site
   (`c` in Details), relative to the selection that keeps each population
-  near its mean without competitors; 0 (the default) for none.
+  near its mean without competitors; 0 (the default) for none. One
+  finite number, 0 or more.
 
 - displacement_width:
 
   Width `w` of the Gaussian competition kernel of character
-  displacement, in units of the trait. The default is the mean niche
-  breadth (`sigma`) of the species.
+  displacement, in units of the trait: one number greater than 0 (`Inf`
+  allowed). The default, `NULL`, is the mean niche breadth (`sigma`) of
+  the species.
 
 - step:
 
-  Recorded step to sample, as in `record_steps`; `NULL` (the default)
-  uses the abundances at the last step. Several steps simulate
-  collections on several dates: each date is sampled on its own (new
-  individuals, drawn from the populations then), and the result gets a
-  column `step`. The deviations of each population from `population_sd`
-  (and `founder_sd`) are kept across dates, so populations change
-  between dates only through the simulation. For evolving
-  metacommunities, the records keep only the lineages extant at the end,
-  so an earlier date misses species that died out later.
+  Recorded step to sample (one or more numbers), as in `record_steps`;
+  `NULL` (the default) uses the abundances at the last step. Several
+  steps simulate collections on several dates: each date is sampled on
+  its own (new individuals, drawn from the populations then), and the
+  result gets a column `step`. The deviations of each population from
+  `population_sd` (and `founder_sd`) are kept across dates, so
+  populations change between dates only through the simulation. For
+  evolving metacommunities, the records keep only the lineages extant at
+  the end, so an earlier date misses species that died out later.
 
 - env:
 
@@ -102,17 +106,18 @@ sample_individuals(
 
 - cover:
 
-  Optional share (0 to 1) of the abundance of each site covered by the
-  species measured: species are taken from the most abundant down until
-  they reach `cover`, and the rest are not measured, as in field
-  protocols that measure the species making up 80% of the abundance
-  (Pakeman & Quested 2007). `NULL` (the default) measures every species.
+  Optional share of the abundance of each site covered by the species
+  measured (one number greater than 0 and up to 1, or `NULL`): species
+  are taken from the most abundant down until they reach `cover`, and
+  the rest are not measured, as in field protocols that measure the
+  species making up 80% of the abundance (Pakeman & Quested 2007).
+  `NULL` (the default) measures every species.
 
 - min_n:
 
   Populations with fewer individuals measured than `min_n` are left out,
   as when populations with a single individual are removed before
-  computing T-statistics.
+  computing T-statistics. One whole number, 1 or more.
 
 - founder_sd:
 
@@ -176,7 +181,7 @@ sample_individuals(
   single step and `session = "step"`, there is one session, so the error
   is a constant added to every individual, which vanishes from any
   statistic centred on means (deviations from population means, variance
-  components) and has no effect on them.
+  components) and has no effect on them. One finite number, 0 or more.
 
 - visits:
 
@@ -184,7 +189,7 @@ sample_individuals(
   its own individuals (`n` or `fraction` per population and visit) from
   the same populations, whose means do not change between visits of the
   same step, and the result gets a column `visit`. 1 (the default) for
-  one.
+  one. One whole number, 1 or more.
 
 - session:
 

@@ -45,7 +45,7 @@ simulate_damocles(
 
 - n:
 
-  Number of communities to simulate.
+  Number of communities to simulate. One whole number, 1 or more.
 
 - root:
 
@@ -56,9 +56,9 @@ simulate_damocles(
 
 - sympatry:
 
-  Probability, between 0 and 1, that a locally present ancestor leaves
-  both daughters present at speciation; 0 (the default) is strictly
-  allopatric speciation.
+  Probability that a locally present ancestor leaves both daughters
+  present at speciation, one number between 0 and 1; 0 (the default) is
+  strictly allopatric speciation.
 
 ## Value
 

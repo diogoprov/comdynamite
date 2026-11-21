@@ -108,7 +108,8 @@ matrix (sites x steps) with the environment at each step, e.g. from <code><a hre
 
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
-<dd><p>Number of time steps. Taken from <code>env</code> when it is a matrix.</p></dd>
+<dd><p>Number of time steps: one whole number, 1 or more. Taken from <code>env</code> when it
+is a matrix.</p></dd>
 
 
 <dt id="arg-sites">sites<a class="anchor" aria-label="anchor" href="#arg-sites"></a></dt>
@@ -117,11 +118,12 @@ site (e.g. <code>integer(0)</code>), <code>env</code> is returned unchanged, as 
 
 
 <dt id="arg-start">start<a class="anchor" aria-label="anchor" href="#arg-start"></a></dt>
-<dd><p>First disturbed step.</p></dd>
+<dd><p>First disturbed step: one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-duration">duration<a class="anchor" aria-label="anchor" href="#arg-duration"></a></dt>
-<dd><p>Number of disturbed steps of each pulse; <code>Inf</code> for a permanent change.</p></dd>
+<dd><p>Number of disturbed steps of each pulse: one whole number, 1 or more, or
+<code>Inf</code> for a permanent change.</p></dd>
 
 
 <dt id="arg-value">value<a class="anchor" aria-label="anchor" href="#arg-value"></a></dt>
@@ -129,7 +131,8 @@ site (e.g. <code>integer(0)</code>), <code>env</code> is returned unchanged, as 
 
 
 <dt id="arg-every">every<a class="anchor" aria-label="anchor" href="#arg-every"></a></dt>
-<dd><p>Optional period of recurrent pulses: a new pulse starts every <code>every</code> steps
+<dd><p>Optional period of recurrent pulses (one whole number, 1 or more): a new pulse
+starts every <code>every</code> steps
 after <code>start</code> until the last step, so that the frequency of disturbance is <code>1 / every</code>.
 <code>NULL</code> (the default) for a single pulse. Needs a finite <code>duration</code> shorter than <code>every</code>.</p></dd>
 

@@ -91,7 +91,7 @@ with the same spatial covariance at every step, as <code>env_time</code>.</p>
 
 <dt id="arg-n-steps">n_steps<a class="anchor" aria-label="anchor" href="#arg-n-steps"></a></dt>
 <dd><p><code>NULL</code> (the default) for one value per site, or the number of steps of a
-series.</p></dd>
+series: one whole number, 1 or more.</p></dd>
 
 
 <dt id="arg-mean">mean<a class="anchor" aria-label="anchor" href="#arg-mean"></a></dt>
@@ -101,7 +101,8 @@ the outlet to the headwaters).</p></dd>
 
 <dt id="arg-temporal-scale">temporal_scale<a class="anchor" aria-label="anchor" href="#arg-temporal-scale"></a></dt>
 <dd><p>Steps over which the correlation in time falls by a factor of
-\(e\) (the correlation between consecutive steps is \(\exp(-1 /\)
+\(e\), one number, 0 or more, or <code>Inf</code> (the correlation between consecutive steps is
+\(\exp(-1 /\)
 <code>temporal_scale</code>)); <code>Inf</code> keeps the first draw at every step and 0 draws every step
 anew.</p></dd>
 

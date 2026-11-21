@@ -41,7 +41,7 @@ env_surrogates(
 
 - n:
 
-  Number of surrogates.
+  Number of surrogates, one whole number, 1 or more.
 
 - method:
 
@@ -49,8 +49,8 @@ env_surrogates(
 
 - lonlat:
 
-  Are `coords` longitude and latitude in decimal degrees? Distances are
-  then great-circle distances in kilometres.
+  Are `coords` longitude and latitude in decimal degrees (`TRUE` or
+  `FALSE`)? Distances are then great-circle distances in kilometres.
 
 - strata:
 

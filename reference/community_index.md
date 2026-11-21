@@ -41,11 +41,12 @@ community_index(
 
 - traits:
 
-  Names of the columns with trait values.
+  Names of the columns with trait values (a character vector).
 
 - site, species:
 
-  Names of the columns with the site and the species.
+  Names of the columns with the site and the species. One character
+  string each.
 
 - null:
 
@@ -53,7 +54,8 @@ community_index(
 
 - n_perm:
 
-  Number of randomisations; 0 for the observed values only.
+  Number of randomisations (one whole number, 0 or more); 0 or `NULL`
+  for the observed values only.
 
 - alternative:
 
@@ -62,7 +64,7 @@ community_index(
 
 - multivariate:
 
-  If `TRUE`, the index receives all traits at once.
+  If `TRUE`, the index receives all traits at once. `TRUE` or `FALSE`.
 
 - nperm:
 

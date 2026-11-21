@@ -21,6 +21,7 @@ fold_summarise(folds, summarise = function(x, shared) summary_stats(x))
 
   Integer vector with the fold of each site, as from
   [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md).
+  One whole number per site, with at least two different folds.
 
 - summarise:
 

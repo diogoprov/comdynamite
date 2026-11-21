@@ -139,7 +139,8 @@ site, or the band of standardised effect sizes) is hatched.</p>
 
 <dt id="arg-level-inner">level, inner<a class="anchor" aria-label="anchor" href="#arg-level-inner"></a></dt>
 <dd><p>Coverage of the outer and inner null intervals; <code>1 - level</code> is also the
-size of the two-sided test (as in <code><a href="tstats_summary.html">tstats_summary()</a></code>).</p></dd>
+size of the two-sided test (as in <code><a href="tstats_summary.html">tstats_summary()</a></code>). One number between 0 and 1 each,
+<code>inner</code> smaller than <code>level</code>.</p></dd>
 
 
 <dt id="arg-statistics-traits-sites">statistics, traits, sites<a class="anchor" aria-label="anchor" href="#arg-statistics-traits-sites"></a></dt>
@@ -159,21 +160,22 @@ are blue, grey and vermillion of the Okabe-Ito palette.</p></dd>
 
 <dt id="arg-point-size-interval-width">point_size, interval_width<a class="anchor" aria-label="anchor" href="#arg-point-size-interval-width"></a></dt>
 <dd><p>Size of the observed points and width of the thick inner
-interval.</p></dd>
+interval. One number greater than 0 each.</p></dd>
 
 
 <dt id="arg-hatch">hatch<a class="anchor" aria-label="anchor" href="#arg-hatch"></a></dt>
 <dd><p>Hatch the area expected by chance; with <code>FALSE</code> it is drawn as a thin line
-(<code>"intervals"</code>) or a grey band (<code>"ses"</code>).</p></dd>
+(<code>"intervals"</code>) or a grey band (<code>"ses"</code>). <code>TRUE</code> or <code>FALSE</code>.</p></dd>
 
 
 <dt id="arg-hatch-density">hatch_density<a class="anchor" aria-label="anchor" href="#arg-hatch-density"></a></dt>
-<dd><p>Number of hatching lines across the width of a panel.</p></dd>
+<dd><p>Number of hatching lines across the width of a panel. One number
+greater than 0.</p></dd>
 
 
 <dt id="arg-scales">scales<a class="anchor" aria-label="anchor" href="#arg-scales"></a></dt>
 <dd><p>Passed to <code><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">ggplot2::facet_grid()</a></code>; <code>"free_x"</code> (the default) lets each
-statistic keep its own range.</p></dd>
+statistic keep its own range. One character string.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

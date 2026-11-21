@@ -14,11 +14,12 @@ logistic_gradients(scenario, n_sites = 31)
 
 - scenario:
 
-  Number of the scenario, from 1 to 7.
+  Number of the scenario, one whole number from 1 to 7.
 
 - n_sites:
 
-  Number of sites.
+  Number of sites, one whole number, at least 4 (8 for scenarios 5 to
+  7).
 
 ## Value
 

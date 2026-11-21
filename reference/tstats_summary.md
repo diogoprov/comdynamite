@@ -31,6 +31,7 @@ tstats_summary(x, level = 0.95)
   \mathrm{n_perm}) \< \alpha / 2\\, so `n_perm` must be at least \\2 /
   \alpha\\; a warning is given otherwise. Before 0.7.0 `level` was the
   size (0.05); values below 0.5 are still read that way, with a warning.
+  One number between 0 and 1, both excluded.
 
 ## Value
 

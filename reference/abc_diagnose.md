@@ -30,7 +30,7 @@ abc_diagnose(fit, newdata, coverage = 0.99)
 - coverage:
 
   Central probability of the reference table within which a statistic
-  counts as inside.
+  counts as inside. One number greater than 0 and less than 1.
 
 ## Value
 

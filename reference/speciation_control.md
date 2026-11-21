@@ -41,17 +41,18 @@ speciation_control(
 
   For `"geographic"` and `"ecological"`: divergence in generations, or
   difference of genetic means in units of the environment, that
-  separates groups; `Inf` turns speciation off. With several traits (one
-  per niche axis), the difference of two populations in `"ecological"`
-  is the Mahalanobis distance of their genetic means under the
-  phenotypic matrix of the species, \\\sqrt{\Delta\bar z^\top P^{-1}
-  \Delta\bar z}\\, so `threshold` is in units of phenotypic standard
-  deviations.
+  separates groups: one number greater than 0; `Inf` turns speciation
+  off. With several traits (one per niche axis), the difference of two
+  populations in `"ecological"` is the Mahalanobis distance of their
+  genetic means under the phenotypic matrix of the species,
+  \\\sqrt{\Delta\bar z^\top P^{-1} \Delta\bar z}\\, so `threshold` is in
+  units of phenotypic standard deviations.
 
 - rate:
 
-  For `"point"`: probability per individual per generation; for
-  `"fission"`: rate per species per generation.
+  For `"point"`: probability per individual per generation, one number
+  between 0 and 1; for `"fission"`: rate per species per generation, one
+  finite number, 0 or more.
 
 - divergence:
 
@@ -60,31 +61,33 @@ speciation_control(
 - migration_min:
 
   For `divergence = "cluster"`: migration rate per generation that links
-  two populations. Where clusters form depends on dispersal, the kernel
-  and abundances: the rate of the strongest link of each population
-  should straddle it. In the design of
-  `data-raw/evolving_migration_min.R` (strongest links with median
-  0.006), species did not split at all at 0.002 or below and split
-  almost as with no links at 0.02 or above.
+  two populations, one number greater than 0 (`Inf` links none). Where
+  clusters form depends on dispersal, the kernel and abundances: the
+  rate of the strongest link of each population should straddle it. In
+  the design of `data-raw/evolving_migration_min.R` (strongest links
+  with median 0.006), species did not split at all at 0.002 or below and
+  split almost as with no links at 0.02 or above.
 
 - reset_generations:
 
   For `divergence = "cluster"`: generations in a row in the same cluster
-  after which divergence returns to 0.
+  after which divergence returns to 0; one whole number, 1 or more.
 
 - homogenization:
 
-  For `divergence = "gradual"`: reduction of divergence per migrant.
+  For `divergence = "gradual"`: reduction of divergence per migrant; one
+  number, 0 or more.
 
 - min_generations:
 
   For `"ecological"`: generations in a row of difference and reduced
-  gene flow before groups split.
+  gene flow before groups split; one whole number, 1 or more.
 
 - migration_max:
 
   For `"ecological"`: migration rate per generation below which gene
-  flow counts as reduced.
+  flow counts as reduced; one number, 0 or more (`Inf` for no limit on
+  gene flow).
 
 - partition:
 
@@ -92,15 +95,15 @@ speciation_control(
 
 - jump_var:
 
-  Variance of the shift of the genetic mean of each new species. With
-  several traits, one value (independent shifts of that variance on
-  every trait) or a covariance matrix with one row and column per trait
-  (for instance proportional to \\G\\).
+  Variance of the shift of the genetic mean of each new species: one
+  number, 0 or more. With several traits, one value (independent shifts
+  of that variance on every trait) or a covariance matrix with one row
+  and column per trait (for instance proportional to \\G\\).
 
 - completion:
 
-  Time to complete speciation, in generations (fixed or mean); 0 for
-  instantaneous speciation.
+  Time to complete speciation, in generations (fixed or mean): one
+  number, 0 or more; 0 for instantaneous speciation.
 
 - completion_dist:
 

@@ -113,16 +113,18 @@ such as from <code><a href="sample_individuals.html">sample_individuals()</a></c
 
 
 <dt id="arg-trait">trait<a class="anchor" aria-label="anchor" href="#arg-trait"></a></dt>
-<dd><p>Name of the column with trait values.</p></dd>
+<dd><p>Name of the column with trait values (finite or missing). One character string.</p></dd>
 
 
 <dt id="arg-site-species">site, species<a class="anchor" aria-label="anchor" href="#arg-site-species"></a></dt>
-<dd><p>Names of the columns with the site and the species.</p></dd>
+<dd><p>Names of the columns with the site and the species. Each one character
+string.</p></dd>
 
 
 <dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
 <dd><p>Name of the column with the abundance of the species in the site (one value
-per population), or <code>NULL</code> to weight each occurrence equally.</p></dd>
+per population), or <code>NULL</code> to weight each occurrence equally. One character string or
+<code>NULL</code>.</p></dd>
 
 
 <dt id="arg-site-weights-species-weights">site_weights, species_weights<a class="anchor" aria-label="anchor" href="#arg-site-weights-species-weights"></a></dt>
@@ -132,11 +134,13 @@ means and of the species means and \(\beta\). Both default to <code>"abundance"<
 
 
 <dt id="arg-leave-one-out">leave_one_out<a class="anchor" aria-label="anchor" href="#arg-leave-one-out"></a></dt>
-<dd><p>Leave the focal species out of the site means (the default).</p></dd>
+<dd><p><code>TRUE</code> or <code>FALSE</code>. Leave the focal species out of the site means (the
+default).</p></dd>
 
 
 <dt id="arg-min-slope">min_slope<a class="anchor" aria-label="anchor" href="#arg-min-slope"></a></dt>
-<dd><p>Smallest number of sites with measured values to fit the slope \(b_i\).</p></dd>
+<dd><p>Smallest number of sites with measured values to fit the slope \(b_i\).
+One whole number, 2 or more.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -63,6 +63,7 @@ plot(x, ...)
   Coverage of the outer and inner null intervals; `1 - level` is also
   the size of the two-sided test (as in
   [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)).
+  One number between 0 and 1 each, `inner` smaller than `level`.
 
 - statistics, traits, sites:
 
@@ -81,22 +82,25 @@ plot(x, ...)
 
 - point_size, interval_width:
 
-  Size of the observed points and width of the thick inner interval.
+  Size of the observed points and width of the thick inner interval. One
+  number greater than 0 each.
 
 - hatch:
 
   Hatch the area expected by chance; with `FALSE` it is drawn as a thin
-  line (`"intervals"`) or a grey band (`"ses"`).
+  line (`"intervals"`) or a grey band (`"ses"`). `TRUE` or `FALSE`.
 
 - hatch_density:
 
-  Number of hatching lines across the width of a panel.
+  Number of hatching lines across the width of a panel. One number
+  greater than 0.
 
 - scales:
 
   Passed to
   [`ggplot2::facet_grid()`](https://ggplot2.tidyverse.org/reference/facet_grid.html);
-  `"free_x"` (the default) lets each statistic keep its own range.
+  `"free_x"` (the default) lets each statistic keep its own range. One
+  character string.
 
 - ...:
 
