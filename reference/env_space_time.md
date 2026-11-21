@@ -110,7 +110,9 @@ Other landscapes:
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
 [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md),
 [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md),
-[`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md)
+[`landscape_points()`](https://provetelab.org/comdynamite/reference/landscape_points.md),
+[`landscape_river()`](https://provetelab.org/comdynamite/reference/landscape_river.md),
+[`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
 
 ## Examples
 

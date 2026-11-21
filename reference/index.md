@@ -55,6 +55,10 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Landscape from site coordinates
 - [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md)
   : Landscape from a dispersal matrix
+- [`landscape_river()`](https://provetelab.org/comdynamite/reference/landscape_river.md)
+  : Landscape on a river network
+- [`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
+  : Random dendritic river network
 - [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
   : Spatially implicit landscape
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)
