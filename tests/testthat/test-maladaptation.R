@@ -146,6 +146,10 @@ test_that("since_change counts the steps since the environment of each site last
   expect_true(all(maladaptation(still)$since_change == 20L))
   still$evolution$since_change <- NULL
   expect_true(all(is.na(maladaptation(still)$since_change)))
+  # a recorded step without the history of since_change gives NA
+  old <- sim
+  old$evolution$since_change$history <- NULL
+  expect_true(all(is.na(maladaptation(old, step = 31)$since_change)))
   # the last step, not recorded, is the end
   expect_identical(maladaptation(sim, step = 60), maladaptation(sim))
 })
