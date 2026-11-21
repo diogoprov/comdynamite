@@ -1,16 +1,24 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-19. Versão atual: 0.9.0 (DOI `10.5281/zenodo.24341231`), com
-`0.9.0.9000` em desenvolvimento (DOI de conceito `10.5281/zenodo.23993533`).
-Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`
-e `v0.9.0`.
+Atualizado em 2026-11-21. Versão atual: 0.10.0 (tag `v0.10.0`; release no GitHub e DOI
+pendentes de decisão do usuário), após a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
+conceito `10.5281/zenodo.23993533`).
+Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`,
+`v0.9.0` e `v0.10.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-19)
+## Próximos passos (2026-11-21)
 
-1. **v0.9.0 publicada em 2026-11-18** (tag `v0.9.0`, release no GitHub, DOI
-   `10.5281/zenodo.24341231`); os dois itens abertos do marco passaram para o bloco A (ver
-   "Itens abertos e plano de implementação"), o próximo marco de código.
+1. **0.10.0 em 2026-11-21** (tag `v0.10.0`): fecha o bloco A (nulos com borda e
+   `env_surrogates()`, gerador de Thompson et al. 2020, competição por traits, nicho com eixos
+   correlacionados, dispersão no tempo, tempo desde a mudança, ambiente sazonal e redes
+   fluviais, dispersão e tolerância a distúrbio por espécie ou grupo) e traz o artigo de
+   persistência em redes fluviais com os cenários do Pantanal. Falta decidir a release no
+   GitHub (gera DOI no Zenodo). Pendências do bloco A que ficam para depois: nicho correlacionado
+   com `evolution` e com especiação (item 4) e `kernel_group` no motor evolutivo e com seleção
+   de imigrantes ou vários traços (item 8). Próximo marco de
+   código: a escolher entre os blocos B a J.
+   A 0.9.0 saiu em 2026-11-18 (tag `v0.9.0`, release, DOI `10.5281/zenodo.24341231`).
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
    2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),

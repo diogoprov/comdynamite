@@ -196,7 +196,10 @@
 #'   `NULL`), and the `landscape`, `traits`, `alpha`, `dispersal`, `extirpation` and `pool`
 #'   used, `env` when given, and `tree` when the traits came from [species_traits()] with a
 #'   tree, the colonisation history (`arrival`, `propagule`, `immigrants`, `migrant_load`;
-#'   see the section Colonisation history) and `n_steps`. With `evolution`, also `evolution`, a
+#'   see the section Colonisation history), `n_steps`, and the settings `dispersal_time`,
+#'   `kernels` (rescaled), `kernel_step`, `kernel_group`, `dispersal_site`,
+#'   `disturbance_sensitivity` (one per species), `disturbance`, `recruitment`, `microsites` and
+#'   `mortality`. With `evolution`, also `evolution`, a
 #'   list with the genetic mean of the optimum in each population (`genetic`), the plastic part
 #'   of its phenotype at the last step (`plastic`), the phenotype after dispersal (`phenotype`,
 #'   which mixes residents and immigrants), the genetic means and the environment at
