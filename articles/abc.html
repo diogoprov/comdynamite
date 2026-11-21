@@ -135,7 +135,7 @@ the rest runs here.</p>
 are about 900 km from each other, so we treat them as two
 metacommunities that share the values of the parameters. Each pond has a
 hydrology score, from small, shallow and warm ponds (0) to large and
-deep ones (100), and the urban cover within 1 km. Each city has its own
+deep ones (100), and the urban cover within 500 m. Each city has its own
 regional pool: the anurans that breed in lentic water and were recorded
 by GBIF in its ecoregion and within 200 km of its ponds (see
 <code><a href="../reference/anurans.html">?anurans</a></code>). The pools are much larger than the sets of
@@ -207,7 +207,7 @@ the objects shared by all simulations (<code>shared</code>):</p>
 <span>                     lambda <span class="op">=</span> <span class="fl">0.5</span>, q_tol <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span>, <span class="va">shared</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowSums</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">abundance</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
 <span><span class="co">#&gt;  site1  site2  site3  site4  site5  site6  site7  site8  site9 site10 </span></span>
-<span><span class="co">#&gt;     11     13     11      8     11     12     12      5     10     13</span></span></code></pre></div>
+<span><span class="co">#&gt;     13     11     11      7     19     15     11      6      5     14</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="summary-statistics">Summary statistics<a class="anchor" aria-label="anchor" href="#summary-statistics"></a>

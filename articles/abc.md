@@ -50,7 +50,7 @@ The ponds of each city are a few kilometres apart, and the two cities
 are about 900 km from each other, so we treat them as two
 metacommunities that share the values of the parameters. Each pond has a
 hydrology score, from small, shallow and warm ponds (0) to large and
-deep ones (100), and the urban cover within 1 km. Each city has its own
+deep ones (100), and the urban cover within 500 m. Each city has its own
 regional pool: the anurans that breed in lentic water and were recorded
 by GBIF in its ecoregion and within 200 km of its ponds (see
 [`?anurans`](https://provetelab.org/comdynamite/reference/anurans.md)).
@@ -132,7 +132,7 @@ sim <- simulate(list(log_dispersal = -2, log_kernel = 0.3, inter_max = 0.5, sigm
                      lambda = 0.5, q_tol = 0.3), shared)
 rowSums(sim$abundance > 0)[1:10]
 #>  site1  site2  site3  site4  site5  site6  site7  site8  site9 site10 
-#>     11     13     11      8     11     12     12      5     10     13
+#>     13     11     11      7     19     15     11      6      5     14
 ```
 
 ## Summary statistics

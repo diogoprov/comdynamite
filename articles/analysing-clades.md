@@ -299,20 +299,20 @@ significant global test.
 vectors <- cbind(first$pev_brown, second$pev_brown)
 partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
 partition
-#> <mc_trait_partition> mean component, 0.559 of the total variation
+#> <mc_trait_partition> mean component, 0.476 of the total variation
 #> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005
 #>   fraction     r2 r2_adjusted r2_component statistic p_site p_species p_max
-#> 1      abc 0.4392      0.3991        0.785    0.4392  0.005     0.005 0.005
-#> 2       ab 0.2613      0.2358        0.467    0.2613  0.005     0.005 0.005
-#> 3       bc 0.2607      0.2352        0.466    0.2607  0.005     0.005 0.005
-#> 4        a 0.1784      0.1639        0.319    0.5975  0.005     0.005 0.005
-#> 5        b 0.0828      0.0719        0.148    0.0828     NA        NA    NA
-#> 6        c 0.1779      0.1633        0.318    0.5967  0.005     0.005 0.005
-#> 7        d 0.5608      0.6009        0.215        NA     NA        NA    NA
+#> 1      abc 0.3754       0.331        0.789    0.3754  0.005     0.005 0.005
+#> 2       ab 0.2076       0.180        0.436    0.2076  0.005     0.005 0.005
+#> 3       bc 0.2348       0.208        0.493    0.2348  0.005     0.005 0.005
+#> 4        a 0.1405       0.122        0.295    0.5828  0.005     0.005 0.005
+#> 5        b 0.0671       0.058        0.141    0.0671     NA        NA    NA
+#> 6        c 0.1678       0.150        0.352    0.6251  0.005     0.005 0.005
+#> 7        d 0.6246       0.669        0.211        NA     NA        NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
-#> env1     0.52  -0.29
-#> space1  -0.24   0.55
+#> env1     0.50  -0.17
+#> space1  -0.27   0.51
 ```
 
 ``` r
