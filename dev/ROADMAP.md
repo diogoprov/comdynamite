@@ -1464,8 +1464,8 @@ Objetivo: API estável e pacote no CRAN.
   Isso ficou explícito na ajuda.
 - **treeshapesim.** O artigo de integração com o comdynamite usa `species_traits()`,
   `competition_matrix()`, `landscape_implicit()` e `simulate_metacommunity()`: mudar
-  assinatura ou saída delas quebra o site do treeshapesim. Quando `prune_tips()` estiver
-  na `main` de lá, pôr o link do artigo no README ou em `evaluating-methods`. O
+  assinatura ou saída delas quebra o site do treeshapesim. Quando `extinct_tips()` (antes
+  `prune_tips()`, renomeada no PR #8 de lá) estiver na `main` de lá, pôr o link do artigo no README ou em `evaluating-methods`. O
   comdynamite fica só em `Config/Needs/website` no treeshapesim, sem dependência circular.
 - **Sessão anterior.** A sessão que começou o pacote não foi avisada por aqui de que o
   desenvolvimento mudou de lugar. Commits novos dela vão divergir do `main`.
