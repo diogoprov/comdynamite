@@ -17,8 +17,11 @@ dispersal in spatially implicit or grid landscapes. Species traits can
 carry phylogenetic signal or evolve under an Ornstein-Uhlenbeck process,
 and competition can be structured by relatedness. Rule-based assembly
 follows Kraft et al. (2007)
-[doi:10.1086/519400](https://doi.org/10.1086/519400) . Models were
-implemented from the published equations.
+[doi:10.1086/519400](https://doi.org/10.1086/519400) . The node
+regression and the phylogenetic gradient analysis are translations of
+the MATLAB code in the supplements of Leibold et al. (2010) and
+Peres-Neto et al. (2012); the simulation models were implemented from
+the published equations.
 
 ## Analyse data
 

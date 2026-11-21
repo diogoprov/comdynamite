@@ -153,8 +153,9 @@ significant at `level`, `b` is left untested and `shared$tested` is
 
 ## Note
 
-Adapted from the MATLAB function `PartitionRDATwoDataMatricesPhylogeny`
-in the supplement of Peres-Neto et al. (2012).
+Translated from the MATLAB function
+`PartitionRDATwoDataMatricesPhylogeny` in the supplement of Peres-Neto
+et al. (2012), with credit to its authors.
 
 ## Simulations
 

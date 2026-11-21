@@ -43,8 +43,8 @@ are equally distant from the root.
 
 ## Note
 
-Adapted from the MATLAB function `CreateNodeContrasts` in the supplement
-of Leibold et al. (2010).
+Translated from the MATLAB function `CreateNodeContrasts` in the
+supplement of Leibold et al. (2010), with credit to its authors.
 
 ## References
 

@@ -207,9 +207,9 @@ row names, and otherwise by position.
 
 ## Note
 
-Adapted from the MATLAB function `MetacommunityPhylogenetics` in the
-supplement of Leibold et al. (2010), with the differences listed in
-Details.
+Translated from the MATLAB function `MetacommunityPhylogenetics` in the
+supplement of Leibold et al. (2010), with credit to its authors and with
+the differences listed in Details.
 
 ## References
 

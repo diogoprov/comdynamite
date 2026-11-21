@@ -99,9 +99,9 @@ individuals have no weight and are left out.
 
 ## Note
 
-Adapted from the MATLAB functions `TraitEnvCor`,
+Translated from the MATLAB functions `TraitEnvCor`,
 `ModelSelectionStochastic` and `PCoAWeigthed` in the supplement of
-Peres-Neto et al. (2012).
+Peres-Neto et al. (2012), with credit to its authors.
 
 ## Article and original code
 

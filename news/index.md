@@ -2,6 +2,18 @@
 
 ## comdynamite (development version)
 
+- The Description and the help pages now say that
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
+  [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md),
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
+  and
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  are translations of the MATLAB code in the supplements of Leibold et
+  al. (2010) and Peres-Neto et al. (2012), with credit to their authors,
+  and that
+  [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
+  was written from the equations and only compared with the MATLAB code
+  of McPeek (2017).
 - Preparation for rOpenSci review: a contributing guide with the
   development stage of the package, a code of conduct, the ORCID of the
   author, a project status badge, British English as the language of the
