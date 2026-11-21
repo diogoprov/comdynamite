@@ -109,7 +109,10 @@ probability <code>dispersal</code>, and emigrants are redistributed among sites:
 <span>  mortality <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  dispersal_time <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  kernels <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  kernel_step <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  kernel_step <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  kernel_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  dispersal_site <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  disturbance_sensitivity <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -201,7 +204,8 @@ with covariance matrices \(G\) and \(E\) (see the section Several traits of
 
 
 <dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
-<dd><p>Probability that a site loses all its populations at each time step:
+<dd><p>Probability that a site is disturbed at each time step, losing all its
+populations unless <code>disturbance_sensitivity</code> is below 1:
 one value (0, the default, for none), or a matrix of sites x steps with the probability of
 each site at each step, for disturbances that vary in space and time, such as the
 seasonal floods of <code><a href="river_floods.html">river_floods()</a></code>.</p></dd>
@@ -265,6 +269,33 @@ and the diagonal is ignored), and <code>kernel_step</code> gives, for each step,
 the matrix used. For example, a matrix of connected ponds for flood steps and one of
 isolated ponds for dry steps. Only for spatially explicit landscapes; <code>NULL</code> (the
 default) keeps the dispersal matrix of <code>landscape</code>.</p></dd>
+
+
+<dt id="arg-kernel-group">kernel_group<a class="anchor" aria-label="anchor" href="#arg-kernel-group"></a></dt>
+<dd><p>Optional routes of dispersal by group of species: one group per species,
+given as a column name or index of <code>kernel_step</code>, which is then a matrix with one row per
+step and one column per group, holding the index or name of the matrix of <code>kernels</code> used
+by that group at that step. For example, long-distance migrants and sedentary fish of the
+same river, each with a matrix for high and one for low water. A run in which every group
+uses the same matrix gives the same results as a vector <code>kernel_step</code>. Not available with
+immigrant selection or several traits under <code>evolution</code>, nor in
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>. <code>NULL</code> (the default) for one route for all species.</p></dd>
+
+
+<dt id="arg-dispersal-site">dispersal_site<a class="anchor" aria-label="anchor" href="#arg-dispersal-site"></a></dt>
+<dd><p>Optional change of emigration among sites: a matrix with one row per
+site and one column per step of multipliers of the emigration probability (probabilities
+above 1 are set to 1), applied on top of <code>dispersal</code> and <code>dispersal_time</code>. For example, a
+dispersal pulse only in the floodplain at high water. <code>NULL</code> (the default) for the same
+emigration at every site.</p></dd>
+
+
+<dt id="arg-disturbance-sensitivity">disturbance_sensitivity<a class="anchor" aria-label="anchor" href="#arg-disturbance-sensitivity"></a></dt>
+<dd><p>Probability that a population is lost when its site is
+disturbed: one value or one per species. 1 (the default) removes all the populations of a
+disturbed site, as without this argument; lower values let species that resist the
+disturbance (for instance drought-tolerant or air-breathing fish when a lake dries out)
+keep their populations.</p></dd>
 
 </dl></div>
     <div class="section level2">

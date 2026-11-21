@@ -38,7 +38,9 @@ simulate_evolving_metacommunity(
   disturbance = 0,
   dispersal_time = NULL,
   kernels = NULL,
-  kernel_step = NULL
+  kernel_step = NULL,
+  dispersal_site = NULL,
+  disturbance_sensitivity = 1
 )
 ```
 
@@ -138,10 +140,11 @@ simulate_evolving_metacommunity(
 
 - disturbance:
 
-  Probability that a site loses all its populations at each time step:
-  one value (0, the default, for none), or a matrix of sites x steps
-  with the probability of each site at each step, for disturbances that
-  vary in space and time, such as the seasonal floods of
+  Probability that a site is disturbed at each time step, losing all its
+  populations unless `disturbance_sensitivity` is below 1: one value (0,
+  the default, for none), or a matrix of sites x steps with the
+  probability of each site at each step, for disturbances that vary in
+  space and time, such as the seasonal floods of
   [`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md).
 
 - dispersal_time:
@@ -164,6 +167,23 @@ simulate_evolving_metacommunity(
   example, a matrix of connected ponds for flood steps and one of
   isolated ponds for dry steps. Only for spatially explicit landscapes;
   `NULL` (the default) keeps the dispersal matrix of `landscape`.
+
+- dispersal_site:
+
+  Optional change of emigration among sites: a matrix with one row per
+  site and one column per step of multipliers of the emigration
+  probability (probabilities above 1 are set to 1), applied on top of
+  `dispersal` and `dispersal_time`. For example, a dispersal pulse only
+  in the floodplain at high water. `NULL` (the default) for the same
+  emigration at every site.
+
+- disturbance_sensitivity:
+
+  Probability that a population is lost when its site is disturbed: one
+  value or one per species. 1 (the default) removes all the populations
+  of a disturbed site, as without this argument; lower values let
+  species that resist the disturbance (for instance drought-tolerant or
+  air-breathing fish when a lake dries out) keep their populations.
 
 ## Value
 
@@ -253,11 +273,12 @@ An `mc_evolving` object, a list with:
   and `plasticity` is a matrix of species x traits.
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
-  `n_steps` used, and `dispersal_time`, `kernels` (rescaled) and
-  `kernel_step`. New species take the emigration through time of their
-  mother. The gene flow that keeps populations together follows the
-  kernel of each step; fission by distance uses the kernel of
-  `landscape`.
+  `n_steps` used, and `dispersal_time`, `kernels` (rescaled),
+  `kernel_step`, `dispersal_site` and `disturbance_sensitivity` (one per
+  species). New species take the emigration through time and the
+  sensitivity to disturbance of their mother. The gene flow that keeps
+  populations together follows the kernel of each step; fission by
+  distance uses the kernel of `landscape`.
 
 [`as_metacommunity()`](https://provetelab.org/comdynamite/reference/as_metacommunity.md)
 turns it into an `mc_sim` for the other functions of the package.

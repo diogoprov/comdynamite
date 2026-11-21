@@ -36,7 +36,10 @@ simulate_metacommunity(
   mortality = 1,
   dispersal_time = NULL,
   kernels = NULL,
-  kernel_step = NULL
+  kernel_step = NULL,
+  kernel_group = NULL,
+  dispersal_site = NULL,
+  disturbance_sensitivity = 1
 )
 ```
 
@@ -140,10 +143,11 @@ simulate_metacommunity(
 
 - disturbance:
 
-  Probability that a site loses all its populations at each time step:
-  one value (0, the default, for none), or a matrix of sites x steps
-  with the probability of each site at each step, for disturbances that
-  vary in space and time, such as the seasonal floods of
+  Probability that a site is disturbed at each time step, losing all its
+  populations unless `disturbance_sensitivity` is below 1: one value (0,
+  the default, for none), or a matrix of sites x steps with the
+  probability of each site at each step, for disturbances that vary in
+  space and time, such as the seasonal floods of
   [`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md).
 
 - pool_from:
@@ -217,6 +221,37 @@ simulate_metacommunity(
   example, a matrix of connected ponds for flood steps and one of
   isolated ponds for dry steps. Only for spatially explicit landscapes;
   `NULL` (the default) keeps the dispersal matrix of `landscape`.
+
+- kernel_group:
+
+  Optional routes of dispersal by group of species: one group per
+  species, given as a column name or index of `kernel_step`, which is
+  then a matrix with one row per step and one column per group, holding
+  the index or name of the matrix of `kernels` used by that group at
+  that step. For example, long-distance migrants and sedentary fish of
+  the same river, each with a matrix for high and one for low water. A
+  run in which every group uses the same matrix gives the same results
+  as a vector `kernel_step`. Not available with immigrant selection or
+  several traits under `evolution`, nor in
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md).
+  `NULL` (the default) for one route for all species.
+
+- dispersal_site:
+
+  Optional change of emigration among sites: a matrix with one row per
+  site and one column per step of multipliers of the emigration
+  probability (probabilities above 1 are set to 1), applied on top of
+  `dispersal` and `dispersal_time`. For example, a dispersal pulse only
+  in the floodplain at high water. `NULL` (the default) for the same
+  emigration at every site.
+
+- disturbance_sensitivity:
+
+  Probability that a population is lost when its site is disturbed: one
+  value or one per species. 1 (the default) removes all the populations
+  of a disturbed site, as without this argument; lower values let
+  species that resist the disturbance (for instance drought-tolerant or
+  air-breathing fish when a lake dries out) keep their populations.
 
 ## Value
 
