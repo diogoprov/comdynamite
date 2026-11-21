@@ -2,6 +2,12 @@
 
 ## comdynamite (development version)
 
+- Simulations with `evolution` record the steps since the environment of
+  each site last changed (`evolution$since_change`, at the end and at
+  `record_steps`), and
+  [`maladaptation()`](https://provetelab.org/comdynamite/reference/maladaptation.md)
+  gains a column `since_change`, to follow the lag load after a change
+  in `env_time`.
 - `env_surrogates(lonlat =, strata =)`: great-circle distances, and
   surrogates drawn within groups of sites such as cities.
   [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),

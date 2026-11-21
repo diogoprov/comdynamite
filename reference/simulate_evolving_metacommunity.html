@@ -266,7 +266,9 @@ part of the phenotype (<code>plastic</code>), the variance among the lineages of
 each site (<code>within_var</code>, 0 for species of one lineage), the environment of each site
 at the end (<code>environment</code>), the same genetic means, variance among lineages and
 environment at <code>record_steps</code> for the lineages extant at the end (<code>history</code>,
-<code>within_history</code>, <code>environment_history</code>), the reference environment of plasticity
+<code>within_history</code>, <code>environment_history</code>), the steps since the environment of each site
+last changed (<code>since_change</code>, as in <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>; the environment of
+this engine is fixed, so they equal the step), the reference environment of plasticity
 (<code>reference</code>), the genetic and environmental variances and the slope of plasticity of
 each species (<code>genetic_var</code>, <code>env_var</code>, <code>plasticity</code>) and the <code>settings</code>; otherwise
 <code>NULL</code>. With several traits, the genetic means, plastic parts and variances among

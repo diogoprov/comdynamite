@@ -96,7 +96,9 @@ because of that distance (the lag load).</p>
     <p>A data frame with one row per population present: <code>step</code> (with several steps),
 <code>site</code>, <code>species</code>, <code>abundance</code>, then <code>env</code>, <code>phenotype</code> and <code>deviation</code> (\(E - \bar
   p\)), or with several traits <code>env_&lt;trait&gt;</code>, <code>phenotype_&lt;trait&gt;</code> and
-<code>deviation_&lt;trait&gt;</code> for each trait, then <code>distance</code> (\(|d| / \sqrt{\sigma^2 + P}\), or the Mahalanobis distance) and <code>load</code>.</p>
+<code>deviation_&lt;trait&gt;</code> for each trait, then <code>since_change</code> (the steps since the environment
+of the site last changed, <code>NA</code> for simulations made with older versions of the package),
+then <code>distance</code> (\(|d| / \sqrt{\sigma^2 + P}\), or the Mahalanobis distance) and <code>load</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -113,6 +115,14 @@ traits; axes with <code>sigma = Inf</code> add a deviation but no load. For evol
 several lineages: its phenotype is their mean weighted by abundance and \(P\) adds the
 variance among them, so the load is that of a single Gaussian population with that mean and
 variance, an approximation of the mean load of the lineages.</p>
+<p>With an environment that changes in steps (<code>env_time</code>, for example annual series of urban
+cover or <code><a href="env_pulse.html">env_pulse()</a></code>), <code>since_change</code> gives the time each population has had to respond to
+the last change. The decay of the load with this time separates a lag of genetic adaptation
+(the load falls over generations) from plasticity (it falls at once, in the step of the
+change). The environment counts as changed in a step whenever it differs from that of the
+step before, so a continuous trend (as in <code><a href="env_space_time.html">env_space_time()</a></code>) resets it every step; round
+the environment to the resolution of interest before the simulation to count only larger
+changes.</p>
 <p>Maladaptation can come from gene flow (immigrants with the means of other sites; see also
 <code>migrant_load</code> in <code><a href="simulate_metacommunity.html">simulate_metacommunity()</a></code>), drift and founder effects in small
 populations, a lag behind an environment that changes (<code>env_time</code>), genetic constraints
@@ -148,13 +158,20 @@ plasticity of the wrong sign or size.</p>
 <span class="r-in"><span>                              evolution <span class="op">=</span> <span class="fu"><a href="evolution_control.html">evolution_control</a></span><span class="op">(</span>genetic_var <span class="op">=</span> <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="fu">maladaptation</span><span class="op">(</span><span class="va">sim</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">m</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    site species abundance      env phenotype  deviation   distance        load</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1     sp1        59 43.46595  45.40789  -1.941941 0.12832708 0.008200114</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 site2     sp1        16 64.22883  47.96264  16.266185 1.07489978 0.438815060</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 site3     sp1         2 77.89147  49.43700  28.454463 1.88032385 0.829293383</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 site4     sp1        38 60.49333  51.26760   9.225728 0.60965328 0.169592354</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 site5     sp1        35 47.81180  49.24181  -1.430003 0.09449729 0.004454916</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 site6     sp1        36 34.66835  45.85711 -11.188763 0.73937428 0.239163783</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    site species abundance      env phenotype  deviation since_change   distance</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1     sp1        59 43.46595  45.40789  -1.941941          100 0.12832708</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 site2     sp1        16 64.22883  47.96264  16.266185          100 1.07489978</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 site3     sp1         2 77.89147  49.43700  28.454463          100 1.88032385</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 site4     sp1        38 60.49333  51.26760   9.225728          100 0.60965328</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 site5     sp1        35 47.81180  49.24181  -1.430003          100 0.09449729</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 site6     sp1        36 34.66835  45.85711 -11.188763          100 0.73937428</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          load</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.008200114</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 0.438815060</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 0.829293383</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 0.169592354</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 0.004454916</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 0.239163783</span>
 <span class="r-in"><span><span class="co"># sites far from the regional mean keep immigrants from the centre: more maladapted</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">m</span><span class="op">$</span><span class="va">env</span> <span class="op">-</span> <span class="fl">50</span><span class="op">)</span>, <span class="va">m</span><span class="op">$</span><span class="va">load</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="maladaptation-1.png" alt="" width="700" height="433"></span>

@@ -32,7 +32,9 @@ A data frame with one row per population present: `step` (with several
 steps), `site`, `species`, `abundance`, then `env`, `phenotype` and
 `deviation` (\\E - \bar p\\), or with several traits `env_<trait>`,
 `phenotype_<trait>` and `deviation_<trait>` for each trait, then
-`distance` (\\\|d\| / \sqrt{\sigma^2 + P}\\, or the Mahalanobis
+`since_change` (the steps since the environment of the site last
+changed, `NA` for simulations made with older versions of the package),
+then `distance` (\\\|d\| / \sqrt{\sigma^2 + P}\\, or the Mahalanobis
 distance) and `load`.
 
 ## Details
@@ -58,6 +60,19 @@ phenotype is their mean weighted by abundance and \\P\\ adds the
 variance among them, so the load is that of a single Gaussian population
 with that mean and variance, an approximation of the mean load of the
 lineages.
+
+With an environment that changes in steps (`env_time`, for example
+annual series of urban cover or
+[`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md)),
+`since_change` gives the time each population has had to respond to the
+last change. The decay of the load with this time separates a lag of
+genetic adaptation (the load falls over generations) from plasticity (it
+falls at once, in the step of the change). The environment counts as
+changed in a step whenever it differs from that of the step before, so a
+continuous trend (as in
+[`env_space_time()`](https://provetelab.org/comdynamite/reference/env_space_time.md))
+resets it every step; round the environment to the resolution of
+interest before the simulation to count only larger changes.
 
 Maladaptation can come from gene flow (immigrants with the means of
 other sites; see also `migrant_load` in
@@ -97,13 +112,20 @@ sim <- simulate_metacommunity(land, traits, alpha, dispersal = 0.1, n_steps = 10
                               evolution = evolution_control(genetic_var = 4))
 m <- maladaptation(sim)
 head(m)
-#>    site species abundance      env phenotype  deviation   distance        load
-#> 1 site1     sp1        59 43.46595  45.40789  -1.941941 0.12832708 0.008200114
-#> 2 site2     sp1        16 64.22883  47.96264  16.266185 1.07489978 0.438815060
-#> 3 site3     sp1         2 77.89147  49.43700  28.454463 1.88032385 0.829293383
-#> 4 site4     sp1        38 60.49333  51.26760   9.225728 0.60965328 0.169592354
-#> 5 site5     sp1        35 47.81180  49.24181  -1.430003 0.09449729 0.004454916
-#> 6 site6     sp1        36 34.66835  45.85711 -11.188763 0.73937428 0.239163783
+#>    site species abundance      env phenotype  deviation since_change   distance
+#> 1 site1     sp1        59 43.46595  45.40789  -1.941941          100 0.12832708
+#> 2 site2     sp1        16 64.22883  47.96264  16.266185          100 1.07489978
+#> 3 site3     sp1         2 77.89147  49.43700  28.454463          100 1.88032385
+#> 4 site4     sp1        38 60.49333  51.26760   9.225728          100 0.60965328
+#> 5 site5     sp1        35 47.81180  49.24181  -1.430003          100 0.09449729
+#> 6 site6     sp1        36 34.66835  45.85711 -11.188763          100 0.73937428
+#>          load
+#> 1 0.008200114
+#> 2 0.438815060
+#> 3 0.829293383
+#> 4 0.169592354
+#> 5 0.004454916
+#> 6 0.239163783
 # sites far from the regional mean keep immigrants from the centre: more maladapted
 plot(abs(m$env - 50), m$load)
 ```

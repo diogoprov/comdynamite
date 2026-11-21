@@ -236,15 +236,18 @@ An `mc_evolving` object, a list with:
   lineage), the environment of each site at the end (`environment`), the
   same genetic means, variance among lineages and environment at
   `record_steps` for the lineages extant at the end (`history`,
-  `within_history`, `environment_history`), the reference environment of
-  plasticity (`reference`), the genetic and environmental variances and
-  the slope of plasticity of each species (`genetic_var`, `env_var`,
-  `plasticity`) and the `settings`; otherwise `NULL`. With several
-  traits, the genetic means, plastic parts and variances among lineages
-  (trait by trait) are arrays of sites x species x traits (with the
-  recorded steps as a fourth dimension in the histories), `genetic_var`
-  and `env_var` hold one matrix per species and `plasticity` is a matrix
-  of species x traits.
+  `within_history`, `environment_history`), the steps since the
+  environment of each site last changed (`since_change`, as in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md);
+  the environment of this engine is fixed, so they equal the step), the
+  reference environment of plasticity (`reference`), the genetic and
+  environmental variances and the slope of plasticity of each species
+  (`genetic_var`, `env_var`, `plasticity`) and the `settings`; otherwise
+  `NULL`. With several traits, the genetic means, plastic parts and
+  variances among lineages (trait by trait) are arrays of sites x
+  species x traits (with the recorded steps as a fourth dimension in the
+  histories), `genetic_var` and `env_var` hold one matrix per species
+  and `plasticity` is a matrix of species x traits.
 
 - The `landscape`, `dispersal`, `extirpation`, `speciation` and
   `n_steps` used, and `dispersal_time`, `kernels` (rescaled) and
