@@ -44,7 +44,7 @@ na `main` (f3aab10). As fases 1 a 3 da especiação e a G multivariada estavam c
 aberta, mas foram feitas (0.8.0); foram marcadas. Os rótulos dos blocos não são números de
 versão: o número sai quando o bloco fecha.
 
-**Bloco A, nulos e ambiente (próximo marco de código, candidato a 0.10.0).** Itens pequenos,
+**Bloco A, nulos e ambiente (fechado na 0.10.0 em 2026-11-21).** Itens pequenos,
 dentro do pacote, que melhoram o núcleo antes de congelar a API.
 
 1. *Nulos restritos com bordas para preditores contínuos e para o simulador.* Hoje o toro numa
