@@ -36,6 +36,8 @@ reference:
   - river_network
   - river_covariance
   - env_river
+  - river_floods
+  - env_seasonal
   - landscape_implicit
   - landscape_grid
   - dispersal_kernel

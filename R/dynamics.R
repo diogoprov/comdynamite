@@ -103,8 +103,10 @@
 #' @param dispersal Emigration probability, one value or one per species.
 #' @param extirpation Probability that a population is lost at each time step,
 #'   one value or one per species.
-#' @param disturbance Probability that a site loses all its populations at each time step
-#'   (one value; 0, the default, for none).
+#' @param disturbance Probability that a site loses all its populations at each time step:
+#'   one value (0, the default, for none), or a matrix of sites x steps with the probability of
+#'   each site at each step, for disturbances that vary in space and time, such as the
+#'   seasonal floods of [river_floods()].
 #' @param n_steps Number of time steps.
 #' @param env_time Optional matrix (sites x `n_steps`) with the environment at
 #'   each step, e.g. from [env_over_time()]. If `NULL`, the environment of the
@@ -403,9 +405,13 @@ mc_setup <- function(st) {
     dispersal <- rep_len(dispersal, k_all)
     extirpation <- rep_len(extirpation, k_all)
     stopifnot(all(dispersal >= 0 & dispersal <= 1), all(extirpation >= 0 & extirpation <= 1))
-    if (!is.numeric(disturbance) || length(disturbance) != 1 || is.na(disturbance) ||
-        disturbance < 0 || disturbance > 1) {
-      stop("`disturbance` must be one probability between 0 and 1", call. = FALSE)
+    if (!is.numeric(disturbance) || anyNA(disturbance) || any(disturbance < 0) ||
+        any(disturbance > 1) ||
+        !(length(disturbance) == 1 ||
+          (is.matrix(disturbance) && nrow(disturbance) == m && ncol(disturbance) >= n_steps))) {
+      stop("`disturbance` must be one probability between 0 and 1, or a matrix of ",
+           "probabilities with one row per site and one column per step (e.g. from ",
+           "river_floods())", call. = FALSE)
     }
     recruitment <- match.arg(recruitment, c("beverton_holt", "lottery"))
     lottery <- recruitment == "lottery"
@@ -841,7 +847,8 @@ mc_step <- function(st, step) {
       }
       # no draws without extirpation, so that seeds give the same results as before
       if (any(p_ex > 0)) n[stats::runif(m * k) < p_ex] <- 0L
-      if (disturbance > 0) n[stats::runif(m) < disturbance, ] <- 0L
+      p_dist <- if (is.matrix(disturbance)) disturbance[, step] else disturbance
+      if (any(p_dist > 0)) n[stats::runif(m) < p_dist, ] <- 0L
       if (!is.null(inside)) n[!inside] <- 0L
       if (isTRUE(ev$mv)) {
         if (any(fixed_z[alive])) {

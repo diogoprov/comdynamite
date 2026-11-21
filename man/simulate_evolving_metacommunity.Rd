@@ -83,8 +83,10 @@ and \code{env_var} of \code{evolution} are then covariance matrices (see the sec
 of \code{\link[=evolution_control]{evolution_control()}}); competition falls with the overlap of the niches on all axes,
 and new species inherit the matrices of their mother.}
 
-\item{disturbance}{Probability that a site loses all its populations at each time step
-(one value; 0, the default, for none).}
+\item{disturbance}{Probability that a site loses all its populations at each time step:
+one value (0, the default, for none), or a matrix of sites x steps with the probability of
+each site at each step, for disturbances that vary in space and time, such as the
+seasonal floods of \code{\link[=river_floods]{river_floods()}}.}
 
 \item{dispersal_time}{Optional change of emigration through time: a vector with one
 multiplier of \code{dispersal} per step (probabilities above 1 are set to 1), or a matrix with

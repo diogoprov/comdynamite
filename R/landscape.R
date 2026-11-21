@@ -417,6 +417,62 @@ exp_field <- function(p, n_features) {
   z * sqrt(2 / n_features)
 }
 
+#' Seasonal cycle of the environment
+#'
+#' Adds a seasonal cycle to the environment of each site,
+#' \eqn{a_s \sin(2 \pi (t - \phi) / P)}{a_s sin(2 pi (t - phi) / P)}, with an amplitude per site
+#' (for instance larger in shallow ponds or in headwaters) and, optionally, an anomaly per year
+#' shared by all sites (wet and dry years). The environment can already change in time (an
+#' `env_time` matrix, e.g. from [env_space_time()] with `ranks = FALSE` or [env_river()] with
+#' `n_steps`), which then gives variation among years that differs among sites; floods can be
+#' added with [env_pulse()] or, as losses of populations, with [river_floods()].
+#'
+#' @param env Environment of each site (a vector), or a matrix (sites x steps).
+#' @param n_steps Number of steps. Taken from `env` when it is a matrix.
+#' @param period Steps per cycle (a year).
+#' @param amplitude Amplitude of the cycle: one value, or one per site.
+#' @param phase Step at which the cycle crosses its mean on the way up.
+#' @param year_sd Standard deviation of an anomaly drawn for each year (each block of `period`
+#'   steps) and added to all sites; 0 (the default) for none.
+#' @return Matrix with one row per site and one column per step, for `env_time` in
+#'   [simulate_metacommunity()].
+#' @family landscapes
+#' @examples
+#' set.seed(1)
+#' e <- env_seasonal(c(10, 20, 30), n_steps = 100, period = 25, amplitude = c(1, 3, 6),
+#'                   year_sd = 1)
+#' matplot(t(e), type = "l", lty = 1, xlab = "step", ylab = "environment")
+#' @export
+env_seasonal <- function(env, n_steps = NULL, period, amplitude, phase = 0, year_sd = 0) {
+  if (is.matrix(env)) {
+    if (!is.null(n_steps) && n_steps != ncol(env)) {
+      stop("`n_steps` differs from the number of columns of `env`", call. = FALSE)
+    }
+    out <- env
+  } else {
+    if (!is.numeric(env) || anyNA(env)) {
+      stop("`env` must be a numeric vector without NA, or a matrix (sites x steps)",
+           call. = FALSE)
+    }
+    if (is.null(n_steps)) stop("`n_steps` is needed when `env` is a vector", call. = FALSE)
+    check_count(n_steps, "n_steps")
+    out <- matrix(env, length(env), n_steps)
+  }
+  m <- nrow(out)
+  steps <- seq_len(ncol(out))
+  stopifnot(length(period) == 1, is.finite(period), period > 0, is.numeric(amplitude),
+            length(amplitude) %in% c(1, m), all(is.finite(amplitude)), length(phase) == 1,
+            is.finite(phase), length(year_sd) == 1, is.finite(year_sd), year_sd >= 0)
+  cycle <- outer(rep_len(amplitude, m), sin(2 * pi * (steps - phase) / period))
+  out <- out + cycle
+  if (year_sd > 0) {
+    year <- ceiling(steps / period)
+    anomaly <- stats::rnorm(max(year), 0, year_sd)
+    out <- out + rep(anomaly[year], each = m)
+  }
+  out
+}
+
 #' Pulse disturbance of the environment
 #'
 #' Sets the environment of some sites to a new value from step `start` for `duration` steps,

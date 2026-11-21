@@ -99,7 +99,7 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    al. (2012, PNAS, doi:10.1073/pnas.1119651109). A dispersão em rede dendrítica já cabe em
    `landscape_matrix()`; falta o ambiente. `env_space_time()` é estacionário, sem ciclo, e usa
    distância euclidiana, de modo que afluentes próximos em linha reta mudam juntos. Plano:
-   (i) componente sazonal, um ciclo determinístico com amplitude por sítio (por exemplo,
+   (i) [feito em 2026-11-20: `env_seasonal()`, `river_floods()` e `disturbance` como matriz sítios x passos] componente sazonal, um ciclo determinístico com amplitude por sítio (por exemplo,
    cota ou distância ao canal) somado a variação entre anos, compondo com
    `env_space_time(ranks = FALSE)` e `env_pulse()` para cheias; (ii) covariância ao longo da
    rede, pelos modelos tail-up de Ver Hoef et al. (2006, Environmental and Ecological
@@ -109,9 +109,9 @@ dentro do pacote, que melhoram o núcleo antes de congelar a API.
    et al. 2014, Environmetrics, pelo conector da Wiley: a exponencial da distância ao longo do
    canal é o modelo tail-down exponencial, que é válido; o que falha com distância de rede são
    modelos como o esférico. Feito em 2026-11-20: `river_covariance()` com tail-up, tail-down,
-   euclidiano e pepita como componentes de variância, e `env_river()`; os textos de Ver Hoef et
-   al. 2006 e Ver Hoef & Peterson 2010 não estavam acessíveis, a fórmula do tail-up veio das
-   leituras secundárias e foi conferida pelos testes de positividade); (iii) um gerador de redes dendríticas, que entra no item (decisão do usuário em
+   euclidiano e pepita como componentes de variância, e `env_river()`; os PDFs de Ver Hoef et
+   al. 2006 (eq. 7) e Ver Hoef & Peterson 2010 (eq. 4 e seção 2.2.1) foram lidos depois, em
+   2026-11-20, e confirmam o peso como raiz do produto das frações a montante); (iii) um gerador de redes dendríticas, que entra no item (decisão do usuário em
    2026-11-19), para variar o tamanho e a forma da rede com réplicas; candidatos: optimal
    channel networks e árvores aleatórias com ordem de Strahler controlada; ler antes como os
    trabalhos de Altermatt e Carrara geram as redes; deve devolver coordenadas, a matriz de
