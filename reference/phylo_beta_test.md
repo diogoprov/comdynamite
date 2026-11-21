@@ -60,7 +60,10 @@ phylo_beta_test(
   Null model of sites: `"permutation"` (free, or `site_permutations`
   when given), or surrogates of the predictors with the same spatial
   autocorrelation, `"variogram"` or `"parametric"`, for landscapes with
-  edges (see
+  edges, or a list of surrogates from
+  [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md),
+  with one row per site (or per occupied site), for example drawn within
+  strata (see
   [`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md);
   their rates of type I error were checked in
   [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),

@@ -254,6 +254,24 @@ For an environment that changes in time,
 whole series of each site to another site, which keeps the dynamics of
 each site and changes only their place.
 
+`data-raw/real_data_nulls.R` applies these nulls to the two example data
+sets, with 999 draws. For the 314 lakes of `daphniids`, with nine
+predictors, the relation of phylogenetic composition to the environment
+held under every null: `p_site` was 0.001 for the whole dissimilarity,
+the first principal coordinate and
+[`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
+with free permutations and with both surrogates. Only the second
+coordinate changed, from 0.050 with free permutations and 0.043 with
+parametric surrogates to 0.123 with the variogram. `p_max` stayed above
+0.1 in every case, as in the analysis of clades, since 13 species give
+permutations of species little power. For the 40 ponds of `anurans`, in
+two cities, the surrogates were drawn within each city with great-circle
+distances (`env_surrogates(..., lonlat = TRUE, strata = city)`, passed
+to the tests as `null`), and compared with free permutations and with
+permutations within each city. No test came below 0.05 under any null
+(`p_site` 0.06 to 0.67), so in these ponds the nulls do not change the
+conclusion.
+
 ## References
 
 Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS – an R-package for

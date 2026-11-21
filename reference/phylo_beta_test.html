@@ -130,7 +130,9 @@ landscape: they leave the analysis but their predictors can reach occupied sites
 <dt id="arg-null">null<a class="anchor" aria-label="anchor" href="#arg-null"></a></dt>
 <dd><p>Null model of sites: <code>"permutation"</code> (free, or <code>site_permutations</code> when given),
 or surrogates of the predictors with the same spatial autocorrelation, <code>"variogram"</code> or
-<code>"parametric"</code>, for landscapes with edges (see <code><a href="env_surrogates.html">env_surrogates()</a></code>; their rates of type I
+<code>"parametric"</code>, for landscapes with edges, or a list of surrogates from
+<code><a href="env_surrogates.html">env_surrogates()</a></code>, with one row per site (or per occupied site), for example drawn
+within strata (see <code><a href="env_surrogates.html">env_surrogates()</a></code>; their rates of type I
 error were checked in <code><a href="pcps_test.html">pcps_test()</a></code>, not here). Surrogates need <code>coords</code>; empty sites
 are then not allowed.</p></dd>
 

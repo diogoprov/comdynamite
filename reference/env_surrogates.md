@@ -9,12 +9,20 @@ do not apply or reject too often. They are the `null` options of
 [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
 and
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
-and also serve as null environments for simulations.
+which also take the list returned here (for example drawn with `lonlat`
+or `strata`), and also serve as null environments for simulations.
 
 ## Usage
 
 ``` r
-env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
+env_surrogates(
+  env,
+  coords,
+  n = 99,
+  method = c("variogram", "parametric"),
+  lonlat = FALSE,
+  strata = NULL
+)
 ```
 
 ## Arguments
@@ -38,6 +46,19 @@ env_surrogates(env, coords, n = 99, method = c("variogram", "parametric"))
 - method:
 
   `"variogram"` or `"parametric"`.
+
+- lonlat:
+
+  Are `coords` longitude and latitude in decimal degrees? Distances are
+  then great-circle distances in kilometres.
+
+- strata:
+
+  Optional group of each site, such as the city or the basin where it
+  lies. Surrogates are drawn within each group on its own, so values
+  never move between groups, which have their own autocorrelation. Each
+  group needs at least 5 sites; a group where the predictors do not vary
+  keeps them.
 
 ## Value
 

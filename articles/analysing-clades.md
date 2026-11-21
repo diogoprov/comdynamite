@@ -255,6 +255,37 @@ only in these simulations. Coordinates should be projected, and with
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
 landscapes with parts far apart may give patches that cross the gaps.
 
+### The daphniids with nulls that respect space
+
+`data-raw/real_data_nulls.R` reruns the analysis of the daphniids above
+with 999 draws of each null, with the coordinates of the lakes projected
+to kilometres. For the predictors, free permutations of lakes were
+compared with variogram and parametric surrogates of the predictors
+(`null = "variogram"` or `"parametric"`, see
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md));
+for the events, free permutations with
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md).
+Number of the 12 nodes with a partial p-value of sites below 0.05:
+
+| Null       | COLOR | COND | DOC | NTL | PHEQ | PTL | AV_DEP | ELEV | TN_TP |
+|------------|-------|------|-----|-----|------|-----|--------|------|-------|
+| Free       | 1     | 1    | 2   | 3   | 3    | 1   | 5      | 3    | 3     |
+| Variogram  | 2     | 1    | 3   | 1   | 3    | 1   | 5      | 2    | 1     |
+| Parametric | 2     | 1    | 3   | 3   | 3    | 1   | 5      | 3    | 3     |
+
+Depth, pH and conductivity gave the same number of nodes under all three
+nulls, so their relations do not seem to come from the autocorrelation
+of the lakes. Total nitrogen and the ratio of nitrogen to phosphorus
+kept three nodes with the parametric surrogates but only one with the
+variogram. The variogram smooths each predictor on its own, so it
+weakens the correlation among them, which changes the null of a partial
+test, whereas the parametric surrogates move whole rows and keep it.
+With correlated predictors, we would therefore read the parametric
+results first. For the events,
+[`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
+gave one node for S1, S3 and S4, against none, two and one with free
+permutations, so the restricted null did not simply remove results.
+
 ## How much of the phylogenetic structure is due to environment and space?
 
 For this question we need a tree with branch lengths and sites with

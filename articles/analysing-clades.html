@@ -290,6 +290,81 @@ function warns.</p>
 only in these simulations. Coordinates should be projected, and with
 <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> landscapes with parts far apart may
 give patches that cross the gaps.</p>
+<div class="section level3">
+<h3 id="the-daphniids-with-nulls-that-respect-space">The daphniids with nulls that respect space<a class="anchor" aria-label="anchor" href="#the-daphniids-with-nulls-that-respect-space"></a>
+</h3>
+<p><code>data-raw/real_data_nulls.R</code> reruns the analysis of the
+daphniids above with 999 draws of each null, with the coordinates of the
+lakes projected to kilometres. For the predictors, free permutations of
+lakes were compared with variogram and parametric surrogates of the
+predictors (<code>null = "variogram"</code> or
+<code>"parametric"</code>, see <code><a href="../reference/env_surrogates.html">env_surrogates()</a></code>); for the
+events, free permutations with <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code>. Number
+of the 12 nodes with a partial p-value of sites below 0.05:</p>
+<table class="table">
+<thead><tr class="header">
+<th>Null</th>
+<th>COLOR</th>
+<th>COND</th>
+<th>DOC</th>
+<th>NTL</th>
+<th>PHEQ</th>
+<th>PTL</th>
+<th>AV_DEP</th>
+<th>ELEV</th>
+<th>TN_TP</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>Free</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>3</td>
+<td>1</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td>Variogram</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+<td>5</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>Parametric</td>
+<td>2</td>
+<td>1</td>
+<td>3</td>
+<td>3</td>
+<td>3</td>
+<td>1</td>
+<td>5</td>
+<td>3</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+<p>Depth, pH and conductivity gave the same number of nodes under all
+three nulls, so their relations do not seem to come from the
+autocorrelation of the lakes. Total nitrogen and the ratio of nitrogen
+to phosphorus kept three nodes with the parametric surrogates but only
+one with the variogram. The variogram smooths each predictor on its own,
+so it weakens the correlation among them, which changes the null of a
+partial test, whereas the parametric surrogates move whole rows and keep
+it. With correlated predictors, we would therefore read the parametric
+results first. For the events, <code><a href="../reference/patch_permutations.html">patch_permutations()</a></code> gave
+one node for S1, S3 and S4, against none, two and one with free
+permutations, so the restricted null did not simply remove results.</p>
+</div>
 </div>
 <div class="section level2">
 <h2 id="how-much-of-the-phylogenetic-structure-is-due-to-environment-and-space">How much of the phylogenetic structure is due to environment and
