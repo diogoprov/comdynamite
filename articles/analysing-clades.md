@@ -43,7 +43,7 @@ out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography, n
 out
 #> <mc_node_test> 12 nodes, 11 tested
 #> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001
-#> nodes with p (max) <= 0.05: 1 before correction, 0 after
+#> nodes with p (max) <= 0.05: 0 before correction, 0 after
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 ```
 

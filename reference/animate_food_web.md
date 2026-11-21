@@ -12,7 +12,7 @@ It needs the package gifski.
 ``` r
 animate_food_web(
   x,
-  file = "food_web.gif",
+  file = tempfile(fileext = ".gif"),
   frames = 100,
   delay = 0.08,
   width = 640,
@@ -30,7 +30,8 @@ animate_food_web(
 
 - file:
 
-  Path of the GIF to write.
+  Path of the GIF to write; by default a temporary file, whose path is
+  returned.
 
 - frames:
 

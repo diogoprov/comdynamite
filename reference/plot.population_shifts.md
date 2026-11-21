@@ -32,3 +32,16 @@ plot(x, ...)
 ## Value
 
 A ggplot object.
+
+## Examples
+
+``` r
+set.seed(1)
+tree <- treeshapesim::sim_tree_shape(20)
+sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
+                              competition_matrix(tree, "none"), n_steps = 100,
+                              seed_steps = 1:5)
+ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
+fit <- population_shifts(ind)
+plot(fit)
+```

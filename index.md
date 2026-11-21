@@ -63,6 +63,21 @@ install.packages("comdynamite", repos = c("https://diogoprov.r-universe.dev",
 remotes::install_github("diogoprov/comdynamite")
 ```
 
+The examples and articles draw trees with
+[treeshapesim](https://github.com/diogoprov/treeshapesim), which
+installs from the same r-universe repository.
+[`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+fits its model in Stan through
+[cmdstanr](https://mc-stan.org/cmdstanr/), which is not on CRAN and also
+needs CmdStan:
+
+``` r
+
+install.packages("cmdstanr", repos = c("https://stan-dev.r-universe.dev",
+                                       "https://cloud.r-project.org"))
+cmdstanr::install_cmdstan()
+```
+
 ## Large analyses
 
 The permutations of
@@ -167,6 +182,16 @@ biogeography in metacommunities. R package.
 This DOI always points to the latest version; each release also has its
 own DOI on Zenodo. In R, `citation("comdynamite")` gives the entry with
 the installed version.
+
+## Contributing
+
+Bug reports, questions and suggestions are welcome as
+[issues](https://github.com/diogoprov/comdynamite/issues); see the
+[contributing
+guide](https://provetelab.org/comdynamite/CONTRIBUTING.html). Please
+note that the comdynamite project is released with a [Contributor Code
+of Conduct](https://provetelab.org/comdynamite/CODE_OF_CONDUCT.html). By
+contributing to this project, you agree to abide by its terms.
 
 ## References
 

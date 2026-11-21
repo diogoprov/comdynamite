@@ -1,5 +1,29 @@
 # Changelog
 
+## comdynamite (development version)
+
+- Preparation for rOpenSci review: a contributing guide with the
+  development stage of the package, a code of conduct, the ORCID of the
+  author, a project status badge, British English as the language of the
+  documentation (with `inst/WORDLIST`), a `.lintr` configuration and a
+  pkgcheck workflow (run by hand). The README explains how to install
+  treeshapesim and cmdstanr.
+- [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
+  writes to a temporary file by default instead of `food_web.gif` in the
+  working directory; the path is returned as before.
+- Examples added for
+  [`plot.population_shifts()`](https://provetelab.org/comdynamite/reference/plot.population_shifts.md)
+  and `pp_check()` on
+  [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md);
+  the example of
+  [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
+  draws only four random partitions and leaves the longer runs in
+  `\donttest{}`.
+- Internal: closures no longer assign with `<<-`,
+  [`on.exit()`](https://rdrr.io/r/base/on.exit.html) calls add to
+  earlier ones, and an internal function used only by the tests moved to
+  them. Results are unchanged.
+
 ## comdynamite 0.10.0
 
 - `kernel_group` (routes of dispersal by group of species) now works

@@ -187,15 +187,25 @@ set.seed(9)
 tr <- treeshapesim::sim_tree_shape(30)
 reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
 comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
-damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
-#> Warning: only 18 distinct random partitions in 19 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.053
+# few random partitions, to keep the example quick
+damocles_partition_test(comm, tr, reg, n_rand = 4, vary = "gamma")
+#> Warning: only 4 distinct random partitions in 4 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.2
 #> Partition of the tree against constant rates (DAMOCLES)
 #> Likelihood ratio against constant rates: 28.07 on 1 df
 #> p (chi-squared): 1.17e-07 
-#> p (random partitions): 0.0526 (18 distinct random partitions)
+#> p (random partitions): 0.2 (4 distinct random partitions)
+# \donttest{
+# random partitions and the parametric bootstrap refit the model many times
+damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
+#> Warning: only 17 distinct random partitions in 19 draws: the tree has few places for clades like those of `regimes`, and `p_random` cannot be below 0.056
+#> Partition of the tree against constant rates (DAMOCLES)
+#> Likelihood ratio against constant rates: 28.07 on 1 df
+#> p (chi-squared): 1.17e-07 
+#> p (random partitions): 0.0556 (17 distinct random partitions)
 damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
 #> Partition of the tree against constant rates (DAMOCLES)
 #> Likelihood ratio against constant rates: 28.07 on 1 df
 #> p (chi-squared): 1.17e-07 
 #> p (parametric bootstrap): 0.05 (19 simulations under constant rates)
+# }
 ```
