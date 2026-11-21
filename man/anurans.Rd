@@ -7,7 +7,8 @@
 \format{
 List with \code{comm}, a matrix of ponds by species with counts; \code{env}, a matrix with
 the hydrology score, area (m²), depth (cm), floating vegetation (\%), water temperature (°C)
-and the urban cover within 1 km in 2022 (\%); \code{city}, a factor; \code{coords}, a matrix with the
+and the urban cover within 500 m in 2022 (\%), the proportion of MapBiomas Collection 9
+pixels classified as urban area; \code{city}, a factor; \code{coords}, a matrix with the
 longitude and latitude of each pond in decimal degrees; \code{pool}, a 0/1 matrix of ponds by
 the 155 species of the regional pools; \code{tree}, a \code{phylo} object with those species; and
 \code{grafted}, the species added to the tree.
@@ -30,6 +31,11 @@ surveys of calling and visual encounter, so their totals depend on effort and de
 The hydrology score is the first principal component of log(x + 1) area, depth, floating
 vegetation and water temperature, standardised across the 40 ponds and rescaled to 0–100,
 with larger and deeper ponds at higher scores.
+
+Urban cover is the proportion of pixels of MapBiomas Collection 9 classified as urban area
+within 500 m of each pond in 2022 (Souza et al. 2020). Counts, one identification (\emph{Scinax
+tymbamirim}, formerly recorded as \emph{S. imbegue}) and the coordinates of some ponds were
+corrected by the collector in November 2026.
 
 The regional pool of each city has the anurans that breed in lentic water and were recorded
 both in its ecoregion (Dinerstein et al. 2017: Cerrado for Campo Grande; Alto Paraná Atlantic
@@ -77,5 +83,9 @@ classification of the amphibian reproductive modes. \emph{Salamandra}, 57, 413�
 Portik, D. M., Streicher, J. W., & Wiens, J. J. (2023). Frog phylogeny: a time-calibrated,
 species-level tree based on hundreds of loci and 5,242 species. \emph{Molecular Phylogenetics and
 Evolution}, 188, 107907. \doi{10.1016/j.ympev.2023.107907}
+
+Souza, C. M., Jr., Shimbo, J. Z., Rosa, M. R., et al. (2020). Reconstructing three decades
+of land use and land cover changes in Brazilian biomes with Landsat archive and Earth Engine.
+\emph{Remote Sensing}, 12, 2735. \doi{10.3390/rs12172735}
 }
 \keyword{datasets}
