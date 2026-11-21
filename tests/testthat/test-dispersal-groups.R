@@ -216,7 +216,13 @@ test_that("kernel_group with immigrant selection and several traits: same matrix
                    list(evolution_control(G), TRUE),
                    list(evolution_control(G, immigrant_selection = TRUE), TRUE))
   for (s in settings) {
-    expect_identical(run(s[[1]], s[[2]], groups = TRUE), run(s[[1]], s[[2]]))
+    x <- run(s[[1]], s[[2]], groups = TRUE)
+    y <- run(s[[1]], s[[2]])
+    # counts must match exactly; the genetic means may differ in the last bits because the
+    # flows of each group are multiplied column by column, which some BLAS round differently
+    expect_identical(x[c("abundance", "immigrants")], y[c("abundance", "immigrants")])
+    expect_equal(x$evolution, y$evolution, tolerance = 1e-10)
+    expect_equal(x$migrant_load, y$migrant_load, tolerance = 1e-10)
   }
 })
 

@@ -7,7 +7,7 @@
   species stay in the group of their mother, the gene flow that keeps the populations of a
   species together follows the routes of its group, and the output has the group of each
   species (`kernel_group`). A run in which every group uses the same matrix gives the same
-  results as a vector `kernel_step`, to the last bit.
+  results as a vector `kernel_step` (with several traits, up to rounding in the last digits).
 - Fixed: `simulate_evolving_metacommunity()` with point speciation and
   `immigrant_selection = TRUE` stopped with an error ("logical subscript too long") when all
   the individuals of a species became point mutants in the same generation. Runs that
