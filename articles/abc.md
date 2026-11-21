@@ -42,6 +42,7 @@ the rest runs here.
 library(comdynamite)
 library(ggplot2)
 res <- readRDS("abc.rds")
+prob <- function(p) if (round(p, 2) >= 1) "> 0.99" else round(p, 2)
 ```
 
 ## The data and the simulator
@@ -155,15 +156,15 @@ function; the observed statistics are
 
 round(res$observed[grepl("^(cg|sjc)_", names(res$observed))], 3)
 #>            cg_alpha            cg_gamma             cg_beta        cg_occupancy 
-#>               8.950              27.000               3.017               0.331 
+#>               9.450              27.000               2.857               0.350 
 #>     cg_occupancy_sd          cg_ses_mpd         cg_ses_mntd            cg_decay 
-#>               0.254              -0.810              -0.219               0.162 
+#>               0.258              -0.758              -0.129               0.154 
 #>     cg_richness_env  cg_composition_env           sjc_alpha           sjc_gamma 
-#>               0.263              -0.073               7.850              26.000 
+#>               0.231              -0.052               8.000              26.000 
 #>            sjc_beta       sjc_occupancy    sjc_occupancy_sd         sjc_ses_mpd 
-#>               3.312               0.302               0.278              -0.198 
+#>               3.250               0.308               0.276              -0.235 
 #>        sjc_ses_mntd           sjc_decay    sjc_richness_env sjc_composition_env 
-#>               0.015               0.225               0.103              -0.030
+#>               0.105               0.234               0.113              -0.030
 ```
 
 With the simulator and the statistics in hand,
@@ -192,13 +193,13 @@ the time.
 ``` r
 
 print(res$recovery, digits = 2)
-#>       parameter   n     r2     bias coverage coverage_se width
-#> 1 log_dispersal 200  0.771  0.00448     0.97       0.011  0.49
-#> 2    log_kernel 200  0.220 -0.00325     0.89       0.023  0.80
-#> 3     inter_max 200  0.948  0.00014     0.94       0.017  0.23
-#> 4    sigma_mean 200  0.625  0.00891     0.96       0.013  0.60
-#> 5        lambda 200 -0.012 -0.02265     0.91       0.021  0.89
-#> 6         q_tol 200  0.668  0.00196     0.92       0.019  0.60
+#>       parameter   n      r2    bias coverage coverage_se width
+#> 1 log_dispersal 200 0.73298  0.0157     0.95       0.015  0.49
+#> 2    log_kernel 200 0.24312 -0.0043     0.91       0.021  0.80
+#> 3     inter_max 200 0.94467  0.0029     0.94       0.016  0.23
+#> 4    sigma_mean 200 0.58988  0.0030     0.94       0.016  0.61
+#> 5        lambda 200 0.00012 -0.0224     0.91       0.020  0.89
+#> 6         q_tol 200 0.68877  0.0080     0.91       0.020  0.59
 ```
 
 ``` r
@@ -234,20 +235,20 @@ tell the two models apart:
 ``` r
 
 res$choice$error
-#> [1] 0.005661606
+#> [1] 0.005462564
 res$choice$confusion
 #>              phylogenetic none
-#> phylogenetic         9867   94
-#> none                   19 9979
+#> phylogenetic         9869   87
+#> none                   22 9976
 print(res$chosen, digits = 2)
 #>   observation        model probability votes_phylogenetic votes_none
-#> 1           1 phylogenetic        0.99                493          7
+#> 1           1 phylogenetic           1                491          9
 ```
 
 The out-of-bag error shows that the two models are easy to tell apart
-when one of them is true. For the observed data, 493 of the 500 trees
+when one of them is true. For the observed data, 491 of the 500 trees
 vote for the model with phylogenetic competition, and the posterior
-probability of that model is 0.99.
+probability of that model is \> 0.99.
 
 ## The posterior
 
@@ -260,12 +261,12 @@ median and a 90% interval for the observed statistics:
 
 print(res$posterior, digits = 2)
 #>   observation     parameter estimate    low  high  mean
-#> 1           1 log_dispersal   -1.025 -3.456 -0.59 -1.28
-#> 2           1    log_kernel    0.049 -0.284  1.02  0.15
-#> 3           1     inter_max    0.566  0.342  0.87  0.58
-#> 4           1    sigma_mean   29.815  6.227 98.15 43.81
-#> 5           1        lambda    0.751  0.092  0.97  0.65
-#> 6           1         q_tol    0.176  0.013  0.63  0.23
+#> 1           1 log_dispersal   -1.049 -3.545 -0.62 -1.41
+#> 2           1    log_kernel    0.017 -0.270  0.63  0.10
+#> 3           1     inter_max    0.573  0.354  0.95  0.59
+#> 4           1    sigma_mean   31.786  6.611 98.36 44.87
+#> 5           1        lambda    0.724  0.059  0.97  0.62
+#> 6           1         q_tol    0.310  0.035  0.81  0.35
 ```
 
 The rows of the reference table that the forests weigh give an
@@ -303,21 +304,28 @@ size, ESS):
 ``` r
 
 print(res$diagnose, digits = 2)
-#>   observation     parameter n_positive ess   khat khat_threshold n_outside
-#> 1           1 log_dispersal        333 100  0.310           0.60         0
-#> 2           1    log_kernel        457 168  0.341           0.62         0
-#> 3           1     inter_max        469 149  0.373           0.63         0
-#> 4           1    sigma_mean        388 130  0.178           0.61         0
-#> 5           1        lambda        404 167 -0.043           0.62         0
-#> 6           1         q_tol        352 116  0.118           0.61         0
-#>   outside
-#> 1        
-#> 2        
-#> 3        
-#> 4        
-#> 5        
-#> 6
+#>   observation     parameter n_positive ess khat khat_threshold n_outside
+#> 1           1 log_dispersal        319  81 0.49           0.60         1
+#> 2           1    log_kernel        448 131 0.34           0.62         1
+#> 3           1     inter_max        497 155 0.45           0.63         1
+#> 4           1    sigma_mean        393  96 0.45           0.61         1
+#> 5           1        lambda        377 146 0.17           0.61         1
+#> 6           1         q_tol        362 101 0.46           0.61         1
+#>      outside
+#> 1 cg_ses_mpd
+#> 2 cg_ses_mpd
+#> 3 cg_ses_mpd
+#> 4 cg_ses_mpd
+#> 5 cg_ses_mpd
+#> 6 cg_ses_mpd
 ```
+
+The weight is spread over enough rows for every parameter, but one
+observed statistic, the standardised MPD of Campo Grande, lies outside
+the central 99% of the reference table: few simulations under the priors
+produced ponds with species as closely related as the observed ones. The
+posterior predictive check below shows the same misfit from another
+angle.
 
 A posterior predictive check compares the observed statistics with those
 of the simulations drawn from the posterior. It is most telling for
@@ -327,46 +335,47 @@ without the phylogenetic statistics and checked those:
 ``` r
 
 print(res$ppc_phylo, digits = 2)
-#>      statistic observed median    low high     p   n
-#> 1   cg_ses_mpd   -0.810   1.03 -0.063  1.6 0.004 500
-#> 2  cg_ses_mntd   -0.219   0.33 -0.788  1.5 0.416 500
-#> 3  sjc_ses_mpd   -0.198   1.41  0.525  2.2 0.028 500
-#> 4 sjc_ses_mntd    0.015   0.23 -0.741  1.6 0.660 500
+#>      statistic observed median   low high     p   n
+#> 1   cg_ses_mpd    -0.76   1.02  0.16  1.7 0.000 500
+#> 2  cg_ses_mntd    -0.13   0.35 -0.74  1.4 0.400 500
+#> 3  sjc_ses_mpd    -0.23   1.47  0.50  2.1 0.028 500
+#> 4 sjc_ses_mntd     0.11   0.11 -1.05  1.4 0.996 500
 ```
 
-The model chosen with a posterior probability of 0.99 fails here. With
-competition among close relatives, the simulated ponds hold species more
-distantly related than expected from the regional pool (standardised MPD
-above zero), whereas in the observed ponds the species are as related
-as, or more related than, random draws from the pool. The observed MPD
-is in the lower tail in both cities (p = 0.004 in Campo Grande and 0.028
-in São José dos Campos). With all the statistics in the fit, the forests
-pull the posterior towards the observed MPD and the misfit is milder:
+The model chosen with a posterior probability of \> 0.99 fails here.
+With competition among close relatives, the simulated ponds hold species
+more distantly related than expected from the regional pool
+(standardised MPD above zero), whereas in the observed ponds the species
+are as related as, or more related than, random draws from the pool. The
+observed MPD is in the lower tail in both cities (p \< 0.002 in Campo
+Grande and p = 0.028 in São José dos Campos). With all the statistics in
+the fit, the forests pull the posterior towards the observed MPD and the
+misfit is milder:
 
 ``` r
 
 print(res$ppc_all[c("statistic", "observed", "median", "low", "high", "p")], digits = 2)
 #>              statistic observed median    low  high     p
-#> 1             cg_alpha    8.950   7.05  4.100 16.33 0.512
-#> 2             cg_gamma   27.000  19.00 10.000 34.00 0.328
-#> 3              cg_beta    3.017   2.56  1.493  3.76 0.468
-#> 4         cg_occupancy    0.331   0.39  0.266  0.67 0.468
-#> 5      cg_occupancy_sd    0.254   0.26  0.181  0.32 0.976
-#> 6           cg_ses_mpd   -0.810   0.81 -0.720  1.56 0.076
-#> 7          cg_ses_mntd   -0.219   0.21 -0.867  1.26 0.524
-#> 8             cg_decay    0.162   0.06 -0.114  0.25 0.280
-#> 9      cg_richness_env    0.263   0.22 -0.086  0.57 0.824
-#> 10  cg_composition_env   -0.073   0.05 -0.093  0.56 0.200
-#> 11           sjc_alpha    7.850   9.72  6.248 28.77 0.504
-#> 12           sjc_gamma   26.000  27.00 16.000 66.00 0.928
-#> 13            sjc_beta    3.312   2.79  1.519  4.27 0.452
-#> 14       sjc_occupancy    0.302   0.36  0.234  0.66 0.452
-#> 15    sjc_occupancy_sd    0.278   0.27  0.162  0.34 0.888
-#> 16         sjc_ses_mpd   -0.198   1.08 -0.237  1.98 0.124
-#> 17        sjc_ses_mntd    0.015   0.14 -0.938  1.53 0.752
-#> 18           sjc_decay    0.225   0.20  0.040  0.41 0.816
-#> 19    sjc_richness_env    0.103  -0.18 -0.631  0.20 0.228
-#> 20 sjc_composition_env   -0.030   0.19  0.038  0.64 0.020
+#> 1             cg_alpha    9.450  7.500  4.200 14.87 0.408
+#> 2             cg_gamma   27.000 19.000 11.000 34.00 0.264
+#> 3              cg_beta    2.857  2.566  1.538  3.88 0.580
+#> 4         cg_occupancy    0.350  0.390  0.258  0.65 0.580
+#> 5      cg_occupancy_sd    0.258  0.252  0.166  0.31 0.872
+#> 6           cg_ses_mpd   -0.758  0.757 -0.704  1.58 0.080
+#> 7          cg_ses_mntd   -0.129  0.151 -0.723  1.09 0.648
+#> 8             cg_decay    0.154  0.062 -0.102  0.23 0.304
+#> 9      cg_richness_env    0.231  0.235 -0.056  0.52 0.976
+#> 10  cg_composition_env   -0.052  0.053 -0.092  0.62 0.268
+#> 11           sjc_alpha    8.000 10.550  6.195 27.40 0.440
+#> 12           sjc_gamma   26.000 28.000 17.000 61.10 0.852
+#> 13            sjc_beta    3.250  2.738  1.501  4.03 0.308
+#> 14       sjc_occupancy    0.308  0.365  0.248  0.67 0.308
+#> 15    sjc_occupancy_sd    0.276  0.264  0.170  0.33 0.776
+#> 16         sjc_ses_mpd   -0.235  1.232 -0.085  1.97 0.068
+#> 17        sjc_ses_mntd    0.105  0.081 -0.916  1.03 0.964
+#> 18           sjc_decay    0.234  0.226  0.055  0.41 0.952
+#> 19    sjc_richness_env    0.113 -0.211 -0.570  0.11 0.100
+#> 20 sjc_composition_env   -0.030  0.209  0.030  0.66 0.020
 ```
 
 Why, then, does model choice favour competition so strongly? The
@@ -377,10 +386,10 @@ total richness of each city:
 
 head(res$importance[res$importance$parameter == "inter_max", ], 4)
 #>   parameter statistic importance
-#> 1 inter_max sjc_gamma  0.3411521
-#> 2 inter_max sjc_alpha  0.2061290
-#> 3 inter_max  cg_gamma  0.2010290
-#> 4 inter_max  cg_alpha  0.1227917
+#> 1 inter_max sjc_gamma  0.3331401
+#> 2 inter_max sjc_alpha  0.2184167
+#> 3 inter_max  cg_gamma  0.1932001
+#> 4 inter_max  cg_alpha  0.1246896
 ```
 
 With pools of 50 to 150 species, the observed ponds hold few of them,
@@ -402,15 +411,15 @@ changes little, so the choice does not rest on them alone:
 
 print(res$reduced$chosen, digits = 2)
 #>   observation        model probability votes_phylogenetic votes_none
-#> 1           1 phylogenetic        0.98                483         17
+#> 1           1 phylogenetic        0.99                489         11
 print(res$reduced$posterior, digits = 2)
 #>   observation     parameter estimate    low  high  mean
-#> 1           1 log_dispersal   -0.989 -3.455 -0.61 -1.25
-#> 2           1    log_kernel    0.091 -0.272  1.07  0.19
-#> 3           1     inter_max    0.659  0.334  0.96  0.65
-#> 4           1    sigma_mean   26.920  5.462 95.68 39.89
-#> 5           1        lambda    0.751  0.081  0.97  0.66
-#> 6           1         q_tol    0.184  0.016  0.67  0.25
+#> 1           1 log_dispersal   -0.998 -3.545 -0.61 -1.34
+#> 2           1    log_kernel    0.017 -0.270  0.83  0.13
+#> 3           1     inter_max    0.687  0.369  0.97  0.69
+#> 4           1    sigma_mean   27.007  6.154 97.03 41.91
+#> 5           1        lambda    0.660  0.059  0.97  0.61
+#> 6           1         q_tol    0.328  0.016  0.81  0.36
 ```
 
 ## Cross-validation over space
@@ -448,26 +457,28 @@ the 90% predictive interval:
 
 print(res$cv_summary, digits = 2)
 #>          statistic n coverage z_mean z_rms rejected
-#> 1            alpha 4     1.00  0.067  0.64     0.00
-#> 2             beta 4     1.00  1.004  1.06     0.00
-#> 3  composition_env 4     0.75 -1.053  1.10     0.25
-#> 4            decay 4     0.50  0.480  2.59     0.50
-#> 5            gamma 4     0.75  0.724  1.33     0.00
-#> 6        occupancy 4     1.00 -0.859  0.90     0.00
-#> 7     occupancy_sd 4     1.00 -0.231  0.35     0.00
-#> 8     richness_env 4     1.00  0.567  0.84     0.00
-#> 9         ses_mntd 4     1.00 -0.411  0.63     0.00
-#> 10         ses_mpd 4     0.25 -2.556  2.65     0.75
+#> 1            alpha 4     1.00   0.15  0.60     0.00
+#> 2             beta 4     1.00   1.00  1.11     0.00
+#> 3  composition_env 4     0.50  -1.20  1.28     0.50
+#> 4            decay 4     0.50   0.17  2.47     0.50
+#> 5            gamma 4     1.00   0.56  1.09     0.00
+#> 6        occupancy 4     1.00  -0.84  0.92     0.00
+#> 7     occupancy_sd 4     1.00  -0.13  0.36     0.00
+#> 8     richness_env 4     0.75   0.58  1.14     0.00
+#> 9         ses_mntd 4     1.00  -0.45  0.55     0.00
+#> 10         ses_mpd 4     0.25  -2.57  2.63     0.75
 ```
 
 With only four folds, these fractions are coarse, but most statistics of
 the ponds left out are predicted. The exceptions repeat the posterior
 predictive check: the standardised MPD of the ponds left out falls below
 the prediction in most folds, so the misfit is not confined to a part of
-either city. Distance decay misses in two folds, once above and once
-below the prediction; it rests on few pairs of ponds within half a city,
-so these misses may be noise, but they may also mean that a single
-exponential kernel for both cities is too simple a description of space.
+either city. The link between composition and the environment is also
+below the prediction in two folds. Distance decay misses in two folds,
+once above and once below the prediction; it rests on few pairs of ponds
+within half a city, so these misses may be noise, but they may also mean
+that a single exponential kernel for both cities is too simple a
+description of space.
 
 ## What this example shows
 

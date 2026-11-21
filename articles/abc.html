@@ -127,7 +127,8 @@ the rest runs here.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://provetelab.org/comdynamite/">comdynamite</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"abc.rds"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"abc.rds"</span><span class="op">)</span></span>
+<span><span class="va">prob</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">p</span><span class="op">)</span> <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">p</span>, <span class="fl">2</span><span class="op">)</span> <span class="op">&gt;=</span> <span class="fl">1</span><span class="op">)</span> <span class="st">"&gt; 0.99"</span> <span class="kw">else</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">p</span>, <span class="fl">2</span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-data-and-the-simulator">The data and the simulator<a class="anchor" aria-label="anchor" href="#the-data-and-the-simulator"></a>
 </h2>
@@ -227,15 +228,15 @@ statistics are</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">observed</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grepl</a></span><span class="op">(</span><span class="st">"^(cg|sjc)_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">observed</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            cg_alpha            cg_gamma             cg_beta        cg_occupancy </span></span>
-<span><span class="co">#&gt;               8.950              27.000               3.017               0.331 </span></span>
+<span><span class="co">#&gt;               9.450              27.000               2.857               0.350 </span></span>
 <span><span class="co">#&gt;     cg_occupancy_sd          cg_ses_mpd         cg_ses_mntd            cg_decay </span></span>
-<span><span class="co">#&gt;               0.254              -0.810              -0.219               0.162 </span></span>
+<span><span class="co">#&gt;               0.258              -0.758              -0.129               0.154 </span></span>
 <span><span class="co">#&gt;     cg_richness_env  cg_composition_env           sjc_alpha           sjc_gamma </span></span>
-<span><span class="co">#&gt;               0.263              -0.073               7.850              26.000 </span></span>
+<span><span class="co">#&gt;               0.231              -0.052               8.000              26.000 </span></span>
 <span><span class="co">#&gt;            sjc_beta       sjc_occupancy    sjc_occupancy_sd         sjc_ses_mpd </span></span>
-<span><span class="co">#&gt;               3.312               0.302               0.278              -0.198 </span></span>
+<span><span class="co">#&gt;               3.250               0.308               0.276              -0.235 </span></span>
 <span><span class="co">#&gt;        sjc_ses_mntd           sjc_decay    sjc_richness_env sjc_composition_env </span></span>
-<span><span class="co">#&gt;               0.015               0.225               0.103              -0.030</span></span></code></pre></div>
+<span><span class="co">#&gt;               0.105               0.234               0.113              -0.030</span></span></code></pre></div>
 <p>With the simulator and the statistics in hand,
 <code><a href="../reference/abc_table.html">abc_table()</a></code> draws parameters uniformly from the prior and
 runs one simulation per draw, in parallel with future:</p>
@@ -256,13 +257,13 @@ well above zero) and the 90% intervals contain the truth about 90% of
 the time.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">recovery</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;       parameter   n     r2     bias coverage coverage_se width</span></span>
-<span><span class="co">#&gt; 1 log_dispersal 200  0.771  0.00448     0.97       0.011  0.49</span></span>
-<span><span class="co">#&gt; 2    log_kernel 200  0.220 -0.00325     0.89       0.023  0.80</span></span>
-<span><span class="co">#&gt; 3     inter_max 200  0.948  0.00014     0.94       0.017  0.23</span></span>
-<span><span class="co">#&gt; 4    sigma_mean 200  0.625  0.00891     0.96       0.013  0.60</span></span>
-<span><span class="co">#&gt; 5        lambda 200 -0.012 -0.02265     0.91       0.021  0.89</span></span>
-<span><span class="co">#&gt; 6         q_tol 200  0.668  0.00196     0.92       0.019  0.60</span></span></code></pre></div>
+<span><span class="co">#&gt;       parameter   n      r2    bias coverage coverage_se width</span></span>
+<span><span class="co">#&gt; 1 log_dispersal 200 0.73298  0.0157     0.95       0.015  0.49</span></span>
+<span><span class="co">#&gt; 2    log_kernel 200 0.24312 -0.0043     0.91       0.021  0.80</span></span>
+<span><span class="co">#&gt; 3     inter_max 200 0.94467  0.0029     0.94       0.016  0.23</span></span>
+<span><span class="co">#&gt; 4    sigma_mean 200 0.58988  0.0030     0.94       0.016  0.61</span></span>
+<span><span class="co">#&gt; 5        lambda 200 0.00012 -0.0224     0.91       0.020  0.89</span></span>
+<span><span class="co">#&gt; 6         q_tol 200 0.68877  0.0080     0.91       0.020  0.59</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">estimates</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">truth</span>, <span class="va">estimate</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_abline</a></span><span class="op">(</span>colour <span class="op">=</span> <span class="st">"grey60"</span><span class="op">)</span> <span class="op">+</span></span>
@@ -288,18 +289,18 @@ fixed at zero (the other five parameters from the same priors) and let
 <code><a href="../reference/abc_choose.html">abc_choose()</a></code> tell the two models apart:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">choice</span><span class="op">$</span><span class="va">error</span></span>
-<span><span class="co">#&gt; [1] 0.005661606</span></span>
+<span><span class="co">#&gt; [1] 0.005462564</span></span>
 <span><span class="va">res</span><span class="op">$</span><span class="va">choice</span><span class="op">$</span><span class="va">confusion</span></span>
 <span><span class="co">#&gt;              phylogenetic none</span></span>
-<span><span class="co">#&gt; phylogenetic         9867   94</span></span>
-<span><span class="co">#&gt; none                   19 9979</span></span>
+<span><span class="co">#&gt; phylogenetic         9869   87</span></span>
+<span><span class="co">#&gt; none                   22 9976</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">chosen</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   observation        model probability votes_phylogenetic votes_none</span></span>
-<span><span class="co">#&gt; 1           1 phylogenetic        0.99                493          7</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           1 phylogenetic           1                491          9</span></span></code></pre></div>
 <p>The out-of-bag error shows that the two models are easy to tell apart
-when one of them is true. For the observed data, 493 of the 500 trees
+when one of them is true. For the observed data, 491 of the 500 trees
 vote for the model with phylogenetic competition, and the posterior
-probability of that model is 0.99.</p>
+probability of that model is &gt; 0.99.</p>
 </div>
 <div class="section level2">
 <h2 id="the-posterior">The posterior<a class="anchor" aria-label="anchor" href="#the-posterior"></a>
@@ -310,12 +311,12 @@ the observed statistics:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">posterior</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   observation     parameter estimate    low  high  mean</span></span>
-<span><span class="co">#&gt; 1           1 log_dispersal   -1.025 -3.456 -0.59 -1.28</span></span>
-<span><span class="co">#&gt; 2           1    log_kernel    0.049 -0.284  1.02  0.15</span></span>
-<span><span class="co">#&gt; 3           1     inter_max    0.566  0.342  0.87  0.58</span></span>
-<span><span class="co">#&gt; 4           1    sigma_mean   29.815  6.227 98.15 43.81</span></span>
-<span><span class="co">#&gt; 5           1        lambda    0.751  0.092  0.97  0.65</span></span>
-<span><span class="co">#&gt; 6           1         q_tol    0.176  0.013  0.63  0.23</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           1 log_dispersal   -1.049 -3.545 -0.62 -1.41</span></span>
+<span><span class="co">#&gt; 2           1    log_kernel    0.017 -0.270  0.63  0.10</span></span>
+<span><span class="co">#&gt; 3           1     inter_max    0.573  0.354  0.95  0.59</span></span>
+<span><span class="co">#&gt; 4           1    sigma_mean   31.786  6.611 98.36 44.87</span></span>
+<span><span class="co">#&gt; 5           1        lambda    0.724  0.059  0.97  0.62</span></span>
+<span><span class="co">#&gt; 6           1         q_tol    0.310  0.035  0.81  0.35</span></span></code></pre></div>
 <p>The rows of the reference table that the forests weigh give an
 approximate sample from the posterior, which we can set against the
 uniform prior:</p>
@@ -342,73 +343,79 @@ within the range of the reference table and how many rows carry the
 weight (effective sample size, ESS):</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">diagnose</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   observation     parameter n_positive ess   khat khat_threshold n_outside</span></span>
-<span><span class="co">#&gt; 1           1 log_dispersal        333 100  0.310           0.60         0</span></span>
-<span><span class="co">#&gt; 2           1    log_kernel        457 168  0.341           0.62         0</span></span>
-<span><span class="co">#&gt; 3           1     inter_max        469 149  0.373           0.63         0</span></span>
-<span><span class="co">#&gt; 4           1    sigma_mean        388 130  0.178           0.61         0</span></span>
-<span><span class="co">#&gt; 5           1        lambda        404 167 -0.043           0.62         0</span></span>
-<span><span class="co">#&gt; 6           1         q_tol        352 116  0.118           0.61         0</span></span>
-<span><span class="co">#&gt;   outside</span></span>
-<span><span class="co">#&gt; 1        </span></span>
-<span><span class="co">#&gt; 2        </span></span>
-<span><span class="co">#&gt; 3        </span></span>
-<span><span class="co">#&gt; 4        </span></span>
-<span><span class="co">#&gt; 5        </span></span>
-<span><span class="co">#&gt; 6</span></span></code></pre></div>
+<span><span class="co">#&gt;   observation     parameter n_positive ess khat khat_threshold n_outside</span></span>
+<span><span class="co">#&gt; 1           1 log_dispersal        319  81 0.49           0.60         1</span></span>
+<span><span class="co">#&gt; 2           1    log_kernel        448 131 0.34           0.62         1</span></span>
+<span><span class="co">#&gt; 3           1     inter_max        497 155 0.45           0.63         1</span></span>
+<span><span class="co">#&gt; 4           1    sigma_mean        393  96 0.45           0.61         1</span></span>
+<span><span class="co">#&gt; 5           1        lambda        377 146 0.17           0.61         1</span></span>
+<span><span class="co">#&gt; 6           1         q_tol        362 101 0.46           0.61         1</span></span>
+<span><span class="co">#&gt;      outside</span></span>
+<span><span class="co">#&gt; 1 cg_ses_mpd</span></span>
+<span><span class="co">#&gt; 2 cg_ses_mpd</span></span>
+<span><span class="co">#&gt; 3 cg_ses_mpd</span></span>
+<span><span class="co">#&gt; 4 cg_ses_mpd</span></span>
+<span><span class="co">#&gt; 5 cg_ses_mpd</span></span>
+<span><span class="co">#&gt; 6 cg_ses_mpd</span></span></code></pre></div>
+<p>The weight is spread over enough rows for every parameter, but one
+observed statistic, the standardised MPD of Campo Grande, lies outside
+the central 99% of the reference table: few simulations under the priors
+produced ponds with species as closely related as the observed ones. The
+posterior predictive check below shows the same misfit from another
+angle.</p>
 <p>A posterior predictive check compares the observed statistics with
 those of the simulations drawn from the posterior. It is most telling
 for statistics left out of the fit, so we fitted a second set of forests
 without the phylogenetic statistics and checked those:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">ppc_phylo</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt;      statistic observed median    low high     p   n</span></span>
-<span><span class="co">#&gt; 1   cg_ses_mpd   -0.810   1.03 -0.063  1.6 0.004 500</span></span>
-<span><span class="co">#&gt; 2  cg_ses_mntd   -0.219   0.33 -0.788  1.5 0.416 500</span></span>
-<span><span class="co">#&gt; 3  sjc_ses_mpd   -0.198   1.41  0.525  2.2 0.028 500</span></span>
-<span><span class="co">#&gt; 4 sjc_ses_mntd    0.015   0.23 -0.741  1.6 0.660 500</span></span></code></pre></div>
-<p>The model chosen with a posterior probability of 0.99 fails here.
-With competition among close relatives, the simulated ponds hold species
-more distantly related than expected from the regional pool
+<span><span class="co">#&gt;      statistic observed median   low high     p   n</span></span>
+<span><span class="co">#&gt; 1   cg_ses_mpd    -0.76   1.02  0.16  1.7 0.000 500</span></span>
+<span><span class="co">#&gt; 2  cg_ses_mntd    -0.13   0.35 -0.74  1.4 0.400 500</span></span>
+<span><span class="co">#&gt; 3  sjc_ses_mpd    -0.23   1.47  0.50  2.1 0.028 500</span></span>
+<span><span class="co">#&gt; 4 sjc_ses_mntd     0.11   0.11 -1.05  1.4 0.996 500</span></span></code></pre></div>
+<p>The model chosen with a posterior probability of &gt; 0.99 fails
+here. With competition among close relatives, the simulated ponds hold
+species more distantly related than expected from the regional pool
 (standardised MPD above zero), whereas in the observed ponds the species
 are as related as, or more related than, random draws from the pool. The
-observed MPD is in the lower tail in both cities (p = 0.004 in Campo
-Grande and 0.028 in São José dos Campos). With all the statistics in the
-fit, the forests pull the posterior towards the observed MPD and the
+observed MPD is in the lower tail in both cities (p &lt; 0.002 in Campo
+Grande and p = 0.028 in São José dos Campos). With all the statistics in
+the fit, the forests pull the posterior towards the observed MPD and the
 misfit is milder:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">ppc_all</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"statistic"</span>, <span class="st">"observed"</span>, <span class="st">"median"</span>, <span class="st">"low"</span>, <span class="st">"high"</span>, <span class="st">"p"</span><span class="op">)</span><span class="op">]</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;              statistic observed median    low  high     p</span></span>
-<span><span class="co">#&gt; 1             cg_alpha    8.950   7.05  4.100 16.33 0.512</span></span>
-<span><span class="co">#&gt; 2             cg_gamma   27.000  19.00 10.000 34.00 0.328</span></span>
-<span><span class="co">#&gt; 3              cg_beta    3.017   2.56  1.493  3.76 0.468</span></span>
-<span><span class="co">#&gt; 4         cg_occupancy    0.331   0.39  0.266  0.67 0.468</span></span>
-<span><span class="co">#&gt; 5      cg_occupancy_sd    0.254   0.26  0.181  0.32 0.976</span></span>
-<span><span class="co">#&gt; 6           cg_ses_mpd   -0.810   0.81 -0.720  1.56 0.076</span></span>
-<span><span class="co">#&gt; 7          cg_ses_mntd   -0.219   0.21 -0.867  1.26 0.524</span></span>
-<span><span class="co">#&gt; 8             cg_decay    0.162   0.06 -0.114  0.25 0.280</span></span>
-<span><span class="co">#&gt; 9      cg_richness_env    0.263   0.22 -0.086  0.57 0.824</span></span>
-<span><span class="co">#&gt; 10  cg_composition_env   -0.073   0.05 -0.093  0.56 0.200</span></span>
-<span><span class="co">#&gt; 11           sjc_alpha    7.850   9.72  6.248 28.77 0.504</span></span>
-<span><span class="co">#&gt; 12           sjc_gamma   26.000  27.00 16.000 66.00 0.928</span></span>
-<span><span class="co">#&gt; 13            sjc_beta    3.312   2.79  1.519  4.27 0.452</span></span>
-<span><span class="co">#&gt; 14       sjc_occupancy    0.302   0.36  0.234  0.66 0.452</span></span>
-<span><span class="co">#&gt; 15    sjc_occupancy_sd    0.278   0.27  0.162  0.34 0.888</span></span>
-<span><span class="co">#&gt; 16         sjc_ses_mpd   -0.198   1.08 -0.237  1.98 0.124</span></span>
-<span><span class="co">#&gt; 17        sjc_ses_mntd    0.015   0.14 -0.938  1.53 0.752</span></span>
-<span><span class="co">#&gt; 18           sjc_decay    0.225   0.20  0.040  0.41 0.816</span></span>
-<span><span class="co">#&gt; 19    sjc_richness_env    0.103  -0.18 -0.631  0.20 0.228</span></span>
-<span><span class="co">#&gt; 20 sjc_composition_env   -0.030   0.19  0.038  0.64 0.020</span></span></code></pre></div>
+<span><span class="co">#&gt; 1             cg_alpha    9.450  7.500  4.200 14.87 0.408</span></span>
+<span><span class="co">#&gt; 2             cg_gamma   27.000 19.000 11.000 34.00 0.264</span></span>
+<span><span class="co">#&gt; 3              cg_beta    2.857  2.566  1.538  3.88 0.580</span></span>
+<span><span class="co">#&gt; 4         cg_occupancy    0.350  0.390  0.258  0.65 0.580</span></span>
+<span><span class="co">#&gt; 5      cg_occupancy_sd    0.258  0.252  0.166  0.31 0.872</span></span>
+<span><span class="co">#&gt; 6           cg_ses_mpd   -0.758  0.757 -0.704  1.58 0.080</span></span>
+<span><span class="co">#&gt; 7          cg_ses_mntd   -0.129  0.151 -0.723  1.09 0.648</span></span>
+<span><span class="co">#&gt; 8             cg_decay    0.154  0.062 -0.102  0.23 0.304</span></span>
+<span><span class="co">#&gt; 9      cg_richness_env    0.231  0.235 -0.056  0.52 0.976</span></span>
+<span><span class="co">#&gt; 10  cg_composition_env   -0.052  0.053 -0.092  0.62 0.268</span></span>
+<span><span class="co">#&gt; 11           sjc_alpha    8.000 10.550  6.195 27.40 0.440</span></span>
+<span><span class="co">#&gt; 12           sjc_gamma   26.000 28.000 17.000 61.10 0.852</span></span>
+<span><span class="co">#&gt; 13            sjc_beta    3.250  2.738  1.501  4.03 0.308</span></span>
+<span><span class="co">#&gt; 14       sjc_occupancy    0.308  0.365  0.248  0.67 0.308</span></span>
+<span><span class="co">#&gt; 15    sjc_occupancy_sd    0.276  0.264  0.170  0.33 0.776</span></span>
+<span><span class="co">#&gt; 16         sjc_ses_mpd   -0.235  1.232 -0.085  1.97 0.068</span></span>
+<span><span class="co">#&gt; 17        sjc_ses_mntd    0.105  0.081 -0.916  1.03 0.964</span></span>
+<span><span class="co">#&gt; 18           sjc_decay    0.234  0.226  0.055  0.41 0.952</span></span>
+<span><span class="co">#&gt; 19    sjc_richness_env    0.113 -0.211 -0.570  0.11 0.100</span></span>
+<span><span class="co">#&gt; 20 sjc_composition_env   -0.030  0.209  0.030  0.66 0.020</span></span></code></pre></div>
 <p>Why, then, does model choice favour competition so strongly? The
 statistics that weigh most in the forest of <code>inter_max</code> are
 the mean and total richness of each city:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">importance</span><span class="op">[</span><span class="va">res</span><span class="op">$</span><span class="va">importance</span><span class="op">$</span><span class="va">parameter</span> <span class="op">==</span> <span class="st">"inter_max"</span>, <span class="op">]</span>, <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   parameter statistic importance</span></span>
-<span><span class="co">#&gt; 1 inter_max sjc_gamma  0.3411521</span></span>
-<span><span class="co">#&gt; 2 inter_max sjc_alpha  0.2061290</span></span>
-<span><span class="co">#&gt; 3 inter_max  cg_gamma  0.2010290</span></span>
-<span><span class="co">#&gt; 4 inter_max  cg_alpha  0.1227917</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 inter_max sjc_gamma  0.3331401</span></span>
+<span><span class="co">#&gt; 2 inter_max sjc_alpha  0.2184167</span></span>
+<span><span class="co">#&gt; 3 inter_max  cg_gamma  0.1932001</span></span>
+<span><span class="co">#&gt; 4 inter_max  cg_alpha  0.1246896</span></span></code></pre></div>
 <p>With pools of 50 to 150 species, the observed ponds hold few of them,
 and among the processes in the simulator, competition is the one that
 can keep richness that low. Any process that limits richness but is
@@ -425,15 +432,15 @@ richness) changes little, so the choice does not rest on them alone:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">reduced</span><span class="op">$</span><span class="va">chosen</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   observation        model probability votes_phylogenetic votes_none</span></span>
-<span><span class="co">#&gt; 1           1 phylogenetic        0.98                483         17</span></span>
+<span><span class="co">#&gt; 1           1 phylogenetic        0.99                489         11</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">reduced</span><span class="op">$</span><span class="va">posterior</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   observation     parameter estimate    low  high  mean</span></span>
-<span><span class="co">#&gt; 1           1 log_dispersal   -0.989 -3.455 -0.61 -1.25</span></span>
-<span><span class="co">#&gt; 2           1    log_kernel    0.091 -0.272  1.07  0.19</span></span>
-<span><span class="co">#&gt; 3           1     inter_max    0.659  0.334  0.96  0.65</span></span>
-<span><span class="co">#&gt; 4           1    sigma_mean   26.920  5.462 95.68 39.89</span></span>
-<span><span class="co">#&gt; 5           1        lambda    0.751  0.081  0.97  0.66</span></span>
-<span><span class="co">#&gt; 6           1         q_tol    0.184  0.016  0.67  0.25</span></span></code></pre></div>
+<span><span class="co">#&gt; 1           1 log_dispersal   -0.998 -3.545 -0.61 -1.34</span></span>
+<span><span class="co">#&gt; 2           1    log_kernel    0.017 -0.270  0.83  0.13</span></span>
+<span><span class="co">#&gt; 3           1     inter_max    0.687  0.369  0.97  0.69</span></span>
+<span><span class="co">#&gt; 4           1    sigma_mean   27.007  6.154 97.03 41.91</span></span>
+<span><span class="co">#&gt; 5           1        lambda    0.660  0.059  0.97  0.61</span></span>
+<span><span class="co">#&gt; 6           1         q_tol    0.328  0.016  0.81  0.36</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="cross-validation-over-space">Cross-validation over space<a class="anchor" aria-label="anchor" href="#cross-validation-over-space"></a>
@@ -459,25 +466,26 @@ value fell inside the 90% predictive interval:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">cv_summary</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
 <span><span class="co">#&gt;          statistic n coverage z_mean z_rms rejected</span></span>
-<span><span class="co">#&gt; 1            alpha 4     1.00  0.067  0.64     0.00</span></span>
-<span><span class="co">#&gt; 2             beta 4     1.00  1.004  1.06     0.00</span></span>
-<span><span class="co">#&gt; 3  composition_env 4     0.75 -1.053  1.10     0.25</span></span>
-<span><span class="co">#&gt; 4            decay 4     0.50  0.480  2.59     0.50</span></span>
-<span><span class="co">#&gt; 5            gamma 4     0.75  0.724  1.33     0.00</span></span>
-<span><span class="co">#&gt; 6        occupancy 4     1.00 -0.859  0.90     0.00</span></span>
-<span><span class="co">#&gt; 7     occupancy_sd 4     1.00 -0.231  0.35     0.00</span></span>
-<span><span class="co">#&gt; 8     richness_env 4     1.00  0.567  0.84     0.00</span></span>
-<span><span class="co">#&gt; 9         ses_mntd 4     1.00 -0.411  0.63     0.00</span></span>
-<span><span class="co">#&gt; 10         ses_mpd 4     0.25 -2.556  2.65     0.75</span></span></code></pre></div>
+<span><span class="co">#&gt; 1            alpha 4     1.00   0.15  0.60     0.00</span></span>
+<span><span class="co">#&gt; 2             beta 4     1.00   1.00  1.11     0.00</span></span>
+<span><span class="co">#&gt; 3  composition_env 4     0.50  -1.20  1.28     0.50</span></span>
+<span><span class="co">#&gt; 4            decay 4     0.50   0.17  2.47     0.50</span></span>
+<span><span class="co">#&gt; 5            gamma 4     1.00   0.56  1.09     0.00</span></span>
+<span><span class="co">#&gt; 6        occupancy 4     1.00  -0.84  0.92     0.00</span></span>
+<span><span class="co">#&gt; 7     occupancy_sd 4     1.00  -0.13  0.36     0.00</span></span>
+<span><span class="co">#&gt; 8     richness_env 4     0.75   0.58  1.14     0.00</span></span>
+<span><span class="co">#&gt; 9         ses_mntd 4     1.00  -0.45  0.55     0.00</span></span>
+<span><span class="co">#&gt; 10         ses_mpd 4     0.25  -2.57  2.63     0.75</span></span></code></pre></div>
 <p>With only four folds, these fractions are coarse, but most statistics
 of the ponds left out are predicted. The exceptions repeat the posterior
 predictive check: the standardised MPD of the ponds left out falls below
 the prediction in most folds, so the misfit is not confined to a part of
-either city. Distance decay misses in two folds, once above and once
-below the prediction; it rests on few pairs of ponds within half a city,
-so these misses may be noise, but they may also mean that a single
-exponential kernel for both cities is too simple a description of
-space.</p>
+either city. The link between composition and the environment is also
+below the prediction in two folds. Distance decay misses in two folds,
+once above and once below the prediction; it rests on few pairs of ponds
+within half a city, so these misses may be noise, but they may also mean
+that a single exponential kernel for both cities is too simple a
+description of space.</p>
 </div>
 <div class="section level2">
 <h2 id="what-this-example-shows">What this example shows<a class="anchor" aria-label="anchor" href="#what-this-example-shows"></a>
