@@ -60,12 +60,14 @@ Other landscapes:
 [`env_over_time()`](https://provetelab.org/comdynamite/reference/env_over_time.md),
 [`env_pulse()`](https://provetelab.org/comdynamite/reference/env_pulse.md),
 [`env_river()`](https://provetelab.org/comdynamite/reference/env_river.md),
+[`env_seasonal()`](https://provetelab.org/comdynamite/reference/env_seasonal.md),
 [`env_space_time()`](https://provetelab.org/comdynamite/reference/env_space_time.md),
 [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md),
 [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md),
 [`landscape_matrix()`](https://provetelab.org/comdynamite/reference/landscape_matrix.md),
 [`landscape_river()`](https://provetelab.org/comdynamite/reference/landscape_river.md),
 [`river_covariance()`](https://provetelab.org/comdynamite/reference/river_covariance.md),
+[`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md),
 [`river_network()`](https://provetelab.org/comdynamite/reference/river_network.md)
 
 ## Examples

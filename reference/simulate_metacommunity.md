@@ -140,8 +140,11 @@ simulate_metacommunity(
 
 - disturbance:
 
-  Probability that a site loses all its populations at each time step
-  (one value; 0, the default, for none).
+  Probability that a site loses all its populations at each time step:
+  one value (0, the default, for none), or a matrix of sites x steps
+  with the probability of each site at each step, for disturbances that
+  vary in space and time, such as the seasonal floods of
+  [`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md).
 
 - pool_from:
 

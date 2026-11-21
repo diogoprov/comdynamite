@@ -276,6 +276,10 @@ Spatially implicit and grid landscapes, dispersal and environment.
   : Covariance of the environment along a river network
 - [`env_river()`](https://provetelab.org/comdynamite/reference/env_river.md)
   : Environment along a river network
+- [`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md)
+  : Seasonal floods along a river network
+- [`env_seasonal()`](https://provetelab.org/comdynamite/reference/env_seasonal.md)
+  : Seasonal cycle of the environment
 - [`landscape_implicit()`](https://provetelab.org/comdynamite/reference/landscape_implicit.md)
   : Spatially implicit landscape
 - [`landscape_grid()`](https://provetelab.org/comdynamite/reference/landscape_grid.md)

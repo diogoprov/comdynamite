@@ -174,8 +174,10 @@ with covariance matrices \(G\) and \(E\) (see the section Several traits of
 
 
 <dt id="arg-disturbance">disturbance<a class="anchor" aria-label="anchor" href="#arg-disturbance"></a></dt>
-<dd><p>Probability that a site loses all its populations at each time step
-(one value; 0, the default, for none).</p></dd>
+<dd><p>Probability that a site loses all its populations at each time step:
+one value (0, the default, for none), or a matrix of sites x steps with the probability of
+each site at each step, for disturbances that vary in space and time, such as the
+seasonal floods of <code><a href="river_floods.html">river_floods()</a></code>.</p></dd>
 
 
 <dt id="arg-pool-from">pool_from<a class="anchor" aria-label="anchor" href="#arg-pool-from"></a></dt>

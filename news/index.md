@@ -3,6 +3,17 @@
 ## comdynamite (development version)
 
 - New
+  [`env_seasonal()`](https://provetelab.org/comdynamite/reference/env_seasonal.md)
+  (a seasonal cycle with an amplitude per site and anomalies per year)
+  and
+  [`river_floods()`](https://provetelab.org/comdynamite/reference/river_floods.md)
+  (washout probabilities by flood season, year and river size).
+  `disturbance` in
+  [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  and
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md)
+  also takes a matrix of probabilities per site and step.
+- New
   [`river_covariance()`](https://provetelab.org/comdynamite/reference/river_covariance.md)
   and
   [`env_river()`](https://provetelab.org/comdynamite/reference/env_river.md):
