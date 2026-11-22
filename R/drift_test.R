@@ -85,31 +85,12 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
   cite_method("drift_test")
   na_action <- match.arg(na_action)
   if (is.data.frame(x)) {
-    if (is.character(group) && length(group) == 1 && group %in% names(x)) {
-      gname <- group
-      group <- x[[group]]
-    } else {
-      gname <- NULL
-    }
-    if (is.null(traits)) {
-      numeric_cols <- names(x)[vapply(x, is.numeric, logical(1))]
-      same <- vapply(numeric_cols, function(v) {
-        length(group) == nrow(x) && isTRUE(all.equal(x[[v]], group, check.attributes = FALSE))
-      }, logical(1))
-      traits <- setdiff(numeric_cols[!same], gname)
-    }
-    if (!is.character(traits) || !all(traits %in% names(x))) {
-      stop("drift_test(): `traits` must name columns of `x`", call. = FALSE)
-    }
-    x <- as.matrix(x[traits])
+    selected <- drift_columns(x, group, traits)
+    x <- selected$x
+    group <- selected$group
   }
-  if (!is.matrix(x) || !is.numeric(x)) {
-    stop("`x` must be a data frame or a numeric matrix", call. = FALSE)
-  }
-  if (any(is.infinite(x))) stop("drift_test(): `x` has infinite values", call. = FALSE)
-  if (is.null(colnames(x))) colnames(x) <- paste0("trait", seq_len(ncol(x)))
+  x <- drift_matrix(x)
   q <- ncol(x)
-  if (q < 3) stop("the test needs at least three traits", call. = FALSE)
   if (length(group) != nrow(x)) {
     stop("`group` must have one value per row of `x` or name a column", call. = FALSE)
   }
@@ -128,26 +109,106 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
     stop("the sampling correction needs groups with more than one individual; ",
          "use `correct = FALSE`", call. = FALSE)
   }
+  W <- drift_w(W, P, df_within, colnames(x))
+  components <- drift_components(means, W, P, sizes, correct)
+  fit <- stats::lm(log(between) ~ log(eigenvalue), data = components)
+  fit_summary <- suppressWarnings(summary(fit))
+  warn_perfect_fit(fit_summary$r.squared, "all principal components",
+                   "log(between variance) and log(eigenvalue)")
+  coef <- fit_summary$coefficients
+  slope <- coef[2, 1]
+  se <- coef[2, 2]
+  df <- q - 2
+  statistic <- if (se > 0) (slope - 1) / se else if (slope == 1) 0 else Inf * sign(slope - 1)
+  crit <- stats::qt(1 - (1 - level) / 2, df)
+  structure(list(slope = slope, se = se, conf_int = slope + c(-1, 1) * crit * se,
+                 level = level, statistic = statistic,
+                 p_value = 2 * stats::pt(-abs(statistic), df), intercept = coef[1, 1], df = df,
+                 n_groups = nrow(means), n_traits = q, W = W, components = components,
+                 fit = fit),
+            class = "drift_test")
+}
+
+#' the traits (a numeric matrix) and the groups of a data frame given to drift_test(): `group`
+#' may name a column, and `traits` defaults to the numeric columns other than the group
+#' @noRd
+drift_columns <- function(x, group, traits) {
+  if (is.character(group) && length(group) == 1 && group %in% names(x)) {
+    gname <- group
+    group <- x[[group]]
+  } else {
+    gname <- NULL
+  }
+  if (is.null(traits)) {
+    numeric_cols <- names(x)[vapply(x, is.numeric, logical(1))]
+    same <- vapply(numeric_cols, function(v) {
+      length(group) == nrow(x) && isTRUE(all.equal(x[[v]], group, check.attributes = FALSE))
+    }, logical(1))
+    traits <- setdiff(numeric_cols[!same], gname)
+  }
+  if (!is.character(traits) || !all(traits %in% names(x))) {
+    stop("drift_test(): `traits` must name columns of `x`", call. = FALSE)
+  }
+  list(x = as.matrix(x[traits]), group = group)
+}
+
+#' the matrix of traits of drift_test() after checking it: numeric, finite, with three traits
+#' or more, and with names of traits
+#' @noRd
+drift_matrix <- function(x) {
+  if (!is.matrix(x) || !is.numeric(x)) {
+    stop("`x` must be a data frame or a numeric matrix", call. = FALSE)
+  }
+  if (any(is.infinite(x))) stop("drift_test(): `x` has infinite values", call. = FALSE)
+  if (is.null(colnames(x))) colnames(x) <- paste0("trait", seq_len(ncol(x)))
+  if (ncol(x) < 3) stop("the test needs at least three traits", call. = FALSE)
+  x
+}
+
+#' the covariance matrix `W` of drift_test(), named after the traits: the one given, after
+#' checking it, or the pooled covariance within groups `P`
+#' @noRd
+drift_w <- function(W, P, df_within, trait_names) {
+  q <- length(trait_names)
   if (is.null(W)) {
     if (df_within < q) {
       stop("too few individuals within groups to estimate `W`; give `W`", call. = FALSE)
     }
     W <- P
   } else {
-    W <- as.matrix(if (is.data.frame(W)) data.matrix(W) else W)
-    if (!is.numeric(W) || !identical(dim(W), c(q, q)) || !all(is.finite(W)) ||
-          !isSymmetric(unname(W))) {
-      stop("`W` must be a symmetric matrix of finite numbers with one row and column per trait",
-           call. = FALSE)
-    }
-    if (!is.null(rownames(W)) && !is.null(colnames(W))) {
-      if (!setequal(rownames(W), colnames(x)) || !setequal(colnames(W), colnames(x))) {
-        stop("the names of `W` must be those of the traits", call. = FALSE)
-      }
-      W <- W[colnames(x), colnames(x)]
-    }
+    W <- drift_w_given(W, trait_names)
   }
-  dimnames(W) <- list(colnames(x), colnames(x))
+  dimnames(W) <- list(trait_names, trait_names)
+  W
+}
+
+#' the matrix `W` given to drift_test(), after checking it, with rows and columns in the order
+#' of the traits when it has names
+#' @noRd
+drift_w_given <- function(W, trait_names) {
+  q <- length(trait_names)
+  W <- as.matrix(if (is.data.frame(W)) data.matrix(W) else W)
+  valid <- is.numeric(W) && identical(dim(W), c(q, q)) && all(is.finite(W)) &&
+    isSymmetric(unname(W))
+  if (!valid) {
+    stop("`W` must be a symmetric matrix of finite numbers with one row and column per trait",
+         call. = FALSE)
+  }
+  if (!is.null(rownames(W)) && !is.null(colnames(W))) {
+    if (!setequal(rownames(W), trait_names) || !setequal(colnames(W), trait_names)) {
+      stop("the names of `W` must be those of the traits", call. = FALSE)
+    }
+    W <- W[trait_names, trait_names]
+  }
+  W
+}
+
+#' the principal components of `W` in drift_test(): the eigenvalue of each one, the variance
+#' among the group means on it (`between`) and the part of that variance due to sampling,
+#' which is subtracted with `correct`; a data frame
+#' @noRd
+drift_components <- function(means, W, P, sizes, correct) {
+  q <- ncol(means)
   eig <- eigen(W, symmetric = TRUE)
   if (any(eig$values <= sqrt(.Machine$double.eps) * max(abs(eig$values)))) {
     stop("`W` must be positive definite", call. = FALSE)
@@ -165,24 +226,8 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
     stop("on some components the variance among group means is no larger than their sampling ",
          "error; measure more individuals per group or use `correct = FALSE`", call. = FALSE)
   }
-  components <- data.frame(component = seq_len(q), eigenvalue = eig$values, sampling = sampling,
-                           between = between)
-  fit <- stats::lm(log(between) ~ log(eigenvalue), data = components)
-  fit_summary <- suppressWarnings(summary(fit))
-  warn_perfect_fit(fit_summary$r.squared, "all principal components",
-                   "log(between variance) and log(eigenvalue)")
-  coef <- fit_summary$coefficients
-  slope <- coef[2, 1]
-  se <- coef[2, 2]
-  df <- q - 2
-  statistic <- if (se > 0) (slope - 1) / se else if (slope == 1) 0 else Inf * sign(slope - 1)
-  crit <- stats::qt(1 - (1 - level) / 2, df)
-  structure(list(slope = slope, se = se, conf_int = slope + c(-1, 1) * crit * se,
-                 level = level, statistic = statistic,
-                 p_value = 2 * stats::pt(-abs(statistic), df), intercept = coef[1, 1], df = df,
-                 n_groups = nrow(means), n_traits = q, W = W, components = components,
-                 fit = fit),
-            class = "drift_test")
+  data.frame(component = seq_len(q), eigenvalue = eig$values, sampling = sampling,
+             between = between)
 }
 
 #' @export

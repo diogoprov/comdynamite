@@ -194,53 +194,19 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
                               level = 0.95, na_action = c("omit", "fail")) {
   cite_method("population_shifts")
   na_action <- match.arg(na_action)
-  check_string(trait, "trait")
-  check_string(site, "site")
-  check_string(species, "species")
-  check_column_names(env, "env")
-  if (anyDuplicated(env)) stop("`env` has repeated names", call. = FALSE)
-  check_string(abundance, "abundance", null_ok = TRUE)
-  check_flag(species_slopes, "species_slopes")
-  check_count(nboot, "nboot", min = 0)
-  check_number(level, "level", 0, 1, open = TRUE)
-  if (!is.null(width) && (!is.numeric(width) || length(width) == 0 ||
-                            !all(is.finite(width)) || any(width <= 0))) {
-    stop("`width` must be one or more finite numbers greater than 0, or NULL", call. = FALSE)
-  }
-  if (is.null(community) && is.null(abundance)) {
-    stop("give the `abundance` column or a `community` matrix", call. = FALSE)
-  }
+  check_shifts_arguments(trait, site, species, env, abundance, species_slopes, nboot, level,
+                         width, community)
   columns <- c(trait, site, species, env, if (is.null(community)) abundance)
   check_data_columns(individuals, columns)
-  d <- individuals[handle_missing(individuals[columns], na_action,
-                                  paste0("`", paste(columns, collapse = "`, `"), "`")),
-                   columns]
   env_cols <- paste0(".env", seq_along(env))
-  names(d) <- c("trait", "site", "species", env_cols, if (is.null(community)) "abundance")
-  numeric_cols <- c("trait", env_cols, if (is.null(community)) "abundance")
-  if (!all(vapply(d[numeric_cols], is.numeric, logical(1)))) {
-    stop("trait, environment and abundance must be numeric", call. = FALSE)
-  }
-  d$site <- as.character(d$site)
-  d$species <- as.character(d$species)
-  if (length(env) > 1) {
-    site_env <- d[!duplicated(d$site), env_cols, drop = FALSE]
-    names(site_env) <- env
-    check_collinear(cbind(`(Intercept)` = 1, as.matrix(site_env)), "`env`")
-  }
+  d <- shifts_data(individuals, columns, env, env_cols, is.null(community), na_action)
   if (!is.null(community)) community <- check_community(community, d)
   slope_names <- if (length(env) == 1) "local_adaptation" else
     paste0("local_adaptation_", env)
   prep <- shifts_prepare(d, env_cols, community, warn = TRUE)
   fit <- shifts_fit_full(prep, width, species_slopes, slope_names)
   prep <- fit$prep
-  if (is.null(width) && !is.na(fit$table$displacement) && (fit$boundary || fit$flat)) {
-    why <- c(if (fit$boundary) "the best width is at an end of the grid",
-             if (fit$flat) sprintf("the residual sum of squares changes by %.1f%% along the grid",
-                                   100 * fit$rss_change))
-    warning(paste(why, collapse = " and "), ": `w` and `c` are poorly identified; see ",
-            "plot(), give `width` or use `nboot`", call. = FALSE)
-  }
+  if (is.null(width)) warn_weak_width(fit)
   out <- fit$table
   if (nboot > 0) out <- shifts_bootstrap(out, fit, prep, d, env_cols, community, width,
                                          species_slopes, slope_names, nboot, level)
@@ -255,6 +221,67 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   }
   class(out) <- c("population_shifts", class(out))
   out
+}
+
+#' warns when the profile of the fit (from shifts_fit()) identifies the width of the kernel
+#' poorly: the best width at an end of the grid, or a flat residual sum of squares
+#' @noRd
+warn_weak_width <- function(fit) {
+  if (!is.na(fit$table$displacement) && (fit$boundary || fit$flat)) {
+    why <- c(if (fit$boundary) "the best width is at an end of the grid",
+             if (fit$flat) sprintf("the residual sum of squares changes by %.1f%% along the grid",
+                                   100 * fit$rss_change))
+    warning(paste(why, collapse = " and "), ": `w` and `c` are poorly identified; see ",
+            "plot(), give `width` or use `nboot`", call. = FALSE)
+  }
+  invisible(NULL)
+}
+
+#' checks the arguments of population_shifts() other than the data
+#' @noRd
+check_shifts_arguments <- function(trait, site, species, env, abundance, species_slopes,
+                                   nboot, level, width, community) {
+  check_string(trait, "trait")
+  check_string(site, "site")
+  check_string(species, "species")
+  check_column_names(env, "env")
+  if (anyDuplicated(env)) stop("`env` has repeated names", call. = FALSE)
+  check_string(abundance, "abundance", null_ok = TRUE)
+  check_flag(species_slopes, "species_slopes")
+  check_count(nboot, "nboot", min = 0)
+  check_number(level, "level", 0, 1, open = TRUE)
+  bad_width <- !is.null(width) && (!is.numeric(width) || length(width) == 0 ||
+                                     !all(is.finite(width)) || any(width <= 0))
+  if (bad_width) {
+    stop("`width` must be one or more finite numbers greater than 0, or NULL", call. = FALSE)
+  }
+  if (is.null(community) && is.null(abundance)) {
+    stop("give the `abundance` column or a `community` matrix", call. = FALSE)
+  }
+  invisible(NULL)
+}
+
+#' the rows of `individuals` without missing values in `columns`, with the columns renamed to
+#' trait, site, species, .env1, .env2, ... and abundance (when `with_abundance`), after checking
+#' their types and that the environmental variables are not collinear
+#' @noRd
+shifts_data <- function(individuals, columns, env, env_cols, with_abundance, na_action) {
+  d <- individuals[handle_missing(individuals[columns], na_action,
+                                  paste0("`", paste(columns, collapse = "`, `"), "`")),
+                   columns]
+  names(d) <- c("trait", "site", "species", env_cols, if (with_abundance) "abundance")
+  numeric_cols <- c("trait", env_cols, if (with_abundance) "abundance")
+  if (!all(vapply(d[numeric_cols], is.numeric, logical(1)))) {
+    stop("trait, environment and abundance must be numeric", call. = FALSE)
+  }
+  d$site <- as.character(d$site)
+  d$species <- as.character(d$species)
+  if (length(env) > 1) {
+    site_env <- d[!duplicated(d$site), env_cols, drop = FALSE]
+    names(site_env) <- env
+    check_collinear(cbind(`(Intercept)` = 1, as.matrix(site_env)), "`env`")
+  }
+  d
 }
 
 #' checks the community matrix and returns it as a numeric matrix
@@ -305,35 +332,10 @@ shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
   }, numeric(length(species_mean))), length(species_mean),
   dimnames = list(names(species_mean), env_cols))
   sites <- unique(pops$site)
-  members <- lapply(sites, function(s) {
-    ix <- which(pops$site == s)
-    if (is.null(community)) {
-      return(list(ix = ix, share = d$abundance[first][ix], ext_mean = numeric(0),
-                  ext_base = numeric(0), ext_gap = matrix(0, 0, length(env_cols)),
-                  ext_share = numeric(0)))
-    }
-    row <- community[s, , drop = FALSE][1, ]
-    measured <- pmax(row[pops$species[ix]], pops$n[ix])
-    others <- setdiff(names(row)[row > 0], pops$species[ix])
-    others <- others[others %in% names(species_mean)]
-    # environment of the site minus the mean environment of the species elsewhere, so that
-    # the mean of an unmeasured competitor can follow the gradient (see shifts_follow())
-    site_env <- unlist(pops[ix[1], env_cols])
-    gap <- matrix(rep(site_env, each = length(others)), length(others), length(env_cols)) -
-      species_env[others, , drop = FALSE]
-    list(ix = ix, share = unname(measured), ext_mean = unname(species_mean[others]),
-         ext_base = unname(species_mean[others]), ext_gap = unname(gap),
-         ext_share = unname(row[others]), ext_species = others)
-  })
-  dropped <- character(0)
-  if (!is.null(community)) {
-    present <- colnames(community)[colSums(community[sites, , drop = FALSE]) > 0]
-    dropped <- setdiff(present, names(species_mean))
-    if (warn && length(dropped) > 0) {
-      warning("species in `community` that were never measured are left out of the push: ",
-              toString(dropped), call. = FALSE)
-    }
-  }
+  members <- lapply(sites, shifts_members, pops = pops, abundance = d$abundance[first],
+                    community = community, species_mean = species_mean,
+                    species_env = species_env, env_cols = env_cols)
+  warn_never_measured(community, sites, names(species_mean), warn)
   for (k in seq_along(members)) {
     total <- sum(members[[k]]$share) + sum(members[[k]]$ext_share)
     members[[k]]$share <- members[[k]]$share / total
@@ -351,6 +353,47 @@ shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
   }
   list(pops = pops, halves = halves, members = members, use = use, env_cols = env_cols,
        within_sd = within_sd, spread = spread, floor = floor, n_pops = n_pops)
+}
+
+#' the competitors of the populations of site `s`: the rows of `pops` of the site (`ix`), their
+#' shares of the community and, with a `community` matrix, the species of the site that were
+#' not measured there (their mean elsewhere, the gap between the environment of the site and
+#' their mean environment, and their shares); a list
+#' @noRd
+shifts_members <- function(s, pops, abundance, community, species_mean, species_env,
+                           env_cols) {
+  ix <- which(pops$site == s)
+  if (is.null(community)) {
+    return(list(ix = ix, share = abundance[ix], ext_mean = numeric(0),
+                ext_base = numeric(0), ext_gap = matrix(0, 0, length(env_cols)),
+                ext_share = numeric(0)))
+  }
+  row <- community[s, , drop = FALSE][1, ]
+  measured <- pmax(row[pops$species[ix]], pops$n[ix])
+  others <- setdiff(names(row)[row > 0], pops$species[ix])
+  others <- others[others %in% names(species_mean)]
+  # environment of the site minus the mean environment of the species elsewhere, so that
+  # the mean of an unmeasured competitor can follow the gradient (see shifts_follow())
+  site_env <- unlist(pops[ix[1], env_cols])
+  gap <- matrix(rep(site_env, each = length(others)), length(others), length(env_cols)) -
+    species_env[others, , drop = FALSE]
+  list(ix = ix, share = unname(measured), ext_mean = unname(species_mean[others]),
+       ext_base = unname(species_mean[others]), ext_gap = unname(gap),
+       ext_share = unname(row[others]), ext_species = others)
+}
+
+#' warns (when `warn`) of the species of the `community` matrix present in the `sites` that
+#' were never measured
+#' @noRd
+warn_never_measured <- function(community, sites, measured, warn) {
+  if (is.null(community)) return(invisible(NULL))
+  present <- colnames(community)[colSums(community[sites, , drop = FALSE]) > 0]
+  dropped <- setdiff(present, measured)
+  if (warn && length(dropped) > 0) {
+    warning("species in `community` that were never measured are left out of the push: ",
+            toString(dropped), call. = FALSE)
+  }
+  invisible(NULL)
 }
 
 #' push of the competitors of each population, with `own` as the population's own mean
@@ -426,6 +469,56 @@ shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
 shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = TRUE) {
   use <- prep$use
   pops <- prep$pops
+  design <- shifts_design(prep, species_slopes, slope_names)
+  y <- design$y
+  slope_species <- design$slope_species
+  search <- shifts_width_search(prep, width, function(w) {
+    shifts_fit_width(w, prep, design, displacement)
+  })
+  grid <- search$grid
+  fits <- search$fits
+  rss <- search$rss
+  best <- which.min(rss)
+  slopes_of <- function(coef) {
+    if (!species_slopes) return(coef[slope_names])
+    vapply(slope_names, function(v) {
+      mean(coef[startsWith(names(coef), paste0(v, "\r"))], na.rm = TRUE)
+    }, numeric(1))
+  }
+  total <- sum(y^2)
+  profile <- data.frame(width = grid, rss = rss, r_squared = 1 - rss / total,
+                        displacement = vapply(fits, function(f) f$coef[["displacement"]],
+                                              numeric(1)))
+  profile <- cbind(profile, do.call(rbind, lapply(fits, function(f) slopes_of(f$coef))))
+  coef <- fits[[best]]$coef
+  table <- data.frame(as.list(slopes_of(coef)), displacement = coef[["displacement"]],
+                      width = grid[best], r_squared = 1 - rss[best] / total,
+                      n_populations = sum(use), n_species = length(slope_species),
+                      check.names = FALSE)
+  species_table <- NULL
+  if (species_slopes) {
+    species_table <- do.call(rbind, lapply(slope_names, function(v) {
+      data.frame(species = slope_species, variable = v,
+                 slope = unname(coef[paste(v, slope_species, sep = "\r")]))
+    }))
+  }
+  model <- data.frame(site = rep(pops$site[use], 2), species = design$sp,
+                      half = rep(1:2, each = sum(use)), response = y,
+                      fitted = y - fits[[best]]$residuals, residual = fits[[best]]$residuals,
+                      stringsAsFactors = FALSE)
+  list(table = table, coef = coef, profile = profile, boundary = search$boundary,
+       flat = search$flat, model = model, rss_change = search$rss_change,
+       species_slopes = species_table, slope_species = slope_species)
+}
+
+#' the response and the slope columns of the model of population shifts, centred within
+#' species: the two halves of the populations used (`y`), their species (`sp`), the
+#' environment (`e`, one column per variable, or per variable and species with
+#' `species_slopes`) and the species with slopes (`slope_species`); a list
+#' @noRd
+shifts_design <- function(prep, species_slopes, slope_names) {
+  use <- prep$use
+  pops <- prep$pops
   sp <- rep(pops$species[use], 2)
   centre <- function(v) v - stats::ave(v, sp)
   y <- centre(c(prep$halves[use, 1], prep$halves[use, 2]))
@@ -441,19 +534,34 @@ shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = 
       x
     }))
   }
-  fit_width <- function(w) {
-    # without displacement, a column of zeros leaves `c` at NA and the slopes alone
-    push <- if (displacement) {
-      centre(c(shifts_push(prep, prep$halves[, 2], w)[use],
-               shifts_push(prep, prep$halves[, 1], w)[use]))
-    } else numeric(length(y))
-    x <- cbind(e, displacement = push)
-    keep <- colSums(x^2) > 0
-    coef <- stats::setNames(rep(NA_real_, ncol(x)), colnames(x))
-    fit <- stats::lm.fit(x[, keep, drop = FALSE], y)
-    coef[keep] <- fit$coefficients
-    list(coef = coef, rss = sum(fit$residuals^2), residuals = fit$residuals)
-  }
+  list(y = y, e = e, sp = sp, slope_species = slope_species, centre = centre)
+}
+
+#' least-squares fit of the model of population shifts with a kernel of width `w`: the
+#' coefficients (NA for columns of zeros), the residual sum of squares and the residuals
+#' @noRd
+shifts_fit_width <- function(w, prep, design, displacement) {
+  use <- prep$use
+  y <- design$y
+  # without displacement, a column of zeros leaves `c` at NA and the slopes alone
+  push <- if (displacement) {
+    design$centre(c(shifts_push(prep, prep$halves[, 2], w)[use],
+                    shifts_push(prep, prep$halves[, 1], w)[use]))
+  } else numeric(length(y))
+  x <- cbind(design$e, displacement = push)
+  keep <- colSums(x^2) > 0
+  coef <- stats::setNames(rep(NA_real_, ncol(x)), colnames(x))
+  fit <- stats::lm.fit(x[, keep, drop = FALSE], y)
+  coef[keep] <- fit$coefficients
+  list(coef = coef, rss = sum(fit$residuals^2), residuals = fit$residuals)
+}
+
+#' fits of the model (`fit_width()`) over the widths given or, with `width = NULL`, over a
+#' grid of 21 widths and the width that refines the best of them; returns the widths (`grid`),
+#' the fits and their residual sums of squares (`fits`, `rss`), whether the best width is at
+#' an end of the grid (`boundary`) and how flat the profile is (`flat`, `rss_change`)
+#' @noRd
+shifts_width_search <- function(prep, width, fit_width) {
   grid <- if (is.null(width)) {
     exp(seq(log(prep$floor), log(4 * prep$spread), length.out = 21))
   } else width
@@ -479,37 +587,8 @@ shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = 
     fits <- c(fits, list(fit_width(refined)))
     rss <- c(rss, fits[[length(fits)]]$rss)
   }
-  best <- which.min(rss)
-  slopes_of <- function(coef) {
-    if (!species_slopes) return(coef[slope_names])
-    vapply(slope_names, function(v) {
-      mean(coef[startsWith(names(coef), paste0(v, "\r"))], na.rm = TRUE)
-    }, numeric(1))
-  }
-  total <- sum(y^2)
-  profile <- data.frame(width = grid, rss = rss, r_squared = 1 - rss / total,
-                        displacement = vapply(fits, function(f) f$coef[["displacement"]],
-                                              numeric(1)))
-  profile <- cbind(profile, do.call(rbind, lapply(fits, function(f) slopes_of(f$coef))))
-  coef <- fits[[best]]$coef
-  table <- data.frame(as.list(slopes_of(coef)), displacement = coef[["displacement"]],
-                      width = grid[best], r_squared = 1 - rss[best] / total,
-                      n_populations = sum(use), n_species = length(slope_species),
-                      check.names = FALSE)
-  species_table <- NULL
-  if (species_slopes) {
-    species_table <- do.call(rbind, lapply(slope_names, function(v) {
-      data.frame(species = slope_species, variable = v,
-                 slope = unname(coef[paste(v, slope_species, sep = "\r")]))
-    }))
-  }
-  model <- data.frame(site = rep(pops$site[use], 2), species = sp,
-                      half = rep(1:2, each = sum(use)), response = y,
-                      fitted = y - fits[[best]]$residuals, residual = fits[[best]]$residuals,
-                      stringsAsFactors = FALSE)
-  list(table = table, coef = coef, profile = profile, boundary = boundary, flat = flat,
-       model = model,
-       rss_change = rss_change, species_slopes = species_table, slope_species = slope_species)
+  list(grid = grid, fits = fits, rss = rss, boundary = boundary, flat = flat,
+       rss_change = rss_change)
 }
 
 #' variance of populations about the model from squared residuals (already scaled for the
@@ -534,86 +613,117 @@ population_variance <- function(r2, sampling, iter = 50) {
 #' @noRd
 shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, species_slopes,
                              slope_names, nboot, level) {
-  pops <- prep$pops
-  env <- as.matrix(pops[env_cols])
-  n_used <- pops$n[prep$use]
-  sampling <- if (is.finite(prep$within_sd)) prep$within_sd^2 / n_used else 0
-  within_sd <- if (is.finite(prep$within_sd)) prep$within_sd else 0
   c_hat <- out$displacement
   w_hat <- out$width
-  # the model that generates the simulations: the species constants and slopes of a fit, the
-  # means before displacement (the observed means minus the push of the fit) and the standard
-  # deviation of populations about them, net of sampling error
-  generator <- function(model, strength) {
-    slopes <- unlist(model$table[slope_names])
-    # slopes of each population's species (the mean slope for species without their own)
-    slope_matrix <- matrix(slopes, nrow(pops), length(slope_names), byrow = TRUE)
-    if (species_slopes) {
-      for (v in seq_along(slope_names)) {
-        s <- model$coef[paste(slope_names[v], pops$species, sep = "\r")]
-        slope_matrix[!is.na(s), v] <- s[!is.na(s)]
-      }
-    }
-    along <- rowSums(env * slope_matrix)
-    pushed <- if (strength > 0) strength * shifts_push(prep, pops$mean, w_hat) else 0
-    base <- pops$mean - along - pushed
-    # constants from the populations that entered the fit, as in its centring within species;
-    # populations of a single individual would add their sampling error to the constants and
-    # through them to the residuals (species without such populations take all of theirs)
-    constant <- stats::ave(base, pops$species)
-    used_constant <- stats::ave(ifelse(prep$use, base, 0), pops$species, FUN = sum) /
-      stats::ave(as.numeric(prep$use), pops$species, FUN = sum)
-    constant[is.finite(used_constant)] <- used_constant[is.finite(used_constant)]
-    residual <- (base - constant)[prep$use]
-    df <- max(sum(prep$use) - length(fit$slope_species) - sum(!is.na(model$coef)), 1)
-    # the sampling error of a mean enters the push removed from it, with slope strength * D,
-    # so only (1 - strength * D)^2 of its sampling variance is left in the residual
-    left <- if (strength > 0) {
-      sampling * (1 - strength * shifts_push_slope(prep, w_hat)[prep$use])^2
-    } else sampling
-    list(mean = constant + along, slopes = slopes, strength = strength,
-         pop_sd = sqrt(population_variance(residual^2 * length(residual) / df, left)))
-  }
-  simulate <- function(g) {
-    strength <- g$strength
-    target <- g$mean + stats::rnorm(nrow(pops), 0, g$pop_sd)
-    m <- target
-    if (strength > 0) {
-      for (mb in prep$members) {
-        k <- length(mb$ix)
-        if (k + length(mb$ext_mean) < 2) next
-        # competitors that were not measured are displaced too, but only measured ones are kept
-        moved <- suppressWarnings(displace(c(target[mb$ix], mb$ext_mean),
-                                           c(mb$share, mb$ext_share), strength, w_hat))
-        m[mb$ix] <- moved[seq_len(k)]
-      }
-    }
-    rows <- rep(seq_len(nrow(pops)), pops$n)
-    sim <- data.frame(trait = m[rows] + stats::rnorm(length(rows), 0, within_sd),
-                      site = pops$site[rows], species = pops$species[rows],
-                      stringsAsFactors = FALSE)
-    for (v in env_cols) sim[[v]] <- pops[[v]][rows]
-    if (is.null(community)) {
-      sim$abundance <- d$abundance[!duplicated(paste(d$site, d$species, sep = "\r"))][rows]
-    }
-    sim_prep <- shifts_prepare(sim, env_cols, community)
-    unlist(shifts_fit_full(sim_prep, width, species_slopes,
-                           slope_names)$table[c(slope_names, "displacement")])
-  }
   draws <- function(g) {
-    t(vapply(seq_len(nboot), function(b) simulate(g), numeric(length(slope_names) + 1)))
+    t(vapply(seq_len(nboot), function(b) {
+      shifts_simulate(g, prep, d, env_cols, community, width, species_slopes, slope_names,
+                      w_hat)
+    }, numeric(length(slope_names) + 1)))
   }
   # the null simulations come from the fit without displacement, as a test under the null
   # should; slopes fitted with the push would carry its error into the deviations of
   # populations and exaggerate the bias of `c` that they cause
-  null_model <- generator(shifts_fit(prep, 1, species_slopes, slope_names,
-                                     displacement = FALSE), 0)
+  null_model <- shifts_generator(shifts_fit(prep, 1, species_slopes, slope_names,
+                                            displacement = FALSE),
+                                 0, fit, prep, w_hat, species_slopes, slope_names)
   null <- draws(null_model)
   fitted_strength <- if (is.na(c_hat)) 0 else max(c_hat, 0)
   # with c_hat <= 0 the fit restricted to c >= 0 is the fit without displacement
-  fitted_model <- if (fitted_strength > 0) generator(fit, fitted_strength) else null_model
+  fitted_model <- if (fitted_strength > 0) {
+    shifts_generator(fit, fitted_strength, fit, prep, w_hat, species_slopes, slope_names)
+  } else {
+    null_model
+  }
   fitted <- if (fitted_strength > 0) draws(fitted_model) else null
-  alpha <- 1 - level
+  out <- shifts_intervals(out, null, fitted, fitted_strength, fitted_model$slopes,
+                          slope_names, 1 - level)
+  draws_table <- rbind(data.frame(set = "null", null, check.names = FALSE),
+                       data.frame(set = "fitted", fitted, check.names = FALSE))
+  attr(draws_table, "population_sd") <- c(null = null_model$pop_sd,
+                                          fitted = fitted_model$pop_sd)
+  attr(out, "draws") <- draws_table
+  out
+}
+
+#' the model that generates the simulations of the bootstrap: the species constants and slopes
+#' of a fit (`model`), the means before displacement (the observed means minus the push of the
+#' fit, of strength `strength` and width `w_hat`) and the standard deviation of populations
+#' about them, net of sampling error; a list
+#' @noRd
+shifts_generator <- function(model, strength, fit, prep, w_hat, species_slopes, slope_names) {
+  pops <- prep$pops
+  sampling <- if (is.finite(prep$within_sd)) prep$within_sd^2 / pops$n[prep$use] else 0
+  slopes <- unlist(model$table[slope_names])
+  # slopes of each population's species (the mean slope for species without their own)
+  slope_matrix <- matrix(slopes, nrow(pops), length(slope_names), byrow = TRUE)
+  if (species_slopes) {
+    for (v in seq_along(slope_names)) {
+      s <- model$coef[paste(slope_names[v], pops$species, sep = "\r")]
+      slope_matrix[!is.na(s), v] <- s[!is.na(s)]
+    }
+  }
+  along <- rowSums(as.matrix(pops[prep$env_cols]) * slope_matrix)
+  pushed <- if (strength > 0) strength * shifts_push(prep, pops$mean, w_hat) else 0
+  base <- pops$mean - along - pushed
+  # constants from the populations that entered the fit, as in its centring within species;
+  # populations of a single individual would add their sampling error to the constants and
+  # through them to the residuals (species without such populations take all of theirs)
+  constant <- stats::ave(base, pops$species)
+  used_constant <- stats::ave(ifelse(prep$use, base, 0), pops$species, FUN = sum) /
+    stats::ave(as.numeric(prep$use), pops$species, FUN = sum)
+  constant[is.finite(used_constant)] <- used_constant[is.finite(used_constant)]
+  residual <- (base - constant)[prep$use]
+  df <- max(sum(prep$use) - length(fit$slope_species) - sum(!is.na(model$coef)), 1)
+  # the sampling error of a mean enters the push removed from it, with slope strength * D,
+  # so only (1 - strength * D)^2 of its sampling variance is left in the residual
+  left <- if (strength > 0) {
+    sampling * (1 - strength * shifts_push_slope(prep, w_hat)[prep$use])^2
+  } else sampling
+  list(mean = constant + along, slopes = slopes, strength = strength,
+       pop_sd = sqrt(population_variance(residual^2 * length(residual) / df, left)))
+}
+
+#' one simulation of the bootstrap: individuals drawn with the design of the data from the
+#' generating model `g` (see shifts_generator()), and the slopes and displacement fitted to them
+#' @noRd
+shifts_simulate <- function(g, prep, d, env_cols, community, width, species_slopes,
+                            slope_names, w_hat) {
+  pops <- prep$pops
+  within_sd <- if (is.finite(prep$within_sd)) prep$within_sd else 0
+  strength <- g$strength
+  target <- g$mean + stats::rnorm(nrow(pops), 0, g$pop_sd)
+  m <- target
+  if (strength > 0) {
+    for (mb in prep$members) {
+      k <- length(mb$ix)
+      if (k + length(mb$ext_mean) < 2) next
+      # competitors that were not measured are displaced too, but only measured ones are kept
+      moved <- suppressWarnings(displace(c(target[mb$ix], mb$ext_mean),
+                                         c(mb$share, mb$ext_share), strength, w_hat))
+      m[mb$ix] <- moved[seq_len(k)]
+    }
+  }
+  rows <- rep(seq_len(nrow(pops)), pops$n)
+  sim <- data.frame(trait = m[rows] + stats::rnorm(length(rows), 0, within_sd),
+                    site = pops$site[rows], species = pops$species[rows],
+                    stringsAsFactors = FALSE)
+  for (v in env_cols) sim[[v]] <- pops[[v]][rows]
+  if (is.null(community)) {
+    sim$abundance <- d$abundance[!duplicated(paste(d$site, d$species, sep = "\r"))][rows]
+  }
+  sim_prep <- shifts_prepare(sim, env_cols, community)
+  unlist(shifts_fit_full(sim_prep, width, species_slopes,
+                         slope_names)$table[c(slope_names, "displacement")])
+}
+
+#' adds to the table of estimates `out` the bias-corrected displacement, its test against the
+#' `null` draws and the basic intervals (of size `alpha`) of displacement and slopes from the
+#' `fitted` draws, generated with displacement `fitted_strength` and slopes `fitted_slopes`
+#' @noRd
+shifts_intervals <- function(out, null, fitted, fitted_strength, fitted_slopes, slope_names,
+                             alpha) {
+  c_hat <- out$displacement
   # basic interval: the estimate minus the error of the simulations about the value that
   # generated them
   basic <- function(estimate, values, truth = estimate) {
@@ -636,15 +746,10 @@ shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, spec
                                    na.rm = TRUE)) / (1 + sum(!is.na(c_null)))
   }
   for (v in slope_names) {
-    interval <- basic(out[[v]], fitted[, v], fitted_model$slopes[[v]])
+    interval <- basic(out[[v]], fitted[, v], fitted_slopes[[v]])
     out[[paste0(v, "_low")]] <- interval[1]
     out[[paste0(v, "_high")]] <- interval[2]
   }
-  draws_table <- rbind(data.frame(set = "null", null, check.names = FALSE),
-                       data.frame(set = "fitted", fitted, check.names = FALSE))
-  attr(draws_table, "population_sd") <- c(null = null_model$pop_sd,
-                                          fitted = fitted_model$pop_sd)
-  attr(out, "draws") <- draws_table
   out
 }
 

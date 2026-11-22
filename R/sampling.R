@@ -162,40 +162,75 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
   if (!is.function(statistic)) stop("`statistic` must be a function or NULL", call. = FALSE)
   by <- if (is.null(cover)) "n" else "cover"
   if (by == "n") {
-    if (is.null(n)) {
-      size <- table(paste(individuals[[site]], individuals[[species]], sep = "\r"))
-      n <- seq(2, max(2, stats::median(size)))
-    }
-    if (!is.numeric(n) || anyNA(n) || any(n < 1) || any(n != round(n))) {
-      stop("`n` must be whole numbers, 1 or more", call. = FALSE)
-    }
-    effort <- sort(unique(n))
+    effort <- rarefaction_sizes(n, individuals, site, species)
   } else {
-    if (!is.numeric(cover) || length(cover) == 0 || anyNA(cover) ||
-          any(cover <= 0 | cover > 1)) {
-      stop("`cover` must be numbers greater than 0 and up to 1", call. = FALSE)
-    }
-    check_sample_size(n, null_ok = TRUE)
+    effort <- rarefaction_covers(cover, n)
     if (is.null(n)) reps <- 1
-    effort <- sort(unique(cover))
   }
   values <- lapply(effort, function(k) {
-    v <- lapply(seq_len(reps), function(r) {
-      d <- if (by == "n") {
-        subsample_individuals(individuals, n = k, min_n = min_n, site = site,
-                              species = species)
-      } else {
-        subsample_individuals(individuals, n = n, cover = k, min_n = min_n, site = site,
-                              species = species, abundance = abundance)
-      }
-      out <- statistic(d)
-      if (!is.numeric(out) || is.null(names(out)) || any(names(out) == "")) {
-        stop("`statistic` must return a named numeric vector", call. = FALSE)
-      }
-      out
-    })
-    do.call(rbind, v)
+    rarefied_statistics(individuals, statistic, by, k, n, reps, min_n, site, species,
+                        abundance)
   })
+  out <- rarefaction_table(values, effort, level)
+  attr(out, "values") <- stats::setNames(values, effort)
+  attr(out, "by") <- by
+  class(out) <- c("trait_rarefaction", class(out))
+  out
+}
+
+#' the numbers of individuals per population to rarefy to: `n`, or from 2 to the median size
+#' of the populations when NULL; sorted and without repeats
+#' @noRd
+rarefaction_sizes <- function(n, individuals, site, species) {
+  if (is.null(n)) {
+    size <- table(paste(individuals[[site]], individuals[[species]], sep = "\r"))
+    n <- seq(2, max(2, stats::median(size)))
+  }
+  if (!is.numeric(n) || anyNA(n) || any(n < 1) || any(n != round(n))) {
+    stop("`n` must be whole numbers, 1 or more", call. = FALSE)
+  }
+  sort(unique(n))
+}
+
+#' the covers to rarefy to, sorted and without repeats, after checking them and the number of
+#' individuals per population `n`
+#' @noRd
+rarefaction_covers <- function(cover, n) {
+  if (!is.numeric(cover) || length(cover) == 0 || anyNA(cover) ||
+        any(cover <= 0 | cover > 1)) {
+    stop("`cover` must be numbers greater than 0 and up to 1", call. = FALSE)
+  }
+  check_sample_size(n, null_ok = TRUE)
+  sort(unique(cover))
+}
+
+#' the statistic of `reps` subsamples of the individuals at effort `k` (individuals per
+#' population with `by = "n"`, cover of the species of each site otherwise); one row per
+#' subsample
+#' @noRd
+rarefied_statistics <- function(individuals, statistic, by, k, n, reps, min_n, site, species,
+                                abundance) {
+  v <- lapply(seq_len(reps), function(r) {
+    d <- if (by == "n") {
+      subsample_individuals(individuals, n = k, min_n = min_n, site = site,
+                            species = species)
+    } else {
+      subsample_individuals(individuals, n = n, cover = k, min_n = min_n, site = site,
+                            species = species, abundance = abundance)
+    }
+    out <- statistic(d)
+    if (!is.numeric(out) || is.null(names(out)) || any(names(out) == "")) {
+      stop("`statistic` must return a named numeric vector", call. = FALSE)
+    }
+    out
+  })
+  do.call(rbind, v)
+}
+
+#' the table of trait_rarefaction(): mean and quantiles of each statistic at each effort, from
+#' the values of the subsamples (`values`, one matrix per effort)
+#' @noRd
+rarefaction_table <- function(values, effort, level) {
   names_out <- colnames(values[[1]])
   rows <- lapply(seq_along(effort), function(i) {
     m <- values[[i]]
@@ -209,9 +244,6 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
   })
   out <- do.call(rbind, rows)
   out$mean[out$reps == 0] <- NA_real_
-  attr(out, "values") <- stats::setNames(values, effort)
-  attr(out, "by") <- by
-  class(out) <- c("trait_rarefaction", class(out))
   out
 }
 

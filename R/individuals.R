@@ -266,6 +266,24 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   source <- match.arg(source)
   check_number(session_sd, "session_sd", lower = 0)
   session <- match.arg(session)
+  check_sampling_design(visits, n, fraction, cover, min_n, displacement, displacement_width,
+                        step)
+  env <- check_step_env(env, step)
+  args <- mget(setdiff(names(formals(sample_individuals)),
+                       c("x", "session_sd", "visits", "session")))
+  if (missing(intraspecific_sd)) args$intraspecific_sd <- NULL
+  if (length(step) <= 1 && visits == 1) {
+    out <- do.call(individuals_at, c(list(x = quote(x)), args))
+    return(session_shift(out, session_sd, if (session == "visit") out$site else 1))
+  }
+  sample_occasions(x, args, step, env, visits, session, session_sd)
+}
+
+#' checks the arguments of sample_individuals() that say how many individuals are measured,
+#' the character displacement and the steps sampled
+#' @noRd
+check_sampling_design <- function(visits, n, fraction, cover, min_n, displacement,
+                                  displacement_width, step) {
   check_count(visits, "visits")
   check_sample_size(n)
   check_number(fraction, "fraction", 0, 1, open = c(TRUE, FALSE), null_ok = TRUE)
@@ -281,21 +299,26 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
     stop("`step` has repeated steps: for several visits to each site at the same step, use ",
          "`visits`", call. = FALSE)
   }
+  invisible(NULL)
+}
+
+#' the environment given to sample_individuals(): a matrix of one column becomes a vector when
+#' one step is sampled, and a matrix must have one column per step
+#' @noRd
+check_step_env <- function(env, step) {
   if (is.matrix(env) && ncol(env) == 1 && length(step) <= 1) env <- env[, 1]
   if (is.matrix(env) && ncol(env) != max(1, length(step))) {
     stop("`env` as a matrix needs one column per step (", max(1, length(step)), ")",
          call. = FALSE)
   }
-  args <- mget(setdiff(names(formals(sample_individuals)),
-                       c("x", "session_sd", "visits", "session")))
-  if (missing(intraspecific_sd)) args$intraspecific_sd <- NULL
-  if (length(step) <= 1 && visits == 1) {
-    out <- do.call(individuals_at, c(list(x = quote(x)), args))
-    return(session_shift(out, session_sd, if (session == "visit") out$site else 1))
-  }
-  # several dates or visits: each is sampled on its own, with the deviations of each population
-  # (of `population_sd` and `founder_sd`) kept across them, and a shift shared by the
-  # individuals of each session
+  env
+}
+
+#' individuals of several dates or visits: each is sampled on its own, with the deviations of
+#' each population (of `population_sd` and `founder_sd`) kept across them, and a shift shared
+#' by the individuals of each session; `args` are the arguments of individuals_at()
+#' @noRd
+sample_occasions <- function(x, args, step, env, visits, session, session_sd) {
   dims <- dim(x$abundance)
   args$draws <- list(population = matrix(stats::rnorm(prod(dims)), dims[1]),
                      founder = matrix(stats::rnorm(prod(dims)), dims[1]))
@@ -344,11 +367,7 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                            displacement_width = NULL, step = NULL, env = NULL,
                            cover = NULL, min_n = 1, founder_sd = 0, monopolization = 0,
                            gene_flow = 1, source = "traits", draws = NULL) {
-  recorded <- dimnames(x$evolution$history)
-  if (source == "evolution" && !is.null(step) && step == x$n_steps &&
-      !step_label(step) %in% recorded[[length(recorded)]]) {
-    step <- NULL
-  }
+  if (source == "evolution") step <- evolved_sampling_step(x, step)
   if (source == "evolution" && length(dim(x$evolution$genetic)) == 3) {
     return(individuals_mv(x, n = n, fraction = fraction, step = step, env = env,
                           cover = cover, min_n = min_n,
@@ -359,32 +378,122 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                     !is.null(displacement_width), any(gene_flow != 1))))
   }
   if (source == "evolution") {
-    if (is.null(x$evolution$genetic)) {
-      stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
-    }
-    check_no_env(env)
-    env <- evolved_environment(x, step)
-    if (any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
-        any(founder_sd != 0) || any(monopolization != 0)) {
-      stop("with `source = \"evolution\"`, population means come from the simulation: ",
-           "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
-           "`monopolization` must stay 0", call. = FALSE)
-    }
+    env <- evolved_sampling_env(x, step, env, local_adaptation, population_sd, displacement,
+                                founder_sd, monopolization)
     extra_sd <- if (missing(intraspecific_sd)) 0 else intraspecific_sd
   }
   abundance <- sampled_abundance(x, step)
   sites <- rownames(abundance)
   species <- colnames(abundance)
-  k <- length(species)
   niche <- sim_niche(x)
+  env <- site_environment(env, niche, length(sites))
+  par <- population_parameters(species, local_adaptation, population_sd, intraspecific_sd,
+                               founder_sd, monopolization, gene_flow)
+  historical <- any(par$founder_sd > 0) || any(par$monopolization > 0)
+  history <- if (historical) {
+    arrival_terms(x, step, sites, species, par$monopolization, par$gene_flow)
+  }
+  # `n`, `fraction`, `cover` and `min_n` were checked by sample_individuals()
+  measured <- measured_individuals(abundance, n, fraction, cover, min_n)
+  theta <- niche$traits[species, "optimum"]
+  ind_var <- NULL
+  if (source == "evolution") {
+    state <- evolved_populations(x, sites, species, step)
+    pop_mean <- state$mean
+    # negative values were refused with `intraspecific_sd` above
+    extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
+    ind_var <- sweep(state$var, 2, extra_sd^2, "+")
+    measured[is.na(pop_mean)] <- 0
+  } else {
+    pop_mean <- trait_population_means(env, theta, par, history, draws, abundance,
+                                       displacement, displacement_width, niche)
+  }
+  individuals_table(measured, sites, species, abundance, env, theta, pop_mean,
+                    history$arrival, par$intraspecific_sd, ind_var)
+}
+
+#' the table of individuals of one date: one row per individual measured (`measured`, sites x
+#' species), with its trait drawn around the mean of its population with the standard deviation
+#' of its species (`ind_sd`) or the variance of its population (`ind_var`, when given)
+#' @noRd
+individuals_table <- function(measured, sites, species, abundance, env, theta, pop_mean,
+                              arrival, ind_sd, ind_var = NULL) {
+  at <- measured_rows(measured, length(sites))
+  rows <- at$rows
+  out <- data.frame(site = sites[at$site_of][rows], species = species[at$species_of][rows],
+                    individual = sequence(at$counts),
+                    abundance = as.vector(abundance)[at$occupied][rows],
+                    env = env[at$site_of][rows], optimum = theta[at$species_of][rows],
+                    population_mean = pop_mean[at$occupied][rows], stringsAsFactors = FALSE)
+  if (!is.null(arrival)) out$arrival <- arrival[at$occupied][rows]
+  spread <- if (is.null(ind_var)) ind_sd[at$species_of][rows] else
+    sqrt(ind_var[at$occupied][rows])
+  out$trait <- out$population_mean + stats::rnorm(nrow(out)) * spread
+  out
+}
+
+#' the environment of each site: `env`, or that of the landscape when NULL, after checking
+#' that the simulation has one environmental axis and that there is one number per site
+#' @noRd
+site_environment <- function(env, niche, n_sites) {
   if (niche$n_axes > 1) {
     stop("sample_individuals() needs a simulation with one environmental axis, not ",
          niche$n_axes, call. = FALSE)
   }
   if (is.null(env)) env <- niche$env
-  if (!is.numeric(env) || length(env) != length(sites) || anyNA(env)) {
-    stop("`env` needs one number per site (", length(sites), ")", call. = FALSE)
+  if (!is.numeric(env) || length(env) != n_sites || anyNA(env)) {
+    stop("`env` needs one number per site (", n_sites, ")", call. = FALSE)
   }
+  env
+}
+
+#' the step to sample of a simulation with evolution: NULL (the state at the end) for the last
+#' step when it was not recorded
+#' @noRd
+evolved_sampling_step <- function(x, step) {
+  recorded <- dimnames(x$evolution$history)
+  if (!is.null(step) && step == x$n_steps &&
+      !step_label(step) %in% recorded[[length(recorded)]]) {
+    step <- NULL
+  }
+  step
+}
+
+#' the environment of a simulation with evolution at the sampled step, after checking that the
+#' arguments that build population means from the optima of species keep their defaults
+#' @noRd
+evolved_sampling_env <- function(x, step, env, local_adaptation, population_sd, displacement,
+                                 founder_sd, monopolization) {
+  if (is.null(x$evolution$genetic)) {
+    stop("`source = \"evolution\"` needs a simulation run with `evolution`", call. = FALSE)
+  }
+  check_no_env(env)
+  env <- evolved_environment(x, step)
+  check_means_from_simulation(local_adaptation, population_sd, displacement, founder_sd,
+                              monopolization)
+  env
+}
+
+#' stops when an argument that builds population means from the optima of species was given
+#' with `source = "evolution"`
+#' @noRd
+check_means_from_simulation <- function(local_adaptation, population_sd, displacement,
+                                        founder_sd, monopolization) {
+  given <- any(local_adaptation != 0) || any(population_sd != 0) || any(displacement != 0) ||
+    any(founder_sd != 0) || any(monopolization != 0)
+  if (given) {
+    stop("with `source = \"evolution\"`, population means come from the simulation: ",
+         "`local_adaptation`, `population_sd`, `displacement`, `founder_sd` and ",
+         "`monopolization` must stay 0", call. = FALSE)
+  }
+  invisible(NULL)
+}
+
+#' the parameters of sample_individuals() that take one value or one per species, checked and
+#' with one value per species; a list named after the arguments
+#' @noRd
+population_parameters <- function(species, local_adaptation, population_sd, intraspecific_sd,
+                                  founder_sd, monopolization, gene_flow) {
   h <- per_species(local_adaptation, species, "local_adaptation")
   if (any(h < 0 | h > 1)) stop("`local_adaptation` must be between 0 and 1", call. = FALSE)
   pop_sd <- per_species(population_sd, species, "population_sd")
@@ -398,42 +507,30 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   if (any(found_sd < 0) || any(mono < 0) || any(flow < 0)) {
     stop("`founder_sd`, `monopolization` and `gene_flow` must not be negative", call. = FALSE)
   }
-  historical <- any(found_sd > 0) || any(mono > 0)
-  if (historical) {
-    history <- arrival_terms(x, step, sites, species, mono, flow)
-  }
-  # `n`, `fraction`, `cover` and `min_n` were checked by sample_individuals()
-  if (is.null(fraction)) {
-    measured <- pmin(abundance, n)
+  list(local_adaptation = h, population_sd = pop_sd, intraspecific_sd = ind_sd,
+       founder_sd = found_sd, monopolization = mono, gene_flow = flow)
+}
+
+#' population means (sites x species) built from the optimum of each species (`theta`): the
+#' part of the gap to the environment closed by local adaptation and monopolization, the
+#' deviations of populations and of their founders, and character displacement
+#' @noRd
+trait_population_means <- function(env, theta, par, history, draws, abundance, displacement,
+                                   displacement_width, niche) {
+  n_sites <- length(rownames(abundance))
+  k <- length(colnames(abundance))
+  h <- par$local_adaptation
+  closed <- if (!is.null(history)) {
+    matrix(h, n_sites, k, byrow = TRUE) + sweep(history$adapted, 2, 1 - h, "*")
   } else {
-    measured <- matrix(stats::rbinom(length(abundance), abundance, fraction),
-                       nrow(abundance), dimnames = dimnames(abundance))
+    matrix(h, n_sites, k, byrow = TRUE)
   }
-  if (!is.null(cover)) {
-    dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), k), cover)
-    measured[!dominant] <- 0
-  }
-  measured[measured < min_n] <- 0
-  theta <- niche$traits[species, "optimum"]
-  if (source == "evolution") {
-    state <- evolved_populations(x, sites, species, step)
-    pop_mean <- state$mean
-    # negative values were refused with `intraspecific_sd` above
-    extra_sd <- per_species(extra_sd, species, "intraspecific_sd")
-    ind_var <- sweep(state$var, 2, extra_sd^2, "+")
-    measured[is.na(pop_mean)] <- 0
-  } else {
-  closed <- if (historical) {
-    matrix(h, length(sites), k, byrow = TRUE) + sweep(history$adapted, 2, 1 - h, "*")
-  } else {
-    matrix(h, length(sites), k, byrow = TRUE)
-  }
-  z_pop <- draws$population %||% matrix(stats::rnorm(length(sites) * k), length(sites), k)
-  pop_mean <- matrix(theta, length(sites), k, byrow = TRUE) + closed * outer(env, theta, "-") +
-    sweep(z_pop, 2, pop_sd, "*")
-  if (any(found_sd > 0)) {
-    z_found <- draws$founder %||% matrix(stats::rnorm(length(sites) * k), length(sites), k)
-    founder <- sweep(z_found, 2, found_sd, "*")
+  z_pop <- draws$population %||% matrix(stats::rnorm(n_sites * k), n_sites, k)
+  pop_mean <- matrix(theta, n_sites, k, byrow = TRUE) + closed * outer(env, theta, "-") +
+    sweep(z_pop, 2, par$population_sd, "*")
+  if (any(par$founder_sd > 0)) {
+    z_found <- draws$founder %||% matrix(stats::rnorm(n_sites * k), n_sites, k)
+    founder <- sweep(z_found, 2, par$founder_sd, "*")
     founder <- founder * history$erosion / sqrt(history$propagule)
     founder[is.na(founder)] <- 0
     pop_mean <- pop_mean + founder
@@ -444,32 +541,22 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
       stop("the mean niche breadth is not a positive number: give `displacement_width`",
            call. = FALSE)
     }
-    for (i in seq_along(sites)) {
-      present <- which(abundance[i, ] > 0)
-      if (length(present) < 2) next
-      pop_mean[i, present] <- displace(pop_mean[i, present], abundance[i, present],
-                                       displacement, width)
-    }
+    pop_mean <- displace_sites(pop_mean, abundance, displacement, width)
   }
+  pop_mean
+}
+
+#' character displacement of the population means of each site with two species or more
+#' (see displace()); returns the matrix of means
+#' @noRd
+displace_sites <- function(pop_mean, abundance, displacement, width) {
+  for (i in seq_len(nrow(pop_mean))) {
+    present <- which(abundance[i, ] > 0)
+    if (length(present) < 2) next
+    pop_mean[i, present] <- displace(pop_mean[i, present], abundance[i, present],
+                                     displacement, width)
   }
-  occupied <- which(measured > 0)
-  site_of <- (occupied - 1) %% length(sites) + 1
-  species_of <- (occupied - 1) %/% length(sites) + 1
-  by_site <- order(site_of, species_of)
-  occupied <- occupied[by_site]
-  site_of <- site_of[by_site]
-  species_of <- species_of[by_site]
-  counts <- as.vector(measured)[occupied]
-  rows <- rep(seq_along(occupied), counts)
-  out <- data.frame(site = sites[site_of][rows], species = species[species_of][rows],
-                    individual = sequence(counts),
-                    abundance = as.vector(abundance)[occupied][rows],
-                    env = env[site_of][rows], optimum = theta[species_of][rows],
-                    population_mean = pop_mean[occupied][rows], stringsAsFactors = FALSE)
-  if (historical) out$arrival <- history$arrival[occupied][rows]
-  spread <- if (source == "evolution") sqrt(ind_var[occupied][rows]) else ind_sd[species_of][rows]
-  out$trait <- out$population_mean + stats::rnorm(nrow(out)) * spread
-  out
+  pop_mean
 }
 
 #' T-statistics of intraspecific trait variation
@@ -872,6 +959,12 @@ restore_site_names <- function(x, site_map) {
     }
     return(x)
   }
+  restore_site_dimnames(x, site_map)
+}
+
+#' gives back the names of sites in the dimnames of a matrix, array or data frame
+#' @noRd
+restore_site_dimnames <- function(x, site_map) {
   labels <- dimnames(x)
   if (!is.null(labels)) {
     dimnames(x) <- lapply(labels, function(d) {
@@ -1056,21 +1149,61 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
          "`monopolization` must stay 0 (and `displacement_width` and `gene_flow` unset)",
          call. = FALSE)
   }
-  ev <- x$evolution
   state <- mv_populations(x, step)
   axes <- state$axes
   q <- length(axes)
   abundance <- state$abundance
   sites <- rownames(abundance)
   species <- colnames(abundance)
-  e <- state$env
-  pop <- state$mean
   extra <- intraspecific_sd
   if (length(extra) == 1) extra <- rep(extra, q)
   if (!is.numeric(extra) || length(extra) != q || any(extra < 0)) {
     stop("`intraspecific_sd` needs one value or one per trait (", q, "), not negative",
          call. = FALSE)
   }
+  measured <- measured_individuals(abundance, n, fraction, cover, min_n)
+  measured[is.na(state$mean[, , 1])] <- 0
+  at <- measured_rows(measured, length(sites))
+  rows <- at$rows
+  out <- individuals_frame(at, sites, species, abundance)
+  means <- matrix(state$mean, ncol = q)[at$occupied, , drop = FALSE]
+  values <- mv_individual_values(means[rows, , drop = FALSE], at$species_of[rows], species,
+                                 x$evolution, extra)
+  # plus the variance among the lineages of the species in the site, trait by trait
+  if (!is.null(state$within)) {
+    w <- matrix(state$within, ncol = q)[at$occupied, , drop = FALSE][rows, , drop = FALSE]
+    values <- values + matrix(stats::rnorm(length(w)), nrow(w)) * sqrt(w)
+  }
+  for (a in seq_len(q)) {
+    out[[paste0("env_", axes[a])]] <- state$env[at$site_of, a][rows]
+    out[[paste0("mean_", axes[a])]] <- means[rows, a]
+  }
+  for (a in seq_len(q)) out[[axes[a]]] <- values[, a]
+  attr(out, "traits") <- axes
+  out
+}
+
+#' adds to the population mean of each individual (rows of `values`, one column per trait) its
+#' own deviation, N(0, G + E + extra) of its species (`species_of`, an index of `species`);
+#' returns the matrix of trait values
+#' @noRd
+mv_individual_values <- function(values, species_of, species, ev, extra) {
+  q <- ncol(values)
+  for (j in unique(species_of)) {
+    pick <- which(species_of == j)
+    k <- match(species[j], names(ev$genetic_var))
+    v <- ev$genetic_var[[k]] + ev$env_var[[k]] + diag(extra^2, q)
+    values[pick, ] <- values[pick, , drop = FALSE] +
+      matrix(stats::rnorm(length(pick) * q), length(pick)) %*% t(evolution_root(v))
+  }
+  values
+}
+
+#' number of individuals measured in each population (sites x species, as `abundance`): `n` per
+#' population or a binomial `fraction` of it, none for species outside the `cover` of their site
+#' or with fewer than `min_n`
+#' @noRd
+measured_individuals <- function(abundance, n, fraction, cover, min_n) {
   if (is.null(fraction)) {
     measured <- pmin(abundance, n)
   } else {
@@ -1078,46 +1211,38 @@ individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecifi
                        nrow(abundance), dimnames = dimnames(abundance))
   }
   if (!is.null(cover)) {
-    dominant <- dominant_species(as.vector(abundance), rep(seq_along(sites), length(species)),
-                                 cover)
+    site <- rep(seq_along(rownames(abundance)), length(colnames(abundance)))
+    dominant <- dominant_species(as.vector(abundance), site, cover)
     measured[!dominant] <- 0
   }
-  measured[measured < min_n | is.na(pop[, , 1])] <- 0
+  measured[measured < min_n] <- 0
+  measured
+}
+
+#' where the measured individuals are: for the populations with individuals (`measured > 0`),
+#' ordered by site and then species, their position in the matrix (`occupied`), site and
+#' species (`site_of`, `species_of`) and number of individuals (`counts`), and for each
+#' individual the population it belongs to (`rows`); a list
+#' @noRd
+measured_rows <- function(measured, n_sites) {
   occupied <- which(measured > 0)
-  site_of <- (occupied - 1) %% length(sites) + 1
-  species_of <- (occupied - 1) %/% length(sites) + 1
+  site_of <- (occupied - 1) %% n_sites + 1
+  species_of <- (occupied - 1) %/% n_sites + 1
   by_site <- order(site_of, species_of)
   occupied <- occupied[by_site]
-  site_of <- site_of[by_site]
-  species_of <- species_of[by_site]
   counts <- as.vector(measured)[occupied]
-  rows <- rep(seq_along(occupied), counts)
-  out <- data.frame(site = sites[site_of][rows], species = species[species_of][rows],
-                    individual = sequence(counts),
-                    abundance = as.vector(abundance)[occupied][rows],
-                    stringsAsFactors = FALSE)
-  means <- matrix(pop, ncol = q)[occupied, , drop = FALSE]
-  values <- means[rows, , drop = FALSE]
-  # the deviation of each individual: N(0, G + E + extra), species by species
-  for (j in unique(species_of)) {
-    pick <- which(species_of[rows] == j)
-    k <- match(species[j], names(ev$genetic_var))
-    v <- ev$genetic_var[[k]] + ev$env_var[[k]] + diag(extra^2, q)
-    values[pick, ] <- values[pick, , drop = FALSE] +
-      matrix(stats::rnorm(length(pick) * q), length(pick)) %*% t(evolution_root(v))
-  }
-  # plus the variance among the lineages of the species in the site, trait by trait
-  if (!is.null(state$within)) {
-    w <- matrix(state$within, ncol = q)[occupied, , drop = FALSE][rows, , drop = FALSE]
-    values <- values + matrix(stats::rnorm(length(w)), nrow(w)) * sqrt(w)
-  }
-  for (a in seq_len(q)) {
-    out[[paste0("env_", axes[a])]] <- e[site_of, a][rows]
-    out[[paste0("mean_", axes[a])]] <- means[rows, a]
-  }
-  for (a in seq_len(q)) out[[axes[a]]] <- values[, a]
-  attr(out, "traits") <- axes
-  out
+  list(occupied = occupied, site_of = site_of[by_site], species_of = species_of[by_site],
+       counts = counts, rows = rep(seq_along(occupied), counts))
+}
+
+#' the first columns of the table of individuals (site, species, number of the individual in
+#' its population and abundance of the population), from the list of measured_rows()
+#' @noRd
+individuals_frame <- function(at, sites, species, abundance) {
+  rows <- at$rows
+  data.frame(site = sites[at$site_of][rows], species = species[at$species_of][rows],
+             individual = sequence(at$counts),
+             abundance = as.vector(abundance)[at$occupied][rows], stringsAsFactors = FALSE)
 }
 
 step_label <- function(step) paste0("step", format(step, scientific = FALSE, trim = TRUE))

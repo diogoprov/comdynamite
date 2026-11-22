@@ -51,22 +51,8 @@ tstats_summary <- function(x, level = 0.95) {
   if (!is.data.frame(x) || is.null(null)) {
     stop("`x` must come from tstats() with n_perm > 0", call. = FALSE)
   }
-  # message kept as before (tests/testthat/test-checks.R matches it)
-  if (!is.numeric(level) || length(level) != 1 || !is.finite(level) || level <= 0 ||
-        level >= 1) {
-    stop("`level` must be one number between 0 and 1", call. = FALSE)
-  }
-  if (level < 0.5) {
-    warning("`level` is now the coverage, as in null_intervals() and plot(); ", level,
-            " was read as the size of the test, level = ", 1 - level, call. = FALSE)
-    level <- 1 - level
-  }
-  level <- 1 - level  # size of the two-sided test from here on
+  level <- summary_test_size(level, dim(null)[1])
   ratios <- c("T_IP.IC", "T_IC.IR", "T_PC.PR")
-  if (1 / (1 + dim(null)[1]) >= level / 2) {
-    warning("with ", dim(null)[1], " randomisations no p-value can fall below (1 - level) / 2 = ",
-            level / 2, "; use n_perm >= ", ceiling(2 / level), call. = FALSE)
-  }
   sites <- list()
   traits <- list()
   for (stat in ratios) {
@@ -74,35 +60,11 @@ tstats_summary <- function(x, level = 0.95) {
     sims[!is.finite(sims)] <- NA
     obs <- x[[stat]]
     tested <- site_tests(obs, sims, level)
-    testable <- tested$testable
-    p_low <- tested$p_low
-    p_high <- tested$p_high
-    deviation <- tested$deviation
-    ses <- tested$ses
     sites[[stat]] <- data.frame(site = x$site, trait = x$trait, statistic = stat, observed = obs,
-                                ses = ses, p_low = p_low, p_high = p_high,
-                                deviation = deviation, stringsAsFactors = FALSE)
+                                ses = tested$ses, p_low = tested$p_low, p_high = tested$p_high,
+                                deviation = tested$deviation, stringsAsFactors = FALSE)
     for (tr in unique(x$trait)) {
-      rows <- which(x$trait == tr & testable)
-      if (length(rows) == 0) {
-        mean_low <- mean_high <- NA_real_
-      } else {
-        null_mean <- rowMeans(sims[, rows, drop = FALSE])
-        obs_mean <- mean(obs[rows])
-        ok <- !is.na(null_mean)
-        mean_low <- (1 + sum(null_mean[ok] <= obs_mean)) / (1 + sum(ok))
-        mean_high <- (1 + sum(null_mean[ok] >= obs_mean)) / (1 + sum(ok))
-      }
-      dev <- deviation[rows]
-      traits[[paste(stat, tr)]] <- data.frame(
-        trait = tr, statistic = stat, n_sites = length(rows),
-        percent_low = if (length(rows)) 100 * mean(dev == "low") else NA_real_,
-        percent_high = if (length(rows)) 100 * mean(dev == "high") else NA_real_,
-        mean_ses = if (length(rows)) mean(ses[rows]) else NA_real_,
-        p_mean_low = mean_low, p_mean_high = mean_high,
-        sites_low = paste(x$site[rows][dev == "low"], collapse = " "),
-        sites_high = paste(x$site[rows][dev == "high"], collapse = " "),
-        stringsAsFactors = FALSE)
+      traits[[paste(stat, tr)]] <- trait_tests(x, stat, tr, obs, sims, tested)
     }
   }
   traits <- do.call(rbind, traits)
@@ -111,6 +73,62 @@ tstats_summary <- function(x, level = 0.95) {
   sites <- do.call(rbind, sites)
   rownames(sites) <- NULL
   list(traits = traits, sites = sites)
+}
+
+#' size of the two-sided tests of tstats_summary() from its `level` (the coverage), after
+#' checking it; warns when `level` was given as the size and when the randomisations are too few
+#' for a p-value to fall below half the size
+#' @noRd
+summary_test_size <- function(level, n_null) {
+  check_summary_level(level)
+  if (level < 0.5) {
+    warning("`level` is now the coverage, as in null_intervals() and plot(); ", level,
+            " was read as the size of the test, level = ", 1 - level, call. = FALSE)
+    level <- 1 - level
+  }
+  level <- 1 - level  # size of the two-sided test from here on
+  if (1 / (1 + n_null) >= level / 2) {
+    warning("with ", n_null, " randomisations no p-value can fall below (1 - level) / 2 = ",
+            level / 2, "; use n_perm >= ", ceiling(2 / level), call. = FALSE)
+  }
+  level
+}
+
+#' stops unless `level` is one number between 0 and 1 (both excluded)
+#' @noRd
+check_summary_level <- function(level) {
+  bad <- !is.numeric(level) || length(level) != 1 || !is.finite(level) || level <= 0 ||
+    level >= 1
+  # message kept as before (tests/testthat/test-checks.R matches it)
+  if (bad) stop("`level` must be one number between 0 and 1", call. = FALSE)
+  invisible(level)
+}
+
+#' one row of the table `traits` of tstats_summary(): the sites that deviate from the null
+#' values of a statistic for one trait, and the test of the mean of the statistic among the
+#' sites that can be tested (`tested` comes from site_tests())
+#' @noRd
+trait_tests <- function(x, stat, tr, obs, sims, tested) {
+  rows <- which(x$trait == tr & tested$testable)
+  if (length(rows) == 0) {
+    mean_low <- mean_high <- NA_real_
+  } else {
+    null_mean <- rowMeans(sims[, rows, drop = FALSE])
+    obs_mean <- mean(obs[rows])
+    ok <- !is.na(null_mean)
+    mean_low <- (1 + sum(null_mean[ok] <= obs_mean)) / (1 + sum(ok))
+    mean_high <- (1 + sum(null_mean[ok] >= obs_mean)) / (1 + sum(ok))
+  }
+  dev <- tested$deviation[rows]
+  data.frame(
+    trait = tr, statistic = stat, n_sites = length(rows),
+    percent_low = if (length(rows)) 100 * mean(dev == "low") else NA_real_,
+    percent_high = if (length(rows)) 100 * mean(dev == "high") else NA_real_,
+    mean_ses = if (length(rows)) mean(tested$ses[rows]) else NA_real_,
+    p_mean_low = mean_low, p_mean_high = mean_high,
+    sites_low = paste(x$site[rows][dev == "low"], collapse = " "),
+    sites_high = paste(x$site[rows][dev == "high"], collapse = " "),
+    stringsAsFactors = FALSE)
 }
 
 #' Intraspecific variability and species turnover in community trait means
@@ -221,44 +239,8 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
   site_id <- as.character(individuals[[site]])
   species_id <- as.character(individuals[[species]])
   site_levels <- unique(site_id)
-  model_vars <- all.vars(formula)
-  if (length(model_vars) > 0) {
-    if (!is.data.frame(env) || !site %in% names(env)) {
-      stop("`env` must be a data frame with a column `", site, "`", call. = FALSE)
-    }
-    missing_vars <- setdiff(model_vars, names(env))
-    if (length(missing_vars) > 0) {
-      stop("`env` has no column ", toString(missing_vars), call. = FALSE)
-    }
-    check_unique_sites(as.character(env[[site]]), "`env`")
-    rows <- match(site_levels, as.character(env[[site]]))
-    if (anyNA(rows)) stop("`env` lacks some sites of `individuals`", call. = FALSE)
-    env_sites <- env[rows, model_vars, drop = FALSE]
-    env_ok <- stats::complete.cases(env_sites)
-    if (!all(env_ok)) {
-      if (na_action == "fail") {
-        stop("sites with missing values in `env`: ",
-             toString(site_levels[!env_ok]),
-             "; remove them or set `na_action = \"omit\"`", call. = FALSE)
-      }
-      warning("sites with missing values in `env` are left out of the decomposition: ",
-              toString(site_levels[!env_ok]), call. = FALSE)
-    }
-    model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
-    check_collinear(stats::model.matrix(formula, env_sites[env_ok, , drop = FALSE]),
-                    "`formula`")
-  } else {
-    env_sites <- data.frame(row.names = seq_along(site_levels))
-    env_ok <- rep(TRUE, length(site_levels))
-  }
-  if (!is.null(abundance)) {
-    a <- individuals[[abundance]]
-    pops <- paste(site_id, species_id, sep = "\r")
-    if (anyNA(a)) stop("`abundance` has missing values", call. = FALSE)
-    if (any(tapply(a, pops, function(v) length(unique(v))) > 1)) {
-      stop("`abundance` must be the same for all individuals of a population", call. = FALSE)
-    }
-  }
+  model <- flex_model(formula, env, site, site_levels, na_action)
+  if (!is.null(abundance)) flex_abundance(individuals[[abundance]], site_id, species_id)
   for (trait in traits) check_numeric_traits(individuals[[trait]], trait)
   handle_missing(individuals[traits], na_action, "`traits`")
   decomposition <- list()
@@ -266,71 +248,11 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
   site_fits <- list()
   exact_labels <- character()
   for (trait in traits) {
-    z <- individuals[[trait]]
-    check_numeric_traits(z, trait)
-    keep <- !is.na(z)
-    pop <- paste(site_id, species_id, sep = "\r")[keep]
-    first <- !duplicated(pop)
-    pop_site <- site_id[keep][first]
-    pop_species <- species_id[keep][first]
-    pop_mean <- tapply(z[keep], factor(pop, unique(pop)), mean)
-    weight <- if (is.null(abundance)) {
-      as.vector(table(factor(pop, unique(pop))))
-    } else {
-      as.numeric(individuals[[abundance]][keep][first])
-    }
-    species_mean <- tapply(z[keep], species_id[keep], mean)[pop_species]
-    weighted <- function(v) {
-      vapply(site_levels, function(s) {
-        i <- pop_site == s
-        if (any(i)) sum(weight[i] * v[i]) / sum(weight[i]) else NA_real_
-      }, numeric(1))
-    }
-    specific <- weighted(as.vector(pop_mean))
-    fixed <- weighted(as.vector(species_mean))
-    values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
-    fits <- lapply(names(values), function(component) {
-      y <- values[[component]]
-      ok <- !is.na(y) & env_ok
-      total <- sum((y[ok] - mean(y[ok]))^2)
-      modelled <- rep(NA_real_, length(y))
-      if (length(model_vars) == 0) {
-        modelled[ok] <- mean(y[ok])
-        return(list(ss = c(explained = 0, residual = total, total = total, p = NA_real_),
-                    fitted = modelled, exact = FALSE))
-      }
-      fit <- stats::lm(model_formula, data = cbind(.y = y, env_sites)[ok, , drop = FALSE])
-      modelled[ok] <- stats::fitted(fit)
-      residual <- sum(stats::residuals(fit)^2)
-      # the exact fits are reported once, below, instead of by summary.lm()
-      f <- suppressWarnings(summary(fit))$fstatistic
-      p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
-      list(ss = c(explained = total - residual, residual = residual, total = total,
-                  p = unname(p)),
-           fitted = modelled,
-           exact = total > 0 && residual <= total * sqrt(.Machine$double.eps))
-    })
-    names(fits) <- names(values)
-    fitted_values <- lapply(fits, `[[`, "fitted")
-    exact <- vapply(fits, `[[`, logical(1), "exact")
-    if (any(exact)) {
-      exact_labels <- c(exact_labels, paste0(trait, " (", names(values)[exact], ")"))
-    }
-    ss <- lapply(fits, `[[`, "ss")
-    site_fits[[trait]] <- do.call(rbind, lapply(names(values), function(component) {
-      data.frame(site = site_levels, trait = trait, component = component,
-                 response = values[[component]], fitted = fitted_values[[component]],
-                 residual = values[[component]] - fitted_values[[component]],
-                 row.names = NULL, stringsAsFactors = FALSE)
-    }))
-    ss$covariation <- ss$total - ss$turnover - ss$intraspecific
-    ss$covariation["p"] <- NA_real_
-    ss <- ss[c("turnover", "intraspecific", "covariation", "total")]
-    decomposition[[trait]] <- data.frame(trait = trait, component = names(ss),
-                                         do.call(rbind, ss), row.names = NULL)
-    site_means[[trait]] <- data.frame(site = site_levels, trait = trait, specific = specific,
-                                      fixed = fixed, intraspecific = specific - fixed,
-                                      row.names = NULL, stringsAsFactors = FALSE)
+    part <- flex_trait(individuals, trait, abundance, site_id, species_id, site_levels, model)
+    decomposition[[trait]] <- part$decomposition
+    site_means[[trait]] <- part$sites
+    site_fits[[trait]] <- part$model
+    exact_labels <- c(exact_labels, part$exact)
   }
   warn_perfect_fit(rep(1, length(exact_labels)), exact_labels,
                    "the model of `formula` and the site values of")
@@ -338,6 +260,140 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
                  sites = do.call(rbind, unname(site_means)),
                  model = do.call(rbind, unname(site_fits)), formula = formula),
             class = "trait_flex")
+}
+
+#' the environmental model of trait_flex(): the variables of `formula` for each site (`sites`),
+#' which sites have them all (`ok`) and the formula of the fits (`formula`, NULL without
+#' variables), after checking `env`; a list
+#' @noRd
+flex_model <- function(formula, env, site, site_levels, na_action) {
+  model_vars <- all.vars(formula)
+  if (length(model_vars) == 0) {
+    return(list(sites = data.frame(row.names = seq_along(site_levels)),
+                ok = rep(TRUE, length(site_levels)), formula = NULL))
+  }
+  if (!is.data.frame(env) || !site %in% names(env)) {
+    stop("`env` must be a data frame with a column `", site, "`", call. = FALSE)
+  }
+  missing_vars <- setdiff(model_vars, names(env))
+  if (length(missing_vars) > 0) {
+    stop("`env` has no column ", toString(missing_vars), call. = FALSE)
+  }
+  check_unique_sites(as.character(env[[site]]), "`env`")
+  rows <- match(site_levels, as.character(env[[site]]))
+  if (anyNA(rows)) stop("`env` lacks some sites of `individuals`", call. = FALSE)
+  env_sites <- env[rows, model_vars, drop = FALSE]
+  env_ok <- stats::complete.cases(env_sites)
+  if (!all(env_ok)) {
+    if (na_action == "fail") {
+      stop("sites with missing values in `env`: ",
+           toString(site_levels[!env_ok]),
+           "; remove them or set `na_action = \"omit\"`", call. = FALSE)
+    }
+    warning("sites with missing values in `env` are left out of the decomposition: ",
+            toString(site_levels[!env_ok]), call. = FALSE)
+  }
+  model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
+  check_collinear(stats::model.matrix(formula, env_sites[env_ok, , drop = FALSE]),
+                  "`formula`")
+  list(sites = env_sites, ok = env_ok, formula = model_formula)
+}
+
+#' stops unless the abundances (one per individual) have no missing values and are the same
+#' for all individuals of a population
+#' @noRd
+flex_abundance <- function(a, site_id, species_id) {
+  pops <- paste(site_id, species_id, sep = "\r")
+  if (anyNA(a)) stop("`abundance` has missing values", call. = FALSE)
+  if (any(tapply(a, pops, function(v) length(unique(v))) > 1)) {
+    stop("`abundance` must be the same for all individuals of a population", call. = FALSE)
+  }
+  invisible(NULL)
+}
+
+#' the decomposition of one trait in trait_flex(): the sums of squares of each component
+#' (`decomposition`), the community means of each site (`sites`), the fits of the model
+#' (`model`) and the labels of the components fitted exactly (`exact`); a list
+#' @noRd
+flex_trait <- function(individuals, trait, abundance, site_id, species_id, site_levels,
+                       model) {
+  z <- individuals[[trait]]
+  check_numeric_traits(z, trait)
+  means <- flex_site_means(z, if (!is.null(abundance)) individuals[[abundance]], site_id,
+                           species_id, site_levels)
+  specific <- means$specific
+  fixed <- means$fixed
+  values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
+  fits <- lapply(values, flex_fit, model = model)
+  fitted_values <- lapply(fits, `[[`, "fitted")
+  exact <- vapply(fits, `[[`, logical(1), "exact")
+  ss <- lapply(fits, `[[`, "ss")
+  site_fits <- do.call(rbind, lapply(names(values), function(component) {
+    data.frame(site = site_levels, trait = trait, component = component,
+               response = values[[component]], fitted = fitted_values[[component]],
+               residual = values[[component]] - fitted_values[[component]],
+               row.names = NULL, stringsAsFactors = FALSE)
+  }))
+  ss$covariation <- ss$total - ss$turnover - ss$intraspecific
+  ss$covariation["p"] <- NA_real_
+  ss <- ss[c("turnover", "intraspecific", "covariation", "total")]
+  list(decomposition = data.frame(trait = trait, component = names(ss), do.call(rbind, ss),
+                                  row.names = NULL),
+       sites = data.frame(site = site_levels, trait = trait, specific = specific,
+                          fixed = fixed, intraspecific = specific - fixed,
+                          row.names = NULL, stringsAsFactors = FALSE),
+       model = site_fits,
+       exact = if (any(exact)) paste0(trait, " (", names(values)[exact], ")"))
+}
+
+#' community means of a trait in each site, weighted by the abundance of the populations (`a`,
+#' one value per individual, or the number of individuals measured when NULL): with the mean
+#' of each population (`specific`) and with the mean of its species (`fixed`); a list
+#' @noRd
+flex_site_means <- function(z, a, site_id, species_id, site_levels) {
+  keep <- !is.na(z)
+  pop <- paste(site_id, species_id, sep = "\r")[keep]
+  first <- !duplicated(pop)
+  pop_site <- site_id[keep][first]
+  pop_species <- species_id[keep][first]
+  pop_mean <- tapply(z[keep], factor(pop, unique(pop)), mean)
+  weight <- if (is.null(a)) {
+    as.vector(table(factor(pop, unique(pop))))
+  } else {
+    as.numeric(a[keep][first])
+  }
+  species_mean <- tapply(z[keep], species_id[keep], mean)[pop_species]
+  weighted <- function(v) {
+    vapply(site_levels, function(s) {
+      i <- pop_site == s
+      if (any(i)) sum(weight[i] * v[i]) / sum(weight[i]) else NA_real_
+    }, numeric(1))
+  }
+  list(specific = weighted(as.vector(pop_mean)), fixed = weighted(as.vector(species_mean)))
+}
+
+#' fit of the model of trait_flex() to the site values `y` of one component: sums of squares
+#' and p-value (`ss`), fitted values (`fitted`) and whether the fit is exact (`exact`); a list
+#' @noRd
+flex_fit <- function(y, model) {
+  ok <- !is.na(y) & model$ok
+  total <- sum((y[ok] - mean(y[ok]))^2)
+  modelled <- rep(NA_real_, length(y))
+  if (is.null(model$formula)) {
+    modelled[ok] <- mean(y[ok])
+    return(list(ss = c(explained = 0, residual = total, total = total, p = NA_real_),
+                fitted = modelled, exact = FALSE))
+  }
+  fit <- stats::lm(model$formula, data = cbind(.y = y, model$sites)[ok, , drop = FALSE])
+  modelled[ok] <- stats::fitted(fit)
+  residual <- sum(stats::residuals(fit)^2)
+  # the exact fits are reported once, below, instead of by summary.lm()
+  f <- suppressWarnings(summary(fit))$fstatistic
+  p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
+  list(ss = c(explained = total - residual, residual = residual, total = total,
+              p = unname(p)),
+       fitted = modelled,
+       exact = total > 0 && residual <= total * sqrt(.Machine$double.eps))
 }
 
 #' Plot the decomposition of community trait means
@@ -493,18 +549,8 @@ nested_variance <- function(data, traits, factors, crossed = NULL, interaction =
   if (!is.null(crossed)) check_column_names(crossed, "crossed")
   check_flag(interaction, "interaction")
   check_data_columns(data, c(traits, factors, crossed), "data")
-  if (length(intersect(factors, crossed)) > 0) {
-    stop("`factors` and `crossed` share ", toString(intersect(factors, crossed)),
-         call. = FALSE)
-  }
+  check_factor_levels(data, factors, crossed)
   all_factors <- c(factors, crossed)
-  single <- all_factors[vapply(all_factors,
-                               function(f) length(unique(stats::na.omit(data[[f]]))) < 2,
-                               logical(1))]
-  if (length(single) > 0) {
-    stop("factor ", paste0("`", single, "`", collapse = ", "), " has a single level",
-         call. = FALSE)
-  }
   groups <- nested_groups(data, factors, warn_crossed = is.null(crossed))
   if (!is.null(crossed)) groups <- c(groups, nested_groups(data, crossed, warn_crossed = FALSE))
   levels <- all_factors
@@ -541,6 +587,24 @@ nested_variance <- function(data, traits, factors, crossed = NULL, interaction =
   attr(out, "engine") <- vapply(fits, function(f) f$engine, character(1))
   class(out) <- c("nested_variance", class(out))
   out
+}
+
+#' stops when a factor of nested_variance() is both nested and crossed, or has a single level
+#' @noRd
+check_factor_levels <- function(data, factors, crossed) {
+  if (length(intersect(factors, crossed)) > 0) {
+    stop("`factors` and `crossed` share ", toString(intersect(factors, crossed)),
+         call. = FALSE)
+  }
+  all_factors <- c(factors, crossed)
+  single <- all_factors[vapply(all_factors,
+                               function(f) length(unique(stats::na.omit(data[[f]]))) < 2,
+                               logical(1))]
+  if (length(single) > 0) {
+    stop("factor ", paste0("`", single, "`", collapse = ", "), " has a single level",
+         call. = FALSE)
+  }
+  invisible(NULL)
 }
 
 #' group labels of each level of a nested hierarchy (each level pasted with the ones above),
@@ -771,16 +835,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   null <- match.arg(null)
   alternative <- match.arg(alternative)
-  if (is.function(index)) {
-    label <- deparse1(substitute(index), collapse = "")
-    if (nchar(label) > 30 || grepl("^function", label)) label <- "index"
-    index <- stats::setNames(list(index), label)
-  }
-  if (!is.list(index) || length(index) == 0 || !all(vapply(index, is.function, logical(1))) ||
-      is.null(names(index)) || any(names(index) == "") || anyDuplicated(names(index))) {
-    stop("`index` must be a function or a list of functions with distinct names",
-         call. = FALSE)
-  }
+  index <- index_functions(index, deparse1(substitute(index), collapse = ""))
   check_column_names(traits, "traits")
   check_string(site, "site")
   check_string(species, "species")
@@ -788,71 +843,16 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   check_data_columns(individuals, c(traits, site, species))
   check_count(n_perm, "n_perm", min = 0, null_ok = TRUE)
   n_perm <- if (is.null(n_perm)) 0 else n_perm
-  index_names <- names(index)
-  n_index <- length(index)
-  uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))
-  apply_index <- function(x, sp) {
-    vapply(seq_len(n_index), function(k) {
-      value <- if (uses_species[k]) index[[k]](x, species = sp) else index[[k]](x)
-      if (!is.numeric(value) || length(value) != 1) {
-        stop("index `", index_names[k], "` must return a single number", call. = FALSE)
-      }
-      as.numeric(value)
-    }, numeric(1))
-  }
-  site_all <- as.character(individuals[[site]])
-  species_all <- as.character(individuals[[species]])
-  site_levels <- unique(site_all)
+  apply_index <- index_applier(index)
+  ids <- list(site = as.character(individuals[[site]]),
+              species = as.character(individuals[[species]]))
+  ids$levels <- unique(ids$site)
   handle_missing(individuals[traits], na_action, "`traits`")
-  sets <- if (multivariate) list(multivariate = traits) else stats::setNames(as.list(traits), traits)
+  sets <- if (multivariate) list(multivariate = traits) else
+    stats::setNames(as.list(traits), traits)
   per_set <- lapply(names(sets), function(label) {
-    values <- as.matrix(individuals[sets[[label]]])
-    check_numeric_traits(values)
-    keep <- stats::complete.cases(values)
-    values <- values[keep, , drop = FALSE]
-    site_id <- site_all[keep]
-    species_id <- species_all[keep]
-    if (null == "regional.pop" || null == "regional.pop.prab") {
-      pop <- paste(site_id, species_id, sep = "\r")
-      pop_means <- rowsum(values, pop, reorder = FALSE) / as.vector(table(pop)[unique(pop)])
-    }
-    if (null == "regional.pop.prab") {
-      # one row per population: the index sees population means
-      first <- !duplicated(pop)
-      values <- pop_means[pop[first], , drop = FALSE]
-      site_id <- site_id[first]
-      species_id <- species_id[first]
-    } else if (null == "regional.pop") {
-      carried <- pop_means[pop, , drop = FALSE]
-    }
-    rows_of <- split(seq_along(site_id), factor(site_id, site_levels))
-    # one value per site and index, sites varying fastest
-    site_index <- function(v) {
-      as.vector(t(matrix(vapply(rows_of, function(i) {
-        if (length(i) == 0) return(rep(NA_real_, n_index))
-        x <- v[i, , drop = FALSE]
-        apply_index(if (multivariate) x else x[, 1], species_id[i])
-      }, numeric(n_index)), n_index)))
-    }
-    observed <- site_index(values)
-    sims <- matrix(NA_real_, n_perm, length(site_levels) * n_index)
-    n <- nrow(values)
-    for (r in seq_len(n_perm)) {
-      shuffled <- values
-      if (null == "local") {
-        for (i in rows_of) shuffled[i, ] <- values[i[sample.int(length(i))], , drop = FALSE]
-      } else {
-        # every row belongs to one site, so one permutation of the whole region gives each
-        # site as many values as it has rows, and the sites partition the regional pool
-        pool <- if (null == "regional.pop") carried else values
-        shuffled <- pool[sample.int(n), , drop = FALSE]
-      }
-      sims[r, ] <- site_index(shuffled)
-    }
-    list(table = data.frame(site = rep(site_levels, n_index), trait = label,
-                            index = rep(index_names, each = length(site_levels)),
-                            observed = observed, row.names = NULL, stringsAsFactors = FALSE),
-         null = sims)
+    index_set(as.matrix(individuals[sets[[label]]]), label, ids, null, n_perm, multivariate,
+              apply_index, names(index))
   })
   out <- do.call(rbind, lapply(per_set, `[[`, "table"))
   rownames(out) <- NULL
@@ -864,6 +864,115 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   out$p <- compared$p
   attr(out, "null") <- sims
   out
+}
+
+#' the indices of community_index() as a list of functions with distinct names; one function is
+#' named after `label` (the expression given by the user), or "index" when that is too long
+#' @noRd
+index_functions <- function(index, label) {
+  if (is.function(index)) {
+    if (nchar(label) > 30 || grepl("^function", label)) label <- "index"
+    index <- stats::setNames(list(index), label)
+  }
+  check_index_list(index)
+}
+
+#' stops unless `index` is a list of functions with distinct names; returns it
+#' @noRd
+check_index_list <- function(index) {
+  functions <- is.list(index) && length(index) > 0 &&
+    all(vapply(index, is.function, logical(1)))
+  bad <- !functions || is.null(names(index)) || any(names(index) == "") ||
+    anyDuplicated(names(index))
+  if (bad) {
+    stop("`index` must be a function or a list of functions with distinct names",
+         call. = FALSE)
+  }
+  index
+}
+
+#' a function of the trait values `x` and the species `sp` of the individuals of a site that
+#' returns the value of each index (those with an argument `species` receive `sp`)
+#' @noRd
+index_applier <- function(index) {
+  index_names <- names(index)
+  n_index <- length(index)
+  uses_species <- vapply(index, function(f) "species" %in% names(formals(f)), logical(1))
+  function(x, sp) {
+    vapply(seq_len(n_index), function(k) {
+      value <- if (uses_species[k]) index[[k]](x, species = sp) else index[[k]](x)
+      if (!is.numeric(value) || length(value) != 1) {
+        stop("index `", index_names[k], "` must return a single number", call. = FALSE)
+      }
+      as.numeric(value)
+    }, numeric(1))
+  }
+}
+
+#' the indices of each site for one set of traits (the columns of `values`, one row per
+#' individual) and their values under the null model: the table of observed values (`table`)
+#' and the matrix of null values, one row per randomisation (`null`); a list
+#' @noRd
+index_set <- function(values, label, ids, null, n_perm, multivariate, apply_index,
+                      index_names) {
+  check_numeric_traits(values)
+  keep <- stats::complete.cases(values)
+  values <- values[keep, , drop = FALSE]
+  site_id <- ids$site[keep]
+  species_id <- ids$species[keep]
+  n_index <- length(index_names)
+  carried <- NULL
+  if (null == "regional.pop" || null == "regional.pop.prab") {
+    pop <- paste(site_id, species_id, sep = "\r")
+    pop_means <- rowsum(values, pop, reorder = FALSE) / as.vector(table(pop)[unique(pop)])
+  }
+  if (null == "regional.pop.prab") {
+    # one row per population: the index sees population means
+    first <- !duplicated(pop)
+    values <- pop_means[pop[first], , drop = FALSE]
+    site_id <- site_id[first]
+    species_id <- species_id[first]
+  } else if (null == "regional.pop") {
+    carried <- pop_means[pop, , drop = FALSE]
+  }
+  rows_of <- split(seq_along(site_id), factor(site_id, ids$levels))
+  # one value per site and index, sites varying fastest
+  site_index <- function(v) {
+    as.vector(t(matrix(vapply(rows_of, function(i) {
+      if (length(i) == 0) return(rep(NA_real_, n_index))
+      x <- v[i, , drop = FALSE]
+      apply_index(if (multivariate) x else x[, 1], species_id[i])
+    }, numeric(n_index)), n_index)))
+  }
+  observed <- site_index(values)
+  sims <- index_null_values(values, carried, rows_of, null, n_perm, site_index,
+                            length(ids$levels) * n_index)
+  list(table = data.frame(site = rep(ids$levels, n_index), trait = label,
+                          index = rep(index_names, each = length(ids$levels)),
+                          observed = observed, row.names = NULL, stringsAsFactors = FALSE),
+       null = sims)
+}
+
+#' values of the indices (`site_index()`, a vector of `n_values`) in `n_perm` randomisations of
+#' the trait values: within sites (`null = "local"`) or over the region, of the values of
+#' individuals or of the means of their populations (`carried`); one row per randomisation
+#' @noRd
+index_null_values <- function(values, carried, rows_of, null, n_perm, site_index, n_values) {
+  sims <- matrix(NA_real_, n_perm, n_values)
+  n <- nrow(values)
+  for (r in seq_len(n_perm)) {
+    shuffled <- values
+    if (null == "local") {
+      for (i in rows_of) shuffled[i, ] <- values[i[sample.int(length(i))], , drop = FALSE]
+    } else {
+      # every row belongs to one site, so one permutation of the whole region gives each
+      # site as many values as it has rows, and the sites partition the regional pool
+      pool <- if (null == "regional.pop") carried else values
+      shuffled <- pool[sample.int(n), , drop = FALSE]
+    }
+    sims[r, ] <- site_index(shuffled)
+  }
+  sims
 }
 
 #' stops unless `colours` holds n valid colours
