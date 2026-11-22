@@ -155,7 +155,8 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   check_count(ncores, "ncores")
   check_seed(seed)
   parameters <- parameters %||% attr(table, "parameters")
-  if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
+  if (is.null(parameters)) stop("abc_cv(): Give `parameters` for a plain data frame.",
+                                call. = FALSE)
   pattern <- "^f([0-9]+)_(train|test)_(.+)$"
   columns <- grep(pattern, names(table), value = TRUE)
   if (!length(columns)) {
@@ -222,15 +223,17 @@ summary.mc_abc_cv <- function(object, ...) {
   out
 }
 
-# weights that the forest of parameter `p` gives to the rows of the reference table, one column
-# per observation, each summing to one
+#' weights that the forest of parameter `p` gives to the rows of the reference table, one column
+#' per observation, each summing to one
+#' @noRd
 parameter_weights <- function(fit, p, observed) {
   training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
   w <- as.matrix(stats::predict(fit$forests[[p]], observed, training, rf.weights = TRUE)$weights)
   sweep(w, 2, colSums(w), "/")
 }
 
-# mean over parameters of the weights that the forests give to the rows of the reference table
+#' mean over parameters of the weights that the forests give to the rows of the reference table
+#' @noRd
 forest_weights <- function(fit, observed) {
   Reduce(`+`, lapply(fit$parameters, function(p) parameter_weights(fit, p, observed))) /
     length(fit$parameters)

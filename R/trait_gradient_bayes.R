@@ -176,7 +176,7 @@ trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)
                                  parallel_chains = 1, iter_warmup = 1000,
                                  iter_sampling = 1000, adapt_delta = 0.95, seed = NULL, ...) {
   if (!inherits(x, "mc_trait_gradient")) {
-    stop("`x` must come from trait_gradient()", call. = FALSE)
+    stop("trait_gradient_bayes(): `x` must come from trait_gradient()", call. = FALSE)
   }
   check_number(ou_alpha, "ou_alpha", lower = 0, open = TRUE, null_ok = TRUE)
   check_count(chains, "chains")
@@ -226,13 +226,15 @@ trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)
             class = "mc_trait_gradient_bayes")
 }
 
-# packages needed to sample, apart so that tests can run without cmdstanr
+#' packages needed to sample, apart so that tests can run without cmdstanr
+#' @noRd
 missing_stan_packages <- function() {
   pkgs <- c("cmdstanr", "posterior")
   pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
 }
 
-# the variables read back from the sampler
+#' the variables read back from the sampler
+#' @noRd
 tg_bayes_variables <- function() {
   c("lp__", "mu", "tau", "lambda", "rho_u", "rho_v", "sigma", "lambda_beta", "lambda_alpha",
     "lambda_mean", "cor_phylo_beta_mean", "cor_phylo_beta_alpha", "var_phylo_beta",
@@ -240,7 +242,8 @@ tg_bayes_variables <- function() {
     "var_species_mean", "beta", "alpha", "mean_trait")
 }
 
-# compiled model, kept in the user cache
+#' compiled model, kept in the user cache
+#' @noRd
 tg_stan_model <- function() {
   file <- system.file("stan", "trait_gradient.stan", package = "comdynamite") # nocov start
   cache <- tools::R_user_dir("comdynamite", "cache")
@@ -252,8 +255,9 @@ tg_stan_model <- function() {
   cmdstanr::cmdstan_model(local, quiet = TRUE) # nocov end
 }
 
-# sampling, apart so that tests can replace it: the fit, its draws, divergences and
-# transitions that hit the maximum tree depth
+#' sampling, apart so that tests can replace it: the fit, its draws, divergences and
+#' transitions that hit the maximum tree depth
+#' @noRd
 run_stan <- function(data, ...) {
   fit <- tg_stan_model()$sample(data = data, ...) # nocov start
   sampler <- fit$diagnostic_summary(quiet = TRUE)
@@ -262,7 +266,8 @@ run_stan <- function(data, ...) {
        treedepth = sum(sampler$num_max_treedepth)) # nocov end
 }
 
-# data of the model, phylogenetic correlation matrix and standardisation
+#' data of the model, phylogenetic correlation matrix and standardisation
+#' @noRd
 tg_bayes_data <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)) {
   p <- x$populations
   dropped <- setdiff(unique(p$species), tree$tip.label)
@@ -299,8 +304,9 @@ tg_bayes_data <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)) {
        no_beta = setdiff(species, unique(p$species[has_p])))
 }
 
-# correlation matrix of the tips under Brownian motion (ou_alpha NULL) or an OU process with
-# a fixed root and strength ou_alpha
+#' correlation matrix of the tips under Brownian motion (ou_alpha NULL) or an OU process with
+#' a fixed root and strength ou_alpha
+#' @noRd
 phylo_correlation <- function(tree, species, ou_alpha = NULL) {
   shared <- ape::vcv(tree)[species, species]
   if (is.null(ou_alpha)) return(stats::cov2cor(shared))
@@ -311,7 +317,8 @@ phylo_correlation <- function(tree, species, ou_alpha = NULL) {
   stats::cov2cor(cov)
 }
 
-# signal, variances and species values from a data frame of posterior draws
+#' signal, variances and species values from a data frame of posterior draws
+#' @noRd
 tg_bayes_summary <- function(draws, species, no_beta = character()) {
   col <- function(name) {
     if (!name %in% names(draws)) stop("the posterior has no parameter ", name, call. = FALSE)
@@ -343,7 +350,8 @@ tg_bayes_summary <- function(draws, species, no_beta = character()) {
   list(signal = signal, variances = variances, species = species_table)
 }
 
-# convergence over the draws read back: largest R-hat, smallest bulk and tail ESS
+#' convergence over the draws read back: largest R-hat, smallest bulk and tail ESS
+#' @noRd
 tg_diagnostics_from <- function(draws, divergent, treedepth = 0) {
   s <- posterior::summarise_draws(draws, "rhat", "ess_bulk", "ess_tail")
   tg_diagnostics_table(max(s$rhat, na.rm = TRUE), min(s$ess_bulk, na.rm = TRUE),
@@ -370,7 +378,8 @@ print.mc_trait_gradient_bayes <- function(x, digits = 3, ...) {
   d <- x$diagnostics
   cat("Convergence: max R-hat ", format(round(d$max_rhat, digits)), ", min ESS bulk ",
       round(d$min_ess_bulk), ", tail ", round(d$min_ess_tail), ", divergent transitions ",
-      d$divergent, ", at maximum tree depth ", d$max_treedepth, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
+      d$divergent, ", at maximum tree depth ", d$max_treedepth,
+      if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
   s <- x$signal
   s[-1] <- lapply(s[-1], function(v) round(v, digits))
   print(s, row.names = FALSE)

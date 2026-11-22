@@ -133,7 +133,8 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
   if (is.null(gap)) {
     gap <- neighbour_distance(distances, 4)
     if (gap == 0) {
-      stop("most sites share their coordinates with other sites: remove repeated sites or ",
+      stop("rigid_permutations(): most sites share their coordinates with other sites: remove ",
+           "repeated sites or ",
            "give `gap`", call. = FALSE)
     }
   }
@@ -177,9 +178,10 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
   out
 }
 
-# sites that move: the sites of the event, or only the smaller side when the other side is
-# the rest of the landscape (an event without zeros where one side has up to a third of the
-# sites), in which case the larger side is the complement of where the smaller one lands
+#' sites that move: the sites of the event, or only the smaller side when the other side is
+#' the rest of the landscape (an event without zeros where one side has up to a third of the
+#' sites), in which case the larger side is the complement of where the smaller one lands
+#' @noRd
 moving_sites <- function(event) {
   if (any(event == 0)) return(which(event != 0))
   sides <- list(which(event == 1), which(event == -1))
@@ -187,34 +189,38 @@ moving_sites <- function(event) {
   if (length(smaller) <= length(event) / 3) smaller else seq_along(event)
 }
 
-# a layout up to the sign of the contrast, which does not change the test
+#' a layout up to the sign of the contrast, which does not change the test
+#' @noRd
 layout_key <- function(event, permutation) {
   moved <- event[permutation]
   first <- moved[moved != 0][1]
   paste(moved * first, collapse = "")
 }
 
-# median distance from a site to its k-th nearest site: the step of a full grid when k is at
-# most 4, and the spacing of sparse sites
+#' median distance from a site to its k-th nearest site: the step of a full grid when k is at
+#' most 4, and the spacing of sparse sites
+#' @noRd
 neighbour_distance <- function(distances, k = 4) {
   n <- nrow(distances)
   k <- min(k, n - 1)
   stats::median(apply(distances + diag(Inf, n), 1, function(d) sort(d)[k]))
 }
 
-# the geometry of the landscape: a regular lattice when the sites lie on one, else a raster
-# with cells of half of `gap`. Both hold the cells inside the landscape: those near a site
-# and those of holes between sites, but not the rim beyond an edge. On a lattice a cell is
-# near a site when closer than `gap`; off a lattice, where sites leave larger voids between
-# neighbours, when closer than twice `gap`
+#' the geometry of the landscape: a regular lattice when the sites lie on one, else a raster
+#' with cells of half of `gap`. Both hold the cells inside the landscape: those near a site
+#' and those of holes between sites, but not the rim beyond an edge. On a lattice a cell is
+#' near a site when closer than `gap`; off a lattice, where sites leave larger voids between
+#' neighbours, when closer than twice `gap`
+#' @noRd
 landscape_of <- function(coords, gap) {
   lattice_of(coords, gap) %||% raster_of(coords, gap)
 }
 
-# the cells of a raster that count as inside the landscape: those closer than `radius` to a
-# site, and those of a hole narrower than twice `radius` between them. Cells beyond an edge
-# are not inside. `cells` are the cells of the sites, `origin` the coordinates of the centre
-# of cell (1, 1) and `steps` the size of a cell
+#' the cells of a raster that count as inside the landscape: those closer than `radius` to a
+#' site, and those of a hole narrower than twice `radius` between them. Cells beyond an edge
+#' are not inside. `cells` are the cells of the sites, `origin` the coordinates of the centre
+#' of cell (1, 1) and `steps` the size of a cell
+#' @noRd
 inside_cells <- function(coords, cells, extent, origin, steps, radius) {
   reach <- ceiling(radius / steps)
   offsets <- as.matrix(expand.grid(-reach[1]:reach[1], -reach[2]:reach[2]))
@@ -250,9 +256,10 @@ inside_cells <- function(coords, cells, extent, origin, steps, radius) {
   inside
 }
 
-# a regular lattice: the step of each axis, the cell of each site, the site of each cell,
-# the cells inside the landscape and the symmetries. NULL when the coordinates do not lie
-# on a lattice
+#' a regular lattice: the step of each axis, the cell of each site, the site of each cell,
+#' the cells inside the landscape and the symmetries. NULL when the coordinates do not lie
+#' on a lattice
+#' @noRd
 lattice_of <- function(coords, gap) {
   steps <- apply(coords, 2, function(x) {
     u <- sort(unique(x))
@@ -290,8 +297,9 @@ lattice_of <- function(coords, gap) {
        near = near, extent = extent, maps = maps, land = apply(cells, 2, range), reach = reach)
 }
 
-# a raster over coordinates that are not on a lattice, with square cells of half of `gap`,
-# a margin of twice `gap` around the sites and the cells inside the landscape
+#' a raster over coordinates that are not on a lattice, with square cells of half of `gap`,
+#' a margin of twice `gap` around the sites and the cells inside the landscape
+#' @noRd
 raster_of <- function(coords, gap) {
   step <- gap / 2
   origin <- unname(apply(coords, 2, min)) - 2 * gap
@@ -302,7 +310,8 @@ raster_of <- function(coords, gap) {
        gap = gap)
 }
 
-# the moves of a landscape that keep enough of a group inside it: one row per move
+#' the moves of a landscape that keep enough of a group inside it: one row per move
+#' @noRd
 landscape_moves <- function(group, coords, landscape, outside) {
   if (landscape$kind == "lattice") {
     lattice_moves(group, landscape, outside)
@@ -311,8 +320,9 @@ landscape_moves <- function(group, coords, landscape, outside) {
   }
 }
 
-# the image of a group under move `pick` of `moves`: coordinates and the site of each image
-# when it lands on one, else 0
+#' the image of a group under move `pick` of `moves`: coordinates and the site of each image
+#' when it lands on one, else 0
+#' @noRd
 landscape_image <- function(group, moves, pick, coords, landscape) {
   if (landscape$kind == "lattice") {
     lattice_image(group, moves[pick, ], landscape)
@@ -321,8 +331,9 @@ landscape_image <- function(group, moves, pick, coords, landscape) {
   }
 }
 
-# the moves of a lattice that keep enough of a group inside the landscape: the symmetry and
-# the translation in cells
+#' the moves of a lattice that keep enough of a group inside the landscape: the symmetry and
+#' the translation in cells
+#' @noRd
 lattice_moves <- function(group, lattice, outside) {
   cells <- lattice$cells[group, , drop = FALSE]
   m <- nrow(cells)
@@ -355,7 +366,8 @@ lattice_moves <- function(group, lattice, outside) {
   do.call(rbind, accepted)
 }
 
-# the image of a group under a move of the lattice
+#' the image of a group under a move of the lattice
+#' @noRd
 lattice_image <- function(group, move, lattice) {
   cells <- lattice$cells[group, , drop = FALSE]
   image <- lattice$maps[[move[1]]](cells[, 1], cells[, 2])
@@ -368,10 +380,11 @@ lattice_image <- function(group, move, lattice) {
        site = site)
 }
 
-# the orientations of a group off a lattice: rotations in steps that move the site farthest
-# from the anchor by about `gap`, at least 4 and at most 360 of them, each with and without
-# a reflection, as matrices. The anchor is the site of the group nearest its centre and the
-# coordinates are relative to it. A group of one site has one orientation
+#' the orientations of a group off a lattice: rotations in steps that move the site farthest
+#' from the anchor by about `gap`, at least 4 and at most 360 of them, each with and without
+#' a reflection, as matrices. The anchor is the site of the group nearest its centre and the
+#' coordinates are relative to it. A group of one site has one orientation
+#' @noRd
 group_orientations <- function(group, coords, gap) {
   from <- coords[group, , drop = FALSE]
   centre <- colMeans(from)
@@ -388,9 +401,10 @@ group_orientations <- function(group, coords, gap) {
   list(anchor = anchor, relative = relative, rotations = c(rotations, reflected))
 }
 
-# the moves of a group off a lattice that keep enough of it inside the landscape: each
-# orientation with the translations that put the anchor on each site, as the index of the
-# orientation and the site, with the orientations as an attribute
+#' the moves of a group off a lattice that keep enough of it inside the landscape: each
+#' orientation with the translations that put the anchor on each site, as the index of the
+#' orientation and the site, with the orientations as an attribute
+#' @noRd
 raster_moves <- function(group, coords, raster, outside) {
   orientation <- group_orientations(group, coords, raster$gap)
   m <- length(group)
@@ -410,7 +424,8 @@ raster_moves <- function(group, coords, raster, outside) {
   structure(do.call(rbind, accepted), orientation = orientation)
 }
 
-# the image of a group under a move off a lattice: only the anchor lands on a site
+#' the image of a group under a move off a lattice: only the anchor lands on a site
+#' @noRd
 raster_image <- function(move, orientation, coords) {
   image <- orientation$relative %*% orientation$rotations[[move[1]]]
   site <- integer(nrow(image))
@@ -418,9 +433,10 @@ raster_image <- function(move, orientation, coords) {
   list(xy = sweep(image, 2, coords[move[2], ], "+"), site = site)
 }
 
-# where the sites of an image go: to their site when it is free, else to the nearest free
-# site within `reach`, the nearest images first; NULL when a site has none, so that a site
-# is never carried to another part of the landscape
+#' where the sites of an image go: to their site when it is free, else to the nearest free
+#' site within `reach`, the nearest images first; NULL when a site has none, so that a site
+#' is never carried to another part of the landscape
+#' @noRd
 place_image <- function(image, coords, free, reach) {
   target <- image$site
   target[target > 0 & !free[pmax(target, 1)]] <- 0L
@@ -449,7 +465,8 @@ place_image <- function(image, coords, free, reach) {
   target
 }
 
-# the distinct permutations of one event, or NULL when none differs from the observed
+#' the distinct permutations of one event, or NULL when none differs from the observed
+#' @noRd
 event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap, outside,
                         independent, max_tries) {
   n <- nrow(coords)

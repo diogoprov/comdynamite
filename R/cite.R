@@ -167,7 +167,8 @@ method_functions <- list(
 # functions whose citation was already shown in this session
 cite_state <- new.env(parent = emptyenv())
 
-# one paper as text, in the style of the help pages
+#' one paper as text, in the style of the help pages
+#' @noRd
 format_paper <- function(paper) {
   authors <- paper$authors
   if (length(authors) > 1) {
@@ -223,7 +224,8 @@ method_references <- function(fun = NULL) {
   unname(vapply(method_papers[method_functions[[fun]]], format_paper, character(1)))
 }
 
-# name of the function of a call, without the namespace
+#' name of the function of a call, without the namespace
+#' @noRd
 call_name <- function(call) {
   fn <- call[[1]]
   if (is.call(fn) && length(fn) == 3 && as.character(fn[[1]]) %in% c("::", ":::")) {
@@ -232,8 +234,9 @@ call_name <- function(call) {
   if (is.name(fn)) as.character(fn) else ""
 }
 
-# shows the original references of `fun` the first time it is called in the session, unless
-# options(comdynamite.cite = FALSE) or `fun` was called by another function that cites
+#' shows the original references of `fun` the first time it is called in the session, unless
+#' options(comdynamite.cite = FALSE) or `fun` was called by another function that cites
+#' @noRd
 cite_method <- function(fun) {
   if (!isTRUE(getOption("comdynamite.cite", TRUE))) return(invisible(NULL))
   if (isTRUE(cite_state[[fun]])) return(invisible(NULL))

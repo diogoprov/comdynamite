@@ -257,7 +257,8 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   out
 }
 
-# checks the community matrix and returns it as a numeric matrix
+#' checks the community matrix and returns it as a numeric matrix
+#' @noRd
 check_community <- function(community, d) {
   community <- as.matrix(community)
   if (!is.numeric(community) || anyNA(community) || any(community < 0)) {
@@ -279,7 +280,8 @@ check_community <- function(community, d) {
   community
 }
 
-# populations, the two random halves, the competitors of each site and the scales of the trait
+#' populations, the two random halves, the competitors of each site and the scales of the trait
+#' @noRd
 shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
   label <- paste(d$site, d$species, sep = "\r")
   first <- !duplicated(label)
@@ -351,7 +353,8 @@ shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
        within_sd = within_sd, spread = spread, floor = floor, n_pops = n_pops)
 }
 
-# push of the competitors of each population, with `own` as the population's own mean
+#' push of the competitors of each population, with `own` as the population's own mean
+#' @noRd
 shifts_push <- function(prep, own, w) {
   out <- numeric(prep$n_pops)
   means <- prep$pops$mean
@@ -370,8 +373,9 @@ shifts_push <- function(prep, own, w) {
   out
 }
 
-# derivative of the push of each population with respect to its own mean (with all means at
-# their observed values): sum_k p_k exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)
+#' derivative of the push of each population with respect to its own mean (with all means at
+#' their observed values): sum_k p_k exp(-g^2 / (2 w^2)) (1 - g^2 / w^2)
+#' @noRd
 shifts_push_slope <- function(prep, w) {
   out <- numeric(prep$n_pops)
   means <- prep$pops$mean
@@ -390,7 +394,8 @@ shifts_push_slope <- function(prep, w) {
   out
 }
 
-# moves the means of unmeasured competitors along the gradient with the fitted slopes
+#' moves the means of unmeasured competitors along the gradient with the fitted slopes
+#' @noRd
 shifts_follow <- function(prep, slopes) {
   for (k in seq_along(prep$members)) {
     m <- prep$members[[k]]
@@ -401,8 +406,9 @@ shifts_follow <- function(prep, slopes) {
   prep
 }
 
-# fits the model; with unmeasured competitors, fits again after moving their means along the
-# gradient with the slopes of the first fit
+#' fits the model; with unmeasured competitors, fits again after moving their means along the
+#' gradient with the slopes of the first fit
+#' @noRd
 shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
   fit <- shifts_fit(prep, width, species_slopes, slope_names)
   external <- any(vapply(prep$members, function(m) length(m$ext_base) > 0, logical(1)))
@@ -415,7 +421,8 @@ shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
   fit
 }
 
-# fits the model over the grid of widths
+#' fits the model over the grid of widths
+#' @noRd
 shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = TRUE) {
   use <- prep$use
   pops <- prep$pops
@@ -505,10 +512,11 @@ shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = 
        rss_change = rss_change, species_slopes = species_table, slope_species = slope_species)
 }
 
-# variance of populations about the model from squared residuals (already scaled for the
-# parameters fitted) and the sampling variance of each mean: the moment equation
-# sum w (r^2 - v - s) = 0 with weights w = 1 / (v + s)^2, so that means of few individuals,
-# whose squared residuals are mostly sampling error, weigh little
+#' variance of populations about the model from squared residuals (already scaled for the
+#' parameters fitted) and the sampling variance of each mean: the moment equation
+#' sum w (r^2 - v - s) = 0 with weights w = 1 / (v + s)^2, so that means of few individuals,
+#' whose squared residuals are mostly sampling error, weigh little
+#' @noRd
 population_variance <- function(r2, sampling, iter = 50) {
   sampling <- rep_len(sampling, length(r2))
   v <- max(0, mean(r2) - mean(sampling))
@@ -522,7 +530,8 @@ population_variance <- function(r2, sampling, iter = 50) {
   v
 }
 
-# parametric bootstrap with the design of the data
+#' parametric bootstrap with the design of the data
+#' @noRd
 shifts_bootstrap <- function(out, fit, prep, d, env_cols, community, width, species_slopes,
                              slope_names, nboot, level) {
   pops <- prep$pops

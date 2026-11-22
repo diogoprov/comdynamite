@@ -160,8 +160,9 @@ surrogates_from <- function(env, d, n, method) {
   })
 }
 
-# landscapes with the environment (and its axes) replaced, with the distances of the landscape,
-# so a torus or a network keeps its own geometry
+#' landscapes with the environment (and its axes) replaced, with the distances of the landscape,
+#' so a torus or a network keeps its own geometry
+#' @noRd
 landscape_surrogates <- function(landscape, n, method) {
   d <- landscape$dist
   if (is.null(d)) {
@@ -188,8 +189,9 @@ landscape_surrogates <- function(landscape, n, method) {
   out
 }
 
-# exponential range by maximum likelihood on normal scores, with the variance profiled out, over
-# a grid of ranges from half the smallest to half the largest distance
+#' exponential range by maximum likelihood on normal scores, with the variance profiled out, over
+#' a grid of ranges from half the smallest to half the largest distance
+#' @noRd
 fit_exponential_range <- function(x, d) {
   y <- stats::qnorm(rank(x) / (length(x) + 1))
   y <- y - mean(y)
@@ -209,8 +211,9 @@ fit_exponential_range <- function(x, d) {
   candidates[which.max(loglik)]
 }
 
-# what depends only on the coordinates: pairs of sites up to the 25% quantile of the distances,
-# in bins, and the neighbours of each site in order of distance
+#' what depends only on the coordinates: pairs of sites up to the 25% quantile of the distances,
+#' in bins, and the neighbours of each site in order of distance
+#' @noRd
 variogram_setup <- function(d, proportions = c(0.01, 0.02, 0.03, 0.05, 0.08, 0.12, 0.18, 0.25,
                                                0.35, 0.5), n_bins = 15) {
   m <- nrow(d)
@@ -252,8 +255,9 @@ variogram_surrogate <- function(x, moved, setup) {
   sqrt(slope) * (best$smoothed - mean(best$smoothed)) + sqrt(nugget) * stats::rnorm(m) + mean(x)
 }
 
-# null draws of the predictors for the occupied sites: permutations of sites (free or given),
-# surrogates drawn here, or surrogates given as a list. `env_at(r)` gives draw r
+#' null draws of the predictors for the occupied sites: permutations of sites (free or given),
+#' surrogates drawn here, or surrogates given as a list. `env_at(r)` gives draw r
+#' @noRd
 site_null <- function(null, draws, landscape_env, env, coords, n_perm) {
   if (is.list(null)) {
     m <- nrow(null[[1]])
@@ -282,7 +286,8 @@ site_null <- function(null, draws, landscape_env, env, coords, n_perm) {
   list(n = n_perm, env_at = function(r) surrogates[[r]])
 }
 
-# a name of a null model, or a list of surrogates from env_surrogates()
+#' a name of a null model, or a list of surrogates from env_surrogates()
+#' @noRd
 check_null <- function(null, site_permutations) {
   if (is.list(null)) {
     if (length(null) == 0 || !all(vapply(null, function(e) is.matrix(e) && is.numeric(e),

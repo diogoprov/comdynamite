@@ -244,11 +244,12 @@ print.mc_evolution <- function(x, ...) {
   invisible(x)
 }
 
-# the state of evolution inside mc_dynamics(): checks the settings against the sites and
-# species and returns the functions that the loop calls
+#' the state of evolution inside mc_dynamics(): checks the settings against the sites and
+#' species and returns the functions that the loop calls
+#' @noRd
 evolution_state <- function(evolution, m, k_all, species) {
   if (!inherits(evolution, "mc_evolution")) {
-    stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+    stop("`evolution` is not an object from `evolution_control()`", call. = FALSE)
   }
   if (is.null(evolution$env) || is.null(evolution$traits)) {
     stop("`evolution` needs `env` and `traits` with `mc_dynamics()`", call. = FALSE)
@@ -285,10 +286,11 @@ evolution_state <- function(evolution, m, k_all, species) {
        vsel = isTRUE(evolution$variance_selection))
 }
 
-# immigrants filtered by viability selection in the site they reach (immigrant_selection =
-# TRUE): the expected number from each source is weighted by the fitness of the source
-# phenotype in the destination; returns the expected numbers and the mean and variance of the
-# genetic means, and the mean phenotype, of the immigrants that arrive (sites x species)
+#' immigrants filtered by viability selection in the site they reach (immigrant_selection =
+#' TRUE): the expected number from each source is weighted by the fitness of the source
+#' phenotype in the destination; returns the expected numbers and the mean and variance of the
+#' genetic means, and the mean phenotype, of the immigrants that arrive (sites x species)
+#' @noRd
 immigrants_selected <- function(em, za, pa, e, width, disp_matrix, vg = NULL) {
   m <- nrow(em)
   k <- ncol(em)
@@ -318,9 +320,10 @@ immigrants_selected <- function(em, za, pa, e, width, disp_matrix, vg = NULL) {
   list(lambda = lam, mean = zi, between = z2, phenotype = pi, variance = vi)
 }
 
-# growth rates of the phenotypes p (sites x species) in environment e: the mean fitness under
-# the response of growth_rates() of phenotypes with variance v around p (v = 0 gives it exactly)
-# the same with the variance v as a matrix (sites x species), one value per population
+#' growth rates of the phenotypes p (sites x species) in environment e: the mean fitness under
+#' the response of growth_rates() of phenotypes with variance v around p (v = 0 gives it exactly)
+#' the same with the variance v as a matrix (sites x species), one value per population
+#' @noRd
 evolution_growth_cells <- function(p, e, sigma, r_max, v) {
   width <- sweep(v, 2, sigma^2, "+")
   r <- exp(-(e - p)^2 / (2 * width))
@@ -337,8 +340,9 @@ evolution_growth <- function(p, e, sigma, r_max, v = 0) {
   sweep(r, 2, r_max * shrink, "*")
 }
 
-# mean trait of the immigrants into each site, from the emigrants em and their trait x
-# (sites x species), through the dispersal matrix or, without it, from all other sites
+#' mean trait of the immigrants into each site, from the emigrants em and their trait x
+#' (sites x species), through the dispersal matrix or, without it, from all other sites
+#' @noRd
 immigrant_mean <- function(em, x, disp_matrix, fallback) {
   x[is.na(x)] <- 0
   if (!is.null(disp_matrix)) {
@@ -353,10 +357,11 @@ immigrant_mean <- function(em, x, disp_matrix, fallback) {
   out
 }
 
-# the genetic variance g (sites x species) after a fraction f of a generation (a number or a
-# matrix) in populations of size n: drift removes 1 / (2 Ne) and mutation adds Vm per generation
-# (Lynch & Hill 1986) and, with `variance_selection`, Gaussian selection of width `width`
-# (= g + sigma^2 + VE) removes g^2 / width (Bulmer 1971)
+#' the genetic variance g (sites x species) after a fraction f of a generation (a number or a
+#' matrix) in populations of size n: drift removes 1 / (2 Ne) and mutation adds Vm per generation
+#' (Lynch & Hill 1986) and, with `variance_selection`, Gaussian selection of width `width`
+#' (= g + sigma^2 + VE) removes g^2 / width (Bulmer 1971)
+#' @noRd
 variance_update <- function(g, n, width, ev, alive, f) {
   m <- nrow(g)
   k <- ncol(g)

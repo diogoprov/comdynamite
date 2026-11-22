@@ -2,13 +2,15 @@
 # and environmental covariance matrices. The univariate engine in mc_step() is left as it was;
 # these helpers do the same steps on arrays of sites x species x traits.
 
-# is this a setting of evolution for several traits?
+#' is this a setting of evolution for several traits?
+#' @noRd
 evolution_is_mv <- function(evolution) {
   is.list(evolution$traits) && !is.data.frame(evolution$traits)
 }
 
-# a covariance matrix for each species from one number (times the identity), one matrix, or a
-# list with one matrix per species
+#' a covariance matrix for each species from one number (times the identity), one matrix, or a
+#' list with one matrix per species
+#' @noRd
 evolution_matrices <- function(x, q, species, name) {
   as_one <- function(v) {
     v <- if (length(v) == 1 && is.null(dim(v))) diag(v, q) else as.matrix(v)
@@ -40,26 +42,30 @@ evolution_matrices <- function(x, q, species, name) {
   rep(list(as_one(x)), length(species))
 }
 
-# a matrix W with W' P W = I on the range of P, so that distances between rows of z %*% W are
-# Mahalanobis distances under P (directions without variance are left out)
+#' a matrix W with W' P W = I on the range of P, so that distances between rows of z %*% W are
+#' Mahalanobis distances under P (directions without variance are left out)
+#' @noRd
 evolution_whiten <- function(p) {
   e <- eigen(p, symmetric = TRUE)
   keep <- e$values > 1e-10 * e$values[1]
   e$vectors[, keep, drop = FALSE] %*% diag(1 / sqrt(e$values[keep]), sum(keep))
 }
 
-# Mahalanobis distances under the P of species j between the rows of z (populations x traits)
+#' Mahalanobis distances under the P of species j between the rows of z (populations x traits)
+#' @noRd
 mv_distance <- function(ev, j, z) {
   as.matrix(stats::dist(z %*% ev$whiten[[j]]))
 }
 
-# any matrix with L %*% t(L) = v, also for singular v
+#' any matrix with L %*% t(L) = v, also for singular v
+#' @noRd
 evolution_root <- function(v) {
   e <- eigen(v, symmetric = TRUE)
   e$vectors %*% diag(sqrt(pmax(e$values, 0)), nrow(v))
 }
 
-# the state of multivariate evolution inside mc_dynamics()
+#' the state of multivariate evolution inside mc_dynamics()
+#' @noRd
 evolution_state_mv <- function(evolution, m, k_all, species) {
   if (!is.null(evolution$mutation_var)) {
     stop("`mutation_var` is not yet available with several traits", call. = FALSE)
@@ -116,7 +122,7 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   cor <- niche_cor_species(niche_cor, sp, q)
   correlated <- vapply(cor, function(m) any(m[row(m) != col(m)] != 0), logical(1))
   if (any(correlated) && any(sigma == 0)) {
-    stop("a niche breadth `sigma` of 0 is not available with correlated axes ",
+    stop("a niche breadth `sigma` of 0 cannot be combined with correlated axes ",
          "(`niche_correlation()`)", call. = FALSE)
   }
   # selection on the axes with a finite niche breadth: the response of each population is
@@ -170,15 +176,17 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
        niche_cor = niche_cor, correlated = any(correlated))
 }
 
-# phenotypes: genetic means plus the plastic response to the environment e (sites x traits)
+#' phenotypes: genetic means plus the plastic response to the environment e (sites x traits)
+#' @noRd
 mv_phenotype <- function(ev, za, e, cols) {
   pa <- za
   for (a in seq_len(ev$q)) pa[, , a] <- za[, , a] + outer(e[, a] - ev$ref[a], ev$b[cols, a])
   pa
 }
 
-# growth rates (sites x species) of phenotypes pa under the multivariate Gaussian niche, with
-# the variance of phenotypes around their mean
+#' growth rates (sites x species) of phenotypes pa under the multivariate Gaussian niche, with
+#' the variance of phenotypes around their mean
+#' @noRd
 mv_growth <- function(ev, pa, e, cols) {
   r <- matrix(0, dim(pa)[1], length(cols))
   for (i in seq_along(cols)) {
@@ -207,7 +215,8 @@ mv_growth <- function(ev, pa, e, cols) {
   r
 }
 
-# selection and drift in the populations present after reproduction (n > 0)
+#' selection and drift in the populations present after reproduction (n > 0)
+#' @noRd
 mv_select <- function(ev, za, pa, e, n, cols) {
   for (i in seq_along(cols)) {
     j <- cols[i]
@@ -229,8 +238,9 @@ mv_select <- function(ev, za, pa, e, n, cols) {
   za
 }
 
-# means of founders in `cells` (sites x species of the alive columns `cols`): k founders drawn
-# from sources with means `from`, with variance `between` (per trait) among the sources
+#' means of founders in `cells` (sites x species of the alive columns `cols`): k founders drawn
+#' from sources with means `from`, with variance `between` (per trait) among the sources
+#' @noRd
 mv_found <- function(ev, target, from, k, cells, cols, between = NULL) {
   for (i in which(colSums(cells) > 0)) {
     rows <- which(cells[, i])
@@ -250,9 +260,10 @@ mv_found <- function(ev, target, from, k, cells, cols, between = NULL) {
   target
 }
 
-# relative fitness (sources x sites) of the mean phenotypes `p` (sources x traits) of species j
-# in the environment `e` (sites x traits): the multivariate Gaussian of mv_growth(), with the
-# variance of phenotypes, divided by its maximum, so that a perfectly adapted source gives 1
+#' relative fitness (sources x sites) of the mean phenotypes `p` (sources x traits) of species j
+#' in the environment `e` (sites x traits): the multivariate Gaussian of mv_growth(), with the
+#' variance of phenotypes, divided by its maximum, so that a perfectly adapted source gives 1
+#' @noRd
 mv_fitness <- function(ev, p, e, j) {
   s <- ev$sel[[j]]
   w <- matrix(1, nrow(p), nrow(e))
@@ -264,10 +275,11 @@ mv_fitness <- function(ev, p, e, j) {
   w
 }
 
-# immigrants filtered by viability selection in the site they reach, with several traits: as
-# immigrants_selected(), with the weights of mv_fitness(); returns the expected numbers
-# (sites x species) and the means, variances among sources and phenotypes of the immigrants
-# that arrive (sites x species x traits)
+#' immigrants filtered by viability selection in the site they reach, with several traits: as
+#' immigrants_selected(), with the weights of mv_fitness(); returns the expected numbers
+#' (sites x species) and the means, variances among sources and phenotypes of the immigrants
+#' that arrive (sites x species x traits)
+#' @noRd
 mv_immigrants_selected <- function(ev, em, za, pa, e, disp_matrix, cols) {
   m <- nrow(em)
   k <- ncol(em)
@@ -301,9 +313,10 @@ mv_immigrants_selected <- function(ev, em, za, pa, e, disp_matrix, cols) {
   list(lambda = lam, mean = zi, between = z2, phenotype = pi)
 }
 
-# gene flow: residents and immigrants mixed by their numbers, immigrants with the means of
-# their sources (or, with `sel` from mv_immigrants_selected(), of the immigrants that survive);
-# populations without residents are founded by a sample of their immigrants
+#' gene flow: residents and immigrants mixed by their numbers, immigrants with the means of
+#' their sources (or, with `sel` from mv_immigrants_selected(), of the immigrants that survive);
+#' populations without residents are founded by a sample of their immigrants
+#' @noRd
 mv_flow <- function(ev, za, pa, n, em, imm, disp_matrix, cols, sel = NULL) {
   imm <- imm + matrix(0L, nrow(n), ncol(n))
   res <- n - em

@@ -173,7 +173,8 @@ print.rate_matrix <- function(x, ...) {
   invisible(x)
 }
 
-# the rate matrices of sigma2 as plain matrices
+#' the rate matrices of sigma2 as plain matrices
+#' @noRd
 strip_rate_matrix <- function(x) {
   if (!inherits(x, "rate_matrix")) return(x)
   if (is.list(x)) {
@@ -183,7 +184,8 @@ strip_rate_matrix <- function(x) {
   }
 }
 
-# rate matrix from the variances and a common correlation or a correlation matrix
+#' rate matrix from the variances and a common correlation or a correlation matrix
+#' @noRd
 build_rate_matrix <- function(variance, correlation, p) {
   if (!is.numeric(variance) || !all(is.finite(variance)) || any(variance < 0) ||
       !length(variance) %in% c(1, p)) {

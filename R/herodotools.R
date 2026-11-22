@@ -160,12 +160,14 @@ arrival_ages <- function(history, x, regions) {
   out
 }
 
-# does each range (a state such as "A" or "A+B") include the region?
+#' does each range (a state such as "A" or "A+B") include the region?
+#' @noRd
 range_has <- function(region, range) {
   vapply(strsplit(range, "+", fixed = TRUE), function(p) region %in% p, logical(1))
 }
 
-# states at the internal nodes (root first) and at the tips of a simmap tree
+#' states at the internal nodes (root first) and at the tips of a simmap tree
+#' @noRd
 history_states <- function(history) {
   if (!inherits(history, "phylo") || is.null(history$maps)) {
     stop("`history` must be a `simmap` tree, such as from `trait_mk()`", call. = FALSE)

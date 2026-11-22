@@ -260,7 +260,8 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                                session_sd = 0, visits = 1, session = c("step", "visit")) {
   if (inherits(x, "mc_evolving")) x <- as_metacommunity(x)
   if (!inherits(x, "mc_sim")) {
-    stop("`x` must be a simulation from simulate_metacommunity()", call. = FALSE)
+    stop("sample_individuals(): `x` must be a simulation from simulate_metacommunity()",
+         call. = FALSE)
   }
   source <- match.arg(source)
   check_number(session_sd, "session_sd", lower = 0)
@@ -321,8 +322,9 @@ sample_individuals <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
   session_shift(out, session_sd, if (session == "visit") paste(date, out$site, visit) else date)
 }
 
-# adds to the traits a deviation of standard deviation `sd` shared by the individuals with the
-# same `key` (a date, or a visit to a site), one per trait
+#' adds to the traits a deviation of standard deviation `sd` shared by the individuals with the
+#' same `key` (a date, or a visit to a site), one per trait
+#' @noRd
 session_shift <- function(out, sd, key) {
   if (sd == 0 || nrow(out) == 0) return(out)
   key <- rep_len(key, nrow(out))
@@ -334,8 +336,9 @@ session_shift <- function(out, sd, key) {
   out
 }
 
-# the individuals of one date; `draws` gives standard normal deviations of each population
-# (sites x species of `x$abundance`) to share among dates
+#' the individuals of one date; `draws` gives standard normal deviations of each population
+#' (sites x species of `x$abundance`) to share among dates
+#' @noRd
 individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
                            population_sd = 0, intraspecific_sd = 1, displacement = 0,
                            displacement_width = NULL, step = NULL, env = NULL,
@@ -713,7 +716,8 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   out
 }
 
-# integer codes of sites, populations and the site of each population
+#' integer codes of sites, populations and the site of each population
+#' @noRd
 tstats_groups <- function(site_id, species_id, site_levels) {
   population <- paste(match(site_id, site_levels), species_id, sep = "\r")
   pop_levels <- unique(population)
@@ -725,9 +729,10 @@ tstats_groups <- function(site_id, species_id, site_levels) {
        by_site = split(seq_along(site), factor(site, seq_along(site_levels))))
 }
 
-# the three ratios per site, from trait values and the groups of tstats_groups(); var_r fixes
-# the denominator of T_IC.IR (variance among all individuals), which its null model does not
-# randomise
+#' the three ratios per site, from trait values and the groups of tstats_groups(); var_r fixes
+#' the denominator of T_IC.IR (variance among all individuals), which its null model does not
+#' randomise
+#' @noRd
 t_ratios <- function(z, g, var_r = NULL) {
   z <- z - mean(z)
   pop_mean <- group_mean(z, g$pop, g$n_pops)
@@ -743,9 +748,10 @@ t_ratios <- function(z, g, var_r = NULL) {
              T_PC.PR = var_pc / stats::var(pop_mean))
 }
 
-# null values (randomisation x site x statistic) of the three null models; those of T_IC.IR and
-# T_PC.PR permute the whole region at once, so that the sites of a randomisation partition the
-# regional pool as those of the data do (tstats_summary() tests the mean over sites)
+#' null values (randomisation x site x statistic) of the three null models; those of T_IC.IR and
+#' T_PC.PR permute the whole region at once, so that the sites of a randomisation partition the
+#' regional pool as those of the data do (tstats_summary() tests the mean over sites)
+#' @noRd
 tstats_null <- function(z, g, n_perm, null_ip = "site", null_pc = "populations") {
   n <- length(z)
   pop_mean <- group_mean(z, g$pop, g$n_pops)
@@ -776,7 +782,8 @@ tstats_null <- function(z, g, n_perm, null_ip = "site", null_pc = "populations")
   out
 }
 
-# sums of x by integer group 1..n_groups; groups without members sum to 0
+#' sums of x by integer group 1..n_groups; groups without members sum to 0
+#' @noRd
 group_sum <- function(x, g, n_groups) {
   sums <- rowsum(x, g, reorder = TRUE)
   out <- numeric(n_groups)
@@ -794,9 +801,10 @@ group_var <- function(x, g, n_groups) {
   out
 }
 
-# standardised effect sizes and permutation p-values of observed values (vector of length m)
-# against null values (matrix n_perm x m); NA where the observed value or every null value is
-# missing
+#' standardised effect sizes and permutation p-values of observed values (vector of length m)
+#' against null values (matrix n_perm x m); NA where the observed value or every null value is
+#' missing
+#' @noRd
 null_compare <- function(obs, sims, alternative = c("less", "greater", "two.sided")) {
   alternative <- match.arg(alternative)
   sims <- matrix(sims, ncol = length(obs))
@@ -819,7 +827,8 @@ null_compare <- function(obs, sims, alternative = c("less", "greater", "two.side
 
 finite_or_na <- function(v) ifelse(is.finite(v), v, NA_real_)
 
-# binds arrays (randomisation x row x statistic) along their rows
+#' binds arrays (randomisation x row x statistic) along their rows
+#' @noRd
 abind_rows <- function(...) {
   parts <- list(...)
   if (length(parts) == 1) return(parts[[1]])
@@ -850,7 +859,8 @@ tstats_cati <- function(values, site_id, species_id, n_perm, ...) {
 
 cati_available <- function() requireNamespace("cati", quietly = TRUE)
 
-# gives back the names of sites in every dimnames and factor of a cati result
+#' gives back the names of sites in every dimnames and factor of a cati result
+#' @noRd
 restore_site_names <- function(x, site_map) {
   if (is.factor(x)) {
     if (all(levels(x) %in% names(site_map))) levels(x) <- unname(site_map[levels(x)])
@@ -871,9 +881,10 @@ restore_site_names <- function(x, site_map) {
   x
 }
 
-# equilibrium of mu_j = target_j + c sum_k p_k (mu_j - mu_k) exp(-(mu_j - mu_k)^2 / (2 w^2)),
-# found by damped fixed-point iteration from the targets; the step keeps the iteration stable,
-# since the slope of the push is between -0.45 c and c
+#' equilibrium of mu_j = target_j + c sum_k p_k (mu_j - mu_k) exp(-(mu_j - mu_k)^2 / (2 w^2)),
+#' found by damped fixed-point iteration from the targets; the step keeps the iteration stable,
+#' since the slope of the push is between -0.45 c and c
+#' @noRd
 displace <- function(target, abundance, strength, width, tol = 1e-8, max_iter = 1e5) {
   p <- abundance / sum(abundance)
   step <- 1 / (1 + strength)
@@ -890,10 +901,11 @@ displace <- function(target, abundance, strength, width, tol = 1e-8, max_iter = 
   mu
 }
 
-# the arrival step, founders, erosion by gene flow, exp(-gene_flow * migrant load), and share
-# of the gap to the environment closed since arrival, the solution of du/dt = rate (1 - u) -
-# gene_flow mbar u with mbar = load / age, of every population (sites x species, in the order
-# of `sites` and `species`)
+#' the arrival step, founders, erosion by gene flow, exp(-gene_flow * migrant load), and share
+#' of the gap to the environment closed since arrival, the solution of du/dt = rate (1 - u) -
+#' gene_flow mbar u with mbar = load / age, of every population (sites x species, in the order
+#' of `sites` and `species`)
+#' @noRd
 arrival_terms <- function(x, step, sites, species, rate, flow) {
   check_history(x)
   if (!is.null(step) && !identical(as.numeric(step), as.numeric(x$n_steps))) {
@@ -912,9 +924,10 @@ arrival_terms <- function(x, step, sites, species, rate, flow) {
        erosion = erosion, adapted = adapted)
 }
 
-# population means (genetic mean plus plastic part, NA where absent) and the variance among
-# individuals (genetic plus environmental, plus that among lineages) of each species at the last
-# step of a simulation with evolution, or at a recorded `step`
+#' population means (genetic mean plus plastic part, NA where absent) and the variance among
+#' individuals (genetic plus environmental, plus that among lineages) of each species at the last
+#' step of a simulation with evolution, or at a recorded `step`
+#' @noRd
 evolved_populations <- function(x, sites, species, step = NULL) {
   ev <- x$evolution
   if (!is.null(step)) ev <- evolved_at(ev, step)
@@ -948,8 +961,9 @@ evolved_populations <- function(x, sites, species, step = NULL) {
   list(mean = mean, var = var)
 }
 
-# the evolutionary state at a recorded step: genetic means from the history, the plastic part
-# from the environment then, and the variance among lineages when it was recorded
+#' the evolutionary state at a recorded step: genetic means from the history, the plastic part
+#' from the environment then, and the variance among lineages when it was recorded
+#' @noRd
 evolved_at <- function(ev, step) {
   label <- step_label(step)
   if (is.null(ev$history) || !label %in% dimnames(ev$history)[[3]] ||
@@ -973,9 +987,10 @@ evolved_at <- function(ev, step) {
   ev
 }
 
-# the environment of each site at the sampled step (the last one by default) of a simulation
-# with evolution; at the last step, NULL for objects that did not keep it (the environment of
-# the landscape is then used)
+#' the environment of each site at the sampled step (the last one by default) of a simulation
+#' with evolution; at the last step, NULL for objects that did not keep it (the environment of
+#' the landscape is then used)
+#' @noRd
 evolved_environment <- function(x, step) {
   ev <- x$evolution
   if (is.null(step)) return(ev$environment)
@@ -986,8 +1001,9 @@ evolved_environment <- function(x, step) {
   unname(ev$environment_history[, label])
 }
 
-# population means (genetic plus plastic, NA where absent), environment (sites x traits) and
-# abundances of a simulation with several evolving traits, at the last step or a recorded one
+#' population means (genetic plus plastic, NA where absent), environment (sites x traits) and
+#' abundances of a simulation with several evolving traits, at the last step or a recorded one
+#' @noRd
 mv_populations <- function(x, step = NULL) {
   ev <- x$evolution
   axes <- dimnames(ev$genetic)[[3]]
@@ -1028,9 +1044,10 @@ mv_populations <- function(x, step = NULL) {
   list(mean = pop, env = e, abundance = abundance, axes = axes, within = within)
 }
 
-# individuals of a simulation with several evolving traits (one per environmental axis): the
-# phenotype of each individual is drawn from N(population mean, G + E), with the population
-# mean the genetic mean plus the plastic response at the sampled step; one column per trait
+#' individuals of a simulation with several evolving traits (one per environmental axis): the
+#' phenotype of each individual is drawn from N(population mean, G + E), with the population
+#' mean the genetic mean plus the plastic response at the sampled step; one column per trait
+#' @noRd
 individuals_mv <- function(x, n, fraction, step, env, cover, min_n, intraspecific_sd, fixed) {
   check_no_env(env)
   if (any(fixed != 0)) {
@@ -1134,7 +1151,8 @@ per_species <- function(value, species, name) {
   value
 }
 
-# stops unless `x` is a data frame with the columns `columns`; `name` is the argument
+#' stops unless `x` is a data frame with the columns `columns`; `name` is the argument
+#' @noRd
 check_data_columns <- function(x, columns, name = "individuals") {
   if (!is.data.frame(x)) stop("`", name, "` must be a data frame", call. = FALSE)
   missing_columns <- setdiff(columns, names(x))
@@ -1144,7 +1162,8 @@ check_data_columns <- function(x, columns, name = "individuals") {
   invisible(x)
 }
 
-# stops unless `x` holds one or more names of columns
+#' stops unless `x` holds one or more names of columns
+#' @noRd
 check_column_names <- function(x, name) {
   if (!is.character(x) || length(x) == 0 || anyNA(x)) {
     stop("`", name, "` must be one or more column names", call. = FALSE)
@@ -1152,20 +1171,23 @@ check_column_names <- function(x, name) {
   invisible(x)
 }
 
-# stops unless `n` is one whole number, 1 or more, or Inf (all the individuals)
+#' stops unless `n` is one whole number, 1 or more, or Inf (all the individuals)
+#' @noRd
 check_sample_size <- function(n, name = "n", null_ok = FALSE) {
   if (null_ok && is.null(n)) return(invisible(n))
   if (is.numeric(n) && length(n) == 1 && isTRUE(n == Inf)) return(invisible(n))
   check_count(n, name)
 }
 
-# stops because the evolutionary state of a simulation was not kept at `step`
+#' stops because the evolutionary state of a simulation was not kept at `step`
+#' @noRd
 stop_not_recorded <- function(step, advice = TRUE) {
   stop("the evolutionary state was not recorded at step ", step,
        if (advice) ": use `record_steps` (with this version of the package)", call. = FALSE)
 }
 
-# with `source = "evolution"` the environment comes from the simulation
+#' with `source = "evolution"` the environment comes from the simulation
+#' @noRd
 check_no_env <- function(env) {
   if (!is.null(env)) {
     stop("with `source = \"evolution\"`, the environment comes from the simulation: ",
@@ -1173,14 +1195,16 @@ check_no_env <- function(env) {
   }
 }
 
-# stops unless the trait values (a vector or a matrix) are numeric; `trait` names a single one
+#' stops unless the trait values (a vector or a matrix) are numeric; `trait` names a single one
+#' @noRd
 check_numeric_traits <- function(values, trait = NULL) {
   if (is.numeric(values)) return(invisible(values))
   if (is.null(trait)) stop("the columns in `traits` must be numeric", call. = FALSE)
   stop("trait `", trait, "` must be numeric", call. = FALSE)
 }
 
-# stops unless the abundance `a` of each individual is the same within its population `pop`
+#' stops unless the abundance `a` of each individual is the same within its population `pop`
+#' @noRd
 check_population_abundance <- function(a, pop) {
   if (anyNA(a) || any(tapply(a, pop, function(v) length(unique(v))) > 1)) {
     stop("`abundance` must have one value, not missing, for each population", call. = FALSE)

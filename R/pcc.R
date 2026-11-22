@@ -133,8 +133,9 @@ print.mc_pcc <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
-# adjusted R2 of each eigenvector; the total sum of squares is the sum of the
-# species weights, because the standardised eigenvectors have weighted variance 1
+#' adjusted R2 of each eigenvector; the total sum of squares is the sum of the
+#' species weights, because the standardised eigenvectors have weighted variance 1
+#' @noRd
 pcc_r2 <- function(comm, vectors, env) {
   n <- nrow(comm)
   species_weights <- colSums(comm)
@@ -148,13 +149,15 @@ pcc_r2 <- function(comm, vectors, env) {
   1 - (n - 1) / (n - ncol(env) - 1) * (1 - r2)
 }
 
-# weighted mean 0 and variance 1, with the sum of the weights as denominator
+#' weighted mean 0 and variance 1, with the sum of the weights as denominator
+#' @noRd
 weighted_standardise <- function(x, w) {
   centred <- sweep(x, 2, colSums(w * x) / sum(w))
   sweep(centred, 2, sqrt(colSums(w * centred^2) / sum(w)), "/")
 }
 
-# a regression on the predictors needs more occupied sites than predictors plus one
+#' a regression on the predictors needs more occupied sites than predictors plus one
+#' @noRd
 check_enough_sites <- function(comm, env) {
   if (nrow(comm) <= ncol(env) + 1) {
     stop("`comm` needs more occupied sites (", nrow(comm), ") than predictors in `env` plus ",

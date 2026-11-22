@@ -157,7 +157,8 @@ phylo_stats <- function(comm, tree, n_null) {
     ses_mntd = effect(mean_nearest(presence, distances), "mntd"))
 }
 
-# per site, from presences; NA with fewer than two species
+#' per site, from presences; NA with fewer than two species
+#' @noRd
 mean_pairwise <- function(presence, distances) {
   richness <- rowSums(presence)
   total <- rowSums((presence %*% distances) * presence)
@@ -181,7 +182,8 @@ decay_stat <- function(comm, coords) {
   safe_cor(dissimilarity, as.vector(stats::dist(coords[occupied, , drop = FALSE])))
 }
 
-# lower triangle, as in stats::dist()
+#' lower triangle, as in stats::dist()
+#' @noRd
 bray_curtis <- function(comm) {
   sums <- rowSums(comm)
   full <- as.matrix(stats::dist(comm, method = "manhattan")) / outer(sums, sums, "+")
@@ -209,7 +211,8 @@ trait_stats <- function(comm, trait, env) {
   }, trait_sd = if (sum(comm) > 0) sqrt(sum(regional * (values - centre)^2)) else NA_real_)
 }
 
-# Blomberg's K over the species shared by the trait and the tree
+#' Blomberg's K over the species shared by the trait and the tree
+#' @noRd
 blomberg_k <- function(trait, tree) {
   if (is.null(trait) || is.null(tree)) return(NA_real_)
   shared <- intersect(tree$tip.label, names(trait))

@@ -142,14 +142,16 @@ fitted.population_shifts <- function(object, ...) attr(object, "model")$fitted
 #' @exportS3Method stats::residuals
 residuals.population_shifts <- function(object, ...) attr(object, "model")$residual
 
-# the slope columns and `displacement`, in the order of the table
+#' the slope columns and `displacement`, in the order of the table
+#' @noRd
 shifts_coef_names <- function(object) {
   d <- as.data.frame(object)
   slopes <- grep("^local_adaptation", names(d), value = TRUE)
   c(slopes[!grepl("_(low|high)$", slopes)], "displacement")
 }
 
-# rows of a coefficient table chosen by name or position
+#' rows of a coefficient table chosen by name or position
+#' @noRd
 pick_parm <- function(parm, available) {
   if (is.numeric(parm)) parm <- available[parm]
   if (!is.character(parm) || anyNA(parm) || !all(parm %in% available)) {

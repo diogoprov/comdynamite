@@ -204,7 +204,8 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
                low = apply(m, 2, stats::quantile, (1 - level) / 2, na.rm = TRUE, names = FALSE),
                high = apply(m, 2, stats::quantile, 1 - (1 - level) / 2, na.rm = TRUE,
                             names = FALSE),
-               reps = colSums(!is.na(m)), row.names = NULL, stringsAsFactors = FALSE)
+               reps = as.integer(colSums(!is.na(m))), row.names = NULL,
+               stringsAsFactors = FALSE)
   })
   out <- do.call(rbind, rows)
   out$mean[out$reps == 0] <- NA_real_
@@ -296,8 +297,9 @@ plot.trait_rarefaction <- function(x, reference = NULL, colours = "#0072B2", alp
     ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
 }
 
-# TRUE for the populations of the most abundant species of each site that together reach
-# `cover` of its abundance (the species that crosses the threshold is included)
+#' TRUE for the populations of the most abundant species of each site that together reach
+#' `cover` of its abundance (the species that crosses the threshold is included)
+#' @noRd
 dominant_species <- function(abundance, site, cover) {
   stopifnot("internal: `cover` must be one number in (0, 1]" =
               is.numeric(cover) && length(cover) == 1 && cover > 0 && cover <= 1)

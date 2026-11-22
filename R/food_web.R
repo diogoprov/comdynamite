@@ -332,7 +332,8 @@ fw_three <- function(x, name, levels) {
   x
 }
 
-# attack coefficient of a feeder with trait z_feed on prey with trait z_prey
+#' attack coefficient of a feeder with trait z_feed on prey with trait z_prey
+#' @noRd
 fw_attack <- function(z_prey, z_feed, max, shape, attack) {
   if (max == 0) return(0)
   switch(attack,
@@ -351,8 +352,9 @@ fw_shapes <- function(p, attack) {
   )
 }
 
-# log mean fitness of an individual of `level` with phenotype z, everyone else at the mean
-# (equations 3.8 and 3.20)
+#' log mean fitness of an individual of `level` with phenotype z, everyone else at the mean
+#' (equations 3.8 and 3.20)
+#' @noRd
 fw_fitness <- function(z, level, state, p, attack, sh) {
   R <- state[["R"]]; N <- state[["N"]]; P <- state[["P"]]
   zR <- state[["z_R"]]; zN <- state[["z_N"]]; zP <- state[["z_P"]]
@@ -382,7 +384,8 @@ fw_fitness <- function(z, level, state, p, attack, sh) {
   )
 }
 
-# per capita growth rates and selection gradients at the current state
+#' per capita growth rates and selection gradients at the current state
+#' @noRd
 fw_gradients <- function(state, p, attack, sh) {
   levels <- c("R", "N", "P")
   growth <- numeric(3)
@@ -403,8 +406,9 @@ fw_deriv <- function(state, p, attack, V) {
   c(state[1:3] * g$growth, fw_trait_change(state, g$grad, p, V))
 }
 
-# change of the mean traits: V times the gradient, except that a trait below the floor relaxes
-# back to it at rate (floor - z), as McPeek's code does with a floor of zero
+#' change of the mean traits: V times the gradient, except that a trait below the floor relaxes
+#' back to it at rate (floor - z), as McPeek's code does with a floor of zero
+#' @noRd
 fw_trait_change <- function(state, grad, p, V) {
   dz <- V * grad
   z <- state[4:6]

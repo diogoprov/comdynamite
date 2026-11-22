@@ -432,7 +432,8 @@ check_damocles_tree <- function(tree) {
   invisible(tree)
 }
 
-# stops unless `tree` is a phylo object with branch lengths, none missing or negative
+#' stops unless `tree` is a phylo object with branch lengths, none missing or negative
+#' @noRd
 check_branch_lengths <- function(tree) {
   check_tree(tree, branch_lengths = FALSE)
   if (is.null(tree$edge.length) || anyNA(tree$edge.length) || any(tree$edge.length < 0)) {
@@ -441,8 +442,9 @@ check_branch_lengths <- function(tree) {
   invisible(tree)
 }
 
-# rates of each edge, in the order of `tree$edge`, and of the root edge, which takes the rates of
-# the two edges leaving the root
+#' rates of each edge, in the order of `tree$edge`, and of the root edge, which takes the rates of
+#' the two edges leaving the root
+#' @noRd
 damocles_edge_rates <- function(tree, gamma, mu) {
   n_edge <- nrow(tree$edge)
   for (rate in list(gamma, mu)) {
@@ -468,7 +470,8 @@ damocles_root_rates <- function(tree, gamma, mu) {
   rates
 }
 
-# `tree` in postorder and the positions of its edges in the original `tree$edge`
+#' `tree` in postorder and the positions of its edges in the original `tree$edge`
+#' @noRd
 damocles_postorder <- function(tree) {
   list(tree = ape::reorder.phylo(tree, "postorder"),
        index = ape::reorder.phylo(tree, "postorder", index.only = TRUE))
@@ -482,16 +485,18 @@ check_sympatry <- function(sympatry) {
   invisible(TRUE)
 }
 
-# presences (0/1) of the tips of `tree`, in their order, one row per community
+#' presences (0/1) of the tips of `tree`, in their order, one row per community
+#' @noRd
 damocles_presence <- function(comm, tree) {
   if (is.null(dim(comm))) {
     if (is.null(names(comm))) stop("`comm` needs species names", call. = FALSE)
     comm <- matrix(comm, 1, dimnames = list(NULL, names(comm)))
   }
   comm <- check_comm(comm)
-  if (is.null(colnames(comm))) stop("`comm` needs species names in its columns", call. = FALSE)
+  if (is.null(colnames(comm))) stop("`comm` has no species names in its columns", call. = FALSE)
   if (anyDuplicated(colnames(comm))) {
-    stop("repeated species: ", species_list(unique(colnames(comm)[duplicated(colnames(comm))])),
+    stop("species repeated in `comm`: ",
+         species_list(unique(colnames(comm)[duplicated(colnames(comm))])),
          call. = FALSE)
   }
   tips <- tree$tip.label
@@ -515,8 +520,9 @@ damocles_presence <- function(comm, tree) {
   out
 }
 
-# probability of being present at the end of a branch of length `t`, given the state at its
-# start: the transition probabilities of the two-state Markov process
+#' probability of being present at the end of a branch of length `t`, given the state at its
+#' start: the transition probabilities of the two-state Markov process
+#' @noRd
 damocles_transition <- function(t, gamma, mu) {
   total <- gamma + mu
   if (total == 0) return(c(from_absent = 0, from_present = 1))
@@ -529,9 +535,10 @@ damocles_step <- function(begin, t, gamma, mu) {
   as.integer(stats::runif(length(begin)) < ifelse(begin == 1, p[[2]], p[[1]]))
 }
 
-# log-likelihood of each row of `presence` (tips of `tree`, in order), `tree` in postorder
-# `gamma` and `mu`: one rate, or one per edge in the order of `tree$edge`; `root_rates`: the
-# rates of the root edge
+#' log-likelihood of each row of `presence` (tips of `tree`, in order), `tree` in postorder
+#' `gamma` and `mu`: one rate, or one per edge in the order of `tree$edge`; `root_rates`: the
+#' rates of the root edge
+#' @noRd
 damocles_prune <- function(presence, tree, gamma, mu, root, sympatry = 0,
                            root_rates = c(gamma[1], mu[1])) {
   n_edge <- nrow(tree$edge)
@@ -596,8 +603,9 @@ damocles_starts <- function(tree, start) {
   as.matrix(expand.grid(gamma = c(0.2, 2), mu = c(0.2, 2))) / height
 }
 
-# the parameters of a fit: rates on the log scale (one per regime for the rates in `vary`),
-# slopes on the covariate, and sympatry on the logit scale when estimated
+#' the parameters of a fit: rates on the log scale (one per regime for the rates in `vary`),
+#' slopes on the covariate, and sympatry on the logit scale when estimated
+#' @noRd
 damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
   n_edge <- nrow(tree$edge)
   at_root <- tree$edge[, 1] == ape::Ntip(tree) + 1
@@ -646,7 +654,8 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
        sympatry = sympatry, names = names, n_par = length(names))
 }
 
-# rates of each edge (or one rate for all) and sympatry from the working parameters
+#' rates of each edge (or one rate for all) and sympatry from the working parameters
+#' @noRd
 damocles_par_rates <- function(par, design) {
   pos <- new.env(parent = emptyenv())
   pos$used <- 0
@@ -669,7 +678,8 @@ damocles_par_rates <- function(par, design) {
        sympatry = if (design$estimate_sympatry) stats::plogis(take(1)) else design$sympatry)
 }
 
-# working parameter `j` on its natural scale
+#' working parameter `j` on its natural scale
+#' @noRd
 damocles_natural <- function(value, j, design) {
   if (j <= design$n_gamma + design$n_mu) return(exp(value))
   if (design$estimate_sympatry && j == design$n_par) return(stats::plogis(value))
@@ -693,7 +703,8 @@ damocles_par_starts <- function(base, design) {
   out
 }
 
-# minus the summed log-likelihood of `presence` as a function of the working parameters
+#' minus the summed log-likelihood of `presence` as a function of the working parameters
+#' @noRd
 damocles_objective <- function(presence, tree, post, root, design) {
   n_edge <- nrow(tree$edge)
   function(par) {
@@ -727,7 +738,8 @@ damocles_minimise <- function(objective, start) {
   list(par = fit$par, value = fit$value, convergence = as.integer(fit$convergence))
 }
 
-# standardised effect size and lower-tail p-value of `observed` against the finite `null`
+#' standardised effect size and lower-tail p-value of `observed` against the finite `null`
+#' @noRd
 null_effect <- function(observed, null) {
   null <- null[is.finite(null)]
   if (!is.finite(observed) || length(null) < 2) return(c(ses = NA_real_, p = NA_real_))

@@ -28,7 +28,7 @@ test_that("external traits replace one trait and leave the others as drawn", {
 
 test_that("wrong external traits stop", {
   expect_error(species_traits(tree, optima = 1:3), "3 values")
-  expect_error(species_traits(tree, optima = c(a = 1, b = 2)), "no value for c, d, e")
+  expect_error(species_traits(tree, optima = c(a = 1, b = 2)), "lacks values for c, d, e")
   expect_error(species_traits(tree, optima = c(1, NA, 3, 4, 5)), "without NA")
   expect_error(species_traits(tree, optima = letters[1:5]), "numbers")
   expect_error(species_traits(tree, optima = matrix(1:10, 5)), "one column")

@@ -1,6 +1,7 @@
 # Checks shared by the analysis functions, with messages that say what to do.
 
-# numeric community without missing or negative values
+#' numeric community without missing or negative values
+#' @noRd
 check_comm <- function(comm) {
   check_numeric_columns(comm, "`comm`", "Move names of sites to row names.")
   comm <- as.matrix(comm) * 1
@@ -10,9 +11,10 @@ check_comm <- function(comm) {
   comm
 }
 
-# numeric predictors in the order of the sites of `comm`, each with variance and, when
-# `collinear` is FALSE, none a combination of the others
-# stops unless `tree` is a phylo object (with branch lengths, if asked); `name` is the argument
+#' numeric predictors in the order of the sites of `comm`, each with variance and, when
+#' `collinear` is FALSE, none a combination of the others
+#' stops unless `tree` is a phylo object (with branch lengths, if asked); `name` is the argument
+#' @noRd
 check_tree <- function(tree, branch_lengths = TRUE, name = "`tree`") {
   if (!inherits(tree, "phylo")) {
     stop(name, " must be a `phylo` object, such as one from treeshapesim::sim_tree_shape()",
@@ -24,8 +26,9 @@ check_tree <- function(tree, branch_lengths = TRUE, name = "`tree`") {
   invisible(tree)
 }
 
-# stops unless `x` is one finite whole number between `min` and `max`; NULL passes when
-# `null_ok` is TRUE
+#' stops unless `x` is one finite whole number between `min` and `max`; NULL passes when
+#' `null_ok` is TRUE
+#' @noRd
 check_count <- function(x, name, min = 1, max = Inf, null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
   if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x != round(x) || x < min ||
@@ -37,9 +40,10 @@ check_count <- function(x, name, min = 1, max = Inf, null_ok = FALSE) {
   invisible(x)
 }
 
-# stops unless `x` is one number (not NA) between `lower` and `upper`, which are excluded when
-# `open` is TRUE (or a pair of logicals for each end); infinite values pass only when
-# `finite` is FALSE, and NULL only when `null_ok` is TRUE
+#' stops unless `x` is one number (not NA) between `lower` and `upper`, which are excluded when
+#' `open` is TRUE (or a pair of logicals for each end); infinite values pass only when
+#' `finite` is FALSE, and NULL only when `null_ok` is TRUE
+#' @noRd
 check_number <- function(x, name, lower = -Inf, upper = Inf, open = FALSE, finite = TRUE,
                          null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
@@ -51,7 +55,8 @@ check_number <- function(x, name, lower = -Inf, upper = Inf, open = FALSE, finit
   invisible(x)
 }
 
-# the range of `check_number()` in words
+#' the range of `check_number()` in words
+#' @noRd
 number_range <- function(lower, upper, open, finite) {
   kind <- if (finite) "one finite number" else "one number"
   low <- if (open[1]) "greater than " else ""
@@ -68,7 +73,8 @@ number_range <- function(lower, upper, open, finite) {
   kind
 }
 
-# stops unless `x` is one TRUE or FALSE
+#' stops unless `x` is one TRUE or FALSE
+#' @noRd
 check_flag <- function(x, name) {
   if (!is.logical(x) || length(x) != 1 || is.na(x)) {
     stop("`", name, "` must be TRUE or FALSE", call. = FALSE)
@@ -76,7 +82,8 @@ check_flag <- function(x, name) {
   invisible(x)
 }
 
-# stops unless `x` is one character string (not NA); NULL passes when `null_ok` is TRUE
+#' stops unless `x` is one character string (not NA); NULL passes when `null_ok` is TRUE
+#' @noRd
 check_string <- function(x, name, null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
   if (!is.character(x) || length(x) != 1 || is.na(x)) {
@@ -85,8 +92,9 @@ check_string <- function(x, name, null_ok = FALSE) {
   invisible(x)
 }
 
-# TRUE for columns (or a vector) whose spread is zero up to rounding error, which `var(x) == 0`
-# misses when the values carry floating-point noise
+#' TRUE for columns (or a vector) whose spread is zero up to rounding error, which `var(x) == 0`
+#' misses when the values carry floating-point noise
+#' @noRd
 no_variance <- function(x) {
   x <- as.matrix(x)
   apply(x, 2, function(column) {
@@ -119,7 +127,8 @@ check_env <- function(env, comm, name = "`env`", collinear = FALSE) {
   env
 }
 
-# one row per site, matched by name when both have names of sites
+#' one row per site, matched by name when both have names of sites
+#' @noRd
 check_sites <- function(x, comm, name) {
   if (nrow(x) != nrow(comm)) {
     stop(name, " has ", nrow(x), " rows and `comm` has ", nrow(comm), " sites", call. = FALSE)
@@ -136,8 +145,9 @@ check_sites <- function(x, comm, name) {
   x[sites, , drop = FALSE]
 }
 
-# rows with missing values: `na_action = "fail"` stops, "omit" reports how many rows are left
-# out; returns the logical vector of the rows to keep
+#' rows with missing values: `na_action = "fail"` stops, "omit" reports how many rows are left
+#' out; returns the logical vector of the rows to keep
+#' @noRd
 handle_missing <- function(values, na_action, name, unit = "individuals") {
   keep <- stats::complete.cases(values)
   n <- sum(!keep)
@@ -151,9 +161,24 @@ handle_missing <- function(values, na_action, name, unit = "individuals") {
   keep
 }
 
-# collinearity of the predictors of a linear model: stops when a column of the design matrix
-# (with intercept) is a linear combination of the others, and warns, without removing any
-# variable, when a variance inflation factor exceeds `vif_max`
+#' warns when fits leave no residual variation (R2 of 1 up to rounding error), where F
+#' statistics, standard errors and p-values lose their meaning; `labels` names the fits
+#' @noRd
+warn_perfect_fit <- function(r2, labels, what) {
+  exact <- !is.na(r2) & abs(1 - r2) < sqrt(.Machine$double.eps)
+  if (any(exact)) {
+    warning(what, " fit exactly, with no residual variation (R2 = 1 up to rounding error): ",
+            paste(labels[exact], collapse = ", "),
+            ". Their F statistics, standard errors and p-values are not meaningful",
+            call. = FALSE)
+  }
+  invisible(exact)
+}
+
+#' collinearity of the predictors of a linear model: stops when a column of the design matrix
+#' (with intercept) is a linear combination of the others, and warns, without removing any
+#' variable, when a variance inflation factor exceeds `vif_max`
+#' @noRd
 check_collinear <- function(design, name, vif_max = 10) {
   design <- as.matrix(design)
   decomposition <- qr(design)
@@ -176,7 +201,8 @@ check_collinear <- function(design, name, vif_max = 10) {
   invisible(vif)
 }
 
-# stops when site names are repeated, since sites are matched by name
+#' stops when site names are repeated, since sites are matched by name
+#' @noRd
 check_unique_sites <- function(sites, name) {
   repeated <- unique(sites[duplicated(sites)])
   if (length(repeated) > 0) {
@@ -207,8 +233,9 @@ check_permutations <- function(permutations, comm, name = "`site_permutations`")
   }
 }
 
-# a loop with a progress bar and an estimate of the time left, which appears only in
-# interactive sessions with purrr installed and when the loop takes more than a few seconds
+#' a loop with a progress bar and an estimate of the time left, which appears only in
+#' interactive sessions with purrr installed and when the loop takes more than a few seconds
+#' @noRd
 progress_map <- function(x, f, name, parallel = TRUE) {
   if (parallel && future_workers() > 1) {
     return(future.apply::future_lapply(x, f, future.seed = TRUE))
@@ -219,13 +246,15 @@ progress_map <- function(x, f, name, parallel = TRUE) {
   lapply(x, f)
 }
 
-# workers of the plan the user chose with future::plan(), 1 without one
+#' workers of the plan the user chose with future::plan(), 1 without one
+#' @noRd
 future_workers <- function(installed = requireNamespace("future.apply", quietly = TRUE)) {
   if (!installed) return(1)
   future::nbrOfWorkers()
 }
 
-# what the null models used, kept in the results and shown when they are printed
+#' what the null models used, kept in the results and shown when they are printed
+#' @noRd
 permutation_record <- function(n_perm, site_permutations = NULL, area_permutations = NULL,
                                null = "permutation") {
   restricted <- !is.null(site_permutations)
@@ -255,16 +284,18 @@ permutation_line <- function(record) {
       sep = "")
 }
 
-# `alpha` also names the competition matrix, so significance levels are called `level`
+#' `alpha` also names the competition matrix, so significance levels are called `level`
+#' @noRd
 deprecated_level <- function(level, alpha) {
   if (is.null(alpha)) return(level)
   warning("`alpha` is deprecated, use `level`", call. = FALSE)
   alpha
 }
 
-# sites with individuals. With restricted permutations, empty sites stay in the landscape, so
-# draws take the predictors of any site and keep those that land on occupied sites. Row r of
-# the result gives the rows of the predictors for the occupied sites
+#' sites with individuals. With restricted permutations, empty sites stay in the landscape, so
+#' draws take the predictors of any site and keep those that land on occupied sites. Row r of
+#' the result gives the rows of the predictors for the occupied sites
+#' @noRd
 site_draws <- function(comm, n_perm, site_permutations) {
   occupied <- rowSums(comm) > 0
   if (is.null(site_permutations)) {

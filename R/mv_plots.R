@@ -62,7 +62,7 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
   }
   if (is.character(traits) && !all(traits %in% colnames(x)) ||
       is.numeric(traits) && any(traits > ncol(x) | traits < 1)) {
-    stop("`traits` must name columns of `x`", call. = FALSE)
+    stop("plot_traits(): `traits` must name columns of `x`", call. = FALSE)
   }
   lab <- colnames(x)[traits] %||% paste("trait", traits)
   nodes <- attr(x, "nodes")
@@ -165,7 +165,7 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL, leg
   legend <- legend_flag(legend)
   ms <- if (is.list(x)) lapply(unclass(x), unclass) else list(rates = unclass(x))
   if (ncol(ms[[1]]) < 2) stop("a rate matrix of one trait has no ellipse", call. = FALSE)
-  if (length(traits) != 2) stop("`traits` must name two traits", call. = FALSE)
+  if (length(traits) != 2) stop("plot.rate_matrix(): `traits` must name two traits", call. = FALSE)
   check_number(level, "level", lower = 0, open = TRUE)
   check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   cols <- unlist(regime_colours(names(ms), colours))
@@ -242,7 +242,7 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
   tr <- x$traits
   if (ncol(tr) < 2) stop("the assembly used one trait: there is no plane to draw",
                          call. = FALSE)
-  if (length(traits) != 2) stop("`traits` must name two traits", call. = FALSE)
+  if (length(traits) != 2) stop("plot_assembly(): `traits` must name two traits", call. = FALSE)
   kept <- rownames(tr) %in% x$community
   s <- x$metric[traits, traits, drop = FALSE]
   contours <- list()
@@ -287,7 +287,8 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
     ggplot2::theme_minimal()
 }
 
-# points on the ellipse {d : d' S^-1 d = r^2}
+#' points on the ellipse {d : d' S^-1 d = r^2}
+#' @noRd
 ellipse_points <- function(s, r, n = 100) {
   ev <- eigen(s, symmetric = TRUE)
   a <- seq(0, 2 * pi, length.out = n)
@@ -295,7 +296,8 @@ ellipse_points <- function(s, r, n = 100) {
   r * circle %*% t(ev$vectors %*% diag(sqrt(pmax(ev$values, 0)), 2))
 }
 
-# the regimes along each edge of `tree` (in the order of tree$edge) as named lengths
+#' the regimes along each edge of `tree` (in the order of tree$edge) as named lengths
+#' @noRd
 branch_maps <- function(tree, regimes) {
   if (is.null(regimes)) {
     return(lapply(tree$edge.length, function(len) stats::setNames(len, "all")))
@@ -318,7 +320,8 @@ branch_maps <- function(tree, regimes) {
   lapply(seq_len(nrow(tree$edge)), function(e) stats::setNames(tree$edge.length[e], reg[e]))
 }
 
-# a named list of colours, one per state
+#' a named list of colours, one per state
+#' @noRd
 regime_colours <- function(states, colours) {
   okabe_ito <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9", "#F0E442")
   if (is.null(colours)) {
@@ -344,15 +347,17 @@ regime_colours <- function(states, colours) {
   stats::setNames(as.list(unname(colours)), states)
 }
 
-# stops with a message naming the function when ggplot2 (Suggests) is not installed
+#' stops with a message naming the function when ggplot2 (Suggests) is not installed
+#' @noRd
 need_ggplot <- function(what) {
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop(what, " needs the package ggplot2: install.packages(\"ggplot2\")", call. = FALSE) # nocov
   }
 }
 
-# `legend` as TRUE or FALSE; a position keyword or NULL, as in base graphics before 0.7.0,
-# still works
+#' `legend` as TRUE or FALSE; a position keyword or NULL, as in base graphics before 0.7.0,
+#' still works
+#' @noRd
 legend_flag <- function(legend) {
   if (is.null(legend)) return(FALSE)
   if (is.character(legend)) return(TRUE)

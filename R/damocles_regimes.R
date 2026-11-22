@@ -186,7 +186,8 @@ confint.mc_damocles_fit <- function(object, parm = NULL, level = 0.95, ...) {
 
 # --- internals ---------------------------------------------------------------------------
 
-# the nodes at or below `node`
+#' the nodes at or below `node`
+#' @noRd
 damocles_below <- function(tree, node) {
   inside <- logical(ape::Ntip(tree) + tree$Nnode)
   inside[node] <- TRUE
@@ -202,8 +203,9 @@ damocles_total_par <- function(fit) {
   if (attr(fit, "damocles")$shared) attr(fit, "n_par") else attr(fit, "n_par") * nrow(fit)
 }
 
-# where the profile log-likelihood of working parameter `j` crosses `threshold`, on each side
-# of the estimate; -Inf or Inf when it does not within 10 units
+#' where the profile log-likelihood of working parameter `j` crosses `threshold`, on each side
+#' of the estimate; -Inf or Inf when it does not within 10 units
+#' @noRd
 damocles_profile_bounds <- function(objective, best, j, threshold) {
   profile <- function(value) {
     fixed <- function(rest) objective(append(rest, value, after = j - 1))

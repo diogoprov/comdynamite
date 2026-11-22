@@ -45,12 +45,13 @@
 mc_data <- function(comm, tree = NULL, traits = NULL, env = NULL, coords = NULL, areas = NULL,
                     series = NULL) {
   comm <- check_comm(comm)
-  if (is.null(colnames(comm))) stop("`comm` needs species names in its columns", call. = FALSE)
+  if (is.null(colnames(comm))) stop("mc_data(): `comm` needs species names in its columns",
+                                    call. = FALSE)
   if (is.null(rownames(comm))) rownames(comm) <- paste0("site", seq_len(nrow(comm)))
   if (anyDuplicated(rownames(comm))) stop("`comm` has repeated site names", call. = FALSE)
   species <- colnames(comm)
   if (!is.null(tree)) {
-    if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
+    if (!inherits(tree, "phylo")) stop("mc_data(): `tree` must be a `phylo` object", call. = FALSE)
     species <- intersect(species, match_species(comm[, species, drop = FALSE], tree$tip.label,
                                                 "`tree`"))
   }
@@ -151,7 +152,8 @@ as.data.frame.mc_data <- function(x, row.names = NULL, optional = FALSE, ...) {
   out
 }
 
-# a part of `data` that a call left out; stops when the object does not have it
+#' a part of `data` that a call left out; stops when the object does not have it
+#' @noRd
 data_part <- function(data, part, argument = part) {
   value <- data[[part]]
   if (is.null(value)) {
@@ -160,8 +162,9 @@ data_part <- function(data, part, argument = part) {
   value
 }
 
-# one predictor or trait from a data frame of an mc_data object
-# environment and traits of one niche axis of a simulation, and the number of axes
+#' one predictor or trait from a data frame of an mc_data object
+#' environment and traits of one niche axis of a simulation, and the number of axes
+#' @noRd
 sim_niche <- function(x, axis = 1) {
   several <- is.list(x$traits) && !is.data.frame(x$traits) && length(x$traits) > 0 &&
     all(vapply(x$traits, is.data.frame, logical(1)))
@@ -192,7 +195,8 @@ as_species_table <- function(traits) {
   traits
 }
 
-# rows of `x` in the order of `sites`: by name when `x` has names, by position otherwise
+#' rows of `x` in the order of `sites`: by name when `x` has names, by position otherwise
+#' @noRd
 site_rows <- function(x, sites, name) {
   is_table <- !is.null(dim(x))
   n <- if (is_table) nrow(x) else length(x)
@@ -210,7 +214,7 @@ site_rows <- function(x, sites, name) {
     check_unique_sites(labels, name)
     at <- match(sites, labels)
     if (anyNA(at)) {
-      stop(name, " has no row for the sites ", species_list(sites[is.na(at)]), call. = FALSE)
+      stop(name, " lacks rows for the sites ", species_list(sites[is.na(at)]), call. = FALSE)
     }
   }
   out <- if (is_table) x[at, , drop = FALSE] else x[at]

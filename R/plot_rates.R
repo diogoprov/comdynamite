@@ -88,9 +88,10 @@ plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_
   p
 }
 
-# coordinates of the nodes of a rectangular phylogram: x is the distance from the root, y puts
-# the tips at 1..n in the order of a cladewise traversal and each internal node at the middle
-# of its children
+#' coordinates of the nodes of a rectangular phylogram: x is the distance from the root, y puts
+#' the tips at 1..n in the order of a cladewise traversal and each internal node at the middle
+#' of its children
+#' @noRd
 tree_layout <- function(tree) {
   n <- length(tree$tip.label)
   x <- ape::node.depth.edgelength(tree)
@@ -107,8 +108,9 @@ tree_layout <- function(tree) {
   list(x = x, y = y)
 }
 
-# horizontal (along the branch) and vertical (connector at the parent) pieces of each branch
-# of a rectangular phylogram, in the coordinates of tree_layout()
+#' horizontal (along the branch) and vertical (connector at the parent) pieces of each branch
+#' of a rectangular phylogram, in the coordinates of tree_layout()
+#' @noRd
 tree_segments <- function(tree, layout) {
   parent <- tree$edge[, 1]
   child <- tree$edge[, 2]

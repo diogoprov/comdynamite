@@ -328,3 +328,8 @@ test_that("lottery founders carry the variance of their source with mutation_var
   expect_true(all(is.finite(sim$evolution$genetic_variance[, 1])))
   expect_gt(sim$evolution$genetic_variance[2, 1], 20)
 })
+
+test_that("evolution_state() needs an object from evolution_control()", {
+  expect_error(evolution_state(list(), 2, 2, c("a", "b")),
+               "`evolution` is not an object from `evolution_control\\(\\)`")
+})

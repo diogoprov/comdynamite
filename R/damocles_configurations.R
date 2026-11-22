@@ -220,7 +220,8 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
   check_tree(tree, branch_lengths = FALSE)
   n_edge <- nrow(tree$edge)
   if (length(regimes) != n_edge || anyNA(regimes)) {
-    stop("`regimes` needs one regime for each edge of `tree`, in the order of `tree$edge`, ",
+    stop("random_regimes(): `regimes` needs one regime for each edge of `tree`, in the order ",
+         "of `tree$edge`, ",
          "with no missing values", call. = FALSE)
   }
   check_number(tolerance, "tolerance", lower = 1)
@@ -263,8 +264,9 @@ random_regimes <- function(tree, regimes, tolerance = 2, max_overlap = 0.25) {
        "`regimes`; increase `tolerance` or `max_overlap`", call. = FALSE)
 }
 
-# adjusted Rand index (Hubert & Arabie 1985, J. Classif. 2: 193-218, doi:10.1007/BF01908075)
-# between two partitions of the same items
+#' adjusted Rand index (Hubert & Arabie 1985, J. Classif. 2: 193-218, doi:10.1007/BF01908075)
+#' between two partitions of the same items
+#' @noRd
 adjusted_rand <- function(a, b) {
   pairs <- function(x) sum(x * (x - 1) / 2)
   counts <- table(a, b)
@@ -483,7 +485,8 @@ print.mc_damocles_partition <- function(x, ...) {
 
 # --- internals ---------------------------------------------------------------------------
 
-# number of edges in the subtree of each edge, the edge included
+#' number of edges in the subtree of each edge, the edge included
+#' @noRd
 damocles_subtree_size <- function(tree) {
   below <- numeric(ape::Ntip(tree) + tree$Nnode)
   for (e in ape::reorder.phylo(tree, "postorder", index.only = TRUE)) {
@@ -493,7 +496,8 @@ damocles_subtree_size <- function(tree) {
   1 + below[tree$edge[, 2]]
 }
 
-# edges (rows) in the subtree of each edge (columns), the edge included
+#' edges (rows) in the subtree of each edge (columns), the edge included
+#' @noRd
 damocles_subtree_edges <- function(tree) {
   n_edge <- nrow(tree$edge)
   out <- diag(n_edge) == 1

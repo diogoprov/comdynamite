@@ -274,14 +274,16 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
     trait_list <- if (several) lapply(traits, as_traits) else list(as_traits(traits))
     attr(trait_list, "niche_cor") <- attr(traits, "niche_cor")
     if (is.null(env)) env <- landscape$env_axes
-    if (is.null(env)) stop("a list of traits needs `env`, one column per element", call. = FALSE)
+    if (is.null(env)) stop("simulate_metacommunity(): a list of traits needs `env`, one ",
+                           "column per element", call. = FALSE)
     unnamed <- is.null(colnames(env)) && !is.data.frame(env)
     env <- as.data.frame(env)
     if (unnamed) {
       names(env) <- (if (several) names(traits)) %||% paste0("axis", seq_len(ncol(env)))
     }
     if (nrow(env) != length(landscape$env) || ncol(env) != length(trait_list)) {
-      stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
+      stop("simulate_metacommunity(): `env` needs one row per site (",
+           length(landscape$env), ") and one column per ",
            "set of traits (", length(trait_list), ")", call. = FALSE)
     }
     traits <- trait_list[[1]]
@@ -324,7 +326,8 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
       is.matrix(evolution$env_var) || is.list(evolution$env_var)
     if (several || mv) {
       if (!several) {
-        stop("`evolution` with covariance matrices needs a niche of several axes (a list of ",
+        stop("simulate_metacommunity(): `evolution` with covariance matrices needs a niche of ",
+             "several axes (a list of ",
              "`traits` and `env`), one trait per axis", call. = FALSE)
       }
       evolution$traits <- stats::setNames(trait_list, names(env))
@@ -365,8 +368,9 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
             class = "mc_sim")
 }
 
-# the environment through time on several axes: a list of matrices (sites x steps), one per
-# column of `env` (matched by name when named), or an array of sites x steps x axes
+#' the environment through time on several axes: a list of matrices (sites x steps), one per
+#' column of `env` (matched by name when named), or an array of sites x steps x axes
+#' @noRd
 env_time_axes <- function(env_time, env, n_steps) {
   if (is.array(env_time) && length(dim(env_time)) == 3) {
     env_time <- lapply(seq_len(dim(env_time)[3]), function(a) env_time[, , a])
@@ -428,7 +432,8 @@ mc_dynamics <- function(r, alpha, dispersal, n_steps = 1000,
   mc_finish(environment())
 }
 
-# preparation of mc_dynamics(), evaluated in the frame that holds its arguments
+#' preparation of mc_dynamics(), evaluated in the frame that holds its arguments
+#' @noRd
 mc_setup <- function(st) {
   eval(quote({
     immigration <- match.arg(immigration)
@@ -639,7 +644,8 @@ mc_setup <- function(st) {
   invisible(st)
 }
 
-# stops unless `evolution` is a set of settings from evolution_control()
+#' stops unless `evolution` is a set of settings from evolution_control()
+#' @noRd
 check_evolution <- function(evolution) {
   if (!inherits(evolution, "mc_evolution")) {
     stop("`evolution` must come from `evolution_control()`", call. = FALSE)
@@ -647,7 +653,8 @@ check_evolution <- function(evolution) {
   invisible(evolution)
 }
 
-# stops unless `x` holds probabilities between 0 and 1, one value or one per species (`k`)
+#' stops unless `x` holds probabilities between 0 and 1, one value or one per species (`k`)
+#' @noRd
 probabilities_per_species <- function(x, name, k) {
   if (!is.numeric(x) || anyNA(x) || any(x < 0 | x > 1) || !length(x) %in% c(1, k)) {
     stop("`", name, "` must be one probability between 0 and 1, or one per species (", k, ")",
@@ -656,7 +663,8 @@ probabilities_per_species <- function(x, name, k) {
   invisible(x)
 }
 
-# one time step of mc_dynamics(), evaluated in the state `st`
+#' one time step of mc_dynamics(), evaluated in the state `st`
+#' @noRd
 mc_step <- function(st, step) {
   assign("step", step, envir = st)
   eval(quote({
@@ -1034,7 +1042,8 @@ mc_step <- function(st, step) {
   invisible(st)
 }
 
-# the output of mc_dynamics() from the state `st`
+#' the output of mc_dynamics() from the state `st`
+#' @noRd
 mc_finish <- function(st) {
   eval(quote({
     abundance <- matrix(0L, m, k_all, dimnames = list(sites, species))
@@ -1100,8 +1109,9 @@ mc_finish <- function(st) {
   }), st)
 }
 
-# steps since the environment of each site last changed (on any axis), at the end and at the
-# recorded steps: 0 in a step where it changed, and the step itself where it never changed
+#' steps since the environment of each site last changed (on any axis), at the end and at the
+#' recorded steps: 0 in a step where it changed, and the step itself where it never changed
+#' @noRd
 since_change <- function(env, n_steps, record_steps, sites) {
   last <- rep(0L, length(sites))
   before <- as.matrix(env(1))
@@ -1117,8 +1127,9 @@ since_change <- function(env, n_steps, record_steps, sites) {
   list(end = stats::setNames(as.integer(n_steps - last), sites), history = if (length(steps)) at)
 }
 
-# recruits of a lottery: in each site, `vacant` microsites are filled by a draw without
-# replacement among the offspring `pool` (sites x species), species by species
+#' recruits of a lottery: in each site, `vacant` microsites are filled by a draw without
+#' replacement among the offspring `pool` (sites x species), species by species
+#' @noRd
 lottery_draw <- function(pool, vacant) {
   out <- pool
   full <- rowSums(pool) > vacant
@@ -1138,10 +1149,11 @@ lottery_draw <- function(pool, vacant) {
   out
 }
 
-# immigrants when the emigrants of each species at each site go to the other sites
-# emigration probabilities at each step (steps x all species) from `dispersal_time`: a vector of
-# multipliers of `dispersal`, one per step, or a matrix of probabilities (steps x species);
-# NULL when the probabilities are constant
+#' immigrants when the emigrants of each species at each site go to the other sites
+#' emigration probabilities at each step (steps x all species) from `dispersal_time`: a vector of
+#' multipliers of `dispersal`, one per step, or a matrix of probabilities (steps x species);
+#' NULL when the probabilities are constant
+#' @noRd
 dispersal_by_step <- function(dispersal_time, dispersal, n_steps, k) {
   if (is.null(dispersal_time)) return(NULL)
   if (is.matrix(dispersal_time)) {
@@ -1162,8 +1174,9 @@ dispersal_by_step <- function(dispersal_time, dispersal, n_steps, k) {
   pmin(outer(dispersal_time[seq_len(n_steps)], dispersal), 1)
 }
 
-# dispersal matrices to switch among, checked and made row-stochastic with a zero diagonal;
-# NULL when the matrix of the landscape holds at every step
+#' dispersal matrices to switch among, checked and made row-stochastic with a zero diagonal;
+#' NULL when the matrix of the landscape holds at every step
+#' @noRd
 kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix,
                             kernel_group = NULL) {
   if (is.null(kernels) && is.null(kernel_step)) return(NULL)
@@ -1217,8 +1230,9 @@ kernels_by_step <- function(kernels, kernel_step, n_steps, m, disp_matrix,
   kernels
 }
 
-# the column of a matrix `kernel_step` used by each species, from `kernel_group` (names of the
-# columns or their indices); NULL without groups
+#' the column of a matrix `kernel_step` used by each species, from `kernel_group` (names of the
+#' columns or their indices); NULL without groups
+#' @noRd
 kernel_groups <- function(kernel_group, kernel_step, k) {
   if (is.null(kernel_group)) return(NULL)
   if (!is.matrix(kernel_step)) {
@@ -1242,9 +1256,10 @@ kernel_groups <- function(kernel_group, kernel_step, k) {
   as.integer(kernel_group)
 }
 
-# expected immigrants (sites x species) from emigrants `x` (sites x species): t(D) %*% x, or,
-# with one kernel per group of species (a list with attribute `group`), each species through
-# the kernel of its group
+#' expected immigrants (sites x species) from emigrants `x` (sites x species): t(D) %*% x, or,
+#' with one kernel per group of species (a list with attribute `group`), each species through
+#' the kernel of its group
+#' @noRd
 kernel_flow <- function(disp_matrix, x) {
   if (!is.list(disp_matrix)) return(crossprod(disp_matrix, x))
   group <- attr(disp_matrix, "group")
@@ -1256,13 +1271,15 @@ kernel_flow <- function(disp_matrix, x) {
   out
 }
 
-# the dispersal matrix of species `s`: `disp_matrix` itself or, with one kernel per group of
-# species, that of the group of `s` (`group`: the group of each species)
+#' the dispersal matrix of species `s`: `disp_matrix` itself or, with one kernel per group of
+#' species, that of the group of `s` (`group`: the group of each species)
+#' @noRd
 species_kernel <- function(disp_matrix, s, group = attr(disp_matrix, "group")) {
   if (is.list(disp_matrix)) disp_matrix[[group[s]]] else disp_matrix
 }
 
-# D %*% x, by group as in kernel_flow()
+#' D %*% x, by group as in kernel_flow()
+#' @noRd
 kernel_product <- function(disp_matrix, x) {
   if (!is.list(disp_matrix)) return(disp_matrix %*% x)
   group <- attr(disp_matrix, "group")
@@ -1274,7 +1291,8 @@ kernel_product <- function(disp_matrix, x) {
   out
 }
 
-# multinomially, with the probabilities of the rows of `disp_matrix`
+#' multinomially, with the probabilities of the rows of `disp_matrix`
+#' @noRd
 place_emigrants <- function(em, disp_matrix, open_to = NULL) {
   if (is.list(disp_matrix)) {
     group <- attr(disp_matrix, "group")
@@ -1298,8 +1316,9 @@ place_emigrants <- function(em, disp_matrix, open_to = NULL) {
   immigrants
 }
 
-# a sites x species matrix in the order of `sites` and `species`: rows by name when they have
-# names, by position otherwise; columns by species name
+#' a sites x species matrix in the order of `sites` and `species`: rows by name when they have
+#' names, by position otherwise; columns by species name
+#' @noRd
 site_species <- function(x, sites, species, name) {
   if (is.data.frame(x)) x <- as.matrix(x)
   if (!is.matrix(x) || !(is.numeric(x) || is.logical(x))) {

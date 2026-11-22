@@ -100,7 +100,8 @@ landscape_grid <- function(side = 10, env_bandwidth = 2, disp_scale = 2,
   out
 }
 
-# stops unless `env_range` is two finite numbers in increasing order
+#' stops unless `env_range` is two finite numbers in increasing order
+#' @noRd
 check_env_range <- function(env_range) {
   if (!is.numeric(env_range) || length(env_range) != 2 || !all(is.finite(env_range)) ||
         env_range[1] >= env_range[2]) {
@@ -110,7 +111,8 @@ check_env_range <- function(env_range) {
   invisible(env_range)
 }
 
-# stops unless `env` is a numeric vector of finite values, with `n` values when `n` is given
+#' stops unless `env` is a numeric vector of finite values, with `n` values when `n` is given
+#' @noRd
 check_env_vector <- function(env, n = NULL) {
   if (!is.numeric(env) || !all(is.finite(env)) || (!is.null(n) && length(env) != n)) {
     stop("`env` must be a vector of finite numbers",
@@ -119,7 +121,8 @@ check_env_vector <- function(env, n = NULL) {
   invisible(env)
 }
 
-# correlation matrix among n axes from one number or a matrix
+#' correlation matrix among n axes from one number or a matrix
+#' @noRd
 axis_correlation <- function(axis_cor, n) {
   if (length(axis_cor) == 1) {
     if (!is.numeric(axis_cor) || is.na(axis_cor) || axis_cor <= -1 / (n - 1) || axis_cor >= 1) {
@@ -466,8 +469,9 @@ env_space_time <- function(landscape, n_steps, burn_in = 200, spatial_scale = 50
   unname(env)
 }
 
-# the environment of env_seasonal() and env_pulse() as a matrix of sites x steps, from a
-# vector repeated over `n_steps` steps or from a matrix
+#' the environment of env_seasonal() and env_pulse() as a matrix of sites x steps, from a
+#' vector repeated over `n_steps` steps or from a matrix
+#' @noRd
 env_steps <- function(env, n_steps) {
   check_count(n_steps, "n_steps", null_ok = TRUE)
   if (is.matrix(env)) {
@@ -484,9 +488,10 @@ env_steps <- function(env, n_steps) {
   matrix(env, length(env), n_steps)
 }
 
-# Gaussian field with covariance exp(-|h|) at the rows of `p` (points in any dimension), by
-# random Fourier features: frequencies from the spectral density of the exponential
-# covariance, a multivariate Student t with one degree of freedom. Unit variance.
+#' Gaussian field with covariance exp(-|h|) at the rows of `p` (points in any dimension), by
+#' random Fourier features: frequencies from the spectral density of the exponential
+#' covariance, a multivariate Student t with one degree of freedom. Unit variance.
+#' @noRd
 exp_field <- function(p, n_features) {
   d <- ncol(p)
   w <- matrix(stats::rnorm(d * n_features), n_features) / abs(stats::rnorm(n_features))
@@ -637,7 +642,8 @@ print.mc_landscape <- function(x, ...) {
   invisible(x)
 }
 
-# great-circle distances in kilometres between points given as longitude and latitude
+#' great-circle distances in kilometres between points given as longitude and latitude
+#' @noRd
 great_circle <- function(coords) {
   radians <- as.matrix(coords) * pi / 180
   lon <- radians[, 1]

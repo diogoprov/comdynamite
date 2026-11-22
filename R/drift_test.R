@@ -99,14 +99,14 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
       traits <- setdiff(numeric_cols[!same], gname)
     }
     if (!is.character(traits) || !all(traits %in% names(x))) {
-      stop("`traits` must name columns of `x`", call. = FALSE)
+      stop("drift_test(): `traits` must name columns of `x`", call. = FALSE)
     }
     x <- as.matrix(x[traits])
   }
   if (!is.matrix(x) || !is.numeric(x)) {
     stop("`x` must be a data frame or a numeric matrix", call. = FALSE)
   }
-  if (any(is.infinite(x))) stop("`x` has infinite values", call. = FALSE)
+  if (any(is.infinite(x))) stop("drift_test(): `x` has infinite values", call. = FALSE)
   if (is.null(colnames(x))) colnames(x) <- paste0("trait", seq_len(ncol(x)))
   q <- ncol(x)
   if (q < 3) stop("the test needs at least three traits", call. = FALSE)
@@ -168,7 +168,10 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
   components <- data.frame(component = seq_len(q), eigenvalue = eig$values, sampling = sampling,
                            between = between)
   fit <- stats::lm(log(between) ~ log(eigenvalue), data = components)
-  coef <- summary(fit)$coefficients
+  fit_summary <- suppressWarnings(summary(fit))
+  warn_perfect_fit(fit_summary$r.squared, "all principal components",
+                   "log(between variance) and log(eigenvalue)")
+  coef <- fit_summary$coefficients
   slope <- coef[2, 1]
   se <- coef[2, 2]
   df <- q - 2

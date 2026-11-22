@@ -126,6 +126,8 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   }
   scores <- ordination$scores[, axes, drop = FALSE]
   observed <- pcps_fit(gower, scores, env)
+  warn_perfect_fit(observed$r2, c("the whole dissimilarity", colnames(scores)),
+                   "the predictors and the response")
   site <- site_null(null, draws, landscape_env, env, coords, n_perm)
   null_site <- progress_map(seq_len(site$n), function(r) {
     pcps_fit(gower, scores, site$env_at(r))$statistic
@@ -170,15 +172,17 @@ print.mc_pcps <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
-# degree of belonging of each species to the others, from the patristic distances: rows
-# sum to 1 (Pillar & Duarte 2010)
+#' degree of belonging of each species to the others, from the patristic distances: rows
+#' sum to 1 (Pillar & Duarte 2010)
+#' @noRd
 fuzzy_belonging <- function(tree) {
   distances <- ape::cophenetic.phylo(tree)[tree$tip.label, tree$tip.label]
   similarity <- 1 - distances / max(distances)
   similarity / rowSums(similarity)
 }
 
-# Gower-centred matrix of the square root of Bray-Curtis among rows of the matrix P
+#' Gower-centred matrix of the square root of Bray-Curtis among rows of the matrix P
+#' @noRd
 pcps_gower <- function(weights, belonging) {
   p <- weights %*% belonging
   sums <- rowSums(p)
@@ -187,7 +191,8 @@ pcps_gower <- function(weights, belonging) {
   unname(sweep(half, 2, colMeans(half)))
 }
 
-# axes with positive eigenvalues, scaled by the root of the eigenvalue, and their shares
+#' axes with positive eigenvalues, scaled by the root of the eigenvalue, and their shares
+#' @noRd
 pcps_axes <- function(gower) {
   eigenvalues <- eigen(gower, symmetric = TRUE)
   keep <- eigenvalues$values > sqrt(.Machine$double.eps) * max(eigenvalues$values)
@@ -197,8 +202,9 @@ pcps_axes <- function(gower) {
   list(scores = scores, share = values / sum(values))
 }
 
-# R2 and F of the distance-based regression of all the dissimilarity, then of each axis;
-# NA when a permutation leaves the predictors without variance
+#' R2 and F of the distance-based regression of all the dissimilarity, then of each axis;
+#' NA when a permutation leaves the predictors without variance
+#' @noRd
 pcps_fit <- function(gower, scores, env) {
   n <- nrow(gower)
   fit <- qr(sweep(env, 2, colMeans(env)))
@@ -329,7 +335,8 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
     ggplot2::coord_equal() + ggplot2::theme_minimal()
 }
 
-# clade of each species, from a number of clades or a vector named by species
+#' clade of each species, from a number of clades or a vector named by species
+#' @noRd
 pcps_clades <- function(clades, tree, species) {
   if (is.numeric(clades) && length(clades) == 1 && is.null(names(clades))) {
     n_tip <- ape::Ntip(tree)
@@ -362,7 +369,8 @@ pcps_clades <- function(clades, tree, species) {
   factor(as.character(clades)[match(species, names(clades))])
 }
 
-# stars coloured by clade, convex hulls of clades with three or more species and their names
+#' stars coloured by clade, convex hulls of clades with three or more species and their names
+#' @noRd
 pcps_clade_layers <- function(sp) {
   .data <- ggplot2::.data
   grouped <- sp[!is.na(sp$clade), , drop = FALSE]

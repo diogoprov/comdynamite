@@ -179,8 +179,9 @@ landscape_river <- function(network = river_network(50), env = NULL, scale_down 
   out
 }
 
-# the network table of river_network() from the downstream neighbour and reach length of each
-# site; checks that the sites form a single tree draining to one outlet
+#' the network table of river_network() from the downstream neighbour and reach length of each
+#' site; checks that the sites form a single tree draining to one outlet
+#' @noRd
 river_table <- function(downstream, length) {
   m <- base::length(downstream)
   downstream <- as.integer(downstream)
@@ -245,8 +246,9 @@ river_table <- function(downstream, length) {
              y = distance * sin(angle), stringsAsFactors = FALSE)
 }
 
-# distance travelled downstream from each site (rows) to each other site (columns): from the
-# site to the confluence where their paths meet
+#' distance travelled downstream from each site (rows) to each other site (columns): from the
+#' site to the confluence where their paths meet
+#' @noRd
 river_downstream <- function(net) {
   m <- nrow(net)
   outlet <- which(is.na(net$downstream))
@@ -414,7 +416,8 @@ env_river <- function(landscape, n_steps = NULL, mean = 0, temporal_scale = Inf,
   out + mean
 }
 
-# stops unless `landscape` comes from landscape_river()
+#' stops unless `landscape` comes from landscape_river()
+#' @noRd
 check_river_landscape <- function(landscape) {
   if (!inherits(landscape, "mc_landscape") || is.null(landscape$network)) {
     stop("`landscape` must come from landscape_river()", call. = FALSE)
@@ -422,8 +425,9 @@ check_river_landscape <- function(landscape) {
   invisible(landscape)
 }
 
-# additive function of the tail-up model: 1 at the outlet, and at each confluence the share of
-# each branch upstream in proportion to its weight, multiplied down to the outlet
+#' additive function of the tail-up model: 1 at the outlet, and at each confluence the share of
+#' each branch upstream in proportion to its weight, multiplied down to the outlet
+#' @noRd
 river_additive <- function(net, weights) {
   m <- nrow(net)
   w <- if (is.character(weights)) {
