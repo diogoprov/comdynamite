@@ -20,7 +20,8 @@ population_shifts(
   species_slopes = FALSE,
   community = NULL,
   nboot = 0,
-  level = 0.95
+  level = 0.95,
+  na_action = c("omit", "fail")
 )
 ```
 
@@ -73,6 +74,13 @@ population_shifts(
 
   Confidence level of the bootstrap intervals. One number between 0 and
   1, both excluded.
+
+- na_action:
+
+  What to do with missing values: rows with a missing value in the
+  trait, site, species, environment or abundance column are left out,
+  with a message giving their number (`"omit"`, the default), or the
+  function stops (`"fail"`).
 
 ## Value
 

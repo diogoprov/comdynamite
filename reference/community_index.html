@@ -85,6 +85,7 @@ communities.</p>
 <span>  n_perm <span class="op">=</span> <span class="fl">99</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two.sided"</span>, <span class="st">"less"</span>, <span class="st">"greater"</span><span class="op">)</span>,</span>
 <span>  multivariate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"omit"</span>, <span class="st">"fail"</span><span class="op">)</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -131,6 +132,12 @@ observed values only.</p></dd>
 
 <dt id="arg-multivariate">multivariate<a class="anchor" aria-label="anchor" href="#arg-multivariate"></a></dt>
 <dd><p>If <code>TRUE</code>, the index receives all traits at once. <code>TRUE</code> or <code>FALSE</code>.</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>What to do with missing values: individuals with a missing trait value are
+left out, with a message giving their number (<code>"omit"</code>, the default), or the function stops
+(<code>"fail"</code>).</p></dd>
 
 
 <dt id="arg-nperm">nperm<a class="anchor" aria-label="anchor" href="#arg-nperm"></a></dt>

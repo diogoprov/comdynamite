@@ -31,7 +31,8 @@ animate_food_web(
 - file:
 
   Path of the GIF to write, one character string; by default a temporary
-  file, whose path is returned.
+  file, whose path is returned. The suffix `.gif` is added when the name
+  has no suffix.
 
 - frames:
 

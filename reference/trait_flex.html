@@ -82,7 +82,8 @@ al. (2011), from the trait values of individuals.</p>
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
 <span>  abundance <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  formula <span class="op">=</span> <span class="op">~</span><span class="fl">1</span>,</span>
-<span>  env <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  env <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"omit"</span>, <span class="st">"fail"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -119,6 +120,13 @@ of squares of the whole model and <code>p</code> the p-value of its F test.</p><
 <dd><p>Data frame with one row per site, a column named like <code>site</code> and the variables of
 <code>formula</code>; it is matched to the sites by name. Sites with missing values in these
 variables are left out of all sums of squares, with a warning.</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>What to do with missing values: individuals with a missing trait value are
+left out of that trait's means, with a message giving their number, and sites with missing
+values in <code>env</code> are left out of the model with a warning (<code>"omit"</code>, the default); or the
+function stops on either (<code>"fail"</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

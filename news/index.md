@@ -2,6 +2,56 @@
 
 ## comdynamite (development version)
 
+- [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+  [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md),
+  [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  gain `na_action`. With the default, `"omit"`, rows with missing values
+  are left out as before, but now with a message giving their number
+  ([`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  dropped them silently); `"fail"` stops instead.
+
+- [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  check the collinearity of their predictors: they stop when one is a
+  linear combination of the others (before,
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  dropped it silently and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  returned `NA` for its slope), and warn when a variance inflation
+  factor exceeds 10. No variable is removed.
+
+- Repeated site names now stop `check_sites()`,
+  [`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+  (row names of `env`, `coords` and `areas`) and
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  (site column of `env`), instead of matching sites by position or to
+  the first repeated name.
+
+- [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
+  warns when the optimiser of the OU model does not converge and adds
+  the column `converged` to `models`.
+
+- The diagnostics of
+  [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+  count transitions that hit the maximum tree depth (`max_treedepth`); a
+  fit passes only when there are none.
+
+- The neighbour metrics
+  ([`mnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`sdnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
+  [`cvnnd()`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md))
+  accept vectors with a class such as `units`, which they drop.
+
+- [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
+  adds the suffix `.gif` to `file` when it has none.
+
 - The regional null models of
   [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
   permute the whole region once per randomisation, instead of drawing
@@ -10,6 +60,7 @@
   now does. The null distribution of each site is unchanged, but null
   values differ from earlier versions for the same seed, and values that
   combine sites are now valid.
+
 - The eigenvectors returned by
   [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   and
@@ -18,6 +69,7 @@
   sign of an eigenvector is arbitrary and could differ between
   platforms; the signs of `eigenvector_correlation` follow. Tests and
   gradients (`pev`) are unchanged.
+
 - Functions that implement a published method, such as
   [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
   [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
@@ -32,6 +84,7 @@
   [`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
   lists the papers of each function, and `citation("comdynamite")` now
   includes them.
+
 - The null models of T_IC/IR and T_PC/PR in
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
   permute the whole region once per randomisation, instead of drawing
@@ -50,6 +103,7 @@
   without any filtering when population sizes differ among sites and
   species differ in their means. Results of `T_PC.PR` therefore change
   with the default.
+
 - [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   and
   [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
@@ -63,6 +117,7 @@
   with several statistics (coverage 0.93 to 0.99 for a nominal 0.9 in
   the extended tests) and too narrow with one very informative statistic
   and small leaves (0.65, 0.89 with leaves of 200 simulations).
+
 - The help of
   [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
   explains that the p-values are F tests of the regressions of the site
@@ -72,6 +127,7 @@
   component is underestimated and its test is conservative, because
   species means taken over all sites absorb part of a shared
   intraspecific response. Results are unchanged.
+
 - Extended tests (rOpenSci standards G5.4-G5.12, BS7.0-BS7.2), run with
   `COMDYNAMITE_EXTENDED_TESTS=true` and once a month on GitHub Actions
   (`tests/README.md`): type I error and power of the permutation and
@@ -82,6 +138,7 @@
   Quick checks that the results do not change with trivial noise in the
   inputs or beyond Monte Carlo error across seeds run with the regular
   tests.
+
 - Input validation (rOpenSci standards G2 and G3): every scalar argument
   of the exported functions is checked for its length, type and range
   before any computation, with a message that names the argument, and
@@ -103,6 +160,7 @@
   `seed` beyond about 1e9 in the ABC functions, and parameters that a
   model ignores but that were out of range. The package help page says
   that arguments that choose among options are case-sensitive.
+
 - The Description and the help pages now say that
   [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
   [`node_contrasts()`](https://provetelab.org/comdynamite/reference/node_contrasts.md),
@@ -115,15 +173,18 @@
   [`food_web_dynamics()`](https://provetelab.org/comdynamite/reference/food_web_dynamics.md)
   was written from the equations and only compared with the MATLAB code
   of McPeek (2017).
+
 - Preparation for rOpenSci review: a contributing guide with the
   development stage of the package, a code of conduct, the ORCID of the
   author, a project status badge, British English as the language of the
   documentation (with `inst/WORDLIST`), a `.lintr` configuration and a
   pkgcheck workflow (run by hand). The README explains how to install
   treeshapesim and cmdstanr.
+
 - [`animate_food_web()`](https://provetelab.org/comdynamite/reference/animate_food_web.md)
   writes to a temporary file by default instead of `food_web.gif` in the
   working directory; the path is returned as before.
+
 - Examples added for
   [`plot.population_shifts()`](https://provetelab.org/comdynamite/reference/plot.population_shifts.md)
   and `pp_check()` on
@@ -132,6 +193,7 @@
   [`damocles_partition_test()`](https://provetelab.org/comdynamite/reference/damocles_partition_test.md)
   draws only four random partitions and leaves the longer runs in
   `\donttest{}`.
+
 - Internal: closures no longer assign with `<<-`,
   [`on.exit()`](https://rdrr.io/r/base/on.exit.html) calls add to
   earlier ones, and an internal function used only by the tests moved to

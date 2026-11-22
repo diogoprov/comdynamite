@@ -17,6 +17,7 @@ community_index(
   n_perm = 99,
   alternative = c("two.sided", "less", "greater"),
   multivariate = FALSE,
+  na_action = c("omit", "fail"),
   nperm = NULL
 )
 ```
@@ -65,6 +66,12 @@ community_index(
 - multivariate:
 
   If `TRUE`, the index receives all traits at once. `TRUE` or `FALSE`.
+
+- na_action:
+
+  What to do with missing values: individuals with a missing trait value
+  are left out, with a message giving their number (`"omit"`, the
+  default), or the function stops (`"fail"`).
 
 - nperm:
 

@@ -31,7 +31,8 @@ trait_rarefaction(
   min_n = 2,
   site = "site",
   species = "species",
-  abundance = NULL
+  abundance = NULL,
+  na_action = c("omit", "fail")
 )
 ```
 
@@ -87,6 +88,14 @@ trait_rarefaction(
   Name of a column with the abundance of each population, used with
   `cover` (passed to
   [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md)).
+
+- na_action:
+
+  What to do with missing values: with the default `statistic`,
+  individuals with a missing value in the column `trait` are left out
+  before subsampling, with a message giving their number (`"omit"`, the
+  default), or the function stops (`"fail"`). A user- supplied
+  `statistic` handles missing values itself.
 
 ## Value
 

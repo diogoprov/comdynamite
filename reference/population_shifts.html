@@ -86,7 +86,8 @@ how far co-occurring species push them apart, by fitting both terms of the model
 <span>  species_slopes <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  community <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  nboot <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  level <span class="op">=</span> <span class="fl">0.95</span></span>
+<span>  level <span class="op">=</span> <span class="fl">0.95</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"omit"</span>, <span class="st">"fail"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -140,6 +141,12 @@ number, 0 or more.</p></dd>
 <dt id="arg-level">level<a class="anchor" aria-label="anchor" href="#arg-level"></a></dt>
 <dd><p>Confidence level of the bootstrap intervals. One number between 0 and 1, both
 excluded.</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>What to do with missing values: rows with a missing value in the trait,
+site, species, environment or abundance column are left out, with a message giving their
+number (<code>"omit"</code>, the default), or the function stops (<code>"fail"</code>).</p></dd>
 
 </dl></div>
     <div class="section level2">

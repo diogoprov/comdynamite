@@ -58,9 +58,14 @@ trait_gradient_phylo(
 An object of class `mc_trait_gradient_phylo`, a list with `models` (one
 row per response and model: `response`, `model`, `mu`, `sigma2`, `a`,
 `half_life` (\\\ln 2 / a\\, in units of branch length), `at_bound` (an
-OU fit with \\a\\ at a bound), `loglik`, `n_par`, `aic` and `delta_aic`
-within each response), `data` (one row per species used: values and
-standard errors) and `tree` (the tree pruned to those species).
+OU fit with \\a\\ at a bound), `converged` (`FALSE` when
+[`stats::optim()`](https://rdrr.io/r/stats/optim.html) reports no
+convergence for an OU fit, with a warning; white noise and BM have one
+parameter, fitted by
+[`stats::optimize()`](https://rdrr.io/r/stats/optimize.html)), `loglik`,
+`n_par`, `aic` and `delta_aic` within each response), `data` (one row
+per species used: values and standard errors) and `tree` (the tree
+pruned to those species).
 
 ## Details
 
@@ -148,24 +153,24 @@ trait_gradient_phylo(tg, tree, n_boot = 99)
 #> Please cite these papers together with comdynamite (citation("comdynamite")).
 #> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> Phylogenetic models of the trait-gradient analysis: 14 species
-#>  response model     mu sigma2     a half_life at_bound loglik n_par   aic
-#>      beta white 64.600   90.9    NA        NA       NA  -49.9     2 104.0
-#>      beta    BM 61.700  201.0    NA        NA       NA  -49.7     2 103.0
-#>      beta    OU 62.900  450.0 1.820      0.38    FALSE  -49.2     3 104.0
-#>     alpha white  0.605   38.7    NA        NA       NA  -44.0     2  92.0
-#>     alpha    BM -1.000   75.6    NA        NA       NA  -41.4     2  86.9
-#>     alpha    OU -1.000   75.7 0.001        NA     TRUE  -41.4     3  88.9
-#>      mean white 64.600  236.0    NA        NA       NA  -55.4     2 115.0
-#>      mean    BM 60.000  538.0    NA        NA       NA  -52.9     2 110.0
-#>      mean    OU 60.600  722.0 0.692      1.00    FALSE  -52.8     3 112.0
-#>  delta_aic
-#>       0.40
-#>       0.00
-#>       1.09
-#>       5.08
-#>       0.00
-#>       2.00
-#>       4.92
-#>       0.00
-#>       1.72
+#>  response model     mu sigma2     a half_life at_bound converged loglik n_par
+#>      beta white 64.600   90.9    NA        NA       NA      TRUE  -49.9     2
+#>      beta    BM 61.700  201.0    NA        NA       NA      TRUE  -49.7     2
+#>      beta    OU 62.900  450.0 1.820      0.38    FALSE      TRUE  -49.2     3
+#>     alpha white  0.605   38.7    NA        NA       NA      TRUE  -44.0     2
+#>     alpha    BM -1.000   75.6    NA        NA       NA      TRUE  -41.4     2
+#>     alpha    OU -1.000   75.7 0.001        NA     TRUE      TRUE  -41.4     3
+#>      mean white 64.600  236.0    NA        NA       NA      TRUE  -55.4     2
+#>      mean    BM 60.000  538.0    NA        NA       NA      TRUE  -52.9     2
+#>      mean    OU 60.600  722.0 0.692      1.00    FALSE      TRUE  -52.8     3
+#>    aic delta_aic
+#>  104.0      0.40
+#>  103.0      0.00
+#>  104.0      1.09
+#>   92.0      5.08
+#>   86.9      0.00
+#>   88.9      2.00
+#>  115.0      4.92
+#>  110.0      0.00
+#>  112.0      1.72
 ```

@@ -248,26 +248,26 @@ evolution.</p>
 <span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">ph</span></span>
 <span><span class="co">#&gt; Phylogenetic models of the trait-gradient analysis: 26 species</span></span>
-<span><span class="co">#&gt;  response model     mu sigma2     a half_life at_bound loglik n_par aic</span></span>
-<span><span class="co">#&gt;      beta white 59.800  203.0    NA        NA       NA -105.0     2 214</span></span>
-<span><span class="co">#&gt;      beta    BM 60.400  379.0    NA        NA       NA  -97.4     2 199</span></span>
-<span><span class="co">#&gt;      beta    OU 60.400  458.0 0.506      1.37    FALSE  -97.3     3 201</span></span>
-<span><span class="co">#&gt;     alpha white -0.809   34.7    NA        NA       NA  -83.5     2 171</span></span>
-<span><span class="co">#&gt;     alpha    BM -0.404   66.6    NA        NA       NA  -75.8     2 156</span></span>
-<span><span class="co">#&gt;     alpha    OU -0.404   66.7 0.001        NA     TRUE  -75.8     3 158</span></span>
-<span><span class="co">#&gt;      mean white 59.700  446.0    NA        NA       NA -114.0     2 231</span></span>
-<span><span class="co">#&gt;      mean    BM 60.600  844.0    NA        NA       NA -105.0     2 215</span></span>
-<span><span class="co">#&gt;      mean    OU 60.500  908.0 0.213      3.25    FALSE -105.0     3 217</span></span>
-<span><span class="co">#&gt;  delta_aic</span></span>
-<span><span class="co">#&gt;      14.88</span></span>
-<span><span class="co">#&gt;       0.00</span></span>
-<span><span class="co">#&gt;       1.77</span></span>
-<span><span class="co">#&gt;      15.26</span></span>
-<span><span class="co">#&gt;       0.00</span></span>
-<span><span class="co">#&gt;       2.00</span></span>
-<span><span class="co">#&gt;      16.76</span></span>
-<span><span class="co">#&gt;       0.00</span></span>
-<span><span class="co">#&gt;       1.96</span></span></code></pre></div>
+<span><span class="co">#&gt;  response model     mu sigma2     a half_life at_bound converged loglik n_par</span></span>
+<span><span class="co">#&gt;      beta white 59.800  203.0    NA        NA       NA      TRUE -105.0     2</span></span>
+<span><span class="co">#&gt;      beta    BM 60.400  379.0    NA        NA       NA      TRUE  -97.4     2</span></span>
+<span><span class="co">#&gt;      beta    OU 60.400  458.0 0.506      1.37    FALSE      TRUE  -97.3     3</span></span>
+<span><span class="co">#&gt;     alpha white -0.809   34.7    NA        NA       NA      TRUE  -83.5     2</span></span>
+<span><span class="co">#&gt;     alpha    BM -0.404   66.6    NA        NA       NA      TRUE  -75.8     2</span></span>
+<span><span class="co">#&gt;     alpha    OU -0.404   66.7 0.001        NA     TRUE      TRUE  -75.8     3</span></span>
+<span><span class="co">#&gt;      mean white 59.700  446.0    NA        NA       NA      TRUE -114.0     2</span></span>
+<span><span class="co">#&gt;      mean    BM 60.600  844.0    NA        NA       NA      TRUE -105.0     2</span></span>
+<span><span class="co">#&gt;      mean    OU 60.500  908.0 0.213      3.25    FALSE      TRUE -105.0     3</span></span>
+<span><span class="co">#&gt;  aic delta_aic</span></span>
+<span><span class="co">#&gt;  214     14.88</span></span>
+<span><span class="co">#&gt;  199      0.00</span></span>
+<span><span class="co">#&gt;  201      1.77</span></span>
+<span><span class="co">#&gt;  171     15.26</span></span>
+<span><span class="co">#&gt;  156      0.00</span></span>
+<span><span class="co">#&gt;  158      2.00</span></span>
+<span><span class="co">#&gt;  231     16.76</span></span>
+<span><span class="co">#&gt;  215      0.00</span></span>
+<span><span class="co">#&gt;  217      1.96</span></span></code></pre></div>
 <p>In this simulation the optima evolve by Brownian motion
 (<code>lambda = 1</code>), so <span class="math inline">\beta</span>,
 which follows the optima, should prefer Brownian motion over the model

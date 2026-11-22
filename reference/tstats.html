@@ -82,6 +82,7 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"less"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span><span class="op">)</span>,</span>
 <span>  null_ip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"species"</span><span class="op">)</span>,</span>
 <span>  null_pc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"populations"</span>, <span class="st">"individuals"</span><span class="op">)</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"omit"</span>, <span class="st">"fail"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -134,6 +135,12 @@ default), the population means permuted among the populations of the region, or
 <code>"individuals"</code>, the population-level values of individuals permuted among all individuals
 of the region as in Taudiere &amp; Violle (2016) and in versions up to 0.10.0 (see the section
 Null model of T_PC.PR and the size of populations).</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>What to do with missing values: individuals with a missing value in a trait
+are left out of that trait's statistics, with a message giving their number (<code>"omit"</code>, the
+default), or the function stops (<code>"fail"</code>).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

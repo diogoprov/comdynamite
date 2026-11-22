@@ -176,26 +176,26 @@ ph <- trait_gradient_phylo(tg, tree, n_boot = 199)
 #> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ph
 #> Phylogenetic models of the trait-gradient analysis: 26 species
-#>  response model     mu sigma2     a half_life at_bound loglik n_par aic
-#>      beta white 59.800  203.0    NA        NA       NA -105.0     2 214
-#>      beta    BM 60.400  379.0    NA        NA       NA  -97.4     2 199
-#>      beta    OU 60.400  458.0 0.506      1.37    FALSE  -97.3     3 201
-#>     alpha white -0.809   34.7    NA        NA       NA  -83.5     2 171
-#>     alpha    BM -0.404   66.6    NA        NA       NA  -75.8     2 156
-#>     alpha    OU -0.404   66.7 0.001        NA     TRUE  -75.8     3 158
-#>      mean white 59.700  446.0    NA        NA       NA -114.0     2 231
-#>      mean    BM 60.600  844.0    NA        NA       NA -105.0     2 215
-#>      mean    OU 60.500  908.0 0.213      3.25    FALSE -105.0     3 217
-#>  delta_aic
-#>      14.88
-#>       0.00
-#>       1.77
-#>      15.26
-#>       0.00
-#>       2.00
-#>      16.76
-#>       0.00
-#>       1.96
+#>  response model     mu sigma2     a half_life at_bound converged loglik n_par
+#>      beta white 59.800  203.0    NA        NA       NA      TRUE -105.0     2
+#>      beta    BM 60.400  379.0    NA        NA       NA      TRUE  -97.4     2
+#>      beta    OU 60.400  458.0 0.506      1.37    FALSE      TRUE  -97.3     3
+#>     alpha white -0.809   34.7    NA        NA       NA      TRUE  -83.5     2
+#>     alpha    BM -0.404   66.6    NA        NA       NA      TRUE  -75.8     2
+#>     alpha    OU -0.404   66.7 0.001        NA     TRUE      TRUE  -75.8     3
+#>      mean white 59.700  446.0    NA        NA       NA      TRUE -114.0     2
+#>      mean    BM 60.600  844.0    NA        NA       NA      TRUE -105.0     2
+#>      mean    OU 60.500  908.0 0.213      3.25    FALSE      TRUE -105.0     3
+#>  aic delta_aic
+#>  214     14.88
+#>  199      0.00
+#>  201      1.77
+#>  171     15.26
+#>  156      0.00
+#>  158      2.00
+#>  231     16.76
+#>  215      0.00
+#>  217      1.96
 ```
 
 In this simulation the optima evolve by Brownian motion (`lambda = 1`),

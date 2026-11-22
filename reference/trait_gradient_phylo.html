@@ -130,7 +130,9 @@ number, 2 or more.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An object of class <code>mc_trait_gradient_phylo</code>, a list with <code>models</code> (one row per
 response and model: <code>response</code>, <code>model</code>, <code>mu</code>, <code>sigma2</code>, <code>a</code>, <code>half_life</code> (\(\ln 2 / a\),
-in units of branch length), <code>at_bound</code> (an OU fit with \(a\) at a bound), <code>loglik</code>,
+in units of branch length), <code>at_bound</code> (an OU fit with \(a\) at a bound), <code>converged</code>
+(<code>FALSE</code> when <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim()</a></code> reports no convergence for an OU fit, with a warning; white noise
+and BM have one parameter, fitted by <code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code>), <code>loglik</code>,
 <code>n_par</code>, <code>aic</code> and <code>delta_aic</code> within each response), <code>data</code> (one row per species used: values and standard errors) and <code>tree</code>
 (the tree pruned to those species).</p>
     </div>
@@ -210,26 +212,26 @@ components. <em>Ecology Letters</em>, 10, 135–145. <a href="https://doi.org/10
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Please cite these papers together with comdynamite (citation("comdynamite")).</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Phylogenetic models of the trait-gradient analysis: 14 species</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  response model     mu sigma2     a half_life at_bound loglik n_par   aic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      beta white 64.600   90.9    NA        NA       NA  -49.9     2 104.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      beta    BM 61.700  201.0    NA        NA       NA  -49.7     2 103.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      beta    OU 62.900  450.0 1.820      0.38    FALSE  -49.2     3 104.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha white  0.605   38.7    NA        NA       NA  -44.0     2  92.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha    BM -1.000   75.6    NA        NA       NA  -41.4     2  86.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha    OU -1.000   75.7 0.001        NA     TRUE  -41.4     3  88.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mean white 64.600  236.0    NA        NA       NA  -55.4     2 115.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mean    BM 60.000  538.0    NA        NA       NA  -52.9     2 110.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      mean    OU 60.600  722.0 0.692      1.00    FALSE  -52.8     3 112.0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  delta_aic</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0.40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       1.09</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       5.08</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       2.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       4.92</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       1.72</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  response model     mu sigma2     a half_life at_bound converged loglik n_par</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      beta white 64.600   90.9    NA        NA       NA      TRUE  -49.9     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      beta    BM 61.700  201.0    NA        NA       NA      TRUE  -49.7     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      beta    OU 62.900  450.0 1.820      0.38    FALSE      TRUE  -49.2     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha white  0.605   38.7    NA        NA       NA      TRUE  -44.0     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha    BM -1.000   75.6    NA        NA       NA      TRUE  -41.4     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     alpha    OU -1.000   75.7 0.001        NA     TRUE      TRUE  -41.4     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mean white 64.600  236.0    NA        NA       NA      TRUE  -55.4     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mean    BM 60.000  538.0    NA        NA       NA      TRUE  -52.9     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      mean    OU 60.600  722.0 0.692      1.00    FALSE      TRUE  -52.8     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    aic delta_aic</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  104.0      0.40</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  103.0      0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  104.0      1.09</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   92.0      5.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   86.9      0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   88.9      2.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  115.0      4.92</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  110.0      0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  112.0      1.72</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -17,7 +17,15 @@ divergence along the minor axes.
 ## Usage
 
 ``` r
-drift_test(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95)
+drift_test(
+  x,
+  group,
+  traits = NULL,
+  W = NULL,
+  correct = TRUE,
+  level = 0.95,
+  na_action = c("omit", "fail")
+)
 ```
 
 ## Arguments
@@ -57,6 +65,12 @@ drift_test(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95)
 
   The confidence level of the interval for the slope: one number greater
   than 0 and less than 1.
+
+- na_action:
+
+  What to do with missing values: rows with a missing trait value or
+  group are left out, with a message giving their number (`"omit"`, the
+  default), or the function stops (`"fail"`).
 
 ## Value
 

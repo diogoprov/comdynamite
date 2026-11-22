@@ -106,7 +106,8 @@ individuals within populations or species within sites; the rarefaction of speci
 <span>  min_n <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  site <span class="op">=</span> <span class="st">"site"</span>,</span>
 <span>  species <span class="op">=</span> <span class="st">"species"</span>,</span>
-<span>  abundance <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  abundance <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  na_action <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"omit"</span>, <span class="st">"fail"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -154,6 +155,13 @@ default) populations of one individual are left out, as in <code><a href="tstats
 <dt id="arg-abundance">abundance<a class="anchor" aria-label="anchor" href="#arg-abundance"></a></dt>
 <dd><p>Name of a column with the abundance of each population, used with <code>cover</code>
 (passed to <code><a href="subsample_individuals.html">subsample_individuals()</a></code>).</p></dd>
+
+
+<dt id="arg-na-action">na_action<a class="anchor" aria-label="anchor" href="#arg-na-action"></a></dt>
+<dd><p>What to do with missing values: with the default <code>statistic</code>, individuals
+with a missing value in the column <code>trait</code> are left out before subsampling, with a message
+giving their number (<code>"omit"</code>, the default), or the function stops (<code>"fail"</code>). A user-
+supplied <code>statistic</code> handles missing values itself.</p></dd>
 
 </dl></div>
     <div class="section level2">

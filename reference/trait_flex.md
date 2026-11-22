@@ -15,7 +15,8 @@ trait_flex(
   species = "species",
   abundance = NULL,
   formula = ~1,
-  env = NULL
+  env = NULL,
+  na_action = c("omit", "fail")
 )
 ```
 
@@ -53,6 +54,14 @@ trait_flex(
   variables of `formula`; it is matched to the sites by name. Sites with
   missing values in these variables are left out of all sums of squares,
   with a warning.
+
+- na_action:
+
+  What to do with missing values: individuals with a missing trait value
+  are left out of that trait's means, with a message giving their
+  number, and sites with missing values in `env` are left out of the
+  model with a warning (`"omit"`, the default); or the function stops on
+  either (`"fail"`).
 
 ## Value
 

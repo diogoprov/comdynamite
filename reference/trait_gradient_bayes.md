@@ -88,7 +88,9 @@ An object of class `mc_trait_gradient_bayes`, a list with
 - diagnostics:
 
   largest R-hat, smallest bulk and tail effective sample sizes, number
-  of divergent transitions, and `ok`.
+  of divergent transitions, number of transitions that hit the maximum
+  tree depth (`max_treedepth`; raise it through `...` if needed), and
+  `ok`.
 
 - fit:
 
@@ -166,9 +168,10 @@ intercepts, `exponential(1)` for the total standard deviations among
 species and for the residuals, `beta(1, 1)` for both \\\lambda\\ (change
 with `lambda_prior`), and `lkj(2)` for the two correlations. Check
 convergence (`diagnostics`: R-hat below 1.01, bulk and tail effective
-sample sizes above 400 and no divergent transitions, over the
-intercepts, standard deviations, \\\lambda\\, correlations, species
-values and `lp__`) and the fit, with
+sample sizes above 400, no divergent transitions and no transitions that
+hit the maximum tree depth of the sampler, over the intercepts, standard
+deviations, \\\lambda\\, correlations, species values and `lp__`) and
+the fit, with
 [`bayesplot::pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
 on the result, before reading the estimates.
 
