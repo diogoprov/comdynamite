@@ -171,11 +171,10 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
       any(lambda_prior <= 0)) {
     stop("`lambda_prior` must be two positive finite numbers", call. = FALSE)
   }
-  for (pkg in c("cmdstanr", "posterior")) {
-    if (!requireNamespace(pkg, quietly = TRUE)) {
-      stop("trait_gradient_bayes() needs the package ", pkg, # nocov
-           " (cmdstanr from https://stan-dev.r-universe.dev)", call. = FALSE) # nocov
-    }
+  absent <- missing_stan_packages()
+  if (length(absent) > 0) {
+    stop("trait_gradient_bayes() needs the package ", absent[1], # nocov
+         " (cmdstanr from https://stan-dev.r-universe.dev)", call. = FALSE) # nocov
   }
   check_tree(tree)
   model <- tg_bayes_data(x, tree, ou_alpha, lambda_prior)
@@ -204,6 +203,12 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
   structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, data = model$data,
                             A = model$A, ou_alpha = ou_alpha, lambda_prior = lambda_prior)),
             class = "mc_trait_gradient_bayes")
+}
+
+# packages needed to sample, apart so that tests can run without cmdstanr
+missing_stan_packages <- function() {
+  pkgs <- c("cmdstanr", "posterior")
+  pkgs[!vapply(pkgs, requireNamespace, logical(1), quietly = TRUE)]
 }
 
 # the variables read back from the sampler

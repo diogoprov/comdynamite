@@ -109,7 +109,6 @@ test_that("diagnostics flag poor convergence and divergences", {
 
 test_that("trait_gradient_bayes() samples and builds the result", {
   skip_on_cran()
-  skip_if_not_installed("cmdstanr")
   skip_if_not_installed("posterior")
   d <- tgb_sim()
   n_sp <- length(tg_bayes_data(d$tg, d$tree)$species)
@@ -120,7 +119,8 @@ test_that("trait_gradient_bayes() samples and builds the result", {
       list(fit = "fit", draws = posterior::as_draws_array(draws), divergent = 0)
     }
   }
-  local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)))
+  local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)),
+                        missing_stan_packages = function() character())
   # constant fake draws have no R-hat, so the fit does not pass
   expect_warning(res <- trait_gradient_bayes(d$tg, d$tree, chains = 2, seed = 4),
                  "not converged")
