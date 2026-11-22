@@ -13,11 +13,13 @@
   for T_PC/PR and in none for T_IC/IR); the site-level null
   distributions are unchanged for T_IC/IR and nearly so for T_PC/PR, but
   null values, effect sizes and p-values differ from earlier versions
-  for the same seed. New argument `null_pc`: the default `"individuals"`
-  is the null of Taudiere & Violle (2016); `"populations"` permutes
-  population means among the populations of the region, which avoids the
-  false “high” sites that the default gives when population sizes differ
-  among sites and species differ in their means.
+  for the same seed. New argument `null_pc`. Its default,
+  `"populations"`, permutes population means among the populations of
+  the region; `"individuals"` is the null of Taudiere & Violle (2016)
+  and of earlier versions, which flags about 80% of sites as “high”
+  without any filtering when population sizes differ among sites and
+  species differ in their means. Results of `T_PC.PR` therefore change
+  with the default.
 - [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   and
   [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)

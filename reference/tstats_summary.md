@@ -102,14 +102,14 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               seed_steps = 1:5)
 res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 tstats_summary(res)$traits
-#>   trait statistic n_sites percent_low percent_high    mean_ses p_mean_low
-#> 1 trait   T_IP.IC      15   100.00000     0.000000 -14.2385746       0.01
-#> 2 trait   T_IC.IR      15    13.33333     6.666667  -0.8029894       0.01
-#> 3 trait   T_PC.PR      15     0.00000     0.000000   0.4211176       0.87
+#>   trait statistic n_sites percent_low percent_high     mean_ses p_mean_low
+#> 1 trait   T_IP.IC      15   100.00000     0.000000 -14.50469753       0.01
+#> 2 trait   T_IC.IR      15    13.33333     6.666667  -0.78140451       0.01
+#> 3 trait   T_PC.PR      15     0.00000     0.000000   0.03624718       0.83
 #>   p_mean_high
 #> 1        1.00
 #> 2        1.00
-#> 3        0.14
+#> 3        0.18
 #>                                                                                         sites_low
 #> 1 site1 site2 site3 site4 site5 site6 site7 site8 site9 site10 site11 site12 site13 site14 site15
 #> 2                                                                                     site2 site5

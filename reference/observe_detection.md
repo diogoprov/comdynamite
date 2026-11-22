@@ -80,5 +80,5 @@ sim <- simulate_metacommunity(landscape_grid(side = 4), species_traits(tree, 0.5
 seen <- observe_detection(sim, detection = 0.1, visits = 3)
 c(true = sum(sim$abundance > 0), recorded = sum(seen$comm > 0))
 #>     true recorded 
-#>       50       39 
+#>       84       59 
 ```

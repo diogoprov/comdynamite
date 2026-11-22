@@ -16,7 +16,7 @@ tstats(
   n_perm = 99,
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
-  null_pc = c("individuals", "populations"),
+  null_pc = c("populations", "individuals"),
   ...,
   nperm = NULL
 )
@@ -64,12 +64,12 @@ tstats(
 
 - null_pc:
 
-  Null model of `T_PC.PR` for `method = "base"`: `"individuals"` (the
-  default), the population-level values of individuals permuted among
-  all individuals of the region as in Taudiere & Violle (2016), or
-  `"populations"`, the population means permuted among the populations
-  of the region (see the section Null model of T_PC.PR and the size of
-  populations).
+  Null model of `T_PC.PR` for `method = "base"`: `"populations"` (the
+  default), the population means permuted among the populations of the
+  region, or `"individuals"`, the population-level values of individuals
+  permuted among all individuals of the region as in Taudiere &
+  Violle (2016) and in versions up to 0.10.0 (see the section Null model
+  of T_PC.PR and the size of populations).
 
 - ...:
 
@@ -133,7 +133,10 @@ implemented in base R from their description:
 - `T_PC.PR`: each individual takes the mean of its population, these
   values are permuted among all individuals of the region, and
   population means are computed again from the values each population
-  received (their null model `regional.pop`, `null_pc = "individuals"`).
+  received (their null model `regional.pop`, `null_pc = "individuals"`);
+  by default (`null_pc = "populations"`), population means are permuted
+  among the populations of the region instead (see the section Null
+  model of T_PC.PR and the size of populations).
 
 Each randomisation is one permutation of the whole region, so the sites
 of a randomisation share the regional pool without repeating its
@@ -232,10 +235,12 @@ permuted among the populations of the region, one value per population
 they do not use for T-statistics). Each site keeps its number of
 populations, the regional variance of the means is that of the data, and
 the size of populations plays no part; in the example above both tests
-rejected in 1 to 5%. Use it when the sizes of populations differ among
-sites. Populations of the same species at different sites have similar
-means, which this permutation treats as independent, so the test tends
-to be conservative when species differ and are placed at random.
+rejected in 1 to 5%. It is the default, because the sizes of populations
+usually differ among sites in field data; `null_pc = "individuals"`
+gives the null model of Taudiere & Violle (2016), the default up to
+version 0.10.0. Populations of the same species at different sites have
+similar means, which this permutation treats as independent, so the test
+tends to be conservative when species differ and are placed at random.
 
 Whatever the null model, `T_PC.PR` is a ratio of variances among
 population means that are not weighted by abundance, and the test of one
@@ -327,10 +332,10 @@ rbind(none = colMeans(none[ratios], na.rm = TRUE),
 res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 #>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC
-#> 1 site1 0.016376543  -13.364187      0.01
-#> 2 site2 0.079715195  -26.659673      0.01
-#> 3 site3 0.012470128  -12.135411      0.01
-#> 4 site4 0.019383034  -18.430831      0.01
-#> 5 site5 0.056784711   -5.107812      0.01
-#> 6 site6 0.005298958  -11.778890      0.01
+#> 1 site1 0.016376543  -11.461270      0.01
+#> 2 site2 0.079715195  -20.219215      0.01
+#> 3 site3 0.012470128  -11.133374      0.01
+#> 4 site4 0.019383034  -19.185231      0.01
+#> 5 site5 0.056784711   -4.568547      0.01
+#> 6 site6 0.005298958  -13.779566      0.01
 ```

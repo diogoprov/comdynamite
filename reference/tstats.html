@@ -81,7 +81,7 @@ trait, from trait values of individuals such as those of <code><a href="sample_i
 <span>  n_perm <span class="op">=</span> <span class="fl">99</span>,</span>
 <span>  alternative <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"less"</span>, <span class="st">"greater"</span>, <span class="st">"two.sided"</span><span class="op">)</span>,</span>
 <span>  null_ip <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"species"</span><span class="op">)</span>,</span>
-<span>  null_pc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"individuals"</span>, <span class="st">"populations"</span><span class="op">)</span>,</span>
+<span>  null_pc <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"populations"</span>, <span class="st">"individuals"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  nperm <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -129,11 +129,11 @@ Null models).</p></dd>
 
 
 <dt id="arg-null-pc">null_pc<a class="anchor" aria-label="anchor" href="#arg-null-pc"></a></dt>
-<dd><p>Null model of <code>T_PC.PR</code> for <code>method = "base"</code>: <code>"individuals"</code> (the
-default), the population-level values of individuals permuted among all individuals of
-the region as in Taudiere &amp; Violle (2016), or <code>"populations"</code>, the population means
-permuted among the populations of the region (see the section Null model of T_PC.PR and
-the size of populations).</p></dd>
+<dd><p>Null model of <code>T_PC.PR</code> for <code>method = "base"</code>: <code>"populations"</code> (the
+default), the population means permuted among the populations of the region, or
+<code>"individuals"</code>, the population-level values of individuals permuted among all individuals
+of the region as in Taudiere &amp; Violle (2016) and in versions up to 0.10.0 (see the section
+Null model of T_PC.PR and the size of populations).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -183,7 +183,9 @@ site receives as many values as it has individuals, drawn without replacement fr
 region (their null model <code>regional.ind</code>);</p></li>
 <li><p><code>T_PC.PR</code>: each individual takes the mean of its population, these values are permuted
 among all individuals of the region, and population means are computed again from the
-values each population received (their null model <code>regional.pop</code>, <code>null_pc = "individuals"</code>).</p></li>
+values each population received (their null model <code>regional.pop</code>, <code>null_pc = "individuals"</code>); by default (<code>null_pc = "populations"</code>), population means are permuted
+among the populations of the region instead (see the section Null model of T_PC.PR and the
+size of populations).</p></li>
 </ul><p>Each randomisation is one permutation of the whole region, so the sites of a randomisation
 share the regional pool without repeating its individuals, as the sites of the data do. The
 null distribution of each site is that of a draw without replacement from the region, and
@@ -253,10 +255,12 @@ not whether the species of a site are a random draw of the species of the region
 populations of the region, one value per population (the null model <code>regional.pop.prab</code> of
 Taudiere &amp; Violle 2016, which they do not use for T-statistics). Each site keeps its number
 of populations, the regional variance of the means is that of the data, and the size of
-populations plays no part; in the example above both tests rejected in 1 to 5%. Use it when
-the sizes of populations differ among sites. Populations of the same species at different
-sites have similar means, which this permutation treats as independent, so the test tends
-to be conservative when species differ and are placed at random.</p>
+populations plays no part; in the example above both tests rejected in 1 to 5%. It is the
+default, because the sizes of populations usually differ among sites in field data;
+<code>null_pc = "individuals"</code> gives the null model of Taudiere &amp; Violle (2016), the default up
+to version 0.10.0. Populations of the same species at different sites have similar means,
+which this permutation treats as independent, so the test tends to be conservative when
+species differ and are placed at random.</p>
 <p>Whatever the null model, <code>T_PC.PR</code> is a ratio of variances among population means that are
 not weighted by abundance, and the test of one site has little power when the site has few
 populations: the variance among three means is so variable that, for normally distributed
@@ -337,12 +341,12 @@ community ecology. <em>Trends in Ecology &amp; Evolution</em>, 27, 244–252.
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">tstats</span><span class="op">(</span><span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, intraspecific_sd <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"site"</span>, <span class="st">"T_IP.IC"</span>, <span class="st">"ses_T_IP.IC"</span>, <span class="st">"p_T_IP.IC"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1 0.016376543  -13.364187      0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 site2 0.079715195  -26.659673      0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 site3 0.012470128  -12.135411      0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 site4 0.019383034  -18.430831      0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5 site5 0.056784711   -5.107812      0.01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6 site6 0.005298958  -11.778890      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 site1 0.016376543  -11.461270      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 site2 0.079715195  -20.219215      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 site3 0.012470128  -11.133374      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 site4 0.019383034  -19.185231      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5 site5 0.056784711   -4.568547      0.01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6 site6 0.005298958  -13.779566      0.01</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
