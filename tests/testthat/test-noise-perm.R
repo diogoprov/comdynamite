@@ -88,7 +88,9 @@ test_that("node_test() and phylo_vector() ignore trivial noise and the seed", {
   }
   vector <- function(d) {
     out <- phylo_vector(d$comm, d$tree, d$env, n_perm = n_perm, n_sim = 10)
-    list(statistic = out$eigenvector_correlation, p = c(out$p_site, out$p_species))
+    # the sign of an eigenvector is arbitrary, and a trivial perturbation can flip it on some
+    # LAPACK builds (seen on Windows), so the correlation is compared in absolute value
+    list(statistic = abs(out$eigenvector_correlation), p = c(out$p_site, out$p_species))
   }
   expect_jitter_invariant(node, d, n_perm)
   expect_jitter_invariant(vector, d, n_perm)
