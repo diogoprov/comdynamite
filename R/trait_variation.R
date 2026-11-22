@@ -281,39 +281,42 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     }
     species_mean <- tapply(z[keep], species_id[keep], mean)[pop_species]
     weighted <- function(v) {
-      sapply(site_levels, function(s) {
+      vapply(site_levels, function(s) {
         i <- pop_site == s
-        if (!any(i)) NA_real_ else sum(weight[i] * v[i]) / sum(weight[i])
-      })
+        if (any(i)) sum(weight[i] * v[i]) / sum(weight[i]) else NA_real_
+      }, numeric(1))
     }
     specific <- weighted(as.vector(pop_mean))
     fixed <- weighted(as.vector(species_mean))
     values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
-    fitted_values <- list()
-    ss <- lapply(names(values), function(component) {
+    fits <- lapply(names(values), function(component) {
       y <- values[[component]]
       ok <- !is.na(y) & env_ok
       total <- sum((y[ok] - mean(y[ok]))^2)
       modelled <- rep(NA_real_, length(y))
       if (length(model_vars) == 0) {
         modelled[ok] <- mean(y[ok])
-        fitted_values[[component]] <<- modelled
-        return(c(explained = 0, residual = total, total = total, p = NA_real_))
+        return(list(ss = c(explained = 0, residual = total, total = total, p = NA_real_),
+                    fitted = modelled, exact = FALSE))
       }
       fit <- stats::lm(model_formula, data = cbind(.y = y, env_sites)[ok, , drop = FALSE])
       modelled[ok] <- stats::fitted(fit)
-      fitted_values[[component]] <<- modelled
       residual <- sum(stats::residuals(fit)^2)
-      exact_labels <<- c(exact_labels, if (total > 0 && residual <= total *
-                                             sqrt(.Machine$double.eps)) {
-        paste0(trait, " (", component, ")")
-      })
       # the exact fits are reported once, below, instead of by summary.lm()
       f <- suppressWarnings(summary(fit))$fstatistic
       p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
-      c(explained = total - residual, residual = residual, total = total, p = unname(p))
+      list(ss = c(explained = total - residual, residual = residual, total = total,
+                  p = unname(p)),
+           fitted = modelled,
+           exact = total > 0 && residual <= total * sqrt(.Machine$double.eps))
     })
-    names(ss) <- names(values)
+    names(fits) <- names(values)
+    fitted_values <- lapply(fits, `[[`, "fitted")
+    exact <- vapply(fits, `[[`, logical(1), "exact")
+    if (any(exact)) {
+      exact_labels <- c(exact_labels, paste0(trait, " (", names(values)[exact], ")"))
+    }
+    ss <- lapply(fits, `[[`, "ss")
     site_fits[[trait]] <- do.call(rbind, lapply(names(values), function(component) {
       data.frame(site = site_levels, trait = trait, component = component,
                  response = values[[component]], fitted = fitted_values[[component]],

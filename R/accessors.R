@@ -280,6 +280,11 @@ nobs.mc_trait_gradient_phylo <- function(object, ...) nrow(object$data)
 #'   of `nodes`). For [abc_fit()], the number of complete simulations in the training table.
 #' @seealso [node_test()], [abc_fit()].
 #' @family inference
+#' @examples
+#' set.seed(1)
+#' out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env[, 1],
+#'                  n_perm = 9)
+#' nobs(out)
 #' @exportS3Method stats::nobs
 nobs.mc_node_test <- function(object, ...) as.integer(max(object$nodes$n_sites, na.rm = TRUE))
 
