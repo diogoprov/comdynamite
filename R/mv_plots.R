@@ -53,29 +53,11 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
   check_number(text_size, "text_size", lower = 0, open = TRUE)
   check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   x <- as.matrix(x)
-  if (!is.numeric(x) || is.null(rownames(x))) {
-    stop("`x` must be a numeric matrix with tip labels as row names", call. = FALSE)
-  }
-  if (!length(traits) %in% 1:2) stop("`traits` must name one or two columns", call. = FALSE)
-  if (length(traits) == 2 && ncol(x) < 2) {
-    stop("`x` has one trait: use `traits = 1` for a traitgram", call. = FALSE)
-  }
-  if (is.character(traits) && !all(traits %in% colnames(x)) ||
-      is.numeric(traits) && any(traits > ncol(x) | traits < 1)) {
-    stop("plot_traits(): `traits` must name columns of `x`", call. = FALSE)
-  }
+  check_plot_traits(x, traits)
   lab <- colnames(x)[traits] %||% paste("trait", traits)
   nodes <- attr(x, "nodes")
-  .data <- ggplot2::.data
   if (is.null(tree) || is.null(nodes)) {
-    if (length(traits) == 1) stop("a traitgram needs the tree and the values of the nodes",
-                                  call. = FALSE)
-    tips <- data.frame(a = x[, traits[1]], b = x[, traits[2]], label = rownames(x))
-    p <- ggplot2::ggplot(tips, ggplot2::aes(.data$a, .data$b)) +
-      ggplot2::geom_point(colour = (colours %||% "#0072B2")[1], size = point_size)
-    if (tip_labels) p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label),
-                                                size = text_size, vjust = -0.6)
-    return(p + ggplot2::labs(x = lab[1], y = lab[2]) + ggplot2::theme_minimal())
+    return(plot_tip_traits(x, traits, lab, colours, tip_labels, point_size, text_size))
   }
   check_tree(tree, branch_lengths = FALSE)
   n_tip <- ape::Ntip(tree)
@@ -83,18 +65,85 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
     stop("`x` does not match `tree`: give the tree that `trait_ou()` simulated on",
          call. = FALSE)
   }
-  values <- rbind(x[tree$tip.label, , drop = FALSE],
-                  nodes[as.character(n_tip + seq_len(tree$Nnode)), , drop = FALSE])
+  values <- trait_node_values(x, nodes, tree)
   maps <- branch_maps(tree, regimes)
   states <- sort(unique(unlist(lapply(maps, names), use.names = FALSE)))
   cols <- unlist(regime_colours(states, colours))
-  edge <- tree$edge
-  xy <- if (length(traits) == 2) {
+  two <- length(traits) == 2
+  xy <- trait_plane(values, tree, traits)
+  pieces <- trait_pieces(tree$edge, maps, xy)
+  tips <- trait_tips(tree, pieces, xy)
+  root <- if (two) data.frame(x = xy[n_tip + 1, 1], y = xy[n_tip + 1, 2])
+  p <- trait_history_plot(pieces, tips, root, tip_labels,
+                          list(point = point_size, text = text_size, line = linewidth))
+  p + ggplot2::scale_colour_manual(values = cols, name = "Regime",
+                                   guide = if (legend && length(states) > 1) "legend" else "none") +
+    ggplot2::labs(x = if (two) lab[1] else "Time from the root",
+                  y = if (two) lab[2] else lab[1]) +
+    ggplot2::theme_minimal()
+}
+
+#' stops unless `x` is a numeric matrix with tip labels and `traits` names one or two of its
+#' columns
+#' @noRd
+check_plot_traits <- function(x, traits) {
+  if (!is.numeric(x) || is.null(rownames(x))) {
+    stop("`x` must be a numeric matrix with tip labels as row names", call. = FALSE)
+  }
+  if (!length(traits) %in% 1:2) stop("`traits` must name one or two columns", call. = FALSE)
+  if (length(traits) == 2 && ncol(x) < 2) {
+    stop("`x` has one trait: use `traits = 1` for a traitgram", call. = FALSE)
+  }
+  if (not_columns(traits, x)) {
+    stop("plot_traits(): `traits` must name columns of `x`", call. = FALSE)
+  }
+}
+
+#' TRUE when `traits` has names or numbers that are not columns of `x`
+#' @noRd
+not_columns <- function(traits, x) {
+  is.character(traits) && !all(traits %in% colnames(x)) ||
+    is.numeric(traits) && any(traits > ncol(x) | traits < 1)
+}
+
+#' the plot of `plot_traits()` without a tree or the values of the nodes: the tips on the plane
+#' of two traits
+#' @noRd
+plot_tip_traits <- function(x, traits, lab, colours, tip_labels, point_size, text_size) {
+  if (length(traits) == 1) stop("a traitgram needs the tree and the values of the nodes",
+                                call. = FALSE)
+  .data <- ggplot2::.data
+  tips <- data.frame(a = x[, traits[1]], b = x[, traits[2]], label = rownames(x))
+  p <- ggplot2::ggplot(tips, ggplot2::aes(.data$a, .data$b)) +
+    ggplot2::geom_point(colour = (colours %||% "#0072B2")[1], size = point_size)
+  if (tip_labels) p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label),
+                                              size = text_size, vjust = -0.6)
+  p + ggplot2::labs(x = lab[1], y = lab[2]) + ggplot2::theme_minimal()
+}
+
+#' the traits of the tips and then of the nodes, in the order of the node numbers of `tree`
+#' @noRd
+trait_node_values <- function(x, nodes, tree) {
+  n_tip <- ape::Ntip(tree)
+  rbind(x[tree$tip.label, , drop = FALSE],
+        nodes[as.character(n_tip + seq_len(tree$Nnode)), , drop = FALSE])
+}
+
+#' coordinates of the tips and nodes in `plot_traits()`: two traits, or the time from the root
+#' and one trait in a traitgram
+#' @noRd
+trait_plane <- function(values, tree, traits) {
+  if (length(traits) == 2) {
     values[, traits, drop = FALSE]
   } else {
     cbind(ape::node.depth.edgelength(tree), values[, traits])
   }
-  # one segment per piece of each branch, split where a mapped history changes regime
+}
+
+#' one segment per piece of each branch, split where a mapped history changes regime; `end`
+#' marks the last piece of each branch
+#' @noRd
+trait_pieces <- function(edge, maps, xy) {
   pieces <- do.call(rbind, lapply(seq_len(nrow(edge)), function(e) {
     m <- maps[[e]]
     from <- xy[edge[e, 1], ]
@@ -107,32 +156,43 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
                regime = names(m), end = c(rep(FALSE, length(m) - 1), TRUE))
   }))
   pieces$edge <- rep(seq_len(nrow(edge)), lengths(maps))
-  tip_edge <- match(seq_len(n_tip), edge[, 2])
+  pieces
+}
+
+#' coordinates, label and regime of the tips, the regime being that at the end of their branch
+#' @noRd
+trait_tips <- function(tree, pieces, xy) {
+  n_tip <- ape::Ntip(tree)
+  tip_edge <- match(seq_len(n_tip), tree$edge[, 2])
   last <- pieces[pieces$end, ]
-  tips <- data.frame(x = xy[seq_len(n_tip), 1], y = xy[seq_len(n_tip), 2],
-                     regime = last$regime[match(tip_edge, last$edge)], label = tree$tip.label)
+  data.frame(x = xy[seq_len(n_tip), 1], y = xy[seq_len(n_tip), 2],
+             regime = last$regime[match(tip_edge, last$edge)], label = tree$tip.label)
+}
+
+#' the branches and tips of `plot_traits()` coloured by regime, with the root as a square when
+#' `root` gives it (two traits) and the names of the tips when `tip_labels` is TRUE; `sizes`
+#' has `point`, `text` and `line`
+#' @noRd
+trait_history_plot <- function(pieces, tips, root, tip_labels, sizes) {
+  .data <- ggplot2::.data
+  two <- !is.null(root)
   p <- ggplot2::ggplot() +
     ggplot2::geom_segment(data = pieces, ggplot2::aes(x = .data$x, y = .data$y,
                                                       xend = .data$xend, yend = .data$yend,
                                                       colour = .data$regime),
-                          linewidth = linewidth) +
+                          linewidth = sizes$line) +
     ggplot2::geom_point(data = tips, ggplot2::aes(.data$x, .data$y, colour = .data$regime),
-                        size = point_size)
-  if (length(traits) == 2) {
-    root <- data.frame(x = xy[n_tip + 1, 1], y = xy[n_tip + 1, 2])
+                        size = sizes$point)
+  if (two) {
     p <- p + ggplot2::geom_point(data = root, ggplot2::aes(.data$x, .data$y), shape = 15,
-                                 size = point_size * 1.4)
+                                 size = sizes$point * 1.4)
   }
   if (tip_labels) {
     p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label),
-                                size = text_size, hjust = if (length(traits) == 2) 0.5 else -0.15,
-                                vjust = if (length(traits) == 2) -0.7 else 0.5)
+                                size = sizes$text, hjust = if (two) 0.5 else -0.15,
+                                vjust = if (two) -0.7 else 0.5)
   }
-  p + ggplot2::scale_colour_manual(values = cols, name = "Regime",
-                                   guide = if (legend && length(states) > 1) "legend" else "none") +
-    ggplot2::labs(x = if (length(traits) == 2) lab[1] else "Time from the root",
-                  y = if (length(traits) == 2) lab[2] else lab[1]) +
-    ggplot2::theme_minimal()
+  p
 }
 
 #' Plot evolutionary rate matrices as ellipses
@@ -244,31 +304,13 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
                          call. = FALSE)
   if (length(traits) != 2) stop("plot_assembly(): `traits` must name two traits", call. = FALSE)
   kept <- rownames(tr) %in% x$community
-  s <- x$metric[traits, traits, drop = FALSE]
-  contours <- list()
-  if (x$rule == "filtering") {
-    w <- solve(chol(x$metric))
-    d <- sqrt(rowSums((sweep(tr, 2, x$optimum) %*% w)^2))
-    radius <- max(d[kept])
-    contours <- list(sweep(ellipse_points(s, radius), 2, x$optimum[traits], "+"))
-  } else if (x$rule == "limiting_similarity" && sum(kept) > 1) {
-    w <- solve(chol(x$metric))
-    radius <- min(stats::dist(tr[kept, , drop = FALSE] %*% w)) / 2
-    unit <- ellipse_points(s, radius)
-    contours <- lapply(which(kept), function(i) sweep(unit, 2, tr[i, traits], "+"))
-  }
+  contours <- assembly_contours(x, kept, traits)
   lab <- colnames(tr)[traits] %||% paste("trait", traits)
   species <- data.frame(x = tr[, traits[1]], y = tr[, traits[2]], label = rownames(tr),
                         status = factor(ifelse(kept, "Kept", "Removed"), c("Kept", "Removed")))
   .data <- ggplot2::.data
   p <- ggplot2::ggplot(species, ggplot2::aes(.data$x, .data$y))
-  if (length(contours) > 0) {
-    lines <- do.call(rbind, lapply(seq_along(contours), function(k) {
-      data.frame(x = contours[[k]][, 1], y = contours[[k]][, 2], group = k)
-    }))
-    p <- p + ggplot2::geom_path(data = lines, ggplot2::aes(group = .data$group),
-                                colour = colours[3])
-  }
+  p <- p + contour_layer(contours, colours[3])
   p <- p + ggplot2::geom_point(ggplot2::aes(colour = .data$status, shape = .data$status),
                                size = point_size) +
     ggplot2::scale_colour_manual(values = c(Kept = colours[1], Removed = colours[2]),
@@ -285,6 +327,39 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
   }
   p + ggplot2::coord_equal() + ggplot2::labs(x = lab[1], y = lab[2]) +
     ggplot2::theme_minimal()
+}
+
+#' the contours of `plot_assembly()`, as a list of matrices of points: with filtering, the
+#' ellipse through the farthest species kept; with limiting similarity, one ellipse around
+#' each species kept, with half the smallest distance among them
+#' @noRd
+assembly_contours <- function(x, kept, traits) {
+  tr <- x$traits
+  s <- x$metric[traits, traits, drop = FALSE]
+  contours <- list()
+  if (x$rule == "filtering") {
+    w <- solve(chol(x$metric))
+    d <- sqrt(rowSums((sweep(tr, 2, x$optimum) %*% w)^2))
+    radius <- max(d[kept])
+    contours <- list(sweep(ellipse_points(s, radius), 2, x$optimum[traits], "+"))
+  } else if (x$rule == "limiting_similarity" && sum(kept) > 1) {
+    w <- solve(chol(x$metric))
+    radius <- min(stats::dist(tr[kept, , drop = FALSE] %*% w)) / 2
+    unit <- ellipse_points(s, radius)
+    contours <- lapply(which(kept), function(i) sweep(unit, 2, tr[i, traits], "+"))
+  }
+  contours
+}
+
+#' the contours of `plot_assembly()` as one layer of paths, or nothing without contours
+#' @noRd
+contour_layer <- function(contours, colour) {
+  if (length(contours) == 0) return(list())
+  .data <- ggplot2::.data
+  lines <- do.call(rbind, lapply(seq_along(contours), function(k) {
+    data.frame(x = contours[[k]][, 1], y = contours[[k]][, 2], group = k)
+  }))
+  list(ggplot2::geom_path(data = lines, ggplot2::aes(group = .data$group), colour = colour))
 }
 
 #' points on the ellipse {d : d' S^-1 d = r^2}

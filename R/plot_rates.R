@@ -35,19 +35,9 @@ plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_
   if (!requireNamespace("ggplot2", quietly = TRUE)) {
     stop("plot_rates() needs the package ggplot2", call. = FALSE) # nocov
   }
-  if (!inherits(tree, "phylo") && is.list(tree) && inherits(tree$tree, "phylo") &&
-      !is.null(tree$edge_rates)) {
-    if (is.null(rates)) rates <- tree$edge_rates
-    tree <- tree$tree
-  }
-  check_tree(tree)
-  if (is.null(rates)) stop("`rates` is missing", call. = FALSE)
-  if (is.list(rates) && !is.null(rates$edge_rates)) rates <- rates$edge_rates
-  if (!is.numeric(rates) || length(rates) != nrow(tree$edge)) {
-    stop("`rates` must have one value per branch (", nrow(tree$edge), "), in the order of ",
-         "the rows of `tree$edge`", call. = FALSE)
-  }
-  if (any(is.infinite(rates))) stop("`rates` has infinite values", call. = FALSE)
+  given <- rates_of_tree(tree, rates)
+  tree <- given$tree
+  rates <- given$rates
   check_flag(log, "log")
   check_flag(tip_labels, "tip_labels")
   check_string(palette, "palette")
@@ -77,15 +67,44 @@ plot_rates <- function(tree, rates = NULL, log = TRUE, palette = "viridis", tip_
     ggplot2::theme(axis.text.y = ggplot2::element_blank(), panel.grid = ggplot2::element_blank(),
                    axis.line.x = ggplot2::element_line())
   if (tip_labels) {
-    n <- length(tree$tip.label)
-    tips <- data.frame(x = layout$x[seq_len(n)], y = layout$y[seq_len(n)],
-                       label = tree$tip.label)
-    p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(x = .data$x, y = .data$y,
-                                                          label = .data$label),
+    p <- p + ggplot2::geom_text(data = tree_tips(tree, layout),
+                                ggplot2::aes(x = .data$x, y = .data$y, label = .data$label),
                                 inherit.aes = FALSE, hjust = -0.1, size = 3) +
       ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.02, 0.15)))
   }
   p
+}
+
+#' TRUE when `x` is not a tree but a list with a tree and the rates of its branches
+#' @noRd
+has_edge_rates <- function(x) {
+  !inherits(x, "phylo") && is.list(x) && inherits(x$tree, "phylo") && !is.null(x$edge_rates)
+}
+
+#' the tree and the rates of its branches given to `plot_rates()`, from a tree and its rates or
+#' from the result of `trait_rates()` or `history_rates()`; a list with `tree` and `rates`
+#' @noRd
+rates_of_tree <- function(tree, rates) {
+  if (has_edge_rates(tree)) {
+    if (is.null(rates)) rates <- tree$edge_rates
+    tree <- tree$tree
+  }
+  check_tree(tree)
+  if (is.null(rates)) stop("`rates` is missing", call. = FALSE)
+  if (is.list(rates) && !is.null(rates$edge_rates)) rates <- rates$edge_rates
+  if (!is.numeric(rates) || length(rates) != nrow(tree$edge)) {
+    stop("`rates` must have one value per branch (", nrow(tree$edge), "), in the order of ",
+         "the rows of `tree$edge`", call. = FALSE)
+  }
+  if (any(is.infinite(rates))) stop("`rates` has infinite values", call. = FALSE)
+  list(tree = tree, rates = rates)
+}
+
+#' coordinates and labels of the tips of a tree, in the coordinates of tree_layout()
+#' @noRd
+tree_tips <- function(tree, layout) {
+  n <- length(tree$tip.label)
+  data.frame(x = layout$x[seq_len(n)], y = layout$y[seq_len(n)], label = tree$tip.label)
 }
 
 #' coordinates of the nodes of a rectangular phylogram: x is the distance from the root, y puts

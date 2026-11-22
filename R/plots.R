@@ -77,91 +77,120 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   layout <- tree_layout(tree)
   n_tip <- length(tree$tip.label)
   depth <- max(layout$x)
-  edges <- tree_segments(tree, layout)
-  tips <- data.frame(x = layout$x[seq_len(n_tip)], y = layout$y[seq_len(n_tip)],
-                     label = tree$tip.label)
   fan <- type == "fan"
-  # text along the radius of a fan, turned on its left half so that it is not upside down
-  turn <- function(y) {
-    angle <- 90 - 360 * (y - 0.5) / n_tip
-    flip <- angle < -90
-    list(angle = ifelse(flip, angle + 180, angle), flip = flip)
-  }
   .data <- ggplot2::.data
   p <- ggplot2::ggplot() +
-    ggplot2::geom_segment(data = edges, ggplot2::aes(x = .data$x, xend = .data$xend,
-                                                     y = .data$y, yend = .data$yend),
-                          linewidth = 0.4)
-  if (fan) {
-    t <- turn(tips$y)
-    tips$angle <- t$angle
-    tips$hjust <- as.numeric(t$flip)
-    p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label,
-                                                          angle = .data$angle,
-                                                          hjust = .data$hjust),
-                                size = text_size, nudge_x = 0.02 * depth)
-  } else {
-    p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label),
-                                size = text_size, hjust = 0, nudge_x = 0.02 * depth)
-  }
+    ggplot2::geom_segment(data = tree_segments(tree, layout),
+                          ggplot2::aes(x = .data$x, xend = .data$xend, y = .data$y,
+                                       yend = .data$yend),
+                          linewidth = 0.4) +
+    node_tip_layer(tree_tips(tree, layout), fan, text_size, depth)
   if (!is.null(marks) && nrow(marks) > 0) {
-    groups <- split(marks, list(marks$node, marks$set == "biogeography", !marks$corrected),
-                    drop = TRUE)
-    symbols <- do.call(rbind, lapply(groups, function(g) {
-      data.frame(node = as.integer(g$node[1]), set = g$set[1], corrected = g$corrected[1],
-                 label = toString(g$variable))
-    }))
-    # one symbol per set and level at each node: predictors above, events below, solid ones
-    # next to the node
-    symbols <- symbols[order(symbols$node, symbols$set, !symbols$corrected), ]
-    side <- ifelse(symbols$set == "biogeography", -1, 1)
-    rank <- stats::ave(side, symbols$node, side, FUN = seq_along)
-    symbols$x <- layout$x[symbols$node]
-    symbols$y <- layout$y[symbols$node] + side * (rank - 0.4) * 0.45
-    symbols$key <- factor(paste(ifelse(symbols$set == "biogeography", "Biogeography",
-                                       "Predictor"),
-                                ifelse(symbols$corrected, "after correction", "uncorrected"),
-                                sep = ", "),
-                          c("Predictor, after correction", "Predictor, uncorrected",
-                            "Biogeography, after correction", "Biogeography, uncorrected"))
-    symbols$colour <- colours[1 + (symbols$set == "biogeography")]
-    key_colour <- stats::setNames(rep(colours, each = 2), levels(symbols$key))
-    key_fill <- stats::setNames(c(colours[1], "white", colours[2], "white"), levels(symbols$key))
-    key_shape <- stats::setNames(c(21, 21, 24, 24), levels(symbols$key))
-    if (fan) {
-      t <- turn(symbols$y)
-      symbols$angle <- t$angle
-      symbols$hjust <- as.numeric(!t$flip)
-    } else {
-      symbols$angle <- 0
-      symbols$hjust <- 1
-    }
-    p <- p +
-      ggplot2::geom_label(data = symbols,
-                          ggplot2::aes(.data$x, .data$y, label = .data$label,
-                                       angle = .data$angle, hjust = .data$hjust),
-                          colour = symbols$colour, fill = "white", linewidth = 0,
-                          size = text_size * 0.9, nudge_x = -0.015 * depth,
-                          label.padding = ggplot2::unit(0.05, "lines")) +
-      ggplot2::geom_point(data = symbols, ggplot2::aes(.data$x, .data$y, colour = .data$key,
-                                                       fill = .data$key, shape = .data$key),
-                          size = 2.2, stroke = 0.9) +
-      ggplot2::scale_colour_manual(values = key_colour, name = NULL, drop = TRUE) +
-      ggplot2::scale_fill_manual(values = key_fill, name = NULL, drop = TRUE) +
-      ggplot2::scale_shape_manual(values = key_shape, name = NULL, drop = TRUE)
+    symbols <- node_symbols(marks, layout, colours, fan, n_tip)
+    p <- p + node_symbol_layers(symbols, colours, text_size, depth)
   }
   p <- p + ggplot2::theme_void() +
     ggplot2::theme(legend.position = if (legend) "bottom" else "none")
-  p <- if (fan) {
-    p + ggplot2::coord_polar(theta = "y", clip = "off") +
-      ggplot2::scale_y_continuous(limits = c(0.5, n_tip + 0.5), expand = c(0, 0)) +
-      ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.2, 0.35)))
-  } else {
-    p + ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.25, 0.3))) +
-      ggplot2::coord_cartesian(clip = "off")
-  }
+  p <- p + node_tree_coord(fan, n_tip)
   attr(p, "marks") <- marks
   p
+}
+
+#' angle of text along the radius of a fan at height `y`, turned on its left half so that it is
+#' not upside down; a list with `angle` and `flip`, TRUE where the text was turned
+#' @noRd
+fan_turn <- function(y, n_tip) {
+  angle <- 90 - 360 * (y - 0.5) / n_tip
+  flip <- angle < -90
+  list(angle = ifelse(flip, angle + 180, angle), flip = flip)
+}
+
+#' the layer with the names of the tips of `plot_node_test()`, along the radius in a fan
+#' @noRd
+node_tip_layer <- function(tips, fan, text_size, depth) {
+  .data <- ggplot2::.data
+  if (!fan) {
+    return(ggplot2::geom_text(data = tips,
+                              ggplot2::aes(.data$x, .data$y, label = .data$label),
+                              size = text_size, hjust = 0, nudge_x = 0.02 * depth))
+  }
+  t <- fan_turn(tips$y, nrow(tips))
+  tips$angle <- t$angle
+  tips$hjust <- as.numeric(t$flip)
+  ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label,
+                                               angle = .data$angle,
+                                               hjust = .data$hjust),
+                     size = text_size, nudge_x = 0.02 * depth)
+}
+
+#' the symbols of `plot_node_test()`: one row per node, set (predictors or events) and level
+#' (after correction or not), with its position, label, key of the legend and colour
+#' @noRd
+node_symbols <- function(marks, layout, colours, fan, n_tip) {
+  groups <- split(marks, list(marks$node, marks$set == "biogeography", !marks$corrected),
+                  drop = TRUE)
+  symbols <- do.call(rbind, lapply(groups, function(g) {
+    data.frame(node = as.integer(g$node[1]), set = g$set[1], corrected = g$corrected[1],
+               label = toString(g$variable))
+  }))
+  # one symbol per set and level at each node: predictors above, events below, solid ones
+  # next to the node
+  symbols <- symbols[order(symbols$node, symbols$set, !symbols$corrected), ]
+  side <- ifelse(symbols$set == "biogeography", -1, 1)
+  rank <- stats::ave(side, symbols$node, side, FUN = seq_along)
+  symbols$x <- layout$x[symbols$node]
+  symbols$y <- layout$y[symbols$node] + side * (rank - 0.4) * 0.45
+  symbols$key <- factor(paste(ifelse(symbols$set == "biogeography", "Biogeography",
+                                     "Predictor"),
+                              ifelse(symbols$corrected, "after correction", "uncorrected"),
+                              sep = ", "),
+                        c("Predictor, after correction", "Predictor, uncorrected",
+                          "Biogeography, after correction", "Biogeography, uncorrected"))
+  symbols$colour <- colours[1 + (symbols$set == "biogeography")]
+  if (fan) {
+    t <- fan_turn(symbols$y, n_tip)
+    symbols$angle <- t$angle
+    symbols$hjust <- as.numeric(!t$flip)
+  } else {
+    symbols$angle <- 0
+    symbols$hjust <- 1
+  }
+  symbols
+}
+
+#' the layers and scales of the symbols of `plot_node_test()`: their labels, their points and
+#' the legend
+#' @noRd
+node_symbol_layers <- function(symbols, colours, text_size, depth) {
+  .data <- ggplot2::.data
+  keys <- levels(symbols$key)
+  key_colour <- stats::setNames(rep(colours, each = 2), keys)
+  key_fill <- stats::setNames(c(colours[1], "white", colours[2], "white"), keys)
+  key_shape <- stats::setNames(c(21, 21, 24, 24), keys)
+  list(ggplot2::geom_label(data = symbols,
+                           ggplot2::aes(.data$x, .data$y, label = .data$label,
+                                        angle = .data$angle, hjust = .data$hjust),
+                           colour = symbols$colour, fill = "white", linewidth = 0,
+                           size = text_size * 0.9, nudge_x = -0.015 * depth,
+                           label.padding = ggplot2::unit(0.05, "lines")),
+       ggplot2::geom_point(data = symbols, ggplot2::aes(.data$x, .data$y, colour = .data$key,
+                                                        fill = .data$key, shape = .data$key),
+                           size = 2.2, stroke = 0.9),
+       ggplot2::scale_colour_manual(values = key_colour, name = NULL, drop = TRUE),
+       ggplot2::scale_fill_manual(values = key_fill, name = NULL, drop = TRUE),
+       ggplot2::scale_shape_manual(values = key_shape, name = NULL, drop = TRUE))
+}
+
+#' the coordinates and scales of the tree of `plot_node_test()`, as a fan or a phylogram
+#' @noRd
+node_tree_coord <- function(fan, n_tip) {
+  if (fan) {
+    return(list(ggplot2::coord_polar(theta = "y", clip = "off"),
+                ggplot2::scale_y_continuous(limits = c(0.5, n_tip + 0.5), expand = c(0, 0)),
+                ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.2, 0.35)))))
+  }
+  list(ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = c(0.25, 0.3))),
+       ggplot2::coord_cartesian(clip = "off"))
 }
 
 #' Plot the semipartial correlations of a node test
@@ -337,51 +366,73 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   table <- x$fractions
   shown <- table[match(c("a", "b", "c", "d"), table$fraction), ]
   shown$shown <- pmax(shown[[value]], 0)
+  edges <- c(0, cumsum(shown$shown))
+  total <- edges[5]
+  bars <- partition_bars(shown, test, level, edges)
+  fills <- c(Significant = colours, `Not significant` = grDevices::adjustcolor(colours, 0.3),
+             `Not tested` = "grey70")
+  texts <- partition_texts(edges, labels)
+  fractions <- data.frame(x = fraction_positions(edges, 0.12 * total), y = 0.45,
+                          label = paste0("[", shown$fraction, "] ",
+                                         format(round(shown$shown, 2), nsmall = 2)))
+  p <- partition_plot(bars, texts, fractions, fills, edges, text_size,
+                      paste(x$component, "component"))
+  attr(p, "fractions") <- shown
+  p
+}
+
+#' the bars of `plot_trait_partition()`: `a` and `b` for the environment and `b` and `c` for
+#' space, with the status of the test of each fraction
+#' @noRd
+partition_bars <- function(shown, test, level, edges) {
   p_of <- stats::setNames(shown[[paste0("p_", test)]], shown$fraction)
   status <- function(fraction) {
     if (is.na(p_of[[fraction]])) "Not tested"
     else if (p_of[[fraction]] <= level) "Significant" else "Not significant"
   }
-  edges <- c(0, cumsum(shown$shown))
-  total <- edges[5]
   bars <- data.frame(xmin = edges[c(1, 2, 2, 3)], xmax = edges[c(2, 3, 3, 4)],
                      ymin = c(2, 2, 1.1, 1.1),
                      status = vapply(c("a", "b", "b", "c"), status, character(1)))
   bars$ymax <- bars$ymin + 0.7
   bars$status <- factor(bars$status, c("Significant", "Not significant", "Not tested"))
-  fills <- c(Significant = colours, `Not significant` = grDevices::adjustcolor(colours, 0.3),
-             `Not tested` = "grey70")
+  bars
+}
+
+#' the names of the two bars and of the unexplained part of `plot_trait_partition()`, with
+#' their positions
+#' @noRd
+partition_texts <- function(edges, labels) {
   # beside the bar of space, on the side with more room
   on_right <- edges[5] - edges[4] >= edges[2]
-  gap <- 0.01 * total
-  texts <- data.frame(x = c(edges[1], if (on_right) edges[4] + gap else edges[2] - gap,
-                            mean(edges[4:5])),
-                      y = c(2.85, 1.45, 2.35), label = c(labels, "Unexplained"),
-                      hjust = c(0, 1 - on_right, 0.5))
-  fractions <- data.frame(x = fraction_positions(edges, 0.12 * total), y = 0.45,
-                          label = paste0("[", shown$fraction, "] ",
-                                         format(round(shown$shown, 2), nsmall = 2)))
+  gap <- 0.01 * edges[5]
+  data.frame(x = c(edges[1], if (on_right) edges[4] + gap else edges[2] - gap,
+                   mean(edges[4:5])),
+             y = c(2.85, 1.45, 2.35), label = c(labels, "Unexplained"),
+             hjust = c(0, 1 - on_right, 0.5))
+}
+
+#' the ggplot of `plot_trait_partition()`, from the data of its bars, names and fractions
+#' @noRd
+partition_plot <- function(bars, texts, fractions, fills, edges, text_size, title) {
   .data <- ggplot2::.data
-  p <- ggplot2::ggplot() +
+  ggplot2::ggplot() +
     ggplot2::geom_rect(data = bars, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax,
                                                  ymin = .data$ymin, ymax = .data$ymax,
                                                  fill = .data$status), colour = "white") +
     ggplot2::geom_text(data = texts, ggplot2::aes(.data$x, .data$y, label = .data$label,
                                                   hjust = .data$hjust), size = text_size,
                        vjust = 0) +
-    ggplot2::annotate("segment", x = 0, xend = total, y = 0.9, yend = 0.9, linewidth = 1.5) +
+    ggplot2::annotate("segment", x = 0, xend = edges[5], y = 0.9, yend = 0.9, linewidth = 1.5) +
     ggplot2::annotate("segment", x = edges, xend = edges, y = 0.75, yend = 1.05) +
     ggplot2::geom_text(data = fractions, ggplot2::aes(.data$x, .data$y, label = .data$label),
                        size = text_size) +
     ggplot2::scale_fill_manual(values = fills, name = NULL, drop = FALSE) +
-    ggplot2::labs(title = paste(x$component, "component")) +
+    ggplot2::labs(title = title) +
     ggplot2::coord_cartesian(clip = "off") +
     ggplot2::theme_void() +
     ggplot2::theme(legend.position = "bottom",
                    plot.title = ggplot2::element_text(hjust = 0.5),
                    plot.margin = ggplot2::margin(10, 20, 10, 20))
-  attr(p, "fractions") <- shown
-  p
 }
 
 #' centres of the fractions, moved apart so that their labels do not overlap
@@ -445,13 +496,7 @@ plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_s
   matched <- present_species(check_phylo_comm(comm, tree, allow_empty = TRUE))
   comm <- matched$comm[rowSums(matched$comm) > 0, , drop = FALSE]
   scores <- as.matrix(x$scores)
-  if (nrow(scores) != nrow(comm)) {
-    stop("`comm` has ", nrow(comm), " occupied sites and `x` has ", nrow(scores),
-         ": use the community given to `phylo_beta_test()`", call. = FALSE)
-  }
-  if (axis < 1 || axis > ncol(scores)) {
-    stop("`axis` must be between 1 and ", ncol(scores), call. = FALSE)
-  }
+  check_beta_scores(scores, comm, axis)
   tree <- ape::ladderize(matched$tree)
   if (is.null(tree$edge.length)) tree$edge.length <- rep(1, nrow(tree$edge))
   layout <- tree_layout(tree)
@@ -462,12 +507,7 @@ plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_s
   n_sites <- nrow(ordered)
   cells <- data.frame(species = rep(seq_len(n_species), each = n_sites),
                       site = rep(seq_len(n_sites), n_species), value = as.vector(ordered))
-  # the tree hangs over the columns, root at the top, over a third of the height
-  height <- max(3, n_sites / 3)
-  depth <- max(layout$x)
-  to_y <- function(d) n_sites + 0.5 + height * (1 - d / depth)
-  edges <- tree_segments(tree, layout)
-  branches <- data.frame(x = edges$y, xend = edges$yend, y = to_y(edges$x), yend = to_y(edges$xend))
+  branches <- hanging_tree(tree, layout, n_sites)
   .data <- ggplot2::.data
   p <- ggplot2::ggplot() +
     ggplot2::geom_tile(data = cells, ggplot2::aes(.data$species, .data$site, fill = .data$value)) +
@@ -485,4 +525,27 @@ plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_s
                    panel.grid = ggplot2::element_blank())
   attr(p, "ordered") <- ordered
   p
+}
+
+#' stops unless the scores of `x` have one row per occupied site of `comm` and the axis asked
+#' @noRd
+check_beta_scores <- function(scores, comm, axis) {
+  if (nrow(scores) != nrow(comm)) {
+    stop("`comm` has ", nrow(comm), " occupied sites and `x` has ", nrow(scores),
+         ": use the community given to `phylo_beta_test()`", call. = FALSE)
+  }
+  if (axis < 1 || axis > ncol(scores)) {
+    stop("`axis` must be between 1 and ", ncol(scores), call. = FALSE)
+  }
+}
+
+#' segments of the tree of `plot_phylo_beta()`, which hangs over the columns of the heatmap of
+#' `n_sites` rows, root at the top, over a third of its height
+#' @noRd
+hanging_tree <- function(tree, layout, n_sites) {
+  height <- max(3, n_sites / 3)
+  depth <- max(layout$x)
+  to_y <- function(d) n_sites + 0.5 + height * (1 - d / depth)
+  edges <- tree_segments(tree, layout)
+  data.frame(x = edges$y, xend = edges$yend, y = to_y(edges$x), yend = to_y(edges$xend))
 }
