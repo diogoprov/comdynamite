@@ -375,3 +375,11 @@ test_that("plot() draws the correlations of the eigenvectors, retained or not", 
   none$selected <- integer()
   expect_ggplot(plot(none))
 })
+
+test_that("trait_partition() stops on missing trait values", {
+  a <- example_a()
+  traits <- as.matrix(a$trait)
+  traits[1, 1] <- NA
+  expect_error(trait_partition(a$comm, traits, a$env, a$space, n_perm = 1),
+               "trait_partition\\(\\): `traits` has missing values")
+})
