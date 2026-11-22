@@ -9,6 +9,7 @@ test_that("drift_test() accessors agree with the stored regression", {
   ci <- confint(res, level = res$level)
   expect_equal(unname(ci["slope", ]), res$conf_int)
   expect_identical(rownames(confint(res, "slope")), "slope")
+  expect_identical(confint(res, 2), confint(res, "slope"))
   expect_error(confint(res, "beta"), "`parm`")
   expect_equal(sqrt(vcov(res)["slope", "slope"]), res$se)
   expect_identical(nobs(res), 4L)
@@ -35,6 +36,9 @@ test_that("trait_flex() keeps its model and prints a summary", {
   expect_output(print(res), "6 sites, 1 trait")
   expect_output(print(res, digits = 2), "Model: ~moisture")
   expect_error(print(res, digits = 0), "`digits`")
+  ind$height <- ind$trait + rnorm(120)
+  expect_output(print(trait_flex(ind, traits = c("trait", "height"), formula = ~moisture,
+                                 env = env)), "6 sites, 2 traits")
   plain <- trait_flex(ind)
   expect_equal(residuals(plain)[plain$model$component == "total"],
                total$response - mean(total$response))
