@@ -65,3 +65,6 @@
 #' "Preparing your data" shows the format that the analyses expect.
 #' @keywords internal
 "_PACKAGE"
+
+# computed variable of ggplot2::geom_histogram(), used through ggplot2::after_stat()
+utils::globalVariables("density")
