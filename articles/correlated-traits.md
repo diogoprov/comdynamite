@@ -174,6 +174,10 @@ moisture <- species_traits(tree, rmax_range = c(1, 1))
 env <- cbind(temperature = land$env, moisture = rev(land$env))
 sim <- simulate_metacommunity(land, list(temperature = temperature, moisture = moisture),
                               competition_matrix(tree, "phylo"), n_steps = 200, env = env)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 sim
 #> <mc_sim> 36 sites x 60 species
 #> species persisting: 44 of 60 

@@ -149,7 +149,16 @@ area_moves <- patch_permutations(coords, events, n_perm = 99)
 ``` r
 
 nodes <- node_contrasts(tree)
+#> node_contrasts() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 out <- node_test(comm, nodes, env, events, n_perm = 99, area_permutations = area_moves)
+#> node_test() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 out
 #> <mc_node_test> 9 nodes, 9 tested
 #> permutations: 99 free of sites, 99 of species, of areas barrier 99; smallest possible p: 0.01

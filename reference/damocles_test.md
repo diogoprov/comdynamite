@@ -159,6 +159,10 @@ set.seed(3)
 tr <- treeshapesim::sim_tree_shape(40)
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 2)
 damocles_test(comm, tr, n_sim = 99)
+#> damocles_test() implements the method of:
+#>   Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic community structure. Ecology Letters, 18, 153-163. https://doi.org/10.1111/ele.12395
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> Phylogenetic structure against the DAMOCLES null model (Pigot & Etienne 2015)
 #> 99 null communities per model; SES < 0: clustering, SES > 0: overdispersion
 #>      richness gamma    mu  mpd ses_mpd_damocles p_mpd_damocles ses_mpd_random

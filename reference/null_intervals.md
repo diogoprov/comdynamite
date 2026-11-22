@@ -86,6 +86,11 @@ ind <- data.frame(site = rep(paste0("s", 1:6), each = 20),
                   species = sample(c("a", "b", "c"), 120, replace = TRUE))
 ind$trait <- c(a = 10, b = 20, c = 30)[ind$species] + rnorm(120)
 head(null_intervals(tstats(ind, n_perm = 99)))
+#> tstats() implements the method of:
+#>   Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof, C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability in community ecology. Trends in Ecology & Evolution, 27, 244-252. https://doi.org/10.1016/j.tree.2011.11.014
+#>   Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits to detect and quantify multi-level community assembly processes. Ecography, 39, 699-708. https://doi.org/10.1111/ecog.01433
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>   site trait statistic    observed null_median  null_low null_high inner_low
 #> 1   s1 trait   T_IP.IC 0.009373208    1.042140 0.7625785  1.125826 0.9789126
 #> 2   s2 trait   T_IP.IC 0.022171031    1.056030 0.7206097  1.280613 0.9467706

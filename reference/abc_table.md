@@ -92,6 +92,10 @@ one_run <- function(scenario, shared) {
 }
 prior <- list(log_dispersal = c(-3, -0.3), lambda = c(0, 1))
 table <- abc_table(prior, one_run, n = 20, setup = shared_pool)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 head(table[, 1:5])
 #>   log_dispersal    lambda alpha gamma     beta
 #> 1    -2.2831266 0.9347052 2.750    10 3.636364

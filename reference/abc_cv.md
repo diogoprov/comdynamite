@@ -129,6 +129,10 @@ for (f in 1:2) {
 }
 observed <- c(f1_train_s = 0.5, f1_test_s = 0.55, f2_train_s = 0.5, f2_test_s = 0.9)
 cv <- abc_cv(table, observed, parameters = "a", ntree = 100)
+#> abc_fit() implements the method of:
+#>   Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC random forests for Bayesian parameter inference. Bioinformatics, 35, 1720-1728. https://doi.org/10.1093/bioinformatics/bty867
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 cv
 #>   observation fold statistic observed    median       low      high inside   p
 #> 1           1    1         s     0.55 0.5007813 0.2110433 0.6163250   TRUE 0.7

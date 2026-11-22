@@ -41,6 +41,10 @@ regions <- rep(c("A", "B"), each = 10)
 sim <- simulate_metacommunity(landscape_implicit(20), species_traits(tree, lambda = 1),
                               competition_matrix(tree, "phylo"), n_steps = 300,
                               pool = region_pool(areas, regions))
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 input <- as_herodotools(sim, regions, history = areas)
 str(input, max.level = 1)
 #> List of 4

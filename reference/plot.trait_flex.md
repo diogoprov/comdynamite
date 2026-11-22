@@ -84,4 +84,8 @@ shift <- env$moisture[match(ind$site, env$site)]
 ind$height <- c(a = 10, b = 20, c = 30)[ind$species] + shift + rnorm(160)
 ind$leaf <- c(a = 3, b = 2, c = 1)[ind$species] - 0.3 * shift + rnorm(160)
 plot(trait_flex(ind, traits = c("height", "leaf"), formula = ~ moisture, env = env))
+#> trait_flex() implements the method of:
+#>   Lepš, J., de Bello, F., Šmilauer, P., & Doležal, J. (2011). Community trait response to environment: disentangling species turnover vs intraspecific trait variability effects. Ecography, 34, 856-863. https://doi.org/10.1111/j.1600-0587.2010.06904.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ```

@@ -344,6 +344,13 @@ Tables, summaries and plots of results.
   [`plot(`*`<mc_trait_partition>`*`)`](https://provetelab.org/comdynamite/reference/result-methods.md)
   : Results as data frames, summaries and plots
 
+## Citation
+
+Original papers of the methods implemented in the package.
+
+- [`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
+  : Original references of the methods in comdynamite
+
 ## Example data
 
 - [`anurans`](https://provetelab.org/comdynamite/reference/anurans.md) :

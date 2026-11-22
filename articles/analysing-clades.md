@@ -26,6 +26,10 @@ different topology.)
 ``` r
 
 nodes <- node_contrasts(daphniids$tree_leibold)
+#> node_contrasts() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 dim(nodes)
 #> [1] 13 12
 ```
@@ -40,10 +44,15 @@ keep the page quick to build, with nodes in parallel on two cores.
 set.seed(1)
 out <- node_test(daphniids$comm, nodes, daphniids$env, daphniids$biogeography, n_perm = 999,
                  cores = 2)
+#> node_test() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 out
 #> <mc_node_test> 12 nodes, 11 tested
 #> permutations: 999 free of sites, 999 of species; smallest possible p: 0.001
-#> nodes with p (max) <= 0.05: 0 before correction, 0 after
+#> nodes with p (max) <= 0.05: 1 before correction, 0 after
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 ```
 
@@ -315,6 +324,10 @@ gradient.
 ``` r
 
 first <- phylo_vector(comm, tree, x, n_perm = 199)
+#> phylo_vector() implements the method of:
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 second <- phylo_vector(comm, tree, y, n_perm = 199)
 c(first$p_max, second$p_max)
 #> [1] 0.005 0.010
@@ -329,21 +342,26 @@ significant global test.
 
 vectors <- cbind(first$pev_brown, second$pev_brown)
 partition <- trait_partition(comm, vectors, x, y, n_perm = 199)
+#> trait_partition() implements the method of:
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#>   Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning of species data matrices: estimation and comparison of fractions. Ecology, 87, 2614-2625. https://doi.org/10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 partition
-#> <mc_trait_partition> mean component, 0.476 of the total variation
+#> <mc_trait_partition> mean component, 0.559 of the total variation
 #> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005
 #>   fraction     r2 r2_adjusted r2_component statistic p_site p_species p_max
-#> 1      abc 0.3754       0.331        0.789    0.3754  0.005     0.005 0.005
-#> 2       ab 0.2076       0.180        0.436    0.2076  0.005     0.005 0.005
-#> 3       bc 0.2348       0.208        0.493    0.2348  0.005     0.005 0.005
-#> 4        a 0.1405       0.122        0.295    0.5828  0.005     0.005 0.005
-#> 5        b 0.0671       0.058        0.141    0.0671     NA        NA    NA
-#> 6        c 0.1678       0.150        0.352    0.6251  0.005     0.005 0.005
-#> 7        d 0.6246       0.669        0.211        NA     NA        NA    NA
+#> 1      abc 0.4392      0.3991        0.785    0.4392  0.005     0.005 0.005
+#> 2       ab 0.2613      0.2358        0.467    0.2613  0.005     0.005 0.005
+#> 3       bc 0.2607      0.2352        0.466    0.2607  0.005     0.005 0.005
+#> 4        a 0.1784      0.1639        0.319    0.5975  0.005     0.005 0.005
+#> 5        b 0.0828      0.0719        0.148    0.0828     NA        NA    NA
+#> 6        c 0.1779      0.1633        0.318    0.5967  0.005     0.005 0.005
+#> 7        d 0.5608      0.6009        0.215        NA     NA        NA    NA
 round(partition$semipartial, 2)
 #>        trait1 trait2
-#> env1     0.50  -0.17
-#> space1  -0.27   0.51
+#> env1     0.52  -0.29
+#> space1  -0.24   0.55
 ```
 
 ``` r

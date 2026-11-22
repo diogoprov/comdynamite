@@ -111,5 +111,10 @@ space <- cbind(runif(40), runif(40))
 comm <- outer(env, trait, function(e, t) exp(-(e - t)^2 / 800))
 colnames(comm) <- names(trait)
 out <- trait_partition(comm, trait, env, space, n_perm = 49)
+#> trait_partition() implements the method of:
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#>   Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning of species data matrices: estimation and comparison of fractions. Ecology, 87, 2614-2625. https://doi.org/10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 plot_trait_partition(out)
 ```

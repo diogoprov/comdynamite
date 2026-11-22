@@ -144,10 +144,14 @@ d <- data.frame(region = rep(c("north", "south"), each = 60),
 d$population <- paste(d$site, d$species)
 d$trait <- c(a = 10, b = 20, c = 30)[d$species] + rnorm(120)
 res <- nested_variance(d, "trait", c("region", "site", "population"))
+#> nested_variance() implements the method of:
+#>   Messier, J., McGill, B. J., & Lechowicz, M. J. (2010). How do traits vary across ecological scales? A case for trait-based ecology. Ecology Letters, 13, 838-848. https://doi.org/10.1111/j.1461-0248.2010.01476.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 res
 #>        level        trait
-#> 1     region 2.551909e-08
-#> 2       site 3.509259e-17
+#> 1     region 1.741575e-08
+#> 2       site 1.125857e-17
 #> 3 population 9.862820e-01
 #> 4     within 1.371800e-02
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)

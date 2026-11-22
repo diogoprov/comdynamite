@@ -160,6 +160,10 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 20),
 ind$trait <- c(a = 1, b = 2, c = 3, d = 4)[ind$species] + rnorm(100, sd = 0.3)
 # range of trait values within sites, against draws from the whole region
 community_index(ind, function(x) diff(range(x)), null = "regional.ind", n_perm = 99)
+#> community_index() implements the method of:
+#>   Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits to detect and quantify multi-level community assembly processes. Ecography, 39, 699-708. https://doi.org/10.1111/ecog.01433
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>   site trait index observed         ses    p
 #> 1   s1 trait index 3.155201 -1.79804612 0.12
 #> 2   s2 trait index 3.695020  0.53805219 0.68

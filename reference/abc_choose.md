@@ -100,6 +100,10 @@ set.seed(1)
 a <- data.frame(s1 = rnorm(200, 0), s2 = rnorm(200))
 b <- data.frame(s1 = rnorm(200, 1.5), s2 = rnorm(200))
 choice <- abc_choose(list(neutral = a, niche = b), ntree = 100)
+#> abc_choose() implements the method of:
+#>   Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., & Robert, C. P. (2016). Reliable ABC model choice via random forests. Bioinformatics, 32, 859-866. https://doi.org/10.1093/bioinformatics/btv684
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 choice$confusion
 #>         neutral niche
 #> neutral     140    60

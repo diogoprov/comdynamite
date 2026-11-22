@@ -161,6 +161,10 @@ default it is the whole tip branch.
 sim <- simulate_metacommunity(landscape_implicit(20), species_traits(tree),
                               competition_matrix(tree, "none"), n_steps = 400,
                               record_steps = seq(200, 400, 10), extirpation = 0.02)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 rates <- turnover_rates(sim, k = 100)
 summary(attr(rates, "turnover"))
 #>    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
@@ -181,6 +185,11 @@ relative rates among levels, scaled by `k`.
 web <- food_web_dynamics(seq(0, 4000, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
                          traits = c(R = 10, N = 4, P = 6), introductions = c(P = 2000),
                          dt = 0.5)
+#> food_web_dynamics() implements the method of:
+#>   McPeek, M. A. (2017). Evolutionary Community Ecology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001
+#>   McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the coevolution of community structure. The American Naturalist, 189, E91-E117. https://doi.org/10.1086/691101
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 levels <- sample(c("R", "N", "P"), ape::Ntip(tree), replace = TRUE)
 rates <- food_web_rates(web, tree, levels, k = 500)
 attr(rates, "speed")

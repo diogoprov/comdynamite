@@ -74,6 +74,11 @@ if (requireNamespace("gifski", quietly = TRUE)) {
   gif <- animate_food_web(x, tempfile(fileext = ".gif"), frames = 30)
   file.exists(gif)
 }
+#> food_web_dynamics() implements the method of:
+#>   McPeek, M. A. (2017). Evolutionary Community Ecology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001
+#>   McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the coevolution of community structure. The American Naturalist, 189, E91-E117. https://doi.org/10.1086/691101
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> `geom_line()`: Each group consists of only one observation.
 #> ℹ Do you need to adjust the group aesthetic?
 #> `geom_line()`: Each group consists of only one observation.

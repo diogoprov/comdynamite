@@ -131,6 +131,10 @@ simulate <- function(scenario, shared) {
 set.seed(1)
 sim <- simulate(list(log_dispersal = -2, log_kernel = 0.3, inter_max = 0.5, sigma_mean = 20,
                      lambda = 0.5, q_tol = 0.3), shared)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 rowSums(sim$abundance > 0)[1:10]
 #>  site1  site2  site3  site4  site5  site6  site7  site8  site9 site10 
 #>     13     11     11      7     19     15     11      6      5     14

@@ -62,6 +62,10 @@ Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O.
 set.seed(10)
 tr <- treeshapesim::sim_tree_shape(20)
 head(dr_rates(tr))
+#> dr_rates() implements the method of:
+#>   Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O. (2012). The global diversity of birds in space and time. Nature, 491, 444-448. https://doi.org/10.1038/nature11631
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>       t1       t2       t3       t4       t5       t6 
 #> 2.227964 2.227964 1.436217 2.056434 2.056434 1.163367 
 head(dr_rates(tr, per = "edge"))

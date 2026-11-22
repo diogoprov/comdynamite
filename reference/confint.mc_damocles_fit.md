@@ -61,7 +61,15 @@ Other dynamic null model:
 set.seed(6)
 tr <- treeshapesim::sim_tree_shape(40)
 comm <- simulate_damocles(tr, gamma = 1, mu = 1, n = 10)
+#> simulate_damocles() implements the method of:
+#>   Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic community structure. Ecology Letters, 18, 153-163. https://doi.org/10.1111/ele.12395
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 fit <- damocles_fit(comm, tr, shared = TRUE)
+#> damocles_fit() implements the method of:
+#>   Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic community structure. Ecology Letters, 18, 153-163. https://doi.org/10.1111/ele.12395
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 confint(fit)
 #>   community parameter     estimate     lower     upper
 #> 1    shared     gamma 6.814352e-01 0.5287597 0.8632444

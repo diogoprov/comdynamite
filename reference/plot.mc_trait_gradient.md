@@ -99,9 +99,17 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
+#> trait_gradient() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 plot(tg)
 
 plot(tg, type = "beta_alpha", species_labels = TRUE)
 
 plot(trait_gradient_test(tg, n_null = 99))
+#> trait_gradient_test() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ```

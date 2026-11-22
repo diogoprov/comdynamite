@@ -70,6 +70,10 @@ tree <- treeshapesim::sim_tree_shape(5)
 comm <- matrix(rbinom(20, 1, 0.7) + diag(1, 4, 5), 4,
                dimnames = list(NULL, tree$tip.label))
 phylo_beta(comm > 0, tree)
+#> phylo_beta() implements the method of:
+#>   Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities. Plant Ecology, 216, 709-724. https://doi.org/10.1007/s11258-014-0405-0
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>          1        2        3
 #> 2 1.168432                  
 #> 3 1.097033 1.108714         

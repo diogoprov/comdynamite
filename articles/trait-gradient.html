@@ -119,8 +119,16 @@ results below are simulated.</p>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="../reference/landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">25</span><span class="op">)</span>, <span class="fu"><a href="../reference/species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                              <span class="fu"><a href="../reference/competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>                              seed_steps <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
+<span><span class="co">#&gt; simulate_metacommunity() implements the method of:</span></span>
+<span><span class="co">#&gt;   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., &amp; Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, n <span class="op">=</span> <span class="fl">5</span>, local_adaptation <span class="op">=</span> <span class="fl">0.5</span>, intraspecific_sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="va">tg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; trait_gradient() implements the method of:</span></span>
+<span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">tg</span></span>
 <span><span class="co">#&gt; Trait-gradient analysis of 29 species in 25 sites</span></span>
 <span><span class="co">#&gt; Site means: without the focal species | weights of sites: abundance | of species: abundance </span></span>
@@ -189,6 +197,10 @@ species among species and keeps the communities as observed, which tests
 whether species with similar traits live in similar communities.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
+<span><span class="co">#&gt; trait_gradient_test() implements the method of:</span></span>
+<span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">test</span></span>
 <span><span class="co">#&gt; Null model of the trait-gradient analysis: 199 communities, species </span></span>
 <span><span class="co">#&gt;       statistic observed null_mean null_sd   ses    p</span></span>
@@ -230,6 +242,10 @@ the model, so a species seen in few sites does not pass for fast
 evolution.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo</a></span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, n_boot <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
+<span><span class="co">#&gt; trait_gradient_phylo() implements the method of:</span></span>
+<span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">ph</span></span>
 <span><span class="co">#&gt; Phylogenetic models of the trait-gradient analysis: 26 species</span></span>
 <span><span class="co">#&gt;  response model     mu sigma2     a half_life at_bound loglik n_par aic</span></span>

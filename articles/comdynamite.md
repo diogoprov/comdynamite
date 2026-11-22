@@ -30,6 +30,10 @@ alpha <- competition_matrix(tr, type = "phylo", inter_max = 0.1)
 land <- landscape_implicit(n_sites = 50)
 
 sim <- simulate_metacommunity(land, traits, alpha, dispersal = 0.01, n_steps = 500)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 sim
 #> <mc_sim> 50 sites x 40 species
 #> species persisting: 33 of 40 

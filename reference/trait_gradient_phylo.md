@@ -143,6 +143,10 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree, lambd
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
 trait_gradient_phylo(tg, tree, n_boot = 99)
+#> trait_gradient_phylo() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> Phylogenetic models of the trait-gradient analysis: 14 species
 #>  response model     mu sigma2     a half_life at_bound loglik n_par   aic
 #>      beta white 64.600   90.9    NA        NA       NA  -49.9     2 104.0

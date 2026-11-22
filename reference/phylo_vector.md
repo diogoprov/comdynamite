@@ -200,8 +200,12 @@ env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
+#> phylo_vector() implements the method of:
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> <mc_phylo_vector> 18 eigenvectors, 2 retained
 #> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01
 #> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 
-#> correlation: PEV 0.61  PEV-B -0.595 
+#> correlation: PEV 0.61  PEV-B 0.588 
 ```

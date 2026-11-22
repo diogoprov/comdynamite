@@ -66,6 +66,10 @@ Other clades and biogeography:
 
 ``` r
 node_contrasts(ape::read.tree(text = "((a,b),(c,(d,e)));"))
+#> node_contrasts() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>       6  7    8  9
 #> a -0.50 -1  0.0  0
 #> b -0.50  1  0.0  0

@@ -187,6 +187,10 @@ outside its interval, or a small <code>p</code>, is evidence against the model, 
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-in"><span><span class="va">observed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>f1_train_s <span class="op">=</span> <span class="fl">0.5</span>, f1_test_s <span class="op">=</span> <span class="fl">0.55</span>, f2_train_s <span class="op">=</span> <span class="fl">0.5</span>, f2_test_s <span class="op">=</span> <span class="fl">0.9</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">cv</span> <span class="op">&lt;-</span> <span class="fu">abc_cv</span><span class="op">(</span><span class="va">table</span>, <span class="va">observed</span>, parameters <span class="op">=</span> <span class="st">"a"</span>, ntree <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> abc_fit() implements the method of:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>   Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., &amp; Estoup, A. (2019). ABC random forests for Bayesian parameter inference. Bioinformatics, 35, 1720-1728. https://doi.org/10.1093/bioinformatics/bty867</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Please cite these papers together with comdynamite (citation("comdynamite")).</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span>
 <span class="r-in"><span><span class="va">cv</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   observation fold statistic observed    median       low      high inside   p</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1           1    1         s     0.55 0.5007813 0.2110433 0.6163250   TRUE 0.7</span>

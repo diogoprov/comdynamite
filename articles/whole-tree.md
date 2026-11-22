@@ -31,6 +31,10 @@ and the value to report is the mean of the positive adjusted R2.
 ``` r
 
 pcc <- pcc_test(comm, tree, env, n_perm = 199)
+#> pcc_test() implements the method of:
+#>   Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities. Plant Ecology, 216, 709-724. https://doi.org/10.1007/s11258-014-0405-0
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 pcc
 #> <mc_pcc> phylogenetic community composition
 #> mean positive adjusted R2: 0.0965 
@@ -49,6 +53,10 @@ distance-based redundancy analysis.
 ``` r
 
 beta <- phylo_beta_test(comm, tree, env, n_perm = 199)
+#> phylo_beta_test() implements the method of:
+#>   Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities. Plant Ecology, 216, 709-724. https://doi.org/10.1007/s11258-014-0405-0
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 beta
 #> <mc_phylo_beta> phylogenetic beta diversity
 #> adjusted R2: 0.221  pseudo-F: 14.9 
@@ -85,6 +93,12 @@ axis in `axes`, whose `share` is its part of the variation.
 ``` r
 
 pcps <- pcps_test(comm, tree, env, n_perm = 199)
+#> pcps_test() implements the method of:
+#>   Pillar, V. D., & Duarte, L. D. S. (2010). A framework for metacommunity analysis of phylogenetic structure. Ecology Letters, 13, 587-596. https://doi.org/10.1111/j.1461-0248.2010.01456.x
+#>   Duarte, L. D. S., Debastiani, V. J., Freitas, A. V. L., & Pillar, V. D. (2016). Dissecting phylogenetic fuzzy weighting: theory and application in metacommunity phylogenetics. Methods in Ecology and Evolution, 7, 937-946. https://doi.org/10.1111/2041-210X.12547
+#>   Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring phylogenetic eigenvectors across metacommunities. Frontiers of Biogeography, 6. https://doi.org/10.21425/F5FBG22943
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 pcps
 #> <mc_pcps> principal coordinates of phylogenetic structure
 #> permutations: 199 free of sites, 199 of species; smallest possible p: 0.005

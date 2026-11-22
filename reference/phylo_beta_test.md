@@ -144,6 +144,10 @@ env <- runif(50, 0, 100)
 comm <- simulate_static(traits, env, incidence = TRUE)$abundance
 keep <- rowSums(comm) > 0
 phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 99)
+#> phylo_beta_test() implements the method of:
+#>   Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities. Plant Ecology, 216, 709-724. https://doi.org/10.1007/s11258-014-0405-0
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> <mc_phylo_beta> phylogenetic beta diversity
 #> adjusted R2: 0.221  pseudo-F: 14.9 
 #> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01

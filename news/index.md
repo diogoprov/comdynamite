@@ -2,6 +2,20 @@
 
 ## comdynamite (development version)
 
+- Functions that implement a published method, such as
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md),
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  and
+  [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
+  show the original papers of the method the first time they run in a
+  session, with a request to cite them together with the package.
+  `options(comdynamite.cite = FALSE)` turns the message off. The new
+  [`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
+  lists the papers of each function, and `citation("comdynamite")` now
+  includes them.
 - The null models of T_IC/IR and T_PC/PR in
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
   permute the whole region once per randomisation, instead of drawing

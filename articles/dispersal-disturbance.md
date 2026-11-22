@@ -175,6 +175,10 @@ sims <- list(
                          kernels = list(dry = dry, wet = wet), kernel_step = regime),
   "philopatry" = run(dispersal_time = ifelse(high, 5, 0.1),
                      kernels = list(dry = dry, wet = wet), kernel_step = regime))
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ```
 
 The figure shows the mean number of species per floodplain site over

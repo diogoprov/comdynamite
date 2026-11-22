@@ -25,8 +25,16 @@ tree <- treeshapesim::sim_tree_shape(30)
 sim <- simulate_metacommunity(landscape_implicit(25), species_traits(tree, lambda = 1),
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
+#> simulate_metacommunity() implements the method of:
+#>   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
+#> trait_gradient() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 tg
 #> Trait-gradient analysis of 29 species in 25 sites
 #> Site means: without the focal species | weights of sites: abundance | of species: abundance 
@@ -106,6 +114,10 @@ live in similar communities.
 ``` r
 
 test <- trait_gradient_test(tg, n_null = 199)
+#> trait_gradient_test() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 test
 #> Null model of the trait-gradient analysis: 199 communities, species 
 #>       statistic observed null_mean null_sd   ses    p
@@ -158,6 +170,10 @@ model, so a species seen in few sites does not pass for fast evolution.
 ``` r
 
 ph <- trait_gradient_phylo(tg, tree, n_boot = 199)
+#> trait_gradient_phylo() implements the method of:
+#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 ph
 #> Phylogenetic models of the trait-gradient analysis: 26 species
 #>  response model     mu sigma2     a half_life at_bound loglik n_par aic

@@ -43,5 +43,10 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 20, local_adaptation = 0.5, displacement = 2)
 fit <- population_shifts(ind)
+#> population_shifts() implements the method of:
+#>   Goldberg, E. E., & Lande, R. (2006). Ecological and reproductive character displacement on an environmental gradient. Evolution, 60, 1344-1357. https://doi.org/10.1554/05-696.1
+#>   Adams, D. C., & Collyer, M. L. (2007). Analysis of character divergence along environmental gradients and other covariates. Evolution, 61, 510-515. https://doi.org/10.1111/j.1558-5646.2007.00063.x
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 plot(fit)
 ```

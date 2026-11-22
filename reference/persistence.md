@@ -91,6 +91,10 @@ sim <- simulate_evolving_metacommunity(ls, ancestor, dispersal = 0.01, extirpati
                                        n_steps = 200,
                                        speciation = speciation_control("fission", rate = 0.02))
 head(persistence(sim, window = 50))
+#> persistence() implements the method of:
+#>   Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). The metapopulation bridge to macroevolutionary speciation rates: a conceptual framework and empirical test. Ecology Letters, 28, e70021. https://doi.org/10.1111/ele.70021
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>   species intervals colonisation extirpation occupancy     epsilon       tau
 #> 1     sp1        50   0.07993967  0.09466437 0.4578340 -0.16906551 -1.745234
 #> 2     sp2        50   0.09105691  0.08346457 0.5217519  0.08706251 -1.745707

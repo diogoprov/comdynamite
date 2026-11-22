@@ -150,6 +150,10 @@ G <- genetic_matrices(1, 4, correlation = 0.5)$genetic_var[[1]]
 means <- matrix(rnorm(30 * 4), 30) %*% chol(G * 0.5)
 ind <- means[rep(1:30, each = 20), ] + matrix(rnorm(600 * 4), 600) %*% chol(G)
 test <- drift_test(ind, group = rep(1:30, each = 20))
+#> drift_test() implements the method of:
+#>   Ackermann, R. R., & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human evolution. Proceedings of the National Academy of Sciences, 101, 17946-17951. https://doi.org/10.1073/pnas.0405919102
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 test
 #> Test of proportional divergence (Ackermann & Cheverud 2004)
 #> 30 groups, 4 traits

@@ -135,6 +135,10 @@ table <- data.frame(a = runif(400), b = runif(400))
 table$s1 <- table$a + rnorm(400, 0, 0.05)
 table$s2 <- rnorm(400)
 abc_recovery(table, parameters = c("a", "b"), n_test = 50, ntree = 100)
+#> abc_recovery() implements the method of:
+#>   Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC random forests for Bayesian parameter inference. Bioinformatics, 35, 1720-1728. https://doi.org/10.1093/bioinformatics/bty867
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>   parameter  n         r2        bias coverage coverage_se    width
 #> 1         a 50  0.9523572  0.01580127     0.86  0.04907138 0.223698
 #> 2         b 50 -0.1949136 -0.01829474     0.70  0.06480741 0.798200

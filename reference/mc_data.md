@@ -135,6 +135,12 @@ d[1:10, ]
 #> traits: optimum
 #> env: env
 pcps_test(d[rowSums(d$comm) > 0, ], n_perm = 9)
+#> pcps_test() implements the method of:
+#>   Pillar, V. D., & Duarte, L. D. S. (2010). A framework for metacommunity analysis of phylogenetic structure. Ecology Letters, 13, 587-596. https://doi.org/10.1111/j.1461-0248.2010.01456.x
+#>   Duarte, L. D. S., Debastiani, V. J., Freitas, A. V. L., & Pillar, V. D. (2016). Dissecting phylogenetic fuzzy weighting: theory and application in metacommunity phylogenetics. Methods in Ecology and Evolution, 7, 937-946. https://doi.org/10.1111/2041-210X.12547
+#>   Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring phylogenetic eigenvectors across metacommunities. Frontiers of Biogeography, 6. https://doi.org/10.21425/F5FBG22943
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> <mc_pcps> principal coordinates of phylogenetic structure
 #> permutations: 9 free of sites, 9 of species; smallest possible p: 0.1
 #>   test share    r2 statistic p_site p_species p_max

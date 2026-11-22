@@ -215,7 +215,16 @@ be projected, because distances are Euclidean;
 </h2>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">nodes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_contrasts.html">node_contrasts</a></span><span class="op">(</span><span class="va">tree</span><span class="op">)</span></span>
+<span><span class="co">#&gt; node_contrasts() implements the method of:</span></span>
+<span><span class="co">#&gt;   Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/node_test.html">node_test</a></span><span class="op">(</span><span class="va">comm</span>, <span class="va">nodes</span>, <span class="va">env</span>, <span class="va">events</span>, n_perm <span class="op">=</span> <span class="fl">99</span>, area_permutations <span class="op">=</span> <span class="va">area_moves</span><span class="op">)</span></span>
+<span><span class="co">#&gt; node_test() implements the method of:</span></span>
+<span><span class="co">#&gt;   Leibold, M. A., Economo, E. P., &amp; Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x</span></span>
+<span><span class="co">#&gt;   Peres-Neto, P. R., Leibold, M. A., &amp; Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1</span></span>
+<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
+<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">out</span></span>
 <span><span class="co">#&gt; &lt;mc_node_test&gt; 9 nodes, 9 tested</span></span>
 <span><span class="co">#&gt; permutations: 99 free of sites, 99 of species, of areas barrier 99; smallest possible p: 0.01</span></span>

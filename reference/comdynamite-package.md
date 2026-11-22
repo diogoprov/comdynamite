@@ -106,6 +106,17 @@ infinite values in `comm`, `env` and the other data inputs stop the
 function with a message that names the argument; remove or impute
 missing values before the analysis.
 
+## Citation
+
+Cite the package with `citation("comdynamite")` and, with it, the
+original papers of the methods you use. Each function that implements a
+published method shows these papers the first time it runs in a session,
+and
+[`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
+lists them by function; see
+[`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
+for how to turn the message off.
+
 ## Where to start
 
 The articles at <https://provetelab.org/comdynamite/articles/> go
