@@ -34,3 +34,14 @@ The result of the new function.
 - `fit_damocles()` is now
   [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md),
   like the other functions of DAMOCLES.
+
+## Examples
+
+``` r
+tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
+set.seed(1)
+old <- suppressWarnings(traits_ou(tree, alpha = 1))
+set.seed(1)
+identical(old, trait_ou(tree, alpha = 1))
+#> [1] TRUE
+```

@@ -53,3 +53,18 @@ Other inference:
 [`plot.mc_abc_choice()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_choice.md),
 [`plot.mc_abc_fit()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_fit.md),
 [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
+
+## Examples
+
+``` r
+set.seed(1)
+out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env[, 1],
+                 n_perm = 9)
+#> node_test() implements the method of:
+#>   Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x
+#>   Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1
+#> Please cite these papers together with comdynamite (citation("comdynamite")).
+#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
+nobs(out)
+#> [1] 239
+```
