@@ -448,7 +448,7 @@ check_branch_lengths <- function(tree) {
 damocles_edge_rates <- function(tree, gamma, mu) {
   n_edge <- nrow(tree$edge)
   for (rate in list(gamma, mu)) {
-    if (!is.numeric(rate) || !length(rate) %in% c(1, n_edge) || any(!is.finite(rate)) ||
+    if (!is.numeric(rate) || !length(rate) %in% c(1, n_edge) || !all(is.finite(rate)) ||
         any(rate < 0)) {
       stop("`gamma` and `mu` must each be one rate, or one per edge of `tree` in the order of ",
            "`tree$edge`, zero or more", call. = FALSE)
@@ -594,7 +594,7 @@ damocles_prune <- function(presence, tree, gamma, mu, root, sympatry = 0,
 
 damocles_starts <- function(tree, start) {
   if (!is.null(start)) {
-    if (length(start) != 2 || any(!is.finite(start)) || any(start <= 0)) {
+    if (length(start) != 2 || !all(is.finite(start)) || any(start <= 0)) {
       stop("`start` needs two positive rates, gamma and mu", call. = FALSE)
     }
     return(matrix(start, 1))
@@ -629,13 +629,13 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
   }
   if (!is.null(edge_covariate)) {
     if (!is.numeric(edge_covariate) || length(edge_covariate) != n_edge ||
-        any(!is.finite(edge_covariate)) || any(edge_covariate <= 0)) {
+        !all(is.finite(edge_covariate)) || any(edge_covariate <= 0)) {
       stop("`edge_covariate` needs one positive number for each edge of `tree`, in the order ",
            "of `tree$edge`", call. = FALSE)
     }
     z <- log(edge_covariate) - mean(log(edge_covariate))
     if (!is.null(tree$root.edge) && length(unique(z[at_root])) > 1) {
-      stop(sub("regime", "covariate", root_msg), call. = FALSE)
+      stop(sub("regime", "covariate", root_msg, fixed = TRUE), call. = FALSE)
     }
     type <- "covariate"
   }

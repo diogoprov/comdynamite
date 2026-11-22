@@ -22,6 +22,12 @@ of \code{nodes}). For \code{\link[=abc_fit]{abc_fit()}}, the number of complete 
 \description{
 Numbers of observations of the node test and of ABC
 }
+\examples{
+set.seed(1)
+out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env[, 1],
+                 n_perm = 9)
+nobs(out)
+}
 \seealso{
 \code{\link[=node_test]{node_test()}}, \code{\link[=abc_fit]{abc_fit()}}.
 

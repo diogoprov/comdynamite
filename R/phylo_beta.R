@@ -237,7 +237,7 @@ match_species <- function(comm, species, source) {
 }
 
 species_list <- function(x) {
-  shown <- paste(x[seq_len(min(length(x), 10))], collapse = ", ")
+  shown <- toString(x[seq_len(min(length(x), 10))])
   if (length(x) > 10) paste0(shown, " and ", length(x) - 10, " more") else shown
 }
 

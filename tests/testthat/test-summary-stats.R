@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.4b} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 small <- matrix(c(4, 1, 0, 0,
                   0, 2, 2, 0,
                   1, 0, 0, 5,

@@ -35,3 +35,7 @@ test_that("wrong external traits stop", {
   expect_error(species_traits(tree, sigma = c(1, 0, 1, 1, 1)), "positive")
   expect_error(species_traits(tree, r_max = c(1, -1, 1, 1, 1)), "negative")
 })
+
+test_that("tables of traits need the columns of species_traits()", {
+  expect_error(as_traits(data.frame(optimum = 1, sigma = 1)), "missing: r_max")
+})

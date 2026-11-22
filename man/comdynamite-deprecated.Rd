@@ -25,4 +25,11 @@ Renamed in 0.7.0 for consistency; the old names still work, with a warning, unti
 \item \code{fit_damocles()} is now \code{\link[=damocles_fit]{damocles_fit()}}, like the other functions of DAMOCLES.
 }
 }
+\examples{
+tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
+set.seed(1)
+old <- suppressWarnings(traits_ou(tree, alpha = 1))
+set.seed(1)
+identical(old, trait_ou(tree, alpha = 1))
+}
 \keyword{internal}

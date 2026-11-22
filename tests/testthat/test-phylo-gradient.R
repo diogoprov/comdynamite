@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.0, G5.4c} Tested in this file, as described in R/srr-stats-general.R.
+#' @srrstats {RE7.0, RE7.2} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 # worked example of Appendix A of Peres-Neto et al. (2012)
 example_a <- function() {
   comm <- rbind(c(1, 1, 0, 0, 0, 0), c(1, 1, 0, 0, 0, 0), c(1, 1, 0, 0, 0, 0), c(1, 0, 1, 0, 0, 0),

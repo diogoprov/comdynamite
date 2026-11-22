@@ -181,7 +181,7 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
   statistics <- statistics %||% attr(table, "statistics") %||% setdiff(names(table), parameters)
   missing <- setdiff(c(parameters, statistics), names(table))
   if (length(missing)) {
-    stop("abc_fit(): Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+    stop("abc_fit(): Not in `table`: ", toString(missing), ".", call. = FALSE)
   }
   statistics <- setdiff(statistics, parameters)
   values <- as.matrix(as.data.frame(table)[, statistics, drop = FALSE])
@@ -254,7 +254,7 @@ abc_importance <- function(x) {
 #' @export
 print.mc_abc_fit <- function(x, ...) {
   cat("ABC random forests for", length(x$parameters), "parameters (",
-      paste(x$parameters, collapse = ", "), ")\n")
+      toString(x$parameters), ")\n")
   cat(nrow(x$training), "simulations and", length(x$statistics), "statistics\n")
   invisible(x)
 }
@@ -471,7 +471,7 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
   statistics <- statistics %||% shared
   missing <- setdiff(statistics, shared)
   if (length(missing)) {
-    stop("Not in every table: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+    stop("Not in every table: ", toString(missing), ".", call. = FALSE)
   }
   training <- do.call(rbind, lapply(names(tables), function(m) {
     data.frame(model = m, as.data.frame(tables[[m]])[, statistics, drop = FALSE])
@@ -520,7 +520,7 @@ predict.mc_abc_choice <- function(object, newdata, ntree = 500, ncores = 1, ...)
 print.mc_abc_choice <- function(x, digits = 3, ...) {
   check_count(digits, "digits")
   cat("ABC model choice among", length(x$models), "models (",
-      paste(x$models, collapse = ", "), ")\n")
+      toString(x$models), ")\n")
   cat(nrow(x$training), "simulations,", length(x$statistics), "statistics, out-of-bag error",
       format(round(x$error, digits)), "\n")
   print(x$confusion)
@@ -590,11 +590,11 @@ observed_statistics <- function(newdata, statistics) {
   if (!is.data.frame(newdata)) newdata <- as.data.frame(as.list(newdata))
   missing <- setdiff(statistics, names(newdata))
   if (length(missing)) {
-    stop("Statistics missing from `newdata`: ", paste(missing, collapse = ", "), ".",
+    stop("Statistics missing from `newdata`: ", toString(missing), ".",
          call. = FALSE)
   }
   observed <- newdata[, statistics, drop = FALSE]
-  if (any(!is.finite(as.matrix(observed)))) {
+  if (!all(is.finite(as.matrix(observed)))) {
     stop("`newdata` has missing or infinite statistics.", call. = FALSE)
   }
   observed
@@ -658,7 +658,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
   if (is.null(simulate)) {
     missing <- setdiff(statistics, names(table))
     if (length(missing)) {
-      stop("abc_ppc(): Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+      stop("abc_ppc(): Not in `table`: ", toString(missing), ".", call. = FALSE)
     }
   }
   values <- observed_statistics(observed, unique(c(fit$statistics, statistics)))
@@ -756,7 +756,7 @@ abc_diagnose <- function(fit, newdata, coverage = 0.99) {
       data.frame(observation = o, parameter = p, n_positive = length(positive),
                  ess = 1 / sum(positive^2), khat = diags$khat,
                  khat_threshold = diags$khat_threshold, n_outside = length(outside[[o]]),
-                 outside = paste(outside[[o]], collapse = ", "))
+                 outside = toString(outside[[o]]))
     }))
   })
   out <- do.call(rbind, out)

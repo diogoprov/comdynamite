@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G4.0} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 fw <- function() {
   food_web_dynamics(seq(0, 600, by = 20), init = c(R = 50, N = 0.1, P = 0.1),
                     traits = c(R = 10, N = 4, P = 6), introductions = c(P = 300), dt = 0.5)

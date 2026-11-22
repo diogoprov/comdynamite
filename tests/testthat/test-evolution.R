@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.3} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 start <- function(n, m) matrix(n, m, 1, dimnames = list(NULL, "sp1"))
 evo_traits <- function(optimum = 0, sigma = 1e6, r_max = 5) {
   data.frame(optimum = optimum, sigma = sigma, r_max = r_max, row.names = "sp1")

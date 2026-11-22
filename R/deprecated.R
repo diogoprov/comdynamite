@@ -10,6 +10,12 @@
 #'
 #' @param ... Passed to the new function.
 #' @return The result of the new function.
+#' @examples
+#' tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
+#' set.seed(1)
+#' old <- suppressWarnings(traits_ou(tree, alpha = 1))
+#' set.seed(1)
+#' identical(old, trait_ou(tree, alpha = 1))
 #' @name comdynamite-deprecated
 #' @keywords internal
 NULL

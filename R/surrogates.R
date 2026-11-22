@@ -100,7 +100,7 @@ env_surrogates <- function(env, coords, n = 99, method = c("variogram", "paramet
   groups <- split(seq_len(nrow(env)), strata, drop = TRUE)
   small <- vapply(groups, length, 1L) < 5
   if (any(small)) {
-    stop("strata need at least 5 sites: ", paste(names(groups)[small], collapse = ", "),
+    stop("strata need at least 5 sites: ", toString(names(groups)[small]),
          call. = FALSE)
   }
   out <- replicate(n, env, simplify = FALSE)

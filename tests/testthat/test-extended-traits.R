@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS2.13, BS7.0, BS7.1, BS7.4} Tested in this file, as described in
+#'   R/srr-stats-bayesian.R.
+NULL
+
 # Extended tests of the analyses of trait variation among individuals: trait-gradient analysis
 # (trait_gradient(), its null models, phylogenetic and Bayesian models), trait_flex(),
 # nested_variance(), tstats() and tstats_summary(), community_index(), population_shifts() and

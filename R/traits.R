@@ -410,7 +410,7 @@ as_traits <- function(traits) {
   missing_traits <- setdiff(c("optimum", "sigma", "r_max"), names(traits))
   if (length(missing_traits) > 0) {
     stop("`traits` needs the columns of `species_traits()`; missing: ",
-         paste(missing_traits, collapse = ", "), call. = FALSE)
+         toString(missing_traits), call. = FALSE)
   }
   if (.row_names_info(traits) < 0) rownames(traits) <- paste0("sp", seq_len(nrow(traits)))
   traits

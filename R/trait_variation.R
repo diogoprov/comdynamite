@@ -228,7 +228,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     }
     missing_vars <- setdiff(model_vars, names(env))
     if (length(missing_vars) > 0) {
-      stop("`env` has no column ", paste(missing_vars, collapse = ", "), call. = FALSE)
+      stop("`env` has no column ", toString(missing_vars), call. = FALSE)
     }
     check_unique_sites(as.character(env[[site]]), "`env`")
     rows <- match(site_levels, as.character(env[[site]]))
@@ -238,11 +238,11 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     if (!all(env_ok)) {
       if (na_action == "fail") {
         stop("sites with missing values in `env`: ",
-             paste(site_levels[!env_ok], collapse = ", "),
+             toString(site_levels[!env_ok]),
              "; remove them or set `na_action = \"omit\"`", call. = FALSE)
       }
       warning("sites with missing values in `env` are left out of the decomposition: ",
-              paste(site_levels[!env_ok], collapse = ", "), call. = FALSE)
+              toString(site_levels[!env_ok]), call. = FALSE)
     }
     model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
     check_collinear(stats::model.matrix(formula, env_sites[env_ok, , drop = FALSE]),
@@ -281,39 +281,42 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     }
     species_mean <- tapply(z[keep], species_id[keep], mean)[pop_species]
     weighted <- function(v) {
-      sapply(site_levels, function(s) {
+      vapply(site_levels, function(s) {
         i <- pop_site == s
-        if (!any(i)) NA_real_ else sum(weight[i] * v[i]) / sum(weight[i])
-      })
+        if (any(i)) sum(weight[i] * v[i]) / sum(weight[i]) else NA_real_
+      }, numeric(1))
     }
     specific <- weighted(as.vector(pop_mean))
     fixed <- weighted(as.vector(species_mean))
     values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
-    fitted_values <- list()
-    ss <- lapply(names(values), function(component) {
+    fits <- lapply(names(values), function(component) {
       y <- values[[component]]
       ok <- !is.na(y) & env_ok
       total <- sum((y[ok] - mean(y[ok]))^2)
       modelled <- rep(NA_real_, length(y))
       if (length(model_vars) == 0) {
         modelled[ok] <- mean(y[ok])
-        fitted_values[[component]] <<- modelled
-        return(c(explained = 0, residual = total, total = total, p = NA_real_))
+        return(list(ss = c(explained = 0, residual = total, total = total, p = NA_real_),
+                    fitted = modelled, exact = FALSE))
       }
       fit <- stats::lm(model_formula, data = cbind(.y = y, env_sites)[ok, , drop = FALSE])
       modelled[ok] <- stats::fitted(fit)
-      fitted_values[[component]] <<- modelled
       residual <- sum(stats::residuals(fit)^2)
-      exact_labels <<- c(exact_labels, if (total > 0 && residual <= total *
-                                             sqrt(.Machine$double.eps)) {
-        paste0(trait, " (", component, ")")
-      })
       # the exact fits are reported once, below, instead of by summary.lm()
       f <- suppressWarnings(summary(fit))$fstatistic
       p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
-      c(explained = total - residual, residual = residual, total = total, p = unname(p))
+      list(ss = c(explained = total - residual, residual = residual, total = total,
+                  p = unname(p)),
+           fitted = modelled,
+           exact = total > 0 && residual <= total * sqrt(.Machine$double.eps))
     })
-    names(ss) <- names(values)
+    names(fits) <- names(values)
+    fitted_values <- lapply(fits, `[[`, "fitted")
+    exact <- vapply(fits, `[[`, logical(1), "exact")
+    if (any(exact)) {
+      exact_labels <- c(exact_labels, paste0(trait, " (", names(values)[exact], ")"))
+    }
+    ss <- lapply(fits, `[[`, "ss")
     site_fits[[trait]] <- do.call(rbind, lapply(names(values), function(component) {
       data.frame(site = site_levels, trait = trait, component = component,
                  response = values[[component]], fitted = fitted_values[[component]],
@@ -491,7 +494,7 @@ nested_variance <- function(data, traits, factors, crossed = NULL, interaction =
   check_flag(interaction, "interaction")
   check_data_columns(data, c(traits, factors, crossed), "data")
   if (length(intersect(factors, crossed)) > 0) {
-    stop("`factors` and `crossed` share ", paste(intersect(factors, crossed), collapse = ", "),
+    stop("`factors` and `crossed` share ", toString(intersect(factors, crossed)),
          call. = FALSE)
   }
   all_factors <- c(factors, crossed)
@@ -769,7 +772,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   null <- match.arg(null)
   alternative <- match.arg(alternative)
   if (is.function(index)) {
-    label <- paste(deparse(substitute(index)), collapse = "")
+    label <- deparse1(substitute(index), collapse = "")
     if (nchar(label) > 30 || grepl("^function", label)) label <- "index"
     index <- stats::setNames(list(index), label)
   }
@@ -886,7 +889,8 @@ site_tests <- function(obs, sims, level) {
   above <- colSums(sims >= rep(obs, each = n_perm), na.rm = TRUE)
   p_low <- ifelse(testable, (1 + below) / (1 + valid), NA_real_)
   p_high <- ifelse(testable, (1 + above) / (1 + valid), NA_real_)
-  deviation <- ifelse(p_low < level / 2, "low", ifelse(p_high < level / 2, "high", "none"))
+  high <- ifelse(p_high < level / 2, "high", "none")
+  deviation <- ifelse(p_low < level / 2, "low", high)
   ses <- null_compare(obs, sims)$ses
   ses[!testable] <- NA_real_
   list(testable = testable, p_low = p_low, p_high = p_high, deviation = deviation, ses = ses)

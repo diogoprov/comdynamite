@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.9} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 test_that("GAUSE removes, from the closest pair, the species with smaller summed distance", {
   # a and b are the closest pair; b is closer to the others (c, d), so it goes first
   x <- c(a = 0, b = 0.5, c = 3, d = 4)

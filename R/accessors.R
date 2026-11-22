@@ -155,7 +155,7 @@ shifts_coef_names <- function(object) {
 pick_parm <- function(parm, available) {
   if (is.numeric(parm)) parm <- available[parm]
   if (!is.character(parm) || anyNA(parm) || !all(parm %in% available)) {
-    stop("`parm` must name coefficients among ", paste(available, collapse = ", "),
+    stop("`parm` must name coefficients among ", toString(available),
          call. = FALSE)
   }
   parm
@@ -280,6 +280,11 @@ nobs.mc_trait_gradient_phylo <- function(object, ...) nrow(object$data)
 #'   of `nodes`). For [abc_fit()], the number of complete simulations in the training table.
 #' @seealso [node_test()], [abc_fit()].
 #' @family inference
+#' @examples
+#' set.seed(1)
+#' out <- node_test(daphniids$comm, node_contrasts(daphniids$tree), daphniids$env[, 1],
+#'                  n_perm = 9)
+#' nobs(out)
 #' @exportS3Method stats::nobs
 nobs.mc_node_test <- function(object, ...) as.integer(max(object$nodes$n_sites, na.rm = TRUE))
 

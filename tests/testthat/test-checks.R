@@ -1,3 +1,11 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {EA2.1} Tested in this file, as described in R/srr-stats-eda.R.
+#' @srrstats {G2.0, G2.1, G2.2, G2.13, G2.14, G2.16, G3.0, G5.2} Tested in this file, as
+#'   described in R/srr-stats-general.R.
+#' @srrstats {RE2.1, RE2.4a, RE7.0} Tested in this file, as described in
+#'   R/srr-stats-regression.R.
+NULL
+
 test_that("check_tree() and check_count() give messages that name the argument", {
   expect_error(check_tree("x"), "`tree` must be a `phylo` object")
   tree <- ape::rtree(5)

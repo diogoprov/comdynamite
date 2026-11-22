@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS7.0, BS7.2} Tested in this file, as described in R/srr-stats-bayesian.R.
+#' @srrstats {G5.4a} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Extended tests of the simulators and of ABC (rOpenSci statistical standards): simulators
 # against analytic results over several seeds, convergence as data grow, and recovery and
 # calibration of ABC with random forests on a cheap simulator. They run only with

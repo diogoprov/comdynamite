@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G3.1a} Tested in this file, as described in R/srr-stats-general.R.
+#' @srrstats {RE7.2} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 test_that("drift_test() regresses log variance among groups on log eigenvalues of W", {
   set.seed(1)
   G <- matrix(c(4, 1, 0.5, 0, 1, 3, 0.2, 0, 0.5, 0.2, 2, 0.3, 0, 0, 0.3, 1), 4)

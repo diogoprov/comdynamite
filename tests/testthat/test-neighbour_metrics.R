@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.11, G5.8b} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 test_that("nearest-neighbour and pairwise metrics follow their definitions", {
   x <- c(1, 2, 2, 5, 9)
   expect_equal(nn_distances(x), c(1, 0, 0, 3, 4))

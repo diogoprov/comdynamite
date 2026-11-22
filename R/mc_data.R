@@ -106,8 +106,8 @@ as_mc_data.mc_sim <- function(x, ...) {
 print.mc_data <- function(x, ...) {
   cat("<mc_data>", nrow(x$comm), "sites x", ncol(x$comm), "species\n")
   parts <- c(tree = if (!is.null(x$tree)) paste(ape::Ntip(x$tree), "tips"),
-             traits = if (!is.null(x$traits)) paste(names(x$traits), collapse = ", "),
-             env = if (!is.null(x$env)) paste(names(x$env), collapse = ", "),
+             traits = if (!is.null(x$traits)) toString(names(x$traits)),
+             env = if (!is.null(x$env)) toString(names(x$env)),
              coords = if (!is.null(x$coords)) paste(ncol(x$coords), "columns"),
              areas = if (!is.null(x$areas)) paste(length(unique(x$areas)), "values"),
              series = if (!is.null(x$series)) paste(dim(x$series)[3], "steps"))

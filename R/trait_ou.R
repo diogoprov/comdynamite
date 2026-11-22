@@ -133,7 +133,7 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
       return(stats::setNames(rep(list(value[[1]]), length(states)), states))
     }
     if (is.null(names(value)) || !all(states %in% names(value))) {
-      stop("`", what, "` must be named with every regime: ", paste(states, collapse = ", "),
+      stop("`", what, "` must be named with every regime: ", toString(states),
            call. = FALSE)
     }
     as.list(value)[states]
@@ -171,7 +171,7 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
     rates <- lapply(rates, matrix_root)
   } else {
     trait_names <- NULL
-    if (any(!vapply(rates, function(s) is.numeric(s) && length(s) == 1 && is.finite(s) &&
+    if (!all(vapply(rates, function(s) is.numeric(s) && length(s) == 1 && is.finite(s) &&
                       s >= 0, logical(1)))) {
       stop("`sigma2` must be zero or more", call. = FALSE)
     }

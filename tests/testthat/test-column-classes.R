@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {EA6.0d} Tested in this file, as described in R/srr-stats-eda.R.
+#' @srrstats {G2.12} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # the class of every column of the tables returned
 
 classes <- function(x) vapply(x, function(v) class(v)[1], character(1))

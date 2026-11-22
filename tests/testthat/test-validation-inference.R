@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS2.6} Tested in this file, as described in R/srr-stats-bayesian.R.
+NULL
+
 # Checks of the scalar arguments of the functions of inference (rOpenSci G2.0-G2.2, G2.16)
 
 test_that("abc_table() and run_scenarios() check their scalar arguments", {

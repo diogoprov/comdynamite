@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {EA2.0, EA6.0a, EA6.0b, EA6.0c} Tested in this file, as described in
+#'   R/srr-stats-eda.R.
+NULL
+
 tree <- ape::read.tree(text = "((t1:1,t2:1):2,(t3:2,(t4:1,t5:1):1):1);")
 comm <- matrix(c(3, 0, 1, 2, 0,
                  1, 2, 0, 0, 4,

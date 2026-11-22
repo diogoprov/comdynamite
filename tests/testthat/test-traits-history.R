@@ -111,3 +111,11 @@ test_that("tip_history_metrics follows its definitions on a known history", {
                                    time_since_change = 1.5))
   expect_error(tip_history_metrics(ape::rcoal(3)), "simmap")
 })
+
+test_that("trait_mk() stops on negative or missing rates", {
+  tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
+  q <- matrix(c(0, -1, 1, 0), 2, dimnames = list(c("x", "y"), c("x", "y")))
+  expect_error(trait_mk(tree, q = q), "rates in `q` must be zero or more")
+  q[1, 2] <- NA
+  expect_error(trait_mk(tree, q = q), "rates in `q` must be zero or more")
+})

@@ -270,11 +270,11 @@ check_community <- function(community, d) {
   }
   absent <- setdiff(unique(d$site), rownames(community))
   if (length(absent) > 0) {
-    stop("`community` has no row for site ", paste(absent, collapse = ", "), call. = FALSE)
+    stop("`community` has no row for site ", toString(absent), call. = FALSE)
   }
   absent <- setdiff(unique(d$species), colnames(community))
   if (length(absent) > 0) {
-    stop("`community` has no column for species ", paste(absent, collapse = ", "),
+    stop("`community` has no column for species ", toString(absent),
          call. = FALSE)
   }
   community
@@ -331,7 +331,7 @@ shifts_prepare <- function(d, env_cols, community, warn = FALSE) {
     dropped <- setdiff(present, names(species_mean))
     if (warn && length(dropped) > 0) {
       warning("species in `community` that were never measured are left out of the push: ",
-              paste(dropped, collapse = ", "), call. = FALSE)
+              toString(dropped), call. = FALSE)
     }
   }
   for (k in seq_along(members)) {
@@ -411,7 +411,7 @@ shifts_follow <- function(prep, slopes) {
 #' @noRd
 shifts_fit_full <- function(prep, width, species_slopes, slope_names) {
   fit <- shifts_fit(prep, width, species_slopes, slope_names)
-  external <- any(vapply(prep$members, function(m) length(m$ext_base) > 0, logical(1)))
+  external <- any(vapply(prep$members, function(m) length(m$ext_base), integer(1)) > 0)
   slopes <- unlist(fit$table[slope_names])
   if (external && all(is.finite(slopes))) {
     prep <- shifts_follow(prep, slopes)

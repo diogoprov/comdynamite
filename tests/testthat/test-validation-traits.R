@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.8a} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Checks of scalar arguments of the functions on traits and individuals: each bad value stops
 # with a message that names the argument.
 

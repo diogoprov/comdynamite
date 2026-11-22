@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.0} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # argument checks of the simulators, null models and food webs
 
 test_that("food web plots check their scalar arguments", {

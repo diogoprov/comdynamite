@@ -100,7 +100,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
     comm <- comm$comm
   }
   check_count(n_perm, "n_perm")
-  if (!is.numeric(axes) || length(axes) < 1 || any(!is.finite(axes)) || any(axes < 1) ||
+  if (!is.numeric(axes) || length(axes) < 1 || !all(is.finite(axes)) || any(axes < 1) ||
         any(axes != round(axes)) || anyDuplicated(axes) > 0) {
     stop("`axes` must be distinct whole numbers, 1 or more", call. = FALSE)
   }
@@ -387,7 +387,7 @@ pcps_clade_layers <- function(sp) {
                                               fill = NA, linetype = 2, linewidth = 0.4,
                                               show.legend = FALSE))
   }
-  if (any(is.na(sp$clade))) {
+  if (anyNA(sp$clade)) {
     layers <- c(layers, ggplot2::geom_point(data = sp[is.na(sp$clade), , drop = FALSE],
                                             shape = 8, colour = "grey60", size = 2))
   }
