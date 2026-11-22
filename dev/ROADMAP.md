@@ -37,7 +37,7 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    um parâmetro bem identificado com intervalos conservadores: revisar; (b) teste da média de
    `tstats_summary()`: corrigido (nulos de T_IC.IR e T_PC.PR permutam a região inteira); (c)
    T_PC.PR: o nulo publicado dá ~80% de sítios "altos" falsos quando o tamanho das populações
-   varia entre sítios; `null_pc = "populations"` evita isso. Decidir se vira o padrão;
+   varia entre sítios; `null_pc = "populations"` evita isso e virou o padrão (decidido em 2026-11-21);
    conferir se `community_index()` tem o mesmo sorteio independente por sítio; (d)
    `trait_flex()`: propriedade do método (atenuação e teste conservador com turnover), ajuda
    corrigida.

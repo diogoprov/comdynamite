@@ -13,7 +13,7 @@ tstats(
   n_perm = 99,
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
-  null_pc = c("individuals", "populations"),
+  null_pc = c("populations", "individuals"),
   ...,
   nperm = NULL
 )
@@ -42,11 +42,11 @@ values permuted within each site as in Taudiere & Violle (2016), or \code{"speci
 means of populations exchanged among the populations of each species (see the section
 Null models).}
 
-\item{null_pc}{Null model of \code{T_PC.PR} for \code{method = "base"}: \code{"individuals"} (the
-default), the population-level values of individuals permuted among all individuals of
-the region as in Taudiere & Violle (2016), or \code{"populations"}, the population means
-permuted among the populations of the region (see the section Null model of T_PC.PR and
-the size of populations).}
+\item{null_pc}{Null model of \code{T_PC.PR} for \code{method = "base"}: \code{"populations"} (the
+default), the population means permuted among the populations of the region, or
+\code{"individuals"}, the population-level values of individuals permuted among all individuals
+of the region as in Taudiere & Violle (2016) and in versions up to 0.10.0 (see the section
+Null model of T_PC.PR and the size of populations).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}
@@ -95,7 +95,9 @@ site receives as many values as it has individuals, drawn without replacement fr
 region (their null model \code{regional.ind});
 \item \code{T_PC.PR}: each individual takes the mean of its population, these values are permuted
 among all individuals of the region, and population means are computed again from the
-values each population received (their null model \code{regional.pop}, \code{null_pc = "individuals"}).
+values each population received (their null model \code{regional.pop}, \code{null_pc = "individuals"}); by default (\code{null_pc = "populations"}), population means are permuted
+among the populations of the region instead (see the section Null model of T_PC.PR and the
+size of populations).
 }
 
 Each randomisation is one permutation of the whole region, so the sites of a randomisation
@@ -172,10 +174,12 @@ With \code{null_pc = "populations"} the observed population means are instead pe
 populations of the region, one value per population (the null model \code{regional.pop.prab} of
 Taudiere & Violle 2016, which they do not use for T-statistics). Each site keeps its number
 of populations, the regional variance of the means is that of the data, and the size of
-populations plays no part; in the example above both tests rejected in 1 to 5\%. Use it when
-the sizes of populations differ among sites. Populations of the same species at different
-sites have similar means, which this permutation treats as independent, so the test tends
-to be conservative when species differ and are placed at random.
+populations plays no part; in the example above both tests rejected in 1 to 5\%. It is the
+default, because the sizes of populations usually differ among sites in field data;
+\code{null_pc = "individuals"} gives the null model of Taudiere & Violle (2016), the default up
+to version 0.10.0. Populations of the same species at different sites have similar means,
+which this permutation treats as independent, so the test tends to be conservative when
+species differ and are placed at random.
 
 Whatever the null model, \code{T_PC.PR} is a ratio of variances among population means that are
 not weighted by abundance, and the test of one site has little power when the site has few

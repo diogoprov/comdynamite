@@ -501,7 +501,9 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' * `T_PC.PR`: each individual takes the mean of its population, these values are permuted
 #'   among all individuals of the region, and population means are computed again from the
 #'   values each population received (their null model `regional.pop`, `null_pc =
-#'   "individuals"`).
+#'   "individuals"`); by default (`null_pc = "populations"`), population means are permuted
+#'   among the populations of the region instead (see the section Null model of T_PC.PR and the
+#'   size of populations).
 #'
 #' Each randomisation is one permutation of the whole region, so the sites of a randomisation
 #' share the regional pool without repeating its individuals, as the sites of the data do. The
@@ -575,10 +577,12 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' populations of the region, one value per population (the null model `regional.pop.prab` of
 #' Taudiere & Violle 2016, which they do not use for T-statistics). Each site keeps its number
 #' of populations, the regional variance of the means is that of the data, and the size of
-#' populations plays no part; in the example above both tests rejected in 1 to 5%. Use it when
-#' the sizes of populations differ among sites. Populations of the same species at different
-#' sites have similar means, which this permutation treats as independent, so the test tends
-#' to be conservative when species differ and are placed at random.
+#' populations plays no part; in the example above both tests rejected in 1 to 5%. It is the
+#' default, because the sizes of populations usually differ among sites in field data;
+#' `null_pc = "individuals"` gives the null model of Taudiere & Violle (2016), the default up
+#' to version 0.10.0. Populations of the same species at different sites have similar means,
+#' which this permutation treats as independent, so the test tends to be conservative when
+#' species differ and are placed at random.
 #'
 #' Whatever the null model, `T_PC.PR` is a ratio of variances among population means that are
 #' not weighted by abundance, and the test of one site has little power when the site has few
@@ -611,11 +615,11 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #'   values permuted within each site as in Taudiere & Violle (2016), or `"species"`, the
 #'   means of populations exchanged among the populations of each species (see the section
 #'   Null models).
-#' @param null_pc Null model of `T_PC.PR` for `method = "base"`: `"individuals"` (the
-#'   default), the population-level values of individuals permuted among all individuals of
-#'   the region as in Taudiere & Violle (2016), or `"populations"`, the population means
-#'   permuted among the populations of the region (see the section Null model of T_PC.PR and
-#'   the size of populations).
+#' @param null_pc Null model of `T_PC.PR` for `method = "base"`: `"populations"` (the
+#'   default), the population means permuted among the populations of the region, or
+#'   `"individuals"`, the population-level values of individuals permuted among all individuals
+#'   of the region as in Taudiere & Violle (2016) and in versions up to 0.10.0 (see the section
+#'   Null model of T_PC.PR and the size of populations).
 #' @param ... Further arguments to [cati::Tstats()], such as `reg.pool` or
 #'   `independantTraits`.
 #' @return With `method = "base"`, a data frame with one row per site and trait and the columns
@@ -657,7 +661,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
                    method = c("base", "cati"), n_perm = 99,
                    alternative = c("less", "greater", "two.sided"),
                    null_ip = c("site", "species"),
-                   null_pc = c("individuals", "populations"), ..., nperm = NULL) {
+                   null_pc = c("populations", "individuals"), ..., nperm = NULL) {
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   method <- match.arg(method)
   alternative <- match.arg(alternative)
@@ -735,7 +739,7 @@ t_ratios <- function(z, g, var_r = NULL) {
 # null values (randomisation x site x statistic) of the three null models; those of T_IC.IR and
 # T_PC.PR permute the whole region at once, so that the sites of a randomisation partition the
 # regional pool as those of the data do (tstats_summary() tests the mean over sites)
-tstats_null <- function(z, g, n_perm, null_ip = "site", null_pc = "individuals") {
+tstats_null <- function(z, g, n_perm, null_ip = "site", null_pc = "populations") {
   n <- length(z)
   pop_mean <- group_mean(z, g$pop, g$n_pops)
   carried <- pop_mean[g$pop]
