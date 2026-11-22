@@ -34,6 +34,7 @@
 #' round(node_contrasts(tree, branch_lengths = TRUE), 3)
 #' @export
 node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
+  cite_method("node_contrasts")
   check_tree(tree, branch_lengths = FALSE)
   check_flag(cherries, "cherries")
   check_flag(branch_lengths, "branch_lengths")
@@ -233,6 +234,7 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores = 1,
                       site_permutations = NULL, area_permutations = NULL,
                       null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  cite_method("node_test")
   null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(nodes)) nodes <- node_contrasts(data_part(comm, "tree", "nodes"))

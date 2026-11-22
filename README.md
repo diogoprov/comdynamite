@@ -156,6 +156,12 @@ This DOI always points to the latest version; each release also has its own DOI
 on Zenodo. In R, `citation("comdynamite")` gives the entry with the installed
 version.
 
+Many functions implement methods published by other authors. Please cite those
+original papers too: each such function shows them the first time it runs in a
+session, `method_references()` lists them by function, and
+`citation("comdynamite")` includes them. `options(comdynamite.cite = FALSE)`
+turns the message off.
+
 ## Contributing
 
 Bug reports, questions and suggestions are welcome as

@@ -662,6 +662,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
                    alternative = c("less", "greater", "two.sided"),
                    null_ip = c("site", "species"),
                    null_pc = c("populations", "individuals"), ..., nperm = NULL) {
+  cite_method("tstats")
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   method <- match.arg(method)
   alternative <- match.arg(alternative)

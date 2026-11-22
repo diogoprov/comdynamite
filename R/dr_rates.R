@@ -29,6 +29,7 @@
 #' head(dr_rates(tr, per = "edge"))
 #' @export
 dr_rates <- function(tree, per = c("tip", "edge")) {
+  cite_method("dr_rates")
   per <- match.arg(per)
   check_branch_lengths(tree)
   n_tip <- ape::Ntip(tree)

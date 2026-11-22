@@ -181,6 +181,7 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
                               env = "env", abundance = "abundance", width = NULL,
                               species_slopes = FALSE, community = NULL, nboot = 0,
                               level = 0.95) {
+  cite_method("population_shifts")
   check_string(trait, "trait")
   check_string(site, "site")
   check_string(species, "species")

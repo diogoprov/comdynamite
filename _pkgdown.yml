@@ -162,6 +162,10 @@ reference:
   desc: Tables, summaries and plots of results.
   contents:
   - result-methods
+- title: Citation
+  desc: Original papers of the methods implemented in the package.
+  contents:
+  - method_references
 - title: Example data
   contents:
   - anurans

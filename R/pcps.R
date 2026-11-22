@@ -89,6 +89,7 @@
 #' @export
 pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutations = NULL,
                       null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  cite_method("pcps_test")
   null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")

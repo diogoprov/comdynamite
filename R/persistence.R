@@ -40,7 +40,10 @@
 #'                                        speciation = speciation_control("fission", rate = 0.02))
 #' head(persistence(sim, window = 50))
 #' @export
-persistence <- function(x, window = NULL, ...) UseMethod("persistence")
+persistence <- function(x, window = NULL, ...) {
+  cite_method("persistence")
+  UseMethod("persistence")
+}
 
 #' @export
 persistence.mc_evolving <- function(x, window = NULL, ...) {

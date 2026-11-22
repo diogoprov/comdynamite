@@ -106,6 +106,7 @@
 #' @export
 phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_sim = 1000,
                          site_permutations = NULL, alpha = NULL, predictor = NULL) {
+  cite_method("phylo_vector")
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")
     if (missing(env)) env <- one_column(comm$env, "env")
@@ -410,6 +411,7 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
                             n_perm = 999, site_permutations = NULL,
                             shared_null = c("none", "msr", "sites"), coords = NULL,
                             level = 0.05) {
+  cite_method("trait_partition")
   if (inherits(comm, "mc_data")) {
     if (missing(traits)) traits <- data_part(comm, "traits")
     if (missing(env)) env <- data_part(comm, "env")

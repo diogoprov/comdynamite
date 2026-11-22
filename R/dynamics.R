@@ -261,6 +261,7 @@ simulate_metacommunity <- function(landscape, traits, alpha, dispersal = 0.01,
                                    dispersal_time = NULL, kernels = NULL,
                                    kernel_step = NULL, kernel_group = NULL,
                                    dispersal_site = NULL, disturbance_sensitivity = 1) {
+  cite_method("simulate_metacommunity")
   if (!inherits(landscape, "mc_landscape")) {
     stop("`landscape` must be an `mc_landscape` object, such as one from ",
          "`landscape_implicit()` or `landscape_grid()`", call. = FALSE)

@@ -52,6 +52,14 @@ other data inputs stop the function with a message that names the argument; remo
 impute missing values before the analysis.
 }
 
+\section{Citation}{
+
+Cite the package with \code{citation("comdynamite")} and, with it, the original papers of the
+methods you use. Each function that implements a published method shows these papers the
+first time it runs in a session, and \code{\link[=method_references]{method_references()}} lists them by function; see
+\code{\link[=method_references]{method_references()}} for how to turn the message off.
+}
+
 \section{Where to start}{
 
 The articles at \url{https://provetelab.org/comdynamite/articles/} go through each question.

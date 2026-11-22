@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- Functions that implement a published method, such as `node_test()`, `phylo_vector()`,
+  `trait_partition()`, `pcps_test()`, `tstats()` and `trait_gradient()`, show the original
+  papers of the method the first time they run in a session, with a request to cite them
+  together with the package. `options(comdynamite.cite = FALSE)` turns the message off. The new
+  `method_references()` lists the papers of each function, and `citation("comdynamite")` now
+  includes them.
 - The null models of T_IC/IR and T_PC/PR in `tstats()` permute the whole region once per
   randomisation, instead of drawing each site from the region independently, so that the sites
   of a randomisation partition the regional pool as the data do. The test of the mean over sites

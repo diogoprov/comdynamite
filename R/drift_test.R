@@ -76,6 +76,7 @@
 #' plot(test)
 #' @export
 drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95) {
+  cite_method("drift_test")
   if (is.data.frame(x)) {
     if (is.character(group) && length(group) == 1 && group %in% names(x)) {
       gname <- group

@@ -37,6 +37,7 @@
 #' phylo_beta(comm > 0, tree)
 #' @export
 phylo_beta <- function(comm, tree) {
+  cite_method("phylo_beta")
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")
     comm <- comm$comm
@@ -117,6 +118,7 @@ phylo_beta <- function(comm, tree) {
 #' @export
 phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = NULL,
                             null = c("permutation", "variogram", "parametric"), coords = NULL) {
+  cite_method("phylo_beta_test")
   null <- check_null(null, site_permutations)
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")

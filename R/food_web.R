@@ -205,6 +205,7 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
                               V = c(R = 0.2, N = 0.2, P = 0.2), omnivory = FALSE,
                               introductions = NULL, dt = 0.1, extinction = 1e-6,
                               trait_floor = NULL) {
+  cite_method("food_web_dynamics")
   attack <- match.arg(attack)
   if (is.null(trait_floor)) trait_floor <- if (attack == "michaelis") 0 else -Inf
   if (!is.numeric(trait_floor) || length(trait_floor) != 1 || is.na(trait_floor) ||

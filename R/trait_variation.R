@@ -195,6 +195,7 @@ tstats_summary <- function(x, level = 0.95) {
 #' @export
 trait_flex <- function(individuals, traits = "trait", site = "site", species = "species",
                        abundance = NULL, formula = ~1, env = NULL) {
+  cite_method("trait_flex")
   check_column_names(traits, "traits")
   check_string(site, "site")
   check_string(species, "species")
@@ -437,6 +438,7 @@ plot.trait_flex <- function(x, relative = TRUE, colours = c("#0072B2", "grey80")
 #' nested_variance(d, "trait", c("region", "site"), crossed = "species")
 #' @export
 nested_variance <- function(data, traits, factors, crossed = NULL, interaction = TRUE) {
+  cite_method("nested_variance")
   check_column_names(traits, "traits")
   check_column_names(factors, "factors")
   if (!is.null(crossed)) check_column_names(crossed, "crossed")
@@ -703,6 +705,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
                                      "regional.pop.prab"),
                             n_perm = 99, alternative = c("two.sided", "less", "greater"),
                             multivariate = FALSE, nperm = NULL) {
+  cite_method("community_index")
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   null <- match.arg(null)
   alternative <- match.arg(alternative)
