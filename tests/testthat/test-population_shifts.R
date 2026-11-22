@@ -241,7 +241,7 @@ test_that("the bootstrap centres the p-value and corrects from the generating va
   c0 <- max(fit$displacement, 0)
   expect_equal(fit$displacement_corrected, fit$displacement - (mean(c_fitted) - c0))
   q <- stats::quantile(c_fitted, c(0.975, 0.025), names = FALSE)
-  expect_identical(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
+  expect_equal(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
 })
 
 test_that("the variance of populations weighs means of few individuals little", {

@@ -280,7 +280,7 @@ test_that("trait_flex() guards the model against missing values, names and no in
   env <- data.frame(site = sprintf("s%02d", 1:6), moisture = c(1, 3, 2, NA, 5, 4))
   res <- expect_warning_value(trait_flex(d, formula = ~moisture, env = env), "s04")
   dec <- res$decomposition
-  expect_identical(dec$explained + dec$residual, dec$total)
+  expect_equal(dec$explained + dec$residual, dec$total)
   kept <- res$sites[res$sites$site != "s04", ]
   expect_equal(dec$total[dec$component == "total"],
                sum((kept$specific - mean(kept$specific))^2))

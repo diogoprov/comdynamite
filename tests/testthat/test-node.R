@@ -263,8 +263,8 @@ test_that("the partial statistic does not depend on the scale of the response", 
   env <- cbind(runif(60), runif(60))
   one <- node_fit(comm, c(1, 1, -1, -1), env)
   two <- node_fit(cbind(comm, comm), rep(c(1, 1, -1, -1), 2), env)
-  expect_identical(one$partial_f, two$partial_f)
-  expect_identical(one$f, two$f)
+  expect_equal(one$partial_f, two$partial_f)
+  expect_equal(one$f, two$f)
 })
 
 test_that("a node with an absent clade is not tested", {

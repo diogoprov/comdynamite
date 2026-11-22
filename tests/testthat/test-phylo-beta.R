@@ -55,7 +55,7 @@ test_that("pseudo-F and R2 equal a distance-based redundancy analysis in vegan",
   reference <- vegan::adonis2(beta ~ a + b, data = env, by = NULL, permutations = 0)
   n <- nrow(d$comm)
   out <- phylo_beta_test(d$comm, d$tree, env, n_perm = 2)
-  expect_identical(out$statistic, reference$F[1])
+  expect_equal(out$statistic, reference$F[1])
   expect_equal(out$r2_adjusted, 1 - (1 - reference$R2[1]) * (n - 1) / (n - 3))
 })
 

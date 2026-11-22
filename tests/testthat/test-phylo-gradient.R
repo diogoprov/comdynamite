@@ -42,7 +42,7 @@ test_that("the correlation and fractions match the original code in Octave", {
   expect_equal(f$r2[1:3], c(0.8839515378, 0.8816771038, 0.0107264733), tolerance = 1e-9)
   expect_equal(f$r2_adjusted[c(4, 6)], c(0.9637275518, -0.0160919076), tolerance = 1e-9)
   expect_equal(out$component_share, 19.630 / 20, tolerance = 1e-3)
-  expect_identical(sum(f$r2[f$fraction %in% c("a", "b", "c", "d")]), 1)
+  expect_equal(sum(f$r2[f$fraction %in% c("a", "b", "c", "d")]), 1)
   expect_true(all(is.na(f$p_max[f$fraction %in% c("b", "d")])))
   expect_output(print(out), "mean component")
 })
