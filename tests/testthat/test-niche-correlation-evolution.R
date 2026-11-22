@@ -48,12 +48,12 @@ test_that("growth and selection use Omega = D R D", {
   expect_equal(w[1, ], exp(-0.5 * rowSums((d %*% solve(om + G + E)) * d)))
   # without variance, the growth of growth_rates() with the same correlation
   st0 <- nc_state(tr, env, 0)
-  expect_equal(mv_growth(st0, pa, unname(env), 1L)[, 1], unname(growth_rates(env, tr)[, 1]))
+  expect_identical(mv_growth(st0, pa, unname(env), 1L)[, 1], unname(growth_rates(env, tr)[, 1]))
   # an axis with an infinite breadth exerts no selection, as in growth_rates()
   tri <- niche_correlation(nc_traits(sigma = c(10, Inf)), cor2(rho))
   sti <- nc_state(tri, env, 0)
-  expect_equal(mv_growth(sti, pa, unname(env), 1L)[, 1], unname(growth_rates(env, tri)[, 1]))
-  expect_equal(sti$sel[[1]]$s, 1L)
+  expect_identical(mv_growth(sti, pa, unname(env), 1L)[, 1], unname(growth_rates(env, tri)[, 1]))
+  expect_identical(sti$sel[[1]]$s, 1L)
 })
 
 test_that("a correlated response moves the trait of the other axis", {
@@ -66,7 +66,7 @@ test_that("a correlated response moves the trait of the other axis", {
     drop(mv_select(st, pa, pa, unname(env), matrix(10L, 1, 1), 1L)) - 50
   }
   expect_gt(step(0)[1], 0)
-  expect_equal(step(0)[2], 0)
+  expect_identical(step(0)[2], 0)
   # with a positive correlation, a departure on the first axis selects the second trait away
   # from its own environment
   expect_lt(step(0.7)[2], 0)
@@ -106,7 +106,7 @@ test_that("the identity gives the results of independent axes in simulate_metaco
   s1 <- simulate_metacommunity(l, trc, a, dispersal = 0.1, n_steps = 30, evolution = ev0)
   set.seed(8)
   s2 <- simulate_metacommunity(l, trc, a, dispersal = 0.1, n_steps = 30)
-  expect_equal(s1$abundance, s2$abundance)
+  expect_identical(s1$abundance, s2$abundance)
 })
 
 test_that("departures of the same sign do better with a positive correlation", {
@@ -126,7 +126,7 @@ test_that("departures of the same sign do better with a positive correlation", {
   # standardised departures (1.5, 1.5): growth 5 exp(-2.25 / (1 + rho))
   pos <- run(0.8)
   expect_gt(pos$n, 30)
-  expect_equal(run(0)$n, 0)
+  expect_identical(run(0)$n, 0L)
   expect_equal(run(-0.5)$n, 0)
   # the load counts the correlation: departures of the same sign weigh less
   m <- maladaptation(pos$sim)

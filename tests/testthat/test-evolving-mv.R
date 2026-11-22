@@ -15,16 +15,16 @@ test_that("several traits evolve and speciate in evolving metacommunities", {
                                          record_steps = c(75, 150))
   k <- ncol(sim$abundance)
   expect_gt(k, 1)
-  expect_equal(dim(sim$genetic), c(36, ncol(sim$lineages), 2))
+  expect_identical(dim(sim$genetic), c(36L, ncol(sim$lineages), 2L))
   expect_named(sim$traits, c("svl", "head"))
   expect_identical(rownames(sim$traits$svl), colnames(sim$abundance))
   expect_true(all(c("genetic_svl", "genetic_head") %in% names(sim$series)))
   ev <- sim$evolution
-  expect_equal(dim(ev$genetic), c(36, k, 2))
-  expect_equal(dim(ev$history), c(36, k, 2, 2))
-  expect_equal(dim(ev$environment_history), c(36, 2, 2))
+  expect_identical(dim(ev$genetic), c(36L, k, 2L))
+  expect_identical(dim(ev$history), c(36L, k, 2L, 2L))
+  expect_identical(dim(ev$environment_history), c(36L, 2L, 2L))
   expect_length(ev$genetic_var, k)
-  expect_equal(unname(ev$genetic_var[[1]]), G)
+  expect_identical(unname(ev$genetic_var[[1]]), G)
   expect_true(all(is.na(ev$genetic[, , 1]) == (sim$abundance == 0)))
   # the series ends with the genetic means of the lineages, weighted by abundance
   last <- sim$series[sim$series$generation == 150 & sim$series$abundance > 0, ]
@@ -33,7 +33,7 @@ test_that("several traits evolve and speciate in evolving metacommunities", {
   expect_equal(last$genetic_svl[1], sum(w * sim$genetic[, l1, "svl"], na.rm = TRUE) / sum(w))
   mc <- as_metacommunity(sim)
   expect_s3_class(mc, "mc_sim")
-  expect_identical(names(mc$env), c("svl", "head"))
+  expect_named(mc$env, c("svl", "head"))
   ind <- sample_individuals(sim, n = 2, source = "evolution", step = c(75, 150))
   expect_true(all(c("svl", "head", "step") %in% names(ind)))
   m <- maladaptation(sim, step = 75)
@@ -82,7 +82,7 @@ test_that("ecological speciation with several traits uses the Mahalanobis distan
   expect_equal(unname(mv_distance(ev, 1, z)), manual)
   # a singular P leaves out the direction without variance
   ev0 <- list(whiten = list(evolution_whiten(diag(c(4, 0)))))
-  expect_equal(unname(mv_distance(ev0, 1, rbind(c(0, 0), c(2, 9))))[1, 2], 1)
+  expect_identical(unname(mv_distance(ev0, 1, rbind(c(0, 0), c(2, 9))))[1, 2], 1)
   s <- ev_mv_setup(6)
   set.seed(1)
   sim <- simulate_evolving_metacommunity(s$ls, s$anc,
@@ -138,19 +138,19 @@ test_that("several traits survive total extinction, sigma = 0 and named axes", {
   gone <- simulate_evolving_metacommunity(s$ls, s$anc, speciation_control("fission", rate = 0.05),
                                           evolution = evolution_control(G, env_var = diag(2)),
                                           env = s$env, extirpation = 0.6, n_steps = 60)
-  expect_equal(ncol(gone$abundance), 0)
-  expect_equal(dim(gone$evolution$plasticity), c(0, 2))
+  expect_identical(ncol(gone$abundance), 0L)
+  expect_identical(dim(gone$evolution$plasticity), c(0L, 2L))
   # two niches of breadth 0 overlap fully at the same phenotype and not at all elsewhere
   st <- new.env()
   st$ev <- list(mv = TRUE, q = 1, sigma = matrix(0, 2, 1))
   st$alive <- 1:2
   st$at <- matrix(1, 2, 2)
   hook <- niche_crowding(st)
-  expect_equal(hook(matrix(c(3, 4), 1), array(c(1, 1), c(1, 2, 1)))[1, ], c(7, 7))
-  expect_equal(hook(matrix(c(3, 4), 1), array(c(1, 2), c(1, 2, 1)))[1, ], c(3, 4))
+  expect_identical(hook(matrix(c(3, 4), 1), array(c(1, 1), c(1, 2, 1)))[1, ], c(7, 7))
+  expect_identical(hook(matrix(c(3, 4), 1), array(c(1, 2), c(1, 2, 1)))[1, ], c(3, 4))
   st$ev <- list(sigma = c(0, 0))
   hook1 <- niche_crowding(st)
-  expect_equal(hook1(matrix(c(3, 4), 1), matrix(c(1, 2), 1))[1, ], c(3, 4))
+  expect_identical(hook1(matrix(c(3, 4), 1), matrix(c(1, 2), 1))[1, ], c(3, 4))
   zero <- s$anc
   zero$head$sigma <- 0
   set.seed(2)

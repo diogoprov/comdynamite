@@ -46,12 +46,13 @@ test_that("a method function called by another one does not cite itself", {
     outer()
     inner()
   }
-  messages <- character()
+  seen <- new.env()
+  seen$messages <- character()
   withCallingHandlers(node_test(), comdynamite_citation = function(m) {
-    messages <<- c(messages, conditionMessage(m))
+    seen$messages <- c(seen$messages, conditionMessage(m))
     invokeRestart("muffleMessage")
   })
-  expect_length(messages, 0)
+  expect_length(seen$messages, 0)
   expect_false(isTRUE(cite_state[["node_contrasts"]]))
 })
 
@@ -85,8 +86,8 @@ test_that("inst/CITATION has the package and every method paper", {
 })
 
 test_that("call_name() drops the namespace and handles anonymous functions", {
-  expect_equal(call_name(quote(node_test(x))), "node_test")
-  expect_equal(call_name(quote(comdynamite::node_test(x))), "node_test")
-  expect_equal(call_name(quote(comdynamite:::cite_method(x))), "cite_method")
-  expect_equal(call_name(quote((function(x) x)(1))), "")
+  expect_identical(call_name(quote(node_test(x))), "node_test")
+  expect_identical(call_name(quote(comdynamite::node_test(x))), "node_test")
+  expect_identical(call_name(quote(comdynamite:::cite_method(x))), "cite_method")
+  expect_identical(call_name(quote((function(x) x)(1))), "")
 })

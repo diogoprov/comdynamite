@@ -20,12 +20,12 @@ pair_tree <- ape::read.tree(text = "(t1:5,t2:5);")
 test_that("the metric gives the mean distance worked out by hand", {
   comm <- rbind(a = c(t1 = 1, t2 = 0), b = c(0, 1), c = c(1, 1), d = c(3, 1))
   beta <- as.matrix(phylo_beta(comm, pair_tree))
-  expect_equal(beta["a", "b"], 10)
-  expect_equal(beta["a", "c"], 5)
-  expect_equal(beta["c", "b"], 5)
+  expect_identical(beta["a", "b"], 10)
+  expect_identical(beta["a", "c"], 5)
+  expect_identical(beta["c", "b"], 5)
   # weights 3/4 and 1/4 against the single species t2
   expect_equal(beta["d", "b"], 7.5)
-  expect_equal(unname(diag(beta)), rep(0, 4))
+  expect_identical(unname(diag(beta)), rep(0, 4))
 })
 
 test_that("the metric equals picante::comdist", {
@@ -55,7 +55,7 @@ test_that("pseudo-F and R2 equal a distance-based redundancy analysis in vegan",
   reference <- vegan::adonis2(beta ~ a + b, data = env, by = NULL, permutations = 0)
   n <- nrow(d$comm)
   out <- phylo_beta_test(d$comm, d$tree, env, n_perm = 2)
-  expect_equal(out$statistic, reference$F[1])
+  expect_identical(out$statistic, reference$F[1])
   expect_equal(out$r2_adjusted, 1 - (1 - reference$R2[1]) * (n - 1) / (n - 3))
 })
 
@@ -65,7 +65,7 @@ test_that("scores reproduce the predicted variation", {
   env <- cbind(d$env, runif(nrow(d$comm)))
   out <- phylo_beta_test(d$comm, d$tree, env, n_perm = 2)
   expect_lte(ncol(out$scores), 2)
-  expect_equal(nrow(out$scores), nrow(d$comm))
+  expect_identical(nrow(out$scores), nrow(d$comm))
   expect_identical(rownames(out$scores), rownames(d$comm))
   expect_identical(colnames(out$scores), paste0("PCoA", seq_len(ncol(out$scores))))
   centred <- gower_centre(as.matrix(phylo_beta(d$comm, d$tree)))
@@ -80,7 +80,7 @@ test_that("the test detects composition linked to phylogeny and environment", {
   expect_s3_class(out, "mc_phylo_beta")
   expect_lt(out$p_site, 0.05)
   expect_lt(out$p_species, 0.05)
-  expect_equal(out$p_max, max(out$p_site, out$p_species))
+  expect_identical(out$p_max, max(out$p_site, out$p_species))
   expect_gt(out$r2_adjusted, 0)
   expect_output(print(out), "p \\(max\\)")
 })

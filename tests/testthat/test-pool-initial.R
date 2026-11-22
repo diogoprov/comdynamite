@@ -53,7 +53,7 @@ test_that("pool and initial are matched by name and checked", {
   sim <- simulate_metacommunity(ls, traits, alpha, n_steps = 30, pool = pool,
                                 initial = pool[paste0("site", 1:4), sp])
   expect_false(sim$pool["site4", "b"])
-  expect_equal(sim$abundance["site4", "b"], 0)
+  expect_identical(sim$abundance["site4", "b"], 0L)
   expect_s3_class(as_mc_data(sim), "mc_data")
   expect_error(mc_dynamics(r3, alpha3, 0, pool = matrix(1, 6, 3)), "species names")
   expect_error(mc_dynamics(r3, alpha3, 0, pool = matrix(1, 6, 2, dimnames = list(NULL, sp[1:2]))),

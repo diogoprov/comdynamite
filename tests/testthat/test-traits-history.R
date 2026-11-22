@@ -5,16 +5,16 @@ test_that("node values do not change the tips nor the other traits", {
   plain <- trait_bm(tree, 0.6)
   set.seed(2)
   with_nodes <- trait_bm(tree, 0.6, nodes = TRUE)
-  expect_equal(as.vector(with_nodes), as.vector(plain))
+  expect_identical(as.vector(with_nodes), as.vector(plain))
   expect_named(attr(with_nodes, "nodes"), as.character(9:15))
-  expect_equal(attr(with_nodes, "nodes")[["9"]], 0)
+  expect_identical(attr(with_nodes, "nodes")[["9"]], 0)
   set.seed(3)
   a <- species_traits(tree, 0.6, sigma_signal = TRUE)
   set.seed(3)
   b <- species_traits(tree, 0.6, sigma_signal = TRUE, nodes = TRUE)
   expect_length(attr(b, "nodes"), 7)
   attr(b, "nodes") <- NULL
-  expect_equal(b, a)
+  expect_identical(b, a)
   expect_error(species_traits(5, nodes = TRUE), "needs a tree")
   expect_error(species_traits(tree, uniform_optima = TRUE, nodes = TRUE), "needs a tree")
 })
@@ -41,14 +41,14 @@ test_that("trait_ou keeps the values at the nodes it walked through", {
   tree <- ape::read.tree(text = "((a:1,b:1):1,c:2);")
   set.seed(5)
   x <- trait_ou(tree, n_traits = 2, root = 3)
-  expect_equal(dim(attr(x, "nodes")), c(2, 2))
-  expect_equal(unname(attr(x, "nodes")["4", ]), c(3, 3))
-  expect_equal(rownames(attr(x, "nodes")), c("4", "5"))
+  expect_identical(dim(attr(x, "nodes")), c(2L, 2L))
+  expect_identical(unname(attr(x, "nodes")["4", ]), c(3, 3))
+  expect_identical(rownames(attr(x, "nodes")), c("4", "5"))
   set.seed(5)
   nodeless <- trait_ou(tree, n_traits = 2, root = 3)
   attr(nodeless, "nodes") <- NULL
   set.seed(5)
-  expect_equal(unclass(trait_ou(tree, n_traits = 2, root = 3))[, ], nodeless[, ])
+  expect_identical(unclass(trait_ou(tree, n_traits = 2, root = 3))[, ], nodeless[, ])
 })
 
 test_that("trait_mk gives a history in the format of phytools", {
@@ -58,13 +58,13 @@ test_that("trait_mk gives a history in the format of phytools", {
   expect_s3_class(h, c("simmap", "phylo"))
   expect_equal(unname(rowSums(h$mapped.edge)), h$edge.length)
   expect_equal(vapply(h$maps, sum, numeric(1)), h$edge.length)
-  expect_equal(names(dimnames(h$mapped.edge)), c("", "state"))
-  expect_equal(h$node.states[h$edge[, 1] == 13, 1][1], "x")
+  expect_named(dimnames(h$mapped.edge), c("", "state"))
+  expect_identical(h$node.states[h$edge[, 1] == 13, 1][1], "x")
   ends <- vapply(h$maps, function(m) names(m)[length(m)], character(1))
-  expect_equal(unname(h$states[h$tip.label]), unname(ends[match(1:12, h$edge[, 2])]))
-  expect_equal(unname(ends), h$node.states[, 2])
+  expect_identical(unname(h$states[h$tip.label]), unname(ends[match(1:12, h$edge[, 2])]))
+  expect_identical(unname(ends), h$node.states[, 2])
   skip_if_not_installed("phytools")
-  expect_equal(sum(phytools::countSimmap(h)$N), sum(vapply(h$maps, length, integer(1)) - 1))
+  expect_identical(sum(phytools::countSimmap(h)$N), sum(vapply(h$maps, length, integer(1L)) - 1L))
 })
 
 test_that("trait_mk follows the rates and checks its arguments", {
@@ -89,22 +89,23 @@ test_that("tip_history_metrics follows its definitions on a known history", {
   h <- ape::read.tree(text = "((a:0.5,b:0.5):1,c:1.5);")
   h <- ape::reorder.phylo(h, "cladewise")
   e <- paste(h$edge[, 1], h$edge[, 2])
-  maps <- list("4 5" = c(x = 0.4, y = 0.6), "5 1" = c(y = 0.2, x = 0.1, y = 0.2),
+  maps <- list("4 5" = c(x = 0.4, y = 0.6),
+               "5 1" = stats::setNames(c(0.2, 0.1, 0.2), c("y", "x", "y")),
                "5 2" = c(y = 0.5), "4 3" = c(x = 1.5))
   h$maps <- unname(maps[e])
   class(h) <- c("simmap", "phylo")
   m <- tip_history_metrics(h)
   # tip a: state y; nodes 5 (y) and 4 (x)
-  expect_equal(m["a", "transitions"], 1)
-  expect_equal(m["a", "total_nodes"], 2)
+  expect_identical(m["a", "transitions"], 1L)
+  expect_identical(m["a", "total_nodes"], 2L)
   expect_equal(m["a", "prop_transitions"], 0.5)
   expect_equal(m["a", "last_transition_time"], 0.5 + 1)
   expect_equal(m["a", "stasis_time"], 0.6)
-  expect_equal(m["a", "changes"], 3)
+  expect_identical(m["a", "changes"], 3L)
   expect_equal(m["a", "time_since_change"], 0.2)
   # tip b: y all along its edge, then y back to 0.4 on the edge below
   expect_equal(m["b", "time_since_change"], 0.5 + 0.6)
-  expect_equal(m["b", "changes"], 1)
+  expect_identical(m["b", "changes"], 1L)
   # tip c: x since the root, one node (the root), nothing changed
   expect_equal(unlist(m["c", ]), c(transitions = 0, total_nodes = 1, prop_transitions = 0,
                                    last_transition_time = 1.5, stasis_time = 1.5, changes = 0,

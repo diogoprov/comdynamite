@@ -33,7 +33,7 @@ test_that("animate_food_web writes a GIF", {
   x <- fw()
   file <- tempfile(fileext = ".gif")
   expect_identical(animate_food_web(x, file, frames = 4, width = 200, height = 200), file)
-  expect_true(file.size(file) > 0)
+  expect_gt(file.size(file), 0)
   bare <- tempfile()
   expect_identical(animate_food_web(x, bare, frames = 2, width = 100, height = 100),
                    paste0(bare, ".gif"))

@@ -43,8 +43,8 @@ test_that("time of abc_fit() grows no faster than about n log n with the referen
     fastest(function() abc_fit(table, parameters = "a", ntree = 50, ncores = 1))
   }, numeric(1))
   slope <- unname(stats::coef(stats::lm(log(seconds) ~ log(sizes)))[2])
-  timing_report("abc_fit: seconds ", paste(signif(seconds, 3), collapse = ", "),
-                " for ", paste(sizes, collapse = ", "), " rows; slope ", signif(slope, 3))
+  timing_report("abc_fit: seconds ", toString(signif(seconds, 3)),
+                " for ", toString(sizes), " rows; slope ", signif(slope, 3))
   expect_true(all(is.finite(seconds) & seconds > 0))
   expect_lt(slope, 1.6)
 })
@@ -88,7 +88,7 @@ test_that("time of trait_gradient_bayes() grows moderately with the number of sp
   seconds <- c(small = system.time(fit(small))[["elapsed"]],
                large = system.time(fit(large))[["elapsed"]])
   ratio <- seconds[["large"]] / seconds[["small"]]
-  timing_report("trait_gradient_bayes: seconds ", paste(signif(seconds, 3), collapse = ", "),
+  timing_report("trait_gradient_bayes: seconds ", toString(signif(seconds, 3)),
                 " for 15 and 30 species; ratio ", signif(ratio, 3))
   expect_true(all(is.finite(seconds) & seconds > 0))
   expect_lt(ratio, 20)

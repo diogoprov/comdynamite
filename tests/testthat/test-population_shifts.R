@@ -51,9 +51,9 @@ test_that("the grid of widths starts at the spread within populations", {
   pops <- split(ind$trait, paste(ind$site, ind$species))
   pooled <- sqrt(sum(vapply(pops, function(v) sum((v - mean(v))^2), 0)) /
                    (nrow(ind) - length(pops)))
-  expect_equal(min(prof$width), pooled)
-  expect_equal(attr(fit, "floor"), pooled)
-  expect_equal(nrow(prof), 22)
+  expect_identical(min(prof$width), pooled)
+  expect_identical(attr(fit, "floor"), pooled)
+  expect_identical(nrow(prof), 22L)
   narrow <- suppressWarnings(population_shifts(make_shifts(within_sd = 0.01, c = 2)))
   expect_null(attr(narrow, "floor"))
 })
@@ -101,13 +101,13 @@ test_that("community adds competitors that were not measured", {
   a <- population_shifts(ind, width = 0.5)
   set.seed(1)
   b <- population_shifts(ind, width = 0.5, community = only_measured, abundance = NULL)
-  expect_equal(a$displacement, b$displacement)
+  expect_identical(a$displacement, b$displacement)
   # drop the measurements of three species at half the sites: community still counts them,
   # which reduces the attenuation of c
   est <- vapply(1:8, function(s) {
     full <- make_shifts(c = 2, n_ind = 10, within_sd = 0.1, seed = 100 + s)
     gone <- full$species %in% c("sp3", "sp5", "sp7") &
-      as.integer(sub("s", "", full$site)) %% 2 == 0
+      as.integer(sub("s", "", full$site, fixed = TRUE)) %% 2 == 0
     set.seed(s)
     without <- population_shifts(full[!gone, ], width = 0.5)$displacement
     set.seed(s)
@@ -146,7 +146,7 @@ test_that("the bootstrap tests and corrects displacement", {
   expect_lt(fit$local_adaptation_low, 0.5)
   expect_gt(fit$local_adaptation_high, 0.5)
   boot <- attr(fit, "bootstrap")
-  expect_equal(as.vector(table(boot$set)[c("null", "fitted")]), c(39, 39))
+  expect_identical(as.vector(table(boot$set)[c("null", "fitted")]), c(39L, 39L))
   null <- make_shifts(c = 0, seed = 6)
   set.seed(3)
   fit0 <- population_shifts(null, width = 0.5, nboot = 39)
@@ -184,7 +184,7 @@ test_that("plot() draws the profile of a fit", {
   p <- plot(fit)
   expect_s3_class(p, "ggplot")
   b <- ggplot2::ggplot_build(p)
-  expect_equal(nlevels(b$data[[2]]$PANEL), 3)
+  expect_identical(nlevels(b$data[[2]]$PANEL), 3L)
   expect_true(any(vapply(b$data, function(l) "xintercept" %in% names(l) &&
                            any(abs(l$xintercept - log10(fit$width)) < 1e-8), logical(1))))
   expect_error(plot(population_shifts(ind, width = 0.5)), "fixed")
@@ -193,7 +193,7 @@ test_that("plot() draws the profile of a fit", {
 test_that("unmeasured competitors follow the gradient with the fitted slopes", {
   ind <- make_shifts(h = 1, c = 2, n_ind = 8, seed = 11)
   community <- attr(ind, "community")
-  gone <- ind$species == "sp4" & as.integer(sub("s", "", ind$site)) %% 2 == 0
+  gone <- ind$species == "sp4" & as.integer(sub("s", "", ind$site, fixed = TRUE)) %% 2 == 0
   kept <- ind[!gone, ]
   set.seed(1)
   fit <- population_shifts(kept, width = 0.5, community = community, abundance = NULL)
@@ -203,7 +203,7 @@ test_that("unmeasured competitors follow the gradient with the fitted slopes", {
   prep <- shifts_prepare(d, ".env1", community)
   first <- shifts_fit(prep, 0.5, FALSE, "local_adaptation")$table$local_adaptation
   full <- shifts_fit_full(prep, 0.5, FALSE, "local_adaptation")
-  expect_equal(full$table$displacement, fit$displacement)
+  expect_identical(full$table$displacement, fit$displacement)
   pops <- unique(d[c("site", "species", ".env1")])
   sp4 <- pops[pops$species == "sp4", ]
   members <- full$prep$members
@@ -223,7 +223,7 @@ test_that("unmeasured competitors follow the gradient with the fitted slopes", {
 test_that("a community with one species keeps its names", {
   ind <- make_shifts(n_species = 1, n_sites = 20, seed = 12)
   community <- attr(ind, "community")
-  expect_equal(ncol(community), 1)
+  expect_identical(ncol(community), 1L)
   fit <- population_shifts(ind, width = 0.5, community = community, abundance = NULL)
   expect_true(is.na(fit$displacement))
 })
@@ -241,7 +241,7 @@ test_that("the bootstrap centres the p-value and corrects from the generating va
   c0 <- max(fit$displacement, 0)
   expect_equal(fit$displacement_corrected, fit$displacement - (mean(c_fitted) - c0))
   q <- stats::quantile(c_fitted, c(0.975, 0.025), names = FALSE)
-  expect_equal(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
+  expect_identical(c(fit$displacement_low, fit$displacement_high), fit$displacement - (q - c0))
 })
 
 test_that("the variance of populations weighs means of few individuals little", {
@@ -282,8 +282,8 @@ test_that("with c below zero the slopes are simulated from the fit without displ
   boot <- attr(fit, "bootstrap")
   slopes <- boot$local_adaptation[boot$set == "fitted"]
   q <- stats::quantile(slopes, c(0.975, 0.025), names = FALSE)
-  expect_equal(c(fit$local_adaptation_low, fit$local_adaptation_high),
-               fit$local_adaptation - (q - null$table$local_adaptation))
+  expect_identical(c(fit$local_adaptation_low, fit$local_adaptation_high),
+                   fit$local_adaptation - (q - null$table$local_adaptation))
   expect_false(isTRUE(all.equal(null$table$local_adaptation, fit$local_adaptation)))
 })
 
@@ -303,11 +303,12 @@ test_that("the fitted set keeps the deviations of populations with a wide kernel
 
 test_that("the slope of the push matches its numerical derivative, with unmeasured competitors", {
   full <- make_shifts(c = 2, seed = 41)
-  gone <- full$species == "sp3" & as.integer(sub("s", "", full$site)) %% 2 == 0
+  gone <- full$species == "sp3" &
+    as.integer(sub("s", "", full$site, fixed = TRUE)) %% 2 == 0
   d <- transform(full[!gone, ], .env1 = env)[c("trait", "site", "species", ".env1")]
   set.seed(1)
   prep <- shifts_prepare(d, ".env1", attr(full, "community"))
-  expect_true(any(vapply(prep$members, function(m) length(m$ext_mean) > 0, logical(1))))
+  expect_true(any(vapply(prep$members, function(m) length(m$ext_mean), integer(1)) > 0))
   slope <- shifts_push_slope(prep, 0.5)
   eps <- 1e-6
   numeric_slope <- vapply(seq_len(prep$n_pops), function(j) {
@@ -319,7 +320,7 @@ test_that("the slope of the push matches its numerical derivative, with unmeasur
 })
 
 test_that("the variance of populations is zero without residuals or sampling error", {
-  expect_equal(population_variance(c(0, 0), 0), 0)
+  expect_identical(population_variance(c(0, 0), 0), 0)
 })
 
 test_that("population_shifts() checks the collinearity of its variables", {
@@ -329,7 +330,7 @@ test_that("population_shifts() checks the collinearity of its variables", {
                "collinear: env3")
   set.seed(5)
   noise <- stats::rnorm(25, sd = 0.02)
-  ind$near <- ind$env + noise[as.integer(sub("s", "", ind$site))]
+  ind$near <- ind$env + noise[as.integer(sub("s", "", ind$site, fixed = TRUE))]
   expect_warning(population_shifts(ind, env = c("env", "near"), width = 0.5),
                  "variance inflation")
 })
@@ -347,10 +348,10 @@ test_that("population_shifts() accessors read the table, the bootstrap and the m
   fit <- population_shifts(ind, env = c("env", "env2"), width = 0.5, nboot = 9)
   names <- c("local_adaptation_env", "local_adaptation_env2", "displacement")
   expect_named(coef(fit), names)
-  expect_equal(coef(fit)[["displacement"]], fit$displacement)
+  expect_identical(coef(fit)[["displacement"]], fit$displacement)
   ci <- confint(fit)
   expect_identical(rownames(ci), names)
-  expect_equal(ci["displacement", 1], fit$displacement_low)
+  expect_identical(ci["displacement", 1], fit$displacement_low)
   expect_error(confint(fit, level = 0.5), "level = 0.95")
   expect_identical(rownames(confint(fit, "displacement")), "displacement")
   v <- vcov(fit)
@@ -358,7 +359,7 @@ test_that("population_shifts() accessors read the table, the bootstrap and the m
   expect_identical(nobs(fit), fit$n_populations)
   m <- attr(fit, "model")
   expect_equal(fitted(fit) + residuals(fit), m$response)
-  expect_equal(nrow(m), 2 * fit$n_populations)
+  expect_identical(nrow(m), 2L * fit$n_populations)
   expect_equal(1 - sum(residuals(fit)^2) / sum(m$response^2), fit$r_squared)
   plain <- population_shifts(ind, width = 0.5)
   expect_error(confint(plain), "nboot > 0")

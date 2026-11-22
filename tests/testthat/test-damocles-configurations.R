@@ -54,9 +54,9 @@ test_that("damocles_samples fits each configuration and summarises them", {
   # one regime is the constant model, with no test
   expect_true(is.na(res$samples$p_value[3]))
   expect_equal(res$samples$loglik[3], attr(res$constant, "loglik_total"), tolerance = 1e-6)
-  expect_equal(res$samples$loglik[1], attr(damocles_fit(comm, tree, shared = TRUE,
-                                                        regimes = reg, vary = "gamma"),
-                                           "loglik_total"))
+  expect_identical(res$samples$loglik[1], attr(damocles_fit(comm, tree, shared = TRUE,
+                                                            regimes = reg, vary = "gamma"),
+                                               "loglik_total"))
   expect_output(print(res), "3 configurations")
   s <- summary(res)
   expect_identical(rownames(s$parameters), "mu")
@@ -79,8 +79,8 @@ test_that("damocles_partition_test compares a partition with random ones", {
   tree <- treeshapesim::sim_tree_shape(30)
   reg <- clade_regimes(tree, list(A = ape::Ntip(tree) + 2))
   comm <- simulate_damocles(tree, ifelse(reg == "A", 3, 0.5), 1, n = 5)
-  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma"),
-                 "cannot be below")
+  res <- expect_warning_value(damocles_partition_test(comm, tree, reg, n_rand = 9, vary = "gamma"),
+                              "cannot be below")
   expect_s3_class(res, "mc_damocles_partition")
   expect_length(res$null, res$n_distinct)
   expect_lte(res$n_distinct, 9)
@@ -132,24 +132,25 @@ test_that("bootstrap fits that fail are left out", {
   reg <- clade_regimes(tree, list(A = ape::Ntip(tree) + 2))
   comm <- simulate_damocles(tree, ifelse(reg == "A", 3, 0.5), 1, n = 5)
   real_sim <- simulate_damocles
-  calls <- 0
+  count <- new.env()
+  count$calls <- 0
   local_mocked_bindings(simulate_damocles = function(...) {
-    calls <<- calls + 1
+    count$calls <- count$calls + 1
     out <- real_sim(...)
-    if (calls == 1) out[] <- NA  # a set that cannot be fitted
+    if (count$calls == 1) out[] <- NA  # a set that cannot be fitted
     out
   })
   set.seed(6)
-  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 3,
-                                                vary = "gamma"),
-                 "1 of 3 bootstrap fits failed")
+  res <- expect_warning_value(damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 3,
+                                                      vary = "gamma"),
+                              "1 of 3 bootstrap fits failed")
   expect_length(res$null_boot, 2)
   local_mocked_bindings(simulate_damocles = function(...) {
     out <- real_sim(...); out[] <- NA; out
   })
-  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 2,
-                                                vary = "gamma"),
-                 "2 of 2")
+  res <- expect_warning_value(damocles_partition_test(comm, tree, reg, n_rand = 0, n_boot = 2,
+                                                      vary = "gamma"),
+                              "2 of 2")
   expect_true(is.na(res$p_boot))
 })
 
@@ -159,35 +160,35 @@ test_that("random partitions that split the tree as the original are excluded", 
                                        "(g:1,h:1):1):1);"))
   # Regime A on the clade of node 10 and its stem, as a shift on that edge.
   reg <- factor(ifelse(seq_len(nrow(tree$edge)) %in% 1:7, "A", "0"))
-  expect_equal(adjusted_rand(reg, reg), 1)
+  expect_identical(adjusted_rand(reg, reg), 1)
   swapped <- factor(ifelse(reg == "A", "0", "A"))
-  expect_equal(adjusted_rand(reg, swapped), 1)
-  expect_equal(adjusted_rand(rep("a", 4), rep("b", 4)), 1)  # one block each: same partition
+  expect_identical(adjusted_rand(reg, swapped), 1)
+  expect_identical(adjusted_rand(rep("a", 4), rep("b", 4)), 1)  # one block each: same partition
   expect_error(random_regimes(tree, reg), "matching `regimes`")
   set.seed(4)
   comm <- simulate_damocles(tree, 1, 1, n = 4)
-  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma"),
-                 "no random partition")
+  res <- expect_warning_value(damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma"),
+                              "no random partition")
   expect_true(is.na(res$p_random))
   expect_length(res$null, 0)
   # With max_overlap = 1 the complement and the clade itself are allowed: two partitions.
-  expect_warning(res <- damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma",
-                                                max_overlap = 1),
-                 "distinct random partitions")
+  res <- expect_warning_value(damocles_partition_test(comm, tree, reg, n_rand = 5, vary = "gamma",
+                                                      max_overlap = 1),
+                              "distinct random partitions")
   expect_gte(res$p_random, 1 / 3)
 })
 
 test_that("dr_rates follows the equal-splits definition", {
   tree <- ape::read.tree(text = "((a:1,b:1):2,(c:2,(d:1,e:1):1):1);")
   dr <- dr_rates(tree)
-  expect_identical(names(dr), tree$tip.label)
+  expect_named(dr, tree$tip.label)
   expect_equal(dr[["a"]], 1 / (1 + 2 / 2))
   expect_equal(dr[["d"]], 1 / (1 + 1 / 2 + 1 / 4))
   expect_equal(dr[["c"]], 1 / (2 + 1 / 2))
   per_edge <- dr_rates(tree, per = "edge")
   expect_length(per_edge, nrow(tree$edge))
   terminal <- tree$edge[, 2] <= ape::Ntip(tree)
-  expect_equal(per_edge[terminal], unname(dr[tree$edge[terminal, 2]]))
+  expect_identical(per_edge[terminal], unname(dr[tree$edge[terminal, 2]]))
   ab <- tree$edge[, 2] == ape::getMRCA(tree, c("a", "b"))
   expect_equal(per_edge[ab], sqrt(dr[["a"]] * dr[["b"]]))
   expect_error(dr_rates(list()), "phylo")

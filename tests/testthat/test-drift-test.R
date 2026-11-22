@@ -18,34 +18,35 @@ test_that("drift_test() regresses log variance among groups on log eigenvalues o
   e <- eigen(W, symmetric = TRUE)
   b <- apply(m %*% e$vectors, 2, var)
   fit <- lm(log(b) ~ log(e$values))
-  expect_equal(test$slope, unname(coef(fit)[2]))
-  expect_equal(unname(test$W), unname(W))
-  expect_equal(test$components$between, b)
+  expect_identical(test$slope, unname(coef(fit)[2]))
+  expect_identical(unname(test$W), unname(W))
+  expect_identical(test$components$between, b)
   expect_true(all(test$components$sampling == 0))
   # the sampling variance of the means, P / n on each component, is subtracted by default
   fixed <- drift_test(ind, grp)
   expect_equal(fixed$components$sampling, e$values / 10)
   expect_equal(fixed$components$between, b - e$values / 10)
-  expect_equal(test$df, 2)
+  expect_identical(test$df, 2)
   expect_equal(test$p_value, 2 * pt(-abs((test$slope - 1) / test$se), 2))
-  expect_true(test$conf_int[1] < test$slope && test$slope < test$conf_int[2])
+  expect_lt(test$conf_int[1], test$slope)
+  expect_lt(test$slope, test$conf_int[2])
   # data frames with a group column, and a known G
   df <- data.frame(site = grp, ind, label = "a")
-  expect_equal(drift_test(df, "site", correct = FALSE)$slope, test$slope)
-  expect_equal(drift_test(df, df$site, traits = paste0("t", 1:4), correct = FALSE)$slope,
-               test$slope)
+  expect_identical(drift_test(df, "site", correct = FALSE)$slope, test$slope)
+  expect_identical(drift_test(df, df$site, traits = paste0("t", 1:4), correct = FALSE)$slope,
+                   test$slope)
   # a group given as a vector equal to a numeric column leaves that column out
-  expect_equal(drift_test(df, df$site, correct = FALSE)$slope, test$slope)
+  expect_identical(drift_test(df, df$site, correct = FALSE)$slope, test$slope)
   known <- drift_test(ind, grp, W = G)
   # W is matched to the traits by name, also as a data frame
   named <- G
   dimnames(named) <- list(paste0("t", 1:4), paste0("t", 1:4))
-  expect_equal(drift_test(ind, grp, W = named[4:1, 4:1])$slope, known$slope)
-  expect_equal(drift_test(ind, grp, W = as.data.frame(named))$slope, known$slope)
+  expect_identical(drift_test(ind, grp, W = named[4:1, 4:1])$slope, known$slope)
+  expect_identical(drift_test(ind, grp, W = as.data.frame(named))$slope, known$slope)
   bad <- named
   dimnames(bad) <- list(letters[1:4], letters[1:4])
   expect_error(drift_test(ind, grp, W = bad), "names of `W`")
-  expect_equal(unname(known$W), G)
+  expect_identical(unname(known$W), G)
   expect_output(print(known), "slope = 1")
   expect_s3_class(plot(known), "ggplot")
   # divergence only along the minor axis gives a slope below 1

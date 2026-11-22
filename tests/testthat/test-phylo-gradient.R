@@ -42,7 +42,7 @@ test_that("the correlation and fractions match the original code in Octave", {
   expect_equal(f$r2[1:3], c(0.8839515378, 0.8816771038, 0.0107264733), tolerance = 1e-9)
   expect_equal(f$r2_adjusted[c(4, 6)], c(0.9637275518, -0.0160919076), tolerance = 1e-9)
   expect_equal(out$component_share, 19.630 / 20, tolerance = 1e-3)
-  expect_equal(sum(f$r2[f$fraction %in% c("a", "b", "c", "d")]), 1)
+  expect_identical(sum(f$r2[f$fraction %in% c("a", "b", "c", "d")]), 1)
   expect_true(all(is.na(f$p_max[f$fraction %in% c("b", "d")])))
   expect_output(print(out), "mean component")
 })
@@ -51,7 +51,7 @@ test_that("mean and variance shares add to one", {
   a <- example_a()
   mean_part <- trait_partition(a$comm, a$trait, a$env, a$space, n_perm = 1)
   dispersion <- trait_partition(a$comm, a$trait, a$env, a$space, "variance", n_perm = 1)
-  expect_equal(mean_part$component_share + dispersion$component_share, 1)
+  expect_identical(mean_part$component_share + dispersion$component_share, 1)
   expect_identical(dispersion$component, "variance")
 })
 
@@ -71,8 +71,8 @@ test_that("nulls have one row per permutation", {
   set.seed(1)
   out <- corner_nulls(a$comm, as.matrix(a$trait), as.matrix(a$env), as.matrix(a$env),
                       t(replicate(2, sample.int(nrow(a$comm)))), 2)
-  expect_equal(dim(out$site), c(2, 1))
-  expect_equal(dim(out$taxa), c(2, 1))
+  expect_identical(dim(out$site), c(2L, 1L))
+  expect_identical(dim(out$taxa), c(2L, 1L))
 })
 
 test_that("weighted coordinates are centred and orthogonal under the weights", {
@@ -91,7 +91,7 @@ test_that("the phylogenetic vector follows a phylogenetic response", {
   expect_s3_class(out, "mc_phylo_vector")
   expect_lte(out$p_max, 0.05)
   expect_gt(length(out$selected), 0)
-  expect_identical(names(out$pev), colnames(d$comm))
+  expect_named(out$pev, colnames(d$comm))
   expect_gte(abs(out$correlation[["pev"]]), 0.3)
   expect_output(print(out), "PEV-B")
   if (requireNamespace("ggplot2", quietly = TRUE)) {
@@ -120,7 +120,7 @@ test_that("absent species are left out", {
   d$comm[, 1] <- 0
   out <- phylo_vector(d$comm, d$tree, d$env, n_perm = 19, n_sim = 5,
                       site_permutations = t(replicate(19, sample(nrow(d$comm)))))
-  expect_equal(nrow(out$eigenvectors), ncol(d$comm) - 1)
+  expect_identical(nrow(out$eigenvectors), ncol(d$comm) - 1L)
   expect_error(phylo_vector(d$comm, d$tree, d$env, n_perm = 9, site_permutations = cbind(1:3)))
 })
 
@@ -147,8 +147,9 @@ test_that("semipartials are the loss of R2 of separate weighted regressions", {
   loss <- explained(full) - explained(lm(y ~ . - e1, x, weights = w))
   slope <- coef(lm(y ~ e1, x, weights = w))[["e1"]]
   expect_equal(out$semipartial["e1", "t1"], sign(slope) * sqrt(loss / sum(d$comm)))
-  expect_equal(dimnames(out$semipartial), list(c("e1", "e2", "space1", "space2"), c("t1", "t2")))
-  expect_equal(out$p_partial_max, pmax(out$p_partial_site, out$p_partial_species))
+  expect_identical(dimnames(out$semipartial),
+                   list(c("e1", "e2", "space1", "space2"), c("t1", "t2")))
+  expect_identical(out$p_partial_max, pmax(out$p_partial_site, out$p_partial_species))
 })
 
 test_that("the sign of a semipartial follows the predictor", {
@@ -157,7 +158,7 @@ test_that("the sign of a semipartial follows the predictor", {
   one <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 1)$semipartial
   set.seed(1)
   other <- trait_partition(d$comm, d$trait, -d$env, d$space, n_perm = 1)$semipartial
-  expect_equal(one[1:2, ], -other[1:2, ])
+  expect_identical(one[1:2, ], -other[1:2, ])
 })
 
 test_that("collinear predictors give no semipartials", {
@@ -180,8 +181,8 @@ test_that("the statistic of a and c is the share of the component left by the ot
   expect_true(is.na(f["d", "statistic"]))
   # one environmental variable: its semipartial test is the test of a
   one <- trait_partition(d$comm, d$trait[, 1], d$env[, 1], d$space, n_perm = 2)
-  expect_equal(one$p_partial_site[1, 1], one$fractions$p_site[one$fractions$fraction == "a"])
-  expect_equal(dimnames(one$semipartial), list(c("env1", "space1", "space2"), "trait1"))
+  expect_identical(one$p_partial_site[1, 1], one$fractions$p_site[one$fractions$fraction == "a"])
+  expect_identical(dimnames(one$semipartial), list(c("env1", "space1", "space2"), "trait1"))
 })
 
 test_that("a fraction that cannot be estimated has no p-value", {
@@ -200,8 +201,11 @@ test_that("a fraction that cannot be estimated has no p-value", {
 
 shared_data <- function(structured = TRUE, side = 6, k = 12) {
   coords <- as.matrix(expand.grid(x = seq_len(side), y = seq_len(side)))
-  mems <- NULL
-  capture.output(mems <- as.matrix(adespatial::dbmem(coords, silent = TRUE)))
+  mems <- local({  # dbmem() prints a note on regular grids
+    sink(nullfile())
+    on.exit(sink())
+    as.matrix(adespatial::dbmem(coords, silent = TRUE))
+  })
   space <- mems[, 1:3]
   env <- if (structured) 50 + 25 * mems[, 1] / max(abs(mems[, 1])) + rnorm(side^2, 0, 3) else {
     runif(side^2, 0, 100)
@@ -220,10 +224,11 @@ test_that("the shared fraction is tested with Moran spectral randomisation", {
                          coords = d$coords)
   f <- out$fractions
   rownames(f) <- f$fraction
-  expect_equal(out$shared[c("null", "draws", "tested")], list(null = "msr", draws = 19L, tested = TRUE))
+  expect_identical(out$shared[c("null", "draws", "tested")],
+                   list(null = "msr", draws = 19L, tested = TRUE))
   expect_lte(out$shared$p_env_space, 0.05)
   expect_false(anyNA(f["b", c("p_site", "p_species", "p_max")]))
-  expect_equal(f["b", "p_max"], max(f["b", c("p_site", "p_species")]))
+  expect_identical(f["b", "p_max"], max(f["b", c("p_site", "p_species")]))
   expect_true(is.na(f["d", "p_max"]))
   expect_output(print(out), "19 Moran spectral randomisations of env")
   # the other fractions do not depend on the request
@@ -231,9 +236,10 @@ test_that("the shared fraction is tested with Moran spectral randomisation", {
   plain <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19)
   expect_equal(plain$fractions[c("r2", "statistic")], f[c("r2", "statistic")], ignore_attr = TRUE)
   expect_true(all(is.na(plain$fractions$p_max[plain$fractions$fraction == "b"])))
-  expect_equal(plain$shared, list(null = "none", draws = 0L, p_env_space = NA_real_, tested = FALSE))
+  expect_identical(plain$shared,
+                   list(null = "none", draws = 0L, p_env_space = NA_real_, tested = FALSE))
   expect_output(print(plain), "permutations:")
-  expect_false(any(grepl("shared", capture.output(print(plain)))))
+  expect_false(any(grepl("shared", capture.output(print(plain)), fixed = TRUE)))
 })
 
 test_that("the shared fraction stays untested when env is unrelated to space", {
@@ -260,8 +266,8 @@ test_that("the shared fraction is tested with moves of env on a grid", {
   set.seed(3)
   out <- trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 19, site_permutations = moves,
                          shared_null = "sites")
-  expect_equal(out$shared$null, "sites")
-  expect_equal(out$shared$draws, 19L)
+  expect_identical(out$shared$null, "sites")
+  expect_identical(out$shared$draws, 19L)
   expect_true(out$shared$tested)
   expect_false(anyNA(out$fractions$p_max[out$fractions$fraction == "b"]))
   expect_output(print(out), "19 moves of env alone")
@@ -281,7 +287,7 @@ test_that("restricted permutations move each set alone against the other", {
   moves <- torus_permutations(6)[1:19, ]
   set.seed(4)
   out <- trait_partition(d$comm, traits, env, d$space, n_perm = 19, site_permutations = moves)
-  expect_equal(out$permutations$moved, "each set alone")
+  expect_identical(out$permutations$moved, "each set alone")
   expect_output(print(out), "sites move env alone for ab, a and its semipartials, space alone")
   f <- out$fractions
   rownames(f) <- f$fraction
@@ -308,25 +314,25 @@ test_that("restricted permutations move each set alone against the other", {
   observed <- stat(id, id)
   nulls <- lapply(list(both = c(TRUE, TRUE), env = c(TRUE, FALSE), space = c(FALSE, TRUE)),
                   function(move) {
-                    sapply(1:19, function(r) {
+                    simplify2array(lapply(1:19, function(r) {
                       stat(if (move[1]) moves[r, ] else id, if (move[2]) moves[r, ] else id)
-                    })
+                    }))
                   })
   p <- function(null, name) permutation_p(nulls[[null]][name, ], observed[[name]])
-  expect_equal(f["abc", "p_site"], p("both", "abc"))
-  expect_equal(f["ab", "p_site"], p("env", "ab"))
-  expect_equal(f["a", "p_site"], p("env", "a"))
-  expect_equal(f["bc", "p_site"], p("space", "bc"))
-  expect_equal(f["c", "p_site"], p("space", "c"))
-  expect_equal(out$p_partial_site["e", "t2"], p("env", "loss_env1_t2"))
-  expect_equal(out$p_partial_site["MEM2", "t1"], p("space", "loss_space2_t1"))
+  expect_identical(f["abc", "p_site"], p("both", "abc"))
+  expect_identical(f["ab", "p_site"], p("env", "ab"))
+  expect_identical(f["a", "p_site"], p("env", "a"))
+  expect_identical(f["bc", "p_site"], p("space", "bc"))
+  expect_identical(f["c", "p_site"], p("space", "c"))
+  expect_identical(out$p_partial_site["e", "t2"], p("env", "loss_env1_t2"))
+  expect_identical(out$p_partial_site["MEM2", "t1"], p("space", "loss_space2_t1"))
   # the test of c is not the test with both sets moved
   expect_false(isTRUE(all.equal(f["c", "p_site"], p("both", "c"))))
   # free permutations keep moving both sets together
   set.seed(4)
   free <- trait_partition(d$comm, traits, env, d$space, n_perm = 19)
-  expect_equal(free$permutations$moved, "together")
-  expect_false(any(grepl("move env alone", capture.output(print(free)))))
+  expect_identical(free$permutations$moved, "together")
+  expect_false(any(grepl("move env alone", capture.output(print(free)), fixed = TRUE)))
 })
 
 test_that("the shared test explains what it needs", {
@@ -347,11 +353,11 @@ test_that("the shared test explains what it needs", {
 test_that("orient_vectors() makes the largest absolute value of each column positive", {
   v <- cbind(c(0.2, -0.9, 0.1), c(0.5, 0.5, -0.5), c(-0.5, 0.5, 0.1))
   out <- orient_vectors(v)
-  expect_equal(out[, 1], -v[, 1])
-  expect_equal(out[, 2], v[, 2])
-  expect_equal(out[, 3], -v[, 3])
-  expect_equal(orient_vectors(-v), out)
-  expect_equal(dim(orient_vectors(v[, 0, drop = FALSE])), c(3, 0))
+  expect_identical(out[, 1], -v[, 1])
+  expect_identical(out[, 2], v[, 2])
+  expect_identical(out[, 3], -v[, 3])
+  expect_identical(orient_vectors(-v), out)
+  expect_identical(dim(orient_vectors(v[, 0, drop = FALSE])), c(3L, 0L))
 })
 
 test_that("phylo_vector() and phylo_eigenvectors() have oriented eigenvectors", {
@@ -375,7 +381,7 @@ test_that("plot() draws the correlations of the eigenvectors, retained or not", 
   p <- plot(out)
   expect_s3_class(p, "ggplot")
   built <- ggplot2::ggplot_build(p)
-  expect_equal(nrow(built$data[[2]]), length(out$eigenvector_correlation))
+  expect_identical(nrow(built$data[[2]]), length(out$eigenvector_correlation))
   none <- out
   none$selected <- integer()
   expect_ggplot(plot(none))

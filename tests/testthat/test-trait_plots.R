@@ -10,7 +10,7 @@ test_that("null_intervals() summarises the nulls of tstats() and community_index
   ind <- toy_plots()
   res <- tstats(ind, traits = "size", n_perm = 99)
   d <- null_intervals(res, level = 0.9, inner = 0.5)
-  expect_equal(nrow(d), 3 * 7)
+  expect_identical(nrow(d), 3L * 7L)
   null <- attr(res, "null")
   row <- d[d$site == "s1" & d$statistic == "T_IC.IR", ]
   v <- null[, 1, "T_IC.IR"]
@@ -19,13 +19,13 @@ test_that("null_intervals() summarises the nulls of tstats() and community_index
   expect_equal(row$null_median, stats::median(v))
   # deviation agrees with tstats_summary() at the same size
   s <- tstats_summary(res, level = 0.9)$sites
-  expect_equal(d$deviation, s$deviation[match(paste(d$site, d$statistic),
-                                              paste(s$site, s$statistic))])
+  expect_identical(d$deviation, s$deviation[match(paste(d$site, d$statistic),
+                                                  paste(s$site, s$statistic))])
   expect_true(is.na(d$deviation[d$site == "solo" & d$statistic == "T_IP.IC"]))
   ci <- community_index(ind, list(variance = stats::var, MNND = mnnd), traits = "size",
                         null = "regional.ind", n_perm = 19)
   dc <- null_intervals(ci)
-  expect_equal(unique(dc$statistic), c("variance", "MNND"))
+  expect_identical(unique(dc$statistic), c("variance", "MNND"))
   expect_error(null_intervals(tstats(ind, traits = "size", n_perm = 0)), "n_perm > 0")
   expect_error(null_intervals(res, level = 0.5, inner = 0.6))
 })
@@ -38,7 +38,7 @@ test_that("plot() of null tests draws intervals, effect sizes and hatching", {
   expect_s3_class(p, "ggplot")
   built <- ggplot2::ggplot_build(p)
   points <- ggplot2::layer_data(p, length(p$layers) - 1)
-  expect_equal(nrow(points), sum(!is.na(null_intervals(res)$deviation)))
+  expect_identical(nrow(points), sum(!is.na(null_intervals(res)$deviation)))
   # hatching lines stay inside their rectangles
   rects <- ggplot2::layer_data(p, 2)
   lines <- ggplot2::layer_data(p, 3)
@@ -51,15 +51,15 @@ test_that("plot() of null tests draws intervals, effect sizes and hatching", {
   expect_true(all(inside))
   ses <- plot(res, type = "ses", order = "ses", hatch = FALSE, statistics = "T_IC.IR")
   expect_s3_class(ses, "ggplot")
-  expect_equal(levels(ses$data$statistic), "T_IC.IR")
+  expect_identical(levels(ses$data$statistic), "T_IC.IR")
   by_observed <- levels(plot(res, order = "observed")$data$site)
   key <- tapply(null_intervals(res)$observed, null_intervals(res)$site, mean, na.rm = TRUE)
-  expect_equal(by_observed, names(sort(key)))
+  expect_identical(by_observed, names(sort(key)))
   expect_error(plot(res, sites = "nowhere"), "not in `x`")
   expect_error(plot(res, colours = "red"), "3 valid colours")
   ci <- community_index(ind, stats::var, traits = "size", null = "regional.ind", n_perm = 19)
   expect_s3_class(plot(ci, type = "ses"), "ggplot")
-  expect_equal(levels(plot(ci)$data$statistic), "stats::var")
+  expect_identical(levels(plot(ci)$data$statistic), "stats::var")
 })
 
 test_that("trait_densities() integrates to one and sums populations into communities", {
@@ -73,7 +73,7 @@ test_that("trait_densities() integrates to one and sums populations into communi
   pops <- s1[s1$level == "population", ]
   community <- tapply(pops$density * pops$weight, pops$trait, sum)
   expect_equal(as.vector(community), s1$density[s1$level == "community"])
-  expect_equal(sum(unique(pops[c("species", "weight")])$weight), 1)
+  expect_identical(sum(unique(pops[c("species", "weight")])$weight), 1)
   expect_gt(attr(d, "bw"), 0)
   expect_equal(attr(trait_densities(ind, "size", bw = 0.7), "bw"), 0.7)
   ind$abundance <- c(a = 1, b = 2, c = 7, z = 1)[ind$species]
@@ -97,7 +97,7 @@ test_that("plot_population_traits() draws populations, communities and rugs", {
   bare <- plot_population_traits(ind, "size", community = FALSE, rug = FALSE,
                                  weighted = FALSE, sites = c("s1", "s2"))
   expect_length(bare$layers, 1)
-  expect_equal(levels(bare$data$site), c("s1", "s2"))
+  expect_identical(levels(bare$data$site), c("s1", "s2"))
   named <- plot_population_traits(ind, "size", colours = c(c = "black", a = "red", b = "blue"))
   expect_s3_class(named, "ggplot")
   expect_error(plot_population_traits(ind, "size", colours = c(a = "red")), "no colour")
@@ -137,8 +137,8 @@ test_that("plot options and input checks of trait plots", {
                     trait = rnorm(36), ab = 1)
   res <- tstats(ind, n_perm = 19)
   expect_s3_class(plot(res, hatch = FALSE), "ggplot")
-  expect_equal(nrow(hatch_lines(data.frame(xmin = numeric(0), xmax = numeric(0),
-                                           ymin = numeric(0), ymax = numeric(0)), 1)), 0)
+  expect_identical(nrow(hatch_lines(data.frame(xmin = numeric(0), xmax = numeric(0),
+                                               ymin = numeric(0), ymax = numeric(0)), 1)), 0L)
   bad <- ind
   bad$trait <- as.character(bad$trait)
   expect_error(trait_densities(bad), "numeric")
@@ -156,13 +156,13 @@ test_that("trait_densities warns when the spread rises with the mean", {
   set.seed(7)
   sizes <- exp(seq(log(15), log(200), length.out = 12))
   ind <- data.frame(site = rep(c("s1", "s2"), each = 60), species = rep(paste0("sp", 1:12), 10))
-  ind$crc <- sizes[as.integer(sub("sp", "", ind$species))] * exp(rnorm(120, 0, 0.1))
+  ind$crc <- sizes[as.integer(sub("sp", "", ind$species, fixed = TRUE))] * exp(rnorm(120, 0, 0.1))
   expect_warning(trait_densities(ind, "crc", n = 16), "logarithm")
   ind$log_crc <- log(ind$crc)
   expect_no_warning(trait_densities(ind, "log_crc", n = 16))
   expect_no_warning(trait_densities(ind, "crc", bw = 1, n = 16))
   # equal spread on a positive scale does not warn
-  ind$even <- 100 + sizes[as.integer(sub("sp", "", ind$species))] + rnorm(120)
+  ind$even <- 100 + sizes[as.integer(sub("sp", "", ind$species, fixed = TRUE))] + rnorm(120)
   expect_no_warning(trait_densities(ind, "even", n = 16))
 })
 
@@ -175,10 +175,10 @@ test_that("plot_population_traits highlights species", {
   b <- ggplot2::ggplot_build(p)
   fills <- unique(b$data[[1]][c("group", "fill")])
   expect_setequal(unique(fills$fill), c("#0072B2", "#E69F00", "grey75"))
-  expect_equal(as.vector(b$plot$scales$get_scales("fill")$get_breaks()), c("c", "f"))
+  expect_identical(as.vector(b$plot$scales$get_scales("fill")$get_breaks()), c("c", "f"))
   # highlighted populations are drawn after the grey ones in each panel
   d1 <- b$data[[1]]
-  expect_equal(tail(unique(d1$fill[d1$PANEL == 1]), 2), c("#0072B2", "#E69F00"))
+  expect_identical(tail(unique(d1$fill[d1$PANEL == 1]), 2), c("#0072B2", "#E69F00"))
   p2 <- plot_population_traits(ind, highlight = "a", colours = c(a = "red"), n = 32)
   expect_true("red" %in% ggplot2::ggplot_build(p2)$data[[1]]$fill)
   expect_error(plot_population_traits(ind, highlight = "z"), "not in the data")

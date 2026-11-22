@@ -10,8 +10,8 @@ test_that("subsample_individuals() applies n, fraction, cover and min_n", {
   d <- toy_sampling()
   sizes <- table(paste(d$site, d$species))
   sub <- subsample_individuals(d, n = 5)
-  expect_equal(as.vector(table(paste(sub$site, sub$species))[names(sizes)]),
-               as.vector(pmin(sizes, 5)))
+  expect_identical(as.vector(table(paste(sub$site, sub$species))[names(sizes)]),
+                   as.vector(pmin(sizes, 5L)))
   expect_true(all(rownames(sub) %in% rownames(d)))
   expect_false(is.unsorted(as.integer(rownames(sub))))
   # cover: species from the most abundant down until they reach the share
@@ -22,7 +22,7 @@ test_that("subsample_individuals() applies n, fraction, cover and min_n", {
     expected <- names(counts)[c(0, share[-length(share)]) < 0.6]
     expect_setequal(unique(covered$species[covered$site == s]), expected)
   }
-  expect_equal(nrow(subsample_individuals(d, cover = 1)), nrow(d))
+  expect_identical(nrow(subsample_individuals(d, cover = 1)), nrow(d))
   # min_n removes small populations
   big <- subsample_individuals(d, min_n = 15)
   expect_true(all(table(paste(big$site, big$species)) >= 15))
@@ -64,45 +64,45 @@ test_that("trait_rarefaction() summarises subsamples and plots them", {
   set.seed(5)
   rare <- trait_rarefaction(d, n = c(2, 5), reps = 4)
   expect_s3_class(rare, "trait_rarefaction")
-  expect_equal(rare$statistic, rep(c("T_IP.IC", "T_IC.IR", "T_PC.PR"), 2))
+  expect_identical(rare$statistic, rep(c("T_IP.IC", "T_IC.IR", "T_PC.PR"), 2))
   values <- attr(rare, "values")
   expect_equal(rare$mean[1:3], unname(colMeans(values[["2"]])))
   expect_true(all(rare$low <= rare$mean & rare$mean <= rare$high))
   own <- trait_rarefaction(d, function(x) c(mean = mean(x$trait), n = nrow(x)), n = 3,
                            reps = 2)
-  expect_equal(own$mean[own$statistic == "n"],
-               sum(pmin(table(paste(d$site, d$species)), 3)))
+  expect_identical(own$mean[own$statistic == "n"],
+                   sum(pmin(table(paste(d$site, d$species)), 3)))
   expect_error(trait_rarefaction(d, function(x) mean(x$trait), n = 2, reps = 1), "named")
   default_n <- trait_rarefaction(d, function(x) c(n = nrow(x)), reps = 1)
-  expect_equal(min(default_n$effort), 2)
-  expect_equal(attr(default_n, "by"), "n")
+  expect_identical(min(default_n$effort), 2L)
+  expect_identical(attr(default_n, "by"), "n")
   # over cover: deterministic without n, one subsample per level
   by_cover <- trait_rarefaction(d, function(x) c(species = length(unique(x$species))),
                                 cover = c(0.5, 1))
-  expect_equal(attr(by_cover, "by"), "cover")
-  expect_equal(by_cover$reps, c(1, 1))
-  expect_equal(by_cover$mean[2], 3)
+  expect_identical(attr(by_cover, "by"), "cover")
+  expect_identical(by_cover$reps, c(1L, 1L))
+  expect_identical(by_cover$mean[2], 3)
   expect_lt(by_cover$mean[1], 3)
   skip_if_not_installed("ggplot2")
   p <- plot(rare)
   expect_s3_class(p, "ggplot")
-  expect_equal(nrow(ggplot2::layer_data(p, 2)), 6)
+  expect_identical(nrow(ggplot2::layer_data(p, 2)), 6L)
   expect_length(p$layers, 3)
   # the published rule for cover is drawn as a dashed line
   pc <- plot(by_cover)
   rule <- ggplot2::layer_data(pc, 1)
   expect_equal(unique(rule$xintercept), 0.8)
-  expect_equal(unique(rule$linetype), "dashed")
+  expect_identical(unique(rule$linetype), "dashed")
   expect_match(unique(ggplot2::layer_data(pc, 2)$label), "Pakeman")
   expect_length(plot(by_cover, reference = FALSE)$layers, 3)
   own_rule <- plot(rare, reference = c(protocol = 4))
-  expect_equal(unique(ggplot2::layer_data(own_rule, 1)$xintercept), 4)
+  expect_identical(unique(ggplot2::layer_data(own_rule, 1)$xintercept), 4)
 })
 
 test_that("sampling helpers handle edge inputs", {
   ind <- data.frame(site = rep(c("s1", "s2"), each = 6), species = rep(c("a", "b"), 6),
                     trait = 1:12)
-  ind$ab <- ifelse(ind$site == "s1", 0, ifelse(ind$species == "a", 5, 1))
+  ind$ab <- ifelse(ind$species == "a", 5, 1) * (ind$site != "s1")
   sub <- subsample_individuals(ind, cover = 0.8, abundance = "ab")
   expect_true(all(sub$site == "s2"))
   expect_error(trait_rarefaction(ind, cover = 1.5))
@@ -118,9 +118,9 @@ test_that("trait_rarefaction over cover with a fixed n keeps the replicates", {
                     species = sample(c("a", "b", "c"), 40, replace = TRUE), trait = rnorm(40))
   r <- trait_rarefaction(ind, statistic = function(x) c(m = mean(x$trait)), cover = c(0.5, 1),
                          n = 2, reps = 3)
-  expect_equal(attr(r, "by"), "cover")
-  expect_equal(nrow(attr(r, "values")[[1]]), 3)
-  expect_equal(r$reps, c(3, 3))
+  expect_identical(attr(r, "by"), "cover")
+  expect_identical(nrow(attr(r, "values")[[1]]), 3L)
+  expect_identical(r$reps, c(3L, 3L))
   expect_error(trait_rarefaction(ind, cover = 0.5, n = 1.5), "`n`")
 })
 
@@ -128,15 +128,16 @@ test_that("the default statistic of trait_rarefaction runs no permutations", {
   set.seed(9)
   ind <- data.frame(site = rep(c("s1", "s2"), each = 20),
                     species = sample(c("a", "b", "c"), 40, replace = TRUE), trait = rnorm(40))
-  calls <- 0
-  trace_fun <- function(...) calls <<- calls + 1
+  count <- new.env()
+  count$calls <- 0
+  trace_fun <- function(...) count$calls <- count$calls + 1
   local_mocked_bindings(
     tstats = function(..., n_perm) {
-      expect_equal(n_perm, 0)
-      calls <<- calls + 1
+      expect_identical(n_perm, 0)
+      count$calls <- count$calls + 1
       data.frame(T_IP.IC = 1, T_IC.IR = 1, T_PC.PR = 1)
     }
   )
   trait_rarefaction(ind, n = 2, reps = 2)
-  expect_equal(calls, 2)
+  expect_identical(count$calls, 2)
 })

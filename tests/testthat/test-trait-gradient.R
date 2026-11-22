@@ -22,12 +22,12 @@ test_that("beta and alpha match the values computed by hand", {
   s <- loo$species
   expect_equal(s$beta, c(4, 2.5, 3))
   expect_equal(s$mean, c(1.5, 3.5, 7))
-  expect_equal(s$alpha, s$mean - s$beta)
-  expect_equal(s$n_alone, c(0L, 0L, 1L))
-  expect_equal(s$breadth, c(2, 3, 0))
-  expect_equal(loo$sites$mean, c(2, 4, 8))
+  expect_identical(s$alpha, s$mean - s$beta)
+  expect_identical(s$n_alone, c(0L, 0L, 1L))
+  expect_identical(s$breadth, c(2, 3, 0))
+  expect_identical(loo$sites$mean, c(2, 4, 8))
   original <- trait_gradient(toy, leave_one_out = FALSE)$species
-  expect_equal(original$beta, c(3, 3, 6))
+  expect_identical(original$beta, c(3, 3, 6))
   weighted <- trait_gradient(toy, abundance = "abundance", leave_one_out = FALSE)
   expect_equal(weighted$sites$mean, c(2, 3.5, 8))
   expect_equal(weighted$species$beta[1], 3)
@@ -44,15 +44,15 @@ test_that("individuals are averaged and unmeasured populations get the species m
   gap <- toy
   gap$trait[3] <- NA
   tg <- trait_gradient(gap)
-  expect_equal(tg$populations$trait[3], 1)
+  expect_identical(tg$populations$trait[3], 1)
   expect_false(tg$populations$measured[3])
   # slopes use measured values only and need min_slope sites
   expect_true(all(is.na(tg$species$slope)))
   line <- data.frame(site = rep(letters[1:4], each = 2), species = rep(c("x", "y"), 4),
                      trait = c(1, 0, 2, 1, 3, 2, 4, 3))
   fit <- trait_gradient(line, min_slope = 3)$species
-  expect_equal(fit$slope, c(1, 1))
-  expect_equal(fit$slope_se, c(0, 0))
+  expect_identical(fit$slope, c(1, 1))
+  expect_identical(fit$slope_se, c(0, 0))
   expect_true(is.na(trait_gradient(line, min_slope = 5)$species$slope[1]))
 })
 
@@ -73,14 +73,14 @@ test_that("the input is checked", {
   expect_error(trait_gradient(toy, leave_one_out = NA))
   expect_error(trait_gradient(toy, min_slope = 1), "`min_slope`")
   zero <- transform(toy, abundance = c(0, 1, 2, 1, 1, 1))
-  expect_equal(trait_gradient(zero, abundance = "abundance")$species$n_sites, c(1L, 2L, 2L))
+  expect_identical(trait_gradient(zero, abundance = "abundance")$species$n_sites, c(1L, 2L, 2L))
 })
 
 test_that("the original analysis is the leave_one_out = FALSE case", {
   d <- tg_sim()
   loo <- trait_gradient(d$ind, abundance = "abundance")
   orig <- trait_gradient(d$ind, abundance = "abundance", leave_one_out = FALSE)
-  expect_equal(loo$species$mean, orig$species$mean)
+  expect_identical(loo$species$mean, orig$species$mean)
   # with the focal species in the site means, the abundance-weighted mean of beta over the
   # populations equals that of the species means
   p <- orig$populations
@@ -97,8 +97,8 @@ test_that("trait_gradient_weights() compares the four choices", {
   d <- tg_sim()
   w <- trait_gradient_weights(d$ind, abundance = "abundance")
   expect_named(w, c("beta", "alpha", "correlation"))
-  expect_equal(ncol(w$beta), 5)
-  expect_equal(w$correlation$beta[1], 1)
+  expect_identical(ncol(w$beta), 5L)
+  expect_identical(w$correlation$beta[1], 1)
   expect_equal(w$beta[["abundance/abundance"]],
                trait_gradient(d$ind, abundance = "abundance")$species$beta)
   expect_error(trait_gradient_weights(d$ind), "needs the column")
@@ -109,8 +109,8 @@ test_that("the curveball keeps the richness of sites and the frequency of specie
   d <- tg_sim()
   x <- tg_records(trait_gradient(d$ind, abundance = "abundance"))
   moved <- curveball_sites(x$site, x$species, 500)
-  expect_equal(as.vector(table(moved)[sort(unique(x$site))]),
-               as.vector(table(x$site)[sort(unique(x$site))]))
+  expect_identical(as.vector(table(moved)[sort(unique(x$site))]),
+                   as.vector(table(x$site)[sort(unique(x$site))]))
   expect_false(anyDuplicated(paste(moved, x$species)) > 0)
   expect_false(identical(moved, x$site))
   expect_identical(curveball_sites(x$site, x$species, 0), x$site)
@@ -126,21 +126,21 @@ test_that("trait_gradient_test() returns the statistics and species tests", {
   k <- nrow(tg$species)
   res <- trait_gradient_test(tg, n_null = 19)
   expect_s3_class(res, "mc_trait_gradient_test")
-  expect_equal(res$settings$null, "species")
+  expect_identical(res$settings$null, "species")
   expect_null(res$settings$thin)
-  expect_equal(res$statistics$statistic, c("cor_beta_alpha", "var_beta", "var_alpha"))
+  expect_identical(res$statistics$statistic, c("cor_beta_alpha", "var_beta", "var_alpha"))
   expect_named(res$species, c("species", "beta", "ses_beta", "p_beta", "alpha", "ses_alpha",
                               "p_alpha"))
-  expect_equal(dim(res$null), c(19, 3 + 2 * k))
+  expect_identical(dim(res$null), c(19L, 3L + 2L * k))
   expect_true(all(res$statistics$p > 0 & res$statistics$p <= 1))
   expect_output(print(res), "species")
   cb <- trait_gradient_test(tg, n_null = 9, null = "curveball", burn_in = 50, thin = 5)
   expect_named(cb$species, c("species", "beta", "ses_beta", "p_beta"))
-  expect_equal(dim(cb$null), c(9, 3 + k))
-  expect_equal(trait_gradient_test(tg, n_null = 2, null = "curveball")$settings$thin,
-               5 * nrow(tg$sites))
+  expect_identical(dim(cb$null), c(9L, 3L + k))
+  expect_identical(trait_gradient_test(tg, n_null = 2, null = "curveball")$settings$thin,
+                   5 * nrow(tg$sites))
   perm <- trait_gradient_test(tg, n_null = 9, null = "permute")
-  expect_equal(perm$settings$null, "permute")
+  expect_identical(perm$settings$null, "permute")
   expect_error(trait_gradient_test(tg, n_null = 2, null = "curveball", thin = 0), "`thin`")
   expect_error(trait_gradient_test(list()), "come from trait_gradient")
   expect_error(trait_gradient_test(tg, n_null = 0), "`n_null`")
@@ -175,8 +175,8 @@ test_that("trait_gradient_phylo() fits the models and checks its input", {
   set.seed(5)
   ph <- trait_gradient_phylo(tg, d$tree, responses = c("beta", "alpha"), n_boot = 19)
   expect_s3_class(ph, "mc_trait_gradient_phylo")
-  expect_equal(nrow(ph$models), 6)
-  expect_equal(as.vector(tapply(ph$models$delta_aic, ph$models$response, min)), c(0, 0))
+  expect_identical(nrow(ph$models), 6L)
+  expect_identical(as.vector(tapply(ph$models$delta_aic, ph$models$response, min)), c(0, 0))
   expect_true(all(ph$data$se_beta >= 0))
   expect_true(all(ph$data$n_sites >= 3))
   expect_setequal(ph$tree$tip.label, ph$data$species)
@@ -206,7 +206,7 @@ test_that("the null models start from the observed values with every choice of w
       tg <- trait_gradient(ab, abundance = "abundance", site_weights = sw, species_weights = pw,
                            leave_one_out = loo)
       again <- tg_compute(tg_records(tg), tg$settings, slopes = FALSE)
-      expect_equal(tg_null_stats(again), tg_null_stats(tg))
+      expect_identical(tg_null_stats(again), tg_null_stats(tg))
     }
   }
 })
@@ -216,10 +216,10 @@ test_that("n_alone counts sites with one species with or without leave-one-out",
                                   abundance = 1))
   loo <- trait_gradient(lonely)$species
   orig <- trait_gradient(lonely, leave_one_out = FALSE)$species
-  expect_equal(loo$n_alone, orig$n_alone)
-  expect_equal(orig$n_alone[4], 2L)
+  expect_identical(loo$n_alone, orig$n_alone)
+  expect_identical(orig$n_alone[4], 2L)
   expect_true(is.na(loo$beta[4]))
-  expect_equal(orig$beta[4], orig$mean[4])
+  expect_identical(orig$beta[4], orig$mean[4])
 })
 
 test_that("the species null exchanges species means and keeps the communities", {
@@ -229,7 +229,7 @@ test_that("the species null exchanges species means and keeps the communities", 
   res <- trait_gradient_test(tg, n_null = 49)
   # a test of the variance of beta under the species null is not trivially significant
   expect_true(all(is.finite(res$statistics$ses)))
-  expect_equal(nrow(res$species), nrow(tg$species))
+  expect_identical(nrow(res$species), nrow(tg$species))
 })
 
 test_that("trait_gradient_phylo() marks OU fits at a bound and stops on constant values", {
@@ -239,7 +239,7 @@ test_that("trait_gradient_phylo() marks OU fits at a bound and stops on constant
   ph <- trait_gradient_phylo(tg, d$tree, responses = "beta", n_boot = 19)
   ou <- ph$models[ph$models$model == "OU", ]
   expect_type(ou$at_bound, "logical")
-  expect_true(is.na(ou$half_life) == ou$at_bound)
+  expect_identical(is.na(ou$half_life), ou$at_bound)
   flat <- tg
   flat$species$beta <- 1
   expect_error(trait_gradient_phylo(flat, d$tree, responses = "beta", n_boot = 5),
@@ -256,7 +256,7 @@ test_that("phylogenetic permutations follow Lapointe & Garland (2001)", {
   # an isolated species keeps its value more often than one with a close relative
   expect_gt(P["e", "e"], P["a", "a"])
   # k = 1: the most distant pairs get probability 0
-  expect_equal(min(phylo_transition(ape::vcv(tree)[sp, sp], 1)), 0)
+  expect_identical(min(phylo_transition(ape::vcv(tree)[sp, sp], 1)), 0)
   set.seed(4)
   v <- phylogenetic_permutation(1:5, P)
   expect_setequal(v, 1:5)
@@ -301,9 +301,9 @@ test_that("trait_gradient_phylo() reports OU fits that did not converge", {
   local_mocked_bindings(ou_optim = function(par, fn, lower, upper) {
     list(par = par, value = fn(par), convergence = 1L)
   })
-  expect_warning(ph <- trait_gradient_phylo(tg, d$tree, responses = "beta", n_boot = 9),
-                 "did not converge for beta ~ OU")
-  expect_equal(ph$models$converged, c(TRUE, TRUE, FALSE))
+  ph <- expect_warning_value(trait_gradient_phylo(tg, d$tree, responses = "beta", n_boot = 9),
+                             "did not converge for beta ~ OU")
+  expect_identical(ph$models$converged, c(TRUE, TRUE, FALSE))
 })
 
 test_that("coef() and nobs() read the trait-gradient results", {
@@ -312,7 +312,7 @@ test_that("coef() and nobs() read the trait-gradient results", {
   b <- coef(tg)
   expect_identical(colnames(b), c("beta", "alpha", "intercept", "slope"))
   expect_identical(rownames(b), tg$species$species)
-  expect_equal(unname(b[, "beta"]), tg$species$beta)
+  expect_identical(unname(b[, "beta"]), tg$species$beta)
   expect_identical(nobs(tg), nrow(tg$populations))
   set.seed(5)
   ph <- trait_gradient_phylo(tg, d$tree, n_boot = 9)

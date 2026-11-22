@@ -21,7 +21,7 @@ test_that("sample_individuals() thins individuals binomially with fraction", {
   sim <- small_sim()
   ind <- sample_individuals(sim, fraction = 0.5)
   counts <- table(paste(ind$site, ind$species))
-  expect_true(abs(nrow(ind) / sum(sim$abundance) - 0.5) < 0.1)
+  expect_lt(abs(nrow(ind) / sum(sim$abundance) - 0.5), 0.1)
   expect_true(all(counts <= ind$abundance[match(names(counts),
                                                 paste(ind$site, ind$species))]))
 })
@@ -29,23 +29,23 @@ test_that("sample_individuals() thins individuals binomially with fraction", {
 test_that("population means follow the optimum, the environment and local adaptation", {
   sim <- small_sim()
   none <- sample_individuals(sim, intraspecific_sd = 0)
-  expect_equal(none$trait, none$optimum)
+  expect_identical(none$trait, none$optimum)
   full <- sample_individuals(sim, local_adaptation = 1, intraspecific_sd = 0)
-  expect_equal(full$trait, full$env)
+  expect_identical(full$trait, full$env)
   half <- sample_individuals(sim, local_adaptation = 0.5)
   expect_equal(half$population_mean, (half$optimum + half$env) / 2)
   sp <- rownames(sim$traits)
   per_sp <- sample_individuals(sim, local_adaptation = stats::setNames(rep(c(0, 1), 4), sp),
                                intraspecific_sd = 0)
   adapted <- per_sp$species %in% sp[c(2, 4, 6, 8)]
-  expect_equal(per_sp$trait[adapted], per_sp$env[adapted])
-  expect_equal(per_sp$trait[!adapted], per_sp$optimum[!adapted])
+  expect_identical(per_sp$trait[adapted], per_sp$env[adapted])
+  expect_identical(per_sp$trait[!adapted], per_sp$optimum[!adapted])
 })
 
 test_that("sample_individuals() uses recorded steps and a given environment", {
   sim <- small_sim(record_steps = c(30, 60))
   at30 <- sample_individuals(sim, step = 30, n = 1e6, intraspecific_sd = 0)
-  expect_equal(sum(at30$abundance[at30$individual == 1]), sum(sim$history[, , "step30"]))
+  expect_identical(sum(at30$abundance[at30$individual == 1]), sum(sim$history[, , "step30"]))
   expect_error(sample_individuals(sim, step = 31), "not recorded")
   expect_error(sample_individuals(small_sim(), step = 30), "record_steps")
   env <- seq(0, 1, length.out = 12)
@@ -70,8 +70,8 @@ test_that("unnamed per-species values follow the order of the species", {
   sp <- rownames(sim$traits)
   ind <- sample_individuals(sim, local_adaptation = rep(c(0, 1), 4), intraspecific_sd = 0)
   adapted <- ind$species %in% sp[c(2, 4, 6, 8)]
-  expect_equal(ind$trait[adapted], ind$env[adapted])
-  expect_equal(ind$trait[!adapted], ind$optimum[!adapted])
+  expect_identical(ind$trait[adapted], ind$env[adapted])
+  expect_identical(ind$trait[!adapted], ind$optimum[!adapted])
 })
 
 # a hand-made data set with known variances
@@ -82,8 +82,8 @@ toy <- data.frame(site = rep(c("a", "b"), each = 6),
 test_that("tstats() gives the variance ratios of Violle et al. (2012)", {
   res <- tstats(toy, n_perm = 0)
   expect_named(res, c("site", "trait", "n_populations", "T_IP.IC", "T_IC.IR", "T_PC.PR"))
-  expect_equal(res$site, c("a", "b"))
-  expect_equal(res$n_populations, c(2, 2))
+  expect_identical(res$site, c("a", "b"))
+  expect_identical(res$n_populations, c(2L, 2L))
   z <- toy$trait
   expect_equal(res$T_IP.IC, c(1 / var(z[1:6]), 1 / var(z[7:12])))
   expect_equal(res$T_IC.IR, c(var(z[1:6]), var(z[7:12])) / var(z))
@@ -95,9 +95,9 @@ test_that("tstats() gives NA where a ratio is undefined and handles several trai
   one_species <- rbind(toy, data.frame(site = "c", species = "x", trait = c(5, 6)))
   one_species$other <- one_species$trait * 2
   res <- tstats(one_species, traits = c("trait", "other"), n_perm = 0)
-  expect_equal(nrow(res), 6)
+  expect_identical(nrow(res), 6L)
   expect_true(is.na(res$T_PC.PR[res$site == "c"][1]))
-  expect_equal(res$T_IP.IC[res$trait == "trait"], res$T_IP.IC[res$trait == "other"])
+  expect_identical(res$T_IP.IC[res$trait == "trait"], res$T_IP.IC[res$trait == "other"])
   expect_error(tstats(toy, traits = "height"), "no column height")
   expect_error(tstats(transform(toy, trait = as.character(trait))), "numeric")
 })
@@ -111,12 +111,13 @@ test_that("tstats() matches cati::Tstats(), also with site names that are prefix
   base <- tstats(ind, n_perm = 0)
   res <- tstats(ind, method = "cati", n_perm = NULL)
   expect_s3_class(res, "Tstats")
-  expect_true(any(base$site == "site1") && any(base$site == "site10"))
+  expect_true(any(base$site == "site1"))
+  expect_true(any(base$site == "site10"))
   for (stat in c("T_IP.IC", "T_IC.IR", "T_PC.PR")) {
     expect_equal(unname(res$Tstats[[stat]][base$site, 1]), base[[stat]])
   }
   with_null <- tstats(ind, method = "cati", n_perm = 9)
-  expect_equal(dim(with_null$Tstats$T_IP.IC_nm)[3], length(unique(ind$site)))
+  expect_identical(dim(with_null$Tstats$T_IP.IC_nm)[3], length(unique(ind$site)))
 })
 
 test_that("tstats() explains how to get cati", {
@@ -144,8 +145,8 @@ test_that("tstats() leaves out missing values trait by trait", {
   with_na$other <- with_na$trait
   with_na$other[1] <- NA
   res <- tstats(with_na, traits = c("trait", "other"), n_perm = 0)
-  expect_equal(res$T_IP.IC[res$trait == "other"],
-               tstats(toy[-1, ], n_perm = 0)$T_IP.IC)
+  expect_identical(res$T_IP.IC[res$trait == "other"],
+                   tstats(toy[-1, ], n_perm = 0)$T_IP.IC)
 })
 
 test_that("tstats() adds effect sizes and p-values from the null models", {
@@ -155,7 +156,7 @@ test_that("tstats() adds effect sizes and p-values from the null models", {
                       "ses_T_IP.IC", "p_T_IP.IC", "ses_T_IC.IR", "p_T_IC.IR",
                       "ses_T_PC.PR", "p_T_PC.PR"))
   null <- attr(res, "null")
-  expect_equal(dim(null), c(49, 2, 3))
+  expect_identical(dim(null), c(49L, 2L, 3L))
   # permuting within a site keeps its variance, and the two species of site a never mix less
   # than observed, so its T_IP.IC is the lowest possible
   expect_true(all(null[, 1, "T_IP.IC"] >= res$T_IP.IC[1] - 1e-12))
@@ -166,7 +167,7 @@ test_that("tstats() adds effect sizes and p-values from the null models", {
   expect_true(all(greater$p_T_IP.IC > 0 & greater$p_T_IP.IC <= 1))
   two <- tstats(toy, n_perm = 49, alternative = "two.sided")
   expect_true(all(two$p_T_IP.IC <= 1))
-  expect_identical(names(tstats(toy, n_perm = NULL)), names(tstats(toy, n_perm = 0)))
+  expect_named(tstats(toy, n_perm = NULL), names(tstats(toy, n_perm = 0)))
   expect_error(tstats(toy, n_perm = -1))
 })
 
@@ -207,8 +208,8 @@ test_that("regional null models of tstats() permute the whole region at once", {
   alone <- tstats_null(d$trait, one_site, 5, null_pc = "populations")
   expect_equal(alone[, 1, "T_PC.PR"], rep(1, 5))
   res <- tstats(d, n_perm = 19, null_pc = "populations")
-  expect_equal(res[c("T_IP.IC", "T_IC.IR", "T_PC.PR")],
-               tstats(d, n_perm = 0)[c("T_IP.IC", "T_IC.IR", "T_PC.PR")])
+  expect_identical(res[c("T_IP.IC", "T_IC.IR", "T_PC.PR")],
+                   tstats(d, n_perm = 0)[c("T_IP.IC", "T_IC.IR", "T_PC.PR")])
   expect_false(anyNA(res$p_T_PC.PR))
   expect_error(tstats(d, null_pc = "species"))
 })
@@ -226,7 +227,7 @@ test_that("character displacement pushes co-occurring populations apart", {
   gap <- outer(mu, mu, "-")
   rhs <- c(0, 1, 5) + 3 * as.vector((gap * exp(-gap^2 / 8)) %*% (c(5, 3, 2) / 10))
   expect_equal(mu, rhs, tolerance = 1e-6)
-  expect_equal(displace(c(2, 2), c(1, 1), 5, 1), c(2, 2))
+  expect_identical(displace(c(2, 2), c(1, 1), 5, 1), c(2, 2))
   expect_warning(displace(c(0, 1), c(1, 1), 2, 2, max_iter = 1), "did not converge")
 })
 
@@ -258,8 +259,8 @@ test_that("tstats() stacks the null values of several traits", {
   two <- transform(toy, other = trait^2)
   set.seed(6)
   res <- tstats(two, traits = c("trait", "other"), n_perm = 19)
-  expect_equal(nrow(res), 4)
-  expect_equal(dim(attr(res, "null")), c(19, 4, 3))
+  expect_identical(nrow(res), 4L)
+  expect_identical(dim(attr(res, "null")), c(19L, 4L, 3L))
   expect_false(anyNA(res$p_T_IP.IC))
 })
 
@@ -272,7 +273,7 @@ test_that("character displacement leaves sites with a single species alone", {
   set.seed(7)
   apart <- sample_individuals(sim, intraspecific_sd = 0, displacement = 3)
   first <- rownames(sim$abundance)[1]
-  expect_equal(apart$trait[apart$site == first], base$trait[base$site == first])
+  expect_identical(apart$trait[apart$site == first], base$trait[base$site == first])
 })
 
 test_that("the species null of T_IP.IC moves populations only within species", {
@@ -281,13 +282,13 @@ test_that("the species null of T_IP.IC moves populations only within species", {
   ind <- sample_individuals(sim, n = 6, intraspecific_sd = 1)
   res <- tstats(ind, n_perm = 20, null_ip = "species", alternative = "two.sided")
   base <- tstats(ind, n_perm = 0)
-  expect_equal(res[names(base)], base)
+  expect_identical(res[names(base)], base)
   # when every species occurs at one site, nothing can move and the null equals the observation
   single <- ind
   single$species <- paste(single$site, single$species)
   kept <- tstats(single, n_perm = 5, null_ip = "species")
-  expect_equal(attr(kept, "null")[, , "T_IP.IC"],
-               matrix(kept$T_IP.IC, 5, nrow(kept), byrow = TRUE))
+  expect_identical(attr(kept, "null")[, , "T_IP.IC"],
+                   matrix(kept$T_IP.IC, 5, nrow(kept), byrow = TRUE))
   expect_true(all(is.finite(res$ses_T_IP.IC) | is.na(res$ses_T_IP.IC)))
   expect_true(all(res$p_T_IP.IC <= 1, na.rm = TRUE))
   expect_error(tstats(ind, null_ip = "region"))
@@ -307,7 +308,7 @@ test_that("the species null of T_IP.IC tells convergence from divergence", {
 })
 
 test_that("group_sum() gives zero to groups without members", {
-  expect_equal(group_sum(c(1, 2, 3), c(1, 3, 3), 4), c(1, 0, 5, 0))
+  expect_identical(group_sum(c(1, 2, 3), c(1, 3, 3), 4), c(1, 0, 5, 0))
   expect_equal(group_mean(c(1, 2, 3), c(1, 3, 3), 3), c(1, NaN, 2.5))
 })
 
@@ -328,13 +329,13 @@ test_that("population_shifts() recovers local adaptation and displacement", {
   expect_equal(both$local_adaptation, 0.4, tolerance = 0.1)
   expect_equal(both$displacement, 3, tolerance = 0.2)
   expect_gt(both$r_squared, 0.8)
-  expect_equal(attr(both, "profile")$width, w)
+  expect_identical(attr(both, "profile")$width, w)
   expect_named(both, c("local_adaptation", "displacement", "width", "r_squared",
                        "n_populations", "n_species"))
   free <- population_shifts(sample_individuals(sim, n = 200, local_adaptation = 0.4,
                                                displacement = 3, intraspecific_sd = 0.5))
-  expect_equal(nrow(attr(free, "profile")), 22)
-  expect_equal(free$width, attr(free, "profile")$width[which.min(attr(free, "profile")$rss)])
+  expect_identical(nrow(attr(free, "profile")), 22L)
+  expect_identical(free$width, attr(free, "profile")$width[which.min(attr(free, "profile")$rss)])
 })
 
 test_that("population_shifts() checks its input", {
@@ -373,7 +374,7 @@ test_that("sample_individuals() draws individuals from the evolutionary state", 
   ind <- sample_individuals(sim, n = 2000, source = "evolution")
   pop <- sim$evolution$genetic + sim$evolution$plastic
   site <- as.integer(factor(ind$site, rownames(sim$abundance)))
-  expect_equal(ind$population_mean, unname(pop[cbind(site, 1)]))
+  expect_identical(ind$population_mean, unname(pop[cbind(site, 1)]))
   # individuals vary around their population mean with variance G + VE
   expect_gt(nrow(ind), 2000)
   expect_equal(stats::var(ind$trait - ind$population_mean), 5, tolerance = 0.1)
@@ -396,12 +397,12 @@ test_that("sample_individuals() takes evolving metacommunities and feeds tstats(
                                                                        env_var = 2),
                                          dispersal = 0.01, extirpation = 0.02, n_steps = 150)
   ev <- sim$evolution
-  expect_equal(dim(ev$genetic), dim(sim$abundance))
+  expect_identical(dim(ev$genetic), dim(sim$abundance))
   expect_identical(is.na(ev$genetic), sim$abundance == 0)
-  expect_equal(unname(ev$genetic_var), rep(10, ncol(sim$abundance)))
+  expect_identical(unname(ev$genetic_var), rep(10, ncol(sim$abundance)))
   ind <- sample_individuals(sim, n = 5, source = "evolution")
   expect_setequal(unique(ind$species), colnames(sim$abundance))
-  expect_equal(nrow(ind), sum(pmin(sim$abundance, 5)))
+  expect_identical(nrow(ind), sum(pmin(sim$abundance, 5L)))
   ts <- tstats(ind, n_perm = 0)
   expect_true(is.list(ts) || is.data.frame(ts))
 })
@@ -423,7 +424,7 @@ test_that("the evolutionary state is NULL without evolution and keeps names and 
   several <- table(sim$lineage_species) > 1
   expect_true(any(several))
   expect_true(any(w[, names(several)[several]] > 0, na.rm = TRUE))
-  if (any(!several)) expect_true(all(w[, names(several)[!several]] == 0, na.rm = TRUE))
+  if (!all(several)) expect_true(all(w[, names(several)[!several]] == 0, na.rm = TRUE))
   # columns are matched by name, not position
   mc <- as_metacommunity(sim)
   set.seed(8)
@@ -436,7 +437,7 @@ test_that("the evolutionary state is NULL without evolution and keeps names and 
                                                                    "population_mean")]
   expect_equal(key(a), key(b), ignore_attr = TRUE)
   expect_error(sample_individuals(mc, source = "evolution", env = ls$env), "env")
-  expect_equal(unique(a$env[a$site == "site1"]), sim$evolution$environment[1])
+  expect_identical(unique(a$env[a$site == "site1"]), sim$evolution$environment[1])
 })
 
 test_that("evolved_populations() checks the names of the evolutionary state", {
@@ -444,11 +445,11 @@ test_that("evolved_populations() checks the names of the evolutionary state", {
   ev <- list(genetic = ab, plastic = ab * 0, genetic_var = 1, env_var = c(a = 1, b = 2))
   x <- list(abundance = ab, evolution = ev)
   st <- evolved_populations(x, c("s1", "s2"), c("b", "a"))
-  expect_equal(unname(st$var[1, ]), c(3, 2))
+  expect_identical(unname(st$var[1, ]), c(3, 2))
   # sites matched by position when the state has other site names
   x2 <- x
   rownames(x2$evolution$genetic) <- rownames(x2$evolution$plastic) <- c("p", "q")
-  expect_equal(dim(evolved_populations(x2, c("s1", "s2"), "a")$mean), c(2, 1))
+  expect_identical(dim(evolved_populations(x2, c("s1", "s2"), "a")$mean), c(2L, 1L))
   expect_error(evolved_populations(x2, c("s1", "s2", "s3"), "a"), "does not match")
   expect_error(evolved_populations(x, "s1", "z"), "lacks")
   x3 <- x
@@ -476,22 +477,22 @@ test_that("sample_individuals() samples several dates with a session error", {
   expect_equal(sim$evolution$environment_history[, "step60"], envt[, 60],
                ignore_attr = TRUE)
   d <- sample_individuals(sim, n = 50, step = c(40, 60, 80), source = "evolution")
-  expect_equal(names(d)[1], "step")
+  expect_identical(names(d)[1], "step")
   expect_setequal(unique(d$step), c(40, 60, 80))
   # each date is drawn from the genetic means and plastic part of its step
   at40 <- d[d$step == 40, ]
   z <- sim$evolution$history[, 1, "step40"]
   expected <- z + 0.5 * (envt[, 40] - sim$evolution$reference)
-  expect_equal(at40$population_mean, unname(expected[at40$site]))
+  expect_identical(at40$population_mean, unname(expected[at40$site]))
 
   site40 <- match(at40$site, rownames(sim$abundance))
-  expect_equal(at40$env, envt[site40, 40])
+  expect_identical(at40$env, envt[site40, 40])
   # the last step equals the default
   set.seed(9)
   a <- sample_individuals(sim, n = 3, step = 80, source = "evolution")
   set.seed(9)
   b <- sample_individuals(sim, n = 3, source = "evolution")
-  expect_equal(a$population_mean, b$population_mean)
+  expect_identical(a$population_mean, b$population_mean)
   # a session error shifts every individual of a date by the same amount
   set.seed(2)
   plain <- sample_individuals(sim, n = 50, step = c(40, 80), source = "evolution")
@@ -501,11 +502,11 @@ test_that("sample_individuals() samples several dates with a session error", {
   shift <- tapply(shifted$trait - shifted$population_mean, shifted$step, mean) -
     tapply(plain$trait - plain$population_mean, plain$step, mean)
   expect_gt(max(abs(shift)), 1)
-  expect_equal(shifted$population_mean, plain$population_mean)
+  expect_identical(shifted$population_mean, plain$population_mean)
   # traits as the source, with the environment of each date
   e2 <- sample_individuals(sim, n = 5, step = c(40, 80), env = envt[, c(40, 80)])
-  expect_equal(e2$env[e2$step == 80],
-               envt[match(e2$site[e2$step == 80], rownames(sim$abundance)), 80])
+  expect_identical(e2$env[e2$step == 80],
+                   envt[match(e2$site[e2$step == 80], rownames(sim$abundance)), 80])
   expect_error(sample_individuals(sim, step = c(40, 80), env = envt[, 1:3]), "one column")
   expect_error(sample_individuals(sim, step = 10, source = "evolution"), "not recorded")
   expect_error(sample_individuals(sim, source = "evolution", env = ls$env), "env")
@@ -523,10 +524,10 @@ test_that("evolving metacommunities keep the evolutionary state at recorded step
     evolution = evolution_control(genetic_var = 10, env_var = 2), dispersal = 0.01,
     extirpation = 0.02, n_steps = 150, record_steps = c(100, 150))
   h <- es$evolution$history
-  expect_equal(dim(h), c(25, ncol(es$abundance), 2))
+  expect_identical(dim(h), c(25L, ncol(es$abundance), 2L))
   # the last record is the final state
-  expect_equal(h[, , "step150"], es$evolution$genetic)
-  expect_equal(es$evolution$within_history[, , "step150"], es$evolution$within_var)
+  expect_identical(h[, , "step150"], es$evolution$genetic)
+  expect_identical(es$evolution$within_history[, , "step150"], es$evolution$within_var)
   # absent populations have no genetic mean
   expect_identical(is.na(h[, , "step100"]), es$history[, , "step100"] == 0)
   d <- sample_individuals(es, n = 3, step = c(100, 150), source = "evolution")
@@ -542,22 +543,22 @@ test_that("dates share the deviations of populations and draw sessions apart", {
   set.seed(1)
   a <- sample_individuals(sim, n = 3, step = c(50, 60), population_sd = 5)
   key <- function(d) tapply(d$population_mean, d$site, unique)
-  expect_equal(key(a[a$step == 50, ]), key(a[a$step == 60, ]))
+  expect_identical(key(a[a$step == 50, ]), key(a[a$step == 60, ]))
   set.seed(1)
   b <- sample_individuals(sim, n = 3, step = c(50, 60), population_sd = 5, session_sd = 3)
-  expect_equal(b$population_mean, a$population_mean)
+  expect_identical(b$population_mean, a$population_mean)
   shift <- tapply(b$trait - a$trait, b$step, stats::sd)
   expect_true(all(shift < 1e-10))
   # an environment as a one-column matrix, and the last step without a record
   e1 <- sample_individuals(sim, n = 2, step = 60, env = matrix(ls$env))
-  expect_equal(nrow(e1), sum(pmin(sim$history[, , "step60"], 2)))
+  expect_identical(nrow(e1), sum(pmin(sim$history[, , "step60"], 2L)))
   evo <- simulate_metacommunity(ls, tr, matrix(0.01, dimnames = list("sp1", "sp1")),
                                 n_steps = 30, evolution = evolution_control(1))
   set.seed(2)
   last <- sample_individuals(evo, n = 2, step = 30, source = "evolution")
   set.seed(2)
-  expect_equal(last, sample_individuals(evo, n = 2, source = "evolution"))
-  expect_equal(step_label(1e5), "step100000")
+  expect_identical(last, sample_individuals(evo, n = 2, source = "evolution"))
+  expect_identical(step_label(1e5), "step100000")
 })
 
 test_that("evolved_at() refuses steps without a record of the evolutionary state", {

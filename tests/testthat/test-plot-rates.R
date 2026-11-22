@@ -6,8 +6,8 @@ test_that("tree_layout() matches the coordinates of ape::plot.phylo()", {
   ape::plot.phylo(tree, plot = FALSE)
   lp <- get("last_plot.phylo", envir = ape::.PlotPhyloEnv)
   l <- tree_layout(tree)
-  expect_equal(l$x, lp$xx)
-  expect_equal(l$y, lp$yy)
+  expect_identical(l$x, lp$xx)
+  expect_identical(l$y, lp$yy)
 })
 
 test_that("plot_rates() draws one L-shaped segment per branch and checks its input", {
@@ -17,10 +17,10 @@ test_that("plot_rates() draws one L-shaped segment per branch and checks its inp
   rates <- rexp(nrow(tree$edge))
   p <- plot_rates(tree, rates, tip_labels = TRUE, title = "x")
   expect_s3_class(p, "ggplot")
-  expect_equal(nrow(p$data), 2 * nrow(tree$edge))
-  expect_equal(p$data$rate, rep(rates, 2))
+  expect_identical(nrow(p$data), 2L * nrow(tree$edge))
+  expect_identical(p$data$rate, rep(rates, 2))
   x <- trait_rates(tree, "iid", rate_sd = 0.5)
-  expect_equal(plot_rates(tree, x)$data$rate, rep(x$edge_rates, 2))
+  expect_identical(plot_rates(tree, x)$data$rate, rep(x$edge_rates, 2))
   expect_s3_class(plot_rates(tree, rates - 1, log = FALSE), "ggplot")
   expect_error(plot_rates(tree, rates - 1), "positive")
   expect_error(plot_rates(tree, rates[-1]), "one value per branch")
@@ -36,12 +36,12 @@ test_that("pcps_test() keeps what plot() needs and plot() checks its arguments",
   comm <- matrix(rpois(20 * 10, 2), 20, dimnames = list(NULL, tree$tip.label))
   env <- cbind(temp = seq_len(20), rain = rnorm(20))
   res <- pcps_test(comm, tree, env, n_perm = 9)
-  expect_equal(dim(res$species), c(10, ncol(res$scores)))
-  expect_equal(length(res$share), ncol(res$scores))
-  expect_equal(colnames(res$env), c("temp", "rain"))
+  expect_identical(dim(res$species), c(10L, ncol(res$scores)))
+  expect_length(res$share, ncol(res$scores))
+  expect_identical(colnames(res$env), c("temp", "rain"))
   p <- plot(res, env = "rain")
   expect_s3_class(p, "ggplot")
-  expect_equal(p$data$env, env[, "rain"])
+  expect_identical(p$data$env, env[, "rain"])
   expect_s3_class(plot(res, env = NULL, species = FALSE), "ggplot")
   expect_s3_class(plot(res, axes = c(2, 3), species_labels = FALSE), "ggplot")
   expect_error(plot(res, axes = c(1, 1)), "two different axes")
@@ -55,7 +55,7 @@ test_that("plot_rates() takes a result of trait_rates() alone", {
   skip_if_not_installed("ggplot2")
   set.seed(4)
   x <- trait_rates(ape::rtree(8), "gbm", rate_sd = 0.5)
-  expect_equal(plot_rates(x)$data$rate, rep(x$edge_rates, 2))
+  expect_identical(plot_rates(x)$data$rate, rep(x$edge_rates, 2))
   expect_error(plot_rates(x$tree), "`rates` is missing")
 })
 
@@ -65,7 +65,7 @@ test_that("plot() of pcps_test() names an unnamed predictor", {
   tree <- ape::rtree(10)
   comm <- matrix(rpois(200, 2), 20, dimnames = list(NULL, tree$tip.label))
   p <- plot(pcps_test(comm, tree, seq_len(20), n_perm = 9))
-  expect_equal(p$scales$get_scales("colour")$name, "env1")
+  expect_identical(p$scales$get_scales("colour")$name, "env1")
 })
 
 test_that("plot() of pcps_test() groups species into clades", {
@@ -82,17 +82,17 @@ test_that("plot() of pcps_test() groups species into clades", {
   root_children <- res$tree$edge[res$tree$edge[, 1] == ape::Ntip(res$tree) + 1, 2]
   first <- if (root_children[1] <= 12) res$tree$tip.label[root_children[1]] else
     ape::extract.clade(res$tree, root_children[1])$tip.label
-  expect_equal(nlevels(two), 2)
+  expect_identical(nlevels(two), 2L)
   expect_length(unique(two[rownames(res$species) %in% first]), 1)
   four <- pcps_clades(4, res$tree, rownames(res$species))
-  expect_equal(nlevels(four), 4)
+  expect_identical(nlevels(four), 4L)
   expect_false(anyNA(four))
   # each clade of four is nested in one clade of two
   expect_true(all(tapply(as.character(two), four, function(z) length(unique(z))) == 1))
   p <- plot(res, clades = 4)
   expect_s3_class(p, "ggplot")
   expect_true(any(vapply(p$layers, function(l) inherits(l$geom, "GeomPolygon"), logical(1))))
-  expect_equal(p$scales$get_scales("fill")$name, "temp")
+  expect_identical(p$scales$get_scales("fill")$name, "temp")
   families <- stats::setNames(rep(c("Hylidae", "Leptodactylidae"), each = 5),
                               res$tree$tip.label[1:10])
   q <- plot(res, clades = families)

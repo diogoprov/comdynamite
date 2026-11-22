@@ -13,7 +13,7 @@ test_that("spatial_folds makes contiguous blocks or balanced random folds", {
     mean(unlist(lapply(split(seq_along(f), f), function(s) stats::dist(grid$coords[s, ]))))
   }
   random <- spatial_folds(grid$coords, k = 4, method = "random")
-  expect_equal(as.vector(table(random)), rep(9, 4))
+  expect_identical(as.vector(table(random)), rep(9L, 4L))
   expect_lt(within(blocks), within(random))
   expect_error(spatial_folds(grid$coords, k = 1))
 })
@@ -59,24 +59,24 @@ test_that("abc_cv predicts left-out statistics and flags those the model misses"
   cv <- abc_cv(table, observed, parameters = "a", n = 300, ntree = 100)
   expect_identical(attr(cv, "seed"), 1)
   expect_s3_class(cv, "mc_abc_cv")
-  expect_equal(nrow(cv), 6)
+  expect_identical(nrow(cv), 6L)
   s <- cv[cv$statistic == "s", ]
-  expect_equal(s$inside, c(TRUE, TRUE, FALSE))
+  expect_identical(s$inside, c(TRUE, TRUE, FALSE))
   expect_lt(s$p[3], 0.05)
   expect_gt(s$z[3], 3)
   expect_lt(abs(s$median[1] - 0.5), 0.1)
   sm <- summary(cv)
-  expect_equal(sm$statistic, c("s", "t"))
+  expect_identical(sm$statistic, c("s", "t"))
   expect_equal(sm$coverage[1], 2 / 3)
   expect_equal(sm$rejected[1], 1 / 3)
   two <- abc_cv(table, rbind(as.data.frame(as.list(observed)),
                              as.data.frame(as.list(observed))), "a", n = 300, ntree = 100)
-  expect_equal(nrow(two), 12)
-  expect_equal(two$inside[two$observation == 2], cv$inside)
+  expect_identical(nrow(two), 12L)
+  expect_identical(two$inside[two$observation == 2], cv$inside)
   gap <- observed
   gap["f2_test_t"] <- NA
   holes <- abc_cv(table, gap, "a", n = 100, ntree = 50)
-  expect_equal(nrow(holes), 5)
+  expect_identical(nrow(holes), 5L)
   expect_false(any(holes$fold == 2 & holes$statistic == "t"))
   flat <- table
   flat$f1_test_t <- 0

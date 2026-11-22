@@ -14,7 +14,7 @@ test_that("G = 0 gives the abundances without evolution", {
   b <- simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, dispersal = 0.01, n_steps = 50,
                               evolution = evolution_control(matrix(0, 2, 2)))
   expect_identical(a$abundance, b$abundance)
-  expect_equal(dim(b$evolution$genetic), c(25, 1, 2))
+  expect_identical(dim(b$evolution$genetic), c(25L, 1L, 2L))
 })
 
 test_that("drift makes the covariance among isolated populations G times sum(1 / Ne)", {
@@ -103,15 +103,15 @@ test_that("sample_individuals() draws several traits from N(mean, G + E)", {
                               session_sd = 1)
   expect_identical(sort(unique(dates$step)), c(20, 40))
   at20 <- sample_individuals(sim, n = 3, source = "evolution", step = 20)
-  expect_equal(unique(at20$mean_svl[at20$site == "site1"]),
-               unname(sim$evolution$history["site1", "sp1", "svl", "step20"]))
+  expect_identical(unique(at20$mean_svl[at20$site == "site1"]),
+                   unname(sim$evolution$history["site1", "sp1", "svl", "step20"]))
   expect_error(sample_individuals(sim, source = "evolution", step = 10), "not recorded")
   expect_error(sample_individuals(sim, source = "evolution", env = s$env[, 1]), "leave `env`")
   expect_error(sample_individuals(sim, source = "evolution", population_sd = 1), "stay 0")
   expect_error(sample_individuals(sim, source = "evolution", intraspecific_sd = c(1, 2, 3)),
                "one per trait")
   frac <- sample_individuals(sim, fraction = 0.5, source = "evolution", cover = 1)
-  expect_true(nrow(frac) > 0)
+  expect_gt(nrow(frac), 0)
 })
 
 test_that("genetic_matrices() builds the three families", {
@@ -141,7 +141,7 @@ test_that("genetic_matrices() builds the three families", {
   sim <- simulate_metacommunity(s$ls, s$tr, s$alpha, env = s$env, dispersal = 0, n_steps = 3,
                                 evolution = evolution_control(m$genetic_var,
                                                               env_var = m$env_var))
-  expect_equal(unname(sim$evolution$genetic_var$sp1), unname(m$genetic_var$sp1))
+  expect_identical(unname(sim$evolution$genetic_var$sp1), unname(m$genetic_var$sp1))
 })
 
 test_that("several species, migrants and plasticity follow the same engine", {
@@ -167,7 +167,7 @@ test_that("several species, migrants and plasticity follow the same engine", {
   # G as a named list out of order is matched by species
   Gs <- list(sp3 = diag(c(3, 1)), sp1 = diag(2), sp2 = matrix(c(2, 1, 1, 2), 2))
   sim <- run(evolution_control(Gs, env_var = diag(2), plasticity = c(0.3, 0)))
-  expect_equal(unname(sim$evolution$genetic_var$sp3), diag(c(3, 1)))
+  expect_identical(unname(sim$evolution$genetic_var$sp3), diag(c(3, 1)))
   plastic <- sim$evolution$plastic[, , "a"]
   ok <- !is.na(plastic[, 1])
   expect_equal(unname(plastic[ok, 1]), (env[ok, "a"] - mean(env[, "a"])) * 0.3)
@@ -180,7 +180,7 @@ test_that("several species, migrants and plasticity follow the same engine", {
                                   env = cbind(a = imp$env * 10 + 40, b = 0),
                                   dispersal = 0.2, n_steps = 20,
                                   evolution = evolution_control(diag(c(4, 1))))
-  expect_equal(dim(s_imp$evolution$genetic), c(6, 1, 2))
+  expect_identical(dim(s_imp$evolution$genetic), c(6L, 1L, 2L))
   expect_error(run(evolution_control(list(sp1 = diag(2), sp2 = diag(2), spx = diag(2)))),
                "lacks matrices for")
   expect_error(run(evolution_control(diag(2), plasticity = c(0.1, 0.2, 0.3))), "plasticity")
@@ -237,8 +237,10 @@ test_that("env_time changes every axis of a niche, with and without evolution", 
   tr <- s$tr
   tr$head$sigma <- 5
   n_steps <- 30
-  warm <- list(svl = sapply(1:n_steps, function(t) s$env[, "svl"] + t),
-               head = sapply(1:n_steps, function(t) s$env[, "head"] - 0.1 * t))
+  n_sites <- nrow(s$env)
+  warm <- list(svl = vapply(1:n_steps, function(t) s$env[, "svl"] + t, numeric(n_sites)),
+               head = vapply(1:n_steps, function(t) s$env[, "head"] - 0.1 * t,
+                             numeric(n_sites)))
   run <- function(env_time, ev = NULL, seed = 1) {
     set.seed(seed)
     simulate_metacommunity(s$ls, tr, s$alpha, env = s$env, env_time = env_time,
@@ -254,11 +256,11 @@ test_that("env_time changes every axis of a niche, with and without evolution", 
   ev <- evolution_control(diag(c(4, 1)), env_var = diag(2))
   sim <- run(warm, ev)
   eh <- sim$evolution$environment_history
-  expect_equal(unname(eh[, "svl", "step10"]), s$env[, "svl"] + 10)
-  expect_equal(unname(eh[, "head", "step30"]), s$env[, "head"] - 3)
-  expect_equal(unname(sim$evolution$environment[, "svl"]), s$env[, "svl"] + 30)
+  expect_identical(unname(eh[, "svl", "step10"]), s$env[, "svl"] + 10)
+  expect_identical(unname(eh[, "head", "step30"]), s$env[, "head"] - 3)
+  expect_identical(unname(sim$evolution$environment[, "svl"]), s$env[, "svl"] + 30)
   m <- maladaptation(sim, step = 10)
-  expect_equal(m$env_svl, unname(s$env[match(m$site, rownames(sim$abundance)), "svl"] + 10))
+  expect_identical(m$env_svl, unname(s$env[match(m$site, rownames(sim$abundance)), "svl"] + 10))
   # G = 0 with env_time gives the abundances without evolution
   expect_identical(run(warm, evolution_control(matrix(0, 2, 2)))$abundance,
                    run(warm)$abundance)
@@ -269,7 +271,7 @@ test_that("env_time changes every axis of a niche, with and without evolution", 
 test_that("env_time as a matrix works with a single column of env and one evolving trait", {
   s <- mv_setup()
   n_steps <- 20
-  warm <- sapply(1:n_steps, function(t) s$ls$env + t)
+  warm <- vapply(1:n_steps, function(t) s$ls$env + t, numeric(length(s$ls$env)))
   run <- function(...) {
     set.seed(8)
     simulate_metacommunity(s$ls, s$tr$svl, s$alpha, dispersal = 0.01, n_steps = n_steps,
@@ -277,8 +279,8 @@ test_that("env_time as a matrix works with a single column of env and one evolvi
   }
   a <- run(env = data.frame(svl = s$ls$env), env_time = warm)
   b <- run(env_time = warm)
-  expect_equal(a$evolution$genetic, b$evolution$genetic)
-  expect_equal(unname(a$evolution$environment_history[, "step10"]), warm[, 10])
+  expect_identical(a$evolution$genetic, b$evolution$genetic)
+  expect_identical(unname(a$evolution$environment_history[, "step10"]), warm[, 10])
 })
 
 test_that("immigrant_selection filters maladapted immigrants with several traits", {
@@ -316,18 +318,18 @@ test_that("mv_immigrants_selected reduces to immigrants_selected with one select
   mv <- mv_immigrants_selected(ev, em, za, za, env, disp, 1)
   uni <- immigrants_selected(em, matrix(za[, , 1], 4), matrix(za[, , 1], 4), env[, 1],
                              20^2 + 4 + 1, disp)
-  expect_equal(mv$lambda, uni$lambda)
-  expect_equal(mv$mean[, , 1], drop(uni$mean))
+  expect_identical(mv$lambda, uni$lambda)
+  expect_identical(mv$mean[, , 1], drop(uni$mean))
   expect_equal(mv_fitness(ev, matrix(c(40, 0), 1), env, 1)[1, ],
                unname(exp(-(env[, 1] - 40)^2 / (2 * (20^2 + 5)))))
   # a species without emigrants sends no one and keeps its own means
   none <- mv_immigrants_selected(ev, matrix(0, 4, 1), za, za, env, disp, 1)
-  expect_equal(none$lambda, matrix(0, 4, 1))
-  expect_equal(none$mean, za)
+  expect_identical(none$lambda, matrix(0, 4, 1))
+  expect_identical(none$mean, za)
   # no axis under selection: every source has fitness 1
   control$traits$svl$sigma <- Inf
   free <- evolution_state_mv(control, 4L, 1L, "sp1")
-  expect_equal(mv_fitness(free, matrix(c(40, 0), 1), env, 1), matrix(1, 1, 4))
+  expect_identical(mv_fitness(free, matrix(c(40, 0), 1), env, 1), matrix(1, 1, 4))
 })
 
 test_that("mutation_var is refused with several traits and in evolving simulations", {

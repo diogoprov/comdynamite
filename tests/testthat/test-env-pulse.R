@@ -1,7 +1,7 @@
 test_that("env_pulse changes only the disturbed sites during the pulse", {
   e <- env_pulse(c(0.6, 0.7, 0.8), n_steps = 10, sites = c(1, 3), start = 4, duration = 3,
                  value = 0.1)
-  expect_equal(dim(e), c(3L, 10L))
+  expect_identical(dim(e), c(3L, 10L))
   expect_equal(e[2, ], rep(0.7, 10))
   expect_equal(e[1, ], c(rep(0.6, 3), rep(0.1, 3), rep(0.6, 4)))
   expect_equal(e[3, 4:6], rep(0.1, 3))
@@ -16,8 +16,8 @@ test_that("env_pulse keeps the course of an environment that varies in time", {
   set.seed(1)
   et <- env_over_time(c(10, 20), 20, rho = 0.5, sd = 1)
   e <- env_pulse(et, sites = 2, start = 5, duration = 5, value = 0)
-  expect_equal(e[1, ], et[1, ])
-  expect_equal(e[2, -(5:9)], et[2, -(5:9)])
+  expect_identical(e[1, ], et[1, ])
+  expect_identical(e[2, -(5:9)], et[2, -(5:9)])
   expect_true(all(e[2, 5:9] == 0))
 })
 
@@ -37,7 +37,7 @@ test_that("env_pulse rejects wrong sites and steps", {
 
 test_that("a permanent change reaches the last step", {
   e <- env_pulse(c(1, 2), 5, sites = 1, start = 2, value = 0)
-  expect_equal(e[1, ], c(1, 0, 0, 0, 0))
+  expect_identical(e[1, ], c(1, 0, 0, 0, 0))
 })
 
 test_that("a pulse below every optimum depresses disturbed sites, which recover", {
@@ -61,10 +61,10 @@ test_that("a pulse below every optimum depresses disturbed sites, which recover"
 })
 
 test_that("env_pulse without disturbed sites returns the environment unchanged", {
-  expect_equal(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = 0),
-               matrix(c(1, 2), 2, 5))
-  expect_equal(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
-               matrix(c(1, 2), 2, 5))
+  expect_identical(env_pulse(c(1, 2), 5, sites = integer(0), start = 1, value = 0),
+                   matrix(c(1, 2), 2, 5))
+  expect_identical(env_pulse(c(1, 2), 5, sites = c(FALSE, FALSE), start = 1, value = 0),
+                   matrix(c(1, 2), 2, 5))
 })
 
 test_that("an undisturbed control still validates its arguments", {
@@ -77,11 +77,11 @@ test_that("an undisturbed control still validates its arguments", {
 
 test_that("env_pulse repeats pulses with a period of every", {
   e <- env_pulse(c(1, 2), 30, sites = 1, start = 5, duration = 3, value = 0, every = 10)
-  expect_equal(which(e[1, ] == 0), c(5:7, 15:17, 25:27))
-  expect_equal(e[2, ], rep(2, 30))
+  expect_identical(which(e[1, ] == 0), c(5:7, 15:17, 25:27))
+  expect_identical(e[2, ], rep(2, 30))
   # a last pulse cut by the end of the run
   e <- env_pulse(c(1, 2), 26, sites = 1, start = 5, duration = 3, value = 0, every = 10)
-  expect_equal(which(e[1, ] == 0), c(5:7, 15:17, 25:26))
+  expect_identical(which(e[1, ] == 0), c(5:7, 15:17, 25:26))
   expect_error(env_pulse(c(1, 2), 30, sites = 1, start = 5, value = 0, every = 10), "longer")
   expect_error(env_pulse(c(1, 2), 30, sites = 1, start = 5, duration = 10, value = 0,
                          every = 10), "longer")

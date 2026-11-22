@@ -94,15 +94,15 @@ test_that("renamed functions and arguments still work, with a warning", {
   set.seed(5)
   tree <- ape::rtree(6)
   set.seed(1); new <- trait_ou(tree)
-  set.seed(1); expect_warning(old <- traits_ou(tree), "deprecated")
-  expect_equal(old, new)
-  expect_warning(x <- trait_rates(tree, "iid", root_value = 3), "`root_value` is deprecated")
-  expect_equal(x$edge_rates, x$edge_rate)
-  expect_warning(h <- trait_mk(tree, q = 0.1, root = "1"), "`root` is deprecated")
+  set.seed(1); old <- expect_warning_value(traits_ou(tree), "deprecated")
+  expect_identical(old, new)
+  x <- expect_warning_value(trait_rates(tree, "iid", root_value = 3), "`root_value` is deprecated")
+  expect_identical(x$edge_rates, x$edge_rate)
+  h <- expect_warning_value(trait_mk(tree, q = 0.1, root = "1"), "`root` is deprecated")
   ind <- data.frame(site = rep(c("a", "b"), each = 6), species = rep(c("x", "y"), 6),
                     trait = rnorm(12))
-  expect_warning(res <- tstats(ind, nperm = 9), "`nperm` is deprecated")
-  expect_equal(dim(attr(res, "null"))[1], 9)
+  res <- expect_warning_value(tstats(ind, nperm = 9), "`nperm` is deprecated")
+  expect_identical(dim(attr(res, "null"))[1], 9L)
   expect_warning(community_index(ind, stats::var, nperm = 0), "`nperm` is deprecated")
   expect_warning(tstats_summary(tstats(ind, n_perm = 49), level = 0.05), "coverage")
   comm <- matrix(c(1, 0, 1, 0, 1, 0), 1, dimnames = list(NULL, tree$tip.label))
@@ -139,14 +139,14 @@ test_that("tstats_summary() checks `level`", {
 test_that("repeated site names stop instead of being matched by position", {
   comm <- matrix(1, 3, 2, dimnames = list(c("a", "b", "c"), c("x", "y")))
   env <- data.frame(v = 1:3, row.names = c("a", "b", "c"))
-  expect_equal(check_sites(env[c(3, 1, 2), , drop = FALSE], comm, "`env`"), env)
+  expect_identical(check_sites(env[c(3, 1, 2), , drop = FALSE], comm, "`env`"), env)
   bad <- matrix(1:3, dimnames = list(c("a", "a", "c"), "v"))
   expect_error(check_sites(bad, comm, "`env`"), "site names of `env` are repeated: a")
   rownames(comm)[2] <- "a"
   expect_error(check_sites(env, comm, "`env`"), "site names of `comm` are repeated")
-  expect_error(site_rows(c(a = 1, a = 2, c = 3), c("a", "c"), "`areas`"),
+  expect_error(site_rows(stats::setNames(1:3, c("a", "a", "c")), c("a", "c"), "`areas`"),
                "site names of `areas` are repeated: a")
-  expect_equal(site_rows(c(c = 3, a = 1), c("a", "c"), "`areas`"), c(a = 1, c = 3))
+  expect_identical(site_rows(c(c = 3, a = 1), c("a", "c"), "`areas`"), c(a = 1, c = 3))
 })
 
 test_that("trait_flex() refuses repeated sites in `env`", {
@@ -165,8 +165,8 @@ test_that("check_collinear() stops on aliased predictors and warns on high VIF",
   expect_error(check_collinear(cbind(`(Intercept)` = 1, x1, x2, x3 = x1 + x2), "`env`"),
                "collinear: x3 is a linear combination")
   near <- x1 + rnorm(30, sd = 0.05)
-  expect_warning(vif <- check_collinear(cbind(`(Intercept)` = 1, x1, near), "`env`"),
-                 "variance inflation factor above 10: x1 = .*No variable was removed")
+  vif <- expect_warning_value(check_collinear(cbind(`(Intercept)` = 1, x1, near), "`env`"),
+                              "variance inflation factor above 10: x1 = .*No variable was removed")
   expect_named(vif, c("x1", "near"))
   expect_null(check_collinear(cbind(`(Intercept)` = 1, x1), "`env`"))
 })
@@ -195,7 +195,7 @@ test_that("na_action omits with a message or stops", {
   expect_error(trait_flex(ind, na_action = "fail"), "missing")
   env <- data.frame(site = paste0("s", 1:6), x = c(NA, rnorm(5)))
   w <- capture_warnings(suppressMessages(trait_flex(ind, formula = ~x, env = env)))
-  expect_true(any(grepl("left out of the decomposition: s1", w)))
+  expect_true(any(grepl("left out of the decomposition: s1", w, fixed = TRUE)))
   expect_error(trait_flex(ind[!is.na(ind$trait), ], formula = ~x, env = env,
                           na_action = "fail"), "sites with missing values in `env`: s1")
   expect_message(trait_rarefaction(ind, n = 2, reps = 1), "2 individuals")

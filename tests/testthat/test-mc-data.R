@@ -17,36 +17,36 @@ env <- data.frame(x = c(1, 3, 2, 6, 5, 8), row.names = paste0("s", 1:6))
 test_that("mc_data() matches names once and keeps everything aligned", {
   d <- mc_data(comm, tree, traits, env[6:1, , drop = FALSE], cbind(1:6, 0), letters[c(1, 1, 2, 2, 3, 3)])
   expect_s3_class(d, "mc_data")
-  expect_equal(rownames(d$env), rownames(comm))
-  expect_equal(d$env$x, env$x)
-  expect_equal(rownames(d$traits), colnames(comm))
+  expect_identical(rownames(d$env), rownames(comm))
+  expect_identical(d$env$x, env$x)
+  expect_identical(rownames(d$traits), colnames(comm))
   expect_equal(d$traits$size, 1:5)
-  expect_equal(sort(d$tree$tip.label), colnames(d$comm))
-  expect_equal(unname(d$areas), letters[c(1, 1, 2, 2, 3, 3)])
-  expect_equal(rownames(d$coords), rownames(comm))
+  expect_identical(sort(d$tree$tip.label), colnames(d$comm))
+  expect_identical(unname(d$areas), letters[c(1, 1, 2, 2, 3, 3)])
+  expect_identical(rownames(d$coords), rownames(comm))
   expect_output(print(d), "6 sites x 5 species")
   small <- d[2:4, c("t1", "t2", "t5")]
-  expect_equal(dim(small$comm), c(3, 3))
-  expect_equal(small$env$x, env$x[2:4])
-  expect_equal(sort(small$tree$tip.label), c("t1", "t2", "t5"))
-  expect_equal(rownames(small$traits), c("t1", "t2", "t5"))
-  expect_equal(unname(small$areas), c("a", "b", "b"))
-  expect_equal(nrow(small$coords), 3)
+  expect_identical(dim(small$comm), c(3L, 3L))
+  expect_identical(small$env$x, env$x[2:4])
+  expect_identical(sort(small$tree$tip.label), c("t1", "t2", "t5"))
+  expect_identical(rownames(small$traits), c("t1", "t2", "t5"))
+  expect_identical(unname(small$areas), c("a", "b", "b"))
+  expect_identical(nrow(small$coords), 3L)
   expect_error(d[, 1], "two species")
   expect_identical(as_mc_data(d), d)
 })
 
 test_that("species in only some parts are dropped with a warning", {
   extra <- cbind(comm, t9 = 1)
-  expect_warning(d <- mc_data(extra, tree), "t9")
-  expect_equal(colnames(d$comm), paste0("t", 1:5))
-  expect_warning(d <- mc_data(comm, tree, traits[1:4, , drop = FALSE]), "t1")
-  expect_equal(ape::Ntip(d$tree), 4)
+  d <- expect_warning_value(mc_data(extra, tree), "t9")
+  expect_identical(colnames(d$comm), paste0("t", 1:5))
+  d <- expect_warning_value(mc_data(comm, tree, traits[1:4, , drop = FALSE]), "t1")
+  expect_identical(ape::Ntip(d$tree), 4L)
   unnamed <- comm
   rownames(unnamed) <- NULL
-  expect_equal(rownames(mc_data(unnamed)$comm), paste0("site", 1:6))
-  expect_equal(colnames(mc_data(comm, traits = c(t1 = 1, t2 = 2, t3 = 3, t4 = 4, t5 = 5))$traits),
-               "trait")
+  expect_identical(rownames(mc_data(unnamed)$comm), paste0("site", 1:6))
+  one_trait <- mc_data(comm, traits = c(t1 = 1, t2 = 2, t3 = 3, t4 = 4, t5 = 5))
+  expect_identical(colnames(one_trait$traits), "trait")
 })
 
 test_that("wrong inputs stop", {
@@ -74,21 +74,22 @@ test_that("series, long tables and summaries", {
   long <- as.data.frame(d)
   expect_named(long, c("site", "species", "step", "abundance"))
   expect_setequal(unique(long$step), c(5, 10))
-  expect_equal(sum(long$abundance), 3 * sum(comm))
+  expect_identical(sum(long$abundance), 3 * sum(comm))
   expect_true(all(is.na(as.data.frame(mc_data(comm))$step)))
-  expect_equal(dim(d[1:3, 1:2]$series), c(3, 2, 2))
+  expect_identical(dim(d[1:3, 1:2]$series), c(3L, 2L, 2L))
   listed <- structure(list(abundance = comm, env = list(a = 1:6, b = 6:1)), class = "mc_sim")
   expect_named(as_mc_data(listed)$env, c("a", "b"))
   unnamed <- series
   dimnames(unnamed)[[3]] <- NULL
-  expect_equal(unique(as.data.frame(mc_data(comm, series = unnamed))$step), 1:2)
+  expect_identical(unique(as.data.frame(mc_data(comm, series = unnamed))$step), 1:2)
   set.seed(1)
   out <- summary(d, n_null = 9)
   set.seed(1)
-  expect_equal(out, summary_stats(comm, tree, stats::setNames(traits$size, rownames(traits)),
-                                  env$x, n_null = 9)[names(out)] |>
-                 replace(c("cv_population", "cv_site", "cv_regional", "turnover"),
-                         summary_stats(series)[c("cv_population", "cv_site", "cv_regional", "turnover")]))
+  expected <- summary_stats(comm, tree, stats::setNames(traits$size, rownames(traits)), env$x,
+                            n_null = 9)[names(out)]
+  over_time <- c("cv_population", "cv_site", "cv_regional", "turnover")
+  expected <- replace(expected, over_time, summary_stats(series)[over_time])
+  expect_identical(out, expected)
   two <- mc_data(comm, env = data.frame(x = 1:6, y = 6:1))
   expect_error(summary_stats(two), "2 numeric columns")
   expect_true(is.na(summary_stats(mc_data(comm))[["trait_env"]]))
@@ -99,32 +100,32 @@ test_that("analyses take their arguments from an mc_data object", {
   set.seed(2)
   a <- pcps_test(d, n_perm = 5)
   set.seed(2)
-  expect_equal(a, pcps_test(comm, tree, env, n_perm = 5))
+  expect_identical(a, pcps_test(comm, tree, env, n_perm = 5))
   set.seed(3)
-  expect_equal(pcc_test(d, n_perm = 5)$tests, {
+  expect_identical(pcc_test(d, n_perm = 5)$tests, {
     set.seed(3)
     pcc_test(comm, tree, env, n_perm = 5)$tests
   })
   set.seed(4)
-  expect_equal(phylo_beta_test(d, n_perm = 5)$tests, {
+  expect_identical(phylo_beta_test(d, n_perm = 5)$tests, {
     set.seed(4)
     phylo_beta_test(comm, tree, env, n_perm = 5)$tests
   })
-  expect_equal(phylo_beta(d), phylo_beta(comm, tree))
+  expect_identical(phylo_beta(d), phylo_beta(comm, tree))
   set.seed(5)
-  expect_equal(node_test(d, n_perm = 5)$nodes, {
+  expect_identical(node_test(d, n_perm = 5)$nodes, {
     set.seed(5)
     nodes <- node_contrasts(d$tree)
     node_test(comm, nodes, env, n_perm = 5)$nodes
   })
   set.seed(6)
-  expect_equal(phylo_vector(d, n_perm = 5, n_sim = 5)$tests, {
+  expect_identical(phylo_vector(d, n_perm = 5, n_sim = 5)$tests, {
     set.seed(6)
     phylo_vector(comm, tree, env$x, n_perm = 5, n_sim = 5)$tests
   })
   space <- cbind(m1 = c(1, -1, 1, -1, 1, -1), m2 = c(1, 1, 0, 0, -1, -1))
   set.seed(7)
-  expect_equal(trait_partition(d, space = space, n_perm = 5)$fractions, {
+  expect_identical(trait_partition(d, space = space, n_perm = 5)$fractions, {
     set.seed(7)
     trait_partition(comm, d$traits, env, space, n_perm = 5)$fractions
   })
@@ -143,16 +144,16 @@ test_that("simulations keep their tree and convert", {
                                 seed_steps = 1:3, record_steps = c(5, 10))
   expect_identical(sim$tree, tree)
   d <- as_mc_data(sim)
-  expect_equal(d$env$env, land$env)
-  expect_equal(unname(d$coords), unname(as.matrix(land$coords)))
-  expect_equal(dim(d$series), c(9, 5, 2))
-  expect_equal(colnames(d$traits), c("optimum", "sigma", "r_max"))
+  expect_identical(d$env$env, land$env)
+  expect_identical(unname(d$coords), unname(as.matrix(land$coords)))
+  expect_identical(dim(d$series), c(9L, 5L, 2L))
+  expect_identical(colnames(d$traits), c("optimum", "sigma", "r_max"))
   static <- simulate_static(traits, seq(0, 100, length.out = 4))
   expect_identical(as_mc_data(static)$tree, tree)
-  expect_equal(nrow(as_mc_data(static)$env), 4)
+  expect_identical(nrow(as_mc_data(static)$env), 4L)
   logistic <- simulate_logistic(tree, logistic_gradients(1, n_sites = 7))
   expect_identical(logistic$tree, tree)
   expect_null(as_mc_data(logistic)$traits)
-  expect_equal(nrow(as_mc_data(logistic)$env), 7)
+  expect_identical(nrow(as_mc_data(logistic)$env), 7L)
   expect_s3_class(as_mc_data(comm, tree = tree), "mc_data")
 })

@@ -42,10 +42,10 @@ test_that("kernel_group sends each group of species along its own routes", {
                                   kernel_group = c("walkers", "fliers"),
                                   immigration = immigration)
     expect_gt(sim$abundance[2, "sp1"], 0)
-    expect_equal(sim$abundance[3, "sp1"], 0)
-    expect_equal(sim$abundance[2, "sp2"], 0)
+    expect_identical(sim$abundance[3, "sp1"], 0L)
+    expect_identical(sim$abundance[2, "sp2"], 0L)
     expect_gt(sim$abundance[3, "sp2"], 0)
-    expect_equal(sim$kernel_group, c("walkers", "fliers"))
+    expect_identical(sim$kernel_group, c("walkers", "fliers"))
   }
   # groups by index, and a change of routes through time
   set.seed(4)
@@ -54,8 +54,8 @@ test_that("kernel_group sends each group of species along its own routes", {
                                 n_steps = 2, initial = start, seed_steps = numeric(0),
                                 kernels = list(near, far), kernel_step = steps,
                                 kernel_group = c(1, 2), record_steps = 1)
-  expect_equal(sim$history[3, "sp1", 1], 0)
-  expect_equal(sim$history[2, "sp2", 1], 0)
+  expect_identical(sim$history[3, "sp1", 1], 0L)
+  expect_identical(sim$history[2, "sp2", 1], 0L)
 })
 
 test_that("kernel_group works with pool_from and univariate evolution", {
@@ -67,8 +67,8 @@ test_that("kernel_group works with pool_from and univariate evolution", {
                                                                                rep(2, 3)),
                                 kernel_group = 1:2, pool_from = open)
   # sp2 flies only to site 3 from site 1, which is closed to it until step 50
-  expect_equal(sim$abundance[2, "sp2"], 0)
-  expect_equal(sim$abundance[3, "sp2"], 0)
+  expect_identical(sim$abundance[2, "sp2"], 0L)
+  expect_identical(sim$abundance[3, "sp2"], 0L)
   set.seed(5)
   multi <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
                                   n_steps = 3, initial = start, seed_steps = numeric(0),
@@ -76,7 +76,7 @@ test_that("kernel_group works with pool_from and univariate evolution", {
                                   kernel_step = cbind(rep(1, 3), rep(2, 3)),
                                   kernel_group = 1:2, pool_from = open,
                                   immigration = "multinomial")
-  expect_equal(multi$abundance[3, "sp2"], 0)
+  expect_identical(multi$abundance[3, "sp2"], 0L)
   expect_gt(multi$abundance[2, "sp1"], 0)
   set.seed(6)
   ev <- simulate_metacommunity(three_sites(), two_species(), diag(0.01, 2), dispersal = 0.2,
@@ -117,8 +117,8 @@ test_that("dispersal_site changes emigration site by site", {
                                 initial = init, seed_steps = numeric(0),
                                 kernels = list(route), kernel_step = 1,
                                 dispersal_site = matrix(c(1, 0, 1), 3, 1))
-  expect_equal(sim$abundance[3, 1], 0)
-  expect_equal(sim$dispersal_site, matrix(c(1, 0, 1), 3, 1))
+  expect_identical(sim$abundance[3, 1], 0L)
+  expect_identical(sim$dispersal_site, matrix(c(1, 0, 1), 3, 1))
   # multipliers above 1 raise emigration, capped at 1
   set.seed(8)
   all_out <- simulate_metacommunity(three_sites(), tr, matrix(0.01), dispersal = 0.3,
@@ -126,7 +126,7 @@ test_that("dispersal_site changes emigration site by site", {
                                     kernels = list(route), kernel_step = 1,
                                     dispersal_site = matrix(c(10, 0, 0), 3, 1),
                                     immigration = "multinomial")
-  expect_equal(all_out$abundance[1, 1], 0)
+  expect_identical(all_out$abundance[1, 1], 0L)
   expect_error(simulate_metacommunity(three_sites(), tr, matrix(0.01), n_steps = 2,
                                       dispersal_site = matrix(1, 2, 2)), "one row per site")
   expect_error(simulate_metacommunity(three_sites(), tr, matrix(0.01), n_steps = 2,
@@ -141,7 +141,7 @@ test_that("disturbance_sensitivity lets resistant species keep their populations
                                 disturbance = 1, disturbance_sensitivity = c(1, 0))
   expect_true(all(sim$abundance[, "sp1"] == 0))
   expect_true(all(sim$abundance[, "sp2"] > 0))
-  expect_equal(sim$disturbance_sensitivity, c(1, 0))
+  expect_identical(sim$disturbance_sensitivity, c(1, 0))
   # only disturbed sites lose populations
   dist <- matrix(c(1, 0, 0), 3, 1)
   set.seed(10)
@@ -184,7 +184,7 @@ test_that("the remaining checks of the new arguments", {
                                 kernels = list(near = near, far = far),
                                 kernel_step = cbind(walkers = "near", fliers = "far"),
                                 kernel_group = factor(c("walkers", "fliers")))
-  expect_equal(sim$abundance[2, "sp2"], 0)
+  expect_identical(sim$abundance[2, "sp2"], 0L)
   # one site cannot take a dispersal pulse
   expect_error(mc_dynamics(matrix(5, 1, 1), matrix(0.05), dispersal = 0, n_steps = 2,
                            dispersal_site = matrix(1, 1, 2)), "two sites")
@@ -243,12 +243,14 @@ test_that("kernel_group routes immigrants and their genes with selection and sev
                                   kernel_step = cbind(1, 2), kernel_group = 1:2,
                                   evolution = s[[1]])
     expect_gt(sim$abundance[2, "sp1"], 0)
-    expect_equal(sim$abundance[3, "sp1"], 0)
-    expect_equal(sim$abundance[2, "sp2"], 0)
+    expect_identical(sim$abundance[3, "sp1"], 0L)
+    expect_identical(sim$abundance[2, "sp2"], 0L)
     expect_gt(sim$abundance[3, "sp2"], 0)
     z <- if (s[[2]]) sim$evolution$genetic[, , 1] else sim$evolution$genetic
-    expect_true(is.finite(z[2, "sp1"]) && is.na(z[3, "sp1"]))
-    expect_true(is.finite(z[3, "sp2"]) && is.na(z[2, "sp2"]))
+    expect_true(is.finite(z[2, "sp1"]))
+    expect_true(is.na(z[3, "sp1"]))
+    expect_true(is.finite(z[3, "sp2"]))
+    expect_true(is.na(z[2, "sp2"]))
   }
 })
 
@@ -293,8 +295,8 @@ test_that("the evolving engine takes kernel_group: same matrix, same run", {
     while (!sp %in% names(first)) sp <- sim$species$parent[sim$species$species == sp]
     sp
   }
-  expect_equal(sim$kernel_group,
-               unname(first[vapply(colnames(sim$abundance), root, character(1))]))
+  expect_identical(sim$kernel_group,
+                   unname(first[vapply(colnames(sim$abundance), root, character(1))]))
   expect_gt(length(unique(sim$kernel_group)), 1)
 })
 
@@ -312,8 +314,8 @@ test_that("the groups of the evolving engine follow their own routes", {
     set.seed(19)
     sim <- run(still, kernel_group = 1:2, immigration = immigration)
     expect_gt(sim$abundance[2, 1], 0)
-    expect_equal(sim$abundance[3, 1], 0)
-    expect_equal(sim$abundance[2, 2], 0)
+    expect_identical(sim$abundance[3, 1], 0L)
+    expect_identical(sim$abundance[2, 2], 0L)
     expect_gt(sim$abundance[3, 2], 0)
     expect_identical(sim$kernel_group, 1:2)
   }
@@ -332,10 +334,11 @@ test_that("the gene flow that keeps populations together follows the kernel of e
                       kernel_group = c(1L, 2L, 1L), ev = NULL))
   zero <- matrix(0, 3, 3)
   flow <- evolving_flow(st, list(NULL, zero, zero), routes)
-  expect_equal(flow[[2]], 10 * rbind(far[1, ], 0, 0))
-  expect_equal(flow[[3]], 10 * rbind(near[1, ], 0, 0))
+  expect_identical(flow[[2]], 10 * rbind(far[1, ], 0, 0))
+  expect_identical(flow[[3]], 10 * rbind(near[1, ], 0, 0))
   # one kernel for all, as before
-  expect_equal(evolving_flow(st, list(NULL, zero, zero), near)[[2]], 10 * rbind(near[1, ], 0, 0))
+  expect_identical(evolving_flow(st, list(NULL, zero, zero), near)[[2]],
+                   10 * rbind(near[1, ], 0, 0))
   expect_identical(species_kernel(near, 2), near)
   expect_identical(species_kernel(routes, 1), far)
   expect_null(species_kernel(NULL, 1, 1L))
@@ -350,11 +353,11 @@ test_that("the gene flow that keeps populations together follows the kernel of e
                         disp_matrix = structure(list(one, two), group = g),
                         kernel_group = c(3L - g, g), ev = NULL))
     upd <- evolving_divergence(st, list(NULL, d), list(NULL, zero), list(NULL, zero), sp)
-    expect_equal(upd$divergence[[2]][3, 1:2], if (g == 1) c(1, 8) else c(8, 1))
+    expect_identical(upd$divergence[[2]][3, 1:2], if (g == 1) c(1, 8) else c(8, 1))
   }
   # without a dispersal matrix (implicit landscape), the largest population sends it
   st <- list2env(list(k = 1, alive = 2L, n = matrix(c(50, 100, 5), 3, 1), disp_matrix = NULL,
                       kernel_group = NULL, ev = NULL))
   upd <- evolving_divergence(st, list(NULL, d), list(NULL, zero), list(NULL, zero), sp)
-  expect_equal(upd$divergence[[2]][3, 1:2], c(8, 1))
+  expect_identical(upd$divergence[[2]][3, 1:2], c(8, 1))
 })

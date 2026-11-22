@@ -29,7 +29,7 @@ test_that("subsample_individuals() and trait_rarefaction() check their scalars",
   expect_error(subsample_individuals(d, species = NA_character_), "`species`")
   expect_error(subsample_individuals(d, abundance = 1), "`abundance`")
   # Inf keeps every individual, as NULL does
-  expect_equal(subsample_individuals(d, n = Inf), d)
+  expect_identical(subsample_individuals(d, n = Inf), d)
   expect_error(trait_rarefaction(d, reps = 0), "`reps`")
   expect_error(trait_rarefaction(d, level = 1), "`level`")
   expect_error(trait_rarefaction(d, min_n = "2"), "`min_n`")
@@ -140,7 +140,7 @@ test_that("species_traits() and trait_bm() check their scalars", {
   expect_error(species_traits(5, rescale_optima = "no"), "`rescale_optima`")
   expect_error(species_traits(5, optima = c(1, 2, 3, 4, Inf)), "`optima`")
   # an infinite niche breadth is meaningful (no selection on that axis)
-  expect_equal(species_traits(5, sigma = c(1, 2, 3, 4, Inf))$sigma[5], Inf)
+  expect_identical(species_traits(5, sigma = c(1, 2, 3, 4, Inf))$sigma[5], Inf)
   expect_error(trait_bm(list()), "`tree`")
   expect_error(trait_bm(toy_tree, lambda = NA), "`lambda`")
   expect_error(trait_bm(toy_tree, nodes = 1), "`nodes`")

@@ -14,7 +14,7 @@ test_that("partner_turnover() counts entries and exits per site and step", {
   # a: site1 over 20 steps, b leaves and returns (2 changes); site2 over 10 steps, no change
   expect_equal(partner_turnover(x), c(a = 2 / 30, b = 0, c = 0))
   # without competition between a and b there are no partners to count
-  expect_equal(partner_turnover(x, "competitors"), c(a = 0, b = 0, c = 0))
+  expect_identical(partner_turnover(x, "competitors"), c(a = 0, b = 0, c = 0))
   alpha <- diag(3)
   alpha[2, 1] <- 0.1
   expect_equal(partner_turnover(fake_sim(alpha), "competitors"), c(a = 2 / 30, b = 0, c = 0))
@@ -30,17 +30,17 @@ test_that("turnover_rates() raises only the tip branches", {
   r <- turnover_rates(x, tree, sigma2 = 2, k = 3)
   tip_edge <- match(1:3, tree$edge[, 2])
   expect_equal(r[tip_edge], 2 * (1 + 3 * c(2 / 30, 0, 0)))
-  expect_equal(r[-tip_edge], 2)
-  expect_equal(attr(r, "turnover"), partner_turnover(x))
+  expect_identical(r[-tip_edge], 2)
+  expect_identical(attr(r, "turnover"), partner_turnover(x))
   # a window of half of the branch of a halves the increase
   r_half <- turnover_rates(x, tree, k = 3, window = 0.5)
   expect_equal(r_half[tip_edge[1]], 1 + 3 * (2 / 30) * 0.5)
   # windows longer than a branch are cut to it
-  expect_equal(turnover_rates(x, tree, k = 3, window = 5)[tip_edge],
-               turnover_rates(x, tree, k = 3)[tip_edge])
+  expect_identical(turnover_rates(x, tree, k = 3, window = 5)[tip_edge],
+                   turnover_rates(x, tree, k = 3)[tip_edge])
   # the rates go to trait_rates()
   out <- trait_rates(tree, edge_rates = r)
-  expect_equal(as.numeric(out$edge_rates), as.numeric(r))
+  expect_identical(as.numeric(out$edge_rates), as.numeric(r))
 })
 
 test_that("turnover_rates() works on a simulation", {

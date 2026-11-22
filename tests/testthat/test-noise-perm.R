@@ -72,13 +72,13 @@ test_that("p-values of the whole-tree tests vary across seeds within Monte Carlo
   # G5.9b: 4 seeds, 199 permutations
   d <- noise_data()
   n_perm <- 199
-  p <- sapply(1:4, function(seed) {
+  p <- simplify2array(lapply(1:4, function(seed) {
     set.seed(seed)
     pcc <- pcc_test(d$comm, d$tree, d$env, n_perm = n_perm)
     beta <- phylo_beta_test(d$comm, d$tree, d$env, n_perm = n_perm)
     pcps <- pcps_test(d$comm, d$tree, d$env, axes = 1, n_perm = n_perm)$tests
     c(pcc$p_site, pcc$p_species, beta$p_site, beta$p_species, pcps$p_site, pcps$p_species)
-  })
+  }))
   expect_seed_stable(p, n_perm)
 })
 
@@ -97,12 +97,12 @@ test_that("node_test() and phylo_vector() ignore trivial noise and the seed", {
   expect_jitter_invariant(node, d, n_perm)
   expect_jitter_invariant(vector, d, n_perm)
   n_perm <- 199
-  p <- sapply(1:4, function(seed) {
+  p <- simplify2array(lapply(1:4, function(seed) {
     set.seed(seed)
     out <- node_test(d$comm, node_contrasts(d$tree)[, 1:3], d$env, n_perm = n_perm)$nodes
     vec <- phylo_vector(d$comm, d$tree, d$env, n_perm = n_perm, n_sim = 10)
     c(out$p_site, out$p_species, vec$p_site, vec$p_species)
-  })
+  }))
   expect_seed_stable(p, n_perm)
 })
 
@@ -134,10 +134,10 @@ test_that("trait_partition() ignores trivial noise and the seed", {
   expect_equal(b$statistic, a$statistic, tolerance = 1e-6)
   expect_true(all(abs(b$p - a$p) <= 1 / (n_perm + 1) + 1e-12, na.rm = TRUE))
   n_perm <- 199
-  p <- sapply(1:4, function(seed) {
+  p <- simplify2array(lapply(1:4, function(seed) {
     set.seed(seed)
     run(env, space, trait)$p
-  })
+  }))
   p <- p[stats::complete.cases(p), , drop = FALSE]
   expect_seed_stable(p, n_perm)
 })
@@ -157,7 +157,7 @@ test_that("torus_permutations() keep distances on the torus whatever the seed", 
     set.seed(seed)
     moves <- torus_permutations(side, n_perm = 20)
     for (r in seq_len(nrow(moves))) {
-      expect_equal(torus_distance(moves[r, ]), reference)
+      expect_identical(torus_distance(moves[r, ]), reference)
     }
   }
 })

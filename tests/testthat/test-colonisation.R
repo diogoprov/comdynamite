@@ -113,7 +113,7 @@ test_that("arrival matches the recorded abundances, including recolonisation", {
     if (length(absent) && any(path[seq_len(min(absent))] > 0)) recolonised <- recolonised + 1
   }
   expect_gt(recolonised, 0)
-  expect_equal(sim$n_steps, 120)
+  expect_identical(sim$n_steps, 120)
 })
 
 test_that("populations from `initial` arrive at step 1 with their founders", {
@@ -144,9 +144,9 @@ test_that("colonisation_history() lists the populations present at the last step
   h <- colonisation_history(sim)
   expect_named(h, c("site", "species", "abundance", "arrival", "age", "propagule",
                     "immigrants", "migrant_load"))
-  expect_equal(nrow(h), sum(sim$abundance > 0))
-  expect_equal(h$age, sim$n_steps - h$arrival)
-  expect_equal(h$abundance, sim$abundance[cbind(h$site, h$species)])
+  expect_identical(nrow(h), sum(sim$abundance > 0))
+  expect_identical(h$age, sim$n_steps - h$arrival)
+  expect_identical(h$abundance, sim$abundance[cbind(h$site, h$species)])
   expect_false(is.unsorted(match(h$site, rownames(sim$abundance))))
   expect_error(colonisation_history(list()), "simulate_metacommunity")
   old <- sim
@@ -216,7 +216,7 @@ test_that("per-species values and validation of the arrival-dependent arguments"
   rates <- stats::setNames(rep(c(0, 0.1), 4), sp)
   ind <- sample_individuals(sim, n = 1, intraspecific_sd = 0, monopolization = rates)
   fixed <- ind$species %in% sp[rates == 0]
-  expect_equal(ind$population_mean[fixed], ind$optimum[fixed])
+  expect_identical(ind$population_mean[fixed], ind$optimum[fixed])
   expect_error(sample_individuals(sim, founder_sd = -1), "must not be negative")
   expect_error(sample_individuals(sim, monopolization = -0.1), "must not be negative")
   expect_error(sample_individuals(sim, monopolization = 0.1, gene_flow = -1),

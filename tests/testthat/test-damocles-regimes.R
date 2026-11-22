@@ -71,7 +71,7 @@ test_that("damocles_fit with regimes recovers a difference among clades", {
   lrt <- damocles_lrt(constant, by_clade)
   expect_identical(lrt$df[2], 1)
   expect_lt(lrt$p_value[2], 0.05)
-  expect_equal(lrt$n_par, c(2, 3))
+  expect_identical(lrt$n_par, c(2, 3))
   both <- damocles_fit(comm[1:2, ], tree, regimes = reg)
   expect_identical(attr(both, "parameters"),
                    c("gamma_background", "gamma_A", "mu_background", "mu_A"))
@@ -96,10 +96,11 @@ test_that("damocles_fit with an edge covariate estimates its slope", {
   expect_gt(fit$beta_gamma[1], 0)
   rates <- attr(fit, "edge_rates")[[1]]
   expect_equal(rates$gamma, fit$gamma[1] * exp(fit$beta_gamma[1] * z))
-  expect_equal(rates$mu, rep(fit$mu[1], nrow(tree$edge)))
+  expect_identical(rates$mu, rep(fit$mu[1], nrow(tree$edge)))
   ci <- confint(fit, "beta_gamma")
   expect_identical(ci$community, "shared")
-  expect_true(ci$lower < fit$beta_gamma[1] && fit$beta_gamma[1] < ci$upper)
+  expect_lt(ci$lower, fit$beta_gamma[1])
+  expect_lt(fit$beta_gamma[1], ci$upper)
   both <- damocles_fit(comm[1, , drop = FALSE], tree, edge_covariate = x, sympatry = NULL)
   expect_identical(attr(both, "parameters"), c("gamma", "mu", "beta_gamma", "beta_mu"))
   expect_error(damocles_fit(comm, tree, edge_covariate = -x), "positive")
@@ -121,7 +122,8 @@ test_that("profile intervals cover the estimate and flag unbounded rates", {
   expect_true(all(ci$lower >= 0))
   wide <- confint(damocles_fit(comm, tree, shared = TRUE, sympatry = NULL), "sympatry",
                   level = 0.99)
-  expect_true(wide$lower >= 0 && wide$upper <= 1)
+  expect_gte(wide$lower, 0)
+  expect_lte(wide$upper, 1)
   expect_error(confint(fit, "beta_gamma"), "not free parameters")
   expect_error(confint(fit, level = 2), "`level`")
   flat <- confint(damocles_fit(c(stats::setNames(rep(1, 30), tree$tip.label)), tree), "mu")
@@ -151,6 +153,6 @@ test_that("damocles_test simulates with regimes and with rates given per edge", 
   given <- damocles_test(comm, tree, n_sim = 19, gamma = list(ifelse(reg == "A", 2, 0.5)),
                          mu = 1)
   expect_true(all(is.na(given$gamma)))
-  expect_equal(given$mu, rep(1, 3))
+  expect_identical(given$mu, rep(1, 3))
   expect_error(damocles_test(comm, tree, gamma = 1, mu = 1, regimes = reg), "estimated rates")
 })

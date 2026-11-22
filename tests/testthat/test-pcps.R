@@ -21,7 +21,7 @@ test_that("fuzzy weighting and the axes follow their definitions", {
   n <- nrow(g)
   centre <- diag(n) - 1 / n
   expect_equal(g, unname(centre %*% (-0.5 * bray) %*% centre))
-  expect_equal(sum(ax$share), 1)
+  expect_identical(sum(ax$share), 1)
   expect_true(all(diff(ax$share) <= 0))
   expect_equal(colSums(ax$scores^2)[1] / sum(colSums(ax$scores^2)), ax$share[1],
                ignore_attr = TRUE)
@@ -32,11 +32,11 @@ test_that("statistics of pcps_test() are those of lm() and of a distance-based r
   out <- pcps_test(d$comm, d$tree, d$env, n_perm = 9)
   expect_s3_class(out, "mc_pcps")
   expect_named(out$tests, c("test", "share", "r2", "statistic", "p_site", "p_species", "p_max"))
-  expect_equal(out$tests$test, c("whole", "pcps1", "pcps2"))
+  expect_identical(out$tests$test, c("whole", "pcps1", "pcps2"))
   expect_equal(out$tests$statistic[2],
                unname(summary(lm(out$scores[, 1] ~ d$env))$fstatistic[1]))
   expect_equal(out$tests$r2[3], summary(lm(out$scores[, 2] ~ d$env))$r.squared)
-  expect_equal(out$tests$p_max, pmax(out$tests$p_site, out$tests$p_species))
+  expect_identical(out$tests$p_max, pmax(out$tests$p_site, out$tests$p_species))
   expect_output(print(out), "mc_pcps")
   expect_identical(summary(out), out$tests)
   expect_identical(as.data.frame(out), out$tests)
@@ -60,13 +60,13 @@ test_that("site_permutations replace the shuffle of sites and allow empty sites"
   d$env <- cbind(x = seq_len(36))
   moves <- torus_permutations(6)[1:19, ]
   out <- pcps_test(d$comm, d$tree, d$env, n_perm = 5, site_permutations = moves)
-  expect_equal(out$permutations$sites, 19)
-  expect_equal(out$permutations$null, "restricted")
+  expect_identical(out$permutations$sites, 19L)
+  expect_identical(out$permutations$null, "restricted")
   empty <- d$comm
   empty[3, ] <- 0
   env <- d$env
   out <- pcps_test(empty, d$tree, env, n_perm = 5, site_permutations = moves)
-  expect_equal(nrow(out$scores), 35)
+  expect_identical(nrow(out$scores), 35L)
   expect_error(pcps_test(empty, d$tree, env, n_perm = 5), "at least one individual")
 })
 
@@ -76,25 +76,25 @@ test_that("a null without variance does not count, and wrong axes stop", {
   d <- sim_pcps(4)
   expect_error(pcps_test(d$comm, d$tree, d$env, axes = 500, n_perm = 3), "positive eigenvalues")
   expect_error(pcps_test(d$comm, d$tree, d$env, axes = 0, n_perm = 3))
-  expect_equal(pcps_test(d$comm, d$tree, d$env, axes = 3, n_perm = 3)$tests$test,
-               c("whole", "pcps3"))
+  expect_identical(pcps_test(d$comm, d$tree, d$env, axes = 3, n_perm = 3)$tests$test,
+                   c("whole", "pcps3"))
 })
 
 test_that("torus_permutations() handles rectangles, symmetries and subsets", {
   rectangle <- as.matrix(expand.grid(x = 1:6, y = 1:4))
   full <- torus_permutations(c(6, 4))
-  expect_equal(nrow(full), 4 * 24 - 1)
+  expect_identical(nrow(full), 4L * 24L - 1L)
   torus <- function(xy) {
     dx <- abs(outer(xy[, 1], xy[, 1], "-"))
     dy <- abs(outer(xy[, 2], xy[, 2], "-"))
     pmin(dx, 6 - dx)^2 + pmin(dy, 4 - dy)^2
   }
   expect_true(all(apply(full, 1, function(p) all(torus(rectangle[p, ]) == torus(rectangle)))))
-  expect_equal(nrow(torus_permutations(c(6, 4), symmetries = FALSE)), 23)
-  expect_equal(nrow(torus_permutations(5, symmetries = FALSE)), 24)
-  expect_equal(nrow(torus_permutations(5)), 8 * 25 - 1)
-  expect_equal(nrow(torus_permutations(5, n_perm = 10)), 10)
-  expect_equal(nrow(torus_permutations(3, symmetries = FALSE, n_perm = 100)), 8)
+  expect_identical(nrow(torus_permutations(c(6, 4), symmetries = FALSE)), 23L)
+  expect_identical(nrow(torus_permutations(5, symmetries = FALSE)), 24L)
+  expect_identical(nrow(torus_permutations(5)), 8L * 25L - 1L)
+  expect_identical(nrow(torus_permutations(5, n_perm = 10)), 10L)
+  expect_identical(nrow(torus_permutations(3, symmetries = FALSE, n_perm = 100)), 8L)
   expect_error(torus_permutations(c(2, 3, 4)))
   expect_error(torus_permutations(1))
 })

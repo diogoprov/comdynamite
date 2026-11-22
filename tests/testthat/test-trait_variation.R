@@ -20,12 +20,12 @@ test_that("tstats_summary() lists deviating sites and skips untestable ones", {
   res <- tstats(d, traits = c("trait", "other"), n_perm = 49)
   s <- tstats_summary(res)
   expect_named(s, c("traits", "sites"))
-  expect_equal(nrow(s$traits), 6)
+  expect_identical(nrow(s$traits), 6L)
   solo <- s$sites[s$sites$site == "solo" & s$sites$statistic == "T_IP.IC", ]
   expect_true(all(is.na(solo$p_low) & is.na(solo$p_high) & is.na(solo$deviation)))
   ip <- s$traits[s$traits$statistic == "T_IP.IC" & s$traits$trait == "trait", ]
-  expect_equal(ip$n_sites, 6)
-  expect_false(grepl("solo", ip$sites_low))
+  expect_identical(ip$n_sites, 6L)
+  expect_false(grepl("solo", ip$sites_low, fixed = TRUE))
   # site lists agree with the per-site table
   for (i in seq_len(nrow(s$traits))) {
     row <- s$traits[i, ]
@@ -35,7 +35,7 @@ test_that("tstats_summary() lists deviating sites and skips untestable ones", {
     expect_equal(row$percent_low, 100 * length(low) / row$n_sites)
   }
   # T_IP.IC is far below the null of permutation within sites when species differ
-  expect_equal(ip$percent_low, 100)
+  expect_identical(ip$percent_low, 100)
   expect_lt(ip$p_mean_low, 0.05)
   expect_error(tstats_summary(tstats(d, n_perm = 0)), "n_perm")
 })
@@ -46,8 +46,8 @@ test_that("trait_flex() splits the community mean as Leps et al. (2011)", {
   d$trait <- d$trait + env$moisture[match(d$site, env$site)]
   res <- trait_flex(d, formula = ~moisture, env = env)
   dec <- res$decomposition
-  expect_equal(dec$component, c("turnover", "intraspecific", "covariation", "total"))
-  expect_equal(sum(dec$total[1:3]), dec$total[4])
+  expect_identical(dec$component, c("turnover", "intraspecific", "covariation", "total"))
+  expect_identical(sum(dec$total[1:3]), dec$total[4])
   expect_equal(dec$explained + dec$residual, dec$total)
   # hand computation of the specific and fixed means of one site
   s1 <- d[d$site == "s01", ]
@@ -59,19 +59,20 @@ test_that("trait_flex() splits the community mean as Leps et al. (2011)", {
   expect_equal(site1$fixed, sum(n * fixed) / sum(n))
   # env is matched by name, not by order
   shuffled <- trait_flex(d, formula = ~moisture, env = env[c(3, 1, 6, 2, 5, 4), ])
-  expect_equal(shuffled$decomposition, dec)
+  expect_identical(shuffled$decomposition, dec)
   expect_lt(dec$p[dec$component == "intraspecific"], 0.05)
   # each p-value is that of the F test of a separate regression of the site values on env
   sites <- merge(res$sites, env)
   for (part in c("turnover", "intraspecific", "total")) {
     y <- sites[[c(turnover = "fixed", intraspecific = "intraspecific", total = "specific")[part]]]
     f <- summary(stats::lm(y ~ sites$moisture))$fstatistic
-    expect_equal(dec$p[dec$component == part],
-                 unname(stats::pf(f[1], f[2], f[3], lower.tail = FALSE)))
+    expect_identical(dec$p[dec$component == part],
+                     unname(stats::pf(f[1], f[2], f[3], lower.tail = FALSE)))
   }
   # without a model nothing is explained
   plain <- trait_flex(d)$decomposition
-  expect_true(all(plain$explained == 0) && all(is.na(plain$p)))
+  expect_true(all(plain$explained == 0))
+  expect_true(all(is.na(plain$p)))
 })
 
 test_that("trait_flex() uses abundances and handles missing values consistently", {
@@ -103,7 +104,7 @@ test_that("nested_variance() checks the nesting and sums to one", {
   d$population <- paste(d$site, d$species)
   res <- suppressWarnings(nested_variance(d, c("trait", "other"),
                                           c("region", "site", "population")))
-  expect_equal(res$level, c("region", "site", "population", "within"))
+  expect_identical(res$level, c("region", "site", "population", "within"))
   expect_equal(colSums(res[c("trait", "other")]), c(trait = 1, other = 1))
   expect_gt(res$trait[res$level == "population"], 0.9)
   expect_error(nested_variance(d, "trait", c("region", "population", "site")),
@@ -129,11 +130,11 @@ test_that("nested_variance() separates species from populations with crossed fac
   expect_warning(nested_variance(d, "trait", c("region", "site", "species")), "crossed")
   crossed <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
                                               crossed = "species"))
-  expect_equal(crossed$level, c("region", "site", "species", "site:species", "within"))
-  expect_equal(sum(crossed$trait), 1)
+  expect_identical(crossed$level, c("region", "site", "species", "site:species", "within"))
+  expect_identical(sum(crossed$trait), 1)
   expect_gt(crossed$trait[crossed$level == "site:species"], 0.05)
   expect_gt(crossed$trait[crossed$level == "species"], 0.6)
-  expect_equal(unname(attr(crossed, "engine")), "lme4")
+  expect_identical(unname(attr(crossed, "engine")), "lme4")
   no_pop <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
                                              crossed = "species", interaction = FALSE))
   expect_false("site:species" %in% no_pop$level)
@@ -141,8 +142,8 @@ test_that("nested_variance() separates species from populations with crossed fac
   # two genera: genus and species nested in the taxonomic hierarchy
   with_genus <- suppressWarnings(nested_variance(d, "trait", c("region", "site"),
                                                  crossed = c("genus", "species")))
-  expect_equal(with_genus$level,
-               c("region", "site", "genus", "species", "site:species", "within"))
+  expect_identical(with_genus$level,
+                   c("region", "site", "genus", "species", "site:species", "within"))
   expect_error(nested_variance(d, "trait", c("region", "site"), crossed = c("species", "genus")),
                "does not split")
   expect_error(nested_variance(d, "trait", c("region", "site"), crossed = "site"), "share")
@@ -155,13 +156,13 @@ test_that("nested_variance() warns on singular fits and falls back to lme4", {
   d <- expand.grid(individual = 1:4, species = paste0("sp", 1:6), site = paste0("s", 1:8),
                    stringsAsFactors = FALSE)
   d$trait <- as.numeric(factor(d$species)) + rnorm(nrow(d))  # no site variance
-  expect_warning(res <- nested_variance(d, "trait", "site", crossed = "species"), "singular")
+  res <- expect_warning_value(nested_variance(d, "trait", "site", crossed = "species"), "singular")
   expect_true(attr(res, "singular")[["trait"]])
   local_mocked_bindings(nested_variance_nlme = function(...) NULL)
-  expect_message(res <- suppressWarnings(nested_variance(d, "trait", c("site", "species"))),
-                 "lme4")
-  expect_equal(unname(attr(res, "engine")), "lme4")
-  expect_equal(res$level, c("site", "species", "within"))
+  res <- expect_message_value(suppressWarnings(nested_variance(d, "trait", c("site", "species"))),
+                              "lme4")
+  expect_identical(unname(attr(res, "engine")), "lme4")
+  expect_identical(res$level, c("site", "species", "within"))
 })
 
 test_that("nested_variance() falls back to lme4 when nlme::lme() errors", {
@@ -173,9 +174,10 @@ test_that("nested_variance() falls back to lme4 when nlme::lme() errors", {
   d$population <- paste(d$site, d$species)
   d$trait <- as.numeric(factor(d$species)) + rnorm(nrow(d))
   local_mocked_bindings(lme = function(...) stop("singular convergence"), .package = "nlme")
-  expect_message(res <- suppressWarnings(nested_variance(d, "trait", c("site", "population"))),
-                 "failed to converge")
-  expect_equal(unname(attr(res, "engine")), "lme4")
+  res <- expect_message_value(
+    suppressWarnings(nested_variance(d, "trait", c("site", "population"))), "failed to converge"
+  )
+  expect_identical(unname(attr(res, "engine")), "lme4")
 })
 
 test_that("nested_variance() agrees with cati::partvar()", {
@@ -184,9 +186,12 @@ test_that("nested_variance() agrees with cati::partvar()", {
   d <- toy_individuals(n_sites = 8, n = 240)
   d$region <- ifelse(d$site %in% sprintf("s%02d", 1:4), "north", "south")
   ours <- nested_variance(d, c("trait", "other"), c("region", "site"))
-  theirs <- suppressMessages(utils::capture.output(
-    pv <- cati::partvar(traits = d[c("trait", "other")],
-                        factors = data.frame(region = d$region, site = d$site))))
+  pv <- local({  # partvar() prints its results
+    sink(nullfile())
+    on.exit(sink())
+    suppressMessages(cati::partvar(traits = d[c("trait", "other")],
+                                   factors = data.frame(region = d$region, site = d$site)))
+  })
   expect_equal(unname(as.matrix(ours[c("trait", "other")])), unname(unclass(pv)[, 1:2]),
                tolerance = 1e-6)
 })
@@ -194,7 +199,7 @@ test_that("nested_variance() agrees with cati::partvar()", {
 test_that("community_index() computes observed values and keeps the null models apart", {
   d <- toy_individuals()
   res <- community_index(d, stats::var, null = "local", n_perm = 9)
-  expect_equal(res$observed, as.vector(tapply(d$trait, d$site, stats::var)[unique(d$site)]))
+  expect_identical(res$observed, as.vector(tapply(d$trait, d$site, stats::var)[unique(d$site)]))
   # permuting within sites cannot change an index that ignores species
   expect_true(all(abs(attr(res, "null") - rep(res$observed, each = 9)) < 1e-9))
   expect_true(all(is.na(res$ses)))
@@ -208,7 +213,7 @@ test_that("community_index() computes observed values and keeps the null models 
   expect_true(all(attr(reg, "null") >= min(d$trait) & attr(reg, "null") <= max(d$trait)))
   # the order of the rows does not matter for observed values
   shuffled <- community_index(d[sample(nrow(d)), ], pop_var, null = "local", n_perm = 0)
-  expect_equal(shuffled$observed[match(sp$site, shuffled$site)], sp$observed)
+  expect_identical(shuffled$observed[match(sp$site, shuffled$site)], sp$observed)
   expect_named(shuffled, c("site", "trait", "index", "observed"))
 })
 
@@ -221,13 +226,13 @@ test_that("community_index() handles populations, several traits and checks the 
   means <- unique(stats::ave(d$trait, d$site, d$species))
   expect_true(all(round(attr(pop, "null"), 8) >= 0))
   two <- community_index(d, mean, traits = c("trait", "other"), null = "regional.ind", n_perm = 5)
-  expect_equal(unique(two$trait), c("trait", "other"))
-  expect_equal(dim(attr(two, "null")), c(5, 12))
+  expect_identical(unique(two$trait), c("trait", "other"))
+  expect_identical(dim(attr(two, "null")), c(5L, 12L))
   # multivariate: rows move together, so the correlation within a site is kept by "local"
   d$twin <- d$trait * 2
   mv <- community_index(d, function(x) stats::cor(x[, 1], x[, 2]), traits = c("trait", "twin"),
                         null = "local", n_perm = 5, multivariate = TRUE)
-  expect_equal(unique(mv$trait), "multivariate")
+  expect_identical(unique(mv$trait), "multivariate")
   expect_true(all(abs(attr(mv, "null") - 1) < 1e-9))
   expect_error(community_index(d, range), "single number")
   expect_error(community_index(d, mean, traits = "nope"), "no column")
@@ -242,9 +247,9 @@ test_that("community_index() and trait_flex() agree with cati where cati is righ
                            index = "tapply(x, ind.plot, var)", sp = factor(d$species),
                            ind.plot = factor(d$site), nullmodels = "regional.ind", nperm = 2,
                            printprogress = FALSE)
-  expect_equal(unname(cbind(ours$observed[ours$trait == "trait"],
-                            ours$observed[ours$trait == "other"])),
-               unname(theirs$obs[[1]]))
+  expect_identical(unname(cbind(ours$observed[ours$trait == "trait"],
+                                ours$observed[ours$trait == "other"])),
+                   unname(theirs$obs[[1]]))
   # decompCTRE() looks for the variables of its formula outside the function, so it is
   # compared without a model
   dc <- cati::decompCTRE(traits = d["trait"], sp = factor(d$species),
@@ -273,17 +278,17 @@ test_that("tstats_summary() warns when n_perm is too small for the level", {
 test_that("trait_flex() guards the model against missing values, names and no intercept", {
   d <- toy_individuals()
   env <- data.frame(site = sprintf("s%02d", 1:6), moisture = c(1, 3, 2, NA, 5, 4))
-  expect_warning(res <- trait_flex(d, formula = ~moisture, env = env), "s04")
+  res <- expect_warning_value(trait_flex(d, formula = ~moisture, env = env), "s04")
   dec <- res$decomposition
-  expect_equal(dec$explained + dec$residual, dec$total)
+  expect_identical(dec$explained + dec$residual, dec$total)
   kept <- res$sites[res$sites$site != "s04", ]
   expect_equal(dec$total[dec$component == "total"],
                sum((kept$specific - mean(kept$specific))^2))
   # an environmental variable called y does not clash with the response
   env$y <- c(1, 3, 2, 6, 5, 4)
   env$moisture <- env$y
-  expect_equal(suppressWarnings(trait_flex(d, formula = ~y, env = env))$decomposition,
-               suppressWarnings(trait_flex(d, formula = ~moisture, env = env))$decomposition)
+  expect_identical(suppressWarnings(trait_flex(d, formula = ~y, env = env))$decomposition,
+                   suppressWarnings(trait_flex(d, formula = ~moisture, env = env))$decomposition)
   expect_error(trait_flex(d, formula = ~ y - 1, env = env), "intercept")
   d$abundance <- seq_len(nrow(d))
   expect_error(trait_flex(d, abundance = "abundance"), "same for all")
@@ -304,8 +309,9 @@ test_that("the functions handle untestable statistics, missing values and bad in
   d$trait <- rnorm(30)
   s <- suppressWarnings(tstats_summary(tstats(d, n_perm = 39)))
   pc <- s$traits[s$traits$statistic == "T_PC.PR", ]
-  expect_equal(pc$n_sites, 0)
-  expect_true(is.na(pc$percent_low) && is.na(pc$p_mean_low))
+  expect_identical(pc$n_sites, 0L)
+  expect_true(is.na(pc$percent_low))
+  expect_true(is.na(pc$p_mean_low))
   d <- toy_individuals()
   env <- data.frame(site = sprintf("s%02d", 1:6), moisture = 1:6)
   expect_error(trait_flex(d, formula = ~ depth, env = env), "no column depth")
@@ -330,13 +336,13 @@ test_that("plot() of nested_variance() stacks the shares from the broadest level
   p <- plot(res)
   expect_s3_class(p, "ggplot")
   bars <- ggplot2::layer_data(p, 1)
-  expect_equal(nrow(bars), 8)
+  expect_identical(nrow(bars), 8L)
   # each bar reaches 1 and the broadest level sits at the bottom
   expect_equal(tapply(bars$ymax, bars$x, max), c(`1` = 1, `2` = 1), ignore_attr = TRUE)
   first <- bars[bars$ymin == 0, ]
-  expect_equal(unique(first$fill), "#0072B2")
+  expect_identical(unique(first$fill), "#0072B2")
   top <- bars$ymax == stats::ave(bars$ymax, bars$x, FUN = max)
-  expect_equal(unique(bars$fill[top]), "grey80")
+  expect_identical(unique(bars$fill[top]), "grey80")
   # more factors than default colours asks for colours
   many <- structure(data.frame(level = c(letters[1:7], "within"), trait = rep(0.125, 8)),
                     class = c("nested_variance", "data.frame"))
@@ -344,7 +350,7 @@ test_that("plot() of nested_variance() stacks the shares from the broadest level
   expect_s3_class(plot(many, colours = grDevices::hcl.colors(8)), "ggplot")
   # own colours, checked for number and validity
   own <- ggplot2::layer_data(plot(res, colours = c("red", "green", "blue", "white")), 1)
-  expect_equal(unique(own$fill[own$ymin == 0]), "red")
+  expect_identical(unique(own$fill[own$ymin == 0]), "red")
   expect_error(plot(res, colours = c("red", "blue")), "4 valid colours")
   expect_error(plot(res, colours = c("red", "green", "blue", "nocolour")), "valid colours")
   labels <- ggplot2::layer_data(plot(res, min_label = 2), 2)$label
@@ -364,7 +370,7 @@ test_that("labels of plot.nested_variance() sit inside their own segment", {
   bars <- ggplot2::layer_data(p, 1)
   text <- ggplot2::layer_data(p, 2)
   expect_equal(text$y, (bars$ymin + bars$ymax) / 2)
-  expect_equal(text$label, sprintf("%.0f%%", 100 * (bars$ymax - bars$ymin)))
+  expect_identical(text$label, sprintf("%.0f%%", 100 * (bars$ymax - bars$ymin)))
 })
 
 test_that("plot() of trait_flex() shows explained and residual parts and negative covariation", {
@@ -384,7 +390,7 @@ test_that("plot() of trait_flex() shows explained and residual parts and negativ
   p <- plot(res)
   expect_s3_class(p, "ggplot")
   bars <- ggplot2::layer_data(p, 2)
-  expect_equal(nrow(bars), 8)
+  expect_identical(nrow(bars), 8L)
   expect_setequal(unique(bars$fill), c("#0072B2", "grey80"))
   expect_error(plot(res, colours = "red"), "2 valid colours")
   # each component reaches its share of the total sum of squares; covariation lies below zero
@@ -394,8 +400,8 @@ test_that("plot() of trait_flex() shows explained and residual parts and negativ
   expect_true(any(bars$ymin[bars$x == 3] < 0))
   # without a model there is one part and no legend
   plain <- ggplot2::layer_data(plot(trait_flex(ind, traits = "height"), relative = FALSE), 2)
-  expect_equal(nrow(plain), 4)
-  expect_equal(plain$y, trait_flex(ind, traits = "height")$decomposition$total)
+  expect_identical(nrow(plain), 4L)
+  expect_identical(plain$y, trait_flex(ind, traits = "height")$decomposition$total)
 })
 
 test_that("regional nulls of community_index() permute the whole region", {

@@ -18,9 +18,9 @@ test_that("maladaptation() gives the lag load of every population", {
   expect_true(all(m$abundance > 0))
   theta <- s$tr[m$species, "optimum"]
   width <- s$tr[m$species, "sigma"]^2 + 2
-  expect_equal(m$phenotype, theta)
+  expect_identical(m$phenotype, theta)
   expect_equal(m$load, 1 - exp(-(m$env - theta)^2 / (2 * width)))
-  expect_equal(nrow(m), sum(fixed$abundance > 0))
+  expect_identical(nrow(m), sum(fixed$abundance > 0))
   both <- maladaptation(fixed, step = c(30, 60))
   expect_identical(sort(unique(both$step)), c(30, 60))
   expect_equal(both[both$step == 60, -1], m, ignore_attr = TRUE)
@@ -57,7 +57,7 @@ test_that("maladaptation() uses the Mahalanobis distance with several traits", {
   A <- solve(diag(c(400, 16)) + G + E)
   expect_equal(m$distance, sqrt(rowSums((d %*% A) * d)))
   expect_equal(m$load, 1 - exp(-m$distance^2 / 2))
-  expect_equal(m$deviation_svl, m$env_svl - m$phenotype_svl)
+  expect_identical(m$deviation_svl, m$env_svl - m$phenotype_svl)
   both <- maladaptation(sim, step = c(25, 50))
   expect_equal(both[both$step == 50, -1], m, ignore_attr = TRUE)
   tr$head$sigma <- Inf
@@ -75,14 +75,14 @@ test_that("maladaptation() takes evolving metacommunities", {
   sim <- simulate_evolving_metacommunity(land, anc, speciation_control("point", rate = 1e-3),
                                          evolution = evolution_control(2), n_steps = 60)
   m <- maladaptation(sim)
-  expect_true(nrow(m) > 0)
+  expect_gt(nrow(m), 0)
   expect_true(all(m$load >= 0 & m$load < 1))
 })
 
 test_that("maladaptation() reads recorded steps, plasticity and a changing environment", {
   set.seed(4)
   s <- mal_setup()
-  env_time <- sapply(1:40, function(t) s$land$env + 0.5 * t)
+  env_time <- vapply(1:40, function(t) s$land$env + 0.5 * t, numeric(length(s$land$env)))
   sim <- simulate_metacommunity(s$land, s$tr, s$alpha, dispersal = 0.05, n_steps = 40,
                                 env_time = env_time, record_steps = c(20, 30),
                                 evolution = evolution_control(3, env_var = 1,
@@ -93,12 +93,12 @@ test_that("maladaptation() reads recorded steps, plasticity and a changing envir
   i <- match(m20$site, rownames(z))
   j <- match(m20$species, colnames(z))
   expected <- z[cbind(i, j)] + 0.4 * (env_time[i, 20] - ev$reference)
-  expect_equal(m20$env, env_time[i, 20])
-  expect_equal(m20$phenotype, expected)
+  expect_identical(m20$env, env_time[i, 20])
+  expect_identical(m20$phenotype, expected)
   width <- s$tr[m20$species, "sigma"]^2 + 3 + 1
   expect_equal(m20$load, 1 - exp(-(env_time[i, 20] - expected)^2 / (2 * width)))
   # the last step falls back to the final state when it was not recorded
-  expect_equal(maladaptation(sim, step = 40), maladaptation(sim))
+  expect_identical(maladaptation(sim, step = 40), maladaptation(sim))
   expect_error(maladaptation(sim, step = numeric(0)), "recorded steps")
   expect_error(maladaptation(sim, step = NA), "recorded steps")
 })
@@ -115,7 +115,7 @@ test_that("a niche of infinite breadth exerts no selection", {
                                 evolution = evolution_control(5, ne_ratio = Inf,
                                                               founder = FALSE))
   z <- sim$evolution$genetic
-  expect_equal(unname(z[, "sp1"][!is.na(z[, "sp1"])]), rep(45, sum(!is.na(z[, "sp1"]))))
+  expect_identical(unname(z[, "sp1"][!is.na(z[, "sp1"])]), rep(45, sum(!is.na(z[, "sp1"]))))
 })
 
 test_that("since_change counts the steps since the environment of each site last changed", {

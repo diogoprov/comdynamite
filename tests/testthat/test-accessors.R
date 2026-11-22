@@ -10,7 +10,7 @@ test_that("drift_test() accessors agree with the stored regression", {
   grp <- rep(seq_len(25), each = 10)
   ind <- means[grp, ] + matrix(rnorm(250 * 4), 250) %*% chol(G)
   res <- drift_test(ind, grp, correct = FALSE)
-  expect_equal(coef(res), c(intercept = res$intercept, slope = res$slope))
+  expect_identical(coef(res), c(intercept = res$intercept, slope = res$slope))
   ci <- confint(res, level = res$level)
   expect_equal(unname(ci["slope", ]), res$conf_int)
   expect_identical(rownames(confint(res, "slope")), "slope")
@@ -32,8 +32,8 @@ test_that("trait_flex() keeps its model and prints a summary", {
   res <- trait_flex(ind, formula = ~moisture, env = env)
   expect_identical(formula(res), ~moisture)
   m <- res$model
-  expect_identical(names(m), c("site", "trait", "component", "response", "fitted", "residual"))
-  expect_equal(fitted(res) + residuals(res), m$response)
+  expect_named(m, c("site", "trait", "component", "response", "fitted", "residual"))
+  expect_identical(fitted(res) + residuals(res), m$response)
   total <- m[m$component == "total", ]
   expect_equal(sum(total$residual^2),
                res$decomposition$residual[res$decomposition$component == "total"])

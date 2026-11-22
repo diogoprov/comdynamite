@@ -3,12 +3,12 @@ test_that("observe_detection keeps everything with detection 1 and nothing with 
   data <- mc_data(comm, series = array(c(comm, comm * 2), c(2, 3, 2),
                                        dimnames = c(dimnames(comm), list(NULL))))
   all_seen <- observe_detection(data, 1, visits = 2)
-  expect_equal(all_seen$comm, comm)
+  expect_identical(all_seen$comm, comm)
   expect_equal(all_seen$series, data$series, ignore_attr = TRUE)
   expect_true(all(observe_detection(data, 0)$comm == 0))
   presence <- observe_detection(data, 1, record = "presence")
-  expect_equal(presence$comm, (comm > 0) * 1)
-  expect_equal(attr(presence, "detection")$record, "presence")
+  expect_identical(presence$comm, (comm > 0) * 1)
+  expect_identical(attr(presence, "detection")$record, "presence")
 })
 
 test_that("observe_detection loses rare species and more visits recover them", {

@@ -12,10 +12,10 @@ known_history <- function() {
 test_that("region_pool limits species to the sites of their region", {
   h <- known_history()
   pool <- region_pool(h, c("A", "A", "B"))
-  expect_equal(dimnames(pool), list(c("site1", "site2", "site3"), c("a", "b", "c")))
-  expect_equal(unname(pool[, "a"]), c(FALSE, FALSE, TRUE))
-  expect_equal(unname(pool[, "c"]), c(TRUE, TRUE, FALSE))
-  expect_equal(rownames(region_pool(h, c(x = "A", y = "B"))), c("x", "y"))
+  expect_identical(dimnames(pool), list(c("site1", "site2", "site3"), c("a", "b", "c")))
+  expect_identical(unname(pool[, "a"]), c(FALSE, FALSE, TRUE))
+  expect_identical(unname(pool[, "c"]), c(TRUE, TRUE, FALSE))
+  expect_identical(rownames(region_pool(h, c(x = "A", y = "B"))), c("x", "y"))
 })
 
 test_that("arrival_ages gives the time since each lineage entered its region", {
@@ -25,29 +25,29 @@ test_that("arrival_ages gives the time since each lineage entered its region", {
   # a is in B since node 5 entered B at age 1.5; b entered A at age 0.6; c in A since the root
   expect_equal(ages[2, "a"], 1.5)
   expect_equal(ages[1, "b"], 0.6)
-  expect_equal(ages[1, "c"], 2)
+  expect_identical(ages[1, "c"], 2)
   expect_true(is.na(ages[1, "a"]))   # absent
   expect_true(is.na(ages[3, "a"]))   # present, but its tip is in B and site 3 in A
-  expect_equal(ages[3, "c"], 2)
+  expect_identical(ages[3, "c"], 2)
   # not ultrametric: the time from the tip to the present is added
   short <- h
   short$edge.length[short$edge[, 2] == 3] <- 1.5
   short$maps[[which(short$edge[, 2] == 3)]] <- c(A = 1.5)
-  expect_equal(arrival_ages(short, comm, c("A", "B", "A"))[1, "c"], 2)
+  expect_identical(arrival_ages(short, comm, c("A", "B", "A"))[1, "c"], 2)
 })
 
 test_that("as_herodotools gives the inputs of Herodotools with the true ancestral areas", {
   h <- known_history()
   comm <- matrix(c(0, 1, 0, 1, 0, 0, 1, 0, 0), 3, dimnames = list(NULL, c("a", "b", "c")))
-  expect_warning(input <- as_herodotools(comm, c("A", "B", "A"), history = h),
-                 "sites without species dropped: site3")
+  input <- expect_warning_value(as_herodotools(comm, c("A", "B", "A"), history = h),
+                                "sites without species dropped: site3")
   expect_named(input, c("W", "tree", "biogeo", "ancestral.area"))
-  expect_equal(input$ancestral.area$area, c("A", "B"))
-  expect_equal(rownames(input$ancestral.area), c("N4", "N5"))
-  expect_equal(input$biogeo$region, c("A", "B"))
-  expect_equal(class(input$tree), "phylo")
+  expect_identical(input$ancestral.area$area, c("A", "B"))
+  expect_identical(rownames(input$ancestral.area), c("N4", "N5"))
+  expect_identical(input$biogeo$region, c("A", "B"))
+  expect_s3_class(input$tree, "phylo", exact = TRUE)
   expect_null(input$tree$maps)
-  expect_equal(unname(input$W[2, ]), c(1, 0, 0))
+  expect_identical(unname(input$W[2, ]), c(1, 0, 0))
   without <- as_herodotools(comm[1:2, ], c("A", "B"), tree = ape::as.phylo(h))
   expect_null(without$ancestral.area)
   expect_error(as_herodotools(comm, c("A", "B", "A")), "no tree")

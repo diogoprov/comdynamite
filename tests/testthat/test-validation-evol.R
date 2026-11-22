@@ -55,7 +55,7 @@ test_that("environments in time check their arguments", {
   expect_error(env_seasonal(1:3, n_steps = 2.5, period = 5, amplitude = 1), "`n_steps`")
   expect_error(env_pulse(1:3, 10, sites = 1, start = 1, duration = -Inf, value = 0),
                "`duration`")
-  expect_equal(env_pulse(1:2, 4, sites = 1, start = 2, value = 0)[1, ], c(1, 0, 0, 0))
+  expect_identical(env_pulse(1:2, 4, sites = 1, start = 2, value = 0)[1, ], c(1, 0, 0, 0))
 })
 
 test_that("river networks and their environments check their arguments", {

@@ -102,8 +102,9 @@ test_that("inputs are checked", {
                "dichotomous")
   expect_error(simulate_damocles(ape::read.tree(text = "((a,b),c);"), 1, 1), "branch lengths")
   expect_error(damocles_loglik(c(1, 0, 1, 0), tree, 1, 1), "species names")
-  expect_warning(ll <- damocles_loglik(c(a = 1, b = 0, c = 1), tree, 1, 1), "counted as absent")
-  expect_equal(ll, damocles_loglik(c(a = 1, b = 0, c = 1, d = 0), tree, 1, 1))
+  ll <- expect_warning_value(damocles_loglik(c(a = 1, b = 0, c = 1), tree, 1, 1),
+                             "counted as absent")
+  expect_identical(ll, damocles_loglik(c(a = 1, b = 0, c = 1, d = 0), tree, 1, 1))
   expect_warning(damocles_loglik(c(a = 1, b = 0, c = 1, d = 0, z = 1), tree, 1, 1),
                  "dropped")
   expect_error(damocles_fit(c(a = 1, b = 0, c = 1, d = 0), tree, start = c(1, -1)), "start")
@@ -145,19 +146,19 @@ test_that("damocles_fit with shared rates maximises the summed log-likelihood", 
   expect_identical(rownames(pooled), rownames(comm))
   expect_length(unique(pooled$gamma), 1)
   expect_length(unique(pooled$mu), 1)
-  expect_equal(pooled$loglik,
-               unname(damocles_loglik(comm, tree, pooled$gamma[1], pooled$mu[1])))
-  expect_equal(attr(pooled, "loglik_total"), sum(pooled$loglik))
+  expect_identical(pooled$loglik,
+                   unname(damocles_loglik(comm, tree, pooled$gamma[1], pooled$mu[1])))
+  expect_identical(attr(pooled, "loglik_total"), sum(pooled$loglik))
   expect_gte(attr(pooled, "loglik_total"), sum(damocles_loglik(comm, tree, 1, 1)) - 1e-6)
   # separate rates can only fit as well or better
-  expect_true(sum(separate$loglik) >= attr(pooled, "loglik_total") - 1e-6)
+  expect_gte(sum(separate$loglik), attr(pooled, "loglik_total") - 1e-6)
   expect_null(attr(separate, "loglik_total"))
   expect_output(print(pooled), "shared by 4 communities")
   one <- damocles_fit(comm[1, , drop = FALSE], tree, shared = TRUE)
   expect_equal(one$loglik, separate$loglik[1], tolerance = 1e-4)
   expect_error(damocles_fit(comm, tree, shared = NA), "TRUE or FALSE")
   res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE)
-  expect_equal(res$gamma[1], res$gamma[2])
+  expect_identical(res$gamma[1], res$gamma[2])
 })
 
 test_that("sympatry relaxes the rule of allopatric speciation", {
@@ -214,7 +215,7 @@ test_that("damocles_fit estimates sympatry when asked", {
   expect_length(unique(each$sympatry), 2)
   expect_error(damocles_fit(comm, tree, sympatry = -1), "between 0 and 1")
   res <- damocles_test(comm[1:2, ], tree, n_sim = 19, shared = TRUE, sympatry = NULL)
-  expect_equal(res$sympatry[1], res$sympatry[2])
+  expect_identical(res$sympatry[1], res$sympatry[2])
   expect_output(print(res), "sympatry")
   given <- damocles_test(comm[1, , drop = FALSE], tree, n_sim = 19, gamma = 1, mu = 1,
                          sympatry = 0.5)
