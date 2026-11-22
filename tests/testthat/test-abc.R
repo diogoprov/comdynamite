@@ -69,6 +69,28 @@ test_that("abc_fit checks its input", {
   expect_error(abc_recovery(table, n_test = 5), "parameters")
 })
 
+test_that("min_node_size sets the leaves of the forests and defaults to 5", {
+  skip_if_not_installed("abcrf")
+  table <- toy_table(200)
+  set.seed(1)
+  default <- abc_fit(table, "a", "s1", ntree = 50)
+  set.seed(1)
+  five <- abc_fit(table, "a", "s1", ntree = 50, min_node_size = 5)
+  large <- abc_fit(table, "a", "s1", ntree = 50, min_node_size = 40)
+  expect_equal(default$forests$a$model.rf$min.node.size, 5)
+  expect_equal(large$forests$a$model.rf$min.node.size, 40)
+  observed <- data.frame(s1 = c(0.2, 0.5, 0.8))
+  expect_equal(predict(default, observed), predict(five, observed))
+  # larger leaves put more simulations behind each posterior, which widens its interval
+  ess <- function(fit) mean(1 / colSums(parameter_weights(fit, "a", observed)^2))
+  expect_gt(ess(large), ess(default))
+  expect_gt(mean(with(predict(large, observed), high - low)),
+            mean(with(predict(default, observed), high - low)))
+  expect_error(abc_fit(table, "a", "s1", min_node_size = 0), "min_node_size")
+  expect_error(abc_recovery(table, "a", "s1", n_test = 20, min_node_size = 1.5),
+               "min_node_size")
+})
+
 test_that("abc_recovery separates a recoverable from an unrecoverable parameter", {
   skip_if_not_installed("abcrf")
   table <- toy_table()

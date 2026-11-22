@@ -115,12 +115,33 @@ check_prior <- function(prior) {
 #' Check with [abc_recovery()] that a parameter can be recovered from simulated data before
 #' trusting its estimate from real data. A good estimate does not validate the model either.
 #'
+#' The credible intervals are approximate and are not calibrated by construction. The forest
+#' gives the parameters of the simulations that share leaves with the observation, a sample of
+#' the posterior given statistics near the observed ones and not given the observed statistics
+#' themselves. With several statistics the leaves are wide along each of them, the posterior is
+#' smoothed and the intervals are wider than the exact ones: Raynal et al. (2019) report fatter
+#' tails and slightly conservative intervals, and in our extended tests (10 statistics, two
+#' well identified parameters) the 90% intervals held the truth in 92% to 99% of 200
+#' pseudo-observations. With one or two statistics the leaves are narrow and the sample is
+#' small instead: with one statistic and the default `min_node_size` about 5 simulations carry
+#' the weight, and the 90% interval of a parameter with a known posterior held the truth in
+#' about 65% of the cases, whatever the number of simulations. The consistency of quantile
+#' regression forests asks for leaves that grow with the number of simulations (Meinshausen
+#' 2006); there, with 5000 simulations, a `min_node_size` of 50, 200 and 500 brought the
+#' coverage to 0.85, 0.89 and 0.91.
+#' [abc_recovery()] measures the coverage that the intervals have for a given table, and
+#' [abc_diagnose()] gives the effective number of simulations behind a posterior.
+#'
 #' @param table An `mc_abc_table` from [abc_table()], or a data frame with the parameters and
 #'   the statistics.
 #' @param parameters Names of the parameters to estimate. By default those of `table`.
 #' @param statistics Names of the statistics to use. By default all the others.
 #' @param ntree Number of trees per forest. One whole number, 1 or more.
 #' @param ncores Number of threads for the forests. One whole number, 1 or more.
+#' @param min_node_size Smallest number of simulations in a node for it to be split, the
+#'   `min.node.size` of `ranger::ranger()`. One whole number, 1 or more. The default, 5, is that
+#'   of Raynal et al. (2019); larger values give larger leaves, which widen intervals that
+#'   [abc_recovery()] shows to be too narrow, at the cost of more smoothing.
 #' @return An `mc_abc_fit`, a list with `forests` (one per parameter), `training`, `parameters`,
 #'   `statistics` and `prior`.
 #' @references
@@ -139,13 +160,15 @@ check_prior <- function(prior) {
 #' fit <- abc_fit(table, parameters = c("a", "b"), ntree = 100)
 #' predict(fit, c(s1 = 0.5, s2 = 0.2))
 #' @export
-abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1) {
+abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1,
+                    min_node_size = 5) {
   if (!requireNamespace("abcrf", quietly = TRUE)) {
     stop("abc_fit() needs the package abcrf.", call. = FALSE) # nocov
   }
   check_abc_table(table)
   check_count(ntree, "ntree")
   check_count(ncores, "ncores")
+  check_count(min_node_size, "min_node_size")
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   statistics <- statistics %||% attr(table, "statistics") %||% setdiff(names(table), parameters)
@@ -165,7 +188,8 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
   if (nrow(training) < 10) stop("Fewer than 10 complete simulations.", call. = FALSE)
   forests <- lapply(stats::setNames(parameters, parameters), function(p) {
     data <- data.frame(.parameter = training[[p]], training[statistics])
-    abcrf::regAbcrf(.parameter ~ ., data, ntree = ntree, paral = ncores > 1, ncores = ncores)
+    abcrf::regAbcrf(.parameter ~ ., data, ntree = ntree, paral = ncores > 1, ncores = ncores,
+                    min.node.size = min_node_size)
   })
   structure(list(forests = forests, training = training, parameters = parameters,
                  statistics = statistics, prior = attr(table, "prior")),
@@ -180,7 +204,8 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #'   than 1.
 #' @param ... Not used.
 #' @return For `predict()`, a data frame with `observation`, `parameter`, `estimate` (posterior
-#'   median), `low`, `high` and `mean`.
+#'   median), `low`, `high` and `mean`. The interval from `low` to `high` is approximate; see
+#'   Details.
 #' @export
 predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
   check_number(level, "level", 0, 1, open = TRUE)
@@ -230,6 +255,18 @@ print.mc_abc_fit <- function(x, ...) {
 #' parameter that is not recovered from simulated data should not be inferred from real data
 #' (Pontarp et al. 2019).
 #'
+#' The credible intervals of [abc_fit()] are approximate, so their coverage is something to
+#' measure and not to assume, and `coverage` is that measure for this table: the fraction of
+#' pseudo-observations, drawn from the prior, whose interval holds the truth. Expect it at or
+#' above `level` with several statistics, since the forests smooth the posterior (Raynal et al.
+#' 2019 report slightly conservative intervals; 0.92 to 0.99 at a `level` of 0.9 in our extended
+#' tests), and equal to `level` for a parameter the statistics say nothing about, whose
+#' posterior is the prior. A coverage below `level` by more than about two `coverage_se` says
+#' the intervals are too narrow, which happens with one or two statistics and small leaves
+#' (about 0.65 with one statistic and the default `min_node_size`); a larger `min_node_size`
+#' widens them. The coverage is an average over the prior and does not say that the interval
+#' of one observation is right.
+#'
 #' @inheritParams abc_fit
 #' @param n_test Number of pseudo-observations. One whole number, 2 or more and at least 11
 #'   fewer than the rows of `table`.
@@ -240,12 +277,17 @@ print.mc_abc_fit <- function(x, ...) {
 #'   variance of the truth), `bias` and `width` (mean width of the interval) as fractions of the
 #'   prior range, and `coverage`, the fraction of intervals that contain the truth, with its
 #'   standard error. The attribute `estimates` holds every estimate. A coverage near `level`
-#'   says the intervals are calibrated; R2 says how much the data narrow the prior.
+#'   says the intervals are calibrated, one above it that they are conservative and one below
+#'   it that they are too narrow (see Details); R2 says how much the data narrow the prior.
 #' @references
 #' Pontarp, M., Brännström, Å., & Petchey, O. L. (2019). Inferring community assembly processes
 #' from macroscopic patterns using dynamic eco-evolutionary models and Approximate Bayesian
 #' Computation (ABC). *Methods in Ecology and Evolution*, 10, 450–460.
 #' \doi{10.1111/2041-210X.13129}
+#'
+#' Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC
+#' random forests for Bayesian parameter inference. *Bioinformatics*, 35, 1720–1728.
+#' \doi{10.1093/bioinformatics/bty867}
 #' @family inference
 #' @examplesIf requireNamespace("abcrf", quietly = TRUE)
 #' set.seed(1)
@@ -255,7 +297,7 @@ print.mc_abc_fit <- function(x, ...) {
 #' abc_recovery(table, parameters = c("a", "b"), n_test = 50, ntree = 100)
 #' @export
 abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 200,
-                         level = 0.9, ntree = 500, ncores = 1, seed = 1) {
+                         level = 0.9, ntree = 500, ncores = 1, seed = 1, min_node_size = 5) {
   check_abc_table(table)
   check_count(n_test, "n_test", min = 2)
   if (n_test >= nrow(table) - 10) {
@@ -266,6 +308,7 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
   check_count(ntree, "ntree")
   check_count(ncores, "ncores")
   check_seed(seed)
+  check_count(min_node_size, "min_node_size")
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
@@ -276,7 +319,8 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
   train <- table[-test, , drop = FALSE]
   attributes(train)[c("prior", "parameters", "statistics")] <-
     attributes(table)[c("prior", "parameters", "statistics")]
-  fit <- abc_fit(train, parameters, statistics, ntree = ntree, ncores = ncores)
+  fit <- abc_fit(train, parameters, statistics, ntree = ntree, ncores = ncores,
+                 min_node_size = min_node_size)
   pseudo <- as.data.frame(table)[test, , drop = FALSE]
   complete <- rowSums(!is.finite(as.matrix(pseudo[, fit$statistics, drop = FALSE]))) == 0
   pseudo <- pseudo[complete, , drop = FALSE]

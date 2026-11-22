@@ -6,7 +6,14 @@
 \alias{abc_importance}
 \title{Estimate parameters by ABC with random forests}
 \usage{
-abc_fit(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1)
+abc_fit(
+  table,
+  parameters = NULL,
+  statistics = NULL,
+  ntree = 500,
+  ncores = 1,
+  min_node_size = 5
+)
 
 \method{predict}{mc_abc_fit}(object, newdata, level = 0.9, ncores = 1, ...)
 
@@ -23,6 +30,11 @@ the statistics.}
 \item{ntree}{Number of trees per forest. One whole number, 1 or more.}
 
 \item{ncores}{Number of threads for the forests. One whole number, 1 or more.}
+
+\item{min_node_size}{Smallest number of simulations in a node for it to be split, the
+\code{min.node.size} of \code{ranger::ranger()}. One whole number, 1 or more. The default, 5, is that
+of Raynal et al. (2019); larger values give larger leaves, which widen intervals that
+\code{\link[=abc_recovery]{abc_recovery()}} shows to be too narrow, at the cost of more smoothing.}
 
 \item{object}{An \code{mc_abc_fit}.}
 
@@ -41,7 +53,8 @@ An \code{mc_abc_fit}, a list with \code{forests} (one per parameter), \code{trai
 \code{statistics} and \code{prior}.
 
 For \code{predict()}, a data frame with \code{observation}, \code{parameter}, \code{estimate} (posterior
-median), \code{low}, \code{high} and \code{mean}.
+median), \code{low}, \code{high} and \code{mean}. The interval from \code{low} to \code{high} is approximate; see
+Details.
 }
 \description{
 Fits one regression random forest per parameter, with the statistics as predictors, following
@@ -54,6 +67,23 @@ dropped, and then simulations with any missing statistic.
 \details{
 Check with \code{\link[=abc_recovery]{abc_recovery()}} that a parameter can be recovered from simulated data before
 trusting its estimate from real data. A good estimate does not validate the model either.
+
+The credible intervals are approximate and are not calibrated by construction. The forest
+gives the parameters of the simulations that share leaves with the observation, a sample of
+the posterior given statistics near the observed ones and not given the observed statistics
+themselves. With several statistics the leaves are wide along each of them, the posterior is
+smoothed and the intervals are wider than the exact ones: Raynal et al. (2019) report fatter
+tails and slightly conservative intervals, and in our extended tests (10 statistics, two
+well identified parameters) the 90\% intervals held the truth in 92\% to 99\% of 200
+pseudo-observations. With one or two statistics the leaves are narrow and the sample is
+small instead: with one statistic and the default \code{min_node_size} about 5 simulations carry
+the weight, and the 90\% interval of a parameter with a known posterior held the truth in
+about 65\% of the cases, whatever the number of simulations. The consistency of quantile
+regression forests asks for leaves that grow with the number of simulations (Meinshausen
+2006); there, with 5000 simulations, a \code{min_node_size} of 50, 200 and 500 brought the
+coverage to 0.85, 0.89 and 0.91.
+\code{\link[=abc_recovery]{abc_recovery()}} measures the coverage that the intervals have for a given table, and
+\code{\link[=abc_diagnose]{abc_diagnose()}} gives the effective number of simulations behind a posterior.
 }
 \section{Functions}{
 \itemize{
