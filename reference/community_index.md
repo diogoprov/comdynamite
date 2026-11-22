@@ -90,20 +90,29 @@ description:
   site; the values of the site are kept and only their link with species
   is broken, so it is useful for indices that use `species`;
 
-- `"regional.ind"`: each site receives as many trait values as it has
-  individuals, drawn without replacement from all individuals of the
-  data;
+- `"regional.ind"`: the trait values of all individuals of the data are
+  permuted among sites, so that each site receives as many values as it
+  has individuals;
 
 - `"regional.pop"`: each individual takes the mean of its population,
-  and each site receives as many of these values as it has individuals,
-  drawn without replacement from all individuals. The observed index
-  uses the values of the individuals, so the null removes the variation
-  within populations as well as the species composition of the site;
+  and these values are permuted among all individuals of the data. The
+  observed index uses the values of the individuals, so the null removes
+  the variation within populations as well as the species composition of
+  the site;
 
 - `"regional.pop.prab"`: the index is computed on the means of the
   populations of each site (one value per population, observed and null
-  alike), and each site receives as many population means as it has
-  populations, drawn without replacement from all populations.
+  alike), and the population means are permuted among all populations of
+  the data.
+
+The regional null models permute the whole region once per
+randomisation, as in
+[`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md), so
+that the sites of a randomisation share out the regional pool as the
+data do. The null distribution of each site is the same as with
+independent draws from the region (as in earlier versions), but values
+that combine sites, such as the mean effect size over sites, are only
+valid under a joint permutation.
 
 In all cases the individuals (or populations) keep their species, so an
 index with an argument named `species`, such as `function(x, species)`,
@@ -165,37 +174,37 @@ community_index(ind, function(x) diff(range(x)), null = "regional.ind", n_perm =
 #> Please cite these papers together with comdynamite (citation("comdynamite")).
 #> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #>   site trait index observed         ses    p
-#> 1   s1 trait index 3.155201 -1.79804612 0.12
-#> 2   s2 trait index 3.695020  0.53805219 0.68
-#> 3   s3 trait index 3.843434  1.13858880 0.40
-#> 4   s4 trait index 3.297534 -0.97698903 0.42
-#> 5   s5 trait index 3.579527 -0.02346576 0.94
+#> 1   s1 trait index 3.155201 -1.45826096 0.14
+#> 2   s2 trait index 3.695020  0.49667343 0.68
+#> 3   s3 trait index 3.843434  1.10548404 0.34
+#> 4   s4 trait index 3.297534 -0.93996186 0.42
+#> 5   s5 trait index 3.579527  0.01114267 1.00
 # variance among the population means of a site
 pop_var <- function(x, species) stats::var(tapply(x, species, mean))
 community_index(ind, pop_var, null = "local", n_perm = 99)
 #>   site trait   index observed      ses    p
-#> 1   s1 trait pop_var 1.476106 4.219795 0.02
-#> 2   s2 trait pop_var 1.577807 7.631109 0.02
-#> 3   s3 trait pop_var 2.090731 7.206326 0.02
-#> 4   s4 trait pop_var 1.661834 8.237044 0.02
-#> 5   s5 trait pop_var 1.713591 4.415371 0.02
+#> 1   s1 trait pop_var 1.476106 4.135961 0.02
+#> 2   s2 trait pop_var 1.577807 7.273284 0.02
+#> 3   s3 trait pop_var 2.090731 5.648320 0.02
+#> 4   s4 trait pop_var 1.661834 9.649191 0.02
+#> 5   s5 trait pop_var 1.713591 4.016460 0.02
 # several indices at once, on the same randomised communities
 community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
                 null = "regional.ind", n_perm = 99)
-#>    site trait    index    observed          ses    p
-#> 1    s1 trait variance  0.96184073 -1.204549411 0.24
-#> 2    s2 trait variance  1.01906139 -1.315648430 0.24
-#> 3    s3 trait variance  1.55696893  0.955877885 0.34
-#> 4    s4 trait variance  0.88096775 -1.394588992 0.16
-#> 5    s5 trait variance  1.72488384  2.015358652 0.06
-#> 6    s1 trait     MNND  0.08888870 -0.721103852 0.50
-#> 7    s2 trait     MNND  0.11849284  0.847592936 0.46
-#> 8    s3 trait     MNND  0.12324692  1.028942015 0.38
-#> 9    s4 trait     MNND  0.04634544 -2.976977563 0.02
-#> 10   s5 trait     MNND  0.09741112 -0.370322230 0.72
-#> 11   s1 trait kurtosis -1.05229048 -0.007918248 0.90
-#> 12   s2 trait kurtosis -0.10003062  3.187360206 0.06
-#> 13   s3 trait kurtosis -1.23233713 -0.420626901 0.76
-#> 14   s4 trait kurtosis -0.68087734  0.906284555 0.36
-#> 15   s5 trait kurtosis -1.55901734 -1.373313414 0.02
+#>    site trait    index    observed        ses    p
+#> 1    s1 trait variance  0.96184073 -1.0836140 0.26
+#> 2    s2 trait variance  1.01906139 -1.0627168 0.30
+#> 3    s3 trait variance  1.55696893  1.1979539 0.18
+#> 4    s4 trait variance  0.88096775 -1.6464750 0.10
+#> 5    s5 trait variance  1.72488384  1.7209647 0.10
+#> 6    s1 trait     MNND  0.08888870 -0.6195095 0.52
+#> 7    s2 trait     MNND  0.11849284  0.6147808 0.52
+#> 8    s3 trait     MNND  0.12324692  0.9530796 0.44
+#> 9    s4 trait     MNND  0.04634544 -2.6037346 0.02
+#> 10   s5 trait     MNND  0.09741112 -0.1460056 1.00
+#> 11   s1 trait kurtosis -1.05229048 -0.1008083 0.82
+#> 12   s2 trait kurtosis -0.10003062  2.5442679 0.06
+#> 13   s3 trait kurtosis -1.23233713 -0.5927939 0.54
+#> 14   s4 trait kurtosis -0.68087734  1.2195410 0.16
+#> 15   s5 trait kurtosis -1.55901734 -1.5884772 0.04
 ```

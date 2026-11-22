@@ -78,9 +78,11 @@ List of class `mc_phylo_vector` with `correlation`, the correlations of
 `pev` and `pev_brown`; `p_site`, `p_species` and `p_max` of the global
 test; `selected`, the columns of `eigenvectors` retained; `pev` and
 `pev_brown`, named vectors or `NULL` when the global test is not
-significant or no eigenvector is retained; `eigenvectors`;
-`eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
-`pev` before combining gradients with
+significant or no eigenvector is retained; `eigenvectors`, each with its
+largest absolute value positive (the sign of an eigenvector is
+arbitrary, and this fixes it across platforms); `eigenvalues`;
+`eigenvector_correlation`, whose signs follow those of `eigenvectors`;
+and `permutations`. Check `pev` before combining gradients with
 [`cbind()`](https://rdrr.io/r/base/cbind.html), which drops a `NULL`
 without warning.
 
@@ -207,5 +209,5 @@ phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 #> <mc_phylo_vector> 18 eigenvectors, 2 retained
 #> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01
 #> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 
-#> correlation: PEV 0.61  PEV-B 0.588 
+#> correlation: PEV 0.61  PEV-B -0.595 
 ```

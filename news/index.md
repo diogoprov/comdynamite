@@ -2,6 +2,22 @@
 
 ## comdynamite (development version)
 
+- The regional null models of
+  [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
+  permute the whole region once per randomisation, instead of drawing
+  each site from the region independently, as
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  now does. The null distribution of each site is unchanged, but null
+  values differ from earlier versions for the same seed, and values that
+  combine sites are now valid.
+- The eigenvectors returned by
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
+  and
+  [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md)
+  have a fixed sign: the largest absolute value of each is positive. The
+  sign of an eigenvector is arbitrary and could differ between
+  platforms; the signs of `eigenvector_correlation` follow. Tests and
+  gradients (`pev`) are unchanged.
 - Functions that implement a published method, such as
   [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
   [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),

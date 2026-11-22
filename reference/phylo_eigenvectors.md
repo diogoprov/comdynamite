@@ -24,7 +24,9 @@ phylo_eigenvectors(tree, squared = FALSE)
 
 ## Value
 
-Matrix with one row per tip and one column per positive eigenvalue.
+Matrix with one row per tip and one column per positive eigenvalue. The
+sign of each column, which is arbitrary, is set so that its largest
+absolute value is positive.
 
 ## References
 

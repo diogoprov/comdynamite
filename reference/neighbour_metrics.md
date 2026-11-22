@@ -175,9 +175,9 @@ ind <- data.frame(site = rep(paste0("s", 1:5), each = 15),
                   species = sample(letters[1:4], 75, replace = TRUE), trait = rnorm(75))
 community_index(ind, mnnd, null = "regional.ind", n_perm = 99)
 #>   site trait index   observed        ses    p
-#> 1   s1 trait  mnnd 0.21951480  1.5305257 0.12
-#> 2   s2 trait  mnnd 0.11803015 -0.6224601 0.58
-#> 3   s3 trait  mnnd 0.10781498 -0.9020233 0.42
-#> 4   s4 trait  mnnd 0.06145019 -1.9225412 0.04
-#> 5   s5 trait  mnnd 0.12445061 -0.4838972 0.70
+#> 1   s1 trait  mnnd 0.21951480  1.5767857 0.16
+#> 2   s2 trait  mnnd 0.11803015 -0.7526785 0.52
+#> 3   s3 trait  mnnd 0.10781498 -0.9202456 0.38
+#> 4   s4 trait  mnnd 0.06145019 -1.8572149 0.04
+#> 5   s5 trait  mnnd 0.12445061 -0.7438704 0.58
 ```

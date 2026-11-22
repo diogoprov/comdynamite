@@ -150,7 +150,10 @@ occupied sites.</p></dd>
 and <code>pev_brown</code>; <code>p_site</code>, <code>p_species</code> and <code>p_max</code> of the global test; <code>selected</code>, the
 columns of <code>eigenvectors</code> retained; <code>pev</code> and <code>pev_brown</code>, named vectors or <code>NULL</code>
 when the global test is not significant or no eigenvector is retained;
-<code>eigenvectors</code>; <code>eigenvalues</code>; <code>eigenvector_correlation</code>; and <code>permutations</code>. Check
+<code>eigenvectors</code>, each with its largest absolute value positive (the sign of an
+eigenvector is arbitrary, and this fixes it across platforms); <code>eigenvalues</code>;
+<code>eigenvector_correlation</code>, whose signs follow those of <code>eigenvectors</code>; and
+<code>permutations</code>. Check
 <code>pev</code> before combining gradients with <code><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind()</a></code>, which drops a <code>NULL</code> without warning.</p>
     </div>
     <div class="section level2">
@@ -247,7 +250,7 @@ traits–environment relationships in the fourth-corner problem. <em>Ecology</em
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_vector&gt; 18 eigenvectors, 2 retained</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B 0.588 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B -0.595 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
