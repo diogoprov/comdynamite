@@ -1,8 +1,10 @@
-# rOpenSci pkgcheck, from https://github.com/ropensci-review-tools/pkgcheck-action
+# rOpenSci pkgcheck, in the image of https://github.com/ropensci-review-tools/pkgcheck-action
+# but with our own script (.github/pkgcheck.R), which works around a failure of the action
+# when it writes its summary (pkgcheck-action issue #77).
 name: pkgcheck
 
 # Run by hand (Actions > pkgcheck > Run workflow) before a release or a submission: it takes
-# about 40 minutes, and the action can fail in its own summary step without a package problem.
+# about 40 minutes.
 on:
   workflow_dispatch:
 
@@ -12,6 +14,24 @@ jobs:
   pkgcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: ropensci-review-tools/pkgcheck-action@main
+      - uses: actions/checkout@v4
         with:
-          post-to-issue: false
+          fetch-depth: 0
+
+      - name: Run pkgcheck
+        uses: docker://ghcr.io/ropensci-review-tools/pkgcheck-action:latest
+        with:
+          entrypoint: Rscript
+          args: .github/pkgcheck.R
+
+      - name: Show the summary
+        if: always()
+        run: |
+          if [ -f .pkgcheck/summary.md ]; then cat .pkgcheck/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pkgcheck-results
+          path: .pkgcheck/*.md
+          if-no-files-found: ignore
