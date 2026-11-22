@@ -800,7 +800,7 @@ Consequências (interpretação minha; substitui a lista anterior onde conflita)
 
 ### 3.8 Extensões de código que o plano exige
 
-1. Verossimilhança integrada sobre configurações (S3c).
+1. Verossimilhança integrada sobre configurações (S3c): feito em 22/11/2026, `damocles_samples(integrate = TRUE)`.
 2. Bootstrap em blocos de comunidades (S5), em `damocles_partition_test()` ou numa função
    de reamostragem.
 3. Regime que depende da comunidade (costa e interior) nos ramos terminais (2.2a), se a

@@ -13,6 +13,7 @@ damocles_samples(
   vary = c("both", "gamma", "mu"),
   root = c("both", "absent", "present"),
   sympatry = 0,
+  integrate = FALSE,
   cores = 1
 )
 
@@ -39,6 +40,10 @@ or \code{"mu"}; the other one is a single rate for the whole tree.}
 daughters present (see \code{\link[=simulate_damocles]{simulate_damocles()}}). In \code{damocles_fit()}, a fixed value, or
 \code{NULL} to estimate it with the rates (shared or not, as they are).}
 
+\item{integrate}{\code{TRUE} or \code{FALSE} (the default). \code{TRUE} also fits the parameters that
+maximise the likelihood averaged over the configurations and tests them against constant
+rates (see Details).}
+
 \item{cores}{Number of cores, with configurations fitted in parallel. One whole number, 1 or
 more. Not available on Windows, where one core is used.}
 
@@ -52,8 +57,10 @@ more. Not available on Windows, where one core is used.}
 A list of class \code{mc_damocles_samples} with \code{samples}, a data frame with one row per
 configuration (\code{n_par}, \code{loglik}, \code{delta_aic} against constant rates, and the
 likelihood-ratio \code{statistic}, \code{df} and \code{p_value}), \code{constant}, the fit with constant rates,
-\code{fits}, the fit of each configuration, and \code{gamma} and \code{mu}, matrices of the rate of each
-edge (rows) in each configuration (columns).
+\code{fits}, the fit of each configuration, \code{gamma} and \code{mu}, matrices of the rate of each
+edge (rows) in each configuration (columns), and \code{integrated}, \code{NULL} unless \code{integrate = TRUE}, when it is a list with the \code{estimates} of the integrated fit, its \code{loglik} and
+\code{n_par}, \code{delta_aic} against constant rates, the likelihood-ratio \code{statistic}, \code{df} and
+\code{p_value}, and the \code{convergence} code of the optimiser.
 }
 \description{
 \code{damocles_samples()} fits \code{\link[=damocles_fit]{damocles_fit()}}, with parameters shared by all communities, once
@@ -82,10 +89,24 @@ carries the sampling noise of each rate, and a noisy covariate attenuates its sl
 (regression dilution): in \code{data-raw/damocles_clads.R}, with colonisation simulated from the
 MAP rates of ClaDS with \code{beta = 2}, the MAP rates gave a slope of 1.6 and rejected constant
 rates, while single posterior samples gave a median slope of 0.22 and rejected constant
-rates in 65 of 100. For continuous rates, fit the posterior mean, median or MAP of each rate
-with \code{\link[=damocles_fit]{damocles_fit()}} for the estimate, and use the posterior samples to see whether the sign
-and the comparison with constant rates hold, knowing that each sample understates the
-slope.
+rates in 65 of 100.
+
+\code{integrate = TRUE} adds one fit that uses all configurations at once: the parameters
+maximise the likelihood averaged over the configurations, \eqn{L(\theta) = K^{-1} \sum_k
+L(\theta \mid c_k)}{L(theta) = mean over k of L(theta | configuration k)}, so that the
+uncertainty in the configuration enters the likelihood instead of a summary of separate
+fits, and this fit is compared with constant rates (which do not depend on the
+configuration) by a likelihood-ratio test. In simulations with posteriors of branch rates
+from ClaDS (\code{data-raw/s3_clads_validation.R}), this test had the highest power of the ways
+of summarising the samples, with the size of the test near or below its nominal level,
+while its slope, like that of the posterior mean, was attenuated by the noise in the
+rates. For continuous rates, then, use the integrated fit for the test, and report the
+slope of the posterior mean (or median, or MAP) of each rate with \code{\link[=damocles_fit]{damocles_fit()}} as a
+lower bound of the effect, knowing that single samples understate it further. The
+parameters must mean the same in every configuration: always true for \code{edge_covariate},
+and true for \code{regimes} only when every configuration has the same regimes with the same
+meaning (for example, \code{"0"} for the background and \code{"1"} for the clade below a shift), not
+for the arbitrary labels of the regimes of each BAMM sample.
 
 \code{summary()} reports, across configurations, how often the varying rates fit better than
 constant rates (p-value below 0.05, and AIC lower by more than 2), quantiles of the
@@ -112,7 +133,8 @@ comm <- simulate_damocles(tr, ifelse(clade_regimes(tr, list(A = crown)) == "A", 
 configurations <- lapply(c(crown, crown + 1, crown + 2), function(node) {
   clade_regimes(tr, list(A = node))
 })
-res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma")
+res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma",
+                        integrate = TRUE)
 res
 summary(res)
 \dontshow{\}) # examplesIf}

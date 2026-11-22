@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `damocles_samples()` gains `integrate`: with `integrate = TRUE` it also fits the parameters
+  that maximise the likelihood averaged over the configurations (posterior samples of regimes
+  or branch rates) and tests them against constant rates by a likelihood-ratio test, returned
+  as `$integrated` and shown by `print()` and `summary()`. In simulations with ClaDS
+  posteriors (`data-raw/s3_clads_validation.R`) this was the most powerful way to test a
+  branch-rate covariate from posterior samples, with the size of the test kept.
+
 - Internal: the long and complex functions that goodpractice flagged (the simulation engines,
   trait simulation, landscapes, DAMOCLES, the trait-variation analyses, `node_test()`,
   `pcps_test()`, ABC and several plots) are split into smaller internal helpers, each at most
