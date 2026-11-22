@@ -1,14 +1,18 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-21. Versão atual: 0.10.0 (tag `v0.10.0`, release, DOI
-`10.5281/zenodo.24423302`), após a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
-conceito `10.5281/zenodo.23993533`). Em desenvolvimento: 0.10.0.9000.
+Atualizado em 2026-11-22. Versão atual: 0.11.0 (tag `v0.11.0`, sem release no GitHub), após
+a 0.10.0 (tag `v0.10.0`, release, DOI `10.5281/zenodo.24423302`) e a 0.9.0 (DOI
+`10.5281/zenodo.24341231`; DOI de conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`,
-`v0.9.0` e `v0.10.0`.
+`v0.9.0`, `v0.10.0` e `v0.11.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-21)
+## Próximos passos (2026-11-22)
 
+0. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
+   aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
+   arquivos de teste, e o pkgcheck local sem falhas nos checks principais (PR #155). Restam só
+   avisos de estilo do goodpractice. A submissão continua adiada (ver 1b).
 1. **0.10.0 em 2026-11-21** (tag `v0.10.0`): fecha o bloco A (nulos com borda e
    `env_surrogates()`, gerador de Thompson et al. 2020, competição por traits, nicho com eixos
    correlacionados, dispersão no tempo, tempo desde a mudança, ambiente sazonal e redes
