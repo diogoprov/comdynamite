@@ -49,6 +49,7 @@
 #' @export
 simulate_damocles <- function(tree, gamma, mu, n = 1, root = c("both", "absent", "present"),
                               sympatry = 0) {
+  cite_method("simulate_damocles")
   root <- match.arg(root)
   check_damocles_tree(tree)
   rates <- damocles_edge_rates(tree, gamma, mu)
@@ -208,6 +209,7 @@ damocles_loglik <- function(comm, tree, gamma, mu, root = c("both", "absent", "p
 damocles_fit <- function(comm, tree, root = c("both", "absent", "present"), start = NULL,
                          shared = FALSE, sympatry = 0, regimes = NULL, edge_covariate = NULL,
                          vary = c("both", "gamma", "mu")) {
+  cite_method("damocles_fit")
   root <- match.arg(root)
   vary <- match.arg(vary)
   check_flag(shared, "shared")
@@ -331,6 +333,7 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
                           root = c("both", "absent", "present"), shared = FALSE,
                           sympatry = 0, regimes = NULL, edge_covariate = NULL,
                           vary = c("both", "gamma", "mu")) {
+  cite_method("damocles_test")
   root <- match.arg(root)
   vary <- match.arg(vary)
   check_damocles_tree(tree)

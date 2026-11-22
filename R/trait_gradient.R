@@ -101,6 +101,7 @@ trait_gradient <- function(data, trait = "trait", site = "site", species = "spec
                            site_weights = if (is.null(abundance)) "occurrence" else "abundance",
                            species_weights = site_weights, leave_one_out = TRUE,
                            min_slope = 3) {
+  cite_method("trait_gradient")
   site_weights <- match.arg(site_weights, c("abundance", "occurrence"))
   species_weights <- match.arg(species_weights, c("abundance", "occurrence"))
   check_string(trait, "trait")
@@ -445,6 +446,7 @@ trait_gradient_weights <- function(data, abundance, ...) {
 trait_gradient_test <- function(x, n_null = 999,
                                 null = c("species", "phylo", "bm", "curveball", "permute"),
                                 burn_in = NULL, thin = NULL, tree = NULL, phylo_k = 1.1) {
+  cite_method("trait_gradient_test")
   if (!inherits(x, "mc_trait_gradient")) {
     stop("`x` must come from trait_gradient()", call. = FALSE)
   }
@@ -683,6 +685,7 @@ print.mc_trait_gradient_test <- function(x, ...) {
 trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean"),
                                  models = c("white", "BM", "OU"), n_boot = 199,
                                  min_sites = 3) {
+  cite_method("trait_gradient_phylo")
   if (!inherits(x, "mc_trait_gradient")) {
     stop("`x` must come from trait_gradient()", call. = FALSE)
   }

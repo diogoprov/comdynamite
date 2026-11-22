@@ -83,6 +83,7 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #' @export
 pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
                      site_permutations = NULL) {
+  cite_method("pcc_test")
   if (inherits(comm, "mc_data")) {
     if (missing(tree)) tree <- data_part(comm, "tree")
     if (missing(env)) env <- data_part(comm, "env")

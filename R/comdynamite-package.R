@@ -34,6 +34,12 @@
 #' other data inputs stop the function with a message that names the argument; remove or
 #' impute missing values before the analysis.
 #'
+#' @section Citation:
+#' Cite the package with `citation("comdynamite")` and, with it, the original papers of the
+#' methods you use. Each function that implements a published method shows these papers the
+#' first time it runs in a session, and [method_references()] lists them by function; see
+#' [method_references()] for how to turn the message off.
+#'
 #' @section Where to start:
 #' The articles at <https://provetelab.org/comdynamite/articles/> go through each question.
 #' "Preparing your data" shows the format that the analyses expect.

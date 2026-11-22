@@ -162,6 +162,7 @@ check_prior <- function(prior) {
 #' @export
 abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1,
                     min_node_size = 5) {
+  cite_method("abc_fit")
   if (!requireNamespace("abcrf", quietly = TRUE)) {
     stop("abc_fit() needs the package abcrf.", call. = FALSE) # nocov
   }
@@ -298,6 +299,7 @@ print.mc_abc_fit <- function(x, ...) {
 #' @export
 abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 200,
                          level = 0.9, ntree = 500, ncores = 1, seed = 1, min_node_size = 5) {
+  cite_method("abc_recovery")
   check_abc_table(table)
   check_count(n_test, "n_test", min = 2)
   if (n_test >= nrow(table) - 10) {
@@ -373,6 +375,7 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
 #' predict(choice, c(s1 = 1.2, s2 = 0))
 #' @export
 abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncores = 1) {
+  cite_method("abc_choose")
   if (!requireNamespace("abcrf", quietly = TRUE)) {
     stop("abc_choose() needs the package abcrf.", call. = FALSE) # nocov
   }

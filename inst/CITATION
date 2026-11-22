@@ -1,4 +1,5 @@
 bibentry(
+  header = "To cite comdynamite in publications, use:",
   bibtype = "Manual",
   title = "comdynamite: Linking Traits, Phylogenies and Biogeography in Metacommunities",
   author = person("Diogo B.", "Provete", comment = c(ORCID = "0000-0002-0097-0651")),
@@ -11,4 +12,256 @@ bibentry(
     "biogeography in metacommunities. R package version ",
     meta$Version, ". https://doi.org/10.5281/zenodo.23993533"
   )
+)
+
+bibentry(
+  header = "Please also cite the original papers of the methods you use; method_references() gives the papers of each function:",
+  bibtype = "Article",
+  author = c(person("M. A.", "Leibold"), person("E. P.", "Economo"), person("P.", "Peres-Neto")),
+  year = "2010",
+  title = "Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography",
+  journal = "Ecology Letters",
+  volume = "13",
+  pages = "1290--1299",
+  doi = "10.1111/j.1461-0248.2010.01523.x",
+  textVersion = "Leibold, M. A., Economo, E. P., & Peres-Neto, P. (2010). Metacommunity phylogenetics: separating the roles of environmental filters and historical biogeography. Ecology Letters, 13, 1290-1299. https://doi.org/10.1111/j.1461-0248.2010.01523.x"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("P. R.", "Peres-Neto"), person("M. A.", "Leibold"), person("S.", "Dray")),
+  year = "2012",
+  title = "Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics",
+  journal = "Ecology",
+  volume = "93",
+  pages = "S14--S30",
+  doi = "10.1890/11-0494.1",
+  textVersion = "Peres-Neto, P. R., Leibold, M. A., & Dray, S. (2012). Assessing the effects of spatial contingency and environmental filtering on metacommunity phylogenetics. Ecology, 93, S14-S30. https://doi.org/10.1890/11-0494.1"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("P. R.", "Peres-Neto"), person("P.", "Legendre"), person("S.", "Dray"), person("D.", "Borcard")),
+  year = "2006",
+  title = "Variation partitioning of species data matrices: estimation and comparison of fractions",
+  journal = "Ecology",
+  volume = "87",
+  pages = "2614--2625",
+  doi = "10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2",
+  textVersion = "Peres-Neto, P. R., Legendre, P., Dray, S., & Borcard, D. (2006). Variation partitioning of species data matrices: estimation and comparison of fractions. Ecology, 87, 2614-2625. https://doi.org/10.1890/0012-9658(2006)87[2614:VPOSDM]2.0.CO;2"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("P. R.", "Peres-Neto"), person("S. W.", "Kembel")),
+  year = "2015",
+  title = "Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities",
+  journal = "Plant Ecology",
+  volume = "216",
+  pages = "709--724",
+  doi = "10.1007/s11258-014-0405-0",
+  textVersion = "Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis: environmental drivers of phylogenetic variation across ecological communities. Plant Ecology, 216, 709-724. https://doi.org/10.1007/s11258-014-0405-0"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("V. D.", "Pillar"), person("L. D. S.", "Duarte")),
+  year = "2010",
+  title = "A framework for metacommunity analysis of phylogenetic structure",
+  journal = "Ecology Letters",
+  volume = "13",
+  pages = "587--596",
+  doi = "10.1111/j.1461-0248.2010.01456.x",
+  textVersion = "Pillar, V. D., & Duarte, L. D. S. (2010). A framework for metacommunity analysis of phylogenetic structure. Ecology Letters, 13, 587-596. https://doi.org/10.1111/j.1461-0248.2010.01456.x"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("L. D. S.", "Duarte"), person("V. J.", "Debastiani"), person("A. V. L.", "Freitas"), person("V. D.", "Pillar")),
+  year = "2016",
+  title = "Dissecting phylogenetic fuzzy weighting: theory and application in metacommunity phylogenetics",
+  journal = "Methods in Ecology and Evolution",
+  volume = "7",
+  pages = "937--946",
+  doi = "10.1111/2041-210X.12547",
+  textVersion = "Duarte, L. D. S., Debastiani, V. J., Freitas, A. V. L., & Pillar, V. D. (2016). Dissecting phylogenetic fuzzy weighting: theory and application in metacommunity phylogenetics. Methods in Ecology and Evolution, 7, 937-946. https://doi.org/10.1111/2041-210X.12547"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("V. J.", "Debastiani"), person("L. D. S.", "Duarte")),
+  year = "2014",
+  title = "PCPS -- an R-package for exploring phylogenetic eigenvectors across metacommunities",
+  journal = "Frontiers of Biogeography",
+  volume = "6",
+  doi = "10.21425/F5FBG22943",
+  textVersion = "Debastiani, V. J., & Duarte, L. D. S. (2014). PCPS -- an R-package for exploring phylogenetic eigenvectors across metacommunities. Frontiers of Biogeography, 6. https://doi.org/10.21425/F5FBG22943"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("C.", "Violle"), person("B. J.", "Enquist"), person("B. J.", "McGill"), person("L.", "Jiang"), person("C. H.", "Albert"), person("C.", "Hulshof"), person("V.", "Jung"), person("J.", "Messier")),
+  year = "2012",
+  title = "The return of the variance: intraspecific variability in community ecology",
+  journal = "Trends in Ecology & Evolution",
+  volume = "27",
+  pages = "244--252",
+  doi = "10.1016/j.tree.2011.11.014",
+  textVersion = "Violle, C., Enquist, B. J., McGill, B. J., Jiang, L., Albert, C. H., Hulshof, C., Jung, V., & Messier, J. (2012). The return of the variance: intraspecific variability in community ecology. Trends in Ecology & Evolution, 27, 244-252. https://doi.org/10.1016/j.tree.2011.11.014"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("A.", "Taudiere"), person("C.", "Violle")),
+  year = "2016",
+  title = "cati: an R package using functional traits to detect and quantify multi-level community assembly processes",
+  journal = "Ecography",
+  volume = "39",
+  pages = "699--708",
+  doi = "10.1111/ecog.01433",
+  textVersion = "Taudiere, A., & Violle, C. (2016). cati: an R package using functional traits to detect and quantify multi-level community assembly processes. Ecography, 39, 699-708. https://doi.org/10.1111/ecog.01433"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("J.", "Lepš"), person("F.", "de Bello"), person("P.", "Šmilauer"), person("J.", "Doležal")),
+  year = "2011",
+  title = "Community trait response to environment: disentangling species turnover vs intraspecific trait variability effects",
+  journal = "Ecography",
+  volume = "34",
+  pages = "856--863",
+  doi = "10.1111/j.1600-0587.2010.06904.x",
+  textVersion = "Lepš, J., de Bello, F., Šmilauer, P., & Doležal, J. (2011). Community trait response to environment: disentangling species turnover vs intraspecific trait variability effects. Ecography, 34, 856-863. https://doi.org/10.1111/j.1600-0587.2010.06904.x"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("J.", "Messier"), person("B. J.", "McGill"), person("M. J.", "Lechowicz")),
+  year = "2010",
+  title = "How do traits vary across ecological scales? A case for trait-based ecology",
+  journal = "Ecology Letters",
+  volume = "13",
+  pages = "838--848",
+  doi = "10.1111/j.1461-0248.2010.01476.x",
+  textVersion = "Messier, J., McGill, B. J., & Lechowicz, M. J. (2010). How do traits vary across ecological scales? A case for trait-based ecology. Ecology Letters, 13, 838-848. https://doi.org/10.1111/j.1461-0248.2010.01476.x"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("D. D.", "Ackerly"), person("W. K.", "Cornwell")),
+  year = "2007",
+  title = "A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components",
+  journal = "Ecology Letters",
+  volume = "10",
+  pages = "135--145",
+  doi = "10.1111/j.1461-0248.2006.01006.x",
+  textVersion = "Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("A. L.", "Pigot"), person("R. S.", "Etienne")),
+  year = "2015",
+  title = "A new dynamic null model for phylogenetic community structure",
+  journal = "Ecology Letters",
+  volume = "18",
+  pages = "153--163",
+  doi = "10.1111/ele.12395",
+  textVersion = "Pigot, A. L., & Etienne, R. S. (2015). A new dynamic null model for phylogenetic community structure. Ecology Letters, 18, 153-163. https://doi.org/10.1111/ele.12395"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("R. R.", "Ackermann"), person("J. M.", "Cheverud")),
+  year = "2004",
+  title = "Detecting genetic drift versus selection in human evolution",
+  journal = "Proceedings of the National Academy of Sciences",
+  volume = "101",
+  pages = "17946--17951",
+  doi = "10.1073/pnas.0405919102",
+  textVersion = "Ackermann, R. R., & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human evolution. Proceedings of the National Academy of Sciences, 101, 17946-17951. https://doi.org/10.1073/pnas.0405919102"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("W.", "Jetz"), person("G. H.", "Thomas"), person("J. B.", "Joy"), person("K.", "Hartmann"), person("A. O.", "Mooers")),
+  year = "2012",
+  title = "The global diversity of birds in space and time",
+  journal = "Nature",
+  volume = "491",
+  pages = "444--448",
+  doi = "10.1038/nature11631",
+  textVersion = "Jetz, W., Thomas, G. H., Joy, J. B., Hartmann, K., & Mooers, A. O. (2012). The global diversity of birds in space and time. Nature, 491, 444-448. https://doi.org/10.1038/nature11631"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("M.", "Januario"), person("M. L.", "Pinsky"), person("D. L.", "Rabosky")),
+  year = "2025",
+  title = "The metapopulation bridge to macroevolutionary speciation rates: a conceptual framework and empirical test",
+  journal = "Ecology Letters",
+  volume = "28",
+  pages = "e70021",
+  doi = "10.1111/ele.70021",
+  textVersion = "Januario, M., Pinsky, M. L., & Rabosky, D. L. (2025). The metapopulation bridge to macroevolutionary speciation rates: a conceptual framework and empirical test. Ecology Letters, 28, e70021. https://doi.org/10.1111/ele.70021"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("L.", "Raynal"), person("J.-M.", "Marin"), person("P.", "Pudlo"), person("M.", "Ribatet"), person("C. P.", "Robert"), person("A.", "Estoup")),
+  year = "2019",
+  title = "ABC random forests for Bayesian parameter inference",
+  journal = "Bioinformatics",
+  volume = "35",
+  pages = "1720--1728",
+  doi = "10.1093/bioinformatics/bty867",
+  textVersion = "Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC random forests for Bayesian parameter inference. Bioinformatics, 35, 1720-1728. https://doi.org/10.1093/bioinformatics/bty867"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("P.", "Pudlo"), person("J.-M.", "Marin"), person("A.", "Estoup"), person("J.-M.", "Cornuet"), person("M.", "Gautier"), person("C. P.", "Robert")),
+  year = "2016",
+  title = "Reliable ABC model choice via random forests",
+  journal = "Bioinformatics",
+  volume = "32",
+  pages = "859--866",
+  doi = "10.1093/bioinformatics/btv684",
+  textVersion = "Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., & Robert, C. P. (2016). Reliable ABC model choice via random forests. Bioinformatics, 32, 859-866. https://doi.org/10.1093/bioinformatics/btv684"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("P. L.", "Thompson"), person("L. M.", "Guzman"), person("L.", "De Meester"), person("Z.", "Horváth"), person("R.", "Ptacnik"), person("B.", "Vanschoenwinkel"), person("D. S.", "Viana"), person("J. M.", "Chase")),
+  year = "2020",
+  title = "A process-based metacommunity framework linking local and regional scale community ecology",
+  journal = "Ecology Letters",
+  volume = "23",
+  pages = "1314--1329",
+  doi = "10.1111/ele.13568",
+  textVersion = "Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568"
+)
+bibentry(
+  bibtype = "Book",
+  author = person("M. A.", "McPeek"),
+  year = "2017",
+  title = "Evolutionary Community Ecology",
+  publisher = "Princeton University Press",
+  doi = "10.23943/princeton/9780691088778.001.0001",
+  textVersion = "McPeek, M. A. (2017). Evolutionary Community Ecology. Princeton University Press. https://doi.org/10.23943/princeton/9780691088778.001.0001"
+)
+bibentry(
+  bibtype = "Article",
+  author = person("M. A.", "McPeek"),
+  year = "2017",
+  title = "The ecological dynamics of natural selection: traits and the coevolution of community structure",
+  journal = "The American Naturalist",
+  volume = "189",
+  pages = "E91--E117",
+  doi = "10.1086/691101",
+  textVersion = "McPeek, M. A. (2017). The ecological dynamics of natural selection: traits and the coevolution of community structure. The American Naturalist, 189, E91-E117. https://doi.org/10.1086/691101"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("E. E.", "Goldberg"), person("R.", "Lande")),
+  year = "2006",
+  title = "Ecological and reproductive character displacement on an environmental gradient",
+  journal = "Evolution",
+  volume = "60",
+  pages = "1344--1357",
+  doi = "10.1554/05-696.1",
+  textVersion = "Goldberg, E. E., & Lande, R. (2006). Ecological and reproductive character displacement on an environmental gradient. Evolution, 60, 1344-1357. https://doi.org/10.1554/05-696.1"
+)
+bibentry(
+  bibtype = "Article",
+  author = c(person("D. C.", "Adams"), person("M. L.", "Collyer")),
+  year = "2007",
+  title = "Analysis of character divergence along environmental gradients and other covariates",
+  journal = "Evolution",
+  volume = "61",
+  pages = "510--515",
+  doi = "10.1111/j.1558-5646.2007.00063.x",
+  textVersion = "Adams, D. C., & Collyer, M. L. (2007). Analysis of character divergence along environmental gradients and other covariates. Evolution, 61, 510-515. https://doi.org/10.1111/j.1558-5646.2007.00063.x"
 )
