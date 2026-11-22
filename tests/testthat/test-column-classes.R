@@ -76,7 +76,8 @@ test_that("as.data.frame() of node_test() has fixed column classes", {
   out <- node_test(comm, node_contrasts(tree), stats::rnorm(10), n_perm = 3)
   expect_identical(classes(as.data.frame(out)), c(
     node = "character", n_species = "integer", n_sites = "integer", r2 = "numeric",
-    r2_adjusted = "numeric", r2_weighted = "numeric", statistic = "numeric",
+    r2_adjusted = "numeric", r2_original = "numeric",
+    r2_adjusted_original = "numeric", r2_weighted = "numeric", statistic = "numeric",
     p_site = "numeric", p_species = "numeric", p_max = "numeric", p_joint = "numeric",
     n_draws = "integer", p_adjusted = "numeric"))
 })

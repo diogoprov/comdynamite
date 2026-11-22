@@ -111,7 +111,8 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' the article on validation).
 #'
 #' Each predictor gets a semipartial correlation, the square root of the loss of R2
-#' when it is removed, with the sign of its slope when it is alone in the model.
+#' when it is removed, with the sign of its slope when it is alone in the model. Like R2, it
+#' uses the site weights of the fit.
 #'
 #' Biogeographic events follow the article: a column of `biogeography` has 1 for sites
 #' in one area, -1 for sites in the other and 0 for sites in neither. Each event is
@@ -128,9 +129,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #' keep their community and predictors. In a landscape with edges, [rigid_permutations()]
 #' and [patch_permutations()] give the permutations of each event for `area_permutations`.
 #'
-#' R2, adjusted R2 and the statistic equal those of the MATLAB function
-#' `MetacommunityPhylogenetics` of the authors, checked in Octave. Four parts of that
-#' function differ from this one:
+#' `r2_original`, `r2_adjusted_original` and the statistic equal the R2, adjusted R2 and
+#' statistic of the MATLAB function `MetacommunityPhylogenetics` of the authors, checked in
+#' Octave. Five parts of that function differ from this one:
 #' \itemize{
 #'   \item In the original, the species permutations shuffle only the first columns
 #'     of the community matrix, as many as there are species in the node, so they
@@ -146,12 +147,14 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'     takes into account that draws of species occupy different numbers of sites. Here
 #'     draws are ranked on F statistics. `statistic` is still the one of the original, and
 #'     p-values of sites alone are the same, but those that use species differ.
+#'   \item The R2 of the original sums squares without site weights, although the fit uses
+#'     them, so it is not the R2 of a weighted regression and can exceed 1. Here `r2` and the
+#'     semipartial correlations sum squares with the site weights and stay between 0 and 1;
+#'     the R2 of the original is kept as `r2_original`. Both adjusted R2 use the degrees of
+#'     freedom of an unweighted model. `statistic` and the F statistics on which draws are
+#'     ranked keep the sums of squares of the original, so p-values do not depend on this
+#'     choice.
 #' }
-#'
-#' As in the original, R2 sums squares without site weights, although the fit
-#' uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
-#' R2 uses the degrees of freedom of an unweighted model. `r2_weighted` sums squares with the
-#' site weights, stays between 0 and 1, and is the value to report as a proportion.
 #'
 #' Nodes for which a predictor has no variance among the remaining sites, with too
 #' few sites, or with a clade without individuals get `NA`. The original stops with an
@@ -193,7 +196,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   with more than one core, call `RNGkind("L'Ecuyer-CMRG")` before `set.seed()`. Results
 #'   still depend on the number of cores.
 #' @return List of class `mc_node_test` with `nodes`, a data frame with one row per
-#'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `r2_weighted`, `statistic`,
+#'   node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`, `r2_original`,
+#'   `r2_adjusted_original` (the R2 of the original code, see Details), `r2_weighted` (equal
+#'   to `r2`, kept for compatibility until version 1.0.0), `statistic`,
 #'   `p_site`, `p_species`, `p_max`, `p_joint`, `n_draws`, the valid draws of sites, since a
 #'   draw without variance does not count, and `p_adjusted`; `semipartial`, a matrix of
 #'   nodes by predictors; `p_partial_max`, with the larger of the two p-values for each of
@@ -518,6 +523,8 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   if (is.na(observed$statistic)) {
     return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                                      r2 = NA_real_, r2_adjusted = NA_real_,
+                                     r2_original = NA_real_,
+                                     r2_adjusted_original = NA_real_,
                                      r2_weighted = NA_real_, statistic = NA_real_,
                                      p_site = NA_real_, p_species = NA_real_, p_max = NA_real_,
                                      p_joint = NA_real_, n_draws = NA_integer_),
@@ -554,7 +561,9 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   partial_joint <- partial_p(by_both)
   list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
                             r2 = observed$r2, r2_adjusted = observed$r2_adjusted,
-                            r2_weighted = observed$r2_weighted,
+                            r2_original = observed$r2_original,
+                            r2_adjusted_original = observed$r2_adjusted_original,
+                            r2_weighted = observed$r2,
                             statistic = observed$statistic, p_site = p_site, p_species = p_species,
                             p_max = max(p_site, p_species), p_joint = p_joint,
                             n_draws = sum(!is.na(by_site[, 1]))),
@@ -582,20 +591,29 @@ node_fit <- function(incidence, values, env) {
   predictors <- weighted_standardise(env, site_weights)
   fit <- weighted_fit(predictors, response, site_weights)
   if (is.null(fit)) return(failed)
+  # sums of squares as in the original code, without site weights: they give `statistic`
+  # and the F statistics on which draws are ranked
   total <- sum(response^2)
   explained <- sum(fit^2)
   residual <- sum((response - fit)^2)
-  r2 <- explained / total
-  partial_r2 <- vapply(seq_len(p), function(j) {
-    if (p == 1) return(r2)
-    r2 - sum(weighted_fit(predictors[, -j, drop = FALSE], response, site_weights)^2) / total
-  }, numeric(1))
+  r2_original <- explained / total
+  reduced <- lapply(seq_len(p), function(j) {
+    if (p == 1) return(rep(0, n))
+    weighted_fit(predictors[, -j, drop = FALSE], response, site_weights)
+  })
+  partial_original <- vapply(reduced, function(f) r2_original - sum(f^2) / total, numeric(1))
+  # the same with site weights, as in the weighted fit: R2 between 0 and 1
+  weighted_total <- sum(site_weights * response^2)
+  r2 <- sum(site_weights * fit^2) / weighted_total
+  partial_r2 <- vapply(reduced, function(f) r2 - sum(site_weights * f^2) / weighted_total,
+                       numeric(1))
   slopes <- colSums(site_weights * predictors * response)
   mean_residual <- residual / (n - p - 1)
+  adjust <- function(x) 1 - (n - 1) / (n - p - 1) * (1 - x)
   list(statistic = explained / residual, f = explained / p / mean_residual,
-       partial_f = partial_r2 * total / mean_residual, r2 = r2,
-       r2_weighted = sum(site_weights * fit^2) / sum(site_weights * response^2),
-       r2_adjusted = 1 - (n - 1) / (n - p - 1) * (1 - r2),
+       partial_f = partial_original * total / mean_residual, r2 = r2,
+       r2_adjusted = adjust(r2), r2_original = r2_original,
+       r2_adjusted_original = adjust(r2_original),
        semipartial = sign(slopes) * sqrt(pmax(partial_r2, 0)), n_sites = n)
 }
 

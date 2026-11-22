@@ -62,7 +62,9 @@ it has them.}
 }
 \value{
 List of class \code{mc_node_test} with \code{nodes}, a data frame with one row per
-node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{r2_weighted}, \code{statistic},
+node with \code{node}, \code{n_species}, \code{n_sites}, \code{r2}, \code{r2_adjusted}, \code{r2_original},
+\code{r2_adjusted_original} (the R2 of the original code, see Details), \code{r2_weighted} (equal
+to \code{r2}, kept for compatibility until version 1.0.0), \code{statistic},
 \code{p_site}, \code{p_species}, \code{p_max}, \code{p_joint}, \code{n_draws}, the valid draws of sites, since a
 draw without variance does not count, and \code{p_adjusted}; \code{semipartial}, a matrix of
 nodes by predictors; \code{p_partial_max}, with the larger of the two p-values for each of
@@ -101,7 +103,8 @@ it, whereas sites alone recover most of the environmental results of its Figure 
 the article on validation).
 
 Each predictor gets a semipartial correlation, the square root of the loss of R2
-when it is removed, with the sign of its slope when it is alone in the model.
+when it is removed, with the sign of its slope when it is alone in the model. Like R2, it
+uses the site weights of the fit.
 
 Biogeographic events follow the article: a column of \code{biogeography} has 1 for sites
 in one area, -1 for sites in the other and 0 for sites in neither. Each event is
@@ -118,9 +121,9 @@ a restricted null model. For events, each row moves the areas across the sites, 
 keep their community and predictors. In a landscape with edges, \code{\link[=rigid_permutations]{rigid_permutations()}}
 and \code{\link[=patch_permutations]{patch_permutations()}} give the permutations of each event for \code{area_permutations}.
 
-R2, adjusted R2 and the statistic equal those of the MATLAB function
-\code{MetacommunityPhylogenetics} of the authors, checked in Octave. Four parts of that
-function differ from this one:
+\code{r2_original}, \code{r2_adjusted_original} and the statistic equal the R2, adjusted R2 and
+statistic of the MATLAB function \code{MetacommunityPhylogenetics} of the authors, checked in
+Octave. Five parts of that function differ from this one:
 \itemize{
 \item In the original, the species permutations shuffle only the first columns
 of the community matrix, as many as there are species in the node, so they
@@ -136,12 +139,14 @@ response, and with one predictor it does not rank draws as the global one does. 
 takes into account that draws of species occupy different numbers of sites. Here
 draws are ranked on F statistics. \code{statistic} is still the one of the original, and
 p-values of sites alone are the same, but those that use species differ.
+\item The R2 of the original sums squares without site weights, although the fit uses
+them, so it is not the R2 of a weighted regression and can exceed 1. Here \code{r2} and the
+semipartial correlations sum squares with the site weights and stay between 0 and 1;
+the R2 of the original is kept as \code{r2_original}. Both adjusted R2 use the degrees of
+freedom of an unweighted model. \code{statistic} and the F statistics on which draws are
+ranked keep the sums of squares of the original, so p-values do not depend on this
+choice.
 }
-
-As in the original, R2 sums squares without site weights, although the fit
-uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
-R2 uses the degrees of freedom of an unweighted model. \code{r2_weighted} sums squares with the
-site weights, stays between 0 and 1, and is the value to report as a proportion.
 
 Nodes for which a predictor has no variance among the remaining sites, with too
 few sites, or with a clade without individuals get \code{NA}. The original stops with an

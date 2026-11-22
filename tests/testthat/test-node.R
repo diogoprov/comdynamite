@@ -39,7 +39,8 @@ test_that("statistics equal the original function run in Octave", {
     m <- which(nodes[, i] != 0)
     node_fit(inc[, m, drop = FALSE], nodes[m, i], env)
   })
-  mine <- t(vapply(fits, function(f) c(f$r2, f$r2_adjusted, f$statistic), numeric(3)))
+  mine <- t(vapply(fits, function(f) c(f$r2_original, f$r2_adjusted_original, f$statistic),
+                    numeric(3)))
   expect_equal(mine, expected, tolerance = 1e-6)
 })
 
@@ -49,6 +50,7 @@ test_that("with one predictor, the semipartial squared is the R2", {
   x <- node_contrasts(d$tree)
   out <- node_test(d$comm, x, d$env, n_perm = 3)
   expect_equal(unname(out$semipartial[, 1]^2), out$nodes$r2)
+  expect_true(all(out$nodes$r2 <= 1 + 1e-12, na.rm = TRUE))
   flipped <- node_test(d$comm, x, -d$env, n_perm = 3)
   expect_equal(flipped$semipartial, -out$semipartial)
   expect_equal(out$nodes$p_adjusted, p.adjust(out$nodes$p_max, "BH"))
@@ -370,7 +372,9 @@ test_that("node_test() has a weighted R2 and counts draws", {
   nodes <- node_contrasts(daphniids$tree)
   out <- node_test(daphniids$comm, nodes, daphniids$env[, 1:2], n_perm = 5)
   tested <- out$nodes[!is.na(out$nodes$r2), ]
-  expect_true(all(tested$r2_weighted >= 0 & tested$r2_weighted <= 1))
+  expect_true(all(tested$r2 >= 0 & tested$r2 <= 1))
+  expect_identical(tested$r2_weighted, tested$r2)
+  expect_true(all(abs(out$semipartial) <= 1, na.rm = TRUE))
   expect_true(all(tested$n_draws <= 5))
   expect_equal(nrow(as.data.frame(out)), ncol(nodes))
   expect_false(is.unsorted(summary(out)$p_adjusted))

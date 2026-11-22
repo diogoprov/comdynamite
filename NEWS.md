@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `node_test()`: `r2`, `r2_adjusted` and the semipartial correlations now sum squares with
+  the site weights of the fit, so they stay between 0 and 1 (and -1 and 1). Before, they
+  followed the original code, which sums squares without weights and can give an R2 above
+  1. The original values are kept as `r2_original` and `r2_adjusted_original`; `r2_weighted`
+  now equals `r2` and will be removed in version 1.0.0. `statistic` and p-values do not
+  change.
+
 - `trait_flex()`, `drift_test()`, `node_test()` and `pcps_test()` warn when a response is an
   exact linear function of the predictors, since their F statistics, standard errors and
   p-values are then not meaningful. `trait_flex()` no longer relays the warning of

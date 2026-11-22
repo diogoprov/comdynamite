@@ -155,8 +155,8 @@
 #'   are stated in the help pages: `log(between)` for `drift_test`, trait units for `trait_flex`,
 #'   and trait units centred within species for `population_shifts`.
 #' @srrstats {RE4.11} Goodness of fit and effect sizes are part of every result: `r2`,
-#'   `r2_adjusted`, `r2_weighted` and the semipartial correlation of each predictor in
-#'   `node_test()`; `r2_mean` and `r2_adjusted` in `pcc_test()`; the adjusted R2 and
+#'   `r2_adjusted` (both weighted as the fit), `r2_original`, `r2_adjusted_original` and the
+#'   semipartial correlation of each predictor in `node_test()`; `r2_mean` and `r2_adjusted` in `pcc_test()`; the adjusted R2 and
 #'   pseudo-F in `phylo_beta_test()`; `r2` and F per axis in `pcps_test()`; the fractions of
 #'   `trait_partition()`; explained and residual sums of squares in `trait_flex()`;
 #'   `r_squared` in `population_shifts()`; log-likelihood and AIC in
