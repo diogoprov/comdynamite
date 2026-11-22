@@ -24,12 +24,13 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    estatístico (categorias EA, RE e BS, 206 padrões a anotar com `srr`). Fase 1 (correções
    rápidas: CONTRIBUTING, código de conduta, ORCID, badge, WORDLIST, `.lintr`, pkgcheck no CI,
    falhas do pkgcheck) na 0.10.0.9000. Fase 2 (atribuição do código derivado de MATLAB) no PR #142, com o
-   e-mail aos autores enviado em 2026-11-21. Faltam: fase 3, validação de
-   entradas (escalares, `Inf`, NA, comparações de ponto flutuante, mensagens de
-   `stopifnot()`); fase 4, suíte estendida de testes (várias sementes, ruído, erro tipo I das
-   permutações, recuperação no modelo Bayesiano); fase 5, anotação `srr` e consulta prévia
-   aos editores, só depois da decisão do JBI (o guia não aceita submissão com manuscrito em
-   revisão em outro periódico).
+   e-mail aos autores enviado em 2026-11-21; mensagens de citação dos artigos originais no
+   PR #147, a pedido de um dos autores. Fase 3 (validação de entradas) no PR #143 e fase 4
+   (suíte estendida de testes) no PR #144. Fase 5, anotação `srr`, começou em 2026-11-22
+   (branch `srr-anotacao`). A consulta prévia aos editores fica para depois da decisão do JBI
+   e de alguns meses de histórico estável: em 2026-11-22 o rOpenSci pôs o lagprotest em
+   espera (ropensci/software-review#829) por ter o repositório novo demais, e o comdynamite
+   tem o mesmo problema (primeiro commit em 2026-11-05).
    Fase 4 (testes estendidos, `tests/testthat/test-extended-*.R`, PR #144) achou quatro
    problemas, tratados no PR seguinte: (a) intervalos do ABC-RF aproximados (propriedade do
    método; ajuda corrigida, `min_node_size` novo); o critério de "recuperável" dos scripts
