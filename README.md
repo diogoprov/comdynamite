@@ -4,9 +4,11 @@
 [![r-universe](https://diogoprov.r-universe.dev/badges/comdynamite)](https://diogoprov.r-universe.dev/comdynamite)
 [![R-CMD-check](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/diogoprov/comdynamite/actions/workflows/R-CMD-check.yaml)
 [![pkgdown](https://github.com/diogoprov/comdynamite/actions/workflows/pkgdown.yaml/badge.svg)](https://provetelab.org/comdynamite/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
+[![Zenodo concept DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23993533.svg)](https://doi.org/10.5281/zenodo.23993533)
 [![Codecov test coverage](https://codecov.io/gh/diogoprov/comdynamite/graph/badge.svg)](https://app.codecov.io/gh/diogoprov/comdynamite)
 [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
+[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit)
 <!-- badges: end -->
 
 Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse
