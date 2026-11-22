@@ -283,21 +283,58 @@ test_that("trait_flex() recovers the intraspecific response and its F tests have
   expect_gte(mean(p_power <= 0.05), 0.9)
 })
 
-test_that("trait_flex(): the intraspecific F test keeps its size under turnover", {
+test_that("trait_flex(): the intraspecific F test is conservative under turnover along env", {
   skip_if_not_extended()
-  skip(paste("known issue: with species turnover along env (turnover = 2) and no",
-             "intraspecific response, the F test of the intraspecific component rejected in",
-             "5/300 = 1.7% (99% CI 0.4-4.6%) and 9/400 = 2.3% of data sets at 5%: conservative",
-             "(4.0% of 400 without turnover)"))
-  # Type I error under turnover, 300 data sets: the rate must be compatible with 0.05.
-  # Interpretation: each fixed mean is the mean of the species over all sites, so the
-  # deviations of the populations of a species sum to about zero over its sites; with
-  # turnover those sites lie at one end of the gradient, which correlates the residuals of
-  # neighbouring sites negatively and makes the F test conservative.
+  # Documented behaviour (see the details of ?trait_flex), not a size of 5%. The fixed means use
+  # species means estimated from the same individuals, so with b = 0 and equal site sizes n
+  # the intraspecific site values D are, given the table of counts C (sites x species, with
+  # species totals n_i), Gaussian with mean 0 and covariance
+  #   V = (I - C diag(1 / n_i) C') / n
+  # in units of the variance among individuals: the directions of the columns of C are
+  # removed. With turnover along env those columns follow env, so the expected explained sum
+  # of squares e' V e (e: centred env scaled to length 1) falls below the expected residual
+  # mean square (tr(V) - 1' V 1 / J - e' V e) / (J - 2), and the F test is conservative.
+  # Over 300 data sets with turnover = 2:
+  # (1) the ratio of the mean explained sum of squares to the mean residual mean square must
+  #     agree with that of the expectations above (about 0.6) within 25%: 3 Monte Carlo
+  #     standard errors, the relative error of a mean of 300 squared Gaussians being
+  #     sqrt(2 / 300) = 0.082 and that of the residual mean square sqrt(2 / (18 * 300)) = 0.019;
+  #     the expected ratio must be below 0.75, so that such an estimate stays below 1;
+  # (2) the test must not reject more often than the level: at most qbinom(0.99, 300, 0.05)
+  #     rejections (the rate was 1.6% of 3000 data sets when the help was written);
+  # (3) with the true species means in the fixed mean the cause is removed, and the rate of
+  #     the same F test must be compatible with 0.05.
   set.seed(403)
-  p_intra <- replicate(300, flex_p(flex_data(b = 0, turnover = 2), "intraspecific"))
-  report_numbers("trait_flex under turnover: type I ", mean(p_intra <= 0.05))
-  expect_true(rejection_compatible(sum(p_intra <= 0.05), 300))
+  mu <- c(0, 2, 4, 6, 8)
+  sims <- replicate(300, {
+    d <- flex_data(b = 0, turnover = 2)
+    res <- trait_flex(d$ind, formula = ~env, env = d$env)
+    dec <- res$decomposition[res$decomposition$component == "intraspecific", ]
+    site <- factor(d$ind$site, d$env$site)
+    counts <- unclass(table(site, d$ind$species))
+    n_sites <- nrow(counts)
+    v <- (diag(n_sites) - counts %*% (t(counts) / colSums(counts)) / 30) / 30
+    e <- d$env$env - mean(d$env$env)
+    e <- e / sqrt(sum(e^2))
+    along <- drop(t(e) %*% v %*% e)
+    true_fixed <- tapply(mu[as.integer(sub("sp", "", d$ind$species))], site, mean)
+    oracle <- res$sites$specific - as.vector(true_fixed)
+    c(p = dec$p, explained = dec$explained, mean_square = dec$residual / (n_sites - 2),
+      expected_explained = along,
+      expected_mean_square = (sum(diag(v)) - sum(v) / n_sites - along) / (n_sites - 2),
+      p_oracle = summary(stats::lm(oracle ~ d$env$env))$coefficients[2, 4])
+  })
+  m <- rowMeans(sims)
+  observed <- unname(m["explained"] / m["mean_square"])
+  expected <- unname(m["expected_explained"] / m["expected_mean_square"])
+  report_numbers("trait_flex under turnover: type I ", mean(sims["p", ] <= 0.05),
+                 "; explained / residual mean square ", signif(observed, 3), ", expected ",
+                 signif(expected, 3), "; type I with true species means ",
+                 mean(sims["p_oracle", ] <= 0.05))
+  expect_lt(expected, 0.75)
+  expect_lt(abs(observed / expected - 1), 0.25)
+  expect_lte(sum(sims["p", ] <= 0.05), stats::qbinom(0.99, 300, 0.05))
+  expect_true(rejection_compatible(sum(sims["p_oracle", ] <= 0.05), 300))
 })
 
 test_that("nested_variance() recovers nested variance components, better with more sites", {
@@ -421,30 +458,98 @@ test_that("tstats() and tstats_summary(): type I error near 5%, high power under
   }
 })
 
-test_that("tstats_summary() mean tests of T_IC.IR and T_PC.PR, and power of T_PC.PR", {
+test_that("tstats_summary() mean tests of T_IC.IR and T_PC.PR: type I error near 5%", {
   skip_if_not_extended()
-  skip(paste("known issue: under the null scenario (individuals placed at random), the mean",
-             "test of tstats_summary() rejected at 5% in 0/200 data sets for T_IC.IR",
-             "(conservative) and in 19/200 = 9.5% and 47/600 = 7.8% (99% CI 5.3-11.1%) for",
-             "T_PC.PR (inflated); under filtering, the T_PC.PR test of site s1 rejected in",
-             "0/200 data sets (its null values had median 2.4, range 0.0005-7.7, against",
-             "observed values of 0.14-0.36)"))
-  # Type I error of the mean tests of T_IC.IR and T_PC.PR (600 data sets, compatible with
-  # 0.05) and power of the site test of T_PC.PR under filtering (200 data sets, at least 90%).
-  # Interpretation: the sites of a data set partition the region, so the mean over sites of
-  # the variance within sites varies less than in the null, where each site draws from the
-  # region on its own; and in the null of T_PC.PR the values drawn are grouped into the
-  # observed populations, whose sizes then set the variance of the null population means.
+  # Type I error of the mean tests of T_IC.IR and T_PC.PR under the null scenario (600 data
+  # sets, compatible with 0.05). The sites of a data set partition the region, so each
+  # randomisation must permute the whole region for the mean over sites to have the right
+  # null distribution. When each site drew from the region on its own (up to 0.10.0, and in
+  # cati), the mean test at 5% rejected in 0/600 data sets for T_IC.IR and in 47/600 = 7.8%
+  # (99% CI 5.3-11.1%) for T_PC.PR.
   set.seed(603)
   null <- tstats_rejections(600, FALSE)
-  set.seed(604)
-  filt <- tstats_rejections(200, TRUE)
   report_numbers("tstats mean tests under the null: T_IC.IR ", mean(null[, "mean_T_IC.IR"]),
-                 ", T_PC.PR ", mean(null[, "mean_T_PC.PR"]), "; T_PC.PR site power ",
-                 mean(filt[, "site_T_PC.PR"]))
+                 ", T_PC.PR ", mean(null[, "mean_T_PC.PR"]))
   expect_true(rejection_compatible(sum(null[, "mean_T_IC.IR"]), 600))
   expect_true(rejection_compatible(sum(null[, "mean_T_PC.PR"]), 600))
-  expect_gte(mean(filt[, "site_T_PC.PR"]), 0.9)
+})
+
+# eight sites of 60 individuals of six species out of 20 with distinct means (0 to 10,
+# individuals with sd 0.5). `filtering`: each site holds the six species nearest its
+# environment, otherwise six species at random (no filtering of species). `sizes`: individuals
+# of the six populations of each site, in random order among its species; a list gives the
+# sizes of sites 1-4 and of sites 5-8
+species_filter_data <- function(filtering, sizes) {
+  mu <- seq(0, 10, length.out = 20)
+  env <- seq(0, 10, length.out = 8)
+  if (!is.list(sizes)) sizes <- list(sizes, sizes)
+  rows <- lapply(1:8, function(j) {
+    pool <- if (filtering) order(abs(mu - env[j]))[1:6] else sample.int(20, 6)
+    sp <- rep(pool[sample.int(6)], sizes[[1 + (j > 4)]])
+    data.frame(site = paste0("s", j), species = paste0("sp", sp),
+               trait = mu[sp] + stats::rnorm(length(sp), 0, 0.5))
+  })
+  do.call(rbind, rows)
+}
+
+test_that("tstats(): power of T_PC.PR under filtering of species, both null models", {
+  skip_if_not_extended()
+  # T_PC.PR compares the variance among the population means of a site with that of the
+  # region, so it has power when the species of a site are a narrow part of those of the
+  # region and the site has enough populations. (In the scenario of tstats_data() sites hold
+  # three to six of six species and the variance among three unweighted means is too variable
+  # for a test of one site: 0/200 rejections with either null model.) Here each site holds
+  # the six species out of 20 nearest its environment, with uneven populations (30, 15, 8, 4,
+  # 2 and 1 individuals): the test of site s1 and the test of the mean must reject in at least
+  # 90% of 200 data sets with both null models.
+  uneven <- c(30, 15, 8, 4, 2, 1)
+  set.seed(604)
+  power <- t(vapply(1:200, function(r) {
+    d <- species_filter_data(TRUE, uneven)
+    unlist(lapply(c("individuals", "populations"), function(null_pc) {
+      ts <- tstats(d, n_perm = 199, null_pc = null_pc)
+      tr <- tstats_summary(ts, level = 0.9)$traits
+      c(ts$p_T_PC.PR[1], tr$p_mean_low[tr$statistic == "T_PC.PR"]) <= 0.05
+    }))
+  }, logical(4)))
+  colnames(power) <- c("site_individuals", "mean_individuals", "site_populations",
+                       "mean_populations")
+  report_numbers("tstats T_PC.PR power under species filtering: ",
+                 paste(colnames(power), colMeans(power), collapse = ", "))
+  for (k in colnames(power)) expect_gte(mean(power[, k]), 0.9, label = k)
+})
+
+test_that("tstats(): the T_PC.PR null of individuals depends on population sizes", {
+  skip_if_not_extended()
+  # Documented behaviour (section "Null model of T_PC.PR and the size of populations" of
+  # ?tstats). Species are placed at random among sites, so no site is filtered, but sites
+  # 1-4 have six populations of 10 individuals and sites 5-8 populations of 45, 10, 2, 1, 1
+  # and 1. With null_pc = "individuals" (regional.pop of Taudiere & Violle 2016) the null
+  # population means of large populations stay near the regional mean and those of small
+  # ones spread, so the test for high values at s1 rejects far more often than 5% (84.5% in
+  # 200 data sets when the test was written; at least 50% is required). With null_pc =
+  # "populations" the sizes play no part: the test for high values at s1 and that for low
+  # values at s8 must not reject more often than 5% (lower limit of the 99% interval of the
+  # rate at or below 0.05; the test is conservative, because populations of one species at
+  # several sites are permuted as independent values).
+  sizes <- list(rep(10, 6), c(45, 10, 2, 1, 1, 1))
+  set.seed(605)
+  rejected <- t(vapply(1:200, function(r) {
+    d <- species_filter_data(FALSE, sizes)
+    high <- function(null_pc) {
+      tstats(d, n_perm = 199, alternative = "greater", null_pc = null_pc)$p_T_PC.PR[1]
+    }
+    low <- tstats(d, n_perm = 199, null_pc = "populations")$p_T_PC.PR[8]
+    c(high("individuals"), high("populations"), low) <= 0.05
+  }, logical(3)))
+  colnames(rejected) <- c("high_individuals", "high_populations", "low_populations")
+  report_numbers("tstats T_PC.PR without filtering, uneven sizes: ",
+                 paste(colnames(rejected), colMeans(rejected), collapse = ", "))
+  expect_gte(mean(rejected[, "high_individuals"]), 0.5)
+  for (k in c("high_populations", "low_populations")) {
+    lower <- stats::binom.test(sum(rejected[, k]), 200, conf.level = 0.99)$conf.int[1]
+    expect_lte(lower, 0.05, label = k)
+  }
 })
 
 test_that("tstats() with null_ip = 'species': type I error near 5%, power", {

@@ -12,7 +12,8 @@ abc_recovery(
   level = 0.9,
   ntree = 500,
   ncores = 1,
-  seed = 1
+  seed = 1,
+  min_node_size = 5
 )
 }
 \arguments{
@@ -34,19 +35,38 @@ than 1.}
 \item{ncores}{Number of threads for the forests. One whole number, 1 or more.}
 
 \item{seed}{Integer for the choice of the pseudo-observations. One finite whole number.}
+
+\item{min_node_size}{Smallest number of simulations in a node for it to be split, the
+\code{min.node.size} of \code{ranger::ranger()}. One whole number, 1 or more. The default, 5, is that
+of Raynal et al. (2019); larger values give larger leaves, which widen intervals that
+\code{\link[=abc_recovery]{abc_recovery()}} shows to be too narrow, at the cost of more smoothing.}
 }
 \value{
 A data frame with one row per parameter: \code{n}, \code{r2} (1 minus the squared error over the
 variance of the truth), \code{bias} and \code{width} (mean width of the interval) as fractions of the
 prior range, and \code{coverage}, the fraction of intervals that contain the truth, with its
 standard error. The attribute \code{estimates} holds every estimate. A coverage near \code{level}
-says the intervals are calibrated; R2 says how much the data narrow the prior.
+says the intervals are calibrated, one above it that they are conservative and one below
+it that they are too narrow (see Details); R2 says how much the data narrow the prior.
 }
 \description{
 Leaves \code{n_test} simulations out of the reference table as pseudo-observations with known
 parameters, fits \code{\link[=abc_fit]{abc_fit()}} on the rest and compares the estimates with the truth. A
 parameter that is not recovered from simulated data should not be inferred from real data
 (Pontarp et al. 2019).
+}
+\details{
+The credible intervals of \code{\link[=abc_fit]{abc_fit()}} are approximate, so their coverage is something to
+measure and not to assume, and \code{coverage} is that measure for this table: the fraction of
+pseudo-observations, drawn from the prior, whose interval holds the truth. Expect it at or
+above \code{level} with several statistics, since the forests smooth the posterior (Raynal et al.
+2019 report slightly conservative intervals; 0.92 to 0.99 at a \code{level} of 0.9 in our extended
+tests), and equal to \code{level} for a parameter the statistics say nothing about, whose
+posterior is the prior. A coverage below \code{level} by more than about two \code{coverage_se} says
+the intervals are too narrow, which happens with one or two statistics and small leaves
+(about 0.65 with one statistic and the default \code{min_node_size}); a larger \code{min_node_size}
+widens them. The coverage is an average over the prior and does not say that the interval
+of one observation is right.
 }
 \examples{
 \dontshow{if (requireNamespace("abcrf", quietly = TRUE)) withAutoprint(\{ # examplesIf}
@@ -62,6 +82,10 @@ Pontarp, M., Brännström, Å., & Petchey, O. L. (2019). Inferring community ass
 from macroscopic patterns using dynamic eco-evolutionary models and Approximate Bayesian
 Computation (ABC). \emph{Methods in Ecology and Evolution}, 10, 450–460.
 \doi{10.1111/2041-210X.13129}
+
+Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., & Estoup, A. (2019). ABC
+random forests for Bayesian parameter inference. \emph{Bioinformatics}, 35, 1720–1728.
+\doi{10.1093/bioinformatics/bty867}
 }
 \seealso{
 Other inference:

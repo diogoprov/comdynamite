@@ -40,12 +40,13 @@ than 1.}
 \item{seed}{Integer that sets the seed. One finite whole number.}
 }
 \value{
-A data frame with one row per observed data set, fold and statistic: \code{observed}, the median and the
-interval of the predicted statistic, \code{inside} (whether the observed value is in the
-interval), \code{p} (two-sided posterior predictive p-value) and \code{z}, the observed value minus
-the predicted median over the predictive standard deviation. \code{summary()} averages over
-folds and data sets (\code{n} rows per statistic): the coverage, the mean of \code{z}, the root mean square of \code{z} and the fraction of
-p-values below 0.05.
+A data frame with one row per observed data set, fold and statistic: \code{observed}, the
+median and the interval of the predicted statistic, \code{inside} (whether the observed value
+is in the interval), \code{p} (two-sided posterior predictive p-value) and \code{z}, the observed
+value minus the predicted median over the predictive standard deviation. \code{summary()}
+averages over folds and data sets (\code{n} rows per statistic): the coverage, the mean of \code{z},
+the root mean square of \code{z} and the fraction of p-values below 0.05. Under the model the
+coverage is at or above \code{level} and the root mean square of \code{z} below 1 (see Details).
 }
 \description{
 For each fold, fits \code{\link[=abc_fit]{abc_fit()}} on the statistics of the sites kept, draws from the
@@ -54,6 +55,17 @@ statistics of the sites left out from the same rows of the reference table, as i
 \code{\link[=abc_ppc]{abc_ppc()}}. A model that fits the sites it saw but not the others gives observed test
 statistics outside the predictive intervals. Use spatial blocks from \code{\link[=spatial_folds]{spatial_folds()}}
 so that the test sites are not neighbours of the training sites.
+}
+\details{
+The predictive intervals are conservative. The rows are drawn with the mean of the weights
+of the forests of all parameters, which is broader than the posterior of each parameter, and
+the forests already smooth the posterior (see \code{\link[=abc_fit]{abc_fit()}}). When the data come from the
+model, the intervals therefore hold the observed value more often than \code{level} and the root
+mean square of \code{z} is below 1: in our extended tests, with data sets simulated from the
+model and a \code{level} of 0.9, the coverage by statistic and fold was 0.91 to 1.00 and the root
+mean square of \code{z} 0.34 to 0.73. The check errs towards accepting the model: a statistic
+outside its interval, or a small \code{p}, is evidence against the model, but a coverage near
+\code{level} is not by itself evidence of a good fit.
 }
 \examples{
 \dontshow{if (requireNamespace("abcrf", quietly = TRUE)) withAutoprint(\{ # examplesIf}

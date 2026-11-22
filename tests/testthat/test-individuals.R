@@ -188,6 +188,31 @@ test_that("null models of tstats() keep what they should", {
   expect_lt(abs(mean(res$ses_T_IC.IR)), 1.5)
 })
 
+test_that("regional null models of tstats() permute the whole region at once", {
+  set.seed(4)
+  d <- data.frame(site = rep(c("a", "b", "c", "d"), c(12, 20, 9, 15)),
+                  species = sample(c("x", "y", "z"), 56, replace = TRUE), trait = rnorm(56))
+  g <- tstats_groups(d$site, d$species, unique(d$site))
+  n_site <- lengths(g$by_site)
+  n_pop <- tabulate(g$pop_site, g$n_sites)
+  # the sites of a randomisation partition the region, so the sums of squares within sites
+  # cannot exceed the total: sum((n_s - 1) T_IC.IR_s) <= n - 1, and the same for the
+  # population means permuted among populations
+  null <- tstats_null(d$trait, g, 50, null_pc = "populations")
+  expect_true(all(null[, , "T_IC.IR"] %*% (n_site - 1) <= 56 - 1 + 1e-8))
+  expect_true(all(null[, , "T_PC.PR"] %*% (n_pop - 1) <= g$n_pops - 1 + 1e-8))
+  # population means permuted among populations: the null values of a site with as many
+  # populations as the region has are all 1 when it is the only site
+  one_site <- tstats_groups(rep("a", 56), d$species, "a")
+  alone <- tstats_null(d$trait, one_site, 5, null_pc = "populations")
+  expect_equal(alone[, 1, "T_PC.PR"], rep(1, 5))
+  res <- tstats(d, n_perm = 19, null_pc = "populations")
+  expect_equal(res[c("T_IP.IC", "T_IC.IR", "T_PC.PR")],
+               tstats(d, n_perm = 0)[c("T_IP.IC", "T_IC.IR", "T_PC.PR")])
+  expect_false(anyNA(res$p_T_PC.PR))
+  expect_error(tstats(d, null_pc = "species"))
+})
+
 test_that("character displacement pushes co-occurring populations apart", {
   pushed <- displace(c(0, 1), c(10, 10), strength = 2, width = 2)
   expect_lt(pushed[1], 0)

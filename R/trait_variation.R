@@ -133,6 +133,26 @@ tstats_summary <- function(x, level = 0.95) {
 #' `env`, and the sums of squares are split into the parts explained by the model and the
 #' residuals, with the p-value of each regression.
 #'
+#' Each p-value is that of the parametric F test of one regression, fitted separately to the
+#' specific mean, to the fixed mean and to their difference, as in the function
+#' `traitflex.anova()` of the package cati. The fixed means use species means estimated from
+#' the same individuals, so the deviations of the populations of a species from its mean
+#' average to zero over the sites where it occurs. When species turnover follows the variables
+#' of `formula`, each species occupies one part of the gradient, and this constraint removes
+#' part of the variation of the intraspecific component along those variables: a response to
+#' the environment shared by all species is partly counted as turnover (and covariation), its
+#' intraspecific sum of squares is underestimated, and the F test of the intraspecific
+#' component becomes conservative. In simulations with 20 sites of 30 individuals and five
+#' species whose proportions shift along the gradient (the relative abundance of the species
+#' at each extreme changing about 7, 55 and 3000 times between the ends of the gradient), an
+#' intraspecific slope of 1 was estimated as 0.84, 0.59 and 0.33 (0.99 without turnover), and
+#' without any intraspecific response the test rejected at the 5% level in 3.6%, 1.6% and 0.2%
+#' of 3000 data sets (4.6% without turnover, and 4.9% of 20000 in the second case when the
+#' true species means replaced the estimated ones). Turnover along a variable unrelated to those
+#' of `formula` left the rate near 5% (4.6% and 5.5% of 3000 data sets in the last two cases).
+#' A non-significant intraspecific component under strong turnover along the modelled
+#' variables is thus weak evidence against an intraspecific response.
+#'
 #' Abundances are those of the `abundance` column when given (one value per population, as in
 #' [sample_individuals()]), otherwise the number of individuals measured. Individuals with a
 #' missing trait value are left out of the population means, the species means and the counts

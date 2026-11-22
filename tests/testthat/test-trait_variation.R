@@ -57,6 +57,14 @@ test_that("trait_flex() splits the community mean as Leps et al. (2011)", {
   shuffled <- trait_flex(d, formula = ~moisture, env = env[c(3, 1, 6, 2, 5, 4), ])
   expect_equal(shuffled$decomposition, dec)
   expect_lt(dec$p[dec$component == "intraspecific"], 0.05)
+  # each p-value is that of the F test of a separate regression of the site values on env
+  sites <- merge(res$sites, env)
+  for (part in c("turnover", "intraspecific", "total")) {
+    y <- sites[[c(turnover = "fixed", intraspecific = "intraspecific", total = "specific")[part]]]
+    f <- summary(stats::lm(y ~ sites$moisture))$fstatistic
+    expect_equal(dec$p[dec$component == part],
+                 unname(stats::pf(f[1], f[2], f[3], lower.tail = FALSE)))
+  }
   # without a model nothing is explained
   plain <- trait_flex(d)$decomposition
   expect_true(all(plain$explained == 0) && all(is.na(plain$p)))
