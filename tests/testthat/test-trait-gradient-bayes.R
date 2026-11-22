@@ -113,10 +113,11 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   d <- tgb_sim()
   n_sp <- length(tg_bayes_data(d$tg, d$tree)$species)
   seen <- NULL
-  fake_run <- function(draws) {
+  fake_run <- function(draws, treedepth = NULL) {
     function(data, ...) {
       seen <<- c(list(data = data), list(...))
-      list(fit = "fit", draws = posterior::as_draws_array(draws), divergent = 0)
+      list(fit = "fit", draws = posterior::as_draws_array(draws), divergent = 0,
+           treedepth = treedepth)
     }
   }
   local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)),
@@ -135,6 +136,13 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   expect_output(print(res), "Brownian motion")
   expect_output(print(res), "CHECK")
   expect_output(print(res), "at maximum tree depth 0")
+  good <- res
+  good$diagnostics$ok <- TRUE
+  expect_output(print(good), "(ok)", fixed = TRUE)
+  local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp), treedepth = 7))
+  deep <- suppressWarnings(trait_gradient_bayes(d$tg, d$tree))
+  expect_identical(deep$diagnostics$max_treedepth, 7L)
+  local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)))
   ou <- suppressWarnings(trait_gradient_bayes(d$tg, d$tree, ou_alpha = 0.5,
                                               lambda_prior = c(2, 2)))
   expect_equal(seen$data$lambda_prior, c(2, 2))
