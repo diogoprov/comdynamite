@@ -1,5 +1,17 @@
 # comdynamite (development version)
 
+- Extended tests (rOpenSci standards G5.4-G5.12, BS7.0-BS7.2), run with
+  `COMDYNAMITE_EXTENDED_TESTS=true` and once a month on GitHub Actions (`tests/README.md`):
+  type I error and power of the permutation and null-model tests, recovery of known parameters
+  over several seeds, convergence as data grow, agreement of the simulators with analytic
+  results, and recovery and prior sensitivity of `trait_gradient_bayes()`. Quick checks that the
+  results do not change with trivial noise in the inputs or beyond Monte Carlo error across seeds
+  run with the regular tests. They found four problems, kept as skipped tests until they are
+  solved: the intervals of the ABC functions are not calibrated (coverage of 0.93 to 0.99 for a
+  nominal 0.9, and 0.65 in a case with an analytic posterior; the same happens with abcrf
+  alone); the mean-over-sites test of `tstats_summary()` rejects too often for T_PC/PR (about 8%)
+  and never for T_IC/IR; the site test of T_PC/PR has no power against strong filtering; and the
+  intraspecific test of `trait_flex()` is conservative under species turnover (about 2%).
 - Input validation (rOpenSci standards G2 and G3): every scalar argument of the exported
   functions is checked for its length, type and range before any computation, with a message
   that names the argument, and the help pages say what each one accepts. Infinite values in

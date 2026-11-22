@@ -1,0 +1,40 @@
+# Extended tests (tests/README.md): statistical properties over many simulated data sets.
+# They take too long for every pull request, so they run by hand and once a month.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 1 * *"
+
+name: extended-tests.yaml
+
+permissions: read-all
+
+jobs:
+  extended-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      COMDYNAMITE_EXTENDED_TESTS: "true"
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::devtools, github::stan-dev/cmdstanr
+          needs: check
+
+      - name: Install CmdStan
+        run: cmdstanr::install_cmdstan(cores = 2)
+        shell: Rscript {0}
+
+      - name: Run the extended tests
+        run: |
+          options(testthat.progress.max_fails = Inf)
+          r <- as.data.frame(devtools::test(filter = "extended", reporter = "summary",
+                                            stop_on_failure = TRUE))
+          print(r[, c("file", "test", "failed", "skipped", "real")])
+        shell: Rscript {0}
