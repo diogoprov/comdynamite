@@ -117,11 +117,19 @@ trait_competition <- function(traits, inter_max) {
   for (x in axes) {
     w <- outer(x$sigma^2, x$sigma^2, "+")
     d2 <- outer(x$optimum, x$optimum, "-")^2
-    log_overlap <- log_overlap - ifelse(!is.finite(w), 0,
-                                        ifelse(w > 0, d2 / (2 * w), ifelse(d2 > 0, Inf, 0)))
+    log_overlap <- log_overlap - ifelse(is.finite(w), niche_penalty(w, d2), 0)
   }
   a <- inter_max * exp(log_overlap)
   diag(a) <- 1
   dimnames(a) <- list(sp, sp)
   a
+}
+
+#' the penalty `d2 / (2 * w)` of the Gaussian niche overlap, from the summed variances `w`
+#' and the squared distances `d2`: with `w = 0`, none at the same phenotype and an infinite
+#' one elsewhere
+#' @noRd
+niche_penalty <- function(w, d2) {
+  flat <- ifelse(d2 > 0, Inf, 0)
+  ifelse(w > 0, d2 / (2 * w), flat)
 }

@@ -279,9 +279,9 @@ history_rates <- function(history, model = c("state", "burst", "sympatry"), sigm
       if (is.null(state_rates) || is.null(names(state_rates)) ||
           !all(states %in% names(state_rates))) {
         stop("`state_rates` needs a rate named by each state: ",
-             paste(states, collapse = ", "), call. = FALSE)
+             toString(states), call. = FALSE)
       }
-      if (any(!is.finite(state_rates[states])) || any(state_rates[states] <= 0)) {
+      if (!all(is.finite(state_rates[states])) || any(state_rates[states] <= 0)) {
         stop("`state_rates` must be positive", call. = FALSE)
       }
       vapply(maps, function(m) sum(m * state_rates[names(m)]), numeric(1))
@@ -557,7 +557,7 @@ food_web_rates <- function(x, tree, levels, sigma2 = 1, k = 1, window = NULL) {
   }, numeric(1))
   absent <- setdiff(unique(levels), names(speed)[!is.na(speed)])
   if (length(absent) > 0) {
-    stop("level ", paste(absent, collapse = ", "), " is absent during the whole run",
+    stop("level ", toString(absent), " is absent during the whole run",
          call. = FALSE)
   }
   rate <- tip_window_rates(tree, speed[levels], sigma2, k, window)

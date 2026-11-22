@@ -185,7 +185,7 @@ trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)
   check_count(iter_sampling, "iter_sampling")
   check_number(adapt_delta, "adapt_delta", lower = 0, upper = 1, open = TRUE)
   check_count(seed, "seed", min = 0, null_ok = TRUE)
-  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || any(!is.finite(lambda_prior)) ||
+  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || !all(is.finite(lambda_prior)) ||
       any(lambda_prior <= 0)) {
     stop("`lambda_prior` must be two positive finite numbers", call. = FALSE)
   }
@@ -272,7 +272,7 @@ tg_bayes_data <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)) {
   p <- x$populations
   dropped <- setdiff(unique(p$species), tree$tip.label)
   if (length(dropped) > 0) {
-    message("species not in `tree`, left out: ", paste(dropped, collapse = ", "))
+    message("species not in `tree`, left out: ", toString(dropped))
   }
   p <- p[p$species %in% tree$tip.label, , drop = FALSE]
   species <- sort(unique(p$species))
@@ -280,7 +280,7 @@ tg_bayes_data <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)) {
   has_p <- !is.na(p$site_mean)
   center <- mean(p$trait[p$measured])
   scale <- stats::sd(p$trait[p$measured])
-  if (!(scale > 0)) stop("the trait does not vary", call. = FALSE)
+  if (scale <= 0) stop("the trait does not vary", call. = FALSE)
   A <- phylo_correlation(ape::keep.tip(tree, species), species, ou_alpha)
   if (!is.null(ou_alpha) && max(abs(A[upper.tri(A)])) < 0.01) {
     warning("with this `ou_alpha` the phylogenetic correlations are all below 0.01, so the ",
@@ -381,7 +381,7 @@ print.mc_trait_gradient_bayes <- function(x, digits = 3, ...) {
       d$divergent, ", at maximum tree depth ", d$max_treedepth,
       if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
   s <- x$signal
-  s[-1] <- lapply(s[-1], function(v) round(v, digits))
+  s[-1] <- lapply(s[-1], round, digits)
   print(s, row.names = FALSE)
   invisible(x)
 }

@@ -68,7 +68,7 @@ maladaptation <- function(x, step = NULL) {
   if (!inherits(x, "mc_sim") || is.null(x$evolution$genetic)) {
     stop("`x` must be a simulation run with `evolution`", call. = FALSE)
   }
-  if (!is.null(step) && (!is.numeric(step) || !length(step) || any(!is.finite(step)))) {
+  if (!is.null(step) && (!is.numeric(step) || !length(step) || !all(is.finite(step)))) {
     stop("`step` must be NULL or recorded steps", call. = FALSE)
   }
   if (length(step) > 1) {

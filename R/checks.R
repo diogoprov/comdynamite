@@ -118,7 +118,7 @@ check_env <- function(env, comm, name = "`env`", collinear = FALSE) {
   labels <- colnames(env) %||% seq_len(ncol(env))
   constant <- no_variance(env)
   if (any(constant)) {
-    stop("predictors without variance in ", name, ": ", paste(labels[constant], collapse = ", "),
+    stop("predictors without variance in ", name, ": ", toString(labels[constant]),
          call. = FALSE)
   }
   if (!collinear && qr(sweep(env, 2, colMeans(env)))$rank < ncol(env)) {
@@ -168,7 +168,7 @@ warn_perfect_fit <- function(r2, labels, what) {
   exact <- !is.na(r2) & abs(1 - r2) < sqrt(.Machine$double.eps)
   if (any(exact)) {
     warning(what, " fit exactly, with no residual variation (R2 = 1 up to rounding error): ",
-            paste(labels[exact], collapse = ", "),
+            toString(labels[exact]),
             ". Their F statistics, standard errors and p-values are not meaningful",
             call. = FALSE)
   }
@@ -184,7 +184,7 @@ check_collinear <- function(design, name, vif_max = 10) {
   decomposition <- qr(design)
   if (decomposition$rank < ncol(design)) {
     aliased <- colnames(design)[decomposition$pivot[-seq_len(decomposition$rank)]]
-    stop("the predictors of ", name, " are collinear: ", paste(aliased, collapse = ", "),
+    stop("the predictors of ", name, " are collinear: ", toString(aliased),
          " is a linear combination of the others; remove it", call. = FALSE)
   }
   x <- design[, colnames(design) != "(Intercept)", drop = FALSE]
@@ -216,7 +216,7 @@ check_numeric_columns <- function(x, name, advice) {
   if (!is.data.frame(x)) return(invisible())
   bad <- names(x)[!vapply(x, function(column) is.numeric(column) || is.logical(column), logical(1))]
   if (length(bad) > 0) {
-    stop("columns of ", name, " that are not numeric: ", paste(bad, collapse = ", "), ". ", advice,
+    stop("columns of ", name, " that are not numeric: ", toString(bad), ". ", advice,
          call. = FALSE)
   }
 }

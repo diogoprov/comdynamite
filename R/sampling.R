@@ -166,7 +166,7 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
       size <- table(paste(individuals[[site]], individuals[[species]], sep = "\r"))
       n <- seq(2, max(2, stats::median(size)))
     }
-    if (!is.numeric(n) || any(is.na(n)) || any(n < 1) || any(n != round(n))) {
+    if (!is.numeric(n) || anyNA(n) || any(n < 1) || any(n != round(n))) {
       stop("`n` must be whole numbers, 1 or more", call. = FALSE)
     }
     effort <- sort(unique(n))

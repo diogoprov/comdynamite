@@ -218,7 +218,7 @@ river_table <- function(downstream, length) {
   n_children <- lengths(children)
   magnitude <- as.numeric(n_children == 0)
   upstream <- length
-  order <- ifelse(n_children == 0, 1L, 0L)
+  order <- as.integer(n_children == 0)
   for (s in rev(ord)) {
     ch <- children[[s]]
     if (!base::length(ch)) next
@@ -331,7 +331,7 @@ river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclid
   m <- nrow(net)
   component <- function(x, name) {
     if (is.null(x)) return(NULL)
-    if (!is.numeric(x) || length(x) != 2 || any(!is.finite(x)) || any(x <= 0)) {
+    if (!is.numeric(x) || length(x) != 2 || !all(is.finite(x)) || any(x <= 0)) {
       stop("`", name, "` must be NULL or two positive numbers, the sill and the range",
            call. = FALSE)
     }
@@ -434,7 +434,7 @@ river_additive <- function(net, weights) {
     weights <- match.arg(weights, c("magnitude", "upstream_length"))
     net[[weights]]
   } else weights
-  if (!is.numeric(w) || length(w) != m || any(!is.finite(w)) || any(w <= 0)) {
+  if (!is.numeric(w) || length(w) != m || !all(is.finite(w)) || any(w <= 0)) {
     stop("`weights` must be \"magnitude\", \"upstream_length\" or one positive value per site",
          call. = FALSE)
   }
@@ -516,7 +516,7 @@ river_floods <- function(landscape, n_steps, period, flood_steps = 1, start = 1,
   w <- if (is.character(size)) {
     net[[match.arg(size, c("upstream_length", "magnitude"))]]
   } else size
-  if (!is.numeric(w) || length(w) != m || any(!is.finite(w)) || any(w <= 0)) {
+  if (!is.numeric(w) || length(w) != m || !all(is.finite(w)) || any(w <= 0)) {
     stop("`size` must be \"upstream_length\", \"magnitude\" or one positive value per site",
          call. = FALSE)
   }

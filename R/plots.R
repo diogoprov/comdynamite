@@ -95,7 +95,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   if (fan) {
     t <- turn(tips$y)
     tips$angle <- t$angle
-    tips$hjust <- ifelse(t$flip, 1, 0)
+    tips$hjust <- as.numeric(t$flip)
     p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label,
                                                           angle = .data$angle,
                                                           hjust = .data$hjust),
@@ -109,7 +109,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
                     drop = TRUE)
     symbols <- do.call(rbind, lapply(groups, function(g) {
       data.frame(node = as.integer(g$node[1]), set = g$set[1], corrected = g$corrected[1],
-                 label = paste(g$variable, collapse = ", "))
+                 label = toString(g$variable))
     }))
     # one symbol per set and level at each node: predictors above, events below, solid ones
     # next to the node
@@ -131,7 +131,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
     if (fan) {
       t <- turn(symbols$y)
       symbols$angle <- t$angle
-      symbols$hjust <- ifelse(t$flip, 0, 1)
+      symbols$hjust <- as.numeric(!t$flip)
     } else {
       symbols$angle <- 0
       symbols$hjust <- 1

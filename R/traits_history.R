@@ -85,7 +85,7 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
     q <- matrix(q, length(states), length(states), dimnames = list(states, states))
   }
   diag(q) <- 0
-  if (any(!is.finite(q)) || any(q < 0)) stop("rates in `q` must be zero or more", call. = FALSE)
+  if (!all(is.finite(q)) || any(q < 0)) stop("rates in `q` must be zero or more", call. = FALSE)
   if (!is.null(alpha) && !is.null(edge_rates)) {
     stop("give `alpha` or `edge_rates`, not both", call. = FALSE)
   }
@@ -94,7 +94,7 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
     edge_rates <- stats::rgamma(n_edge, shape = alpha, rate = alpha)
   }
   if (!is.null(edge_rates) &&
-      (length(edge_rates) != n_edge || any(!is.finite(edge_rates)) || any(edge_rates < 0))) {
+      (length(edge_rates) != n_edge || !all(is.finite(edge_rates)) || any(edge_rates < 0))) {
     stop("`edge_rates` needs one number, zero or more, per row of `tree$edge`", call. = FALSE)
   }
   observed_q <- q

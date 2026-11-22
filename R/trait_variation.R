@@ -228,7 +228,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     }
     missing_vars <- setdiff(model_vars, names(env))
     if (length(missing_vars) > 0) {
-      stop("`env` has no column ", paste(missing_vars, collapse = ", "), call. = FALSE)
+      stop("`env` has no column ", toString(missing_vars), call. = FALSE)
     }
     check_unique_sites(as.character(env[[site]]), "`env`")
     rows <- match(site_levels, as.character(env[[site]]))
@@ -238,11 +238,11 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     if (!all(env_ok)) {
       if (na_action == "fail") {
         stop("sites with missing values in `env`: ",
-             paste(site_levels[!env_ok], collapse = ", "),
+             toString(site_levels[!env_ok]),
              "; remove them or set `na_action = \"omit\"`", call. = FALSE)
       }
       warning("sites with missing values in `env` are left out of the decomposition: ",
-              paste(site_levels[!env_ok], collapse = ", "), call. = FALSE)
+              toString(site_levels[!env_ok]), call. = FALSE)
     }
     model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
     check_collinear(stats::model.matrix(formula, env_sites[env_ok, , drop = FALSE]),
@@ -494,7 +494,7 @@ nested_variance <- function(data, traits, factors, crossed = NULL, interaction =
   check_flag(interaction, "interaction")
   check_data_columns(data, c(traits, factors, crossed), "data")
   if (length(intersect(factors, crossed)) > 0) {
-    stop("`factors` and `crossed` share ", paste(intersect(factors, crossed), collapse = ", "),
+    stop("`factors` and `crossed` share ", toString(intersect(factors, crossed)),
          call. = FALSE)
   }
   all_factors <- c(factors, crossed)
@@ -772,7 +772,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   null <- match.arg(null)
   alternative <- match.arg(alternative)
   if (is.function(index)) {
-    label <- paste(deparse(substitute(index)), collapse = "")
+    label <- deparse1(substitute(index), collapse = "")
     if (nchar(label) > 30 || grepl("^function", label)) label <- "index"
     index <- stats::setNames(list(index), label)
   }
@@ -889,7 +889,8 @@ site_tests <- function(obs, sims, level) {
   above <- colSums(sims >= rep(obs, each = n_perm), na.rm = TRUE)
   p_low <- ifelse(testable, (1 + below) / (1 + valid), NA_real_)
   p_high <- ifelse(testable, (1 + above) / (1 + valid), NA_real_)
-  deviation <- ifelse(p_low < level / 2, "low", ifelse(p_high < level / 2, "high", "none"))
+  high <- ifelse(p_high < level / 2, "high", "none")
+  deviation <- ifelse(p_low < level / 2, "low", high)
   ses <- null_compare(obs, sims)$ses
   ses[!testable] <- NA_real_
   list(testable = testable, p_low = p_low, p_high = p_high, deviation = deviation, ses = ses)

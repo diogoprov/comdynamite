@@ -131,7 +131,7 @@ tg_populations <- function(data, trait, site, species, abundance) {
   needed <- c(trait, site, species, abundance)
   missing_columns <- setdiff(needed, names(data))
   if (length(missing_columns) > 0) {
-    stop("`data` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
+    stop("`data` has no column ", toString(missing_columns), call. = FALSE)
   }
   if (!is.numeric(data[[trait]])) stop("`", trait, "` must be numeric", call. = FALSE)
   if (any(is.infinite(data[[trait]]))) {
@@ -147,7 +147,7 @@ tg_populations <- function(data, trait, site, species, abundance) {
                      abundance = 1, trait = as.vector(values), stringsAsFactors = FALSE)
   if (!is.null(abundance)) {
     a <- data[[abundance]]
-    if (!is.numeric(a) || any(!is.finite(a)) || any(a < 0)) {
+    if (!is.numeric(a) || !all(is.finite(a)) || any(a < 0)) {
       stop("`", abundance, "` must be finite numbers, 0 or more, without missing values",
            call. = FALSE)
     }
@@ -163,7 +163,7 @@ tg_populations <- function(data, trait, site, species, abundance) {
   unmeasured <- tapply(!is.na(pops$trait), pops$species, any)
   if (!all(unmeasured)) {
     stop("species without any trait value: ",
-         paste(names(unmeasured)[!unmeasured], collapse = ", "), call. = FALSE)
+         toString(names(unmeasured)[!unmeasured]), call. = FALSE)
   }
   if (length(unique(pops$site)) < 2) stop("`data` needs two sites or more", call. = FALSE)
   rownames(pops) <- NULL
@@ -299,7 +299,7 @@ trait_gradient_weights <- function(data, abundance, ...) {
   choices <- expand.grid(site = c("abundance", "occurrence"),
                          species = c("abundance", "occurrence"), stringsAsFactors = FALSE)
   choices <- choices[order(choices$site), ]
-  labels <- paste(choices$site, choices$species, sep = "/")
+  labels <- sprintf("%s/%s", choices$site, choices$species)
   fits <- Map(function(s, p) trait_gradient(data, abundance = abundance, site_weights = s,
                                             species_weights = p, ...)$species,
               choices$site, choices$species)
@@ -477,7 +477,7 @@ trait_gradient_test <- function(x, n_null = 999,
     check_tree(tree)
     absent <- setdiff(species_ids, tree$tip.label)
     if (length(absent) > 0) {
-      stop("species of `x` not in `tree`: ", paste(absent, collapse = ", "), call. = FALSE)
+      stop("species of `x` not in `tree`: ", toString(absent), call. = FALSE)
     }
     check_number(phylo_k, "phylo_k", lower = 1)
     shared <- ape::vcv(ape::keep.tip(tree, species_ids))[species_ids, species_ids]
@@ -489,7 +489,7 @@ trait_gradient_test <- function(x, n_null = 999,
   means <- stats::setNames(x$species$mean, species_ids)
   if (null == "phylo") transition <- phylo_transition(shared, phylo_k)
   if (null == "bm") {
-    if (!(stats::var(means) > 0)) {
+    if (stats::var(means) <= 0) {
       stop("the species means do not vary, so null = \"bm\" cannot estimate a rate",
            call. = FALSE)
     }
@@ -552,7 +552,7 @@ phylo_transition <- function(shared, k) {
   depth <- diag(shared)
   d <- outer(depth, depth, "+") - 2 * shared
   d_max <- max(d)
-  if (!(d_max > 0)) stop("the species are at distance 0 in `tree`", call. = FALSE)
+  if (d_max <= 0) stop("the species are at distance 0 in `tree`", call. = FALSE)
   similarity <- k - d / d_max
   similarity / rowSums(similarity)
 }
@@ -622,7 +622,7 @@ print.mc_trait_gradient_test <- function(x, digits = 3, ...) {
   s <- x$settings
   cat("Null model of the trait-gradient analysis:", s$n_null, "communities,", s$null, "\n")
   st <- x$statistics
-  st[-1] <- lapply(st[-1], function(v) signif(v, digits))
+  st[-1] <- lapply(st[-1], signif, digits)
   print(st, row.names = FALSE)
   invisible(x)
 }
@@ -854,7 +854,7 @@ print.mc_trait_gradient_phylo <- function(x, digits = 3, ...) {
   cat("Phylogenetic models of the trait-gradient analysis:", nrow(x$data), "species\n")
   m <- x$models
   num <- vapply(m, is.numeric, logical(1)) & names(m) != "delta_aic"
-  m[num] <- lapply(m[num], function(v) signif(v, digits))
+  m[num] <- lapply(m[num], signif, digits)
   m$delta_aic <- round(m$delta_aic, 2)
   print(m, row.names = FALSE)
   invisible(x)
