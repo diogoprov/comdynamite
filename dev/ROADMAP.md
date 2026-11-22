@@ -30,6 +30,15 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    permutações, recuperação no modelo Bayesiano); fase 5, anotação `srr` e consulta prévia
    aos editores, só depois da decisão do JBI (o guia não aceita submissão com manuscrito em
    revisão em outro periódico).
+   Fase 4 (testes estendidos, `tests/testthat/test-extended-*.R`) achou quatro problemas,
+   guardados como testes com `skip("known issue")`: (a) intervalos do ABC sem calibração
+   (cobertura 0,93 a 0,99 para 0,9 nominal; 0,65 com posterior analítica; o mesmo com o abcrf
+   puro), e a ajuda de `abc_recovery()` diz que cobertura perto de `level` indica calibração;
+   (b) teste da média entre sítios de `tstats_summary()`: T_PC.PR com 7,8% de rejeição sob a
+   nula, T_IC.IR com 0%; (c) teste por sítio de T_PC.PR sem poder contra filtragem forte (os
+   valores médios sorteados em `tstats_null()` são reagrupados nas populações observadas, e o
+   tamanho desigual das populações define a variância nula); (d) teste intraespecífico de
+   `trait_flex()` conservador com turnover (cerca de 2%). Decidir a correção de cada um.
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
    2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),
