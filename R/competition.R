@@ -74,8 +74,9 @@ competition_matrix <- function(species, type = c("none", "random", "phylo", "tra
 #' @noRd
 trait_competition <- function(traits, inter_max) {
   if (is.null(traits)) stop("type = \"trait\" needs `traits`", call. = FALSE)
-  niche_cor <- if (is.list(traits) && !is.data.frame(traits)) attr(traits, "niche_cor")
-  axes <- if (is.list(traits) && !is.data.frame(traits)) traits else list(traits)
+  several <- is.list(traits) && !is.data.frame(traits)
+  niche_cor <- if (several) attr(traits, "niche_cor")
+  axes <- if (several) traits else list(traits)
   axes <- lapply(axes, function(x) {
     if (!all(c("optimum", "sigma") %in% names(x))) {
       stop("`traits` needs columns `optimum` and `sigma`", call. = FALSE)
@@ -83,36 +84,13 @@ trait_competition <- function(traits, inter_max) {
     x
   })
   sp <- rownames(axes[[1]])
-  if (is.null(sp) || (is.data.frame(axes[[1]]) && .row_names_info(axes[[1]]) < 0)) {
+  unnamed <- is.null(sp) || (is.data.frame(axes[[1]]) && .row_names_info(axes[[1]]) < 0)
+  if (unnamed) {
     sp <- paste0("sp", seq_len(nrow(axes[[1]])))
   } else if (length(axes) > 1) {
-    if (!all(vapply(axes, function(x) setequal(rownames(x), sp), logical(1)))) {
-      stop("sets of `traits` (one per axis) have different species", call. = FALSE)
-    }
-    axes <- lapply(axes, function(x) x[sp, , drop = FALSE])
+    axes <- trait_axes_aligned(axes, sp)
   }
-  if (!is.null(niche_cor)) {
-    # correlated axes: the overlap is exp(-d' (Omega_j + Omega_k)^-1 d / 2)
-    q <- length(axes)
-    cor <- niche_cor_species(niche_cor, sp, q)
-    sigma <- matrix(vapply(axes, function(x) x$sigma, numeric(length(sp))), length(sp), q)
-    optimum <- matrix(vapply(axes, function(x) x$optimum, numeric(length(sp))), length(sp), q)
-    if (any(sigma == 0)) {
-      stop("a niche breadth `sigma` of 0 is not available with correlated axes ",
-           "(`niche_correlation()`)", call. = FALSE)
-    }
-    precision <- lapply(seq_along(sp), function(j) niche_precision(sigma[j, ], cor[[j]]))
-    a <- diag(1, length(sp))
-    for (j in seq_along(sp)[-1]) {
-      for (k in seq_len(j - 1)) {
-        d <- optimum[j, ] - optimum[k, ]
-        m <- niche_overlap_matrix(precision[[j]], precision[[k]])
-        a[j, k] <- a[k, j] <- inter_max * exp(-0.5 * sum((d %*% m) * d))
-      }
-    }
-    dimnames(a) <- list(sp, sp)
-    return(a)
-  }
+  if (!is.null(niche_cor)) return(trait_competition_correlated(axes, sp, niche_cor, inter_max))
   log_overlap <- 0
   for (x in axes) {
     w <- outer(x$sigma^2, x$sigma^2, "+")
@@ -121,6 +99,41 @@ trait_competition <- function(traits, inter_max) {
   }
   a <- inter_max * exp(log_overlap)
   diag(a) <- 1
+  dimnames(a) <- list(sp, sp)
+  a
+}
+
+#' the tables of traits of several axes with their rows in the order of the species `sp`; stops
+#' when the axes have different species
+#' @noRd
+trait_axes_aligned <- function(axes, sp) {
+  if (!all(vapply(axes, function(x) setequal(rownames(x), sp), logical(1)))) {
+    stop("sets of `traits` (one per axis) have different species", call. = FALSE)
+  }
+  lapply(axes, function(x) x[sp, , drop = FALSE])
+}
+
+#' competition with correlated axes of the niche: the overlap of the niches of two species is
+#' exp(-d' (Omega_j + Omega_k)^-1 d / 2); returns the species x species matrix
+#' @noRd
+trait_competition_correlated <- function(axes, sp, niche_cor, inter_max) {
+  q <- length(axes)
+  cor <- niche_cor_species(niche_cor, sp, q)
+  sigma <- matrix(vapply(axes, function(x) x$sigma, numeric(length(sp))), length(sp), q)
+  optimum <- matrix(vapply(axes, function(x) x$optimum, numeric(length(sp))), length(sp), q)
+  if (any(sigma == 0)) {
+    stop("a niche breadth `sigma` of 0 is not available with correlated axes ",
+         "(`niche_correlation()`)", call. = FALSE)
+  }
+  precision <- lapply(seq_along(sp), function(j) niche_precision(sigma[j, ], cor[[j]]))
+  a <- diag(1, length(sp))
+  for (j in seq_along(sp)[-1]) {
+    for (k in seq_len(j - 1)) {
+      d <- optimum[j, ] - optimum[k, ]
+      m <- niche_overlap_matrix(precision[[j]], precision[[k]])
+      a[j, k] <- a[k, j] <- inter_max * exp(-0.5 * sum((d %*% m) * d))
+    }
+  }
   dimnames(a) <- list(sp, sp)
   a
 }

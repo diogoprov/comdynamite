@@ -79,11 +79,24 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
             beta = beta, phi = phi, psi = psi, alpha = alpha, rho = rho, tau = tau,
             eps_R = eps_R, eps_N = eps_N, eta_N = eta_N, eta_P = eta_P,
             kappa_R = kappa_R, kappa_P = kappa_P)
+  fw_check_params(p)
+  structure(p, class = "food_web_params")
+}
+
+#' stops unless every parameter of the food web is one finite number of the sign it needs
+#' @noRd
+fw_check_params <- function(p) {
   for (nm in names(p)) {
-    if (!is.numeric(p[[nm]]) || length(p[[nm]]) != 1 || !is.finite(p[[nm]])) {
-      stop("`", nm, "` must be one finite number", call. = FALSE)
-    }
+    one <- is.numeric(p[[nm]]) && length(p[[nm]]) == 1
+    if (!one || !is.finite(p[[nm]])) stop("`", nm, "` must be one finite number", call. = FALSE)
   }
+  fw_check_signs(p)
+  invisible(p)
+}
+
+#' stops unless the parameters of the food web that must be positive, or zero or more, are so
+#' @noRd
+fw_check_signs <- function(p) {
   positive <- c("beta", "phi", "psi", "eps_R", "eps_N", "eta_N", "eta_P", "kappa_R", "kappa_P")
   for (nm in positive) {
     if (p[[nm]] <= 0) stop("`", nm, "` must be positive", call. = FALSE)
@@ -92,7 +105,7 @@ food_web_params <- function(c0 = 1, gamma = 0.002, zc_R = 10, d = 0.02,
   for (nm in setdiff(names(p), c(positive, any_sign))) {
     if (p[[nm]] < 0) stop("`", nm, "` must be zero or more", call. = FALSE)
   }
-  structure(p, class = "food_web_params")
+  invisible(p)
 }
 
 #' Coevolution of a resource, a consumer and a predator
@@ -208,59 +221,33 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
   cite_method("food_web_dynamics")
   attack <- match.arg(attack)
   if (is.null(trait_floor)) trait_floor <- if (attack == "michaelis") 0 else -Inf
-  if (!is.numeric(trait_floor) || length(trait_floor) != 1 || is.na(trait_floor) ||
-      trait_floor == Inf) {
-    stop("`trait_floor` must be one number or -Inf", call. = FALSE)
-  }
+  fw_check_floor(trait_floor)
   levels <- c("R", "N", "P")
-  if (!is.numeric(times) || length(times) < 2 || anyNA(times) || any(diff(times) <= 0)) {
-    stop("`times` must be at least two increasing numbers", call. = FALSE)
-  }
+  fw_check_times(times)
   init <- fw_three(init, "init", levels)
   traits <- fw_three(traits, "traits", levels)
   if (length(V) == 1) V <- rep(V, 3)
   V <- fw_three(V, "V", levels)
   if (any(init < 0)) stop("`init` must be zero or more", call. = FALSE)
   if (any(V < 0)) stop("`V` must be zero or more", call. = FALSE)
-  if (!inherits(params, "food_web_params")) {
-    stop("`params` must come from `food_web_params()`", call. = FALSE)
-  }
-  if (!is.logical(omnivory) || length(omnivory) != 1 || is.na(omnivory)) {
-    stop("`omnivory` must be TRUE or FALSE", call. = FALSE)
-  }
-  if (!is.numeric(dt) || length(dt) != 1 || !is.finite(dt) || dt <= 0) {
-    stop("`dt` must be one positive number", call. = FALSE)
-  }
-  if (!is.numeric(extinction) || length(extinction) != 1 || !is.finite(extinction) ||
-      extinction < 0) {
-    stop("`extinction` must be one number, zero or more", call. = FALSE)
-  }
-  if (!is.null(introductions)) {
-    if (!is.numeric(introductions) || is.null(names(introductions)) ||
-        !all(names(introductions) %in% levels) || anyDuplicated(names(introductions)) ||
-        anyNA(introductions)) {
-      stop("`introductions` must be numbers named `R`, `N` or `P`, each once", call. = FALSE)
-    }
-    if (any(introductions <= times[1]) || any(introductions > times[length(times)])) {
-      stop("`introductions` must fall after the first time and within `times`", call. = FALSE)
-    }
-    if (any(init[names(introductions)] <= 0)) {
-      stop("levels in `introductions` need a positive abundance in `init`", call. = FALSE)
-    }
-  }
-  if (attack == "michaelis" && any(traits < 0)) {
-    stop("`traits` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
-  }
-  if (attack == "michaelis" && trait_floor < 0) {
-    stop("`trait_floor` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
-  }
-  if (any(traits < trait_floor)) {
-    stop("`traits` must be at or above `trait_floor`", call. = FALSE)
-  }
+  fw_check_settings(params, omnivory, dt, extinction)
+  fw_check_introductions(introductions, times, init, levels)
+  fw_check_traits(traits, attack, trait_floor)
   p <- unclass(params)
   p$trait_floor <- trait_floor
   if (!omnivory) p$v0 <- 0
+  out <- fw_trajectory(times, init, traits, introductions, dt, extinction, p, attack, V)
+  res <- data.frame(time = times, out)
+  structure(res, class = c("food_web", "data.frame"), params = params, attack = attack,
+            V = V, omnivory = omnivory, introductions = introductions)
+}
 
+#' the states of the food web at `times`, integrated from the start with the levels of
+#' `introductions` arriving at their times: a matrix with one row per time and the 15 columns
+#' of fw_report()
+#' @noRd
+fw_trajectory <- function(times, init, traits, introductions, dt, extinction, p, attack, V) {
+  levels <- c("R", "N", "P")
   state <- c(init, traits)
   for (nm in names(introductions)) state[nm] <- 0
   grid <- sort(unique(c(times, introductions)))
@@ -271,18 +258,7 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
   for (k in seq_along(grid)) {
     t_now <- grid[k]
     if (k > 1) {
-      span <- t_now - grid[k - 1]
-      steps <- max(1, ceiling(span / dt - 1e-8))
-      h <- span / steps
-      for (s in seq_len(steps)) {
-        state <- fw_rk4(state, h, p, attack, V)
-        if (!all(is.finite(state)) || any(state[1:3] < -extinction)) {
-          stop("the integration diverged before time ", format(t_now), "; reduce `dt`",
-               call. = FALSE)
-        }
-        low <- state[1:3] < extinction
-        state[1:3][low] <- 0
-      }
+      state <- fw_advance(state, t_now - grid[k - 1], t_now, dt, extinction, p, attack, V)
     }
     arrive <- names(introductions)[introductions == t_now]
     for (nm in arrive) {
@@ -294,9 +270,106 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
       out[row, ] <- fw_report(state, p, attack, V)
     }
   }
-  res <- data.frame(time = times, out)
-  structure(res, class = c("food_web", "data.frame"), params = params, attack = attack,
-            V = V, omnivory = omnivory, introductions = introductions)
+  out
+}
+
+#' stops unless `trait_floor` is one number or -Inf
+#' @noRd
+fw_check_floor <- function(trait_floor) {
+  if (!is.numeric(trait_floor) || length(trait_floor) != 1 || is.na(trait_floor) ||
+      trait_floor == Inf) {
+    stop("`trait_floor` must be one number or -Inf", call. = FALSE)
+  }
+  invisible(trait_floor)
+}
+
+#' stops unless `times` holds at least two increasing numbers
+#' @noRd
+fw_check_times <- function(times) {
+  if (!is.numeric(times) || length(times) < 2 || anyNA(times) || any(diff(times) <= 0)) {
+    stop("`times` must be at least two increasing numbers", call. = FALSE)
+  }
+  invisible(times)
+}
+
+#' stops unless the parameters, the flag of omnivory, the time step and the threshold of
+#' extinction of food_web_dynamics() are valid
+#' @noRd
+fw_check_settings <- function(params, omnivory, dt, extinction) {
+  if (!inherits(params, "food_web_params")) {
+    stop("`params` must come from `food_web_params()`", call. = FALSE)
+  }
+  bad <- !is.logical(omnivory) || length(omnivory) != 1
+  if (bad || is.na(omnivory)) stop("`omnivory` must be TRUE or FALSE", call. = FALSE)
+  fw_check_steps(dt, extinction)
+  invisible(params)
+}
+
+#' stops unless the time step is one positive number and the threshold of extinction one
+#' number, zero or more
+#' @noRd
+fw_check_steps <- function(dt, extinction) {
+  bad <- !is.numeric(dt) || length(dt) != 1
+  if (bad || !is.finite(dt) || dt <= 0) {
+    stop("`dt` must be one positive number", call. = FALSE)
+  }
+  bad <- !is.numeric(extinction) || length(extinction) != 1
+  if (bad || !is.finite(extinction) || extinction < 0) {
+    stop("`extinction` must be one number, zero or more", call. = FALSE)
+  }
+  invisible(dt)
+}
+
+#' stops unless `introductions` (or NULL) names levels once, with times inside `times` and a
+#' positive abundance in `init`
+#' @noRd
+fw_check_introductions <- function(introductions, times, init, levels) {
+  if (is.null(introductions)) return(invisible(NULL))
+  bad <- !is.numeric(introductions) || is.null(names(introductions))
+  bad <- bad || !all(names(introductions) %in% levels) || anyDuplicated(names(introductions))
+  if (bad || anyNA(introductions)) {
+    stop("`introductions` must be numbers named `R`, `N` or `P`, each once", call. = FALSE)
+  }
+  if (any(introductions <= times[1]) || any(introductions > times[length(times)])) {
+    stop("`introductions` must fall after the first time and within `times`", call. = FALSE)
+  }
+  if (any(init[names(introductions)] <= 0)) {
+    stop("levels in `introductions` need a positive abundance in `init`", call. = FALSE)
+  }
+  invisible(introductions)
+}
+
+#' stops unless the starting `traits` respect the floor and the kind of attack
+#' @noRd
+fw_check_traits <- function(traits, attack, trait_floor) {
+  if (attack == "michaelis" && any(traits < 0)) {
+    stop("`traits` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
+  }
+  if (attack == "michaelis" && trait_floor < 0) {
+    stop("`trait_floor` must be zero or more with `attack = \"michaelis\"`", call. = FALSE)
+  }
+  if (any(traits < trait_floor)) {
+    stop("`traits` must be at or above `trait_floor`", call. = FALSE)
+  }
+  invisible(traits)
+}
+
+#' the state after `span` units of time ending at `t_now`, in Runge-Kutta steps of about `dt`;
+#' levels below `extinction` go to zero
+#' @noRd
+fw_advance <- function(state, span, t_now, dt, extinction, p, attack, V) {
+  steps <- max(1, ceiling(span / dt - 1e-8))
+  h <- span / steps
+  for (s in seq_len(steps)) {
+    state <- fw_rk4(state, h, p, attack, V)
+    if (!all(is.finite(state)) || any(state[1:3] < -extinction)) {
+      stop("the integration diverged before time ", format(t_now), "; reduce `dt`",
+           call. = FALSE)
+    }
+    low <- state[1:3] < extinction
+    state[1:3][low] <- 0
+  }
+  state
 }
 
 #' @export

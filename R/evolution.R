@@ -190,17 +190,7 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
                               traits = NULL, immigrant_selection = FALSE, mutation_var = NULL,
                               variance_selection = FALSE) {
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
-  # several traits: covariance matrices (checked when the simulation starts)
-  covariance <- function(v) is.matrix(v) || is.list(v)
-  variances <- function(v) is.numeric(v) && length(v) >= 1 && all(is.finite(v)) && all(v >= 0)
-  if (!covariance(genetic_var) && !variances(genetic_var)) {
-    stop("`genetic_var` must be one or more finite, non-negative numbers, or covariance ",
-         "matrices", call. = FALSE)
-  }
-  if (!covariance(env_var) && !variances(env_var)) {
-    stop("`env_var` must be one or more finite, non-negative numbers, or covariance matrices",
-         call. = FALSE)
-  }
+  evolution_check_variances(genetic_var, env_var)
   # Inf turns drift off
   check_number(ne_ratio, "ne_ratio", lower = 0, open = c(TRUE, FALSE),
                finite = FALSE)
@@ -211,7 +201,7 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
   check_flag(founder, "founder")
   check_flag(immigrant_selection, "immigrant_selection")
   if (!is.null(mutation_var)) {
-    if (!variances(mutation_var)) {
+    if (!is_variances(mutation_var)) {
       stop("`mutation_var` must be one or more finite, non-negative numbers", call. = FALSE)
     }
     if (!is.finite(ne_ratio)) {
@@ -228,6 +218,31 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
                  immigrant_selection = immigrant_selection, mutation_var = mutation_var,
                  variance_selection = variance_selection),
             class = "mc_evolution")
+}
+
+#' is `v` a covariance matrix or a list of them (several traits; checked when the simulation
+#' starts)?
+#' @noRd
+is_covariance <- function(v) is.matrix(v) || is.list(v)
+
+#' is `v` one or more finite, non-negative numbers?
+#' @noRd
+is_variances <- function(v) {
+  is.numeric(v) && length(v) >= 1 && all(is.finite(v)) && all(v >= 0)
+}
+
+#' stops unless the genetic and the environmental variances are variances or covariance matrices
+#' @noRd
+evolution_check_variances <- function(genetic_var, env_var) {
+  if (!is_covariance(genetic_var) && !is_variances(genetic_var)) {
+    stop("`genetic_var` must be one or more finite, non-negative numbers, or covariance ",
+         "matrices", call. = FALSE)
+  }
+  if (!is_covariance(env_var) && !is_variances(env_var)) {
+    stop("`env_var` must be one or more finite, non-negative numbers, or covariance matrices",
+         call. = FALSE)
+  }
+  invisible(genetic_var)
 }
 
 #' @export
@@ -248,6 +263,37 @@ print.mc_evolution <- function(x, ...) {
 #' species and returns the functions that the loop calls
 #' @noRd
 evolution_state <- function(evolution, m, k_all, species) {
+  traits <- evolution_state_traits(evolution, k_all, species)
+  env_fun <- if (is.function(evolution$env)) evolution$env else {
+    function(step) evolution$env
+  }
+  e1 <- env_fun(1)
+  if (length(e1) != m) stop("`env` of `evolution` needs one value per site (", m, ")",
+                            call. = FALSE)
+  each <- function(x) evolution_each(x, k_all)
+  list(env = function(step) unname(as.numeric(env_fun(step))), ref = mean(e1),
+       optimum = traits$optimum, sigma = traits$sigma, r_max = traits$r_max,
+       g = each(evolution$genetic_var), b = each(evolution$plasticity),
+       ve = each(evolution$env_var), nu = evolution$ne_ratio,
+       per = evolution$steps_per_generation, founder = evolution$founder,
+       imm_sel = isTRUE(evolution$immigrant_selection),
+       dyn = !is.null(evolution$mutation_var),
+       vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var),
+       vsel = isTRUE(evolution$variance_selection))
+}
+
+#' a setting of `evolution` for every species, from one value or one per species (`k_all`)
+#' @noRd
+evolution_each <- function(x, k_all) {
+  if (!length(x) %in% c(1, k_all)) stop("settings of `evolution` take one value or one per ",
+                                        "species (", k_all, ")", call. = FALSE)
+  rep_len(x, k_all)
+}
+
+#' checks the settings of `evolution` for one trait and returns its table of traits, with one
+#' row per species, in the order of `species` when they are named
+#' @noRd
+evolution_state_traits <- function(evolution, k_all, species) {
   if (!inherits(evolution, "mc_evolution")) {
     stop("`evolution` is not an object from `evolution_control()`", call. = FALSE)
   }
@@ -259,31 +305,11 @@ evolution_state <- function(evolution, m, k_all, species) {
     stop("`traits` of `evolution` need one row per species (", k_all, ")", call. = FALSE)
   }
   if (!is.null(species) && all(species %in% rownames(traits))) traits <- traits[species, ]
-  if (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
-      is.matrix(evolution$env_var) || is.list(evolution$env_var)) {
+  if (is_covariance(evolution$genetic_var) || is_covariance(evolution$env_var)) {
     stop("covariance matrices in `evolution` need a niche of several axes (a list of ",
          "`traits`), one trait per axis", call. = FALSE)
   }
-  env_fun <- if (is.function(evolution$env)) evolution$env else {
-    function(step) evolution$env
-  }
-  e1 <- env_fun(1)
-  if (length(e1) != m) stop("`env` of `evolution` needs one value per site (", m, ")",
-                            call. = FALSE)
-  each <- function(x) {
-    if (!length(x) %in% c(1, k_all)) stop("settings of `evolution` take one value or one per ",
-                                          "species (", k_all, ")", call. = FALSE)
-    rep_len(x, k_all)
-  }
-  list(env = function(step) unname(as.numeric(env_fun(step))), ref = mean(e1),
-       optimum = traits$optimum, sigma = traits$sigma, r_max = traits$r_max,
-       g = each(evolution$genetic_var), b = each(evolution$plasticity),
-       ve = each(evolution$env_var), nu = evolution$ne_ratio,
-       per = evolution$steps_per_generation, founder = evolution$founder,
-       imm_sel = isTRUE(evolution$immigrant_selection),
-       dyn = !is.null(evolution$mutation_var),
-       vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var),
-       vsel = isTRUE(evolution$variance_selection))
+  traits
 }
 
 #' immigrants filtered by viability selection in the site they reach (immigrant_selection =

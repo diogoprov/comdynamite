@@ -170,10 +170,7 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
   check_number(intercept_sd, "intercept_sd", lower = 0)
   check_number(slope_sd, "slope_sd", lower = 0)
   check_number(lambda, "lambda", lower = 0, upper = 1)
-  if (!is.numeric(reduction) || length(reduction) != 2 || anyNA(reduction) ||
-        reduction[1] < 0 || reduction[2] > 1 || reduction[1] > reduction[2]) {
-    stop("`reduction` must be two increasing numbers between 0 and 1", call. = FALSE)
-  }
+  check_reduction(reduction)
   grads <- if (is.list(gradients)) as.list(gradients) else list(gradients)
   check_gradients(grads, "gradients")
   sp <- tree$tip.label
@@ -183,17 +180,38 @@ simulate_logistic <- function(tree, gradients, intercept_mean = 0, intercept_sd 
   b <- vapply(grads, function(g) slope_sd * drop(scale(trait_bm(tree, lambda))), numeric(k))
   a <- matrix(a, k, dimnames = list(sp, names(grads)))
   b <- matrix(b, k, dimnames = list(sp, names(grads)))
-  probability <- matrix(1, n, k, dimnames = list(paste0("site", seq_len(n)), sp))
-  for (g in seq_along(grads)) {
-    x <- grads[[g]] - mean(grads[[g]])
-    probability <- probability * stats::plogis(sweep(outer(x, b[, g]), 2, a[, g], "+"))
-  }
+  probability <- logistic_probability(grads, a, b)
   probability <- probability * stats::runif(n, reduction[1], reduction[2])
   value <- if (draw == "uniform") stats::runif(n * k) else stats::rnorm(n * k)
   abundance <- (value < probability) * 1L
   structure(list(abundance = abundance, history = NULL, probability = probability,
                  env = gradients, traits = list(intercept = a, slope = b), tree = tree),
             class = "mc_sim")
+}
+
+#' stops unless `reduction` holds two increasing numbers between 0 and 1
+#' @noRd
+check_reduction <- function(reduction) {
+  bad <- !is.numeric(reduction) || length(reduction) != 2 || anyNA(reduction)
+  bad <- bad || reduction[1] < 0 || reduction[2] > 1
+  if (bad || reduction[1] > reduction[2]) {
+    stop("`reduction` must be two increasing numbers between 0 and 1", call. = FALSE)
+  }
+  invisible(reduction)
+}
+
+#' probabilities of occurrence (sites x species): the product over the gradients of the logistic
+#' responses with intercepts `a` and slopes `b` (species x gradients)
+#' @noRd
+logistic_probability <- function(grads, a, b) {
+  n <- length(grads[[1]])
+  sp <- rownames(a)
+  probability <- matrix(1, n, nrow(a), dimnames = list(paste0("site", seq_len(n)), sp))
+  for (g in seq_along(grads)) {
+    x <- grads[[g]] - mean(grads[[g]])
+    probability <- probability * stats::plogis(sweep(outer(x, b[, g]), 2, a[, g], "+"))
+  }
+  probability
 }
 
 #' Gradients of the seven scenarios of Peres-Neto et al. (2012)
