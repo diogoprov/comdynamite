@@ -23,6 +23,9 @@
 # Run from the root of the package, with the package abc installed. N_REF and N_TEST change the
 # size, N_IND the individuals per population, CORES the number of workers and TOLS the
 # tolerances. The pilot as planned is the default.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "5000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "500"))
@@ -110,8 +113,8 @@ summarise <- function(d) {
              bias = mean(d$estimate - d$truth) / range, coverage = mean(covered),
              coverage_se = sqrt(mean(covered) * (1 - mean(covered)) / nrow(d)),
              width = mean(d$high - d$low) / range,
-             recoverable = r2(d) >= 0.5 & mean(covered) >= 0.85 & mean(covered) <= 0.95,
-             too_wide = mean(covered) > 0.95)
+             recoverable = r2(d) >= 0.5 & mean(covered) >= 0.85,
+             conservative = mean(covered) > 0.95)
 }
 set.seed(1)
 results <- do.call(rbind, lapply(split(estimates,

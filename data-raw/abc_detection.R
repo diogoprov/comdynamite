@@ -10,6 +10,9 @@
 #     often do the intervals miss the truth?
 # Run from the root of the package after abc_recovery.R. N_REF, N_TEST, CORES and NTREE change
 # the size; OUTPUT the file.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "20000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))
@@ -62,7 +65,8 @@ score <- function(fit, pseudo, parameters, label) {
                width = mean(e$high - e$low) / range,
                recoverable = 1 - sum((e$truth - e$estimate)^2) /
                  sum((e$truth - mean(e$truth))^2) >= 0.5 &
-                 mean(covered) >= 0.85 & mean(covered) <= 0.95)
+                 mean(covered) >= 0.85,
+               conservative = mean(covered) > 0.95)
   }))
 }
 with_detection <- abc_fit(train, ntree = ntree, ncores = cores)

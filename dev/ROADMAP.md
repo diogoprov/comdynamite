@@ -32,15 +32,22 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    revisão em outro periódico).
    Fase 4 (testes estendidos, `tests/testthat/test-extended-*.R`, PR #144) achou quatro
    problemas, tratados no PR seguinte: (a) intervalos do ABC-RF aproximados (propriedade do
-   método; ajuda corrigida, `min_node_size` novo); os scripts `data-raw/abc_*.R` ainda usam
-   cobertura entre 85% e 95% como critério de "recuperável", o que marca como não recuperável
-   um parâmetro bem identificado com intervalos conservadores: revisar; (b) teste da média de
+   método; ajuda corrigida, `min_node_size` novo); o critério de "recuperável" dos scripts
+   `data-raw/abc_*.R` e dos pilotos perdeu o teto de 95% de cobertura (R2 >= 0,5 e cobertura
+   >= 85%, coluna `conservative` acima de 95%), aplicado aos rds salvos sem rodar de novo por
+   `data-raw/abc_criterion_update.R`: 26 linhas passaram a recuperáveis, todas com R2 >= 0,64;
+   o artigo do JBI descreve o critério antigo e já diz que ele falhou por excesso de
+   cobertura, então só mudar o texto se a revisão pedir; (b) teste da média de
    `tstats_summary()`: corrigido (nulos de T_IC.IR e T_PC.PR permutam a região inteira); (c)
    T_PC.PR: o nulo publicado dá ~80% de sítios "altos" falsos quando o tamanho das populações
    varia entre sítios; `null_pc = "populations"` evita isso e virou o padrão (decidido em 2026-11-21);
-   conferir se `community_index()` tem o mesmo sorteio independente por sítio; (d)
+   `community_index()` sorteava cada sítio da região de forma independente: os nulos regionais
+   agora permutam a região inteira (a distribuição de cada sítio não muda); (d)
    `trait_flex()`: propriedade do método (atenuação e teste conservador com turnover), ajuda
-   corrigida.
+   corrigida. Também resolvidos: sinal dos autovetores de `phylo_vector()` e
+   `phylo_eigenvectors()` fixado (maior valor absoluto positivo; o sinal trocava no Windows) e
+   exemplo de `damocles_partition_test()` reduzido (o custo está no ajuste; acelerar
+   `damocles_prune()` fica como ideia).
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
    2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),

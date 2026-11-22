@@ -335,3 +335,26 @@ test_that("the shared test explains what it needs", {
   expect_error(trait_partition(d$comm, d$trait, d$env, d$space, n_perm = 2, shared_null = "msr",
                                coords = d$coords), "needs the package adespatial")
 })
+
+test_that("orient_vectors() makes the largest absolute value of each column positive", {
+  v <- cbind(c(0.2, -0.9, 0.1), c(0.5, 0.5, -0.5), c(-0.5, 0.5, 0.1))
+  out <- orient_vectors(v)
+  expect_equal(out[, 1], -v[, 1])
+  expect_equal(out[, 2], v[, 2])
+  expect_equal(out[, 3], -v[, 3])
+  expect_equal(orient_vectors(-v), out)
+  expect_equal(dim(orient_vectors(v[, 0, drop = FALSE])), c(3, 0))
+})
+
+test_that("phylo_vector() and phylo_eigenvectors() have oriented eigenvectors", {
+  set.seed(4)
+  tree <- ape::rcoal(8)
+  # the first of the largest absolute values (up to rounding, as cherries tie) is positive
+  lead_positive <- function(m) {
+    all(apply(m, 2, function(v) v[which(abs(v) >= max(abs(v)) * (1 - 1e-6))[1]] > 0))
+  }
+  expect_true(lead_positive(phylo_eigenvectors(tree)))
+  comm <- matrix(rpois(10 * 8, 2) + 1, 10, dimnames = list(NULL, tree$tip.label))
+  out <- phylo_vector(comm, tree, env = rnorm(10), n_perm = 9, n_sim = 10)
+  expect_true(lead_positive(out$eigenvectors))
+})

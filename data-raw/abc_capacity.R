@@ -9,6 +9,9 @@
 # (ii) do the four parameters of abc_recovery.R keep their recovery?
 # Run from the root of the package. N_REF, N_TEST, CORES and NTREE change the size; OUTPUT the
 # file.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "20000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))
@@ -61,7 +64,8 @@ results <- do.call(rbind, lapply(parameters, function(p) {
   r2 <- 1 - sum((e$truth - e$estimate)^2) / sum((e$truth - mean(e$truth))^2)
   data.frame(parameter = p, n = nrow(e), r2 = r2, bias = mean(e$estimate - e$truth) / range,
              coverage = mean(covered), width = mean(e$high - e$low) / range,
-             recoverable = r2 >= 0.5 & mean(covered) >= 0.85 & mean(covered) <= 0.95)
+             recoverable = r2 >= 0.5 & mean(covered) >= 0.85,
+             conservative = mean(covered) > 0.95)
 }))
 # correlation between the errors of detection and capacity: strongly negative if they trade off
 wide <- reshape(est[est$parameter %in% c("log_detection", "log_capacity"),

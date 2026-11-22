@@ -47,7 +47,10 @@ List of class \code{mc_phylo_vector} with \code{correlation}, the correlations o
 and \code{pev_brown}; \code{p_site}, \code{p_species} and \code{p_max} of the global test; \code{selected}, the
 columns of \code{eigenvectors} retained; \code{pev} and \code{pev_brown}, named vectors or \code{NULL}
 when the global test is not significant or no eigenvector is retained;
-\code{eigenvectors}; \code{eigenvalues}; \code{eigenvector_correlation}; and \code{permutations}. Check
+\code{eigenvectors}, each with its largest absolute value positive (the sign of an
+eigenvector is arbitrary, and this fixes it across platforms); \code{eigenvalues};
+\code{eigenvector_correlation}, whose signs follow those of \code{eigenvectors}; and
+\code{permutations}. Check
 \code{pev} before combining gradients with \code{cbind()}, which drops a \code{NULL} without warning.
 }
 \description{

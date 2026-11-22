@@ -20,6 +20,9 @@
 # estimated and the fit checked with abc_ppc() on statistics held out of the fit.
 # Run from the root of the package with abcrf installed. N_REF (per model), N_TEST, CORES and
 # NTREE change the size; OUTPUT the file.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "8000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))

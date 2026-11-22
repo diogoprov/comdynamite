@@ -37,7 +37,10 @@
 #'   and `pev_brown`; `p_site`, `p_species` and `p_max` of the global test; `selected`, the
 #'   columns of `eigenvectors` retained; `pev` and `pev_brown`, named vectors or `NULL`
 #'   when the global test is not significant or no eigenvector is retained;
-#'   `eigenvectors`; `eigenvalues`; `eigenvector_correlation`; and `permutations`. Check
+#'   `eigenvectors`, each with its largest absolute value positive (the sign of an
+#'   eigenvector is arbitrary, and this fixes it across platforms); `eigenvalues`;
+#'   `eigenvector_correlation`, whose signs follow those of `eigenvectors`; and
+#'   `permutations`. Check
 #'   `pev` before combining gradients with `cbind()`, which drops a `NULL` without warning.
 #' @note Translated from the MATLAB functions `TraitEnvCor`, `ModelSelectionStochastic` and
 #'   `PCoAWeigthed` in the supplement of Peres-Neto et al. (2012), with credit to its authors.
@@ -652,8 +655,21 @@ weighted_pcoa <- function(half_squared, weights) {
   root <- sqrt(w)
   eig <- eigen(-outer(root, root) * centred, symmetric = TRUE)
   keep <- eig$values > sqrt(.Machine$double.eps) * max(eig$values)
-  list(vectors = sweep(eig$vectors[, keep, drop = FALSE], 2, sqrt(eig$values[keep]), "*") / root,
-       values = eig$values[keep])
+  vectors <- sweep(eig$vectors[, keep, drop = FALSE], 2, sqrt(eig$values[keep]), "*") / root
+  list(vectors = orient_vectors(vectors), values = eig$values[keep])
+}
+
+# eigenvectors have no sign: flip each column so that its largest absolute value is positive,
+# taking the first row among values tied up to rounding, so that results do not depend on
+# the platform's linear algebra
+orient_vectors <- function(vectors) {
+  if (ncol(vectors) == 0) return(vectors)
+  signs <- apply(vectors, 2, function(v) {
+    size <- abs(v)
+    lead <- which(size >= max(size) * (1 - 1e-6))[1]
+    if (v[lead] < 0) -1 else 1
+  })
+  sweep(vectors, 2, signs, "*")
 }
 
 # one Brownian vector per column

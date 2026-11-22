@@ -639,15 +639,20 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' * `"local"`: trait values are permuted among the individuals of each site; the values of the
 #'   site are kept and only their link with species is broken, so it is useful for indices that
 #'   use `species`;
-#' * `"regional.ind"`: each site receives as many trait values as it has individuals, drawn
-#'   without replacement from all individuals of the data;
-#' * `"regional.pop"`: each individual takes the mean of its population, and each site receives
-#'   as many of these values as it has individuals, drawn without replacement from all
-#'   individuals. The observed index uses the values of the individuals, so the null removes
+#' * `"regional.ind"`: the trait values of all individuals of the data are permuted among
+#'   sites, so that each site receives as many values as it has individuals;
+#' * `"regional.pop"`: each individual takes the mean of its population, and these values are
+#'   permuted among all individuals of the data. The observed index uses the values of the individuals, so the null removes
 #'   the variation within populations as well as the species composition of the site;
 #' * `"regional.pop.prab"`: the index is computed on the means of the populations of each site
-#'   (one value per population, observed and null alike), and each site receives as many
-#'   population means as it has populations, drawn without replacement from all populations.
+#'   (one value per population, observed and null alike), and the population means are
+#'   permuted among all populations of the data.
+#'
+#' The regional null models permute the whole region once per randomisation, as in
+#' [tstats()], so that the sites of a randomisation share out the regional pool as the data
+#' do. The null distribution of each site is the same as with independent draws from the
+#' region (as in earlier versions), but values that combine sites, such as the mean
+#' effect size over sites, are only valid under a joint permutation.
 #'
 #' In all cases the individuals (or populations) keep their species, so an index with an
 #' argument named `species`, such as `function(x, species)`, receives the species of the
@@ -779,10 +784,10 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
       if (null == "local") {
         for (i in rows_of) shuffled[i, ] <- values[i[sample.int(length(i))], , drop = FALSE]
       } else {
+        # every row belongs to one site, so one permutation of the whole region gives each
+        # site as many values as it has rows, and the sites partition the regional pool
         pool <- if (null == "regional.pop") carried else values
-        for (i in rows_of) {
-          shuffled[i, ] <- pool[sample.int(n, length(i)), , drop = FALSE]
-        }
+        shuffled <- pool[sample.int(n), , drop = FALSE]
       }
       sims[r, ] <- site_index(shuffled)
     }
