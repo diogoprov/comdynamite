@@ -181,8 +181,9 @@ trait_kurtosis <- function(x, na.rm = FALSE) {
   mean(centred^4) / m2^2 - 3
 }
 
-# checks the input of the metrics and drops missing values when asked; returns NULL when a
-# missing value remains (the metric is then NA)
+#' checks the input of the metrics and drops missing values when asked; returns NULL when a
+#' missing value remains (the metric is then NA)
+#' @noRd
 metric_input <- function(x, na.rm) {
   check_flag(na.rm, "na.rm")
   if (inherits(x, "dist")) {
@@ -221,7 +222,8 @@ n_values <- function(x) {
     length(x)
 }
 
-# range of one trait, or the largest pairwise distance
+#' range of one trait, or the largest pairwise distance
+#' @noRd
 metric_scale <- function(x, na.rm) {
   x <- metric_input(x, na.rm)
   if (is.numeric(x) && is.null(dim(x)) && !inherits(x, "dist")) diff(range(x)) else
@@ -247,7 +249,8 @@ pair_summary <- function(x, f, relative, na.rm) {
   finite_or_na(value)
 }
 
-# edge lengths of the minimum spanning tree; for one trait, the gaps between sorted values
+#' edge lengths of the minimum spanning tree; for one trait, the gaps between sorted values
+#' @noRd
 mst_edges <- function(x, na.rm) {
   clean <- metric_input(x, na.rm)
   if (is.null(clean)) return(NA_real_)
@@ -276,7 +279,8 @@ single_trait <- function(x, na.rm) {
   x
 }
 
-# Inf among the trait values would make every distance metric meaningless
+#' Inf among the trait values would make every distance metric meaningless
+#' @noRd
 no_infinite_trait <- function(x) {
   if (any(is.infinite(x))) stop("`x` has infinite values", call. = FALSE)
 }

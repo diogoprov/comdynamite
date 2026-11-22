@@ -55,7 +55,8 @@ abc_table <- function(prior, simulate, n, setup = NULL,
             seed = seed)
 }
 
-# stops unless `table` is a data frame, such as an `mc_abc_table`
+#' stops unless `table` is a data frame, such as an `mc_abc_table`
+#' @noRd
 check_abc_table <- function(table) {
   if (!is.data.frame(table)) {
     stop("`table` must be a data frame, such as one from abc_table()", call. = FALSE)
@@ -63,7 +64,8 @@ check_abc_table <- function(table) {
   invisible(table)
 }
 
-# stops unless `x` is a fit from abc_fit(); `name` is the argument
+#' stops unless `x` is a fit from abc_fit(); `name` is the argument
+#' @noRd
 check_abc_fit <- function(x, name) {
   if (!inherits(x, "mc_abc_fit")) {
     stop("`", name, "` must be an `mc_abc_fit` from abc_fit()", call. = FALSE)
@@ -71,8 +73,9 @@ check_abc_fit <- function(x, name) {
   invisible(x)
 }
 
-# stops unless `seed` is one whole number that set.seed() takes as an integer, with room for
-# the offsets added to it for each cell
+#' stops unless `seed` is one whole number that set.seed() takes as an integer, with room for
+#' the offsets added to it for each cell
+#' @noRd
 check_seed <- function(seed, name = "seed") {
   limit <- .Machine$integer.max / 2
   if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed) || seed != round(seed) ||
@@ -83,7 +86,8 @@ check_seed <- function(seed, name = "seed") {
   invisible(seed)
 }
 
-# stops unless `x` is a function (or NULL when `null_ok` is TRUE); `name` is the argument
+#' stops unless `x` is a function (or NULL when `null_ok` is TRUE); `name` is the argument
+#' @noRd
 check_function_arg <- function(x, name, null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
   if (!is.function(x)) {
@@ -172,17 +176,18 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
   check_count(ncores, "ncores")
   check_count(min_node_size, "min_node_size")
   parameters <- parameters %||% attr(table, "parameters")
-  if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
+  if (is.null(parameters)) stop("abc_fit(): Give `parameters` for a plain data frame.",
+                                call. = FALSE)
   statistics <- statistics %||% attr(table, "statistics") %||% setdiff(names(table), parameters)
   missing <- setdiff(c(parameters, statistics), names(table))
   if (length(missing)) {
-    stop("Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+    stop("abc_fit(): Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
   }
   statistics <- setdiff(statistics, parameters)
   values <- as.matrix(as.data.frame(table)[, statistics, drop = FALSE])
   usable <- colMeans(is.finite(values)) > 0.95 &
     apply(values, 2, function(v) isTRUE(stats::sd(v[is.finite(v)]) > 0))
-  if (!any(usable)) stop("No statistic varies among the simulations.", call. = FALSE)
+  if (!any(usable)) stop("abc_fit(): No statistic varies among the simulations.", call. = FALSE)
   statistics <- statistics[usable]
   training <- as.data.frame(table)[, c(parameters, statistics), drop = FALSE]
   training <- training[stats::complete.cases(training) &
@@ -285,7 +290,8 @@ plot.mc_abc_fit <- function(x, newdata, bins = 30, colour = "#0072B2", ...) {
   check_count(bins, "bins")
   check_colours(colour, 1)
   observed <- observed_statistics(newdata, x$statistics)
-  if (nrow(observed) != 1) stop("`newdata` must hold one observation", call. = FALSE)
+  if (nrow(observed) != 1) stop("plot.mc_abc_fit(): `newdata` must hold one observation",
+                                call. = FALSE)
   .data <- ggplot2::.data
   d <- do.call(rbind, lapply(x$parameters, function(p) {
     w <- parameter_weights(x, p, observed)[, 1]
@@ -378,7 +384,8 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
   check_seed(seed)
   check_count(min_node_size, "min_node_size")
   parameters <- parameters %||% attr(table, "parameters")
-  if (is.null(parameters)) stop("Give `parameters` for a plain data frame.", call. = FALSE)
+  if (is.null(parameters)) stop("abc_recovery(): Give `parameters` for a plain data frame.",
+                                call. = FALSE)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()), add = TRUE)
@@ -472,7 +479,7 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
   values <- as.matrix(training[statistics])
   usable <- colMeans(is.finite(values)) > 0.95 &
     apply(values, 2, function(v) isTRUE(stats::sd(v[is.finite(v)]) > 0))
-  if (!any(usable)) stop("No statistic varies among the simulations.", call. = FALSE)
+  if (!any(usable)) stop("abc_choose(): No statistic varies among the simulations.", call. = FALSE)
   statistics <- statistics[usable]
   training <- training[c("model", statistics)]
   training <- training[rowSums(!is.finite(as.matrix(training[statistics]))) == 0, , drop = FALSE]
@@ -565,7 +572,8 @@ plot.mc_abc_choice <- function(x, newdata = NULL, ntree = 500, colour = "#0072B2
              ggplot2::theme_minimal())
   }
   post <- stats::predict(x, newdata, ntree = ntree)
-  if (nrow(post) != 1) stop("`newdata` must hold one observation", call. = FALSE)
+  if (nrow(post) != 1) stop("plot.mc_abc_choice(): `newdata` must hold one observation",
+                            call. = FALSE)
   d <- data.frame(model = factor(x$models, x$models),
                   votes = unlist(post[1, -(1:3)], use.names = FALSE))
   d$chosen <- d$model == post$model
@@ -650,7 +658,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
   if (is.null(simulate)) {
     missing <- setdiff(statistics, names(table))
     if (length(missing)) {
-      stop("Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
+      stop("abc_ppc(): Not in `table`: ", paste(missing, collapse = ", "), ".", call. = FALSE)
     }
   }
   values <- observed_statistics(observed, unique(c(fit$statistics, statistics)))

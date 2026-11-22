@@ -301,8 +301,9 @@ history_rates <- function(history, model = c("state", "burst", "sympatry"), sigm
   unname(rate)
 }
 
-# integral of 1 + burst * exp(-u / decay) along each edge, where u is the time since the last
-# change of state on the path from the root
+#' integral of 1 + burst * exp(-u / decay) along each edge, where u is the time since the last
+#' change of state on the path from the root
+#' @noRd
 burst_integral <- function(history, burst, decay) {
   edge <- history$edge
   since <- rep(Inf, ape::Ntip(history) + history$Nnode)
@@ -323,8 +324,9 @@ burst_integral <- function(history, burst, decay) {
   integral
 }
 
-# integral of exp(r * n) along each edge, where n is the number of lineages in the same state
-# at each moment, the lineage itself included
+#' integral of exp(r * n) along each edge, where n is the number of lineages in the same state
+#' at each moment, the lineage itself included
+#' @noRd
 sympatry_integral <- function(history, r, overlap = FALSE) {
   edge <- history$edge
   depth <- ape::node.depth.edgelength(history)
@@ -479,8 +481,9 @@ check_tip_window <- function(sigma2, k, window) {
   check_number(window, "window", lower = 0, open = TRUE, null_ok = TRUE)
 }
 
-# rate sigma2 * (1 + k * value) over the last `window` of each tip branch, sigma2 elsewhere;
-# `value` is in the order of tree$tip.label
+#' rate sigma2 * (1 + k * value) over the last `window` of each tip branch, sigma2 elsewhere;
+#' `value` is in the order of tree$tip.label
+#' @noRd
 tip_window_rates <- function(tree, value, sigma2, k, window) {
   rate <- rep(sigma2, nrow(tree$edge))
   tip_edge <- match(seq_along(tree$tip.label), tree$edge[, 2])

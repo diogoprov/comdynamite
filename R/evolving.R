@@ -383,12 +383,14 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     trait_list <- lapply(traits, as_traits)
     if (is.null(env)) env <- landscape$env_axes
     if (is.null(env)) {
-      stop("a list of traits needs `env`, one column per element", call. = FALSE)
+      stop("simulate_evolving_metacommunity(): a list of traits needs `env`, one column per ",
+           "element", call. = FALSE)
     }
     env <- as.matrix(env)
     if (!is.numeric(env) || nrow(env) != length(landscape$env) ||
         ncol(env) != length(trait_list) || anyNA(env)) {
-      stop("`env` needs one row per site (", length(landscape$env), ") and one column per ",
+      stop("simulate_evolving_metacommunity(): `env` needs one row per site (",
+           length(landscape$env), ") and one column per ",
            "set of traits (", length(trait_list), ")", call. = FALSE)
     }
     if (!is.null(colnames(env)) && !is.null(names(traits))) {
@@ -402,7 +404,8 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     colnames(env) <- colnames(env) %||% names(traits) %||% paste0("axis", seq_len(ncol(env)))
     sp1 <- rownames(trait_list[[1]])
     if (!all(vapply(trait_list, function(t) setequal(rownames(t), sp1), logical(1)))) {
-      stop("sets of traits have different species", call. = FALSE)
+      stop("simulate_evolving_metacommunity(): sets of traits have different species",
+           call. = FALSE)
     }
     tree_attr <- attr(trait_list[[1]], "tree")
     trait_list <- lapply(trait_list, function(t) t[sp1, , drop = FALSE])
@@ -416,11 +419,13 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
   has_evolution <- !is.null(evolution)
   if (!has_evolution) evolution <- evolution_control(0, ne_ratio = Inf)
   if (!inherits(evolution, "mc_evolution")) {
-    stop("`evolution` must come from `evolution_control()`", call. = FALSE)
+    stop("simulate_evolving_metacommunity(): `evolution` must come from `evolution_control()`",
+         call. = FALSE)
   }
   if (!several && (is.matrix(evolution$genetic_var) || is.list(evolution$genetic_var) ||
                    is.matrix(evolution$env_var) || is.list(evolution$env_var))) {
-    stop("`evolution` with covariance matrices needs a niche of several axes (a list of ",
+    stop("simulate_evolving_metacommunity(): `evolution` with covariance matrices needs a ",
+         "niche of several axes (a list of ",
          "`traits` and `env`), one trait per axis", call. = FALSE)
   }
   if (speciation$mode == "ecological" && all(unlist(evolution$genetic_var) == 0)) {
@@ -823,8 +828,9 @@ as_metacommunity.mc_evolving <- function(x, ...) {
                  evolution = x$evolution, n_steps = x$n_steps), class = "mc_sim")
 }
 
-# competition among species from the times at which each pair split (generations; 0 on the
-# diagonal is ignored) at generation `now`
+#' competition among species from the times at which each pair split (generations; 0 on the
+#' diagonal is ignored) at generation `now`
+#' @noRd
 evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, scale,
                            distance_scale) {
   k <- nrow(split_time)
@@ -835,8 +841,9 @@ evolving_alpha <- function(split_time, now, competition, inter_max, inter_min, s
   scale * a
 }
 
-# crowding in each site with competition scaled by the overlap of the Gaussian niches of the
-# phenotypes p there (sites x alive species); the phylogenetic part is the alpha of the state
+#' crowding in each site with competition scaled by the overlap of the Gaussian niches of the
+#' phenotypes p there (sites x alive species); the phylogenetic part is the alpha of the state
+#' @noRd
 niche_crowding <- function(st) {
   if (isTRUE(st$ev$mv) && isTRUE(st$ev$correlated)) return(niche_crowding_correlated(st))
   if (isTRUE(st$ev$mv)) {
@@ -876,10 +883,11 @@ niche_crowding <- function(st) {
   }
 }
 
-# the same with a correlation between the axes of the niches (niche_correlation()): the overlap
-# of the niches of two species is exp(-d' M d / 2), with d the difference of their phenotypes
-# and M = (Omega_i + Omega_j)^-1. The breadths and correlations of a species never change, so M
-# is kept for each pair of species (indexed over all species ever)
+#' the same with a correlation between the axes of the niches (niche_correlation()): the overlap
+#' of the niches of two species is exp(-d' M d / 2), with d the difference of their phenotypes
+#' and M = (Omega_i + Omega_j)^-1. The breadths and correlations of a species never change, so M
+#' is kept for each pair of species (indexed over all species ever)
+#' @noRd
 niche_crowding_correlated <- function(st) {
   cache <- new.env(parent = emptyenv())
   precision <- function(l) {
@@ -916,9 +924,10 @@ niche_crowding_correlated <- function(st) {
   }
 }
 
-# split times (by name, among alive species) after the species `names_new` bud from `mothers`
-# (one per new species) at generation `gen`: a new species shares the history of its mother up
-# to `gen`, and new species of the same mother split from each other at `gen`
+#' split times (by name, among alive species) after the species `names_new` bud from `mothers`
+#' (one per new species) at generation `gen`: a new species shares the history of its mother up
+#' to `gen`, and new species of the same mother split from each other at `gen`
+#' @noRd
 evolving_split_time <- function(split_time, mothers, names_new, gen) {
   k <- nrow(split_time)
   anchor <- c(seq_len(k), match(mothers, rownames(split_time)))
@@ -933,8 +942,9 @@ evolving_split_time <- function(split_time, mothers, names_new, gen) {
   out
 }
 
-# expected migrants of each species from each site (rows) to each other site (columns) in this
-# step, added to `flow` (indexed by species over all species ever)
+#' expected migrants of each species from each site (rows) to each other site (columns) in this
+#' step, added to `flow` (indexed by species over all species ever)
+#' @noRd
 evolving_flow <- function(st, flow, disp_matrix) {
   em <- st$em
   if (is.null(em)) return(flow)
@@ -956,8 +966,9 @@ evolving_flow <- function(st, flow, disp_matrix) {
   flow
 }
 
-# relative fitness (sources x sites) of the emigrants of the alive column c (species j) in
-# each site, as in immigrants_selected() and mv_immigrants_selected()
+#' relative fitness (sources x sites) of the emigrants of the alive column c (species j) in
+#' each site, as in immigrants_selected() and mv_immigrants_selected()
+#' @noRd
 evolving_immigrant_fitness <- function(st, c, j) {
   ev <- st$ev
   if (isTRUE(ev$mv)) {
@@ -972,16 +983,18 @@ evolving_immigrant_fitness <- function(st, c, j) {
   exp(-outer(p, st$e_now, "-")^2 / (2 * width))
 }
 
-# migration rate between pairs of populations: the larger of the migrants each sends to the
-# other over the size of the receiver
+#' migration rate between pairs of populations: the larger of the migrants each sends to the
+#' other over the size of the receiver
+#' @noRd
 migration_rate <- function(f, n) {
   into <- sweep(f, 2, n, "/")
   into[!is.finite(into)] <- 0
   pmax(into, t(into))
 }
 
-# divergence (geographic) or counts (ecological) among the populations of each species after
-# one generation, with the generations in a row in one cluster
+#' divergence (geographic) or counts (ecological) among the populations of each species after
+#' one generation, with the generations in a row in one cluster
+#' @noRd
 evolving_divergence <- function(st, divergence, together, flow, speciation) {
   for (c in seq_len(st$k)) {
     j <- st$alive[c]
@@ -1053,8 +1066,9 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
   list(divergence = divergence, together = together)
 }
 
-# groups of the populations of species j (column index over all species ever) by single
-# linkage on pairs below the limit; a list of sites
+#' groups of the populations of species j (column index over all species ever) by single
+#' linkage on pairs below the limit; a list of sites
+#' @noRd
 evolving_groups <- function(st, j, d, speciation) {
   if (!is.finite(speciation$threshold)) return(list())
   c <- match(j, st$alive)
@@ -1069,8 +1083,9 @@ evolving_groups <- function(st, j, d, speciation) {
   unname(split(idx, cl))
 }
 
-# groups in the order of budding: first the one that keeps the species (most sites, then most
-# individuals), then the others from the most to the least divergent from it
+#' groups in the order of budding: first the one that keeps the species (most sites, then most
+#' individuals), then the others from the most to the least divergent from it
+#' @noRd
 evolving_order <- function(st, j, groups, d, speciation) {
   c <- match(j, st$alive)
   size <- vapply(groups, length, numeric(1))
@@ -1091,7 +1106,8 @@ evolving_order <- function(st, j, groups, d, speciation) {
   c(groups[keep], groups[others[order(-dist)]])
 }
 
-# connected components of a symmetric logical adjacency matrix
+#' connected components of a symmetric logical adjacency matrix
+#' @noRd
 link_groups <- function(adj) {
   n <- nrow(adj)
   group <- integer(n)
@@ -1112,10 +1128,11 @@ link_groups <- function(adj) {
   group
 }
 
-# new species to start this generation: a list with, for each budding mother, `j` (index over
-# all species ever), `sites` (a list of the sites of each new species), `amounts` (individuals
-# each new species takes in its sites, or NULL for whole populations) and `groups` (for the
-# geographic and ecological modes, the groups of populations with the one kept first)
+#' new species to start this generation: a list with, for each budding mother, `j` (index over
+#' all species ever), `sites` (a list of the sites of each new species), `amounts` (individuals
+#' each new species takes in its sites, or NULL for whole populations) and `groups` (for the
+#' geographic and ecological modes, the groups of populations with the one kept first)
+#' @noRd
 evolving_initiate <- function(st, divergence, speciation, disp_matrix) {
   mode <- speciation$mode
   out <- list()
@@ -1150,8 +1167,9 @@ evolving_initiate <- function(st, divergence, speciation, disp_matrix) {
   out
 }
 
-# two groups of the occupied sites `idx` for fission: the sites nearest (by the kernel) to a
-# random one, in a random number, or a random partition
+#' two groups of the occupied sites `idx` for fission: the sites nearest (by the kernel) to a
+#' random one, in a random number, or a random partition
+#' @noRd
 evolving_partition <- function(idx, partition, disp_matrix) {
   q <- length(idx)
   if (partition == "spatial" && !is.null(disp_matrix)) {
@@ -1168,12 +1186,13 @@ evolving_partition <- function(idx, partition, disp_matrix) {
   list(idx[!side], idx[side])
 }
 
-# several mothers bud at once: each element of `buds` has the mother `j` (index over all
-# species ever), the `sites` and `amounts` of each new species (amounts NULL for whole
-# populations), and their `names` and `ids`. Every per-species structure of the state grows once;
-# new species take the genetic means and history of the mother in their sites, shifted by one
-# Gaussian draw of variance `jump_var` each. Point mutants (`mutants = TRUE`) arrive now, from a
-# propagule of their own individuals.
+#' several mothers bud at once: each element of `buds` has the mother `j` (index over all
+#' species ever), the `sites` and `amounts` of each new species (amounts NULL for whole
+#' populations), and their `names` and `ids`. Every per-species structure of the state grows once;
+#' new species take the genetic means and history of the mother in their sites, shifted by one
+#' Gaussian draw of variance `jump_var` each. Point mutants (`mutants = TRUE`) arrive now, from a
+#' propagule of their own individuals.
+#' @noRd
 evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_root = NULL) {
   q <- sum(vapply(buds, function(b) length(b$sites), numeric(1)))
   m <- st$m
@@ -1318,11 +1337,12 @@ evolving_split_many <- function(st, buds, jump_var = 0, mutants = FALSE, jump_ro
   invisible(st)
 }
 
-# the full tree (with extinct species) from the table of species: each species is a lineage
-# from its birth to its end, from which the species that budded from it branch off at their
-# birth, in their order; species at the start hang from the tips of `tree0` (or from the root,
-# alone). Built from the youngest lineages to the oldest, without recursion, since a lineage
-# may have many buds.
+#' the full tree (with extinct species) from the table of species: each species is a lineage
+#' from its birth to its end, from which the species that budded from it branch off at their
+#' birth, in their order; species at the start hang from the tips of `tree0` (or from the root,
+#' alone). Built from the youngest lineages to the oldest, without recursion, since a lineage
+#' may have many buds.
+#' @noRd
 evolving_tree <- function(sp, tree0) {
   buds <- split(seq_len(nrow(sp)), factor(sp$parent, sp$species))
   inner <- character(nrow(sp))
@@ -1360,9 +1380,10 @@ evolving_tree <- function(sp, tree0) {
   ape::read.tree(text = paste0(text, ";"))
 }
 
-# the evolutionary state by species with several traits: the genetic means and variance among
-# lineages of evolving_species_state(), trait by trait, as arrays of sites x species x traits,
-# at the end and at the recorded steps, with the plastic part and the matrices of each species
+#' the evolutionary state by species with several traits: the genetic means and variance among
+#' lineages of evolving_species_state(), trait by trait, as arrays of sites x species x traits,
+#' at the end and at the recorded steps, with the plastic part and the matrices of each species
+#' @noRd
 evolving_state_mv <- function(st, out, lineage_ab, genetic, members, species, extant, sp_idx,
                               n_steps) {
   ev <- st$ev
@@ -1413,9 +1434,10 @@ evolving_state_mv <- function(st, out, lineage_ab, genetic, members, species, ex
        settings = out$evolution$settings)
 }
 
-# genetic means of species (weighted by the abundance of their lineages) and the variance among
-# their lineages within each site (0 for species of one lineage), from lineage abundances and
-# genetic means (sites x extant lineages)
+#' genetic means of species (weighted by the abundance of their lineages) and the variance among
+#' their lineages within each site (0 for species of one lineage), from lineage abundances and
+#' genetic means (sites x extant lineages)
+#' @noRd
 evolving_species_state <- function(ab, z, members, species) {
   wmean <- vapply(members, function(l) {
     w <- ab[, l, drop = FALSE]
@@ -1437,20 +1459,22 @@ evolving_species_state <- function(ab, z, members, species) {
        within = matrix(within, nrow(z), length(species), dimnames = dimnames(wmean)))
 }
 
-# changes of presence between two matrices of sites x lineages (all lineages ever), as rows of
-# generation, lineage, site and new presence (1 or 0)
+#' changes of presence between two matrices of sites x lineages (all lineages ever), as rows of
+#' generation, lineage, site and new presence (1 or 0)
+#' @noRd
 range_changes <- function(was, now, gen) {
   at <- which(was != now, arr.ind = TRUE)
   if (!length(at)) return(matrix(numeric(0), 0, 4))
   cbind(gen, at[, 2], at[, 1], now[at])
 }
 
-# rows of the series for generation `gen`: for each lineage alive at its start, its occupancy,
-# abundance and mean genetic optimum (weighted by abundance) at its end, and the sites it
-# colonised and lost since the last generation, out of those it did not and did occupy then.
-# Lineages that died out in this generation get a row with their last losses. A site a mother
-# passed to its buds in this generation counts neither as a loss nor as exposure; a lineage
-# born in this generation has no transitions yet.
+#' rows of the series for generation `gen`: for each lineage alive at its start, its occupancy,
+#' abundance and mean genetic optimum (weighted by abundance) at its end, and the sites it
+#' colonised and lost since the last generation, out of those it did not and did occupy then.
+#' Lineages that died out in this generation get a row with their last losses. A site a mother
+#' passed to its buds in this generation counts neither as a loss nor as exposure; a lineage
+#' born in this generation has no transitions yet.
+#' @noRd
 evolving_series_rows <- function(st, before, buds, sp_table, gen) {
   dead <- setdiff(which(colSums(before) > 0), st$alive)
   ids <- c(st$alive, dead)
@@ -1490,11 +1514,12 @@ evolving_series_rows <- function(st, before, buds, sp_table, gen) {
   out
 }
 
-# extant lineages grouped into good species: a lineage that completed by its end (`status`
-# "good") is its own species; an incipient one belongs to the species its parent belonged to at
-# its birth, as in the labels of the PBD; `group` maps lineages to species and
-# `rep` names, for each species (in the order of the table), the lineage that represents it:
-# itself if extant, otherwise its earliest extant member
+#' extant lineages grouped into good species: a lineage that completed by its end (`status`
+#' "good") is its own species; an incipient one belongs to the species its parent belonged to at
+#' its birth, as in the labels of the PBD; `group` maps lineages to species and
+#' `rep` names, for each species (in the order of the table), the lineage that represents it:
+#' itself if extant, otherwise its earliest extant member
+#' @noRd
 evolving_observed <- function(sp) {
   good <- sp$status == "good"
   extant <- which(sp$fate == "extant")
@@ -1519,8 +1544,9 @@ evolving_observed <- function(sp) {
   list(group = group, rep = stats::setNames(rep, sp$species[ids]))
 }
 
-# a record of the extant lineages (sites x lineages) by good species: summed, or taken from the
-# most abundant lineage of the species in each site
+#' a record of the extant lineages (sites x lineages) by good species: summed, or taken from the
+#' most abundant lineage of the species in each site
+#' @noRd
 evolving_by_species <- function(x, abundance, members, sum = FALSE) {
   out <- vapply(members, function(l) {
     if (length(l) == 1) return(as.numeric(x[, l]))
@@ -1540,7 +1566,8 @@ body(mc_state) <- quote({
   environment()
 })
 
-# names for q new species that no species has used
+#' names for q new species that no species has used
+#' @noRd
 evolving_names <- function(used, q) {
   out <- character(0)
   i <- length(used)
@@ -1552,8 +1579,9 @@ evolving_names <- function(used, q) {
   out
 }
 
-# drops from the state the alive species with no individual left, as mc_step() does at the
-# start of the next step; returns their indices over all species ever
+#' drops from the state the alive species with no individual left, as mc_step() does at the
+#' start of the next step; returns their indices over all species ever
+#' @noRd
 evolving_prune <- function(st) {
   if (st$k == 0) return(integer(0))
   empty <- colSums(st$n) == 0

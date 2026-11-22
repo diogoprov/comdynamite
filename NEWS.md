@@ -1,5 +1,16 @@
 # comdynamite (development version)
 
+- `trait_flex()`, `drift_test()`, `node_test()` and `pcps_test()` warn when a response is an
+  exact linear function of the predictors, since their F statistics, standard errors and
+  p-values are then not meaningful. `trait_flex()` no longer relays the warning of
+  `summary.lm()` in that case.
+- Error, warning and message texts are now unique; where the same check is made in several
+  functions, the text names the function.
+- The column `reps` of `trait_rarefaction()` is an integer.
+- The README gives how the time of `node_test()`, `pcc_test()`, `pcps_test()`,
+  `phylo_beta_test()` and `trait_partition()` grows with sites, species and permutations
+  (script in `data-raw/benchmark_regression.R`).
+
 - Text in plots is larger by default (3.2 to 3.5 mm), and `plot_traits()` and `plot_assembly()`
   gain `text_size`.
 - Documentation: the intended audience and the priors of the Bayesian functions in the README;

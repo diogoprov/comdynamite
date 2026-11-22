@@ -1,28 +1,29 @@
-# Internal: trees with heritable shifts in the rate of speciation, for the simulations of the
-# DAMOCLES paper (data-raw/s1_type1_shifts.R and later blocks; dev/plano-artigo-damocles.md).
-#
-# A forward birth-death process with one rate per lineage. Speciation starts at `lambda0` and
-# extinction is `epsilon` times speciation in every lineage. Each of `n_shifts` shifts
-# multiplies the speciation (and so the extinction) rate of one living lineage and all its
-# descendants by `ratio`; shift k happens when the number of living lineages first reaches a
-# number drawn between 3 and `n_tips / 4`, on a lineage drawn at random, so shifts can be
-# nested. The tree is conditioned on `n_tips` living lineages with the general sampling
-# approach (GSA) of Hartmann, Wong & Stadler (2010, Syst. Biol. 59: 465-476,
-# doi:10.1093/sysbio/syq026): each run goes on until `gsa_factor * n_tips` lineages are alive or
-# all are extinct; a run contributes a tree with probability proportional to the total time Phi
-# it spent with exactly `n_tips` lineages (their sampling rate r, here min(1, Phi / Phi_ref) with
-# Phi_ref = gsa_scale / (n_tips * lambda0 * (1 + epsilon)), gsa_scale times the expected length
-# of one such interval under the background rates); the tree is cut in one of those intervals,
-# drawn with weight equal to its length, at a time uniform within it. Extinct lineages are
-# pruned and the tree rescaled to height one. Trees in which a regime (the background included)
-# holds fewer than `min_fraction` of the tips are drawn again (a further condition, not part of
-# the GSA). The attribute "capped" of the result is TRUE when Phi exceeded Phi_ref, which
-# truncates the weight; data-raw/validation_shift_tree.R reports how often.
-#
-# Returns a list with `tree` (a binary ultrametric phylo of height one), `regimes` (a factor,
-# the regime of each edge in the order of tree$edge: "0" for the background and k for the
-# lineages below shift k, the regime of the lower end of the edge), `tip_regime` (integer, per
-# tip) and `rates` (speciation rate of each regime before rescaling).
+#' Internal: trees with heritable shifts in the rate of speciation, for the simulations of the
+#' DAMOCLES paper (data-raw/s1_type1_shifts.R and later blocks; dev/plano-artigo-damocles.md).
+#'
+#' A forward birth-death process with one rate per lineage. Speciation starts at `lambda0` and
+#' extinction is `epsilon` times speciation in every lineage. Each of `n_shifts` shifts
+#' multiplies the speciation (and so the extinction) rate of one living lineage and all its
+#' descendants by `ratio`; shift k happens when the number of living lineages first reaches a
+#' number drawn between 3 and `n_tips / 4`, on a lineage drawn at random, so shifts can be
+#' nested. The tree is conditioned on `n_tips` living lineages with the general sampling
+#' approach (GSA) of Hartmann, Wong & Stadler (2010, Syst. Biol. 59: 465-476,
+#' doi:10.1093/sysbio/syq026): each run goes on until `gsa_factor * n_tips` lineages are alive or
+#' all are extinct; a run contributes a tree with probability proportional to the total time Phi
+#' it spent with exactly `n_tips` lineages (their sampling rate r, here min(1, Phi / Phi_ref) with
+#' Phi_ref = gsa_scale / (n_tips * lambda0 * (1 + epsilon)), gsa_scale times the expected length
+#' of one such interval under the background rates); the tree is cut in one of those intervals,
+#' drawn with weight equal to its length, at a time uniform within it. Extinct lineages are
+#' pruned and the tree rescaled to height one. Trees in which a regime (the background included)
+#' holds fewer than `min_fraction` of the tips are drawn again (a further condition, not part of
+#' the GSA). The attribute "capped" of the result is TRUE when Phi exceeded Phi_ref, which
+#' truncates the weight; data-raw/validation_shift_tree.R reports how often.
+#'
+#' Returns a list with `tree` (a binary ultrametric phylo of height one), `regimes` (a factor,
+#' the regime of each edge in the order of tree$edge: "0" for the background and k for the
+#' lineages below shift k, the regime of the lower end of the edge), `tip_regime` (integer, per
+#' tip) and `rates` (speciation rate of each regime before rescaling).
+#' @noRd
 sim_shift_tree <- function(n_tips, n_shifts = 1, ratio = 2, lambda0 = 1, epsilon = 0.5,
                            min_fraction = 0.05, gsa_factor = 2, gsa_scale = 15,
                            max_tries = 10000) {
@@ -116,7 +117,8 @@ shift_tree_once <- function(n_tips, n_shifts, ratio, lambda0, epsilon, gsa_facto
   out
 }
 
-# Keep the segments that start before `cut`; segments that span it end there, as living tips.
+#' Keep the segments that start before `cut`; segments that span it end there, as living tips.
+#' @noRd
 shift_tree_cut <- function(segments, cut, rates) {
   colnames(segments) <- c("from", "to", "start", "end", "regime", "kind")
   keep <- segments[, "start"] < cut

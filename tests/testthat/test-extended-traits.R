@@ -690,3 +690,39 @@ test_that("trait_rarefaction() converges to the full-data statistic as effort gr
     expect_equal(at30$mean, unname(full[at30$statistic]), tolerance = 1e-10)
   }
 })
+
+test_that("trait_gradient_bayes() can run without printing anything", {
+  skip_if_not_extended()
+  skip_if_not_installed("cmdstanr")
+  skip_if_not_installed("posterior")
+  skip_if(is.null(cmdstanr::cmdstan_version(error_on_NA = FALSE)), "CmdStan is not installed")
+  # BS2.13: with refresh = 0, show_messages = FALSE and show_exceptions = FALSE passed through
+  # `...` to $sample(), a fit prints nothing to the console and emits no messages. The only
+  # condition left is the package's own warning when the diagnostics fail, which is allowed
+  # here because short chains may trigger it. A first fit compiles the model and shows the
+  # one-time citation message, so that the second fit checks the sampler's own output only.
+  set.seed(401)
+  d <- tgb_data(8, 10)
+  quiet <- function() {
+    trait_gradient_bayes(d$tg, d$tree, chains = 1, iter_warmup = 300, iter_sampling = 300,
+                         seed = 1, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
+  }
+  suppressWarnings(suppressMessages(quiet()))
+  messages <- character()
+  warnings <- character()
+  printed <- utils::capture.output(fit <- withCallingHandlers(
+    quiet(),
+    message = function(m) {
+      messages <<- c(messages, conditionMessage(m))
+      invokeRestart("muffleMessage")
+    },
+    warning = function(w) {
+      warnings <<- c(warnings, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  ))
+  expect_length(printed, 0)
+  expect_length(messages, 0)
+  expect_length(grep("has not converged", warnings, invert = TRUE, value = TRUE), 0)
+  expect_s3_class(fit, "mc_trait_gradient_bayes")
+})

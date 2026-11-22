@@ -63,7 +63,8 @@ run_scenarios <- function(scenarios, simulate, setup = NULL,
         row.names = NULL)
 }
 
-# with its generator named, since workers of the future package use another one
+#' with its generator named, since workers of the future package use another one
+#' @noRd
 cell_seed <- function(seed) {
   set.seed(seed, kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
 }

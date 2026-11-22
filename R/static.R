@@ -263,7 +263,8 @@ logistic_gradients <- function(scenario, n_sites = 31) {
   data.frame(x = x, y = y, x_test = test[[1]], y_test = test[[2]])
 }
 
-# stops unless the gradients in the list `x` are numeric, finite and of the same length
+#' stops unless the gradients in the list `x` are numeric, finite and of the same length
+#' @noRd
 check_gradients <- function(x, name) {
   ok <- length(x) >= 1 &&
     all(vapply(x, function(g) is.numeric(g) && length(g) >= 1 && all(is.finite(g)),
@@ -278,9 +279,10 @@ check_gradients <- function(x, name) {
   invisible(x)
 }
 
-# Moran's eigenvector maps of a regular transect, from the broadest scale: the
-# eigenvectors with positive eigenvalues of the doubly centred similarity
-# matrix, with distances above one step truncated to four steps
+#' Moran's eigenvector maps of a regular transect, from the broadest scale: the
+#' eigenvectors with positive eigenvalues of the doubly centred similarity
+#' matrix, with distances above one step truncated to four steps
+#' @noRd
 transect_mem <- function(n) {
   d <- as.matrix(stats::dist(seq_len(n)))
   d[d > 1] <- 4

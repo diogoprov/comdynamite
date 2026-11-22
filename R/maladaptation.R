@@ -116,8 +116,9 @@ maladaptation_at <- function(x, step) {
   out
 }
 
-# steps since the environment of each site last changed, at the end or at a recorded step (NA
-# for simulations made before this output existed)
+#' steps since the environment of each site last changed, at the end or at a recorded step (NA
+#' for simulations made before this output existed)
+#' @noRd
 steps_since_change <- function(x, step) {
   sc <- x$evolution$since_change
   n <- nrow(x$abundance)

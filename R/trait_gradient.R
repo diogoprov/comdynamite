@@ -123,8 +123,9 @@ trait_gradient <- function(data, trait = "trait", site = "site", species = "spec
   out
 }
 
-# one row per population (site x species): site, species, abundance, trait (NA if not
-# measured); several rows of a population are averaged
+#' one row per population (site x species): site, species, abundance, trait (NA if not
+#' measured); several rows of a population are averaged
+#' @noRd
 tg_populations <- function(data, trait, site, species, abundance) {
   if (!is.data.frame(data)) stop("`data` must be a data frame", call. = FALSE)
   needed <- c(trait, site, species, abundance)
@@ -169,7 +170,8 @@ tg_populations <- function(data, trait, site, species, abundance) {
   pops
 }
 
-# the analysis of a table of populations (site, species, abundance, trait)
+#' the analysis of a table of populations (site, species, abundance, trait)
+#' @noRd
 tg_compute <- function(pops, settings, slopes = TRUE) {
   measured <- !is.na(pops$trait)
   w_site <- if (settings$site_weights == "abundance") pops$abundance else rep(1, nrow(pops))
@@ -228,7 +230,8 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
   list(species = species_table, sites = sites, populations = populations)
 }
 
-# intercept, slope and standard error of the slope of a weighted least-squares line
+#' intercept, slope and standard error of the slope of a weighted least-squares line
+#' @noRd
 weighted_slope <- function(x, y, w) {
   sw <- sum(w)
   mx <- sum(w * x) / sw
@@ -450,7 +453,7 @@ trait_gradient_test <- function(x, n_null = 999,
                                 burn_in = NULL, thin = NULL, tree = NULL, phylo_k = 1.1) {
   cite_method("trait_gradient_test")
   if (!inherits(x, "mc_trait_gradient")) {
-    stop("`x` must come from trait_gradient()", call. = FALSE)
+    stop("trait_gradient_test(): `x` must come from trait_gradient()", call. = FALSE)
   }
   null <- match.arg(null)
   check_count(n_null, "n_null")
@@ -542,8 +545,9 @@ trait_gradient_test <- function(x, n_null = 999,
             class = "mc_trait_gradient_test")
 }
 
-# initial transition probabilities of the phylogenetic permutations of Lapointe & Garland
-# (2001): similarities k - d / d_max, divided by their row sums
+#' initial transition probabilities of the phylogenetic permutations of Lapointe & Garland
+#' (2001): similarities k - d / d_max, divided by their row sums
+#' @noRd
 phylo_transition <- function(shared, k) {
   depth <- diag(shared)
   d <- outer(depth, depth, "+") - 2 * shared
@@ -553,9 +557,10 @@ phylo_transition <- function(shared, k) {
   similarity / rowSums(similarity)
 }
 
-# one phylogenetic permutation of `values`: species in random order send their value to a free
-# position with the transition probabilities of the free positions, rescaled; the last value
-# takes the last free position. With k = 1 a probability can be 0.
+#' one phylogenetic permutation of `values`: species in random order send their value to a free
+#' position with the transition probabilities of the free positions, rescaled; the last value
+#' takes the last free position. With k = 1 a probability can be 0.
+#' @noRd
 phylogenetic_permutation <- function(values, transition) {
   n <- length(values)
   out <- values
@@ -572,15 +577,17 @@ phylogenetic_permutation <- function(values, transition) {
   out
 }
 
-# the populations of a trait_gradient() result as the input of tg_compute(), with
-# unmeasured trait values back to NA
+#' the populations of a trait_gradient() result as the input of tg_compute(), with
+#' unmeasured trait values back to NA
+#' @noRd
 tg_records <- function(x) {
   p <- x$populations
   data.frame(site = p$site, species = p$species, abundance = p$abundance,
              trait = ifelse(p$measured, p$trait, NA_real_), stringsAsFactors = FALSE)
 }
 
-# correlation of beta and alpha, their variances, and beta and alpha of each species
+#' correlation of beta and alpha, their variances, and beta and alpha of each species
+#' @noRd
 tg_null_stats <- function(x) {
   s <- x$species
   ok <- stats::complete.cases(s$beta, s$alpha)
@@ -588,7 +595,8 @@ tg_null_stats <- function(x) {
   c(r, stats::var(s$beta, na.rm = TRUE), stats::var(s$alpha, na.rm = TRUE), s$beta, s$alpha)
 }
 
-# `n_trades` curveball trades on the sites of populations; species never repeat in a site
+#' `n_trades` curveball trades on the sites of populations; species never repeat in a site
+#' @noRd
 curveball_sites <- function(site_of, species, n_trades) {
   if (n_trades == 0) return(site_of)
   site_ids <- unique(site_of)
@@ -700,7 +708,7 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
                                  min_sites = 3) {
   cite_method("trait_gradient_phylo")
   if (!inherits(x, "mc_trait_gradient")) {
-    stop("`x` must come from trait_gradient()", call. = FALSE)
+    stop("trait_gradient_phylo(): `x` must come from trait_gradient()", call. = FALSE)
   }
   check_tree(tree)
   responses <- unique(match.arg(responses, several.ok = TRUE))
@@ -744,8 +752,9 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
             class = "mc_trait_gradient_phylo")
 }
 
-# bootstrap standard errors of mean, beta and alpha of each species, resampling its sites with
-# the site means of the observed data held fixed
+#' bootstrap standard errors of mean, beta and alpha of each species, resampling its sites with
+#' the site means of the observed data held fixed
+#' @noRd
 tg_boot_se <- function(x, n_boot) {
   p <- x$populations
   rows <- split(seq_len(nrow(p)), factor(p$species, x$species$species))
@@ -766,18 +775,21 @@ tg_boot_se <- function(x, n_boot) {
   out
 }
 
-# shared lengths and root-to-tip distances of the tips, in the order of `species`
+#' shared lengths and root-to-tip distances of the tips, in the order of `species`
+#' @noRd
 tg_tree_parts <- function(tree, species) {
   shared <- ape::vcv(tree)[species, species]
   list(shared = shared, depth = diag(shared), height = max(diag(shared)))
 }
 
-# bounded optimisation of the OU fit, apart so that tests can make it fail
+#' bounded optimisation of the OU fit, apart so that tests can make it fail
+#' @noRd
 ou_optim <- function(par, fn, lower, upper) {
   stats::optim(par, fn, method = "L-BFGS-B", lower = lower, upper = upper)
 }
 
-# REML fit of y ~ N(mu, sigma2 C + diag(v)) for a covariance model
+#' REML fit of y ~ N(mu, sigma2 C + diag(v)) for a covariance model
+#' @noRd
 gls_known_error <- function(y, v, covs, model) {
   n <- length(y)
   ones <- rep(1, n)

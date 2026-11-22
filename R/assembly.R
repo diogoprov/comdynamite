@@ -104,8 +104,8 @@ assemble_community <- function(traits, size,
   distance <- match.arg(distance)
   x <- as.matrix(traits)
   if (!is.numeric(x)) stop("`traits` must be numeric (one column per trait)", call. = FALSE)
-  if (anyNA(x)) stop("`traits` has missing values", call. = FALSE)
-  if (any(is.infinite(x))) stop("`traits` has infinite values", call. = FALSE)
+  if (anyNA(x)) stop("assemble_community(): `traits` has missing values", call. = FALSE)
+  if (any(is.infinite(x))) stop("assemble_community(): `traits` has infinite values", call. = FALSE)
   if (is.null(rownames(x))) {
     named <- if (is.null(dim(traits))) names(traits)
     if (is.null(named)) {
@@ -159,7 +159,8 @@ print.mc_assembly <- function(x, ...) {
   invisible(x)
 }
 
-# matrix w such that Euclidean distances between the rows of x %*% w are the chosen distances
+#' matrix w such that Euclidean distances between the rows of x %*% w are the chosen distances
+#' @noRd
 trait_whitening <- function(x, distance, trait_cov = NULL) {
   p <- ncol(x)
   if (!is.null(trait_cov) && distance != "mahalanobis") {
@@ -195,11 +196,12 @@ trait_whitening <- function(x, distance, trait_cov = NULL) {
     })
 }
 
-# GAUSE (Colwell & Winkler 1984): remove, from the closest pair, the species
-# with the smaller sum of distances to the remaining species. The nearest neighbour of each
-# species is kept up to date, so each step costs O(n) instead of O(n^2); the closest pairs are
-# listed in the order of which(arr.ind = TRUE) on the remaining species, so the random draws,
-# and the species removed, are the same as when scanning the whole matrix at each step
+#' GAUSE (Colwell & Winkler 1984): remove, from the closest pair, the species
+#' with the smaller sum of distances to the remaining species. The nearest neighbour of each
+#' species is kept up to date, so each step costs O(n) instead of O(n^2); the closest pairs are
+#' listed in the order of which(arr.ind = TRUE) on the remaining species, so the random draws,
+#' and the species removed, are the same as when scanning the whole matrix at each step
+#' @noRd
 gause_removal <- function(x, size, min_distance = NULL) {
   d <- as.matrix(stats::dist(x))
   diag(d) <- Inf

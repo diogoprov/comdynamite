@@ -28,7 +28,8 @@ fit_damocles <- function(...) {
   damocles_fit(...)
 }
 
-# value of a renamed argument: the old one, with a warning, when it was given
+#' value of a renamed argument: the old one, with a warning, when it was given
+#' @noRd
 renamed_arg <- function(new, old, new_name, old_name) {
   if (is.null(old)) return(new)
   warning("`", old_name, "` is deprecated; use `", new_name, "`", call. = FALSE)

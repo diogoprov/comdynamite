@@ -312,6 +312,11 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   }, "Nodes")
   table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
+  # explained over explained plus residual sum of squares of the weighted fit
+  fitted_share <- ifelse(is.infinite(table$statistic), 1,
+                         table$statistic / (1 + table$statistic))
+  warn_perfect_fit(fitted_share, paste("node", table$node),
+                   "the predictors and the composition of")
   structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
                  p_partial_max = matrix_of(results, "p_partial_max", env_names),
                  p_partial_site = matrix_of(results, "p_partial_site", env_names),
@@ -429,7 +434,8 @@ biogeography_matrix <- function(area, contrast = "others", outside = c("zero", "
   events
 }
 
-# one logical column per area
+#' one logical column per area
+#' @noRd
 area_membership <- function(area) {
   if (is.matrix(area) || is.data.frame(area)) {
     member <- as.matrix(area)
@@ -460,7 +466,8 @@ check_events <- function(contrast, areas) {
   }
 }
 
-# events with one row per site, in the order of `comm`
+#' events with one row per site, in the order of `comm`
+#' @noRd
 check_biogeography <- function(biogeography, comm) {
   biogeography <- check_sites(as.matrix(biogeography), comm, "`biogeography`")
   if (!all(biogeography %in% c(-1, 0, 1))) {
@@ -555,9 +562,10 @@ one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
        p_partial_site = partial_site, p_partial_joint = partial_joint)
 }
 
-# statistics of one node; all NA when the model cannot be fitted. `statistic` is that of
-# the original code. Draws are ranked on F, which is free of the scale of the response and
-# takes into account that draws can occupy different numbers of sites
+#' statistics of one node; all NA when the model cannot be fitted. `statistic` is that of
+#' the original code. Draws are ranked on F, which is free of the scale of the response and
+#' takes into account that draws can occupy different numbers of sites
+#' @noRd
 node_fit <- function(incidence, values, env) {
   occupied <- rowSums(incidence) > 0
   incidence <- incidence[occupied, , drop = FALSE]

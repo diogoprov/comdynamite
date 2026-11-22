@@ -70,7 +70,8 @@ competition_matrix <- function(species, type = c("none", "random", "phylo", "tra
   scale * a
 }
 
-# competition by the overlap of Gaussian niches, 1 on the diagonal; product over axes
+#' competition by the overlap of Gaussian niches, 1 on the diagonal; product over axes
+#' @noRd
 trait_competition <- function(traits, inter_max) {
   if (is.null(traits)) stop("type = \"trait\" needs `traits`", call. = FALSE)
   niche_cor <- if (is.list(traits) && !is.data.frame(traits)) attr(traits, "niche_cor")

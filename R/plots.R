@@ -65,7 +65,8 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
   legend <- legend_flag(legend)
   check_number(level, "level", lower = 0, upper = 1)
   check_number(text_size, "text_size", lower = 0, open = TRUE)
-  if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
+  if (!inherits(x, "mc_node_test")) stop("plot_node_test(): `x` must come from node_test()",
+                                         call. = FALSE)
   check_tree(tree, branch_lengths = FALSE)
   check_colours(colours, 2)
   test <- match.arg(test)
@@ -201,7 +202,8 @@ plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
   if (!is.null(cex)) text_size <- 3.5 * renamed_arg(text_size, cex, "text_size", "cex")
   check_number(level, "level", lower = 0, upper = 1)
   check_number(text_size, "text_size", lower = 0, open = TRUE)
-  if (!inherits(x, "mc_node_test")) stop("`x` must come from node_test()", call. = FALSE)
+  if (!inherits(x, "mc_node_test")) stop("plot_node_heatmap(): `x` must come from node_test()",
+                                         call. = FALSE)
   check_colours(colours, 2)
   test <- match.arg(test)
   values <- cbind(x$semipartial, x$biogeography$semipartial)
@@ -236,7 +238,8 @@ plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
   p
 }
 
-# the tree must be able to hold the species of each node
+#' the tree must be able to hold the species of each node
+#' @noRd
 check_node_tree <- function(x, tree) {
   sizes <- colSums(node_contrasts(tree) != 0)
   size <- sizes[as.character(x$nodes$node)]
@@ -245,7 +248,8 @@ check_node_tree <- function(x, tree) {
   }
 }
 
-# one row for each significant test, in the sets of predictors and events
+#' one row for each significant test, in the sets of predictors and events
+#' @noRd
 node_marks <- function(x, test, alpha) {
   field <- c(max = "p_partial_max", site = "p_partial_site", joint = "p_partial_joint")[[test]]
   one_set <- function(p, set, offset = 0) {
@@ -380,7 +384,8 @@ plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component
   p
 }
 
-# centres of the fractions, moved apart so that their labels do not overlap
+#' centres of the fractions, moved apart so that their labels do not overlap
+#' @noRd
 fraction_positions <- function(edges, width) {
   centres <- (edges[-1] + edges[-length(edges)]) / 2
   for (i in seq_along(centres)[-1]) centres[i] <- max(centres[i], centres[i - 1] + width)

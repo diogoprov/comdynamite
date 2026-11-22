@@ -81,12 +81,11 @@
 #'   predictor is a linear combination of the others, naming it, and warns, without removing any
 #'   variable, when a variance inflation factor exceeds 10 (tests in tests/testthat/test-checks.R
 #'   and tests/testthat/test-population_shifts.R).
-#' @srrstatsTODO {RE2.4b} No function checks whether a response is an exact linear function
-#'   of the predictors. With such data `trait_flex()` only relays the warning of
-#'   `summary.lm()` ("essentially perfect fit"), and `drift_test()` returns an infinite
-#'   statistic when the standard error is zero. Missing: a check of a residual sum of
-#'   squares of zero up to rounding error, with a warning, in `trait_flex()`, `drift_test()`,
-#'   `node_test()` and `pcps_test()`.
+#' @srrstats {RE2.4b} `trait_flex()`, `drift_test()`, `node_test()` and `pcps_test()` warn,
+#'   through `warn_perfect_fit()` (R/checks.R), when a response is an exact linear function
+#'   of the predictors (a residual sum of squares of zero up to rounding error), naming the
+#'   models concerned and saying that their F statistics, standard errors and p-values are
+#'   not meaningful.
 #' @srrstats {RE3.0} Closed-form fits (`stats::lm()`, `stats::lm.fit()`, QR) need no
 #'   convergence check, and random forests do not iterate to convergence. Of the iterative fits,
 #'   `population_shifts()` warns when the width of the kernel stays at an end of its grid or the
@@ -190,12 +189,10 @@
 #'   functions and not `summary()` methods: the bootstrap of `population_shifts()` runs only
 #'   with `nboot > 0`, and `abc_recovery()`, `abc_cv()` and `abc_diagnose()` are apart from
 #'   `abc_fit()`.
-#' @srrstatsTODO {RE5.0} The documentation gives one timing (README, section "Large
-#'   analyses": about 4 minutes for `node_test()` with 600 species, 100 sites and 999
-#'   permutations on one core) and says which tests run in parallel, but no scaling
-#'   relationship. Missing: a benchmark of the regression functions against the numbers of
-#'   sites, species and permutations (a script in data-raw/ and a table in an article or in
-#'   the README).
+#' @srrstats {RE5.0} `data-raw/benchmark_regression.R` times `node_test()`, `pcc_test()`,
+#'   `pcps_test()`, `phylo_beta_test()` and `trait_partition()` over 25 to 200 sites, 25 to
+#'   100 species and 99 or 499 permutations; the README (section "Large analyses") gives the
+#'   exponents of time on each of these and the time of the largest case.
 #' @srrstats {RE6.0} `plot()` methods exist for every regression class: `mc_node_test`,
 #'   `mc_pcps`, `mc_phylo_beta`, `mc_trait_partition`, `mc_trait_gradient`,
 #'   `mc_trait_gradient_test`, `trait_flex`, `population_shifts` and `drift_test`, and now
@@ -228,11 +225,13 @@
 #'   "collinear", `check_env()` stops with "without variance", `node_fit()` returns `NA`
 #'   and `weighted_fit()` `NULL` (so the node gets `NA`), and `trait_partition()` returns
 #'   `NA` semipartial correlations.
-#' @srrstatsTODO {RE7.1} No test fits a response that is an exact, noiseless function of
-#'   the predictors. Missing: such tests for `trait_flex()`, `drift_test()`, `node_test()`
-#'   and `pcps_test()`, together with the check of RE2.4b.
-#' @srrstatsTODO {RE7.1a} No test compares the time of a fit on noiseless and on noisy
-#'   data. Missing: that comparison in the tests of RE7.1.
+#' @srrstats {RE7.1} `tests/testthat/test-perfect-fit.R` fits noiseless responses with
+#'   `trait_flex()`, `drift_test()`, `node_test()` and `pcps_test()`, checks the warning of
+#'   RE2.4b and that the exact relation is recovered, and checks that noisy versions of the
+#'   same data raise no warning.
+#' @srrstats {RE7.1a} `tests/testthat/test-perfect-fit.R` checks that a fit of
+#'   `trait_flex()` on noiseless data takes no more than three times as long as on noisy
+#'   data, plus half a second.
 #' @srrstats {RE7.2} Tests show that names of the input reach the output:
 #'   tests/testthat/test-node.R (predictor and event names as column names of
 #'   `semipartial`, defaults for unnamed predictors), tests/testthat/test-phylo-gradient.R

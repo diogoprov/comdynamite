@@ -103,7 +103,8 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
     at <- match(paste(tree$edge[order, 1], tree$edge[order, 2]),
                 paste(regimes$edge[, 1], regimes$edge[, 2]))
     if (is.null(regimes$maps) || nrow(regimes$edge) != nrow(tree$edge) || anyNA(at)) {
-      stop("a tree given as `regimes` needs a mapped history (class `simmap`) and the same ",
+      stop("trait_ou(): a tree given as `regimes` needs a mapped history (class `simmap`) and ",
+           "the same ",
            "edges as `tree`", call. = FALSE)
     }
     maps <- regimes$maps[at]
@@ -220,7 +221,8 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
   out
 }
 
-# upper triangular U with crossprod(U) = m, for a symmetric positive semidefinite matrix
+#' upper triangular U with crossprod(U) = m, for a symmetric positive semidefinite matrix
+#' @noRd
 matrix_root <- function(m) {
   if (!is.numeric(m) || nrow(m) != ncol(m) || anyNA(m) || !isSymmetric(unname(m))) {
     stop("a rate matrix must be square, symmetric and without NA", call. = FALSE)
@@ -276,7 +278,8 @@ paint_regimes <- function(tree, nodes, stem = FALSE) {
   structure(reg, order = "cladewise")
 }
 
-# all nodes (tips and internal) below `node`
+#' all nodes (tips and internal) below `node`
+#' @noRd
 phangorn_descendants <- function(tree, node) {
   out <- integer(0)
   front <- node

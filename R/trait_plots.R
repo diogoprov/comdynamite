@@ -238,9 +238,10 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
 #' @export
 plot.community_index <- function(x, ...) plot.tstats(x, ...)
 
-# diagonal hatching lines inside rectangles (columns xmin, xmax, ymin, ymax, and any facet
-# columns, which are kept), spaced by `spacing` (one value per rectangle) along x; over one unit
-# of y a line moves 2.5 spacings along x, so that the angle is the same in every rectangle
+#' diagonal hatching lines inside rectangles (columns xmin, xmax, ymin, ymax, and any facet
+#' columns, which are kept), spaced by `spacing` (one value per rectangle) along x; over one unit
+#' of y a line moves 2.5 spacings along x, so that the angle is the same in every rectangle
+#' @noRd
 hatch_lines <- function(rects, spacing) {
   rows <- lapply(seq_len(nrow(rects)), function(i) {
     r <- rects[i, , drop = FALSE]
@@ -392,8 +393,9 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
   out
 }
 
-# warns when the spread within populations rises with their mean, so that one bandwidth fits
-# small and large populations badly
+#' warns when the spread within populations rises with their mean, so that one bandwidth fits
+#' small and large populations badly
+#' @noRd
 check_spread_scale <- function(z, pop) {
   if (any(z <= 0)) return(invisible(NULL))
   size <- tapply(z, pop, length)

@@ -155,12 +155,11 @@
 #'   `as.data.frame.mc_data()` in `tests/testthat/test-mc-data.R`, the columns of
 #'   `community_index()` in `test-trait_variation.R` and the names of `summary_stats()`
 #'   in `test-summary-stats.R`.
-#' @srrstatsTODO {EA6.0d} Missing: the tests check the names and dimensions of the data
-#'   frames returned but not the class of each column. Add expectations such as
-#'   `expect_identical(vapply(out, class, character(1)), c(site = "character", ...))` for
-#'   the tables of `tstats()`, `community_index()`, `null_intervals()`, `tstats_summary()`,
-#'   `trait_flex()`, `nested_variance()`, `trait_densities()`, `trait_rarefaction()` and
-#'   the `as.data.frame()` methods.
+#' @srrstats {EA6.0d} `tests/testthat/test-column-classes.R` checks the class of every
+#'   column of the tables of `tstats()`, `tstats_summary()`, `null_intervals()`,
+#'   `community_index()`, `trait_flex()`, `nested_variance()`, `trait_densities()`,
+#'   `trait_rarefaction()` and the `as.data.frame()` methods of `trait_gradient()` and
+#'   `node_test()`.
 #' @srrstats {EA6.0e} Numeric results are compared with analytic, reference or recomputed
 #'   values through `expect_equal()` with an explicit `tolerance` (40 test files), for
 #'   example the equilibria in `tests/testthat/test-analytic.R` and the sums of squares of

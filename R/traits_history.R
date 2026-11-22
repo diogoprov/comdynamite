@@ -157,8 +157,9 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
   out
 }
 
-# the history of a continuous-time Markov chain with rates `q` (zero diagonal) along a tree in
-# cladewise order, starting from `root`; the rates of edge e are multiplied by `multiplier[e]`
+#' the history of a continuous-time Markov chain with rates `q` (zero diagonal) along a tree in
+#' cladewise order, starting from `root`; the rates of edge e are multiplied by `multiplier[e]`
+#' @noRd
 mk_history <- function(tree, q, root, multiplier) {
   states <- rownames(q)
   n_tip <- ape::Ntip(tree)
@@ -191,7 +192,8 @@ mk_history <- function(tree, q, root, multiplier) {
   list(maps = maps, at_node = at_node)
 }
 
-# a cladewise tree with the history of a discrete character, in the format of phytools
+#' a cladewise tree with the history of a discrete character, in the format of phytools
+#' @noRd
 as_simmap <- function(tree, maps, at_node, states) {
   n_tip <- ape::Ntip(tree)
   labels <- paste(tree$edge[, 1], tree$edge[, 2], sep = ",")
@@ -277,8 +279,9 @@ tip_history_metrics <- function(history) {
   out
 }
 
-# values at the internal nodes (root included) of a Brownian motion with Pagel's lambda, drawn
-# given the values at the tips, so that tips and nodes have their joint distribution
+#' values at the internal nodes (root included) of a Brownian motion with Pagel's lambda, drawn
+#' given the values at the tips, so that tips and nodes have their joint distribution
+#' @noRd
 bm_nodes <- function(tree, lambda, tips) {
   n_tip <- ape::Ntip(tree)
   scaled <- tree

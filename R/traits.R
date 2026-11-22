@@ -206,7 +206,7 @@ growth_rates <- function(env, traits) {
     }
     species <- rownames(traits[[1]])
     if (!all(vapply(traits, function(x) setequal(rownames(x), species), logical(1)))) {
-      stop("sets of traits have different species", call. = FALSE)
+      stop("growth_rates(): sets of traits have different species", call. = FALSE)
     }
     sites <- if (is.matrix(env) || is.data.frame(env)) rownames(env)
     if (is.data.frame(env) && .row_names_info(env) < 0) sites <- NULL
@@ -231,8 +231,9 @@ growth_rates <- function(env, traits) {
   r
 }
 
-# multivariate Gaussian response: standardised departures d (sites x axes) for each species,
-# exp(-t(d) solve(R) d / 2), times the product of the maxima
+#' multivariate Gaussian response: standardised departures d (sites x axes) for each species,
+#' exp(-t(d) solve(R) d / 2), times the product of the maxima
+#' @noRd
 correlated_growth <- function(axes, traits, cor, species) {
   q <- length(traits)
   env <- vapply(unname(as.list(axes)), function(e) as.numeric(unname(e)), numeric(length(axes[[1]])))
@@ -252,8 +253,9 @@ correlated_growth <- function(axes, traits, cor, species) {
   r
 }
 
-# the correlation matrix of each species (a list in the order of `species`) from the attribute
-# of niche_correlation(); NULL without it
+#' the correlation matrix of each species (a list in the order of `species`) from the attribute
+#' of niche_correlation(); NULL without it
+#' @noRd
 niche_cor_species <- function(cor, species, q) {
   if (is.null(cor)) return(NULL)
   if (is.list(cor)) {
@@ -274,9 +276,10 @@ niche_cor_species <- function(cor, species, q) {
   lapply(cor, unname)
 }
 
-# covariance Omega of the Gaussian niche of one species on its axes with a finite breadth
-# `s`: D R D with D = diag(sigma) when all are finite; otherwise the inverse of that block of
-# the precision, the limit of an infinite breadth, as in correlated_growth()
+#' covariance Omega of the Gaussian niche of one species on its axes with a finite breadth
+#' `s`: D R D with D = diag(sigma) when all are finite; otherwise the inverse of that block of
+#' the precision, the limit of an infinite breadth, as in correlated_growth()
+#' @noRd
 niche_omega <- function(sigma, cor, s = which(is.finite(sigma))) {
   d <- diag(sigma[s], length(s))
   r <- if (length(s) == length(sigma)) cor else solve(solve(cor)[s, s, drop = FALSE])
@@ -284,7 +287,8 @@ niche_omega <- function(sigma, cor, s = which(is.finite(sigma))) {
   (om + t(om)) / 2
 }
 
-# precision of the niche over all the axes, with zeros on those without a finite breadth
+#' precision of the niche over all the axes, with zeros on those without a finite breadth
+#' @noRd
 niche_precision <- function(sigma, cor) {
   s <- which(is.finite(sigma))
   out <- matrix(0, length(sigma), length(sigma))
@@ -292,8 +296,9 @@ niche_precision <- function(sigma, cor) {
   out
 }
 
-# the matrix M of the overlap exp(-d' M d / 2) of two Gaussian niches with precisions a and b
-# whose optima differ by d: (Omega_a + Omega_b)^-1 when both covariances exist
+#' the matrix M of the overlap exp(-d' M d / 2) of two Gaussian niches with precisions a and b
+#' whose optima differ by d: (Omega_a + Omega_b)^-1 when both covariances exist
+#' @noRd
 niche_overlap_matrix <- function(a, b) {
   u <- which(diag(a) > 0 | diag(b) > 0)
   m <- matrix(0, nrow(a), ncol(a))
@@ -372,9 +377,10 @@ niche_correlation <- function(traits, cor) {
   traits
 }
 
-# traits of species_traits() as a data frame with names of species, also from a matrix or a
-# tibble, which has no row names
-# a trait given from outside, in the order of `species`; NULL when not given
+#' traits of species_traits() as a data frame with names of species, also from a matrix or a
+#' tibble, which has no row names
+#' a trait given from outside, in the order of `species`; NULL when not given
+#' @noRd
 external_trait <- function(x, species, name, finite = TRUE) {
   if (is.null(x)) return(NULL)
   if (!is.null(dim(x))) {
@@ -394,7 +400,7 @@ external_trait <- function(x, species, name, finite = TRUE) {
   }
   missing_species <- setdiff(species, names(x))
   if (length(missing_species) > 0) {
-    stop("`", name, "` has no value for ", species_list(missing_species), call. = FALSE)
+    stop("`", name, "` lacks values for ", species_list(missing_species), call. = FALSE)
   }
   unname(x[species])
 }
@@ -410,8 +416,9 @@ as_traits <- function(traits) {
   traits
 }
 
-# stops unless `x` is two finite numbers, the first not larger than the second, both `lower` or
-# more
+#' stops unless `x` is two finite numbers, the first not larger than the second, both `lower` or
+#' more
+#' @noRd
 check_range_pair <- function(x, name, lower = -Inf) {
   if (!is.numeric(x) || length(x) != 2 || !all(is.finite(x)) || x[1] > x[2] || any(x < lower)) {
     stop("`", name, "` must be two finite numbers, the first not larger than the second",

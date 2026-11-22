@@ -476,14 +476,15 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
   if (is.null(traits)) stop("`traits` is NULL", call. = FALSE)
   traits <- as.matrix(traits)
   if (!is.numeric(traits)) stop("`traits` is not numeric", call. = FALSE)
-  if (any(is.infinite(traits))) stop("`traits` has infinite values", call. = FALSE)
+  if (any(is.infinite(traits))) stop("trait_partition(): `traits` has infinite values",
+                                     call. = FALSE)
   check_count(n_perm, "n_perm")
   check_number(level, "level", lower = 0, upper = 1, open = TRUE)
   if (!is.null(coords)) check_coords(coords)
   comm <- check_species_comm(comm, rownames(traits), "`traits`", !is.null(site_permutations))
   comm <- comm[, colSums(comm) > 0, drop = FALSE]
   traits <- traits[colnames(comm), , drop = FALSE]
-  if (anyNA(traits)) stop("`traits` has missing values", call. = FALSE)
+  if (anyNA(traits)) stop("trait_partition(): `traits` has missing values", call. = FALSE)
   if (any(no_variance(traits))) {
     stop("traits without variance among the species with individuals", call. = FALSE)
   }
@@ -631,9 +632,10 @@ print.mc_trait_partition <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
-# null environments for the shared fraction, with one row per site of the landscape: Moran
-# spectral randomisations keep the autocorrelation of each variable (Wagner & Dray 2015), and
-# restricted permutations of a complete grid move the whole map
+#' null environments for the shared fraction, with one row per site of the landscape: Moran
+#' spectral randomisations keep the autocorrelation of each variable (Wagner & Dray 2015), and
+#' restricted permutations of a complete grid move the whole map
+#' @noRd
 shared_nulls <- function(shared_null, env, coords, site_permutations, n_perm) {
   if (shared_null == "none") return(list())
   if (shared_null == "sites") {
@@ -662,8 +664,9 @@ shared_nulls <- function(shared_null, env, coords, site_permutations, n_perm) {
 
 has_adespatial <- function() requireNamespace("adespatial", quietly = TRUE)
 
-# p-value of the weighted R2 of `env` on `space`, with free permutations of the sites of
-# `env`: the shared fraction has no meaning when `env` has no structure that `space` holds
+#' p-value of the weighted R2 of `env` on `space`, with free permutations of the sites of
+#' `env`: the shared fraction has no meaning when `env` has no structure that `space` holds
+#' @noRd
 spatial_structure_p <- function(env, space, site_weights, n_perm) {
   space <- weighted_standardise(space, site_weights)
   r2 <- function(e) explained_ss(space, e, site_weights) / sum(column_ss(e, site_weights))
@@ -672,15 +675,17 @@ spatial_structure_p <- function(env, space, site_weights, n_perm) {
   permutation_p(null, r2(env))
 }
 
-# weighted correlations between the columns of env and the site means of the columns of
-# traits; species without individuals have no weight
+#' weighted correlations between the columns of env and the site means of the columns of
+#' traits; species without individuals have no weight
+#' @noRd
 corner_correlation <- function(comm, traits, env) {
   site_weights <- rowSums(comm)
   means <- comm %*% weighted_standardise(traits, colSums(comm)) / site_weights
   crossprod(weighted_standardise(env, site_weights), site_weights * means) / sum(site_weights)
 }
 
-# one row per permutation and one column per column of traits
+#' one row per permutation and one column per column of traits
+#' @noRd
 corner_nulls <- function(comm, traits, env, landscape_env, rows, n_perm) {
   permuted <- matrix(landscape_env[as.vector(t(rows)), 1], nrow(comm))
   list(site = corner_correlation(comm, traits, permuted),
@@ -689,16 +694,18 @@ corner_nulls <- function(comm, traits, env, landscape_env, rows, n_perm) {
        }, "Species")))
 }
 
-# a permutation can leave a variable without variance, and then it does not count; if
-# none counts, or the statistic itself cannot be estimated, there is no test
+#' a permutation can leave a variable without variance, and then it does not count; if
+#' none counts, or the statistic itself cannot be estimated, there is no test
+#' @noRd
 permutation_p <- function(null, observed) {
   if (is.na(observed) || all(is.na(null))) return(NA_real_)
   (sum(null >= observed, na.rm = TRUE) + 1) / (sum(!is.na(null)) + 1)
 }
 
-# principal coordinates with species weights (Appendix B of Peres-Neto et al. 2012);
-# half_squared holds D^2 / 2. The coordinates have weighted mean zero and are orthogonal
-# under the weights
+#' principal coordinates with species weights (Appendix B of Peres-Neto et al. 2012);
+#' half_squared holds D^2 / 2. The coordinates have weighted mean zero and are orthogonal
+#' under the weights
+#' @noRd
 weighted_pcoa <- function(half_squared, weights) {
   w <- weights / sum(weights)
   n <- length(w)
@@ -711,9 +718,10 @@ weighted_pcoa <- function(half_squared, weights) {
   list(vectors = orient_vectors(vectors), values = eig$values[keep])
 }
 
-# eigenvectors have no sign: flip each column so that its largest absolute value is positive,
-# taking the first row among values tied up to rounding, so that results do not depend on
-# the platform's linear algebra
+#' eigenvectors have no sign: flip each column so that its largest absolute value is positive,
+#' taking the first row among values tied up to rounding, so that results do not depend on
+#' the platform's linear algebra
+#' @noRd
 orient_vectors <- function(vectors) {
   if (ncol(vectors) == 0) return(vectors)
   signs <- apply(vectors, 2, function(v) {
@@ -724,14 +732,16 @@ orient_vectors <- function(vectors) {
   sweep(vectors, 2, signs, "*")
 }
 
-# one Brownian vector per column
+#' one Brownian vector per column
+#' @noRd
 brownian_vectors <- function(covariance, n_sim) {
   eig <- eigen(covariance, symmetric = TRUE)
   eig$vectors %*% (sqrt(pmax(eig$values, 0)) * matrix(stats::rnorm(nrow(covariance) * n_sim),
                                                       nrow(covariance)))
 }
 
-# site means or standard deviations of the standardised traits (Appendix A)
+#' site means or standard deviations of the standardised traits (Appendix A)
+#' @noRd
 trait_response <- function(comm, traits, component) {
   site_weights <- rowSums(comm)
   standardised <- weighted_standardise(traits, colSums(comm))
@@ -740,26 +750,30 @@ trait_response <- function(comm, traits, component) {
   sqrt(pmax(comm %*% standardised^2 / site_weights - means^2, 0))
 }
 
-# share of what a model leaves (`left`) that another gains (`gain`); not estimable when
-# nothing is left, as when the model has as many predictors as sites
+#' share of what a model leaves (`left`) that another gains (`gain`); not estimable when
+#' nothing is left, as when the model has as many predictors as sites
+#' @noRd
 share_left <- function(gain, left, scale) {
   ifelse(left > sqrt(.Machine$double.eps) * scale, gain / left, NA_real_)
 }
 
-# weighted sums of squares of each column around its weighted mean
+#' weighted sums of squares of each column around its weighted mean
+#' @noRd
 column_ss <- function(response, site_weights) {
   colSums(site_weights * sweep(response, 2, colSums(site_weights * response) / sum(site_weights))^2)
 }
 
-# weighted sum of squares explained by centred predictors, around the weighted mean
+#' weighted sum of squares explained by centred predictors, around the weighted mean
+#' @noRd
 explained_ss <- function(predictors, response, site_weights) {
   sum(full_model(predictors, response, site_weights)$fitted)
 }
 
-# the model of all predictors: `fitted`, the explained sum of squares of each column of the
-# response, and `loss`, the loss of that sum when each predictor leaves the model, for each
-# column; beta^2 / the diagonal of the inverse of X'WX gives it without fitting one model
-# per predictor, and it is NA when predictors are collinear
+#' the model of all predictors: `fitted`, the explained sum of squares of each column of the
+#' response, and `loss`, the loss of that sum when each predictor leaves the model, for each
+#' column; beta^2 / the diagonal of the inverse of X'WX gives it without fitting one model
+#' per predictor, and it is NA when predictors are collinear
+#' @noRd
 full_model <- function(predictors, response, site_weights) {
   root <- sqrt(site_weights)
   centred <- sweep(response, 2, colSums(site_weights * response) / sum(site_weights))

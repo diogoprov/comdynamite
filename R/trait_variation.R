@@ -264,6 +264,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
   decomposition <- list()
   site_means <- list()
   site_fits <- list()
+  exact_labels <- character()
   for (trait in traits) {
     z <- individuals[[trait]]
     check_numeric_traits(z, trait)
@@ -303,7 +304,12 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
       modelled[ok] <- stats::fitted(fit)
       fitted_values[[component]] <<- modelled
       residual <- sum(stats::residuals(fit)^2)
-      f <- summary(fit)$fstatistic
+      exact_labels <<- c(exact_labels, if (total > 0 && residual <= total *
+                                             sqrt(.Machine$double.eps)) {
+        paste0(trait, " (", component, ")")
+      })
+      # the exact fits are reported once, below, instead of by summary.lm()
+      f <- suppressWarnings(summary(fit))$fstatistic
       p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
       c(explained = total - residual, residual = residual, total = total, p = unname(p))
     })
@@ -323,6 +329,8 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
                                       fixed = fixed, intraspecific = specific - fixed,
                                       row.names = NULL, stringsAsFactors = FALSE)
   }
+  warn_perfect_fit(rep(1, length(exact_labels)), exact_labels,
+                   "the model of `formula` and the site values of")
   structure(list(decomposition = do.call(rbind, unname(decomposition)),
                  sites = do.call(rbind, unname(site_means)),
                  model = do.call(rbind, unname(site_fits)), formula = formula),
@@ -532,8 +540,9 @@ nested_variance <- function(data, traits, factors, crossed = NULL, interaction =
   out
 }
 
-# group labels of each level of a nested hierarchy (each level pasted with the ones above),
-# after checking that each factor splits the one before it
+#' group labels of each level of a nested hierarchy (each level pasted with the ones above),
+#' after checking that each factor splits the one before it
+#' @noRd
 nested_groups <- function(data, factors, warn_crossed) {
   groups <- lapply(seq_along(factors), function(k) {
     do.call(paste, c(lapply(factors[seq_len(k)], function(f) as.character(data[[f]])),
@@ -564,7 +573,8 @@ need_lme4 <- function(what) {
   }
 }
 
-# nested random intercepts with nlme; NULL when the fit fails
+#' nested random intercepts with nlme; NULL when the fit fails
+#' @noRd
 nested_variance_nlme <- function(y, data, factors) {
   if (!requireNamespace("nlme", quietly = TRUE)) return(NULL) # nocov
   model_data <- data.frame(lapply(data[factors], function(f) factor(as.character(f))))
@@ -578,7 +588,8 @@ nested_variance_nlme <- function(y, data, factors) {
   list(variance = v, singular = FALSE, engine = "nlme")
 }
 
-# random intercepts for each grouping (nested or crossed) with lme4
+#' random intercepts for each grouping (nested or crossed) with lme4
+#' @noRd
 nested_variance_lme4 <- function(y, groups, levels) {
   terms <- paste0("g", seq_along(groups))
   model_data <- data.frame(stats::setNames(lapply(groups, factor), terms))
@@ -852,7 +863,8 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   out
 }
 
-# stops unless `colours` holds n valid colours
+#' stops unless `colours` holds n valid colours
+#' @noRd
 check_colours <- function(colours, n) {
   ok <- is.character(colours) && length(colours) == n &&
     !inherits(try(grDevices::col2rgb(colours), silent = TRUE), "try-error")
@@ -860,9 +872,10 @@ check_colours <- function(colours, n) {
   invisible(colours)
 }
 
-# one-sided tests of each site against its null values (columns of sims), as in
-# tstats_summary(): sites with a missing observed value, no valid null value or every null value
-# tied with the observed one cannot be tested and get NA
+#' one-sided tests of each site against its null values (columns of sims), as in
+#' tstats_summary(): sites with a missing observed value, no valid null value or every null value
+#' tied with the observed one cannot be tested and get NA
+#' @noRd
 site_tests <- function(obs, sims, level) {
   sims[!is.finite(sims)] <- NA
   n_perm <- nrow(sims)

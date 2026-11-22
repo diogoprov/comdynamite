@@ -121,7 +121,7 @@ test_that("edge cases of inputs and of the null distributions", {
   expect_error(simulate_damocles(twins, 1, 1), "different tip labels")
   expect_error(damocles_loglik(matrix(c(1, 0, 1, 0), 1), tree, 1, 1), "species names")
   repeated <- matrix(c(1, 0, 1, 0), 1, dimnames = list(NULL, c("a", "a", "c", "d")))
-  expect_error(damocles_loglik(repeated, tree, 1, 1), "repeated species")
+  expect_error(damocles_loglik(repeated, tree, 1, 1), "species repeated in `comm`")
   # one species present: no MPD nor MNTD, so no effect sizes
   single <- damocles_test(c(a = 1, b = 0, c = 0, d = 0), tree, n_sim = 9, gamma = 1, mu = 1)
   expect_true(is.na(single$ses_mpd_damocles))

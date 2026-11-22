@@ -175,7 +175,8 @@ print.mc_phylo_beta <- function(x, digits = 3, ...) {
   invisible(x)
 }
 
-# the community and the tree with the same species, in the order of the tips
+#' the community and the tree with the same species, in the order of the tips
+#' @noRd
 check_phylo_comm <- function(comm, tree, allow_empty = FALSE) {
   if (!inherits(tree, "phylo")) stop("`tree` must be a `phylo` object", call. = FALSE)
   comm <- check_species_comm(comm, tree$tip.label, "the phylogeny", allow_empty)
@@ -183,7 +184,8 @@ check_phylo_comm <- function(comm, tree, allow_empty = FALSE) {
   list(comm = comm[, tree$tip.label, drop = FALSE], tree = tree)
 }
 
-# species without individuals have no weight, so they leave the analysis
+#' species without individuals have no weight, so they leave the analysis
+#' @noRd
 present_species <- function(matched, minimum = 2) {
   present <- colSums(matched$comm) > 0
   if (sum(present) < minimum) {
@@ -193,7 +195,8 @@ present_species <- function(matched, minimum = 2) {
   list(comm = matched$comm[, tree$tip.label, drop = FALSE], tree = tree)
 }
 
-# numeric community with the species in `species`, in that order, and no empty site
+#' numeric community with the species in `species`, in that order, and no empty site
+#' @noRd
 check_species_comm <- function(comm, species, source, allow_empty = FALSE) {
   comm <- check_comm(comm)
   already_empty <- sum(rowSums(comm) == 0)
@@ -209,9 +212,10 @@ check_species_comm <- function(comm, species, source, allow_empty = FALSE) {
   comm
 }
 
-# species shared by `comm` and `species`, matched by name, as match.phylo.comm() of
-# picante does. Species of `comm` without individuals do not matter, so they raise no
-# warning
+#' species shared by `comm` and `species`, matched by name, as match.phylo.comm() of
+#' picante does. Species of `comm` without individuals do not matter, so they raise no
+#' warning
+#' @noRd
 match_species <- function(comm, species, source) {
   if (is.null(colnames(comm))) stop("`comm` needs species names in its columns", call. = FALSE)
   if (is.null(species)) stop(source, " needs species names", call. = FALSE)
@@ -241,7 +245,8 @@ tip_distances <- function(tree) {
   ape::cophenetic.phylo(tree)[tree$tip.label, tree$tip.label]
 }
 
-# weights sum to 1 in each row, so each cell is the mean distance between two sites
+#' weights sum to 1 in each row, so each cell is the mean distance between two sites
+#' @noRd
 beta_matrix <- function(weights, distances) {
   beta <- weights %*% distances %*% t(weights)
   diag(beta) <- 0
@@ -254,8 +259,9 @@ gower_centre <- function(beta) {
   sweep(a, 2, colMeans(a))
 }
 
-# basis is orthonormal, so trace(HGH) = trace(Q'GQ) and the residual trace is the
-# difference from the trace of G
+#' basis is orthonormal, so trace(HGH) = trace(Q'GQ) and the residual trace is the
+#' difference from the trace of G
+#' @noRd
 beta_fit <- function(centred, basis) {
   n <- nrow(centred)
   p <- ncol(basis)

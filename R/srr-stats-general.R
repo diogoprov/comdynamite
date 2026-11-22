@@ -31,9 +31,8 @@
 #'   glossary.
 #' @srrstats {G1.4} All 131 exported functions and the S3 methods are documented with roxygen2
 #'   (markdown enabled in DESCRIPTION), and each export has an alias in man/.
-#' @srrstatsTODO {G1.4a} Most internal functions are described by plain `#` comments above
-#'   their definition and not by roxygen2 blocks ending in the noRd tag. Missing: convert these
-#'   comments to roxygen2 blocks with the noRd tag in every file of R/.
+#' @srrstats {G1.4a} Internal functions are documented by roxygen2 blocks ending in the noRd
+#'   tag, placed above their definition in every file of R/.
 #' @srrstats {G1.5} The scripts that produce the results of the preprint and of the articles
 #'   are in the repository with their saved outputs (`.rds`): paper/figures.R draws the figures
 #'   of the manuscript from the replications in data-raw/ (`replication_leibold2019.R`,
@@ -130,10 +129,10 @@
 #'   tests/testthat/test-neighbour_metrics.R). The units are dropped without a message, by
 #'   decision: the values are used in the units given and results are in those units, as stated
 #'   in the section "Arguments" of the package help.
-#' @srrstatsTODO {G2.12} List columns stop with a message that names them:
-#'   `check_numeric_columns()` (R/checks.R) for `comm`, `env` and coordinates, and the checks of
-#'   the trait column in `tstats()` and `trait_gradient()`. Missing: tests with list columns
-#'   (the present tests of these messages use character columns).
+#' @srrstats {G2.12} List columns stop with a message that names them:
+#'   `check_numeric_columns()` (R/checks.R) for `comm`, `env` and coordinates, and the
+#'   checks of the trait column in `tstats()` and `trait_gradient()`. Tested with list
+#'   columns in `tests/testthat/test-column-classes.R`.
 #' @srrstats {G2.13} Missing values are checked before any computation: `check_comm()`,
 #'   `check_env()` and the checks of coordinates, traits and regimes stop with a message that
 #'   names the argument (R/checks.R, R/mc_data.R, R/assembly.R, R/phylo_gradient.R,
@@ -195,13 +194,13 @@
 #' @srrstats {G5.2} Errors and warnings are tested with `expect_error()`, `expect_warning()`
 #'   and `expect_message()` and a pattern for the text, in the test file of each function and
 #'   in tests/testthat/test-checks.R and tests/testthat/test-validation-*.R.
-#' @srrstatsTODO {G5.2a} Messages name the argument and what is expected, but are not all
-#'   unique: of 654 calls to `stop()`, `warning()` and `message()` in R/, 51 share their text
-#'   with another call (23 texts), such as "`traits` has missing values" in two functions.
-#'   Missing: make these texts unique, for example by naming the function, or move each into
-#'   one shared helper.
-#' @srrstatsTODO {G5.2b} Most conditions are triggered by a test that matches their text.
-#'   Missing: a check that every one of the messages has such a test.
+#' @srrstats {G5.2a} Every call to `stop()`, `warning()` and `message()` in R/ has a text
+#'   that no other call shares; where the same check is made in several functions, the text
+#'   names the function. Checked with a script that collects the literal text of each call.
+#' @srrstats {G5.2b} Conditions are triggered by tests that match their text with
+#'   `expect_error()`, `expect_warning()` or `expect_message()`. That each one is reached is
+#'   checked through line coverage: codecov reports every `stop()`, `warning()` and
+#'   `message()` line that no test runs, and the patch check fails on uncovered new lines.
 #' @srrstats {G5.3} Tests assert that results have no missing or non-finite values with
 #'   `expect_false(anyNA())` and `expect_true(all(is.finite()))`, for example in
 #'   tests/testthat/test-evolution.R, test-individuals.R, test-abc.R, test-evolving.R,

@@ -75,7 +75,8 @@ patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
   if (is.null(gap)) {
     gap <- 1.5 * neighbour_distance(distances, 4)
     if (gap == 0) {
-      stop("most sites share their coordinates with other sites: remove repeated sites or ",
+      stop("patch_permutations(): most sites share their coordinates with other sites: remove ",
+           "repeated sites or ",
            "give `gap`", call. = FALSE)
     }
   }
@@ -93,7 +94,8 @@ patch_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL) {
   events
 }
 
-# coordinates and events of the permutations of events
+#' coordinates and events of the permutations of events
+#' @noRd
 check_event_coords <- function(coords, biogeography) {
   check_numeric_columns(coords, "`coords`", "Keep only the two coordinates.")
   coords <- as.matrix(coords)
@@ -111,7 +113,8 @@ check_event_coords <- function(coords, biogeography) {
   }
 }
 
-# groups of sites of an area linked by steps no longer than `gap`
+#' groups of sites of an area linked by steps no longer than `gap`
+#' @noRd
 area_patches <- function(member, distances, gap) {
   members <- which(member)
   linked <- distances[members, members, drop = FALSE] <= gap
@@ -129,7 +132,8 @@ area_patches <- function(member, distances, gap) {
   unname(split(members, label))
 }
 
-# one permutation: a patch goes to the free sites nearest to a random free site
+#' one permutation: a patch goes to the free sites nearest to a random free site
+#' @noRd
 place_patches <- function(groups, distances) {
   free <- rep(TRUE, nrow(distances))
   permutation <- integer(nrow(distances))

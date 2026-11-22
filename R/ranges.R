@@ -78,7 +78,8 @@ range_history <- function(x, areas, tree = c("reconstructed", "full")) {
   ranges_simmap(rec, projected$maps, mapped$nodes[projected$root_full])
 }
 
-# for each lineage, the times (generations) at which its range changed and the range from then
+#' for each lineage, the times (generations) at which its range changed and the range from then
+#' @noRd
 range_timelines <- function(ranges, areas) {
   levels <- levels(areas)
   if (!nrow(ranges)) return(list())
@@ -106,10 +107,11 @@ range_timelines <- function(ranges, areas) {
 
 range_eps <- 1e-6
 
-# the ranges of a lineage over [from, to] as a named vector of durations, each range taken
-# after the changes at its start; changes at `to` count, with no duration, only for terminal
-# edges (the range at a tip), and an empty range (at extinction) is left out. Time before the
-# first record takes the first range.
+#' the ranges of a lineage from `from` to `to` as a named vector of durations, each range taken
+#' after the changes at its start; changes at `to` count, with no duration, only for terminal
+#' edges (the range at a tip), and an empty range (at extinction) is left out. Time before the
+#' first record takes the first range.
+#' @noRd
 range_segment <- function(tl, from, to, terminal = FALSE) {
   eps <- range_eps
   change <- tl$time[tl$time > from + eps &
@@ -124,7 +126,8 @@ range_segment <- function(tl, from, to, terminal = FALSE) {
   range_pieces(stats::setNames(ends - starts, state), tl$state[tl$state != ""][1])
 }
 
-# drops empty ranges and pieces without duration other than the last, and merges runs
+#' drops empty ranges and pieces without duration other than the last, and merges runs
+#' @noRd
 range_pieces <- function(d, fallback = NULL) {
   d <- d[names(d) != "" & (d > 0 | seq_along(d) == length(d))]
   if (!length(d)) return(stats::setNames(0, fallback))
@@ -132,7 +135,8 @@ range_pieces <- function(d, fallback = NULL) {
   stats::setNames(as.vector(tapply(d, run, sum)), names(d)[!duplicated(run)])
 }
 
-# the range of a lineage just before the changes at time t (at a node, before the split)
+#' the range of a lineage just before the changes at time t (at a node, before the split)
+#' @noRd
 range_before <- function(tl, t) {
   i <- which(tl$time < t - range_eps)
   tl$state[if (length(i)) max(i) else 1]
@@ -143,10 +147,11 @@ range_union <- function(states, levels) {
   paste(levels[levels %in% parts], collapse = "+")
 }
 
-# maps of the edges of the full tree, and the range at each node. Each edge follows the lineage
-# that has, among the tips it leads to, the earliest birth (ties by the order of budding, then
-# of the table); a node has the range of that lineage before the split. Nodes before the start
-# (of a starting tree) take the union of the ranges at the start of the species below them.
+#' maps of the edges of the full tree, and the range at each node. Each edge follows the lineage
+#' that has, among the tips it leads to, the earliest birth (ties by the order of budding, then
+#' of the table); a node has the range of that lineage before the split. Nodes before the start
+#' (of a starting tree) take the union of the ranges at the start of the species below them.
+#' @noRd
 range_full_maps <- function(full, sp, timeline, levels) {
   n_tip <- ape::Ntip(full)
   n_node <- n_tip + full$Nnode
@@ -191,14 +196,16 @@ range_full_maps <- function(full, sp, timeline, levels) {
   list(maps = maps, nodes = node_state)
 }
 
-# the lineage of the full tree that represents each species of the reconstructed tree
+#' the lineage of the full tree that represents each species of the reconstructed tree
+#' @noRd
 range_representatives <- function(x) {
   obs <- evolving_observed(x$species)
   obs$rep
 }
 
-# maps of the reconstructed tree from those of the full tree: each of its edges joins the
-# edges of the full tree between the nodes that are the ancestors of the same tips
+#' maps of the reconstructed tree from those of the full tree: each of its edges joins the
+#' edges of the full tree between the nodes that are the ancestors of the same tips
+#' @noRd
 range_project_maps <- function(full, full_maps, rec, tips) {
   n_rec <- ape::Ntip(rec)
   tip_full <- match(tips, full$tip.label)
@@ -220,7 +227,8 @@ range_project_maps <- function(full, full_maps, rec, tips) {
   list(maps = maps, root_full = node_full[n_rec + 1])
 }
 
-# tips below an internal node
+#' tips below an internal node
+#' @noRd
 range_tips_below <- function(tree, node) {
   n_tip <- ape::Ntip(tree)
   out <- integer(0)

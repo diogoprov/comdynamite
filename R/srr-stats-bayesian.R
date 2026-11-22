@@ -120,13 +120,13 @@
 #'   cmdstanr are passed through `...` (`refresh` is named in the help page), and by
 #'   default the sampler prints progress and all messages. The ABC functions print
 #'   nothing but a progress bar in interactive sessions.
-#' @srrstatsTODO {BS2.13} Enabled but not tested. `refresh = 0` and
-#'   `show_messages = FALSE` silence the progress and messages of the sampler while the
-#'   warnings of `trait_gradient_bayes()` are kept (used in
-#'   `tests/testthat/test-extended-traits.R`), but no test asserts that the output is
-#'   silent and that the warnings remain. Missing: an extended test with
-#'   `expect_silent()` or `capture.output()` on a converged fit, and one with
-#'   `expect_warning()` on a fit that fails the diagnostics with the same arguments.
+#' @srrstats {BS2.13} With `refresh = 0`, `show_messages = FALSE` and `show_exceptions =
+#'   FALSE` passed through `...` to `$sample()`, `trait_gradient_bayes()` prints nothing and
+#'   emits no messages, while its own warning on failed diagnostics is kept. Tested in
+#'   `tests/testthat/test-extended-traits.R` ("trait_gradient_bayes() can run without
+#'   printing anything"), which captures the console output, messages and warnings of a fit
+#'   and allows only that warning; the warning itself is tested in
+#'   `tests/testthat/test-trait-gradient-bayes.R`.
 #' @srrstats {BS2.14} All warnings of `trait_gradient_bayes()` (weights, `ou_alpha`,
 #'   failed summary, failed diagnostics) are raised with `warning()` and can be
 #'   suppressed with `suppressWarnings()` or handled one by one;
@@ -250,12 +250,11 @@
 #'   ("abc_recovery intervals are too narrow with one statistic and small leaves",
 #'   "larger leaves bring the abc_recovery coverage towards the nominal level",
 #'   "abc_recovery credible intervals are conservative with several statistics").
-#' @srrstatsTODO {BS7.3} No test measures how computing time scales with the size of
-#'   the input. `tests/testthat/test-extended-sims.R` ("the error of abc_fit falls as
-#'   the reference table grows") tests the scaling of accuracy, not of time. Missing:
-#'   extended tests that time `abc_fit()` over reference tables of increasing size and
-#'   `trait_gradient_bayes()` over increasing numbers of species, and check that the
-#'   time grows no faster than expected.
+#' @srrstats {BS7.3} `tests/testthat/test-extended-timing.R` times `abc_fit()` over
+#'   reference tables of 500, 1000 and 2000 rows and checks that the log-log slope of time
+#'   on size is below 1.6, and times `trait_gradient_bayes()` on 15 and 30 species after an
+#'   untimed fit that compiles the model, checking that doubling the species multiplies the
+#'   time by less than 20.
 #' @srrstats {BS7.4} The Stan model standardises both responses and returns every
 #'   estimate and the replicated data in trait units.
 #'   `tests/testthat/test-trait-gradient-bayes.R` checks that the standardised data
