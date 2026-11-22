@@ -58,7 +58,7 @@ method_papers <- list(
                   "multi-level community assembly processes"),
     journal = "Ecography", volume = "39", pages = "699--708", doi = "10.1111/ecog.01433"),
   leps2011 = list(
-    authors = c("Lepš, J.", "de Bello, F.", "Šmilauer, P.", "Doležal, J."),
+    authors = c("Lep\u0161, J.", "de Bello, F.", "\u0160milauer, P.", "Dole\u017eal, J."),
     year = 2011,
     title = paste("Community trait response to environment: disentangling species turnover",
                   "vs intraspecific trait variability effects"),
@@ -106,7 +106,7 @@ method_papers <- list(
     journal = "Bioinformatics", volume = "32", pages = "859--866",
     doi = "10.1093/bioinformatics/btv684"),
   thompson2020 = list(
-    authors = c("Thompson, P. L.", "Guzman, L. M.", "De Meester, L.", "Horváth, Z.",
+    authors = c("Thompson, P. L.", "Guzman, L. M.", "De Meester, L.", "Horv\u00e1th, Z.",
                 "Ptacnik, R.", "Vanschoenwinkel, B.", "Viana, D. S.", "Chase, J. M."),
     year = 2020,
     title = paste("A process-based metacommunity framework linking local and regional scale",
