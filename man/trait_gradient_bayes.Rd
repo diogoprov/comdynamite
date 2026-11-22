@@ -42,11 +42,12 @@ An object of class \code{mc_trait_gradient_bayes}, a list with
 \describe{
 \item{signal}{the phylogenetic share \eqn{\lambda} of \eqn{\beta}, \eqn{\alpha} and the
 mean, and the phylogenetic correlations of \eqn{\beta} with the mean and with
-\eqn{\alpha}: \code{estimate} (posterior median), \code{lower}, \code{upper} (95\% interval).}
+\eqn{\alpha}: \code{estimate} (posterior median), \code{lower}, \code{upper} (central interval with
+probability 0.95).}
 \item{variances}{the phylogenetic and species variances of the three quantities, in
 squared trait units.}
-\item{species}{posterior median and 95\% interval of \eqn{\beta}, \eqn{\alpha} and the
-mean of each species.}
+\item{species}{posterior median and central interval with probability 0.95 of
+\eqn{\beta}, \eqn{\alpha} and the mean of each species.}
 \item{diagnostics}{largest R-hat, smallest bulk and tail effective sample sizes,
 number of divergent transitions, and \code{ok}.}
 \item{fit}{the \code{CmdStanMCMC} object; its draws live in temporary files of the session,

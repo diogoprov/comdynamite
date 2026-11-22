@@ -124,11 +124,12 @@
 #'   \describe{
 #'     \item{signal}{the phylogenetic share \eqn{\lambda} of \eqn{\beta}, \eqn{\alpha} and the
 #'       mean, and the phylogenetic correlations of \eqn{\beta} with the mean and with
-#'       \eqn{\alpha}: `estimate` (posterior median), `lower`, `upper` (95% interval).}
+#'       \eqn{\alpha}: `estimate` (posterior median), `lower`, `upper` (central interval with
+#'       probability 0.95).}
 #'     \item{variances}{the phylogenetic and species variances of the three quantities, in
 #'       squared trait units.}
-#'     \item{species}{posterior median and 95% interval of \eqn{\beta}, \eqn{\alpha} and the
-#'       mean of each species.}
+#'     \item{species}{posterior median and central interval with probability 0.95 of
+#'       \eqn{\beta}, \eqn{\alpha} and the mean of each species.}
 #'     \item{diagnostics}{largest R-hat, smallest bulk and tail effective sample sizes,
 #'       number of divergent transitions, and `ok`.}
 #'     \item{fit}{the `CmdStanMCMC` object; its draws live in temporary files of the session,
