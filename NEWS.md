@@ -6,10 +6,11 @@
   in `tstats_summary()` now has its nominal size (it rejected in about 8% of null data sets for
   T_PC/PR and in none for T_IC/IR); the site-level null distributions are unchanged for T_IC/IR
   and nearly so for T_PC/PR, but null values, effect sizes and p-values differ from earlier
-  versions for the same seed. New argument `null_pc`: the default `"individuals"` is the null
-  of Taudiere & Violle (2016); `"populations"` permutes population means among the populations
-  of the region, which avoids the false "high" sites that the default gives when population
-  sizes differ among sites and species differ in their means.
+  versions for the same seed. New argument `null_pc`. Its default, `"populations"`, permutes
+  population means among the populations of the region; `"individuals"` is the null of
+  Taudiere & Violle (2016) and of earlier versions, which flags about 80% of sites as "high"
+  without any filtering when population sizes differ among sites and species differ in their
+  means. Results of `T_PC.PR` therefore change with the default.
 - `abc_fit()` and `abc_recovery()` gain `min_node_size` (default 5, as before), the minimal
   size of the leaves of the forests. The help of `abc_fit()`, `abc_recovery()` and `abc_cv()`
   now says that the intervals of ABC-RF are approximate: conservative with several statistics
