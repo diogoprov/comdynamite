@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {RE7.2} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 toy_individuals <- function(seed = 1, n_sites = 6, n = 120) {
   set.seed(seed)
   d <- data.frame(site = rep(sprintf("s%02d", seq_len(n_sites)), length.out = n),

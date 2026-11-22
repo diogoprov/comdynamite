@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {EA4.1} Tested in this file, as described in R/srr-stats-eda.R.
+#' @srrstats {RE7.3} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 test_that("drift_test() accessors agree with the stored regression", {
   set.seed(1)
   G <- matrix(c(4, 1, 0.5, 0, 1, 3, 0.2, 0, 0.5, 0.2, 2, 0.3, 0, 0, 0.3, 1), 4)

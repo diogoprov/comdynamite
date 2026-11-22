@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.14} Tested in this file, as described in R/srr-stats-general.R.
+#' @srrstats {RE2.1, RE2.4a} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 # data with known local adaptation (one slope per variable) and displacement
 make_shifts <- function(n_sites = 25, n_species = 8, n_ind = 6, h = 0.5, h2 = 0, c = 0,
                         w = 0.5, within_sd = 0.2, species_h = NULL, seed = 1) {

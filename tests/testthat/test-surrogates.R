@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.13} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 field_on <- function(coords, range, seed) {
   set.seed(seed)
   d <- as.matrix(dist(coords))

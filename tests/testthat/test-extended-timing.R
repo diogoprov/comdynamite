@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS7.3} Tested in this file, as described in R/srr-stats-bayesian.R.
+NULL
+
 # Extended tests of how computing time scales with the size of the input (rOpenSci standard
 # BS7.3), for abc_fit() and trait_gradient_bayes(). They run only with
 # COMDYNAMITE_EXTENDED_TESTS=true (helper-extended.R). Timings depend on the machine, so the

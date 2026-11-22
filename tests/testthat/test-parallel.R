@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G2.7, G2.10} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 sim_small <- function() {
   set.seed(1)
   tree <- ape::rcoal(8)

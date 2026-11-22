@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS2.1a} Tested in this file, as described in R/srr-stats-bayesian.R.
+NULL
+
 test_that("spatial_folds makes contiguous blocks or balanced random folds", {
   grid <- landscape_grid(side = 6)
   blocks <- spatial_folds(grid$coords, k = 4)

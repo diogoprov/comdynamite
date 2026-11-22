@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.4} Tested in this file, as described in R/srr-stats-general.R.
+#' @srrstats {RE3.0} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 toy <- data.frame(site = c("A", "A", "B", "B", "B", "C"),
                   species = c("s1", "s2", "s1", "s3", "s2", "s3"),
                   trait = c(1, 3, 2, 6, 4, 8), abundance = c(1, 1, 2, 1, 1, 1))

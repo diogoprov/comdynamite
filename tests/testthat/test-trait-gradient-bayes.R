@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS1.5, BS2.1a, BS2.5, BS2.13, BS2.14, BS2.15, BS3.1, BS6.0, BS6.1, BS7.4,
+#'   BS7.4a} Tested in this file, as described in R/srr-stats-bayesian.R.
+NULL
+
 tgb_sim <- function(weights = "occurrence") {
   set.seed(1)
   tree <- treeshapesim::sim_tree_shape(12)

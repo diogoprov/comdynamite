@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {RE1.4} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 # Extended tests of the permutation and null-model tests: pcc_test(), phylo_beta_test(),
 # pcps_test(), node_test() with node_contrasts(), phylo_vector(), trait_partition(), and the
 # restricted nulls torus_permutations(), rigid_permutations(), patch_permutations() and

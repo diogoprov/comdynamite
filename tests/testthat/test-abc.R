@@ -1,3 +1,9 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS2.1a, BS2.3, BS2.5, BS5.0, BS6.0, BS7.0, BS7.1, BS7.4} Tested in this file,
+#'   as described in R/srr-stats-bayesian.R.
+#' @srrstats {RE1.3} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 toy_table <- function(n = 400) {
   set.seed(3)
   table <- data.frame(a = runif(n), b = runif(n))

@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.6, G5.7} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Extended tests of the evolutionary and DAMOCLES functions (rOpenSci statistical standards):
 # parameter recovery over several seeds, convergence as data grow, and the type I error and
 # power of the tests. They run only with COMDYNAMITE_EXTENDED_TESTS=true (helper-extended.R).

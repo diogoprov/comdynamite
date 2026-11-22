@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {RE7.1, RE7.1a} Tested in this file, as described in R/srr-stats-regression.R.
+NULL
+
 # noiseless data: the response is an exact linear function of the predictors
 
 flex_data <- function(noise) {

@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.9} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Quick checks of sensitivity to noise (G5.9a) and to the seed (G5.9b) of the permutation
 # tests. G5.9a: a relative jitter of 1e-10 on the predictors and on the branch lengths, with
 # the same seed, leaves the statistics equal up to 1e-6 (relative) and the p-values equal up

@@ -1,3 +1,9 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.0} Tested in this file, as described in R/srr-stats-general.R.
+#' @srrstats {RE7.0, RE7.2, RE7.3} Tested in this file, as described in
+#'   R/srr-stats-regression.R.
+NULL
+
 simulated <- function(lambda, n_sites = 50, n_species = 14) {
   tree <- ape::rcoal(n_species)
   traits <- species_traits(tree, lambda = lambda, optima_range = c(-1, 101),

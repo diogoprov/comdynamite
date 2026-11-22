@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {EA6.0e} Tested in this file, as described in R/srr-stats-eda.R.
+#' @srrstats {G5.4, G5.4a} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Results that can be derived by hand from the model. Equilibria come from
 # setting the expectation of r N / (1 + alpha N) equal to N.
 

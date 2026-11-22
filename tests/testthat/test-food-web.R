@@ -1,3 +1,7 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {G5.4a} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 test_that("food_web_params checks its values and keeps the names of the book", {
   p <- food_web_params()
   expect_s3_class(p, "food_web_params")

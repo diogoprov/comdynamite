@@ -1,3 +1,8 @@
+# rOpenSci statistical standards tested in this file (see the srr tags in R/)
+#' @srrstats {BS2.5, BS2.6} Tested in this file, as described in R/srr-stats-bayesian.R.
+#' @srrstats {G2.13, G5.8c} Tested in this file, as described in R/srr-stats-general.R.
+NULL
+
 # Input validation of the analysis functions: scalar arguments, Inf and coordinates
 
 d <- daphniids
