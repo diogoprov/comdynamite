@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- Internal: the long and complex functions that goodpractice flagged (the simulation engines,
+  trait simulation, landscapes, DAMOCLES, the trait-variation analyses, `node_test()`,
+  `pcps_test()`, ABC and several plots) are split into smaller internal helpers, each at most
+  50 lines with a cyclomatic complexity of at most 15. Results, messages and the sequence of
+  random draws are unchanged: every function gives identical output for the same seed.
+  The tests follow the lintr style that goodpractice checks.
+
 # comdynamite 0.11.0
 
 - `node_test()`: `r2`, `r2_adjusted` and the semipartial correlations now sum squares with
