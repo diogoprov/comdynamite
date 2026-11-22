@@ -393,3 +393,17 @@ test_that("plot() of trait_flex() shows explained and residual parts and negativ
   expect_equal(nrow(plain), 4)
   expect_equal(plain$y, trait_flex(ind, traits = "height")$decomposition$total)
 })
+
+test_that("regional nulls of community_index() permute the whole region", {
+  set.seed(3)
+  ind <- data.frame(site = rep(paste0("s", 1:4), times = c(5, 8, 12, 15)),
+                    species = sample(letters[1:3], 40, replace = TRUE), trait = rnorm(40))
+  for (null in c("regional.ind", "regional.pop", "regional.pop.prab")) {
+    out <- community_index(ind, sum, null = null, n_perm = 20)
+    totals <- rowSums(attr(out, "null"))
+    # each randomisation shares out the same regional pool among the sites
+    expect_equal(totals, rep(totals[1], 20), info = null)
+  }
+  out <- community_index(ind, sum, null = "regional.ind", n_perm = 20)
+  expect_equal(rowSums(attr(out, "null")), rep(sum(ind$trait), 20))
+})

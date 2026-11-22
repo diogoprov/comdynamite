@@ -8,6 +8,9 @@
 # from the pilot's, so the comparison is between designs, not between paired draws.
 # Run from the root of the package, with abcrf installed. N_REF, N_TEST, CORES and NTREE change
 # the size; OUTPUT the file.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "50000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))
@@ -43,7 +46,8 @@ results <- do.call(rbind, lapply(names(views), function(view) {
   rec <- abc_recovery(table, statistics = views[[view]], n_test = n_test, ntree = ntree,
                       ncores = cores, seed = 2028)
   cbind(view = view, rec,
-        recoverable = rec$r2 >= 0.5 & rec$coverage >= 0.85 & rec$coverage <= 0.95)
+        recoverable = rec$r2 >= 0.5 & rec$coverage >= 0.85,
+        conservative = rec$coverage > 0.95)
 }))
 minutes_fit <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 fit <- abc_fit(table, statistics = views$series, ntree = ntree, ncores = cores)

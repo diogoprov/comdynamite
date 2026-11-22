@@ -21,6 +21,9 @@
 # pseudo-observations left out of the table.
 # Run from the root of the package, with abcrf installed. N_REF, N_TEST, CORES and NTREE change
 # the size; OUTPUT the file.
+# Criterion revised on 2026-11-21 (data-raw/abc_criterion_update.R): coverage of at least
+# 85%, without the upper bound of 95%, which counted conservative intervals as a failure;
+# `conservative` flags coverage above 95%.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "5000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "200"))
@@ -123,8 +126,8 @@ summary_table <- do.call(rbind, lapply(names(results), function(e) {
       "parameter", "r2", "bias", "coverage", "width")])
   }))
 }))
-summary_table$recoverable <- summary_table$r2 >= 0.5 & summary_table$coverage >= 0.85 &
-  summary_table$coverage <= 0.95
+summary_table$recoverable <- summary_table$r2 >= 0.5 & summary_table$coverage >= 0.85
+summary_table$conservative <- summary_table$coverage > 0.95
 print(summary_table, digits = 3, row.names = FALSE)
 saveRDS(list(summary = summary_table,
              recovery = lapply(results, `[[`, "recovery"),

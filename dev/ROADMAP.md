@@ -24,23 +24,31 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    estatístico (categorias EA, RE e BS, 206 padrões a anotar com `srr`). Fase 1 (correções
    rápidas: CONTRIBUTING, código de conduta, ORCID, badge, WORDLIST, `.lintr`, pkgcheck no CI,
    falhas do pkgcheck) na 0.10.0.9000. Fase 2 (atribuição do código derivado de MATLAB) no PR #142, com o
-   e-mail aos autores enviado em 2026-11-21. Faltam: fase 3, validação de
-   entradas (escalares, `Inf`, NA, comparações de ponto flutuante, mensagens de
-   `stopifnot()`); fase 4, suíte estendida de testes (várias sementes, ruído, erro tipo I das
-   permutações, recuperação no modelo Bayesiano); fase 5, anotação `srr` e consulta prévia
-   aos editores, só depois da decisão do JBI (o guia não aceita submissão com manuscrito em
-   revisão em outro periódico).
+   e-mail aos autores enviado em 2026-11-21; mensagens de citação dos artigos originais no
+   PR #147, a pedido de um dos autores. Fase 3 (validação de entradas) no PR #143 e fase 4
+   (suíte estendida de testes) no PR #144. Fase 5, anotação `srr`, começou em 2026-11-22
+   (branch `srr-anotacao`). A consulta prévia aos editores fica para depois da decisão do JBI
+   e de alguns meses de histórico estável: em 2026-11-22 o rOpenSci pôs o lagprotest em
+   espera (ropensci/software-review#829) por ter o repositório novo demais, e o comdynamite
+   tem o mesmo problema (primeiro commit em 2026-11-05).
    Fase 4 (testes estendidos, `tests/testthat/test-extended-*.R`, PR #144) achou quatro
    problemas, tratados no PR seguinte: (a) intervalos do ABC-RF aproximados (propriedade do
-   método; ajuda corrigida, `min_node_size` novo); os scripts `data-raw/abc_*.R` ainda usam
-   cobertura entre 85% e 95% como critério de "recuperável", o que marca como não recuperável
-   um parâmetro bem identificado com intervalos conservadores: revisar; (b) teste da média de
+   método; ajuda corrigida, `min_node_size` novo); o critério de "recuperável" dos scripts
+   `data-raw/abc_*.R` e dos pilotos perdeu o teto de 95% de cobertura (R2 >= 0,5 e cobertura
+   >= 85%, coluna `conservative` acima de 95%), aplicado aos rds salvos sem rodar de novo por
+   `data-raw/abc_criterion_update.R`: 26 linhas passaram a recuperáveis, todas com R2 >= 0,64;
+   o artigo do JBI descreve o critério antigo e já diz que ele falhou por excesso de
+   cobertura, então só mudar o texto se a revisão pedir; (b) teste da média de
    `tstats_summary()`: corrigido (nulos de T_IC.IR e T_PC.PR permutam a região inteira); (c)
    T_PC.PR: o nulo publicado dá ~80% de sítios "altos" falsos quando o tamanho das populações
    varia entre sítios; `null_pc = "populations"` evita isso e virou o padrão (decidido em 2026-11-21);
-   conferir se `community_index()` tem o mesmo sorteio independente por sítio; (d)
+   `community_index()` sorteava cada sítio da região de forma independente: os nulos regionais
+   agora permutam a região inteira (a distribuição de cada sítio não muda); (d)
    `trait_flex()`: propriedade do método (atenuação e teste conservador com turnover), ajuda
-   corrigida.
+   corrigida. Também resolvidos: sinal dos autovetores de `phylo_vector()` e
+   `phylo_eigenvectors()` fixado (maior valor absoluto positivo; o sinal trocava no Windows) e
+   exemplo de `damocles_partition_test()` reduzido (o custo está no ajuste; acelerar
+   `damocles_prune()` fica como ideia).
 2. **Preprint reescrito para a 0.9.0** (PR #112, mesclado em 2026-11-18, cb65a09): preprint
    postado e artigo submetido ao Journal of Biogeography (Methods and Tools, double blind) em
    2026-11-18. Os arquivos renderizados ficam no Box (`Meus Artigos/2026 - comdynamite JBI`),

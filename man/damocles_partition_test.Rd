@@ -128,11 +128,12 @@ twice a random partition. Set \code{n_rand = 0} to run the bootstrap alone.
 set.seed(9)
 tr <- treeshapesim::sim_tree_shape(30)
 reg <- clade_regimes(tr, list(A = ape::Ntip(tr) + 2))
-comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
-# few random partitions, to keep the example quick
-damocles_partition_test(comm, tr, reg, n_rand = 4, vary = "gamma")
+comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 3)
+# few sites and random partitions, to keep the example quick
+damocles_partition_test(comm, tr, reg, n_rand = 2, vary = "gamma")
 \donttest{
 # random partitions and the parametric bootstrap refit the model many times
+comm <- simulate_damocles(tr, ifelse(reg == "A", 3, 0.5), mu = 1, n = 5)
 damocles_partition_test(comm, tr, reg, n_rand = 19, vary = "gamma")
 damocles_partition_test(comm, tr, reg, n_rand = 0, n_boot = 19, vary = "gamma")
 }

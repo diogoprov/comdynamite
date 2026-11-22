@@ -14,7 +14,8 @@ principal coordinate analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the f
 printed by Peres-Neto & Kembel (2015)?}
 }
 \value{
-Matrix with one row per tip and one column per positive eigenvalue.
+Matrix with one row per tip and one column per positive eigenvalue. The sign of
+each column, which is arbitrary, is set so that its largest absolute value is positive.
 }
 \description{
 Principal coordinates of the patristic distances among species, the first

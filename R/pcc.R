@@ -7,7 +7,8 @@
 #' @param squared `TRUE` or `FALSE`. Use \eqn{-\mathrm{PD}^2 / 2}{-PD^2 / 2}, as in a classic
 #'   principal coordinate analysis, instead of \eqn{-\mathrm{PD} / 2}{-PD / 2}, the form
 #'   printed by Peres-Neto & Kembel (2015)?
-#' @return Matrix with one row per tip and one column per positive eigenvalue.
+#' @return Matrix with one row per tip and one column per positive eigenvalue. The sign of
+#'   each column, which is arbitrary, is set so that its largest absolute value is positive.
 #' @references
 #' Peres-Neto, P. R., & Kembel, S. W. (2015). Phylogenetic gradient analysis:
 #' environmental drivers of phylogenetic variation across ecological
@@ -27,7 +28,7 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
   b <- sweep(b, 2, colMeans(b))
   eig <- eigen(b, symmetric = TRUE)
   keep <- eig$values > sqrt(.Machine$double.eps) * max(eig$values)
-  vectors <- eig$vectors[, keep, drop = FALSE]
+  vectors <- orient_vectors(eig$vectors[, keep, drop = FALSE])
   rownames(vectors) <- tree$tip.label
   vectors
 }

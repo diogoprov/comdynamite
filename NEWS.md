@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- The regional null models of `community_index()` permute the whole region once per
+  randomisation, instead of drawing each site from the region independently, as `tstats()` now
+  does. The null distribution of each site is unchanged, but null values differ from earlier
+  versions for the same seed, and values that combine sites are now valid.
+- The eigenvectors returned by `phylo_vector()` and `phylo_eigenvectors()` have a fixed sign:
+  the largest absolute value of each is positive. The sign of an eigenvector is arbitrary and
+  could differ between platforms; the signs of `eigenvector_correlation` follow. Tests and
+  gradients (`pev`) are unchanged.
 - Functions that implement a published method, such as `node_test()`, `phylo_vector()`,
   `trait_partition()`, `pcps_test()`, `tstats()` and `trait_gradient()`, show the original
   papers of the method the first time they run in a session, with a request to cite them
