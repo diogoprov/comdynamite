@@ -189,7 +189,7 @@ print.trait_flex <- function(x, digits = 3, ...) {
   check_count(digits, "digits")
   dec <- x$decomposition
   traits <- unique(dec$trait)
-  cat("Decomposition of community trait means (Lepš et al. 2011):",
+  cat("Decomposition of community trait means (Lep\u0161 et al. 2011):",
       length(unique(x$sites$site)), "sites,", length(traits),
       if (length(traits) == 1) "trait\n" else "traits\n")
   cat("Model:", deparse(x$formula), "\n")
