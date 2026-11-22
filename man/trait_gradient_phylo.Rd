@@ -70,7 +70,15 @@ it.
 
 \eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
 lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
-such fits are marked in \code{at_bound} and their half-life is \code{NA}. AIC differences among three
+such fits are marked in \code{at_bound} and their half-life is \code{NA}. The restricted likelihood
+is maximised by \code{\link[stats:optimize]{stats::optimize()}} over the logarithm of \eqn{\sigma^2} for white noise and
+BM, with its default tolerance, and for OU by \code{\link[stats:optim]{stats::optim()}} with method \code{"L-BFGS-B"} and
+its default controls (relative tolerance \code{factr = 1e7}, at most 100 iterations) from three
+starting values of \eqn{a} (0.1, 1 and 5 divided by the height of the tree), keeping the
+best. These settings are fixed: the surfaces have one or two parameters on bounded
+intervals, and the several starts guard against local optima better than a tighter
+tolerance would; \code{converged} reports the convergence code of the best start. AIC
+differences among three
 models fitted to few species are unstable, and the bootstrap standard error of a species
 seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 }
@@ -95,18 +103,24 @@ components. \emph{Ecology Letters}, 10, 135--145. \doi{10.1111/j.1461-0248.2006.
 \code{\link[=trait_gradient]{trait_gradient()}}, \code{\link[=trait_ou]{trait_ou()}} to simulate traits under these models.
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
+\code{\link[=plot.mc_trait_gradient_bayes]{plot.mc_trait_gradient_bayes()}},
+\code{\link[=plot.mc_trait_gradient_phylo]{plot.mc_trait_gradient_phylo()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_flex]{plot.trait_flex()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

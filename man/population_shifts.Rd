@@ -61,7 +61,11 @@ An object of class \code{population_shifts}: a data frame with one row and the c
 \code{n_populations} and \code{n_species} (that entered as responses). With \code{nboot > 0} it also has
 \code{displacement_corrected}, \code{displacement_low}, \code{displacement_high}, \code{p_displacement} and,
 for each slope, \verb{_low} and \verb{_high} columns. The attribute \code{profile} holds, for each width
-tried, the residual sum of squares, \eqn{R^2} and the estimates.
+tried, the residual sum of squares, \eqn{R^2} and the estimates; the attribute \code{model}
+holds the regression at the chosen width, one row per half-sample mean of a population
+(\code{site}, \code{species}, \code{half}), with the \code{response} and \code{fitted} values and the \code{residual},
+all centred within species. Methods: \link[=coef.population_shifts]{coef()}, \code{confint()} and
+\code{vcov()} (from the bootstrap, with \code{nboot > 0}), \code{nobs()}, \code{fitted()} and \code{residuals()}.
 }
 \description{
 Estimates how far the populations of a species follow the environment of their site and
@@ -149,7 +153,10 @@ of \code{c} far from zero, of either sign. The grid runs from the larger of one 
 median standard deviation of population means within sites and the pooled standard
 deviation within populations (a kernel narrower than the spread of individuals mostly fits
 sampling noise), but no higher than that median, to four times the median, and is refined by
-\code{\link[stats:optimize]{stats::optimize()}} around its best value. A warning is given when the best width stays at
+\code{\link[stats:optimize]{stats::optimize()}} around its best value, on the logarithm of the width and with the
+default tolerance of \code{optimize()}, since the residual sum of squares is flat near its
+minimum and a finer width would not change \code{c} beyond its sampling error. A warning is given
+when the best width stays at
 one of the ends of the grid after the refinement or when the residual sum of squares changes
 by less than 5\% along the grid; \code{plot()} shows the profile of
 the fit and of the estimates along the width. Fix \code{width} from independent knowledge of the
@@ -166,7 +173,8 @@ standard deviation of the simulations come from a fit: the constants are the mea
 species of the populations that enter as responses, and the variance of populations is the
 root of a moment equation in which each squared residual is net of the sampling variance of
 its mean and weighted by the inverse square of its expected value, so that means of few
-individuals weigh little (in the fitted set, the sampling variance is scaled by
+individuals weigh little (solved by fixed-point iteration to a relative change below
+\eqn{10^{-8}}{1e-8}, at most 50 iterations, which is ample for one parameter; in the fitted set, the sampling variance is scaled by
 \eqn{(1 - c_0 D_j)^2}{(1 - c_0 D_j)^2}, with \eqn{D_j}{D_j} the derivative of the push on a
 population with respect to its own mean, since the sampling error of the mean also enters
 the push removed from it). Two sets are simulated:
@@ -227,17 +235,23 @@ an environmental gradient. \emph{Evolution}, 60, 1344--1357. \doi{10.1554/05-696
 \code{\link[=sample_individuals]{sample_individuals()}}, \code{\link[=tstats]{tstats()}} with \code{null_ip = "species"}.
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
+\code{\link[=plot.mc_trait_gradient_bayes]{plot.mc_trait_gradient_bayes()}},
+\code{\link[=plot.mc_trait_gradient_phylo]{plot.mc_trait_gradient_phylo()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_flex]{plot.trait_flex()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

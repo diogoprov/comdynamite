@@ -18,25 +18,23 @@
 #'   matched to the sites by name, so the design matrix is that of `stats::model.matrix()`
 #'   with the default contrasts. The help of `trait_flex()` states that `formula` is
 #'   one-sided, must keep the intercept and uses the variables of `env`.
-#' @srrstatsTODO {RE1.2} The help pages give the format of the predictors (`env`: a vector,
-#'   matrix or data frame with one row per site, matched to `comm` by row names; column names
-#'   in `trait_flex()`, `population_shifts()`, `trait_gradient()`), and `check_env()` and
-#'   `check_numeric_columns()` (R/checks.R) refuse character and factor columns with a
-#'   message that says to code factors as dummy variables. Missing: the `env` entries of the
-#'   help pages of `node_test()`, `pcc_test()`, `phylo_beta_test()`, `pcps_test()`,
-#'   `phylo_vector()` and `trait_partition()` do not say that only numeric or logical
-#'   columns are accepted and that factors and character columns are refused.
-#' @srrstatsTODO {RE1.3} Names are kept in most results: node numbers and predictor names in
-#'   the tables and matrices of `node_test()`, predictor and trait names in
-#'   `trait_partition()`, species names in `phylo_vector()` and `phylo_eigenvectors()`, site
-#'   and species names in the `scores` and `species` of `pcps_test()`, site, species and
-#'   trait names in `trait_flex()` and `trait_gradient()`, trait names in the `W` of
-#'   `drift_test()`. Missing: the `scores` of `phylo_beta_test()` have no row names when
-#'   `comm` has site names, and `predict()` of `abc_fit()` numbers the observations and drops
-#'   the row names of `newdata`.
-#' @srrstatsTODO {RE1.3a} The loss of the site names in the `scores` of `phylo_beta_test()`
-#'   is not documented (the `observation` index of `predict()` for `abc_fit()` is). Either
-#'   keep the names (see RE1.3) or state the loss in the help page.
+#' @srrstats {RE1.2} The help pages give the format of the predictors: `env` is a vector,
+#'   matrix or data frame with one row per site, matched to `comm` by row names, and the `env`
+#'   entries of `node_test()`, `pcc_test()`, `phylo_beta_test()`, `pcps_test()`, `phylo_vector()`
+#'   and `trait_partition()` say that columns must be numeric or logical and that factors and
+#'   character columns stop with an error, to be coded as dummy variables; `check_env()` and
+#'   `check_numeric_columns()` (R/checks.R) enforce it.
+#' @srrstats {RE1.3} Names are kept in the results: node numbers and predictor names in the
+#'   tables and matrices of `node_test()`, predictor and trait names in `trait_partition()`,
+#'   species names in `phylo_vector()` and `phylo_eigenvectors()`, site and species names in the
+#'   `scores` and `species` of `pcps_test()`, site, species and trait names in `trait_flex()` and
+#'   `trait_gradient()`, trait names in the `W` of `drift_test()`. The `scores` of
+#'   `phylo_beta_test()` have the site names of `comm` as row names (`predicted_scores()` in
+#'   R/phylo_beta.R), and `predict()` of `abc_fit()` adds a column `name` with the row names of
+#'   `newdata` (tests in tests/testthat/test-phylo-beta.R and tests/testthat/test-abc.R).
+#' @srrstats {RE1.3a} Where row names cannot be kept as row names, because a result stacks
+#'   several rows per observation, they are kept as a column: `name` in `predict()` of
+#'   `abc_fit()`, beside the row index `observation`, as its help page says.
 #' @srrstats {RE1.4} The help pages state the assumptions and what follows when they fail,
 #'   with rates from simulations: exchangeable sites in the permutation tests (`node_test()`,
 #'   `pcps_test()`: free permutations reject too often with spatial autocorrelation, and the
@@ -99,45 +97,43 @@
 #'   information stays in the result: `population_shifts()` keeps the attribute `profile`, with
 #'   the residual sum of squares and the estimates at each width, and `trait_gradient_phylo()`
 #'   keeps the columns `at_bound` and `converged` of its `models` table.
-#' @srrstatsTODO {RE3.2} The help of `population_shifts()` gives the grid of widths and the
-#'   5% threshold of a flat profile, and that of `trait_gradient_phylo()` the bounds of the
-#'   OU parameter. Missing: the tolerances themselves (defaults of `stats::optimize()` and
-#'   of `stats::optim()` with L-BFGS-B, and the relative tolerance of 1e-8 and 50 iterations
-#'   of `population_variance()`) are not documented.
-#' @srrstatsTODO {RE3.3} `population_shifts()` lets the user fix `width`, which removes the
-#'   search, but no function takes a tolerance or a maximum number of iterations. Missing:
-#'   either such arguments (for example a `control` list passed to `stats::optim()` in
-#'   `trait_gradient_phylo()`) or a documented reason for fixing them.
+#' @srrstats {RE3.2} The tolerances are documented: the help of `trait_gradient_phylo()` gives
+#'   the bounds of the OU parameter, the use of `stats::optimize()` with its default tolerance
+#'   and of `stats::optim()` with L-BFGS-B and its default controls from three starts; that of
+#'   `population_shifts()` gives the grid of widths, its refinement by `optimize()` with its
+#'   default tolerance, the 5% threshold of a flat profile, and the relative tolerance of 1e-8
+#'   and 50 iterations of the variance of populations.
+#' @srrstats {RE3.3} `population_shifts()` lets the user fix `width`, which removes the search.
+#'   The other tolerances are fixed, with the reason given in the help pages: the surfaces have
+#'   one or two parameters on bounded intervals, several starts guard against local optima better
+#'   than a tighter tolerance would, and a finer width or variance would not change the estimates
+#'   beyond their sampling error; non-convergence is reported (`converged`, warnings).
 #' @srrstats {RE4.0} Each analysis returns an object of its own S3 class: `mc_node_test`,
 #'   `mc_pcc`, `mc_phylo_beta`, `mc_pcps`, `mc_phylo_vector`, `mc_trait_partition`,
 #'   `mc_trait_gradient`, `mc_trait_gradient_test`, `mc_trait_gradient_phylo`, `trait_flex`,
 #'   `population_shifts` (a data frame with attributes), `drift_test`, and, for the random
 #'   forests, `mc_abc_fit` and `mc_abc_choice`, which hold the `regAbcrf` and `abcrf`
 #'   objects of the package abcrf together with the training table.
-#' @srrstatsTODO {RE4.2} Coefficients are returned as elements of the results (`slope` and
-#'   `intercept` of `drift_test()`; the columns `local_adaptation` and `displacement` of
-#'   `population_shifts()`; `slope` and `intercept` per species in `trait_gradient()`; `mu`,
-#'   `sigma2` and `a` in `trait_gradient_phylo()`), but no class has a `coef()` method.
-#'   Missing: `coef()` methods for `drift_test`, `population_shifts`, `mc_trait_gradient`
-#'   and `mc_trait_gradient_phylo`.
-#' @srrstatsTODO {RE4.3} Intervals are returned as elements (`conf_int` and `level` of
-#'   `drift_test()`; the `_low` and `_high` bootstrap columns of `population_shifts()`;
-#'   `slope_se` in `trait_gradient()`), but `confint()` exists only for `mc_damocles_fit`.
-#'   Missing: `confint()` methods for `drift_test` and `population_shifts`.
-#' @srrstatsTODO {RE4.4} Most models have a fixed specification, given in the help page.
-#'   The only model chosen by the user is the `formula` of `trait_flex()`, and its result
-#'   does not keep it. Missing: the formula as an element of the `trait_flex` object, with a
-#'   `formula()` method.
-#' @srrstatsTODO {RE4.5} The numbers of observations are elements of the results
-#'   (`n_sites` and `n_species` per node in `node_test()`, `n_groups` and `n_traits` in
-#'   `drift_test()`, `n_populations` and `n_species` in `population_shifts()`, `n_sites` per
-#'   species in `trait_gradient()`, the rows of `training` in `abc_fit()`), but no class has
-#'   a `nobs()` method. Missing: `nobs()` methods for these classes.
-#' @srrstatsTODO {RE4.6} No result has a `vcov()` method. The permutation tests estimate no
-#'   parametric covariance, but `drift_test()` discards the `stats::lm()` fit behind its
-#'   slope and intercept, and `population_shifts()` keeps the bootstrap draws (attribute
-#'   `bootstrap`) without their covariance. Missing: `vcov()` methods for `drift_test` and
-#'   for `population_shifts` with `nboot > 0`.
+#' @srrstats {RE4.2} `coef()` methods (R/accessors.R) for `drift_test` (intercept and slope),
+#'   `population_shifts` (slopes and displacement), `mc_trait_gradient` (beta, alpha, intercept
+#'   and slope per species) and `mc_trait_gradient_phylo` (mu, sigma2 and a per response and
+#'   model); `mc_damocles_fit` has its estimates in `confint()`. Tests in tests/testthat/test-
+#'   accessors.R, test-population_shifts.R and test-trait-gradient.R.
+#' @srrstats {RE4.3} `confint()` methods for `drift_test` (from the \eqn{t} distribution of its
+#'   regression, at any `level`), `population_shifts` (the basic bootstrap intervals, with
+#'   `nboot > 0`, at the level they were computed) and `mc_damocles_fit`.
+#' @srrstats {RE4.4} The only model chosen by the user is the `formula` of `trait_flex()`; the
+#'   result keeps it as the element `formula`, returned by `formula()` (R/accessors.R) and shown
+#'   by `print()`.
+#' @srrstats {RE4.5} `nobs()` methods for `drift_test` (the number of traits, the points of its
+#'   regression), `population_shifts` (populations that entered as responses), `trait_flex`
+#'   (sites in the model), `mc_trait_gradient` (populations), `mc_trait_gradient_phylo`
+#'   (species), `mc_node_test` (sites at the root) and `mc_abc_fit` (simulations in the training
+#'   table).
+#' @srrstats {RE4.6} `vcov()` methods for `drift_test` (from its `stats::lm()` fit, now kept as
+#'   `fit`) and for `population_shifts` with `nboot > 0` (the covariance of the coefficients
+#'   among the bootstrap simulations from the fitted model). The permutation tests estimate no
+#'   parametric covariance.
 #' @srrstats {RE4.7} Where a fit is iterative the result carries what is needed to judge
 #'   it: the attribute `profile` of `population_shifts()` (residual sum of squares, R2 and
 #'   estimates at each width), `at_bound` and `loglik` in `trait_gradient_phylo()`, the
@@ -152,16 +148,13 @@
 #'   `node_test()`, `pcc_test()` and `phylo_beta_test()` return the statistics of each node,
 #'   eigenvector or matrix and not the site-level responses, which `node_contrasts()`,
 #'   `phylo_eigenvectors()` and `phylo_beta()` give.
-#' @srrstatsTODO {RE4.9} Modelled values are returned only by `predict()` for `mc_abc_fit`
-#'   and `mc_abc_choice` and as the `scores` of the predicted matrix in `phylo_beta_test()`.
-#'   `trait_flex()` and `drift_test()` discard their `stats::lm()` fits, and
-#'   `population_shifts()` and `node_test()` return no fitted values. Missing: `fitted()`
-#'   methods (at least for `drift_test`, `trait_flex` and `population_shifts`).
-#' @srrstatsTODO {RE4.10} No result returns residuals: `trait_flex()` gives only the
-#'   residual sum of squares, `population_shifts()` the residual sum of squares at each
-#'   width, and `drift_test()` the points from which they can be computed. Missing:
-#'   `residuals()` methods for `drift_test`, `trait_flex` and `population_shifts`, with the
-#'   scale of the residuals stated in the help pages.
+#' @srrstats {RE4.9} `fitted()` methods for `drift_test` (one value per principal component),
+#'   `trait_flex` (one per site, trait and component, in the element `model`) and
+#'   `population_shifts` (one per half-sample mean of a population, in the attribute `model`);
+#'   `predict()` gives modelled values for `mc_abc_fit` and `mc_abc_choice`.
+#' @srrstats {RE4.10} `residuals()` methods for the same three classes as RE4.9; their scales
+#'   are stated in the help pages: `log(between)` for `drift_test`, trait units for `trait_flex`,
+#'   and trait units centred within species for `population_shifts`.
 #' @srrstats {RE4.11} Goodness of fit and effect sizes are part of every result: `r2`,
 #'   `r2_adjusted`, `r2_weighted` and the semipartial correlation of each predictor in
 #'   `node_test()`; `r2_mean` and `r2_adjusted` in `pcc_test()`; the adjusted R2 and
@@ -184,12 +177,12 @@
 #'   `abc_diagnose()` lists the statistics of an observation that fall outside the reference
 #'   table, where the forests extrapolate, and `abc_recovery()` measures the error and
 #'   coverage of the predictions on simulations left out.
-#' @srrstatsTODO {RE4.17} `print()` methods exist for `mc_node_test`, `mc_pcc`, `mc_pcps`,
+#' @srrstats {RE4.17} `print()` methods exist for `mc_node_test`, `mc_pcc`, `mc_pcps`,
 #'   `mc_phylo_beta`, `mc_phylo_vector`, `mc_trait_partition`, `mc_trait_gradient`,
-#'   `mc_trait_gradient_test`, `mc_trait_gradient_phylo`, `drift_test`, `mc_abc_fit` and
-#'   `mc_abc_choice`, with the numbers of sites, species or simulations, the statistics and
-#'   the permutations used; `population_shifts` prints as the data frame it is. Missing: a
-#'   `print()` method for `trait_flex`, which prints as a bare list.
+#'   `mc_trait_gradient_test`, `mc_trait_gradient_phylo`, `drift_test`, `trait_flex` (new, with
+#'   the model and the decomposition), `mc_abc_fit` and `mc_abc_choice`, with the numbers of
+#'   sites, species or simulations, the statistics and the permutations used; `population_shifts`
+#'   prints as the data frame it is.
 #' @srrstats {RE4.18} `summary()` methods exist for `mc_node_test` (nodes in order of
 #'   `p_adjusted`), `mc_pcc`, `mc_pcps`, `mc_phylo_beta`, `mc_phylo_vector` and
 #'   `mc_trait_partition` (help topic `result-methods`, R/methods.R) and for `mc_abc_cv`
@@ -203,11 +196,13 @@
 #'   relationship. Missing: a benchmark of the regression functions against the numbers of
 #'   sites, species and permutations (a script in data-raw/ and a table in an article or in
 #'   the README).
-#' @srrstatsTODO {RE6.0} `plot()` methods exist for `mc_node_test`, `mc_pcps`,
-#'   `mc_phylo_beta`, `mc_trait_partition`, `mc_trait_gradient`, `mc_trait_gradient_test`,
-#'   `trait_flex`, `population_shifts` and `drift_test`. Missing: `plot()` methods for
-#'   `mc_pcc`, `mc_phylo_vector`, `mc_trait_gradient_phylo`, `mc_abc_fit` and
-#'   `mc_abc_choice`, which have none.
+#' @srrstats {RE6.0} `plot()` methods exist for every regression class: `mc_node_test`,
+#'   `mc_pcps`, `mc_phylo_beta`, `mc_trait_partition`, `mc_trait_gradient`,
+#'   `mc_trait_gradient_test`, `trait_flex`, `population_shifts` and `drift_test`, and now
+#'   `mc_pcc` (adjusted R2 of each eigenvector), `mc_phylo_vector` (correlation of each
+#'   eigenvector with the predictor, retained ones marked), `mc_trait_gradient_phylo` (Akaike
+#'   weights of the models), `mc_abc_fit` (posterior against prior) and `mc_abc_choice`
+#'   (confusion matrix, or votes for an observation). Tests in the test file of each function.
 #' @srrstats {RE6.1} Where the plot is drawn by a named function, an S3 method sends the
 #'   user to it: `plot.mc_node_test()` calls `plot_node_test()`, `plot.mc_trait_partition()`
 #'   calls `plot_trait_partition()` and `plot.mc_phylo_beta()` calls `plot_phylo_beta()`
@@ -245,11 +240,11 @@
 #'   tests/testthat/test-pcc.R (tip labels as row names of the eigenvectors),
 #'   tests/testthat/test-trait_variation.R (sites of `env` matched by name in
 #'   `trait_flex()`) and tests/testthat/test-drift-test.R (trait names of `W`).
-#' @srrstatsTODO {RE7.3} The methods that exist are tested (`as.data.frame()` and
-#'   `summary()` in tests/testthat/test-node.R and test-pcps.R, `print()` and `plot()` in
-#'   the test file of each function), but the accessors of RE4.2 to RE4.7 (`coef()`,
-#'   `confint()`, `formula()`, `nobs()`, `vcov()`) do not exist for the regression objects.
-#'   Missing: tests of those methods once they are added.
+#' @srrstats {RE7.3} The methods are tested: `as.data.frame()` and `summary()` in
+#'   tests/testthat/test-node.R and test-pcps.R, `print()` and `plot()` in the test file of each
+#'   function, and the accessors `coef()`, `confint()`, `vcov()`, `nobs()`, `fitted()`,
+#'   `residuals()` and `formula()` in tests/testthat/test-accessors.R, test-population_shifts.R,
+#'   test-trait-gradient.R, test-node.R and test-abc.R.
 #' @noRd
 NULL
 

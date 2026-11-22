@@ -53,8 +53,9 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #'   two are dropped with a warning. Every site needs at least one individual.
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
-#' @param env Predictor, or matrix or data frame of predictors, with one row per
-#'   site.
+#' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param squared `TRUE` or `FALSE`, passed to [phylo_eigenvectors()].
 #' @param site_permutations Optional matrix of site indices with one permutation
@@ -122,12 +123,13 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
 }
 
 #' @export
-print.mc_pcc <- function(x, ...) {
+print.mc_pcc <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_pcc> phylogenetic community composition\n")
-  cat("mean positive adjusted R2:", format(x$r2_mean, digits = 3), "\n")
+  cat("mean positive adjusted R2:", format(x$r2_mean, digits = digits), "\n")
   permutation_line(x$permutations)
-  cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+  cat("p (sites):", format(x$p_site, digits = digits), " p (species):",
+      format(x$p_species, digits = digits), " p (max):", format(x$p_max, digits = digits), "\n")
   invisible(x)
 }
 
@@ -158,4 +160,41 @@ check_enough_sites <- function(comm, env) {
     stop("`comm` needs more occupied sites (", nrow(comm), ") than predictors in `env` plus ",
          "one (", ncol(env) + 1, ")", call. = FALSE)
   }
+}
+
+#' Plot a test of phylogenetic community composition
+#'
+#' Draws the adjusted R2 of each phylogenetic eigenvector regressed on the predictors, as
+#' computed by [pcc_test()], with the mean of the positive values (`r2_mean`) as a dashed line
+#' and the largest p-value in the subtitle. The test statistic is the variance of these bars.
+#'
+#' @param x Result of [pcc_test()].
+#' @param colour Colour of the bars.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [pcc_test()]
+#' @family the whole tree
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' traits <- species_traits(tree, lambda = 1, optima_range = c(-1, 101),
+#'                          rmax_range = c(0, 30))
+#' env <- runif(50, 0, 100)
+#' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+#' keep <- rowSums(comm) > 0
+#' plot(pcc_test(comm[keep, ], tree, env[keep], n_perm = 99))
+#' @export
+plot.mc_pcc <- function(x, colour = "#0072B2", ...) {
+  need_ggplot("plot() of pcc_test()")
+  check_colours(colour, 1)
+  .data <- ggplot2::.data
+  d <- data.frame(eigenvector = seq_along(x$r2_adjusted), r2 = x$r2_adjusted)
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$eigenvector, y = .data$r2)) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey50") +
+    ggplot2::geom_col(fill = colour) +
+    ggplot2::geom_hline(yintercept = x$r2_mean, linetype = "dashed", colour = "grey30") +
+    ggplot2::labs(x = "Phylogenetic eigenvector", y = "Adjusted R2",
+                  subtitle = sprintf("Mean positive adjusted R2 %.3f (dashed line), p (max) %.3g",
+                                     x$r2_mean, x$p_max)) +
+    ggplot2::theme_minimal()
 }

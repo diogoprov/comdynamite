@@ -44,17 +44,23 @@ plot(trait_flex(ind, traits = c("height", "leaf"), formula = ~ moisture, env = e
 \code{\link[=trait_flex]{trait_flex()}}.
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
+\code{\link[=plot.mc_trait_gradient_bayes]{plot.mc_trait_gradient_bayes()}},
+\code{\link[=plot.mc_trait_gradient_phylo]{plot.mc_trait_gradient_phylo()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

@@ -31,7 +31,7 @@ is \code{\link[=summary_stats]{summary_stats()}}, with \code{shared$tree} if the
 }
 \value{
 An \code{mc_abc_table}: a data frame with one row per simulation, the parameters and the
-statistics, with the attributes \code{prior}, \code{parameters} and \code{statistics}.
+statistics, with the attributes \code{prior}, \code{parameters}, \code{statistics} and \code{seed}.
 }
 \description{
 Draws parameters from uniform priors, simulates one data set per draw and summarises it, as
@@ -68,7 +68,10 @@ Other inference:
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
+\code{\link[=plot.mc_abc_choice]{plot.mc_abc_choice()}},
+\code{\link[=plot.mc_abc_fit]{plot.mc_abc_fit()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}

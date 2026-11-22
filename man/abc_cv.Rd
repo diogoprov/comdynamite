@@ -47,6 +47,7 @@ value minus the predicted median over the predictive standard deviation. \code{s
 averages over folds and data sets (\code{n} rows per statistic): the coverage, the mean of \code{z},
 the root mean square of \code{z} and the fraction of p-values below 0.05. Under the model the
 coverage is at or above \code{level} and the root mean square of \code{z} below 1 (see Details).
+The attribute \code{seed} holds the seed.
 }
 \description{
 For each fold, fits \code{\link[=abc_fit]{abc_fit()}} on the statistics of the sites kept, draws from the
@@ -90,7 +91,10 @@ Other inference:
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
+\code{\link[=plot.mc_abc_choice]{plot.mc_abc_choice()}},
+\code{\link[=plot.mc_abc_fit]{plot.mc_abc_fit()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}

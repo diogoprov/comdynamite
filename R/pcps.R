@@ -36,6 +36,8 @@
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param axes Principal coordinates to test, in order of eigenvalue: a vector of distinct
 #'   whole numbers, 1 or more.
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
@@ -160,10 +162,11 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
 }
 
 #' @export
-print.mc_pcps <- function(x, ...) {
+print.mc_pcps <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_pcps> principal coordinates of phylogenetic structure\n")
   permutation_line(x$permutations)
-  print(format(x$tests, digits = 3), row.names = FALSE, quote = FALSE)
+  print(format(x$tests, digits = digits), row.names = FALSE, quote = FALSE)
   invisible(x)
 }
 

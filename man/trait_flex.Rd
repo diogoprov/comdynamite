@@ -45,8 +45,12 @@ A list with \code{decomposition}, a data frame with one row per trait and compon
 (\code{turnover}, \code{intraspecific}, \code{covariation}, \code{total}) and the columns \code{explained},
 \code{residual}, \code{total} (sums of squares) and \code{p} (of the regression, \code{NA} for the
 covariation and without a model), and \code{sites}, a data frame with the specific and fixed
-means and their difference for each site and trait. The list has class \code{trait_flex},
-with a \link[=plot.trait_flex]{plot()} method.
+means and their difference for each site and trait, \code{model}, a data frame with the
+site values of each trait and component (\code{turnover}, \code{intraspecific}, \code{total}) as
+\code{response}, with their \code{fitted} values and residuals (the site mean without a model),
+and \code{formula}. The list has class \code{trait_flex}, with \link[=print.trait_flex]{print()},
+\link[=plot.trait_flex]{plot()}, \link[=formula.trait_flex]{formula()}, \link[=fitted.trait_flex]{fitted()},
+\link[=residuals.trait_flex]{residuals()} and \link[=nobs.trait_flex]{nobs()} methods.
 }
 \description{
 Splits the variation among sites of the community-weighted mean of a trait into the parts due
@@ -113,18 +117,24 @@ variability effects. \emph{Ecography}, 34, 856--863. \doi{10.1111/j.1600-0587.20
 \code{\link[=tstats]{tstats()}}, \code{\link[=nested_variance]{nested_variance()}}.
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
+\code{\link[=plot.mc_trait_gradient_bayes]{plot.mc_trait_gradient_bayes()}},
+\code{\link[=plot.mc_trait_gradient_phylo]{plot.mc_trait_gradient_phylo()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_flex]{plot.trait_flex()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

@@ -47,7 +47,9 @@ interval \code{conf_int}, the \code{statistic} (\eqn{t}{t}) and \code{p_value} o
 the matrix \code{W}
 and a data frame \code{components} with the \code{eigenvalue}, the expected \code{sampling} variance of
 the means (0 without correction) and the \code{between} variance (corrected) of each principal
-component. It has \code{print()} and \code{plot()} methods.
+component, and \code{fit}, the \code{\link[stats:lm]{stats::lm()}} fit of \code{log(between)} on \code{log(eigenvalue)}. It
+has \code{print()}, \code{plot()}, \link[=coef.drift_test]{coef()}, \code{confint()}, \code{vcov()}, \code{nobs()},
+\code{fitted()} and \code{residuals()} methods.
 }
 \description{
 Tests the prediction of neutral evolution that the variance among group means is
@@ -106,17 +108,23 @@ with phenotypic covariance matrices: a simulation study. \emph{Evolution}, 67, 1
 }
 \seealso{
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link{neighbour_metrics}},
 \code{\link[=nested_variance]{nested_variance()}},
 \code{\link[=null_intervals]{null_intervals()}},
 \code{\link[=plot.mc_trait_gradient]{plot.mc_trait_gradient()}},
+\code{\link[=plot.mc_trait_gradient_bayes]{plot.mc_trait_gradient_bayes()}},
+\code{\link[=plot.mc_trait_gradient_phylo]{plot.mc_trait_gradient_phylo()}},
 \code{\link[=plot.nested_variance]{plot.nested_variance()}},
 \code{\link[=plot.trait_flex]{plot.trait_flex()}},
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

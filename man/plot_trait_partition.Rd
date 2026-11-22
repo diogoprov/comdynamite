@@ -11,7 +11,7 @@ plot_trait_partition(
   level = 0.05,
   colours = "#0072B2",
   labels = c("Environment", "Space"),
-  text_size = 3.2,
+  text_size = 3.5,
   ...,
   alpha = NULL,
   col = NULL,
@@ -80,6 +80,7 @@ multiple regression and canonical analysis. \emph{Journal of Plant Ecology}, 1, 
 \seealso{
 Other environment and space:
 \code{\link[=phylo_vector]{phylo_vector()}},
+\code{\link[=plot.mc_phylo_vector]{plot.mc_phylo_vector()}},
 \code{\link[=trait_partition]{trait_partition()}}
 }
 \concept{environment and space}

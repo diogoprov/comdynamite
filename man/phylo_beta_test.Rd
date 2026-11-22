@@ -21,8 +21,9 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 
 \item{tree}{A \code{phylo} object with the same species as \code{comm}.}
 
-\item{env}{Predictor, or matrix or data frame of predictors, with one row per
-site.}
+\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with \code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
@@ -46,7 +47,8 @@ it has them.}
 \value{
 List of class \code{mc_phylo_beta} with \code{r2_adjusted}, the adjusted R2; \code{statistic},
 the pseudo-F; \code{p_site}, \code{p_species} and \code{p_max}; \code{scores}, the sites on the
-principal coordinates of the predicted matrix, which the authors suggest
+principal coordinates of the predicted matrix (rows named by the occupied sites of
+\code{comm}, columns \code{PCoA1}, \code{PCoA2}, ...), which the authors suggest
 using to order sites in a heatmap of the community matrix; and \code{permutations}.
 }
 \description{
@@ -106,6 +108,7 @@ Other the whole tree:
 \code{\link[=pcps_test]{pcps_test()}},
 \code{\link[=phylo_beta]{phylo_beta()}},
 \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcc]{plot.mc_pcc()}},
 \code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
 \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }

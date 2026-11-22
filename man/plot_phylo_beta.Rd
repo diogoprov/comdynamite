@@ -10,7 +10,7 @@ plot_phylo_beta(
   tree,
   axis = 1,
   colours = "#0072B2",
-  text_size = 2.5,
+  text_size = 3.2,
   ...,
   col = NULL,
   cex = NULL
@@ -67,6 +67,7 @@ Other the whole tree:
 \code{\link[=phylo_beta]{phylo_beta()}},
 \code{\link[=phylo_beta_test]{phylo_beta_test()}},
 \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcc]{plot.mc_pcc()}},
 \code{\link[=plot.mc_pcps]{plot.mc_pcps()}}
 }
 \concept{the whole tree}

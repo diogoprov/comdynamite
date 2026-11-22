@@ -175,8 +175,12 @@ tstats_summary <- function(x, level = 0.95) {
 #'   (`turnover`, `intraspecific`, `covariation`, `total`) and the columns `explained`,
 #'   `residual`, `total` (sums of squares) and `p` (of the regression, `NA` for the
 #'   covariation and without a model), and `sites`, a data frame with the specific and fixed
-#'   means and their difference for each site and trait. The list has class `trait_flex`,
-#'   with a [plot()][plot.trait_flex] method.
+#'   means and their difference for each site and trait, `model`, a data frame with the
+#'   site values of each trait and component (`turnover`, `intraspecific`, `total`) as
+#'   `response`, with their `fitted` values and residuals (the site mean without a model),
+#'   and `formula`. The list has class `trait_flex`, with [print()][print.trait_flex],
+#'   [plot()][plot.trait_flex], [formula()][formula.trait_flex], [fitted()][fitted.trait_flex],
+#'   [residuals()][residuals.trait_flex] and [nobs()][nobs.trait_flex] methods.
 #' @references Lepš, J., de Bello, F., Šmilauer, P., & Doležal, J. (2011). Community trait
 #'   response to environment: disentangling species turnover vs intraspecific trait
 #'   variability effects. *Ecography*, 34, 856--863. \doi{10.1111/j.1600-0587.2010.06904.x}
@@ -259,6 +263,7 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
   handle_missing(individuals[traits], na_action, "`traits`")
   decomposition <- list()
   site_means <- list()
+  site_fits <- list()
   for (trait in traits) {
     z <- individuals[[trait]]
     check_numeric_traits(z, trait)
@@ -283,17 +288,32 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     specific <- weighted(as.vector(pop_mean))
     fixed <- weighted(as.vector(species_mean))
     values <- list(turnover = fixed, intraspecific = specific - fixed, total = specific)
-    ss <- lapply(values, function(y) {
+    fitted_values <- list()
+    ss <- lapply(names(values), function(component) {
+      y <- values[[component]]
       ok <- !is.na(y) & env_ok
       total <- sum((y[ok] - mean(y[ok]))^2)
-      if (length(model_vars) == 0) return(c(explained = 0, residual = total, total = total,
-                                             p = NA_real_))
+      modelled <- rep(NA_real_, length(y))
+      if (length(model_vars) == 0) {
+        modelled[ok] <- mean(y[ok])
+        fitted_values[[component]] <<- modelled
+        return(c(explained = 0, residual = total, total = total, p = NA_real_))
+      }
       fit <- stats::lm(model_formula, data = cbind(.y = y, env_sites)[ok, , drop = FALSE])
+      modelled[ok] <- stats::fitted(fit)
+      fitted_values[[component]] <<- modelled
       residual <- sum(stats::residuals(fit)^2)
       f <- summary(fit)$fstatistic
       p <- if (is.null(f)) NA_real_ else stats::pf(f[1], f[2], f[3], lower.tail = FALSE)
       c(explained = total - residual, residual = residual, total = total, p = unname(p))
     })
+    names(ss) <- names(values)
+    site_fits[[trait]] <- do.call(rbind, lapply(names(values), function(component) {
+      data.frame(site = site_levels, trait = trait, component = component,
+                 response = values[[component]], fitted = fitted_values[[component]],
+                 residual = values[[component]] - fitted_values[[component]],
+                 row.names = NULL, stringsAsFactors = FALSE)
+    }))
     ss$covariation <- ss$total - ss$turnover - ss$intraspecific
     ss$covariation["p"] <- NA_real_
     ss <- ss[c("turnover", "intraspecific", "covariation", "total")]
@@ -304,7 +324,9 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
                                       row.names = NULL, stringsAsFactors = FALSE)
   }
   structure(list(decomposition = do.call(rbind, unname(decomposition)),
-                 sites = do.call(rbind, unname(site_means))), class = "trait_flex")
+                 sites = do.call(rbind, unname(site_means)),
+                 model = do.call(rbind, unname(site_fits)), formula = formula),
+            class = "trait_flex")
 }
 
 #' Plot the decomposition of community trait means

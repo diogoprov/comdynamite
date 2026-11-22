@@ -49,7 +49,20 @@ Arguments that choose among options, such as \code{method}, \code{null} or \code
 stops with the list of valid options. Each scalar argument is checked for its length, type
 and range before any computation, and missing or infinite values in \code{comm}, \code{env} and the
 other data inputs stop the function with a message that names the argument; remove or
-impute missing values before the analysis.
+impute missing values before the analysis. Factors used as labels (the site and species
+columns of the data on individuals, \code{group} of \code{\link[=drift_test]{drift_test()}}, \code{regimes} of the DAMOCLES
+functions, \code{strata} of \code{\link[=env_surrogates]{env_surrogates()}}) are taken as unordered: the order of the levels
+of an ordered factor is ignored. Factors and character columns are refused as predictors in
+\code{env}; code them as dummy variables.
+
+Inputs are converted once, at the start: community tables become double matrices (integer
+counts included, so the \code{comm} of \code{\link[=mc_data]{mc_data()}} is double), and site and species labels in
+results are character, even when the input columns were factors. Attributes and classes of
+numeric columns, such as units of the units package, are dropped without a message: values
+are taken in the units given, and results are in those units. The analyses take either an
+\code{\link[=mc_data]{mc_data()}} object, which keeps the parts matched by site and species names, or the parts
+as separate arguments (\code{comm}, \code{tree}, \code{traits}, \code{env}), which are matched by the same names
+inside each function.
 }
 
 \section{Citation}{
@@ -58,6 +71,15 @@ Cite the package with \code{citation("comdynamite")} and, with it, the original 
 methods you use. Each function that implements a published method shows these papers the
 first time it runs in a session, and \code{\link[=method_references]{method_references()}} lists them by function; see
 \code{\link[=method_references]{method_references()}} for how to turn the message off.
+}
+
+\section{Audience}{
+
+The package is written for community ecologists, biogeographers and evolutionary biologists
+who analyse species composition, traits and phylogenies across sites, and for
+methodologists who want to check, by simulation, whether a method recovers a known process.
+It assumes familiarity with R and with the methods it implements, whose original papers each
+help page cites.
 }
 
 \section{Where to start}{

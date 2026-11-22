@@ -89,6 +89,9 @@ test_that("the phylogenetic vector follows a phylogenetic response", {
   expect_identical(names(out$pev), colnames(d$comm))
   expect_gte(abs(out$correlation[["pev"]]), 0.3)
   expect_output(print(out), "PEV-B")
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    expect_match(plot(out)$labels$subtitle, "correlation of PEV")
+  }
   # signed weights never fit worse than absolute ones, for orthogonal eigenvectors
   sel <- out$selected
   absolute <- out$eigenvectors[, sel, drop = FALSE] %*% abs(out$eigenvector_correlation[sel])
@@ -357,4 +360,18 @@ test_that("phylo_vector() and phylo_eigenvectors() have oriented eigenvectors", 
   comm <- matrix(rpois(10 * 8, 2) + 1, 10, dimnames = list(NULL, tree$tip.label))
   out <- phylo_vector(comm, tree, env = rnorm(10), n_perm = 9, n_sim = 10)
   expect_true(lead_positive(out$eigenvectors))
+})
+
+test_that("plot() draws the correlations of the eigenvectors, retained or not", {
+  skip_if_not_installed("ggplot2")
+  d <- simulated(k = 12)
+  set.seed(3)
+  out <- phylo_vector(d$comm, d$tree, d$env, n_perm = 19, n_sim = 5)
+  p <- plot(out)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(nrow(built$data[[2]]), length(out$eigenvector_correlation))
+  none <- out
+  none$selected <- integer()
+  expect_ggplot(plot(none))
 })

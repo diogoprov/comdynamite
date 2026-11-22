@@ -26,8 +26,9 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 \item{nodes}{Matrix of contrasts with one row per species, from
 \code{\link[=node_contrasts]{node_contrasts()}}.}
 
-\item{env}{Predictor, or matrix or data frame of predictors, with one row per
-site.}
+\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with \code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{biogeography}{Optional matrix of biogeographic events with one row per site
 and values of 1, -1 and 0.}

@@ -57,6 +57,7 @@ test_that("with one predictor, the semipartial squared is the R2", {
 test_that("several cores give the same statistics", {
   x <- node_contrasts(daphniids$tree)
   one <- node_test(daphniids$comm, x, daphniids$env, n_perm = 2)
+  expect_identical(nobs(one), sum(rowSums(daphniids$comm) > 0))
   two <- node_test(daphniids$comm, x, daphniids$env, n_perm = 2, cores = 2)
   expect_equal(two$nodes$r2, one$nodes$r2)
   expect_equal(two$semipartial, one$semipartial)

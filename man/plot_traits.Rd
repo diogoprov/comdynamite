@@ -13,6 +13,7 @@ plot_traits(
   tip_labels = FALSE,
   legend = TRUE,
   point_size = 1.8,
+  text_size = 3.5,
   linewidth = 0.7,
   ...,
   labels = NULL
@@ -38,6 +39,9 @@ regimes; one colour when there are no regimes.}
 \item{legend}{\code{TRUE} or \code{FALSE}. Draw the legend of the regimes?}
 
 \item{point_size}{Size of the tips. One number greater than 0.}
+
+\item{text_size}{Size of the tip labels, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}). One number
+greater than 0.}
 
 \item{linewidth}{Width of the branches. One number greater than 0.}
 

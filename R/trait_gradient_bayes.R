@@ -60,7 +60,12 @@
 #' above 400, no divergent transitions and no transitions that hit the maximum tree depth of
 #' the sampler, over the intercepts, standard deviations,
 #' \eqn{\lambda}, correlations, species values and `lp__`) and the fit, with
-#' [bayesplot::pp_check()] on the result, before reading the estimates.
+#' [bayesplot::pp_check()] on the result, before reading the estimates. R-hat and the bulk
+#' and tail effective sample sizes are those of Vehtari et al. (2021), computed by
+#' `posterior::summarise_draws()`; divergences and transitions at the maximum tree depth are
+#' counted by cmdstanr. When the chains have not converged, run them longer
+#' (`iter_sampling`, `iter_warmup`), or restart from the end of a previous fit: `init`, passed
+#' through `...`, takes the `fit` element of an earlier result, as in the examples.
 #'
 #' The model is in `system.file("stan", "trait_gradient.stan", package = "comdynamite")`. It
 #' is compiled by cmdstanr the first time it is used and kept in
@@ -120,7 +125,9 @@
 #'   `$sample()` method of cmdstanr. `chains`, `parallel_chains` and `iter_sampling` are each
 #'   one whole number, 1 or more; `iter_warmup` one whole number, 0 or more; `adapt_delta` one
 #'   number between 0 and 1, both excluded; `seed` one whole number, 0 or more, or `NULL`.
-#' @param ... Further arguments to `$sample()`, such as `max_treedepth` or `refresh`.
+#' @param ... Further arguments to `$sample()`, such as `max_treedepth`, `refresh`,
+#'   `save_warmup` or `init` (which accepts the `fit` of an earlier result, to restart the
+#'   chains from where it stopped).
 #' @return An object of class `mc_trait_gradient_bayes`, a list with
 #'   \describe{
 #'     \item{signal}{the phylogenetic share \eqn{\lambda} of \eqn{\beta}, \eqn{\alpha} and the
@@ -136,9 +143,15 @@
 #'       depth (`max_treedepth`; raise it through `...` if needed), and `ok`.}
 #'     \item{fit}{the `CmdStanMCMC` object; its draws live in temporary files of the session,
 #'       so save them with `fit$save_object()` to keep them.}
+#'     \item{seed}{the seed of the sampler, also the one drawn by cmdstanr when `seed = NULL`
+#'       (from `fit$metadata()$seed`).}
 #'     \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
 #'       correlation matrix and the settings.}
 #'   }
+#' @references Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021).
+#'   Rank-normalization, folding, and localization: an improved \eqn{\hat{R}} for assessing
+#'   convergence of MCMC (with discussion). *Bayesian Analysis*, 16, 667--718.
+#'   \doi{10.1214/20-BA1221}
 #' @seealso [trait_gradient()], [trait_gradient_phylo()]
 #' @family trait variation among individuals
 #' @examplesIf interactive() && requireNamespace("cmdstanr", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
@@ -153,8 +166,13 @@
 #' bayes$diagnostics
 #' bayes$signal
 #' bayesplot::pp_check(bayes, resp = "sitemean")
+#' plot(bayes)
+#' plot(bayes, type = "trace")
+#' # longer chains that start where the first ones stopped
+#' longer <- trait_gradient_bayes(tg, tree, parallel_chains = 4, iter_sampling = 2000,
+#'                                init = bayes$fit)
 #' @export
-trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1), chains = 4,
+trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1), chains = 4,
                                  parallel_chains = 1, iter_warmup = 1000,
                                  iter_sampling = 1000, adapt_delta = 0.95, seed = NULL, ...) {
   if (!inherits(x, "mc_trait_gradient")) {
@@ -200,7 +218,10 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
     warning("the model has not converged, has divergent transitions or hit the maximum tree ",
             "depth; see `diagnostics`", call. = FALSE)
   }
-  structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, data = model$data,
+  used_seed <- tryCatch(run$fit$metadata()$seed, error = function(e) NULL)
+  if (is.null(used_seed)) used_seed <- seed
+  structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, seed = used_seed,
+                            data = model$data,
                             A = model$A, ou_alpha = ou_alpha, lambda_prior = lambda_prior)),
             class = "mc_trait_gradient_bayes")
 }
@@ -337,22 +358,114 @@ tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent, treedepth 
 }
 
 #' @export
-print.mc_trait_gradient_bayes <- function(x, ...) {
+print.mc_trait_gradient_bayes <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("Bayesian phylogenetic model of the trait gradient:", nrow(x$A), "species,",
       if (is.null(x$ou_alpha)) "Brownian motion\n" else
-        paste0("Ornstein-Uhlenbeck (a = ", format(signif(x$ou_alpha, 3)), ")\n"))
+        paste0("Ornstein-Uhlenbeck (a = ", format(signif(x$ou_alpha, digits)), ")\n"))
   if (is.null(x$signal)) {
     cat("The posterior could not be summarised; see `fit`\n")
     return(invisible(x))
   }
   d <- x$diagnostics
-  cat("Convergence: max R-hat ", format(round(d$max_rhat, 3)), ", min ESS bulk ",
+  cat("Convergence: max R-hat ", format(round(d$max_rhat, digits)), ", min ESS bulk ",
       round(d$min_ess_bulk), ", tail ", round(d$min_ess_tail), ", divergent transitions ",
       d$divergent, ", at maximum tree depth ", d$max_treedepth, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
   s <- x$signal
-  s[-1] <- lapply(s[-1], function(v) round(v, 3))
+  s[-1] <- lapply(s[-1], function(v) round(v, digits))
   print(s, row.names = FALSE)
   invisible(x)
+}
+
+#' Plot the Bayesian model of the trait gradient
+#'
+#' `type = "intervals"` draws the posterior median and central 95% interval of each quantity
+#' in `signal` of [trait_gradient_bayes()]: the phylogenetic share \eqn{\lambda} of
+#' \eqn{\beta}, \eqn{\alpha} and the mean, and the phylogenetic correlations of \eqn{\beta}
+#' with the mean and with \eqn{\alpha}. With `species = TRUE` it draws instead the medians and
+#' intervals of \eqn{\beta}, \eqn{\alpha} and the mean of each species. `type = "trace"` draws
+#' the chains of `variables` with [bayesplot::mcmc_trace()]. Read neither before checking
+#' `diagnostics`.
+#'
+#' Warmup draws are shown with `inc_warmup = TRUE` only when the model was fitted with
+#' `save_warmup = TRUE`, passed through the `...` of [trait_gradient_bayes()] to cmdstanr;
+#' otherwise the fit has no warmup draws and cmdstanr stops with an error.
+#'
+#' @param x Result of [trait_gradient_bayes()].
+#' @param type `"intervals"` or `"trace"`.
+#' @param species `TRUE` or `FALSE`. With `type = "intervals"`, draw the values of the species
+#'   instead of `signal`.
+#' @param variables Names of the variables of the Stan model for `type = "trace"`, such as
+#'   `"lambda_beta"`, `"rho_u"` or `"beta[1]"`.
+#' @param inc_warmup `TRUE` or `FALSE`. Include the warmup draws in `type = "trace"`; see
+#'   Details.
+#' @param colour Colour of the points and intervals.
+#' @param ... Further arguments to [bayesplot::mcmc_trace()] for `type = "trace"`, and not used
+#'   otherwise.
+#' @return A ggplot object.
+#' @seealso [trait_gradient_bayes()], [pp_check.mc_trait_gradient_bayes()]
+#' @family trait variation among individuals
+#' @examplesIf interactive() && requireNamespace("cmdstanr", quietly = TRUE) && requireNamespace("bayesplot", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(30)
+#' sim <- simulate_metacommunity(landscape_implicit(20), species_traits(tree, lambda = 1),
+#'                               competition_matrix(tree, "none"), n_steps = 100,
+#'                               seed_steps = 1:5)
+#' ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
+#' tg <- trait_gradient(ind, abundance = "abundance", species_weights = "occurrence")
+#' bayes <- trait_gradient_bayes(tg, tree, parallel_chains = 4, save_warmup = TRUE)
+#' plot(bayes)
+#' plot(bayes, species = TRUE)
+#' plot(bayes, type = "trace", inc_warmup = TRUE)
+#' @export
+plot.mc_trait_gradient_bayes <- function(x, type = c("intervals", "trace"), species = FALSE,
+                                         variables = c("lambda_beta", "lambda_alpha",
+                                                       "lambda_mean"),
+                                         inc_warmup = FALSE, colour = "#0072B2", ...) {
+  need_ggplot("plot() of trait_gradient_bayes()")
+  type <- match.arg(type)
+  check_flag(species, "species")
+  check_flag(inc_warmup, "inc_warmup")
+  check_colours(colour, 1)
+  if (type == "trace") {
+    if (!requireNamespace("bayesplot", quietly = TRUE)) {
+      stop("plot(type = \"trace\") needs the package bayesplot", call. = FALSE) # nocov
+    }
+    if (!is.character(variables) || length(variables) == 0) {
+      stop("`variables` must be names of variables of the model", call. = FALSE)
+    }
+    draws <- x$fit$draws(variables = variables, inc_warmup = inc_warmup)
+    n_warmup <- if (inc_warmup) x$fit$metadata()$iter_warmup else 0
+    return(bayesplot::mcmc_trace(draws, n_warmup = n_warmup, ...))
+  }
+  if (is.null(x$signal)) stop("the posterior was not summarised; see `x$fit`", call. = FALSE)
+  .data <- ggplot2::.data
+  if (species) {
+    s <- x$species
+    quantities <- c("beta", "alpha", "mean")
+    d <- do.call(rbind, lapply(quantities, function(q) {
+      data.frame(species = s$species, quantity = q, estimate = s[[q]],
+                 lower = s[[paste0(q, "_lower")]], upper = s[[paste0(q, "_upper")]])
+    }))
+    d$quantity <- factor(d$quantity, quantities)
+    d$species <- factor(d$species, rev(s$species))
+    d <- d[!is.na(d$estimate), , drop = FALSE]
+    return(ggplot2::ggplot(d, ggplot2::aes(x = .data$estimate, y = .data$species)) +
+             ggplot2::geom_pointrange(ggplot2::aes(xmin = .data$lower, xmax = .data$upper),
+                                      colour = colour, size = 0.3) +
+             ggplot2::facet_wrap(~quantity, scales = "free_x") +
+             ggplot2::labs(x = "Posterior median and 95% interval (trait units)", y = NULL) +
+             ggplot2::theme_minimal())
+  }
+  d <- x$signal
+  d$quantity <- factor(d$quantity, rev(d$quantity))
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$estimate, y = .data$quantity)) +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed", colour = "grey50") +
+    ggplot2::geom_pointrange(ggplot2::aes(xmin = .data$lower, xmax = .data$upper),
+                             colour = colour) +
+    ggplot2::scale_x_continuous(limits = c(-1, 1)) +
+    ggplot2::labs(x = "Posterior median and 95% interval", y = NULL) +
+    ggplot2::theme_minimal()
 }
 
 #' Posterior predictive check of the trait-gradient model

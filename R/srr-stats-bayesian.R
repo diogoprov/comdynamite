@@ -24,10 +24,9 @@
 #'   limits (`prior` of `abc_table()`). The Stan model has fixed, explicit priors on the
 #'   standardised scale (normal(0, 1), exponential(1), lkj(2)) and a beta prior of the
 #'   phylogenetic share that the user sets with `lambda_prior`.
-#' @srrstatsTODO {BS1.2a} The README names `trait_gradient_bayes()` only in the
-#'   installation notes and says nothing about ABC or about how priors are specified.
-#'   Missing: a short paragraph or example in `README.Rmd` on the `prior` list of
-#'   `abc_table()` and on `lambda_prior` of `trait_gradient_bayes()`.
+#' @srrstats {BS1.2a} The README has a section "Priors" on the `prior` list of `abc_table()`
+#'   (uniform limits per parameter, with an example) and on `lambda_prior` of
+#'   `trait_gradient_bayes()`, whose help page lists the fixed priors of the other parameters.
 #' @srrstats {BS1.2b} `vignettes/abc.Rmd` explains that parameters are drawn uniformly
 #'   from the prior, defines the `prior` list of six parameters in code (with parameters
 #'   that span orders of magnitude drawn on the log scale), passes it to `abc_table()`
@@ -49,12 +48,10 @@
 #'   `ntree`, `ncores` and `min_node_size` of `abc_fit()`, `n_test`, `level` and `seed`
 #'   of `abc_recovery()`, and `n`, `seed` of `abc_ppc()` and `abc_cv()` are documented
 #'   in the respective help pages.
-#' @srrstatsTODO {BS1.3a} Not documented. For the Stan model it works: `init` passed
-#'   through `...` accepts the `fit` element of a previous result (checked by hand with
-#'   cmdstanr 0.9.0.9002), but neither the help page nor an example says so. Missing: a
-#'   sentence and an example line in `trait_gradient_bayes()`, such as
-#'   `trait_gradient_bayes(tg, tree, init = previous$fit)`. Does not apply to ABC, which
-#'   has no starting point.
+#' @srrstats {BS1.3a} The help page of `trait_gradient_bayes()` says, in Details and under
+#'   `...`, that `init` accepts the `fit` element of an earlier result to restart the chains from
+#'   where they stopped, and its examples show `trait_gradient_bayes(tg, tree, iter_sampling =
+#'   2000, init = bayes$fit)`. ABC has no starting point.
 #' @srrstats {BS1.4} The convergence checks of the Stan model (R-hat, bulk and tail
 #'   effective sample sizes, divergent transitions) are computed after sampling in
 #'   every call and returned in `diagnostics`; they do not change or stop the sampling,
@@ -168,12 +165,10 @@
 #'   predictive check), `abc_cv()` (cross-validation over folds of sites) and
 #'   `abc_diagnose()` (effective sample size of the weights, statistics outside the
 #'   reference table).
-#' @srrstatsTODO {BS4.3} The checkers exist (R-hat, bulk and tail effective sample
-#'   sizes from `posterior::summarise_draws()`, divergent transitions from the sampler;
-#'   `tg_diagnostics_from()`), but the help page of `trait_gradient_bayes()` gives only
-#'   the thresholds, with no reference for the statistics or their implementation.
-#'   Missing: a `@references` entry for R-hat and the effective sample sizes as
-#'   computed by the posterior package, and a mention of that package in Details.
+#' @srrstats {BS4.3} The help page of `trait_gradient_bayes()` cites Vehtari et al. (2021,
+#'   Bayesian Analysis 16: 667-718) for R-hat and the bulk and tail effective sample sizes, and
+#'   says that they are computed by `posterior::summarise_draws()` and that divergences and
+#'   transitions at the maximum tree depth are counted by cmdstanr.
 #' @srrstats {BS4.5} The diagnostics count transitions that hit the maximum tree depth
 #'   (`max_treedepth` in `diagnostics`) besides divergences, R-hat and effective sample
 #'   sizes. When the diagnostics fail, `trait_gradient_bayes()` warns, returns
@@ -181,14 +176,12 @@
 #'   the fit is still returned for inspection. The help page says not to read such a
 #'   fit and names longer chains (`iter_sampling`) as the first remedy; `adapt_delta`
 #'   and `max_treedepth` are available for divergent transitions.
-#' @srrstatsTODO {BS5.0} Partly met. The object of `trait_gradient_bayes()` holds the
-#'   `CmdStanMCMC` fit, and `fit$metadata()$seed` gives the seed used, also when
-#'   `seed = NULL`; this is not documented, and starting values are not kept unless
-#'   given. The ABC objects do not keep their seeds: `abc_table()` returns the
-#'   attributes `prior`, `parameters` and `statistics` only, and `abc_recovery()`,
-#'   `abc_ppc()` and `abc_cv()` return no seed. Missing: a `seed` element in
-#'   `mc_trait_gradient_bayes`, a `seed` attribute in `mc_abc_table` and in the results
-#'   of the other three functions, and their documentation.
+#' @srrstats {BS5.0} The seed is kept with each result: the element `seed` of
+#'   `mc_trait_gradient_bayes` (from `fit$metadata()$seed`, so also the seed drawn by cmdstanr
+#'   when `seed = NULL`) and the attribute `seed` of the results of `abc_table()`,
+#'   `abc_recovery()`, `abc_ppc()` and `abc_cv()`, documented in their help pages and tested in
+#'   tests/testthat/test-abc.R and test-abc-cv.R. Starting values are kept by cmdstanr in the
+#'   `CmdStanMCMC` object when given through `...`.
 #' @srrstats {BS5.1} `mc_trait_gradient_bayes` returns `data` (the table of populations
 #'   used, with species, site, trait, site mean and weight), `A` (the phylogenetic
 #'   correlation matrix, with one row per species) and `ou_alpha`; `print()` gives the
@@ -214,23 +207,18 @@
 #'   `print.mc_abc_choice()`; `mc_abc_table` and `mc_abc_cv` are data frames and print
 #'   as such. Tested in `tests/testthat/test-trait-gradient-bayes.R` and
 #'   `tests/testthat/test-abc.R`.
-#' @srrstatsTODO {BS6.1} There is no `plot()` method for `mc_trait_gradient_bayes`,
-#'   `mc_abc_fit`, `mc_abc_choice` or `mc_abc_cv`. The only plot is the `pp_check()`
-#'   method for `mc_trait_gradient_bayes`. Missing: `plot()` methods, for instance the
-#'   posterior medians and intervals of `signal` and `species` for the Stan model and
-#'   posterior against prior for `mc_abc_fit` (as drawn by hand in
-#'   `vignettes/abc.Rmd`).
-#' @srrstatsTODO {BS6.2} Applies to the Stan model only. Trace plots are neither
-#'   provided nor documented; they can be drawn from the returned fit with bayesplot
-#'   (`bayesplot::mcmc_trace(x$fit$draws("lambda"))`), and the warmup draws are not
-#'   saved unless `save_warmup = TRUE` is passed through `...`. Missing: a documented
-#'   example, or an option of a `plot()` method (BS6.1), that shows the chains with the
-#'   warmup marked.
-#' @srrstatsTODO {BS6.3} Partly met. `vignettes/abc.Rmd` plots histograms of the
-#'   posterior draws of each ABC parameter against its prior range with ggplot2 code,
-#'   but the package has no function for it, and nothing is documented for the Stan
-#'   model apart from the posterior predictive densities of `pp_check()`. Missing: the
-#'   `plot()` methods of BS6.1, or documented examples with bayesplot on `x$fit`.
+#' @srrstats {BS6.1} `plot()` methods for `mc_trait_gradient_bayes` (posterior medians and
+#'   intervals of `signal`, or of the species values with `species = TRUE`, and trace plots with
+#'   `type = "trace"`), `mc_abc_fit` (weighted posterior against the prior for one observation)
+#'   and `mc_abc_choice` (confusion matrix, or the votes for an observation). Tests in
+#'   tests/testthat/test-trait-gradient-bayes.R and test-abc.R.
+#' @srrstats {BS6.2} `plot(x, type = "trace")` for `mc_trait_gradient_bayes` draws the chains
+#'   with `bayesplot::mcmc_trace()`; with `inc_warmup = TRUE` it includes the warmup draws, which
+#'   the help page says are saved only when the fit was run with `save_warmup = TRUE` passed
+#'   through `...`. ABC has no chains.
+#' @srrstats {BS6.3} The posterior is plotted by `plot()` for `mc_trait_gradient_bayes`
+#'   (medians and intervals) and for `mc_abc_fit` (weighted histograms of the posterior over the
+#'   prior), besides the posterior predictive densities of `pp_check()`.
 #' @srrstats {BS6.4} `summary.mc_abc_cv()` averages the cross-validation over folds and
 #'   data sets. The other objects have no `summary()` method: the tables `signal`,
 #'   `variances` and `species` of `mc_trait_gradient_bayes` and the result of

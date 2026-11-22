@@ -82,7 +82,10 @@
 #' median standard deviation of population means within sites and the pooled standard
 #' deviation within populations (a kernel narrower than the spread of individuals mostly fits
 #' sampling noise), but no higher than that median, to four times the median, and is refined by
-#' [stats::optimize()] around its best value. A warning is given when the best width stays at
+#' [stats::optimize()] around its best value, on the logarithm of the width and with the
+#' default tolerance of `optimize()`, since the residual sum of squares is flat near its
+#' minimum and a finer width would not change `c` beyond its sampling error. A warning is given
+#' when the best width stays at
 #' one of the ends of the grid after the refinement or when the residual sum of squares changes
 #' by less than 5% along the grid; `plot()` shows the profile of
 #' the fit and of the estimates along the width. Fix `width` from independent knowledge of the
@@ -97,7 +100,8 @@
 #' species of the populations that enter as responses, and the variance of populations is the
 #' root of a moment equation in which each squared residual is net of the sampling variance of
 #' its mean and weighted by the inverse square of its expected value, so that means of few
-#' individuals weigh little (in the fitted set, the sampling variance is scaled by
+#' individuals weigh little (solved by fixed-point iteration to a relative change below
+#' \eqn{10^{-8}}{1e-8}, at most 50 iterations, which is ample for one parameter; in the fitted set, the sampling variance is scaled by
 #' \eqn{(1 - c_0 D_j)^2}{(1 - c_0 D_j)^2}, with \eqn{D_j}{D_j} the derivative of the push on a
 #' population with respect to its own mean, since the sampling error of the mean also enters
 #' the push removed from it). Two sets are simulated:
@@ -157,7 +161,11 @@
 #'   `n_populations` and `n_species` (that entered as responses). With `nboot > 0` it also has
 #'   `displacement_corrected`, `displacement_low`, `displacement_high`, `p_displacement` and,
 #'   for each slope, `_low` and `_high` columns. The attribute `profile` holds, for each width
-#'   tried, the residual sum of squares, \eqn{R^2} and the estimates.
+#'   tried, the residual sum of squares, \eqn{R^2} and the estimates; the attribute `model`
+#'   holds the regression at the chosen width, one row per half-sample mean of a population
+#'   (`site`, `species`, `half`), with the `response` and `fitted` values and the `residual`,
+#'   all centred within species. Methods: [coef()][coef.population_shifts], `confint()` and
+#'   `vcov()` (from the bootstrap, with `nboot > 0`), `nobs()`, `fitted()` and `residuals()`.
 #' @references Adams, D. C., & Collyer, M. L. (2007). Analysis of character divergence along
 #'   environmental gradients and other covariates. *Evolution*, 61, 510--515.
 #'   \doi{10.1111/j.1558-5646.2007.00063.x}
@@ -237,6 +245,8 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   if (nboot > 0) out <- shifts_bootstrap(out, fit, prep, d, env_cols, community, width,
                                          species_slopes, slope_names, nboot, level)
   attr(out, "profile") <- fit$profile
+  attr(out, "model") <- fit$model
+  if (nboot > 0) attr(out, "level") <- level
   if (species_slopes) attr(out, "species_slopes") <- fit$species_slopes
   if (nboot > 0) attr(out, "bootstrap") <- attr(out, "draws")
   attr(out, "draws") <- NULL
@@ -435,7 +445,7 @@ shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = 
     coef <- stats::setNames(rep(NA_real_, ncol(x)), colnames(x))
     fit <- stats::lm.fit(x[, keep, drop = FALSE], y)
     coef[keep] <- fit$coefficients
-    list(coef = coef, rss = sum(fit$residuals^2))
+    list(coef = coef, rss = sum(fit$residuals^2), residuals = fit$residuals)
   }
   grid <- if (is.null(width)) {
     exp(seq(log(prep$floor), log(4 * prep$spread), length.out = 21))
@@ -486,7 +496,12 @@ shifts_fit <- function(prep, width, species_slopes, slope_names, displacement = 
                  slope = unname(coef[paste(v, slope_species, sep = "\r")]))
     }))
   }
+  model <- data.frame(site = rep(pops$site[use], 2), species = sp,
+                      half = rep(1:2, each = sum(use)), response = y,
+                      fitted = y - fits[[best]]$residuals, residual = fits[[best]]$residuals,
+                      stringsAsFactors = FALSE)
   list(table = table, coef = coef, profile = profile, boundary = boundary, flat = flat,
+       model = model,
        rss_change = rss_change, species_slopes = species_table, slope_species = slope_species)
 }
 

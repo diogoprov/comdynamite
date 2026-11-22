@@ -242,7 +242,8 @@ weighted_slope <- function(x, y, w) {
 }
 
 #' @export
-print.mc_trait_gradient <- function(x, ...) {
+print.mc_trait_gradient <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   s <- x$species
   cat("Trait-gradient analysis of", nrow(s), "species in", nrow(x$sites), "sites\n")
   cat("Site means:", if (x$settings$leave_one_out) "without the focal species" else
@@ -250,10 +251,11 @@ print.mc_trait_gradient <- function(x, ...) {
     "| of species:", x$settings$species_weights, "\n")
   ok <- stats::complete.cases(s$beta, s$alpha)
   cat("Correlation of beta and alpha:",
-      format(signif(stats::cor(s$beta[ok], s$alpha[ok]), 3)), "\n")
-  cat("Variance of species means: ", format(signif(stats::var(s$mean), 3)),
-      "\n  of beta: ", format(signif(stats::var(s$beta, na.rm = TRUE), 3)),
-      "\n  of alpha: ", format(signif(stats::var(s$alpha, na.rm = TRUE), 3)), "\n", sep = "")
+      format(signif(stats::cor(s$beta[ok], s$alpha[ok]), digits)), "\n")
+  cat("Variance of species means: ", format(signif(stats::var(s$mean), digits)),
+      "\n  of beta: ", format(signif(stats::var(s$beta, na.rm = TRUE), digits)),
+      "\n  of alpha: ", format(signif(stats::var(s$alpha, na.rm = TRUE), digits)), "\n",
+      sep = "")
   invisible(x)
 }
 
@@ -607,11 +609,12 @@ curveball_sites <- function(site_of, species, n_trades) {
 }
 
 #' @export
-print.mc_trait_gradient_test <- function(x, ...) {
+print.mc_trait_gradient_test <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   s <- x$settings
   cat("Null model of the trait-gradient analysis:", s$n_null, "communities,", s$null, "\n")
   st <- x$statistics
-  st[-1] <- lapply(st[-1], function(v) signif(v, 3))
+  st[-1] <- lapply(st[-1], function(v) signif(v, digits))
   print(st, row.names = FALSE)
   invisible(x)
 }
@@ -648,7 +651,15 @@ print.mc_trait_gradient_test <- function(x, ...) {
 #'
 #' \eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
 #' lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
-#' such fits are marked in `at_bound` and their half-life is `NA`. AIC differences among three
+#' such fits are marked in `at_bound` and their half-life is `NA`. The restricted likelihood
+#' is maximised by [stats::optimize()] over the logarithm of \eqn{\sigma^2} for white noise and
+#' BM, with its default tolerance, and for OU by [stats::optim()] with method `"L-BFGS-B"` and
+#' its default controls (relative tolerance `factr = 1e7`, at most 100 iterations) from three
+#' starting values of \eqn{a} (0.1, 1 and 5 divided by the height of the tree), keeping the
+#' best. These settings are fixed: the surfaces have one or two parameters on bounded
+#' intervals, and the several starts guard against local optima better than a tighter
+#' tolerance would; `converged` reports the convergence code of the best start. AIC
+#' differences among three
 #' models fitted to few species are unstable, and the bootstrap standard error of a species
 #' seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 #'
@@ -826,14 +837,58 @@ gls_known_error <- function(y, v, covs, model) {
 }
 
 #' @export
-print.mc_trait_gradient_phylo <- function(x, ...) {
+print.mc_trait_gradient_phylo <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("Phylogenetic models of the trait-gradient analysis:", nrow(x$data), "species\n")
   m <- x$models
   num <- vapply(m, is.numeric, logical(1)) & names(m) != "delta_aic"
-  m[num] <- lapply(m[num], function(v) signif(v, 3))
+  m[num] <- lapply(m[num], function(v) signif(v, digits))
   m$delta_aic <- round(m$delta_aic, 2)
   print(m, row.names = FALSE)
   invisible(x)
+}
+
+#' Plot the phylogenetic models of a trait-gradient analysis
+#'
+#' Draws, for each response of [trait_gradient_phylo()], the Akaike weight of each model of
+#' trait evolution, with the best model in `colour` and the AIC difference from it above each
+#' bar. Check `at_bound` and `converged` in `x$models` before reading an OU fit.
+#'
+#' @param x Result of [trait_gradient_phylo()].
+#' @param colour Colour of the best model of each response.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [trait_gradient_phylo()]
+#' @family trait variation among individuals
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree, lambda = 1),
+#'                               competition_matrix(tree, "none"), n_steps = 100,
+#'                               seed_steps = 1:5)
+#' ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
+#' tg <- trait_gradient(ind, abundance = "abundance")
+#' plot(trait_gradient_phylo(tg, tree, n_boot = 99))
+#' @export
+plot.mc_trait_gradient_phylo <- function(x, colour = "#0072B2", ...) {
+  need_ggplot("plot() of trait_gradient_phylo()")
+  check_colours(colour, 1)
+  .data <- ggplot2::.data
+  m <- x$models
+  m$weight <- exp(-m$delta_aic / 2) / stats::ave(exp(-m$delta_aic / 2), m$response, FUN = sum)
+  m$best <- m$delta_aic == 0
+  m$model <- factor(m$model, c("white", "BM", "OU"))
+  m$response <- factor(m$response, c("beta", "alpha", "mean"))
+  ggplot2::ggplot(m, ggplot2::aes(x = .data$model, y = .data$weight, fill = .data$best)) +
+    ggplot2::geom_col(show.legend = FALSE) +
+    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f", .data$delta_aic)), vjust = -0.4,
+                       size = 3) +
+    ggplot2::scale_fill_manual(values = c(`TRUE` = colour, `FALSE` = "grey70")) +
+    ggplot2::scale_y_continuous(limits = c(0, 1.08), breaks = seq(0, 1, 0.25)) +
+    ggplot2::facet_wrap(~response, drop = TRUE) +
+    ggplot2::labs(x = "Model", y = "Akaike weight",
+                  subtitle = "Numbers: AIC difference from the best model of each response") +
+    ggplot2::theme_minimal()
 }
 
 #' Plot a trait-gradient analysis

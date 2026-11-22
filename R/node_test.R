@@ -166,8 +166,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
 #'   Or an [mc_data()] object, whose parts fill the arguments left out (its tree gives `nodes`).
 #' @param nodes Matrix of contrasts with one row per species, from
 #'   [node_contrasts()].
-#' @param env Predictor, or matrix or data frame of predictors, with one row per
-#'   site.
+#' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param biogeography Optional matrix of biogeographic events with one row per site
 #'   and values of 1, -1 and 0.
 #' @param n_perm Number of permutations of sites, of species and of both. With

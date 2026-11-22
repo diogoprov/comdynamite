@@ -21,8 +21,9 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 
 \item{tree}{A \code{phylo} object.}
 
-\item{env}{Predictor, or matrix or data frame of predictors, with one row per
-site.}
+\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with \code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 
@@ -79,6 +80,7 @@ Other the whole tree:
 \code{\link[=phylo_beta]{phylo_beta()}},
 \code{\link[=phylo_beta_test]{phylo_beta_test()}},
 \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcc]{plot.mc_pcc()}},
 \code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
 \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }

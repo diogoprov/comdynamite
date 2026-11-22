@@ -27,7 +27,9 @@ or the vectors of \code{\link[=phylo_vector]{phylo_vector()}}. Species are match
 order, and those in only one of the two are dropped with a warning.}
 
 \item{env, space}{Numeric vector, or matrix or data frame, with one row per site. For
-\code{space}, the article uses Moran's eigenvector maps, which \code{adespatial::dbmem()} gives.}
+\code{space}, the article uses Moran's eigenvector maps, which \code{adespatial::dbmem()} gives.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with \code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{component}{\code{"mean"} for the composition of sites or \code{"variance"} for their
 dispersion.}
@@ -268,6 +270,7 @@ and Evolution}, 6, 1169--1178. \doi{10.1111/2041-210X.12407}
 
 Other environment and space:
 \code{\link[=phylo_vector]{phylo_vector()}},
+\code{\link[=plot.mc_phylo_vector]{plot.mc_phylo_vector()}},
 \code{\link[=plot_trait_partition]{plot_trait_partition()}}
 }
 \concept{environment and space}

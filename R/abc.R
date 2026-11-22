@@ -16,7 +16,7 @@
 #'   is [summary_stats()], with `shared$tree` if there is one.
 #' @param seed Integer that sets all the seeds. One finite whole number.
 #' @return An `mc_abc_table`: a data frame with one row per simulation, the parameters and the
-#'   statistics, with the attributes `prior`, `parameters` and `statistics`.
+#'   statistics, with the attributes `prior`, `parameters`, `statistics` and `seed`.
 #' @family inference
 #' @seealso [abc_fit()] to estimate the parameters, [abc_recovery()] to check whether they can be
 #'   recovered.
@@ -51,7 +51,8 @@ abc_table <- function(prior, simulate, n, setup = NULL,
   table <- run_scenarios(parameters, simulate, setup, summarise, n_rep = 1, seed = seed + 1)
   table$replicate <- NULL
   structure(table, class = c("mc_abc_table", "data.frame"), prior = prior,
-            parameters = names(prior), statistics = setdiff(names(table), names(prior)))
+            parameters = names(prior), statistics = setdiff(names(table), names(prior)),
+            seed = seed)
 }
 
 # stops unless `table` is a data frame, such as an `mc_abc_table`
@@ -204,8 +205,9 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #' @param level Probability of the credible interval. One number greater than 0 and less
 #'   than 1.
 #' @param ... Not used.
-#' @return For `predict()`, a data frame with `observation`, `parameter`, `estimate` (posterior
-#'   median), `low`, `high` and `mean`. The interval from `low` to `high` is approximate; see
+#' @return For `predict()`, a data frame with `observation` (the row of `newdata`; with
+#'   row names, also `name`), `parameter`, `estimate` (posterior median), `low`, `high` and
+#'   `mean`. The interval from `low` to `high` is approximate; see
 #'   Details.
 #' @export
 predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
@@ -222,6 +224,9 @@ predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
                high = post$quantiles[, 2], mean = post$expectation)
   })
   out <- do.call(rbind, out)
+  if (is.data.frame(newdata) && .row_names_info(newdata) > 0) {
+    out <- cbind(out[1], name = rownames(newdata)[out$observation], out[-1])
+  }
   out[order(out$observation), , drop = FALSE] |> `rownames<-`(NULL)
 }
 
@@ -247,6 +252,66 @@ print.mc_abc_fit <- function(x, ...) {
       paste(x$parameters, collapse = ", "), ")\n")
   cat(nrow(x$training), "simulations and", length(x$statistics), "statistics\n")
   invisible(x)
+}
+
+#' Plot the posterior of an ABC fit against the prior
+#'
+#' For one observation, draws for each parameter the histogram of the simulations of the
+#' reference table weighted by its random forest, an approximate sample from the posterior,
+#' over the histogram of the unweighted simulations, which are draws from the prior. When the
+#' fit has the `prior` of [abc_table()], each panel spans the prior range. Each parameter has
+#' its own weights, so the panels are marginal posteriors.
+#'
+#' @param x An `mc_abc_fit` from [abc_fit()].
+#' @param newdata Named numeric vector of observed statistics, as from [summary_stats()], or a
+#'   data frame with one row.
+#' @param bins Number of bins of the histograms. One whole number, 1 or more.
+#' @param colour Colour of the posterior.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [abc_fit()], [abc_diagnose()] for the effective number of simulations behind the
+#'   posterior.
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' table <- data.frame(a = runif(300), b = runif(300))
+#' table$s1 <- table$a + rnorm(300, 0, 0.05)
+#' table$s2 <- table$b * table$a + rnorm(300, 0, 0.05)
+#' fit <- abc_fit(table, parameters = c("a", "b"), ntree = 100)
+#' plot(fit, c(s1 = 0.5, s2 = 0.2))
+#' @export
+plot.mc_abc_fit <- function(x, newdata, bins = 30, colour = "#0072B2", ...) {
+  need_ggplot("plot() of abc_fit()")
+  check_count(bins, "bins")
+  check_colours(colour, 1)
+  observed <- observed_statistics(newdata, x$statistics)
+  if (nrow(observed) != 1) stop("`newdata` must hold one observation", call. = FALSE)
+  .data <- ggplot2::.data
+  d <- do.call(rbind, lapply(x$parameters, function(p) {
+    w <- parameter_weights(x, p, observed)[, 1]
+    v <- x$training[[p]]
+    data.frame(parameter = p, value = c(v, v), weight = c(rep(1, length(v)), w),
+               distribution = rep(c("prior", "posterior"), each = length(v)))
+  }))
+  d$parameter <- factor(d$parameter, x$parameters)
+  d$distribution <- factor(d$distribution, c("prior", "posterior"))
+  p <- ggplot2::ggplot(d, ggplot2::aes(x = .data$value, weight = .data$weight,
+                                       fill = .data$distribution)) +
+    ggplot2::geom_histogram(ggplot2::aes(y = ggplot2::after_stat(density)), bins = bins,
+                            position = "identity", alpha = 0.7) +
+    ggplot2::scale_fill_manual(values = c(prior = "grey70", posterior = colour)) +
+    ggplot2::facet_wrap(~parameter, scales = "free") +
+    ggplot2::labs(x = "Value", y = "Density", fill = NULL) +
+    ggplot2::theme_minimal()
+  prior <- x$prior[intersect(x$parameters, names(x$prior))]
+  if (length(prior) > 0) {
+    limits <- data.frame(parameter = factor(names(prior), x$parameters),
+                         value = c(vapply(prior, `[`, numeric(1), 1),
+                                   vapply(prior, `[`, numeric(1), 2)),
+                         weight = 1, distribution = "prior")
+    p <- p + ggplot2::geom_blank(data = limits)
+  }
+  p
 }
 
 #' Can the parameters be recovered by ABC?
@@ -277,7 +342,8 @@ print.mc_abc_fit <- function(x, ...) {
 #' @return A data frame with one row per parameter: `n`, `r2` (1 minus the squared error over the
 #'   variance of the truth), `bias` and `width` (mean width of the interval) as fractions of the
 #'   prior range, and `coverage`, the fraction of intervals that contain the truth, with its
-#'   standard error. The attribute `estimates` holds every estimate. A coverage near `level`
+#'   standard error. The attribute `estimates` holds every estimate and `seed` the seed. A
+#'   coverage near `level`
 #'   says the intervals are calibrated, one above it that they are conservative and one below
 #'   it that they are too narrow (see Details); R2 says how much the data narrow the prior.
 #' @references
@@ -341,6 +407,7 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
                width = mean(d$high - d$low) / range)
   }))
   attr(out, "estimates") <- estimates
+  attr(out, "seed") <- seed
   out
 }
 
@@ -443,13 +510,72 @@ predict.mc_abc_choice <- function(object, newdata, ntree = 500, ncores = 1, ...)
 }
 
 #' @export
-print.mc_abc_choice <- function(x, ...) {
+print.mc_abc_choice <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("ABC model choice among", length(x$models), "models (",
       paste(x$models, collapse = ", "), ")\n")
   cat(nrow(x$training), "simulations,", length(x$statistics), "statistics, out-of-bag error",
-      format(round(x$error, 3)), "\n")
+      format(round(x$error, digits)), "\n")
   print(x$confusion)
   invisible(x)
+}
+
+#' Plot an ABC model choice
+#'
+#' Without `newdata`, draws the out-of-bag confusion matrix of [abc_choose()] as the share of
+#' the simulations of each true model (rows) assigned to each model (columns), which shows
+#' before looking at the data which models can be told apart. With `newdata`, draws the votes
+#' of the trees for each model for one observation, with the chosen model in `colour` and its
+#' posterior probability in the subtitle, which is more reliable than the share of votes.
+#'
+#' @param x An `mc_abc_choice` from [abc_choose()].
+#' @param newdata `NULL`, or a named numeric vector of observed statistics or a data frame with
+#'   one row.
+#' @param ntree Number of trees for the posterior probability, passed to [predict()]. One whole
+#'   number, 1 or more.
+#' @param colour Colour of the chosen model, or of the largest shares.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [abc_choose()]
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' a <- data.frame(s1 = rnorm(200, 0), s2 = rnorm(200))
+#' b <- data.frame(s1 = rnorm(200, 1.5), s2 = rnorm(200))
+#' choice <- abc_choose(list(neutral = a, niche = b), ntree = 100)
+#' plot(choice)
+#' plot(choice, c(s1 = 1.2, s2 = 0), ntree = 100)
+#' @export
+plot.mc_abc_choice <- function(x, newdata = NULL, ntree = 500, colour = "#0072B2", ...) {
+  need_ggplot("plot() of abc_choose()")
+  check_colours(colour, 1)
+  .data <- ggplot2::.data
+  if (is.null(newdata)) {
+    share <- x$confusion / rowSums(x$confusion)
+    d <- data.frame(true = factor(rep(rownames(share), ncol(share)), rev(x$models)),
+                    chosen = factor(rep(colnames(share), each = nrow(share)), x$models),
+                    share = as.vector(share))
+    return(ggplot2::ggplot(d, ggplot2::aes(x = .data$chosen, y = .data$true,
+                                           fill = .data$share)) +
+             ggplot2::geom_tile(colour = "white") +
+             ggplot2::geom_text(ggplot2::aes(label = sprintf("%.2f", .data$share)), size = 3.5) +
+             ggplot2::scale_fill_gradient(low = "white", high = colour, limits = c(0, 1)) +
+             ggplot2::labs(x = "Chosen model", y = "True model", fill = "Share",
+                           subtitle = sprintf("Out-of-bag error %.3f", x$error)) +
+             ggplot2::theme_minimal())
+  }
+  post <- stats::predict(x, newdata, ntree = ntree)
+  if (nrow(post) != 1) stop("`newdata` must hold one observation", call. = FALSE)
+  d <- data.frame(model = factor(x$models, x$models),
+                  votes = unlist(post[1, -(1:3)], use.names = FALSE))
+  d$chosen <- d$model == post$model
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$model, y = .data$votes, fill = .data$chosen)) +
+    ggplot2::geom_col(show.legend = FALSE) +
+    ggplot2::scale_fill_manual(values = c(`TRUE` = colour, `FALSE` = "grey70")) +
+    ggplot2::labs(x = "Model", y = "Votes of the trees",
+                  subtitle = sprintf("Chosen: %s, posterior probability %.2f", post$model,
+                                     post$probability)) +
+    ggplot2::theme_minimal()
 }
 
 observed_statistics <- function(newdata, statistics) {
@@ -493,7 +619,8 @@ observed_statistics <- function(newdata, statistics) {
 #' @return A data frame with one row per statistic: `observed`, the median and the 5% and 95%
 #'   quantiles of the predicted statistic, and `p`, the two-sided posterior predictive p-value
 #'   (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
-#'   The attribute `draws` holds the drawn parameters and predicted statistics.
+#'   The attribute `draws` holds the drawn parameters and predicted statistics, and `seed`
+#'   the seed.
 #' @references
 #' Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2013).
 #' *Bayesian data analysis* (3rd ed.). Chapman & Hall/CRC.
@@ -553,6 +680,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
                p = min(1, 2 * min(mean(v >= obs), mean(v <= obs))), n = length(v))
   }))
   attr(out, "draws") <- cbind(parameters, predicted)
+  attr(out, "seed") <- seed
   out
 }
 

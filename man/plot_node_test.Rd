@@ -11,7 +11,7 @@ plot_node_test(
   type = c("phylogram", "fan"),
   level = 0.05,
   colours = c("#0072B2", "#D55E00"),
-  text_size = 2.8,
+  text_size = 3.5,
   legend = TRUE,
   ...,
   alpha = NULL,

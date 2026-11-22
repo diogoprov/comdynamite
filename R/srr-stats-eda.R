@@ -3,9 +3,10 @@
 #' rOpenSci statistical standards (`srr`) of this category, with the parts of the
 #' package that comply with each one or the reason it does not apply.
 #'
-#' @srrstatsTODO {EA1.0} The documentation states what the package does and the questions
-#'   it answers, but no file names the target audience. Missing: one explicit sentence on
-#'   the intended users in `README.md` and in the package help (`R/comdynamite-package.R`).
+#' @srrstats {EA1.0} The intended users are named in the README and in the section "Audience"
+#'   of the package help (`R/comdynamite-package.R`): community ecologists, biogeographers and
+#'   evolutionary biologists who analyse composition, traits and phylogenies across sites, and
+#'   methodologists who check methods by simulation.
 #' @srrstats {EA1.1} The kinds of data are described in the article "Preparing your data"
 #'   (`vignettes/articles/preparing-data.Rmd`) and in the help of `mc_data()`
 #'   (`R/mc_data.R`): a numeric community matrix of sites by species, a `phylo` tree,
@@ -48,14 +49,13 @@
 #'   `trait_densities()` and `subsample_individuals()`, and `check_data_columns()` stops
 #'   when a named column is absent. In `nested_variance()` the columns are given by
 #'   `traits` and `factors`.
-#' @srrstatsTODO {EA2.4} The class `mc_data` holds the multi-table input and the analyses
-#'   accept it as their first argument (`node_test()`, `pcc_test()`, `pcps_test()`,
-#'   `phylo_beta()`, `phylo_beta_test()`, `phylo_vector()`, `trait_partition()`,
-#'   `summary_stats()`; tested in `tests/testthat/test-mc-data.R`). Missing: the class is
-#'   not demanded. The same functions also accept `comm`, `tree`, `traits` and `env` as
-#'   separate objects, which are matched by name inside each function. Either coerce the
-#'   separate objects with `mc_data()` at the start of each analysis or document this as a
-#'   justified deviation.
+#' @srrstats {EA2.4} Justified deviation: the class `mc_data` is accepted but not demanded. The
+#'   analyses take either an `mc_data` object or the parts as separate arguments, because most
+#'   users hold a community matrix, a tree and a table of predictors as separate objects, as in
+#'   the papers whose methods the package implements. Both routes run the same matching by site
+#'   and species names (`match_species()`, `check_sites()`, with the uniqueness checks of EA2.1),
+#'   so the separate objects are aligned exactly as `mc_data()` would align them. This is stated
+#'   in the section "Arguments" of the package help.
 #' @srrstats {EA2.5} The tables inside `mc_data` are keyed by site and species names, whose
 #'   uniqueness is checked as in EA2.1, so each site and species of the index matches one row of
 #'   every part.
@@ -81,17 +81,15 @@
 #'   combinations of weights side by side. The `as.data.frame()` methods of the whole-tree
 #'   tests (`R/methods.R`) share the columns `statistic`, `p_site`, `p_species` and
 #'   `p_max`.
-#' @srrstatsTODO {EA4.0} Partly met: `simulate_metacommunity()` returns integer abundances
-#'   (tested in `tests/testthat/test-dynamics.R`), statistics that are means or ratios are
-#'   double, and `trait_range()` of integers is integer. Missing: `check_comm()`
-#'   (`R/checks.R`) multiplies by 1, so `mc_data()` and its `[` method return a double
-#'   `comm` for an integer input; and `tstats()`, `community_index()` and
-#'   `trait_densities()` return `site` as character when the input column is a factor.
-#'   Either keep the input type in these cases or document the conversion in the return
-#'   values.
-#' @srrstatsTODO {EA4.1} No function has a parameter for numeric precision. The `print`
-#'   methods fix it in the code (`format(., digits = 3)`, `signif(., 3)`, `sprintf()`).
-#'   Missing: a `digits` argument in the `print` methods, passed to these calls.
+#' @srrstats {EA4.0} Simulated abundances are integers (tested in `tests/testthat/test-
+#'   dynamics.R`) and `trait_range()` of integers is integer. The other conversions are
+#'   documented in the section "Arguments" of the package help: community tables become double
+#'   matrices, so the `comm` of `mc_data()` is double for an integer input, and site and species
+#'   labels in results are character even when the input columns are factors.
+#' @srrstats {EA4.1} The `print()` methods of the result classes take `digits` (default 3),
+#'   passed to `format()`, `signif()`, `round()` and `sprintf()`; tables returned as data frames
+#'   take the `digits` argument of `print.data.frame()`. Test "print methods take the number of
+#'   digits" in `tests/testthat/test-accessors.R`.
 #' @srrstats {EA4.2} Results with their own class have `print` methods (27 in the
 #'   package, for example `mc_node_test`, `mc_pcc`, `mc_pcps`, `mc_phylo_beta`,
 #'   `mc_trait_gradient`, `mc_trait_partition`, `mc_data`, `mc_sim`, `drift_test`), and
@@ -109,13 +107,12 @@
 #'   text sizes, colours and themes can be changed by adding ggplot2 layers, as the help
 #'   of `plot.tstats()` and `plot_population_traits()` shows. Colours follow EA5.0b; text
 #'   sizes are discussed in EA5.0a.
-#' @srrstatsTODO {EA5.0a} Axis and legend text use the defaults of
-#'   `ggplot2::theme_minimal()` and are not enlarged. Text drawn inside the plots defaults
-#'   to 2.5 to 3.2 mm (about 7 to 9 pt), set by `text_size` in `plot_node_test()`,
-#'   `plot_node_heatmap()`, `plot_trait_partition()` and `plot_phylo_beta()`, and fixed at
-#'   2.5 mm for the labels of `plot_traits()` and `plot_assembly()` (`R/mv_plots.R`).
-#'   Missing: larger defaults for these labels and a `text_size` argument in
-#'   `plot_traits()` and `plot_assembly()`.
+#' @srrstats {EA5.0a} Text drawn inside the plots defaults to 3.2 to 3.5 mm (about 9 to 10 pt),
+#'   and every function that draws labels takes `text_size`: `plot_node_test()`,
+#'   `plot_node_heatmap()`, `plot_trait_partition()`, `plot_phylo_beta()`, and now
+#'   `plot_traits()` and `plot_assembly()` (R/mv_plots.R). Axis and legend text use the defaults
+#'   of `ggplot2::theme_minimal()` and can be enlarged with `ggplot2::theme()` on the returned
+#'   object.
 #' @srrstats {EA5.0b} Default colours come from the Okabe-Ito palette, which is safe for
 #'   colour-blind readers: blue and vermillion for two groups (`plot_node_test()`,
 #'   `plot_node_heatmap()`), blue, grey and vermillion in `plot.tstats()` and
@@ -124,14 +121,12 @@
 #'   `grDevices::hcl.colors(n, "Dark 3")` for more levels. Continuous scales use
 #'   `grDevices::hcl.colors()` with `"viridis"` as the default palette (`plot_rates()`).
 #'   Every plot has a `colours` or `palette` argument.
-#' @srrstatsTODO {EA5.2} The `print` methods of the result classes format numbers with
-#'   `format(., digits = 3)`, `signif()` or `sprintf()` (for example `print.mc_pcps()`,
-#'   `print.mc_phylo_beta()`, `print.mc_trait_gradient()`, `print.drift_test()`). Missing:
-#'   the number of digits is fixed in the code and not set by a parameter (EA4.1), and the
-#'   results that print as data frames or lists (`tstats()`, `community_index()`,
-#'   `null_intervals()`, `nested_variance()`, `trait_flex()`, the `summary` methods of
-#'   `R/methods.R`) and the vector of `summary_stats()` rely on the default formatting of
-#'   numbers.
+#' @srrstats {EA5.2} The `print()` methods format numbers with `digits` significant digits
+#'   (EA4.1), for example `print.mc_pcps()`, `print.mc_phylo_beta()`,
+#'   `print.mc_trait_gradient()`, `print.drift_test()` and `print.trait_flex()`. Results that are
+#'   data frames (`tstats()`, `community_index()`, `null_intervals()`, `nested_variance()`,
+#'   `population_shifts()`) print with `print.data.frame()`, whose `digits` argument sets the
+#'   precision.
 #' @srrstats {EA5.4} Axis breaks are those of the ggplot2 scales, which choose round
 #'   values. Numbers written inside the plots are rounded: two decimals in
 #'   `plot_node_heatmap()` and `plot_trait_partition()` (`R/plots.R`), whole percentages

@@ -10,6 +10,7 @@ plot_assembly(
   colours = c("#0072B2", "grey60", "#D55E00"),
   species_labels = FALSE,
   point_size = 2,
+  text_size = 3.5,
   ...,
   labels = NULL
 )
@@ -24,6 +25,9 @@ plot_assembly(
 \item{species_labels}{\code{TRUE} or \code{FALSE}. Should the species be labelled?}
 
 \item{point_size}{Size of the species. One number greater than 0.}
+
+\item{text_size}{Size of the species labels, in mm (as in \code{\link[ggplot2:geom_text]{ggplot2::geom_text()}}). One
+number greater than 0.}
 
 \item{labels, ...}{Deprecated: \code{labels} is now \code{species_labels}; graphical arguments of base
 graphics are no longer used. The aspect ratio is always 1, so that the contours of
