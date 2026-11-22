@@ -83,3 +83,10 @@ test_that("inst/CITATION has the package and every method paper", {
   expect_setequal(setdiff(dois, "10.5281/zenodo.23993533"),
                   vapply(method_papers, `[[`, character(1), "doi"))
 })
+
+test_that("call_name() drops the namespace and handles anonymous functions", {
+  expect_equal(call_name(quote(node_test(x))), "node_test")
+  expect_equal(call_name(quote(comdynamite::node_test(x))), "node_test")
+  expect_equal(call_name(quote(comdynamite:::cite_method(x))), "cite_method")
+  expect_equal(call_name(quote((function(x) x)(1))), "")
+})
