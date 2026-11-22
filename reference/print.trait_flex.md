@@ -105,7 +105,7 @@ res
 #>  trait         total     42.50   2.6700 45.20 1.34e-03
 formula(res)
 #> ~moisture
-#> <environment: 0x5ae8251b3578>
+#> <environment: 0x6125fe638048>
 head(residuals(res))
 #> [1]  0.9149881 -1.2164700  0.1542713 -0.1912190  0.2105633  0.1278662
 ```

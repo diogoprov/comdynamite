@@ -121,6 +121,30 @@ has its own `cores` argument: it took about 4 minutes with 600 species,
 future::plan(future::multisession, workers = 4)
 ```
 
+Computing time grows as a power of the number of sites, species and
+permutations. The table gives the exponents of a regression of log time
+on the logs of the three, fitted to 24 combinations of 25 to 200 sites,
+25 to 100 species and 99 or 499 permutations of simulated incidence
+data, and the time with 200 sites, 100 species and 499 permutations, on
+one core of a laptop with R version 4.6.1 (script in
+`data-raw/benchmark_regression.R`). An exponent of 1 means that time
+doubles when that size doubles, and 0 that it does not change. Exponents
+of permutations are a little below 1 because part of the time does not
+depend on them. For
+[`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+the effect of sites grows with sites: time rose about fourfold from 100
+to 200 sites. The time of
+[`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+hardly depended on sites or species in this range.
+
+| Function | Sites | Species | Permutations | Seconds |
+|----|----|----|----|----|
+| [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md) | 0.08 | 0.76 | 0.80 | 19.2 |
+| [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md) | 0.43 | 0.84 | 0.86 | 0.97 |
+| [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md) | 1.62 | 0.03 | 0.84 | 4.9 |
+| [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md) | 1.16 | 0.44 | 0.84 | 1.3 |
+| [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md) | 0.01 | -0.29 | 0.78 | 0.45 |
+
 Inputs can be tibbles of numeric columns, and
 [`as.data.frame()`](https://rdrr.io/r/base/as.data.frame.html) or
 [`tibble::as_tibble()`](https://tibble.tidyverse.org/reference/as_tibble.html)

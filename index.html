@@ -244,6 +244,53 @@
 <p>The permutations of <code><a href="reference/pcc_test.html">pcc_test()</a></code>, <code><a href="reference/pcps_test.html">pcps_test()</a></code>, <code><a href="reference/phylo_beta_test.html">phylo_beta_test()</a></code> and <code><a href="reference/trait_partition.html">trait_partition()</a></code> run in parallel when you choose a plan with the future package, and results can be reproduced with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code> for any number of workers. <code><a href="reference/node_test.html">node_test()</a></code> has its own <code>cores</code> argument: it took about 4 minutes with 600 species, 100 sites and 999 permutations on one core.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span></code></pre></div>
+<p>Computing time grows as a power of the number of sites, species and permutations. The table gives the exponents of a regression of log time on the logs of the three, fitted to 24 combinations of 25 to 200 sites, 25 to 100 species and 99 or 499 permutations of simulated incidence data, and the time with 200 sites, 100 species and 499 permutations, on one core of a laptop with R version 4.6.1 (script in <code>data-raw/benchmark_regression.R</code>). An exponent of 1 means that time doubles when that size doubles, and 0 that it does not change. Exponents of permutations are a little below 1 because part of the time does not depend on them. For <code><a href="reference/pcps_test.html">pcps_test()</a></code> the effect of sites grows with sites: time rose about fourfold from 100 to 200 sites. The time of <code><a href="reference/trait_partition.html">trait_partition()</a></code> hardly depended on sites or species in this range.</p>
+<table class="table">
+<thead><tr>
+<th>Function</th>
+<th>Sites</th>
+<th>Species</th>
+<th>Permutations</th>
+<th>Seconds</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code><a href="reference/node_test.html">node_test()</a></code></td>
+<td>0.08</td>
+<td>0.76</td>
+<td>0.80</td>
+<td>19.2</td>
+</tr>
+<tr>
+<td><code><a href="reference/pcc_test.html">pcc_test()</a></code></td>
+<td>0.43</td>
+<td>0.84</td>
+<td>0.86</td>
+<td>0.97</td>
+</tr>
+<tr>
+<td><code><a href="reference/pcps_test.html">pcps_test()</a></code></td>
+<td>1.62</td>
+<td>0.03</td>
+<td>0.84</td>
+<td>4.9</td>
+</tr>
+<tr>
+<td><code><a href="reference/phylo_beta_test.html">phylo_beta_test()</a></code></td>
+<td>1.16</td>
+<td>0.44</td>
+<td>0.84</td>
+<td>1.3</td>
+</tr>
+<tr>
+<td><code><a href="reference/trait_partition.html">trait_partition()</a></code></td>
+<td>0.01</td>
+<td>-0.29</td>
+<td>0.78</td>
+<td>0.45</td>
+</tr>
+</tbody>
+</table>
 <p>Inputs can be tibbles of numeric columns, and <code><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame()</a></code> or <code><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">tibble::as_tibble()</a></code> turn results into tables.</p>
 </div>
 <div class="section level2">

@@ -111,7 +111,9 @@ node_test(
 
 List of class `mc_node_test` with `nodes`, a data frame with one row per
 node with `node`, `n_species`, `n_sites`, `r2`, `r2_adjusted`,
-`r2_weighted`, `statistic`, `p_site`, `p_species`, `p_max`, `p_joint`,
+`r2_original`, `r2_adjusted_original` (the R2 of the original code, see
+Details), `r2_weighted` (equal to `r2`, kept for compatibility until
+version 1.0.0), `statistic`, `p_site`, `p_species`, `p_max`, `p_joint`,
 `n_draws`, the valid draws of sites, since a draw without variance does
 not count, and `p_adjusted`; `semipartial`, a matrix of nodes by
 predictors; `p_partial_max`, with the larger of the two p-values for
@@ -148,7 +150,7 @@ article on validation).
 
 Each predictor gets a semipartial correlation, the square root of the
 loss of R2 when it is removed, with the sign of its slope when it is
-alone in the model.
+alone in the model. Like R2, it uses the site weights of the fit.
 
 Biogeographic events follow the article: a column of `biogeography` has
 1 for sites in one area, -1 for sites in the other and 0 for sites in
@@ -173,8 +175,9 @@ and
 [`patch_permutations()`](https://provetelab.org/comdynamite/reference/patch_permutations.md)
 give the permutations of each event for `area_permutations`.
 
-R2, adjusted R2 and the statistic equal those of the MATLAB function
-`MetacommunityPhylogenetics` of the authors, checked in Octave. Four
+`r2_original`, `r2_adjusted_original` and the statistic equal the R2,
+adjusted R2 and statistic of the MATLAB function
+`MetacommunityPhylogenetics` of the authors, checked in Octave. Five
 parts of that function differ from this one:
 
 - In the original, the species permutations shuffle only the first
@@ -197,11 +200,14 @@ parts of that function differ from this one:
   statistics. `statistic` is still the one of the original, and p-values
   of sites alone are the same, but those that use species differ.
 
-As in the original, R2 sums squares without site weights, although the
-fit uses them, so it is not the R2 of a weighted regression and can
-exceed 1. The adjusted R2 uses the degrees of freedom of an unweighted
-model. `r2_weighted` sums squares with the site weights, stays between 0
-and 1, and is the value to report as a proportion.
+- The R2 of the original sums squares without site weights, although the
+  fit uses them, so it is not the R2 of a weighted regression and can
+  exceed 1. Here `r2` and the semipartial correlations sum squares with
+  the site weights and stay between 0 and 1; the R2 of the original is
+  kept as `r2_original`. Both adjusted R2 use the degrees of freedom of
+  an unweighted model. `statistic` and the F statistics on which draws
+  are ranked keep the sums of squares of the original, so p-values do
+  not depend on this choice.
 
 Nodes for which a predictor has no variance among the remaining sites,
 with too few sites, or with a clade without individuals get `NA`. The
@@ -272,15 +278,15 @@ out
 #> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)
 round(out$semipartial, 2)
 #>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP
-#> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00
-#> 15 -0.04 -0.07 -0.04 -0.04  0.09  0.02   0.08  0.12  0.03
-#> 16 -0.04  0.00 -0.18 -0.16  0.30 -0.06   0.29  0.19  0.19
-#> 17  0.02  0.03  0.07  0.11 -0.13 -0.07  -0.05 -0.21 -0.16
-#> 18 -0.01  0.06 -0.06 -0.06  0.28  0.03   0.20  0.14  0.14
-#> 19  0.00 -0.20 -0.02 -0.15 -0.01 -0.05   0.06  0.01  0.00
-#> 20 -0.03  0.11 -0.09  0.05 -0.16  0.03  -0.36  0.00  0.00
+#> 14  0.14  0.05  0.17  0.05  0.01  0.00  -0.26 -0.11 -0.02
+#> 15 -0.02 -0.06 -0.03 -0.03  0.08  0.02   0.09  0.10  0.04
+#> 16 -0.03  0.01 -0.16 -0.13  0.26 -0.05   0.32  0.16  0.14
+#> 17  0.02  0.04  0.07  0.10 -0.12 -0.07  -0.06 -0.20 -0.16
+#> 18 -0.01  0.08 -0.06 -0.05  0.24  0.02   0.23  0.13  0.11
+#> 19  0.00 -0.23 -0.01 -0.18  0.00 -0.08   0.04  0.01  0.00
+#> 20 -0.03  0.11 -0.10  0.05 -0.16  0.02  -0.39  0.01  0.01
 #> 21 -0.28  0.19 -0.24  0.39  0.01  0.15  -0.15 -0.35 -0.17
-#> 22  0.03  0.01  0.06  0.00  0.13  0.06  -0.29 -0.21 -0.03
+#> 22  0.03  0.00  0.07  0.03  0.12  0.05  -0.33 -0.21 -0.03
 #> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02
 #> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25
 #> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA

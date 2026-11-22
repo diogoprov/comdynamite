@@ -2,6 +2,46 @@
 
 ## comdynamite (development version)
 
+- [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
+  `r2`, `r2_adjusted` and the semipartial correlations now sum squares
+  with the site weights of the fit, so they stay between 0 and 1 (and -1
+  and 1). Before, they followed the original code, which sums squares
+  without weights and can give an R2 above
+
+  1.  The original values are kept as `r2_original` and
+      `r2_adjusted_original`; `r2_weighted` now equals `r2` and will be
+      removed in version 1.0.0. `statistic` and p-values do not change.
+
+- [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+  [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  and
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
+  warn when a response is an exact linear function of the predictors,
+  since their F statistics, standard errors and p-values are then not
+  meaningful.
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  no longer relays the warning of
+  [`summary.lm()`](https://rdrr.io/r/stats/summary.lm.html) in that
+  case.
+
+- Error, warning and message texts are now unique; where the same check
+  is made in several functions, the text names the function.
+
+- The column `reps` of
+  [`trait_rarefaction()`](https://provetelab.org/comdynamite/reference/trait_rarefaction.md)
+  is an integer.
+
+- The README gives how the time of
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md),
+  [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+  [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  and
+  [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
+  grows with sites, species and permutations (script in
+  `data-raw/benchmark_regression.R`).
+
 - Text in plots is larger by default (3.2 to 3.5 mm), and
   [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
   and

@@ -167,7 +167,9 @@ it has them.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>List of class <code>mc_node_test</code> with <code>nodes</code>, a data frame with one row per
-node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>r2_weighted</code>, <code>statistic</code>,
+node with <code>node</code>, <code>n_species</code>, <code>n_sites</code>, <code>r2</code>, <code>r2_adjusted</code>, <code>r2_original</code>,
+<code>r2_adjusted_original</code> (the R2 of the original code, see Details), <code>r2_weighted</code> (equal
+to <code>r2</code>, kept for compatibility until version 1.0.0), <code>statistic</code>,
 <code>p_site</code>, <code>p_species</code>, <code>p_max</code>, <code>p_joint</code>, <code>n_draws</code>, the valid draws of sites, since a
 draw without variance does not count, and <code>p_adjusted</code>; <code>semipartial</code>, a matrix of
 nodes by predictors; <code>p_partial_max</code>, with the larger of the two p-values for each of
@@ -196,7 +198,8 @@ conservative: with the <a href="daphniids.html">daphniids</a> of the article, of
 it, whereas sites alone recover most of the environmental results of its Figure 3 (see
 the article on validation).</p>
 <p>Each predictor gets a semipartial correlation, the square root of the loss of R2
-when it is removed, with the sign of its slope when it is alone in the model.</p>
+when it is removed, with the sign of its slope when it is alone in the model. Like R2, it
+uses the site weights of the fit.</p>
 <p>Biogeographic events follow the article: a column of <code>biogeography</code> has 1 for sites
 in one area, -1 for sites in the other and 0 for sites in neither. Each event is
 tested only in its sites, controlling for <code>env</code>. Other contrasts are allowed, for
@@ -210,9 +213,9 @@ the 5% level in a simulation with areas placed at random, against 5% with
 a restricted null model. For events, each row moves the areas across the sites, which
 keep their community and predictors. In a landscape with edges, <code><a href="rigid_permutations.html">rigid_permutations()</a></code>
 and <code><a href="patch_permutations.html">patch_permutations()</a></code> give the permutations of each event for <code>area_permutations</code>.</p>
-<p>R2, adjusted R2 and the statistic equal those of the MATLAB function
-<code>MetacommunityPhylogenetics</code> of the authors, checked in Octave. Four parts of that
-function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
+<p><code>r2_original</code>, <code>r2_adjusted_original</code> and the statistic equal the R2, adjusted R2 and
+statistic of the MATLAB function <code>MetacommunityPhylogenetics</code> of the authors, checked in
+Octave. Five parts of that function differ from this one:</p><ul><li><p>In the original, the species permutations shuffle only the first columns
 of the community matrix, as many as there are species in the node, so they
 do not draw from all species. Here they do.</p></li>
 <li><p>The original keeps the total of the observed data after permuting
@@ -226,11 +229,14 @@ response, and with one predictor it does not rank draws as the global one does. 
 takes into account that draws of species occupy different numbers of sites. Here
 draws are ranked on F statistics. <code>statistic</code> is still the one of the original, and
 p-values of sites alone are the same, but those that use species differ.</p></li>
-</ul><p>As in the original, R2 sums squares without site weights, although the fit
-uses them, so it is not the R2 of a weighted regression and can exceed 1. The adjusted
-R2 uses the degrees of freedom of an unweighted model. <code>r2_weighted</code> sums squares with the
-site weights, stays between 0 and 1, and is the value to report as a proportion.</p>
-<p>Nodes for which a predictor has no variance among the remaining sites, with too
+<li><p>The R2 of the original sums squares without site weights, although the fit uses
+them, so it is not the R2 of a weighted regression and can exceed 1. Here <code>r2</code> and the
+semipartial correlations sum squares with the site weights and stay between 0 and 1;
+the R2 of the original is kept as <code>r2_original</code>. Both adjusted R2 use the degrees of
+freedom of an unweighted model. <code>statistic</code> and the F statistics on which draws are
+ranked keep the sums of squares of the original, so p-values do not depend on this
+choice.</p></li>
+</ul><p>Nodes for which a predictor has no variance among the remaining sites, with too
 few sites, or with a clade without individuals get <code>NA</code>. The original stops with an
 error.</p>
 <p>Sites are matched by name when <code>comm</code>, <code>env</code> and <code>biogeography</code> all have row names, and
@@ -286,15 +292,15 @@ a landscape with edges. <code><a href="plot_node_test.html">plot_node_test()</a>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nodes not tested: 1 (a clade without individuals, too few sites or a predictor without variance in the sites of the node)</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">semipartial</span>, <span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    COLOR  COND   DOC   NTL  PHEQ   PTL AV_DEP  ELEV TN_TP</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 14  0.17  0.06  0.20  0.06  0.02  0.01  -0.26 -0.12  0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 15 -0.04 -0.07 -0.04 -0.04  0.09  0.02   0.08  0.12  0.03</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 16 -0.04  0.00 -0.18 -0.16  0.30 -0.06   0.29  0.19  0.19</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 17  0.02  0.03  0.07  0.11 -0.13 -0.07  -0.05 -0.21 -0.16</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 18 -0.01  0.06 -0.06 -0.06  0.28  0.03   0.20  0.14  0.14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 19  0.00 -0.20 -0.02 -0.15 -0.01 -0.05   0.06  0.01  0.00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.03  0.11 -0.09  0.05 -0.16  0.03  -0.36  0.00  0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 14  0.14  0.05  0.17  0.05  0.01  0.00  -0.26 -0.11 -0.02</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 15 -0.02 -0.06 -0.03 -0.03  0.08  0.02   0.09  0.10  0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 16 -0.03  0.01 -0.16 -0.13  0.26 -0.05   0.32  0.16  0.14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 17  0.02  0.04  0.07  0.10 -0.12 -0.07  -0.06 -0.20 -0.16</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 18 -0.01  0.08 -0.06 -0.05  0.24  0.02   0.23  0.13  0.11</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 19  0.00 -0.23 -0.01 -0.18  0.00 -0.08   0.04  0.01  0.00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 20 -0.03  0.11 -0.10  0.05 -0.16  0.02  -0.39  0.01  0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 21 -0.28  0.19 -0.24  0.39  0.01  0.15  -0.15 -0.35 -0.17</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 22  0.03  0.01  0.06  0.00  0.13  0.06  -0.29 -0.21 -0.03</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 22  0.03  0.00  0.07  0.03  0.12  0.05  -0.33 -0.21 -0.03</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 23  0.33 -0.02  0.28 -0.02  0.15  0.04  -0.13  0.07 -0.02</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 24 -0.14 -0.11 -0.04 -0.39  0.31 -0.50   0.04  0.01  0.25</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 25    NA    NA    NA    NA    NA    NA     NA    NA    NA</span>
