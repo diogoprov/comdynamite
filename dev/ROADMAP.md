@@ -15,6 +15,15 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    arquivos de teste, e o pkgcheck local sem falhas nos checks principais (PR #155). Restam só
    avisos de estilo do goodpractice. Release no GitHub com DOI `10.5281/zenodo.24446713`. A
    submissão continua adiada (ver 1b).
+   Depois da tag, na 0.11.0.9000: o workflow do pkgcheck no GitHub voltou a funcionar (PR #159,
+   script próprio `.github/pkgcheck.R` na imagem da action, que contorna o erro do resumo de
+   pkgcheck-action #77; roda à mão, uns 40 min) e o goodpractice passou nos checks de tamanho
+   (até 50 linhas) e de complexidade (até 15) das funções (PR #158). Cerca de 105 funções em
+   43 arquivos foram divididas em auxiliares internas, sem mudança de comportamento (resultado,
+   mensagens e sequência de sorteios idênticos em comparações golden), e os testes seguem o
+   estilo do lintr (888 `expect_identical()`). Ficam de propósito: as 307 comparações de ponto
+   flutuante em `expect_equal()`, as linhas acima de 80 colunas (o pacote usa 100) e
+   `shift_tree_once()` cerca de 25% mais lenta (interna, só em `data-raw`).
 1. **0.10.0 em 2026-11-21** (tag `v0.10.0`): fecha o bloco A (nulos com borda e
    `env_surrogates()`, gerador de Thompson et al. 2020, competição por traits, nicho com eixos
    correlacionados, dispersão no tempo, tempo desde a mudança, ambiente sazonal e redes
