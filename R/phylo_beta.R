@@ -87,7 +87,8 @@ phylo_beta <- function(comm, tree) {
 #'   it has them.
 #' @return List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2; `statistic`,
 #'   the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`, the sites on the
-#'   principal coordinates of the predicted matrix, which the authors suggest
+#'   principal coordinates of the predicted matrix (rows named by the occupied sites of
+#'   `comm`, columns `PCoA1`, `PCoA2`, ...), which the authors suggest
 #'   using to order sites in a heatmap of the community matrix; and `permutations`.
 #' @references
 #' Legendre, P., & Anderson, M. J. (1999). Distance-based redundancy analysis:
@@ -162,13 +163,14 @@ phylo_beta_test <- function(comm, tree, env, n_perm = 999, site_permutations = N
 }
 
 #' @export
-print.mc_phylo_beta <- function(x, ...) {
+print.mc_phylo_beta <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_phylo_beta> phylogenetic beta diversity\n")
-  cat("adjusted R2:", format(x$r2_adjusted, digits = 3), " pseudo-F:",
-      format(x$statistic, digits = 3), "\n")
+  cat("adjusted R2:", format(x$r2_adjusted, digits = digits), " pseudo-F:",
+      format(x$statistic, digits = digits), "\n")
   permutation_line(x$permutations)
-  cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+  cat("p (sites):", format(x$p_site, digits = digits), " p (species):",
+      format(x$p_species, digits = digits), " p (max):", format(x$p_max, digits = digits), "\n")
   invisible(x)
 }
 
@@ -267,5 +269,7 @@ predicted_scores <- function(centred, basis) {
   hat <- tcrossprod(basis)
   eig <- eigen(hat %*% centred %*% hat, symmetric = TRUE)
   keep <- eig$values > sqrt(.Machine$double.eps) * max(eig$values)
-  sweep(eig$vectors[, keep, drop = FALSE], 2, sqrt(eig$values[keep]), "*")
+  scores <- sweep(eig$vectors[, keep, drop = FALSE], 2, sqrt(eig$values[keep]), "*")
+  dimnames(scores) <- list(rownames(centred), paste0("PCoA", seq_len(ncol(scores))))
+  scores
 }

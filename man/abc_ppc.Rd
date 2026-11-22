@@ -39,7 +39,8 @@ enter \code{fit}, or all if every statistic did.}
 A data frame with one row per statistic: \code{observed}, the median and the 5\% and 95\%
 quantiles of the predicted statistic, and \code{p}, the two-sided posterior predictive p-value
 (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
-The attribute \code{draws} holds the drawn parameters and predicted statistics.
+The attribute \code{draws} holds the drawn parameters and predicted statistics, and \code{seed}
+the seed.
 }
 \description{
 Draws parameter sets from the approximate posterior of an \code{\link[=abc_fit]{abc_fit()}} and compares the
@@ -77,6 +78,7 @@ Other inference:
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }

@@ -60,6 +60,8 @@ test_that("scores reproduce the predicted variation", {
   out <- phylo_beta_test(d$comm, d$tree, env, n_perm = 2)
   expect_lte(ncol(out$scores), 2)
   expect_equal(nrow(out$scores), nrow(d$comm))
+  expect_identical(rownames(out$scores), rownames(d$comm))
+  expect_identical(colnames(out$scores), paste0("PCoA", seq_len(ncol(out$scores))))
   centred <- gower_centre(as.matrix(phylo_beta(d$comm, d$tree)))
   basis <- qr.Q(qr(sweep(env, 2, colMeans(env))))
   expect_equal(sum(out$scores^2), sum(basis * (centred %*% basis)))

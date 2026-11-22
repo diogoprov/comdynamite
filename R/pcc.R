@@ -122,12 +122,13 @@ pcc_test <- function(comm, tree, env, n_perm = 999, squared = FALSE,
 }
 
 #' @export
-print.mc_pcc <- function(x, ...) {
+print.mc_pcc <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_pcc> phylogenetic community composition\n")
-  cat("mean positive adjusted R2:", format(x$r2_mean, digits = 3), "\n")
+  cat("mean positive adjusted R2:", format(x$r2_mean, digits = digits), "\n")
   permutation_line(x$permutations)
-  cat("p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+  cat("p (sites):", format(x$p_site, digits = digits), " p (species):",
+      format(x$p_species, digits = digits), " p (max):", format(x$p_max, digits = digits), "\n")
   invisible(x)
 }
 

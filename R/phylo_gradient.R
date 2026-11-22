@@ -168,18 +168,19 @@ phylo_vector <- function(comm, tree, env = NULL, n_perm = 999, level = 0.05, n_s
 }
 
 #' @export
-print.mc_phylo_vector <- function(x, ...) {
+print.mc_phylo_vector <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_phylo_vector>", ncol(x$eigenvectors), "eigenvectors,", length(x$selected), "retained\n")
   permutation_line(x$permutations)
-  cat("global test: p (sites):", format(x$p_site, digits = 3), " p (species):",
-      format(x$p_species, digits = 3), " p (max):", format(x$p_max, digits = 3), "\n")
+  cat("global test: p (sites):", format(x$p_site, digits = digits), " p (species):",
+      format(x$p_species, digits = digits), " p (max):", format(x$p_max, digits = digits), "\n")
   if (length(x$selected) == 0) {
     cat("no vector retained: `pev` and `pev_brown` are NULL, so this gradient cannot enter",
         "`trait_partition()`\n")
   }
   if (length(x$selected) > 0) {
-    cat("correlation: PEV", format(x$correlation[["pev"]], digits = 3), " PEV-B",
-        format(x$correlation[["pev_brown"]], digits = 3), "\n")
+    cat("correlation: PEV", format(x$correlation[["pev"]], digits = digits), " PEV-B",
+        format(x$correlation[["pev_brown"]], digits = digits), "\n")
   }
   invisible(x)
 }
@@ -558,8 +559,9 @@ trait_partition <- function(comm, traits, env, space, component = c("mean", "var
 }
 
 #' @export
-print.mc_trait_partition <- function(x, ...) {
-  cat("<mc_trait_partition>", x$component, "component,", format(x$component_share, digits = 3),
+print.mc_trait_partition <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
+  cat("<mc_trait_partition>", x$component, "component,", format(x$component_share, digits = digits),
       "of the total variation\n")
   permutation_line(x$permutations)
   if (x$permutations$moved == "each set alone") {
@@ -573,9 +575,9 @@ print.mc_trait_partition <- function(x, ...) {
             " Moran spectral randomisations of env"
           } else " moves of env alone with `site_permutations`")
         } else "not tested, env is unrelated to space",
-        " (env against space: p = ", format(x$shared$p_env_space, digits = 3), ")\n", sep = "")
+        " (env against space: p = ", format(x$shared$p_env_space, digits = digits), ")\n", sep = "")
   }
-  print(format(x$fractions, digits = 3), quote = FALSE)
+  print(format(x$fractions, digits = digits), quote = FALSE)
   invisible(x)
 }
 

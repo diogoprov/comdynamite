@@ -132,6 +132,7 @@ fold_summarise <- function(folds, summarise = function(x, shared) summary_stats(
 #'   averages over folds and data sets (`n` rows per statistic): the coverage, the mean of `z`,
 #'   the root mean square of `z` and the fraction of p-values below 0.05. Under the model the
 #'   coverage is at or above `level` and the root mean square of `z` below 1 (see Details).
+#'   The attribute `seed` holds the seed.
 #' @family inference
 #' @examplesIf requireNamespace("abcrf", quietly = TRUE)
 #' set.seed(1)
@@ -204,6 +205,7 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   out <- do.call(rbind, out)
   out <- out[order(out$observation, out$fold), , drop = FALSE]
   rownames(out) <- NULL
+  attr(out, "seed") <- seed
   class(out) <- c("mc_abc_cv", "data.frame")
   out
 }

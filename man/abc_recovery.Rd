@@ -45,7 +45,8 @@ of Raynal et al. (2019); larger values give larger leaves, which widen intervals
 A data frame with one row per parameter: \code{n}, \code{r2} (1 minus the squared error over the
 variance of the truth), \code{bias} and \code{width} (mean width of the interval) as fractions of the
 prior range, and \code{coverage}, the fraction of intervals that contain the truth, with its
-standard error. The attribute \code{estimates} holds every estimate. A coverage near \code{level}
+standard error. The attribute \code{estimates} holds every estimate and \code{seed} the seed. A
+coverage near \code{level}
 says the intervals are calibrated, one above it that they are conservative and one below
 it that they are too narrow (see Details); R2 says how much the data narrow the prior.
 }
@@ -96,6 +97,7 @@ Other inference:
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }

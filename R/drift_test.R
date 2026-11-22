@@ -52,7 +52,9 @@
 #'   the matrix `W`
 #'   and a data frame `components` with the `eigenvalue`, the expected `sampling` variance of
 #'   the means (0 without correction) and the `between` variance (corrected) of each principal
-#'   component. It has `print()` and `plot()` methods.
+#'   component, and `fit`, the [stats::lm()] fit of `log(between)` on `log(eigenvalue)`. It
+#'   has `print()`, `plot()`, [coef()][coef.drift_test], `confint()`, `vcov()`, `nobs()`,
+#'   `fitted()` and `residuals()` methods.
 #' @references
 #' Ackermann, R. R. & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human
 #' evolution. *Proceedings of the National Academy of Sciences*, 101, 17946--17951.
@@ -175,19 +177,22 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
   structure(list(slope = slope, se = se, conf_int = slope + c(-1, 1) * crit * se,
                  level = level, statistic = statistic,
                  p_value = 2 * stats::pt(-abs(statistic), df), intercept = coef[1, 1], df = df,
-                 n_groups = nrow(means), n_traits = q, W = W, components = components),
+                 n_groups = nrow(means), n_traits = q, W = W, components = components,
+                 fit = fit),
             class = "drift_test")
 }
 
 #' @export
-print.drift_test <- function(x, ...) {
+print.drift_test <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("Test of proportional divergence (Ackermann & Cheverud 2004)\n")
   cat(sprintf("%d groups, %d traits\n", x$n_groups, x$n_traits))
-  cat(sprintf("slope of log(between variance) on log(eigenvalue): %.3f (SE %.3f)\n",
-              x$slope, x$se))
-  cat(sprintf("%g%% interval: %.3f to %.3f\n", 100 * x$level, x$conf_int[1], x$conf_int[2]))
-  cat(sprintf("test of slope = 1 (drift): t = %.3f, df = %d, p = %.3g\n", x$statistic, x$df,
-              x$p_value))
+  cat(sprintf("slope of log(between variance) on log(eigenvalue): %.*f (SE %.*f)\n",
+              digits, x$slope, digits, x$se))
+  cat(sprintf("%g%% interval: %.*f to %.*f\n", 100 * x$level, digits, x$conf_int[1], digits,
+              x$conf_int[2]))
+  cat(sprintf("test of slope = 1 (drift): t = %.*f, df = %d, p = %.*g\n", digits, x$statistic,
+              x$df, digits, x$p_value))
   invisible(x)
 }
 

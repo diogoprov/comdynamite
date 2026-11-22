@@ -61,7 +61,11 @@ An object of class \code{population_shifts}: a data frame with one row and the c
 \code{n_populations} and \code{n_species} (that entered as responses). With \code{nboot > 0} it also has
 \code{displacement_corrected}, \code{displacement_low}, \code{displacement_high}, \code{p_displacement} and,
 for each slope, \verb{_low} and \verb{_high} columns. The attribute \code{profile} holds, for each width
-tried, the residual sum of squares, \eqn{R^2} and the estimates.
+tried, the residual sum of squares, \eqn{R^2} and the estimates; the attribute \code{model}
+holds the regression at the chosen width, one row per half-sample mean of a population
+(\code{site}, \code{species}, \code{half}), with the \code{response} and \code{fitted} values and the \code{residual},
+all centred within species. Methods: \link[=coef.population_shifts]{coef()}, \code{confint()} and
+\code{vcov()} (from the bootstrap, with \code{nboot > 0}), \code{nobs()}, \code{fitted()} and \code{residuals()}.
 }
 \description{
 Estimates how far the populations of a species follow the environment of their site and
@@ -227,6 +231,9 @@ an environmental gradient. \emph{Evolution}, 60, 1344--1357. \doi{10.1554/05-696
 \code{\link[=sample_individuals]{sample_individuals()}}, \code{\link[=tstats]{tstats()}} with \code{null_ip = "species"}.
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
@@ -238,6 +245,7 @@ Other trait variation among individuals:
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

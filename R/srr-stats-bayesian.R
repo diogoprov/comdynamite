@@ -181,14 +181,12 @@
 #'   the fit is still returned for inspection. The help page says not to read such a
 #'   fit and names longer chains (`iter_sampling`) as the first remedy; `adapt_delta`
 #'   and `max_treedepth` are available for divergent transitions.
-#' @srrstatsTODO {BS5.0} Partly met. The object of `trait_gradient_bayes()` holds the
-#'   `CmdStanMCMC` fit, and `fit$metadata()$seed` gives the seed used, also when
-#'   `seed = NULL`; this is not documented, and starting values are not kept unless
-#'   given. The ABC objects do not keep their seeds: `abc_table()` returns the
-#'   attributes `prior`, `parameters` and `statistics` only, and `abc_recovery()`,
-#'   `abc_ppc()` and `abc_cv()` return no seed. Missing: a `seed` element in
-#'   `mc_trait_gradient_bayes`, a `seed` attribute in `mc_abc_table` and in the results
-#'   of the other three functions, and their documentation.
+#' @srrstats {BS5.0} The seed is kept with each result: the element `seed` of
+#'   `mc_trait_gradient_bayes` (from `fit$metadata()$seed`, so also the seed drawn by cmdstanr
+#'   when `seed = NULL`) and the attribute `seed` of the results of `abc_table()`,
+#'   `abc_recovery()`, `abc_ppc()` and `abc_cv()`, documented in their help pages and tested in
+#'   tests/testthat/test-abc.R and test-abc-cv.R. Starting values are kept by cmdstanr in the
+#'   `CmdStanMCMC` object when given through `...`.
 #' @srrstats {BS5.1} `mc_trait_gradient_bayes` returns `data` (the table of populations
 #'   used, with species, site, trait, site mean and weight), `A` (the phylogenetic
 #'   correlation matrix, with one row per species) and `ou_alpha`; `print()` gives the

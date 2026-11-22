@@ -46,7 +46,8 @@ it has them.}
 \value{
 List of class \code{mc_phylo_beta} with \code{r2_adjusted}, the adjusted R2; \code{statistic},
 the pseudo-F; \code{p_site}, \code{p_species} and \code{p_max}; \code{scores}, the sites on the
-principal coordinates of the predicted matrix, which the authors suggest
+principal coordinates of the predicted matrix (rows named by the occupied sites of
+\code{comm}, columns \code{PCoA1}, \code{PCoA2}, ...), which the authors suggest
 using to order sites in a heatmap of the community matrix; and \code{permutations}.
 }
 \description{

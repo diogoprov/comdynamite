@@ -242,7 +242,8 @@ weighted_slope <- function(x, y, w) {
 }
 
 #' @export
-print.mc_trait_gradient <- function(x, ...) {
+print.mc_trait_gradient <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   s <- x$species
   cat("Trait-gradient analysis of", nrow(s), "species in", nrow(x$sites), "sites\n")
   cat("Site means:", if (x$settings$leave_one_out) "without the focal species" else
@@ -250,10 +251,11 @@ print.mc_trait_gradient <- function(x, ...) {
     "| of species:", x$settings$species_weights, "\n")
   ok <- stats::complete.cases(s$beta, s$alpha)
   cat("Correlation of beta and alpha:",
-      format(signif(stats::cor(s$beta[ok], s$alpha[ok]), 3)), "\n")
-  cat("Variance of species means: ", format(signif(stats::var(s$mean), 3)),
-      "\n  of beta: ", format(signif(stats::var(s$beta, na.rm = TRUE), 3)),
-      "\n  of alpha: ", format(signif(stats::var(s$alpha, na.rm = TRUE), 3)), "\n", sep = "")
+      format(signif(stats::cor(s$beta[ok], s$alpha[ok]), digits)), "\n")
+  cat("Variance of species means: ", format(signif(stats::var(s$mean), digits)),
+      "\n  of beta: ", format(signif(stats::var(s$beta, na.rm = TRUE), digits)),
+      "\n  of alpha: ", format(signif(stats::var(s$alpha, na.rm = TRUE), digits)), "\n",
+      sep = "")
   invisible(x)
 }
 
@@ -607,11 +609,12 @@ curveball_sites <- function(site_of, species, n_trades) {
 }
 
 #' @export
-print.mc_trait_gradient_test <- function(x, ...) {
+print.mc_trait_gradient_test <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   s <- x$settings
   cat("Null model of the trait-gradient analysis:", s$n_null, "communities,", s$null, "\n")
   st <- x$statistics
-  st[-1] <- lapply(st[-1], function(v) signif(v, 3))
+  st[-1] <- lapply(st[-1], function(v) signif(v, digits))
   print(st, row.names = FALSE)
   invisible(x)
 }
@@ -826,11 +829,12 @@ gls_known_error <- function(y, v, covs, model) {
 }
 
 #' @export
-print.mc_trait_gradient_phylo <- function(x, ...) {
+print.mc_trait_gradient_phylo <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("Phylogenetic models of the trait-gradient analysis:", nrow(x$data), "species\n")
   m <- x$models
   num <- vapply(m, is.numeric, logical(1)) & names(m) != "delta_aic"
-  m[num] <- lapply(m[num], function(v) signif(v, 3))
+  m[num] <- lapply(m[num], function(v) signif(v, digits))
   m$delta_aic <- round(m$delta_aic, 2)
   print(m, row.names = FALSE)
   invisible(x)

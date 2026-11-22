@@ -136,6 +136,8 @@
 #'       depth (`max_treedepth`; raise it through `...` if needed), and `ok`.}
 #'     \item{fit}{the `CmdStanMCMC` object; its draws live in temporary files of the session,
 #'       so save them with `fit$save_object()` to keep them.}
+#'     \item{seed}{the seed of the sampler, also the one drawn by cmdstanr when `seed = NULL`
+#'       (from `fit$metadata()$seed`).}
 #'     \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
 #'       correlation matrix and the settings.}
 #'   }
@@ -200,7 +202,10 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
     warning("the model has not converged, has divergent transitions or hit the maximum tree ",
             "depth; see `diagnostics`", call. = FALSE)
   }
-  structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, data = model$data,
+  used_seed <- tryCatch(run$fit$metadata()$seed, error = function(e) NULL)
+  if (is.null(used_seed)) used_seed <- seed
+  structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, seed = used_seed,
+                            data = model$data,
                             A = model$A, ou_alpha = ou_alpha, lambda_prior = lambda_prior)),
             class = "mc_trait_gradient_bayes")
 }
@@ -337,20 +342,21 @@ tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent, treedepth 
 }
 
 #' @export
-print.mc_trait_gradient_bayes <- function(x, ...) {
+print.mc_trait_gradient_bayes <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("Bayesian phylogenetic model of the trait gradient:", nrow(x$A), "species,",
       if (is.null(x$ou_alpha)) "Brownian motion\n" else
-        paste0("Ornstein-Uhlenbeck (a = ", format(signif(x$ou_alpha, 3)), ")\n"))
+        paste0("Ornstein-Uhlenbeck (a = ", format(signif(x$ou_alpha, digits)), ")\n"))
   if (is.null(x$signal)) {
     cat("The posterior could not be summarised; see `fit`\n")
     return(invisible(x))
   }
   d <- x$diagnostics
-  cat("Convergence: max R-hat ", format(round(d$max_rhat, 3)), ", min ESS bulk ",
+  cat("Convergence: max R-hat ", format(round(d$max_rhat, digits)), ", min ESS bulk ",
       round(d$min_ess_bulk), ", tail ", round(d$min_ess_tail), ", divergent transitions ",
       d$divergent, ", at maximum tree depth ", d$max_treedepth, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
   s <- x$signal
-  s[-1] <- lapply(s[-1], function(v) round(v, 3))
+  s[-1] <- lapply(s[-1], function(v) round(v, digits))
   print(s, row.names = FALSE)
   invisible(x)
 }

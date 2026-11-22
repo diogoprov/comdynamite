@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- New accessor methods for the regression results: `coef()`, `confint()`, `vcov()`, `nobs()`,
+  `fitted()` and `residuals()` for `drift_test()` (which now keeps its `stats::lm()` fit as
+  `fit`) and `population_shifts()` (intervals and covariance from the bootstrap; fitted values
+  and residuals of the regression at the chosen width, in the new attribute `model`);
+  `formula()`, `fitted()`, `residuals()`, `nobs()` and a `print()` method for `trait_flex()`,
+  whose result now keeps `formula` and the site-level `model`; `coef()` and `nobs()` for
+  `trait_gradient()` and `trait_gradient_phylo()`; `nobs()` for `node_test()` and `abc_fit()`.
+- The `print()` methods of the result classes take `digits`.
+- The seed is kept with the result of `trait_gradient_bayes()` (element `seed`) and of
+  `abc_table()`, `abc_recovery()`, `abc_ppc()` and `abc_cv()` (attribute `seed`).
+- The `scores` of `phylo_beta_test()` keep the site names of `comm`, and `predict()` of
+  `abc_fit()` adds a column `name` with the row names of `newdata`.
+
 - `tstats()`, `community_index()`, `trait_flex()`, `trait_rarefaction()`, `drift_test()` and
   `population_shifts()` gain `na_action`. With the default, `"omit"`, rows with missing values
   are left out as before, but now with a message giving their number (`drift_test()` and

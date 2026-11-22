@@ -52,8 +52,9 @@ than 1.}
 An \code{mc_abc_fit}, a list with \code{forests} (one per parameter), \code{training}, \code{parameters},
 \code{statistics} and \code{prior}.
 
-For \code{predict()}, a data frame with \code{observation}, \code{parameter}, \code{estimate} (posterior
-median), \code{low}, \code{high} and \code{mean}. The interval from \code{low} to \code{high} is approximate; see
+For \code{predict()}, a data frame with \code{observation} (the row of \code{newdata}; with
+row names, also \code{name}), \code{parameter}, \code{estimate} (posterior median), \code{low}, \code{high} and
+\code{mean}. The interval from \code{low} to \code{high} is approximate; see
 Details.
 }
 \description{
@@ -120,6 +121,7 @@ Other inference:
 \code{\link[=abc_recovery]{abc_recovery()}},
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
+\code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }

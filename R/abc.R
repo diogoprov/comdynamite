@@ -16,7 +16,7 @@
 #'   is [summary_stats()], with `shared$tree` if there is one.
 #' @param seed Integer that sets all the seeds. One finite whole number.
 #' @return An `mc_abc_table`: a data frame with one row per simulation, the parameters and the
-#'   statistics, with the attributes `prior`, `parameters` and `statistics`.
+#'   statistics, with the attributes `prior`, `parameters`, `statistics` and `seed`.
 #' @family inference
 #' @seealso [abc_fit()] to estimate the parameters, [abc_recovery()] to check whether they can be
 #'   recovered.
@@ -51,7 +51,8 @@ abc_table <- function(prior, simulate, n, setup = NULL,
   table <- run_scenarios(parameters, simulate, setup, summarise, n_rep = 1, seed = seed + 1)
   table$replicate <- NULL
   structure(table, class = c("mc_abc_table", "data.frame"), prior = prior,
-            parameters = names(prior), statistics = setdiff(names(table), names(prior)))
+            parameters = names(prior), statistics = setdiff(names(table), names(prior)),
+            seed = seed)
 }
 
 # stops unless `table` is a data frame, such as an `mc_abc_table`
@@ -204,8 +205,9 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #' @param level Probability of the credible interval. One number greater than 0 and less
 #'   than 1.
 #' @param ... Not used.
-#' @return For `predict()`, a data frame with `observation`, `parameter`, `estimate` (posterior
-#'   median), `low`, `high` and `mean`. The interval from `low` to `high` is approximate; see
+#' @return For `predict()`, a data frame with `observation` (the row of `newdata`; with
+#'   row names, also `name`), `parameter`, `estimate` (posterior median), `low`, `high` and
+#'   `mean`. The interval from `low` to `high` is approximate; see
 #'   Details.
 #' @export
 predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
@@ -222,6 +224,9 @@ predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
                high = post$quantiles[, 2], mean = post$expectation)
   })
   out <- do.call(rbind, out)
+  if (is.data.frame(newdata) && .row_names_info(newdata) > 0) {
+    out <- cbind(out[1], name = rownames(newdata)[out$observation], out[-1])
+  }
   out[order(out$observation), , drop = FALSE] |> `rownames<-`(NULL)
 }
 
@@ -277,7 +282,8 @@ print.mc_abc_fit <- function(x, ...) {
 #' @return A data frame with one row per parameter: `n`, `r2` (1 minus the squared error over the
 #'   variance of the truth), `bias` and `width` (mean width of the interval) as fractions of the
 #'   prior range, and `coverage`, the fraction of intervals that contain the truth, with its
-#'   standard error. The attribute `estimates` holds every estimate. A coverage near `level`
+#'   standard error. The attribute `estimates` holds every estimate and `seed` the seed. A
+#'   coverage near `level`
 #'   says the intervals are calibrated, one above it that they are conservative and one below
 #'   it that they are too narrow (see Details); R2 says how much the data narrow the prior.
 #' @references
@@ -341,6 +347,7 @@ abc_recovery <- function(table, parameters = NULL, statistics = NULL, n_test = 2
                width = mean(d$high - d$low) / range)
   }))
   attr(out, "estimates") <- estimates
+  attr(out, "seed") <- seed
   out
 }
 
@@ -443,11 +450,12 @@ predict.mc_abc_choice <- function(object, newdata, ntree = 500, ncores = 1, ...)
 }
 
 #' @export
-print.mc_abc_choice <- function(x, ...) {
+print.mc_abc_choice <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("ABC model choice among", length(x$models), "models (",
       paste(x$models, collapse = ", "), ")\n")
   cat(nrow(x$training), "simulations,", length(x$statistics), "statistics, out-of-bag error",
-      format(round(x$error, 3)), "\n")
+      format(round(x$error, digits)), "\n")
   print(x$confusion)
   invisible(x)
 }
@@ -493,7 +501,8 @@ observed_statistics <- function(newdata, statistics) {
 #' @return A data frame with one row per statistic: `observed`, the median and the 5% and 95%
 #'   quantiles of the predicted statistic, and `p`, the two-sided posterior predictive p-value
 #'   (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
-#'   The attribute `draws` holds the drawn parameters and predicted statistics.
+#'   The attribute `draws` holds the drawn parameters and predicted statistics, and `seed`
+#'   the seed.
 #' @references
 #' Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., & Rubin, D. B. (2013).
 #' *Bayesian data analysis* (3rd ed.). Chapman & Hall/CRC.
@@ -553,6 +562,7 @@ abc_ppc <- function(fit, observed, table, statistics = NULL, n = 200, simulate =
                p = min(1, 2 * min(mean(v >= obs), mean(v <= obs))), n = length(v))
   }))
   attr(out, "draws") <- cbind(parameters, predicted)
+  attr(out, "seed") <- seed
   out
 }
 

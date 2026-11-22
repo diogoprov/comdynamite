@@ -89,9 +89,10 @@
 #'   `trait_densities()` return `site` as character when the input column is a factor.
 #'   Either keep the input type in these cases or document the conversion in the return
 #'   values.
-#' @srrstatsTODO {EA4.1} No function has a parameter for numeric precision. The `print`
-#'   methods fix it in the code (`format(., digits = 3)`, `signif(., 3)`, `sprintf()`).
-#'   Missing: a `digits` argument in the `print` methods, passed to these calls.
+#' @srrstats {EA4.1} The `print()` methods of the result classes take `digits` (default 3),
+#'   passed to `format()`, `signif()`, `round()` and `sprintf()`; tables returned as data frames
+#'   take the `digits` argument of `print.data.frame()`. Test "print methods take the number of
+#'   digits" in `tests/testthat/test-accessors.R`.
 #' @srrstats {EA4.2} Results with their own class have `print` methods (27 in the
 #'   package, for example `mc_node_test`, `mc_pcc`, `mc_pcps`, `mc_phylo_beta`,
 #'   `mc_trait_gradient`, `mc_trait_partition`, `mc_data`, `mc_sim`, `drift_test`), and
@@ -124,14 +125,12 @@
 #'   `grDevices::hcl.colors(n, "Dark 3")` for more levels. Continuous scales use
 #'   `grDevices::hcl.colors()` with `"viridis"` as the default palette (`plot_rates()`).
 #'   Every plot has a `colours` or `palette` argument.
-#' @srrstatsTODO {EA5.2} The `print` methods of the result classes format numbers with
-#'   `format(., digits = 3)`, `signif()` or `sprintf()` (for example `print.mc_pcps()`,
-#'   `print.mc_phylo_beta()`, `print.mc_trait_gradient()`, `print.drift_test()`). Missing:
-#'   the number of digits is fixed in the code and not set by a parameter (EA4.1), and the
-#'   results that print as data frames or lists (`tstats()`, `community_index()`,
-#'   `null_intervals()`, `nested_variance()`, `trait_flex()`, the `summary` methods of
-#'   `R/methods.R`) and the vector of `summary_stats()` rely on the default formatting of
-#'   numbers.
+#' @srrstats {EA5.2} The `print()` methods format numbers with `digits` significant digits
+#'   (EA4.1), for example `print.mc_pcps()`, `print.mc_phylo_beta()`,
+#'   `print.mc_trait_gradient()`, `print.drift_test()` and `print.trait_flex()`. Results that are
+#'   data frames (`tstats()`, `community_index()`, `null_intervals()`, `nested_variance()`,
+#'   `population_shifts()`) print with `print.data.frame()`, whose `digits` argument sets the
+#'   precision.
 #' @srrstats {EA5.4} Axis breaks are those of the ggplot2 scales, which choose round
 #'   values. Numbers written inside the plots are rounded: two decimals in
 #'   `plot_node_heatmap()` and `plot_trait_partition()` (`R/plots.R`), whole percentages

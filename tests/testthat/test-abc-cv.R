@@ -53,6 +53,7 @@ test_that("abc_cv predicts left-out statistics and flags those the model misses"
                 f2_train_s = 0.5, f2_test_s = 0.48, f2_test_t = 0.1,
                 f3_train_s = 0.5, f3_test_s = 1.4, f3_test_t = -0.2)
   cv <- abc_cv(table, observed, parameters = "a", n = 300, ntree = 100)
+  expect_identical(attr(cv, "seed"), 1)
   expect_s3_class(cv, "mc_abc_cv")
   expect_equal(nrow(cv), 6)
   s <- cv[cv$statistic == "s", ]

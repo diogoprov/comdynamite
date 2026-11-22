@@ -53,6 +53,8 @@ number of divergent transitions, number of transitions that hit the maximum tree
 depth (\code{max_treedepth}; raise it through \code{...} if needed), and \code{ok}.}
 \item{fit}{the \code{CmdStanMCMC} object; its draws live in temporary files of the session,
 so save them with \code{fit$save_object()} to keep them.}
+\item{seed}{the seed of the sampler, also the one drawn by cmdstanr when \code{seed = NULL}
+(from \code{fit$metadata()$seed}).}
 \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
 correlation matrix and the settings.}
 }
@@ -186,6 +188,9 @@ bayesplot::pp_check(bayes, resp = "sitemean")
 \code{\link[=trait_gradient]{trait_gradient()}}, \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}}
 
 Other trait variation among individuals:
+\code{\link[=coef.drift_test]{coef.drift_test()}},
+\code{\link[=coef.mc_trait_gradient]{coef.mc_trait_gradient()}},
+\code{\link[=coef.population_shifts]{coef.population_shifts()}},
 \code{\link[=community_index]{community_index()}},
 \code{\link[=drift_test]{drift_test()}},
 \code{\link{neighbour_metrics}},
@@ -198,6 +203,7 @@ Other trait variation among individuals:
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

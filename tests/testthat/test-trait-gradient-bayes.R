@@ -128,6 +128,7 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   expect_equal(seen$chains, 2)
   expect_equal(seen$adapt_delta, 0.95)
   expect_equal(seen$seed, 4)
+  expect_identical(res$seed, 4) # the mocked fit has no metadata
   expect_equal(seen$data$lambda_prior, c(1, 1))
   expect_equal(nrow(res$species), n_sp)
   expect_identical(res$fit, "fit")

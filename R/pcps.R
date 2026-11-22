@@ -160,10 +160,11 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
 }
 
 #' @export
-print.mc_pcps <- function(x, ...) {
+print.mc_pcps <- function(x, digits = 3, ...) {
+  check_count(digits, "digits")
   cat("<mc_pcps> principal coordinates of phylogenetic structure\n")
   permutation_line(x$permutations)
-  print(format(x$tests, digits = 3), row.names = FALSE, quote = FALSE)
+  print(format(x$tests, digits = digits), row.names = FALSE, quote = FALSE)
   invisible(x)
 }
 
