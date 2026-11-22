@@ -57,6 +57,7 @@ Other the whole tree:
 \code{\link[=pcps_test]{pcps_test()}},
 \code{\link[=phylo_beta_test]{phylo_beta_test()}},
 \code{\link[=phylo_eigenvectors]{phylo_eigenvectors()}},
+\code{\link[=plot.mc_pcc]{plot.mc_pcc()}},
 \code{\link[=plot.mc_pcps]{plot.mc_pcps()}},
 \code{\link[=plot_phylo_beta]{plot_phylo_beta()}}
 }

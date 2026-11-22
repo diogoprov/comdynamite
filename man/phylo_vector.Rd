@@ -146,6 +146,7 @@ traits--environment relationships in the fourth-corner problem. \emph{Ecology}, 
 }
 \seealso{
 Other environment and space:
+\code{\link[=plot.mc_phylo_vector]{plot.mc_phylo_vector()}},
 \code{\link[=plot_trait_partition]{plot_trait_partition()}},
 \code{\link[=trait_partition]{trait_partition()}}
 }

@@ -836,6 +836,49 @@ print.mc_trait_gradient_phylo <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot the phylogenetic models of a trait-gradient analysis
+#'
+#' Draws, for each response of [trait_gradient_phylo()], the Akaike weight of each model of
+#' trait evolution, with the best model in `colour` and the AIC difference from it above each
+#' bar. Check `at_bound` and `converged` in `x$models` before reading an OU fit.
+#'
+#' @param x Result of [trait_gradient_phylo()].
+#' @param colour Colour of the best model of each response.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [trait_gradient_phylo()]
+#' @family trait variation among individuals
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree, lambda = 1),
+#'                               competition_matrix(tree, "none"), n_steps = 100,
+#'                               seed_steps = 1:5)
+#' ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
+#' tg <- trait_gradient(ind, abundance = "abundance")
+#' plot(trait_gradient_phylo(tg, tree, n_boot = 99))
+#' @export
+plot.mc_trait_gradient_phylo <- function(x, colour = "#0072B2", ...) {
+  need_ggplot("plot() of trait_gradient_phylo()")
+  check_colours(colour, 1)
+  .data <- ggplot2::.data
+  m <- x$models
+  m$weight <- exp(-m$delta_aic / 2) / stats::ave(exp(-m$delta_aic / 2), m$response, FUN = sum)
+  m$best <- m$delta_aic == 0
+  m$model <- factor(m$model, c("white", "BM", "OU"))
+  m$response <- factor(m$response, c("beta", "alpha", "mean"))
+  ggplot2::ggplot(m, ggplot2::aes(x = .data$model, y = .data$weight, fill = .data$best)) +
+    ggplot2::geom_col(show.legend = FALSE) +
+    ggplot2::geom_text(ggplot2::aes(label = sprintf("%.1f", .data$delta_aic)), vjust = -0.4,
+                       size = 3) +
+    ggplot2::scale_fill_manual(values = c(`TRUE` = colour, `FALSE` = "grey70")) +
+    ggplot2::scale_y_continuous(limits = c(0, 1.08), breaks = seq(0, 1, 0.25)) +
+    ggplot2::facet_wrap(~response, drop = TRUE) +
+    ggplot2::labs(x = "Model", y = "Akaike weight",
+                  subtitle = "Numbers: AIC difference from the best model of each response") +
+    ggplot2::theme_minimal()
+}
+
 #' Plot a trait-gradient analysis
 #'
 #' `type = "gradient"` draws the trait value of each population against the mean of its site,

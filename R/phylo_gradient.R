@@ -184,6 +184,52 @@ print.mc_phylo_vector <- function(x, ...) {
   invisible(x)
 }
 
+#' Plot the phylogenetic eigenvectors related to a predictor
+#'
+#' Draws the fourth-corner correlation of each phylogenetic eigenvector with the predictor,
+#' in the order of the eigenvalues, as computed by [phylo_vector()]. The eigenvectors summed
+#' into `pev` are drawn in `colour` and the others in grey; the subtitle gives the largest
+#' p-value of the global test and the correlations of `pev` and `pev_brown`.
+#'
+#' @param x Result of [phylo_vector()].
+#' @param colour Colour of the retained eigenvectors.
+#' @param ... Not used.
+#' @return A ggplot object.
+#' @seealso [phylo_vector()]
+#' @family environment and space
+#' @examplesIf requireNamespace("treeshapesim", quietly = TRUE) && requireNamespace("ggplot2", quietly = TRUE)
+#' set.seed(1)
+#' tree <- treeshapesim::sim_tree_shape(20)
+#' traits <- species_traits(tree, lambda = 1, optima_range = c(0, 100),
+#'                          rmax_range = c(0, 30))
+#' env <- runif(50, 0, 100)
+#' comm <- simulate_static(traits, env, incidence = TRUE)$abundance
+#' keep <- rowSums(comm) > 0
+#' plot(phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100))
+#' @export
+plot.mc_phylo_vector <- function(x, colour = "#0072B2", ...) {
+  need_ggplot("plot() of phylo_vector()")
+  check_colours(colour, 1)
+  .data <- ggplot2::.data
+  n <- length(x$eigenvector_correlation)
+  d <- data.frame(eigenvector = seq_len(n), correlation = x$eigenvector_correlation,
+                  retained = factor(ifelse(seq_len(n) %in% x$selected, "yes", "no"),
+                                    c("yes", "no")))
+  subtitle <- sprintf("Global test: p (max) %.3g", x$p_max)
+  if (length(x$selected) > 0) {
+    subtitle <- sprintf("%s; correlation of PEV %.2f, of PEV-B %.2f", subtitle,
+                        x$correlation[["pev"]], x$correlation[["pev_brown"]])
+  }
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$eigenvector, y = .data$correlation,
+                                  fill = .data$retained)) +
+    ggplot2::geom_hline(yintercept = 0, colour = "grey50") +
+    ggplot2::geom_col() +
+    ggplot2::scale_fill_manual(values = c(yes = colour, no = "grey70"), drop = FALSE) +
+    ggplot2::labs(x = "Phylogenetic eigenvector", y = "Correlation with the predictor",
+                  fill = "Retained", subtitle = subtitle) +
+    ggplot2::theme_minimal()
+}
+
 #' Partition trait or phylogenetic variation between environment and space
 #'
 #' The phylogenetic gradient analysis of Peres-Neto et al. (2012). Trait values are

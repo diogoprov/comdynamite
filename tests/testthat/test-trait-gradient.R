@@ -300,3 +300,16 @@ test_that("trait_gradient_phylo() reports OU fits that did not converge", {
                  "did not converge for beta ~ OU")
   expect_equal(ph$models$converged, c(TRUE, TRUE, FALSE))
 })
+
+test_that("plot() of trait_gradient_phylo() draws the Akaike weights", {
+  skip_if_not_installed("ggplot2")
+  d <- tg_sim(n_tips = 15, n_sites = 12)
+  tg <- trait_gradient(d$ind, abundance = "abundance")
+  set.seed(6)
+  ph <- trait_gradient_phylo(tg, d$tree, responses = c("beta", "alpha"), n_boot = 9)
+  p <- plot(ph)
+  expect_s3_class(p, "ggplot")
+  heights <- ggplot2::ggplot_build(p)$data[[1]]$y
+  expect_length(heights, nrow(ph$models))
+  expect_equal(sum(heights), 2)
+})
