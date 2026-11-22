@@ -505,7 +505,7 @@ mc_setup <- function(st) {
     if (!is.null(dispersal_site)) {
       if (!is.matrix(dispersal_site) || !is.numeric(dispersal_site) ||
           nrow(dispersal_site) != m || ncol(dispersal_site) < n_steps ||
-          anyNA(dispersal_site) || any(dispersal_site < 0) || any(!is.finite(dispersal_site))) {
+          anyNA(dispersal_site) || any(dispersal_site < 0) || !all(is.finite(dispersal_site))) {
         stop("`dispersal_site` must be a matrix of multipliers of emigration (0 or more) with ",
              "one row per site (", m, ") and one column per step (", n_steps, ")",
              call. = FALSE)
@@ -548,7 +548,7 @@ mc_setup <- function(st) {
     at <- t(alpha)
     if (!is.null(pool_from)) {
       pool_from <- site_species(pool_from, sites, species, "`pool_from`")
-      if (any(is.na(pool_from)) || any(pool_from < 1)) {
+      if (anyNA(pool_from) || any(pool_from < 1)) {
         stop("`pool_from` must hold steps of 1 or more", call. = FALSE)
       }
       if (!is.null(initial) && any(initial[pool_from > 1] > 0)) {
@@ -1167,7 +1167,7 @@ dispersal_by_step <- function(dispersal_time, dispersal, n_steps, k) {
     return(matrix(dispersal_time[seq_len(n_steps), ], n_steps, k))
   }
   if (!is.numeric(dispersal_time) || length(dispersal_time) < n_steps ||
-      anyNA(dispersal_time) || any(dispersal_time < 0) || any(!is.finite(dispersal_time))) {
+      anyNA(dispersal_time) || any(dispersal_time < 0) || !all(is.finite(dispersal_time))) {
     stop("`dispersal_time` needs one multiplier of `dispersal` (0 or more) per step (",
          n_steps, "), or a matrix of emigration probabilities", call. = FALSE)
   }

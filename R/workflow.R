@@ -104,9 +104,9 @@ equilibrium_check <- function(x, tolerance = 0.05) {
     stop("`x` needs at least four recorded steps: use `record_steps`", call. = FALSE)
   }
   present <- x$history > 0
-  series <- rbind(gamma = apply(apply(present, c(2, 3), any), 2, sum),
-                  alpha = apply(present, 3, sum) / dim(present)[1],
-                  abundance = apply(x$history, 3, sum) / dim(present)[1])
+  series <- rbind(gamma = colSums(apply(present, c(2, 3), any)),
+                  alpha = colSums(present, dims = 2) / dim(present)[1],
+                  abundance = colSums(x$history, dims = 2) / dim(present)[1])
   half <- seq_len(steps %/% 2)
   early <- rowMeans(series[, half, drop = FALSE])
   late <- rowMeans(series[, -half, drop = FALSE])
@@ -114,7 +114,7 @@ equilibrium_check <- function(x, tolerance = 0.05) {
   out <- data.frame(statistic = rownames(series), early = unname(early), late = unname(late),
                     change = unname(change), settled = unname(abs(change) <= tolerance))
   if (!all(out$settled)) {
-    warning("still changing: ", paste(out$statistic[!out$settled], collapse = ", "),
+    warning("still changing: ", toString(out$statistic[!out$settled]),
             ". Run more steps", call. = FALSE)
   }
   invisible(out)

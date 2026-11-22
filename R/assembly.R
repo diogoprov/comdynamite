@@ -154,7 +154,7 @@ assemble_community <- function(traits, size,
 print.mc_assembly <- function(x, ...) {
   cat("<mc_assembly>", x$rule, "with", x$distance, "distances:", length(x$community), "of",
       nrow(x$traits), "species kept\n")
-  cat("community:", paste(utils::head(x$community, 10), collapse = ", "),
+  cat("community:", toString(utils::head(x$community, 10)),
       if (length(x$community) > 10) "...", "\n")
   invisible(x)
 }

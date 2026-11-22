@@ -256,7 +256,7 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   }
   comm <- check_comm(comm)
   nodes <- as.matrix(nodes)
-  if (!is.numeric(nodes) || any(!is.finite(nodes))) {
+  if (!is.numeric(nodes) || !all(is.finite(nodes))) {
     stop("`nodes` must be a numeric matrix without missing or infinite values, as from ",
          "`node_contrasts()`", call. = FALSE)
   }
@@ -424,8 +424,8 @@ biogeography_matrix <- function(area, contrast = "others", outside = c("zero", "
     in_any(first) * 1 - in_any(second) * 1
   }
   events <- if (identical(contrast, "others")) {
-    vapply(colnames(member), function(a) ifelse(member[, a], 1, ifelse(inside, -1, 0)),
-           numeric(nrow(member)))
+    away <- ifelse(inside, -1, 0)
+    vapply(colnames(member), function(a) ifelse(member[, a], 1, away), numeric(nrow(member)))
   } else {
     check_events(contrast, colnames(member))
     vapply(contrast, function(event) sides(event[[1]], event[[2]]), numeric(nrow(member)))
@@ -434,7 +434,7 @@ biogeography_matrix <- function(area, contrast = "others", outside = c("zero", "
   smaller <- pmin(colSums(events == 1), colSums(events == -1))
   if (any(smaller < min_sites)) {
     warning("fewer than ", min_sites, " sites on one side of: ",
-            paste(names(smaller)[smaller < min_sites], collapse = ", "), call. = FALSE)
+            toString(names(smaller)[smaller < min_sites]), call. = FALSE)
   }
   events
 }
@@ -466,7 +466,7 @@ check_events <- function(contrast, areas) {
   }
   unknown <- setdiff(unlist(contrast), areas)
   if (length(unknown) > 0) {
-    stop("areas in `contrast` not found in `area`: ", paste(unknown, collapse = ", "),
+    stop("areas in `contrast` not found in `area`: ", toString(unknown),
          call. = FALSE)
   }
 }

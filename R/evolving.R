@@ -859,9 +859,7 @@ niche_crowding <- function(st) {
           d2 <- outer(p[s, here, a], p[s, here, a], "-")^2
           # sigma = Inf gives no penalty; sigma = 0 on both sides gives overlap 1 at the same
           # phenotype and 0 elsewhere
-          log_overlap <- log_overlap - ifelse(!is.finite(w), 0,
-                                              ifelse(w > 0, d2 / (2 * w),
-                                                     ifelse(d2 > 0, Inf, 0)))
+          log_overlap <- log_overlap - ifelse(is.finite(w), niche_penalty(w, d2), 0)
         }
         out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * exp(log_overlap))
       }
@@ -876,7 +874,7 @@ niche_crowding <- function(st) {
       here <- which(n[s, ] > 0)
       w <- outer(sigma2[here], sigma2[here], "+")
       d2 <- outer(p[s, here], p[s, here], "-")^2
-      overlap <- exp(-ifelse(w > 0, d2 / (2 * w), ifelse(d2 > 0, Inf, 0)))
+      overlap <- exp(-niche_penalty(w, d2))
       out[s, here] <- n[s, here] %*% (st$at[here, here, drop = FALSE] * overlap)
     }
     out
@@ -1049,7 +1047,8 @@ evolving_divergence <- function(st, divergence, together, flow, speciation) {
         same <- outer(cl, cl, "==")
         tsub <- tg[idx, idx]
         tsub[] <- ifelse(same, tsub + 1, 0)
-        sub[] <- ifelse(same, ifelse(tsub >= speciation$reset_generations, 0, sub), sub + 1)
+        kept <- ifelse(tsub >= speciation$reset_generations, 0, sub)
+        sub[] <- ifelse(same, kept, sub + 1)
         tg[idx, idx] <- tsub
       } else {
         M <- f[idx, idx, drop = FALSE] + t(f[idx, idx, drop = FALSE])

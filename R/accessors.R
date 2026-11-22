@@ -155,7 +155,7 @@ shifts_coef_names <- function(object) {
 pick_parm <- function(parm, available) {
   if (is.numeric(parm)) parm <- available[parm]
   if (!is.character(parm) || anyNA(parm) || !all(parm %in% available)) {
-    stop("`parm` must name coefficients among ", paste(available, collapse = ", "),
+    stop("`parm` must name coefficients among ", toString(available),
          call. = FALSE)
   }
   parm

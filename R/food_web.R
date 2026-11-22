@@ -276,7 +276,7 @@ food_web_dynamics <- function(times, init = c(R = 50, N = 0.1, P = 0),
       h <- span / steps
       for (s in seq_len(steps)) {
         state <- fw_rk4(state, h, p, attack, V)
-        if (any(!is.finite(state)) || any(state[1:3] < -extinction)) {
+        if (!all(is.finite(state)) || any(state[1:3] < -extinction)) {
           stop("the integration diverged before time ", format(t_now), "; reduce `dt`",
                call. = FALSE)
         }
@@ -319,7 +319,7 @@ print.food_web <- function(x, ...) {
 }
 
 fw_three <- function(x, name, levels) {
-  if (!is.numeric(x) || length(x) != 3 || anyNA(x) || any(!is.finite(x))) {
+  if (!is.numeric(x) || length(x) != 3 || anyNA(x) || !all(is.finite(x))) {
     stop("`", name, "` must be three finite numbers, for R, N and P", call. = FALSE)
   }
   if (is.null(names(x))) {

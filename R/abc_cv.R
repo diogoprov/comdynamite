@@ -29,7 +29,7 @@ spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 
     stop("`coords` must be a numeric matrix with one row per site and at least two sites",
          call. = FALSE)
   }
-  if (any(!is.finite(coords))) stop("`coords` has missing or infinite values", call. = FALSE)
+  if (!all(is.finite(coords))) stop("`coords` has missing or infinite values", call. = FALSE)
   check_count(k, "k", min = 2, max = nrow(coords))
   check_seed(seed)
   old <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
@@ -71,7 +71,7 @@ spatial_folds <- function(coords, k = 5, method = c("blocks", "random"), seed = 
 #' @export
 fold_summarise <- function(folds, summarise = function(x, shared) summary_stats(x)) {
   if (is.factor(folds)) folds <- as.integer(folds)
-  if (!is.numeric(folds) || length(folds) < 2 || any(!is.finite(folds)) ||
+  if (!is.numeric(folds) || length(folds) < 2 || !all(is.finite(folds)) ||
         any(folds != round(folds))) {
     stop("`folds` must be whole numbers, one per site, as from spatial_folds()", call. = FALSE)
   }
@@ -169,7 +169,7 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   if (!is.data.frame(observed)) observed <- as.data.frame(as.list(observed))
   missing <- setdiff(info$column, names(observed))
   if (length(missing)) {
-    stop("Statistics missing from `observed`: ", paste(utils::head(missing, 5), collapse = ", "),
+    stop("Statistics missing from `observed`: ", toString(utils::head(missing, 5)),
          if (length(missing) > 5) ", ...", ".", call. = FALSE)
   }
   probs <- c((1 - level) / 2, (1 + level) / 2)

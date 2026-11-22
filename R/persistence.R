@@ -89,7 +89,7 @@ persistence.default <- function(x, window = NULL, ...) {
   pres <- x > 0
   a <- pres[, , -times, drop = FALSE]
   b <- pres[, , -1, drop = FALSE]
-  each <- function(y) apply(y, 2, sum)
+  each <- function(y) rowSums(colSums(y))
   species <- dimnames(x)[[2]] %||% paste0("sp", seq_len(dim(x)[2]))
   persistence_table(species, rep(times - 1, dim(x)[2]), each(!a & b), each(!a),
                     each(a & !b), each(a))

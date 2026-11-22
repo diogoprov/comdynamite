@@ -224,7 +224,7 @@ landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
   diag(dispersal) <- 0
   if (any(rowSums(dispersal) == 0)) {
     stop("every site needs at least one destination in `dispersal` (rows ",
-         paste(which(rowSums(dispersal) == 0), collapse = ", "), " are empty)", call. = FALSE)
+         toString(which(rowSums(dispersal) == 0)), " are empty)", call. = FALSE)
   }
   dispersal <- dispersal / rowSums(dispersal)
   dimnames(dispersal) <- NULL

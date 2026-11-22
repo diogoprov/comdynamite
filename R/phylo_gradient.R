@@ -658,7 +658,9 @@ shared_nulls <- function(shared_null, env, coords, site_permutations, n_perm) {
   }
   # all eigenvectors of the spatial weights of `dbmem()`, which `msr()` takes as a basis
   basis <- NULL
-  utils::capture.output(basis <- adespatial::dbmem(coords, MEM.autocor = "all", silent = TRUE))
+  utils::capture.output({
+    basis <- adespatial::dbmem(coords, MEM.autocor = "all", silent = TRUE)
+  })
   adespatial::msr(env, basis, nrepet = n_perm, method = "singleton", simplify = FALSE)
 }
 

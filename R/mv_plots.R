@@ -300,7 +300,7 @@ ellipse_points <- function(s, r, n = 100) {
 #' @noRd
 branch_maps <- function(tree, regimes) {
   if (is.null(regimes)) {
-    return(lapply(tree$edge.length, function(len) stats::setNames(len, "all")))
+    return(lapply(tree$edge.length, stats::setNames, "all"))
   }
   if (inherits(regimes, "phylo")) {
     at <- match(paste(tree$edge[, 1], tree$edge[, 2]),
@@ -333,7 +333,7 @@ regime_colours <- function(states, colours) {
   }
   if (!is.null(names(colours))) {
     if (!all(states %in% names(colours))) {
-      stop("`colours` must be named with every regime: ", paste(states, collapse = ", "),
+      stop("`colours` must be named with every regime: ", toString(states),
            call. = FALSE)
     }
     colours <- colours[states]

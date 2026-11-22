@@ -141,7 +141,7 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
     if (!is.null(keep)) {
       unknown <- setdiff(keep, d[[column]])
       if (length(unknown) > 0) {
-        stop("`", arg, "` has values not in `x`: ", paste(unknown, collapse = ", "),
+        stop("`", arg, "` has values not in `x`: ", toString(unknown),
              call. = FALSE)
       }
       d <- d[d[[column]] %in% keep, , drop = FALSE]
@@ -363,8 +363,8 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
     d <- deviation[used]
     pooled_sd <- sqrt(sum(d^2) / (length(d) - sum(size > 1)))
     spread <- min(pooled_sd, stats::IQR(d * sqrt(n_i / (n_i - 1))) / 1.34)
-    if (!(spread > 0)) spread <- pooled_sd
-    if (!(spread > 0)) {
+    if (spread <= 0) spread <- pooled_sd
+    if (spread <= 0) {
       stop("the individuals of each population have identical values: give `bw`", call. = FALSE)
     }
     bw <- 0.9 * spread * mean(size)^(-1 / 5)
@@ -481,7 +481,7 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   if (!is.null(sites)) {
     unknown <- setdiff(sites, site_levels)
     if (length(unknown) > 0) {
-      stop("`sites` has values not in the data: ", paste(unknown, collapse = ", "),
+      stop("`sites` has values not in the data: ", toString(unknown),
            call. = FALSE)
     }
     site_levels <- site_levels[site_levels %in% sites]
@@ -494,7 +494,7 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
     }
     unknown <- setdiff(highlight, species_levels)
     if (length(unknown) > 0) {
-      stop("`highlight` has species not in the data: ", paste(unknown, collapse = ", "),
+      stop("`highlight` has species not in the data: ", toString(unknown),
            call. = FALSE)
     }
     if (is.null(colours)) {
@@ -529,7 +529,7 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   } else {
     missing_species <- setdiff(species_levels, names(colours))
     if (length(missing_species) > 0) {
-      stop("`colours` has no colour for ", paste(missing_species, collapse = ", "),
+      stop("`colours` has no colour for ", toString(missing_species),
            call. = FALSE)
     }
     colours <- colours[species_levels]

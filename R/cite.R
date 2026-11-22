@@ -172,14 +172,14 @@ cite_state <- new.env(parent = emptyenv())
 format_paper <- function(paper) {
   authors <- paper$authors
   if (length(authors) > 1) {
-    authors <- paste0(paste(authors[-length(authors)], collapse = ", "), ", & ",
+    authors <- paste0(toString(authors[-length(authors)]), ", & ",
                       authors[length(authors)])
   }
   source <- if (is.null(paper$journal)) {
     paste0(paper$publisher, ".")
   } else {
-    paste0(paste(c(paper$journal, paper$volume, gsub("--", "-", paper$pages, fixed = TRUE)),
-                 collapse = ", "), ".")
+    paste0(toString(c(paper$journal, paper$volume, gsub("--", "-", paper$pages, fixed = TRUE))),
+           ".")
   }
   paste0(authors, " (", paper$year, "). ", paper$title, ". ", source,
          " https://doi.org/", paper$doi)

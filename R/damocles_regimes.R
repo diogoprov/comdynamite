@@ -156,7 +156,7 @@ confint.mc_damocles_fit <- function(object, parm = NULL, level = 0.95, ...) {
   parm <- parm %||% design$names
   unknown <- setdiff(parm, design$names)
   if (length(unknown) > 0) {
-    stop("not free parameters of the fit: ", paste(unknown, collapse = ", "), call. = FALSE)
+    stop("not free parameters of the fit: ", toString(unknown), call. = FALSE)
   }
   post <- damocles_postorder(info$tree)
   groups <- if (info$shared) list(seq_len(nrow(info$presence))) else

@@ -241,7 +241,9 @@ logistic_gradients <- function(scenario, n_sites = 31) {
   to_range <- function(v) rescale(v, c(-15, 15))
   mem <- if (scenario >= 5) transect_mem(n_sites)
   switch(as.character(scenario),
-    "2" = y <- x + stats::rnorm(n_sites),
+    "2" = {
+      y <- x + stats::rnorm(n_sites)
+    },
     "5" = {
       x <- sample(x)
       y <- to_range(mem[, 1])

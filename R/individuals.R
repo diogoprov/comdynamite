@@ -1157,7 +1157,7 @@ check_data_columns <- function(x, columns, name = "individuals") {
   if (!is.data.frame(x)) stop("`", name, "` must be a data frame", call. = FALSE)
   missing_columns <- setdiff(columns, names(x))
   if (length(missing_columns) > 0) {
-    stop("`", name, "` has no column ", paste(missing_columns, collapse = ", "), call. = FALSE)
+    stop("`", name, "` has no column ", toString(missing_columns), call. = FALSE)
   }
   invisible(x)
 }

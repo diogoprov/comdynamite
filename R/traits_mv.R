@@ -138,8 +138,7 @@ rate_matrix <- function(variance = 1, correlation = 0,
              function(r) build_rate_matrix(variance, r, p))
     },
     correlation = {
-      lapply(regime_list(variance, "variance"),
-             function(v) build_rate_matrix(v, correlation, p))
+      lapply(regime_list(variance, "variance"), build_rate_matrix, correlation, p)
     })
   names_traits <- paste0("trait", seq_len(p))
   name_it <- function(m) {
