@@ -20,6 +20,10 @@ jobs:
 
       - name: Run pkgcheck
         uses: docker://ghcr.io/ropensci-review-tools/pkgcheck-action:latest
+        env:
+          # pkgcheck reads the CI badges and runs through the GitHub API.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
         with:
           entrypoint: Rscript
           args: .github/pkgcheck.R
