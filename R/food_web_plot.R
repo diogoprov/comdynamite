@@ -100,7 +100,7 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
 #'
 #' @param x Result of [food_web_dynamics()].
 #' @param file Path of the GIF to write, one character string; by default a temporary file,
-#'   whose path is returned.
+#'   whose path is returned. The suffix `.gif` is added when the name has no suffix.
 #' @param frames Number of frames, taken at evenly spaced rows of `x`: one whole number, 2 or
 #'   more, that cannot exceed the number of rows.
 #' @param delay Seconds between frames, one number greater than 0.
@@ -126,6 +126,7 @@ animate_food_web <- function(x, file = tempfile(fileext = ".gif"), frames = 100,
          call. = FALSE)
   }
   check_string(file, "file")
+  if (!grepl("\\.[[:alnum:]]+$", basename(file))) file <- paste0(file, ".gif")
   check_count(frames, "frames", min = 2, max = nrow(x))
   check_number(delay, "delay", lower = 0, open = TRUE)
   check_count(width, "width")

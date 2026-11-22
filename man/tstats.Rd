@@ -14,6 +14,7 @@ tstats(
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
   null_pc = c("populations", "individuals"),
+  na_action = c("omit", "fail"),
   ...,
   nperm = NULL
 )
@@ -47,6 +48,10 @@ default), the population means permuted among the populations of the region, or
 \code{"individuals"}, the population-level values of individuals permuted among all individuals
 of the region as in Taudiere & Violle (2016) and in versions up to 0.10.0 (see the section
 Null model of T_PC.PR and the size of populations).}
+
+\item{na_action}{What to do with missing values: individuals with a missing value in a trait
+are left out of that trait's statistics, with a message giving their number (\code{"omit"}, the
+default), or the function stops (\code{"fail"}).}
 
 \item{...}{Further arguments to \code{\link[cati:Tstats]{cati::Tstats()}}, such as \code{reg.pool} or
 \code{independantTraits}.}

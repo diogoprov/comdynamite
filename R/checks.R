@@ -125,16 +125,65 @@ check_sites <- function(x, comm, name) {
     stop(name, " has ", nrow(x), " rows and `comm` has ", nrow(comm), " sites", call. = FALSE)
   }
   sites <- rownames(comm)
-  if (is.null(sites) || is.null(rownames(x)) || anyDuplicated(sites) > 0 ||
-        anyDuplicated(rownames(x)) > 0) {
-    return(x)
-  }
+  if (is.null(sites) || is.null(rownames(x))) return(x)
+  check_unique_sites(sites, "`comm`")
+  check_unique_sites(rownames(x), name)
   different <- union(setdiff(rownames(x), sites), setdiff(sites, rownames(x)))
   if (length(different) > 0) {
     stop("sites of ", name, " and `comm` have different names: ", species_list(different),
          call. = FALSE)
   }
   x[sites, , drop = FALSE]
+}
+
+# rows with missing values: `na_action = "fail"` stops, "omit" reports how many rows are left
+# out; returns the logical vector of the rows to keep
+handle_missing <- function(values, na_action, name, unit = "individuals") {
+  keep <- stats::complete.cases(values)
+  n <- sum(!keep)
+  if (n > 0) {
+    if (na_action == "fail") {
+      stop(n, " ", unit, " have missing values in ", name,
+           "; remove them or set `na_action = \"omit\"`", call. = FALSE)
+    }
+    message(n, " ", unit, " with missing values in ", name, " left out")
+  }
+  keep
+}
+
+# collinearity of the predictors of a linear model: stops when a column of the design matrix
+# (with intercept) is a linear combination of the others, and warns, without removing any
+# variable, when a variance inflation factor exceeds `vif_max`
+check_collinear <- function(design, name, vif_max = 10) {
+  design <- as.matrix(design)
+  decomposition <- qr(design)
+  if (decomposition$rank < ncol(design)) {
+    aliased <- colnames(design)[decomposition$pivot[-seq_len(decomposition$rank)]]
+    stop("the predictors of ", name, " are collinear: ", paste(aliased, collapse = ", "),
+         " is a linear combination of the others; remove it", call. = FALSE)
+  }
+  x <- design[, colnames(design) != "(Intercept)", drop = FALSE]
+  if (ncol(x) < 2) return(invisible(NULL))
+  vif <- diag(solve(stats::cor(x)))
+  high <- vif > vif_max
+  if (any(high)) {
+    warning("the predictors of ", name, " are strongly correlated (variance inflation factor ",
+            "above ", vif_max, ": ", paste0(names(vif)[high], " = ", signif(vif[high], 3),
+                                            collapse = ", "),
+            "); their effects are poorly separated. No variable was removed",
+            call. = FALSE)
+  }
+  invisible(vif)
+}
+
+# stops when site names are repeated, since sites are matched by name
+check_unique_sites <- function(sites, name) {
+  repeated <- unique(sites[duplicated(sites)])
+  if (length(repeated) > 0) {
+    stop("site names of ", name, " are repeated: ", species_list(repeated),
+         ". Give each site a distinct name.", call. = FALSE)
+  }
+  invisible(sites)
 }
 
 check_numeric_columns <- function(x, name, advice) {

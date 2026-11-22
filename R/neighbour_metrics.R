@@ -194,6 +194,9 @@ metric_input <- function(x, na.rm) {
     return(x)
   }
   if (is.data.frame(x)) x <- as.matrix(x)
+  # classes such as `units` would send sd() and friends to their own methods
+  kept <- intersect(names(attributes(x)), c("dim", "dimnames", "names"))
+  attributes(x) <- attributes(x)[kept]
   if (length(dim(x)) > 2) stop("`x` must be a vector, a matrix or a dist object", call. = FALSE)
   if (!is.numeric(x)) stop("`x` must be numeric, a numeric matrix or a dist object", call. = FALSE)
   no_infinite_trait(x)

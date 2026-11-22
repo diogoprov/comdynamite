@@ -30,14 +30,11 @@
 #'   `mc_data()` does this matching once and keeps the parts aligned, including under
 #'   subsetting with `[`. Tested in `tests/testthat/test-mc-data.R` and
 #'   `tests/testthat/test-species-match.R`.
-#' @srrstatsTODO {EA2.1} Uniqueness is affirmed for species names (`match_species()` stops
-#'   with "repeated species", tested in `tests/testthat/test-species-match.R`) and for the
-#'   site names of `comm` in `mc_data()` (tested in `tests/testthat/test-mc-data.R`).
-#'   Missing: `check_sites()` (`R/checks.R`) falls back to matching by position, without
-#'   an error or warning, when the site names of `comm` or of the predictors are repeated;
-#'   `site_rows()` (`R/mc_data.R`) does not check that the row names of `env`, `coords` or
-#'   `areas` are unique; and `trait_flex()` (`R/trait_variation.R`) matches `env` to the
-#'   sites with `match()` without checking that the site column of `env` is unique.
+#' @srrstats {EA2.1} Uniqueness is affirmed for species names (`match_species()` stops with
+#'   "repeated species", tested in `tests/testthat/test-species-match.R`) and for site names:
+#'   `check_unique_sites()` (`R/checks.R`) stops on repeated site names in `check_sites()`, in
+#'   `site_rows()` (`R/mc_data.R`) for the row names of `env`, `coords` and `areas`, and in
+#'   `trait_flex()` for the site column of `env` (tests in `tests/testthat/test-checks.R`).
 #' @srrstats {EA2.2} The index is identified through the class system of EA2.2a.
 #' @srrstats {EA2.2a} The class `mc_data` (`R/mc_data.R`) fixes the index of each part:
 #'   the row names of `comm`, `env`, `coords` and `areas` are the sites and the column
@@ -59,9 +56,9 @@
 #'   separate objects, which are matched by name inside each function. Either coerce the
 #'   separate objects with `mc_data()` at the start of each analysis or document this as a
 #'   justified deviation.
-#' @srrstatsTODO {EA2.5} Depends on EA2.1: the tables inside `mc_data` are keyed by site
-#'   and species names, but the uniqueness of the row names of `env`, `coords` and `areas`
-#'   is not checked in `site_rows()` (`R/mc_data.R`).
+#' @srrstats {EA2.5} The tables inside `mc_data` are keyed by site and species names, whose
+#'   uniqueness is checked as in EA2.1, so each site and species of the index matches one row of
+#'   every part.
 #' @srrstats {EA2.6} Extra attributes of input vectors are ignored. `check_comm()` and
 #'   `check_env()` (`R/checks.R`) convert inputs with `as.matrix()`, which keeps only the
 #'   values and names, and the functions for individuals use the trait columns only in

@@ -98,11 +98,12 @@
 #'   of the functions for individuals) treat them as unordered labels. Missing: the help pages
 #'   do not say that factors are taken as unordered and that the order of an ordered factor is
 #'   ignored.
-#' @srrstatsTODO {G2.6} One-dimensional input is accepted as a vector, a one-column matrix or a
-#'   one-column data frame (`check_env()`, `metric_input()` in R/neighbour_metrics.R), but class
-#'   attributes are not removed in every function. Missing: a vector of class `units` works in
-#'   `trait_range()` and stops with an S3 dispatch error in `sdnnd()`; strip the class in the
-#'   shared helpers and add tests.
+#' @srrstats {G2.6} One-dimensional input is accepted as a vector, a one-column matrix or a
+#'   one-column data frame (`check_env()`, `metric_input()` in R/neighbour_metrics.R).
+#'   `metric_input()` keeps only the `dim`, `dimnames` and `names` attributes, so a vector of
+#'   class `units` gives the same neighbour metrics and `trait_range()` as a plain vector (test
+#'   "vectors of class units give the same metrics as plain vectors" in tests/testthat/test-
+#'   neighbour_metrics.R).
 #' @srrstats {G2.7} Community, predictor, coordinate and trait tables can be a matrix, a
 #'   `data.frame` or a tibble, converted by `check_comm()` and `check_env()`; data on
 #'   individuals are a `data.frame` or tibble in long format. Domain forms are accepted too:
@@ -138,19 +139,21 @@
 #'   names the argument (R/checks.R, R/mc_data.R, R/assembly.R, R/phylo_gradient.R,
 #'   R/surrogates.R). Tests in tests/testthat/test-validation-analysis.R,
 #'   tests/testthat/test-surrogates.R and tests/testthat/test-checks.R.
-#' @srrstatsTODO {G2.14} The treatment of missing values is fixed for each function and
-#'   documented, and the user cannot choose it, except for `na.rm` in the neighbour metrics
-#'   (R/neighbour_metrics.R). Missing: an argument to choose between stopping and omitting in
-#'   the functions for individuals (`tstats()`, `community_index()`, `trait_flex()`,
-#'   `trait_rarefaction()`, `trait_gradient()`), which now always omit.
+#' @srrstats {G2.14} The functions for individuals and the regressions on long tables
+#'   (`tstats()`, `community_index()`, `trait_flex()`, `trait_rarefaction()`, `drift_test()`,
+#'   `population_shifts()`) take `na_action = c("omit", "fail")`, handled by `handle_missing()`
+#'   in R/checks.R; the neighbour metrics take `na.rm`. In `trait_gradient()` a missing trait
+#'   value marks a population that was not measured, which the method uses by design (its help
+#'   page), so it has no such argument. Tests in tests/testthat/test-checks.R and
+#'   tests/testthat/test-population_shifts.R.
 #' @srrstats {G2.14a} Missing values in `comm`, `env`, coordinates and species traits stop the
 #'   function with an error that names the argument, as stated in the section "Arguments" of
 #'   the package help page; the neighbour metrics return `NA` with the default `na.rm = FALSE`.
-#' @srrstatsTODO {G2.14b} Individuals with a missing trait value are left out, as the help
-#'   pages of `tstats()`, `community_index()`, `trait_flex()` and `trait_gradient()` say, and
-#'   `trait_partition()` warns when it leaves out sites with missing predictors. Missing: a
-#'   message or warning with the number of individuals left out in the first four functions,
-#'   and with `na.rm = TRUE` in the neighbour metrics.
+#' @srrstats {G2.14b} With `na_action = "omit"`, the functions of G2.14 leave out the
+#'   incomplete rows with a message giving their number, and `trait_flex()` and
+#'   `trait_partition()` warn when they leave out sites with missing predictors. The neighbour
+#'   metrics with `na.rm = TRUE` drop missing values without a message, since they are called
+#'   once per site inside `community_index()`, whose own message already counts them.
 #' @srrstats {G2.15} Data reach `mean()`, `var()`, `cor()` and similar routines after the
 #'   checks of G2.13, so without missing values; where missing values are allowed (trait values
 #'   of individuals, statistics that cannot be computed for a site) the code selects complete
@@ -177,9 +180,9 @@
 #' @srrstats {G3.1a} The arguments `W` and `trait_cov` are described in the help pages of
 #'   `drift_test()` and `assemble_community()`, and tests/testthat/test-drift-test.R runs
 #'   `drift_test()` with a covariance matrix given by the user. The examples do not show it.
-#' @srrstatsTODO {G4.0} `animate_food_web()` (R/food_web_plot.R) is the only function that
-#'   writes a file; `file` is checked as one character string and passed to gifski as given.
-#'   Missing: add the suffix `.gif` when the name has none.
+#' @srrstats {G4.0} `animate_food_web()` (R/food_web_plot.R) is the only function that writes a
+#'   file; `file` is checked as one character string and the suffix `.gif` is added when the name
+#'   has none (test in tests/testthat/test-food-web-plot.R).
 #' @srrstats {G5.0} Tests use the data sets of the package, `daphniids` (lakes of the EMAP
 #'   survey of the US EPA, as analysed by Leibold et al. 2010) in tests/testthat/test-node.R,
 #'   and the worked example of Appendix A of Peres-Neto et al. (2012), typed in

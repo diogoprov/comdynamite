@@ -316,3 +316,22 @@ test_that("the slope of the push matches its numerical derivative, with unmeasur
 test_that("the variance of populations is zero without residuals or sampling error", {
   expect_equal(population_variance(c(0, 0), 0), 0)
 })
+
+test_that("population_shifts() checks the collinearity of its variables", {
+  ind <- make_shifts()
+  ind$env3 <- ind$env + ind$env2
+  expect_error(population_shifts(ind, env = c("env", "env2", "env3"), width = 0.5),
+               "collinear: env3")
+  set.seed(5)
+  noise <- stats::rnorm(25, sd = 0.02)
+  ind$near <- ind$env + noise[as.integer(sub("s", "", ind$site))]
+  expect_warning(population_shifts(ind, env = c("env", "near"), width = 0.5),
+                 "variance inflation")
+})
+
+test_that("population_shifts() reports or refuses missing values", {
+  ind <- make_shifts()
+  ind$trait[3] <- NA
+  expect_message(population_shifts(ind, width = 0.5), "1 individuals with missing values")
+  expect_error(population_shifts(ind, width = 0.5, na_action = "fail"), "1 individuals have")
+})

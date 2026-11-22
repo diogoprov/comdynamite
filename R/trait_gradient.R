@@ -494,7 +494,7 @@ trait_gradient_test <- function(x, n_null = 999,
     })
     fit <- gls_known_error(means, rep(0, k), list(shared = shared, depth = diag(shared),
                                                  height = max(diag(shared))), "BM")
-    root <- sqrt(fit$sigma2) * root
+    root <- sqrt(fit$sigma2) * root # BM uses optimize(), which always returns
   }
   sims <- matrix(NA_real_, n_null, 3 + 2 * k)
   for (b in seq_len(n_null)) {
@@ -664,7 +664,9 @@ print.mc_trait_gradient_test <- function(x, ...) {
 #'   number, 2 or more.
 #' @return An object of class `mc_trait_gradient_phylo`, a list with `models` (one row per
 #'   response and model: `response`, `model`, `mu`, `sigma2`, `a`, `half_life` (\eqn{\ln 2 / a},
-#'   in units of branch length), `at_bound` (an OU fit with \eqn{a} at a bound), `loglik`,
+#'   in units of branch length), `at_bound` (an OU fit with \eqn{a} at a bound), `converged`
+#'   (`FALSE` when [stats::optim()] reports no convergence for an OU fit, with a warning; white noise
+#'   and BM have one parameter, fitted by [stats::optimize()]), `loglik`,
 #'   `n_par`, `aic` and `delta_aic` within each response), `data` (one row per species used: values and standard errors) and `tree`
 #'   (the tree pruned to those species).
 #' @references Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community
@@ -719,6 +721,12 @@ trait_gradient_phylo <- function(x, tree, responses = c("beta", "alpha", "mean")
     }))
   })
   table <- do.call(rbind, fits)
+  if (!all(table$converged)) {
+    failed <- table[!table$converged, ]
+    warning("the optimiser did not converge for ", paste(failed$response, failed$model,
+                                                         sep = " ~ ", collapse = ", "),
+            "; see `converged` in `models`", call. = FALSE)
+  }
   table$delta_aic <- table$aic - stats::ave(table$aic, table$response, FUN = min)
   structure(list(models = table, data = data, tree = pruned,
                  settings = c(x$settings, list(n_boot = n_boot, min_sites = min_sites))),
@@ -751,6 +759,11 @@ tg_boot_se <- function(x, n_boot) {
 tg_tree_parts <- function(tree, species) {
   shared <- ape::vcv(tree)[species, species]
   list(shared = shared, depth = diag(shared), height = max(diag(shared)))
+}
+
+# bounded optimisation of the OU fit, apart so that tests can make it fail
+ou_optim <- function(par, fn, lower, upper) {
+  stats::optim(par, fn, method = "L-BFGS-B", lower = lower, upper = upper)
 }
 
 # REML fit of y ~ N(mu, sigma2 C + diag(v)) for a covariance model
@@ -789,24 +802,26 @@ gls_known_error <- function(y, v, covs, model) {
     objective <- function(par) -reml(par[1], exp(par[2]) / h)
     starts <- expand.grid(log(scale), log(c(0.1, 1, 5)))
     fits <- lapply(seq_len(nrow(starts)), function(i) {
-      stats::optim(unlist(starts[i, ]), objective, method = "L-BFGS-B",
-                   lower = c(lower, log(1e-3)), upper = c(upper, log(50)))
+      ou_optim(unlist(starts[i, ]), objective, lower = c(lower, log(1e-3)),
+               upper = c(upper, log(50)))
     })
     best <- fits[[which.min(vapply(fits, `[[`, numeric(1), "value"))]]
     a <- exp(best$par[2]) / h
     log_s2 <- best$par[1]
     at_bound <- abs(best$par[2] - log(1e-3)) < 1e-4 || abs(best$par[2] - log(50)) < 1e-4
+    converged <- best$convergence == 0
   } else {
     best <- stats::optimize(function(z) -reml(z), c(lower, upper))
     log_s2 <- best$minimum
     a <- NA_real_
     at_bound <- NA
+    converged <- TRUE # optimize() stops at its tolerance in the bracketing interval
   }
   ll <- reml(log_s2, a)
   k <- 2 + (model == "OU")
   data.frame(mu = attr(ll, "mu"), sigma2 = exp(log_s2), a = a,
              half_life = if (model == "OU" && !at_bound) log(2) / a else NA_real_,
-             at_bound = at_bound,
+             at_bound = at_bound, converged = converged,
              loglik = as.numeric(ll), n_par = k, aic = -2 * as.numeric(ll) + 2 * k)
 }
 

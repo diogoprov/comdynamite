@@ -4,7 +4,15 @@
 \alias{drift_test}
 \title{Test whether divergence among groups is proportional to variation within them}
 \usage{
-drift_test(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95)
+drift_test(
+  x,
+  group,
+  traits = NULL,
+  W = NULL,
+  correct = TRUE,
+  level = 0.95,
+  na_action = c("omit", "fail")
+)
 }
 \arguments{
 \item{x}{A data frame or a numeric matrix with one row per individual (for example, from
@@ -26,6 +34,10 @@ with more than one individual): \code{TRUE} or \code{FALSE}.}
 
 \item{level}{The confidence level of the interval for the slope: one number greater than 0
 and less than 1.}
+
+\item{na_action}{What to do with missing values: rows with a missing trait value or group
+are left out, with a message giving their number (\code{"omit"}, the default), or the function
+stops (\code{"fail"}).}
 }
 \value{
 An object of class \code{drift_test}: a list with \code{slope}, its standard error \code{se}, the

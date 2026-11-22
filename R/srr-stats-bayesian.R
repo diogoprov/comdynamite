@@ -174,7 +174,9 @@
 #'   the thresholds, with no reference for the statistics or their implementation.
 #'   Missing: a `@references` entry for R-hat and the effective sample sizes as
 #'   computed by the posterior package, and a mention of that package in Details.
-#' @srrstats {BS4.5} When the diagnostics fail, `trait_gradient_bayes()` warns, returns
+#' @srrstats {BS4.5} The diagnostics count transitions that hit the maximum tree depth
+#'   (`max_treedepth` in `diagnostics`) besides divergences, R-hat and effective sample
+#'   sizes. When the diagnostics fail, `trait_gradient_bayes()` warns, returns
 #'   `diagnostics$ok = FALSE` and `print()` marks the result "CHECK BEFORE READING";
 #'   the fit is still returned for inspection. The help page says not to read such a
 #'   fit and names longer chains (`iter_sampling`) as the first remedy; `adapt_delta`

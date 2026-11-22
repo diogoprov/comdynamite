@@ -15,7 +15,8 @@ population_shifts(
   species_slopes = FALSE,
   community = NULL,
   nboot = 0,
-  level = 0.95
+  level = 0.95,
+  na_action = c("omit", "fail")
 )
 }
 \arguments{
@@ -48,6 +49,10 @@ number, 0 or more.}
 
 \item{level}{Confidence level of the bootstrap intervals. One number between 0 and 1, both
 excluded.}
+
+\item{na_action}{What to do with missing values: rows with a missing value in the trait,
+site, species, environment or abundance column are left out, with a message giving their
+number (\code{"omit"}, the default), or the function stops (\code{"fail"}).}
 }
 \value{
 An object of class \code{population_shifts}: a data frame with one row and the columns

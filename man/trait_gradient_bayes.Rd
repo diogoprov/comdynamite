@@ -49,7 +49,8 @@ squared trait units.}
 \item{species}{posterior median and central interval with probability 0.95 of
 \eqn{\beta}, \eqn{\alpha} and the mean of each species.}
 \item{diagnostics}{largest R-hat, smallest bulk and tail effective sample sizes,
-number of divergent transitions, and \code{ok}.}
+number of divergent transitions, number of transitions that hit the maximum tree
+depth (\code{max_treedepth}; raise it through \code{...} if needed), and \code{ok}.}
 \item{fit}{the \code{CmdStanMCMC} object; its draws live in temporary files of the session,
 so save them with \code{fit$save_object()} to keep them.}
 \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
@@ -113,7 +114,8 @@ The function warns when this is below 70\% of the populations; \code{species_wei
 for the total standard deviations among species and for the residuals, \code{beta(1, 1)} for
 both \eqn{\lambda} (change with \code{lambda_prior}), and \code{lkj(2)} for the two correlations.
 Check convergence (\code{diagnostics}: R-hat below 1.01, bulk and tail effective sample sizes
-above 400 and no divergent transitions, over the intercepts, standard deviations,
+above 400, no divergent transitions and no transitions that hit the maximum tree depth of
+the sampler, over the intercepts, standard deviations,
 \eqn{\lambda}, correlations, species values and \code{lp__}) and the fit, with
 \code{\link[bayesplot:pp_check]{bayesplot::pp_check()}} on the result, before reading the estimates.
 

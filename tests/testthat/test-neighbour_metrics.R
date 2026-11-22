@@ -111,3 +111,13 @@ test_that("metrics return NA for too few or missing values", {
   expect_true(is.na(mnd(c(1, NA, 4))))
   expect_true(is.na(mnd(1)))
 })
+
+test_that("vectors of class units give the same metrics as plain vectors", {
+  skip_if_not_installed("units")
+  x <- c(1, 2, 2, 5, 9)
+  u <- units::set_units(x, "mm")
+  expect_equal(sdnnd(u), sdnnd(x))
+  expect_equal(mnnd(u), mnnd(x))
+  expect_equal(cvnnd(u), cvnnd(x))
+  expect_equal(trait_range(u), trait_range(x))
+})

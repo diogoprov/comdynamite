@@ -33,7 +33,9 @@ number, 2 or more.}
 \value{
 An object of class \code{mc_trait_gradient_phylo}, a list with \code{models} (one row per
 response and model: \code{response}, \code{model}, \code{mu}, \code{sigma2}, \code{a}, \code{half_life} (\eqn{\ln 2 / a},
-in units of branch length), \code{at_bound} (an OU fit with \eqn{a} at a bound), \code{loglik},
+in units of branch length), \code{at_bound} (an OU fit with \eqn{a} at a bound), \code{converged}
+(\code{FALSE} when \code{\link[stats:optim]{stats::optim()}} reports no convergence for an OU fit, with a warning; white noise
+and BM have one parameter, fitted by \code{\link[stats:optimize]{stats::optimize()}}), \code{loglik},
 \code{n_par}, \code{aic} and \code{delta_aic} within each response), \code{data} (one row per species used: values and standard errors) and \code{tree}
 (the tree pruned to those species).
 }
