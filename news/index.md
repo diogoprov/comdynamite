@@ -2,6 +2,44 @@
 
 ## comdynamite (development version)
 
+- The null models of T_IC/IR and T_PC/PR in
+  [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
+  permute the whole region once per randomisation, instead of drawing
+  each site from the region independently, so that the sites of a
+  randomisation partition the regional pool as the data do. The test of
+  the mean over sites in
+  [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
+  now has its nominal size (it rejected in about 8% of null data sets
+  for T_PC/PR and in none for T_IC/IR); the site-level null
+  distributions are unchanged for T_IC/IR and nearly so for T_PC/PR, but
+  null values, effect sizes and p-values differ from earlier versions
+  for the same seed. New argument `null_pc`: the default `"individuals"`
+  is the null of Taudiere & Violle (2016); `"populations"` permutes
+  population means among the populations of the region, which avoids the
+  false “high” sites that the default gives when population sizes differ
+  among sites and species differ in their means.
+- [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  and
+  [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+  gain `min_node_size` (default 5, as before), the minimal size of the
+  leaves of the forests. The help of
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
+  [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+  and
+  [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md)
+  now says that the intervals of ABC-RF are approximate: conservative
+  with several statistics (coverage 0.93 to 0.99 for a nominal 0.9 in
+  the extended tests) and too narrow with one very informative statistic
+  and small leaves (0.65, 0.89 with leaves of 200 simulations).
+- The help of
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
+  explains that the p-values are F tests of the regressions of the site
+  values on the predictors, as in
+  [`cati::traitflex.anova()`](https://adrientaudiere.github.io/cati/reference/traitflex.anova.html),
+  and that under species turnover along the predictor the intraspecific
+  component is underestimated and its test is conservative, because
+  species means taken over all sites absorb part of a shared
+  intraspecific response. Results are unchanged.
 - Extended tests (rOpenSci standards G5.4-G5.12, BS7.0-BS7.2), run with
   `COMDYNAMITE_EXTENDED_TESTS=true` and once a month on GitHub Actions
   (`tests/README.md`): type I error and power of the permutation and
@@ -11,17 +49,7 @@
   [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md).
   Quick checks that the results do not change with trivial noise in the
   inputs or beyond Monte Carlo error across seeds run with the regular
-  tests. They found four problems, kept as skipped tests until they are
-  solved: the intervals of the ABC functions are not calibrated
-  (coverage of 0.93 to 0.99 for a nominal 0.9, and 0.65 in a case with
-  an analytic posterior; the same happens with abcrf alone); the
-  mean-over-sites test of
-  [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
-  rejects too often for T_PC/PR (about 8%) and never for T_IC/IR; the
-  site test of T_PC/PR has no power against strong filtering; and the
-  intraspecific test of
-  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
-  is conservative under species turnover (about 2%).
+  tests.
 - Input validation (rOpenSci standards G2 and G3): every scalar argument
   of the exported functions is checked for its length, type and range
   before any computation, with a message that names the argument, and

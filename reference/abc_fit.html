@@ -84,7 +84,14 @@ dropped, and then simulations with any missing statistic.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">abc_fit</span><span class="op">(</span><span class="va">table</span>, parameters <span class="op">=</span> <span class="cn">NULL</span>, statistics <span class="op">=</span> <span class="cn">NULL</span>, ntree <span class="op">=</span> <span class="fl">500</span>, ncores <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">abc_fit</span><span class="op">(</span></span>
+<span>  <span class="va">table</span>,</span>
+<span>  parameters <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  statistics <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ntree <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  min_node_size <span class="op">=</span> <span class="fl">5</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'mc_abc_fit'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span>, level <span class="op">=</span> <span class="fl">0.9</span>, ncores <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -117,6 +124,13 @@ the statistics.</p></dd>
 <dd><p>Number of threads for the forests. One whole number, 1 or more.</p></dd>
 
 
+<dt id="arg-min-node-size">min_node_size<a class="anchor" aria-label="anchor" href="#arg-min-node-size"></a></dt>
+<dd><p>Smallest number of simulations in a node for it to be split, the
+<code>min.node.size</code> of <code><a href="http://imbs-hl.github.io/ranger/reference/ranger.html" class="external-link">ranger::ranger()</a></code>. One whole number, 1 or more. The default, 5, is that
+of Raynal et al. (2019); larger values give larger leaves, which widen intervals that
+<code><a href="abc_recovery.html">abc_recovery()</a></code> shows to be too narrow, at the cost of more smoothing.</p></dd>
+
+
 <dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
 <dd><p>An <code>mc_abc_fit</code>.</p></dd>
 
@@ -144,12 +158,29 @@ than 1.</p></dd>
     <p>An <code>mc_abc_fit</code>, a list with <code>forests</code> (one per parameter), <code>training</code>, <code>parameters</code>,
 <code>statistics</code> and <code>prior</code>.</p>
 <p>For <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, a data frame with <code>observation</code>, <code>parameter</code>, <code>estimate</code> (posterior
-median), <code>low</code>, <code>high</code> and <code>mean</code>.</p>
+median), <code>low</code>, <code>high</code> and <code>mean</code>. The interval from <code>low</code> to <code>high</code> is approximate; see
+Details.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>Check with <code><a href="abc_recovery.html">abc_recovery()</a></code> that a parameter can be recovered from simulated data before
 trusting its estimate from real data. A good estimate does not validate the model either.</p>
+<p>The credible intervals are approximate and are not calibrated by construction. The forest
+gives the parameters of the simulations that share leaves with the observation, a sample of
+the posterior given statistics near the observed ones and not given the observed statistics
+themselves. With several statistics the leaves are wide along each of them, the posterior is
+smoothed and the intervals are wider than the exact ones: Raynal et al. (2019) report fatter
+tails and slightly conservative intervals, and in our extended tests (10 statistics, two
+well identified parameters) the 90% intervals held the truth in 92% to 99% of 200
+pseudo-observations. With one or two statistics the leaves are narrow and the sample is
+small instead: with one statistic and the default <code>min_node_size</code> about 5 simulations carry
+the weight, and the 90% interval of a parameter with a known posterior held the truth in
+about 65% of the cases, whatever the number of simulations. The consistency of quantile
+regression forests asks for leaves that grow with the number of simulations (Meinshausen
+2006); there, with 5000 simulations, a <code>min_node_size</code> of 50, 200 and 500 brought the
+coverage to 0.85, 0.89 and 0.91.
+<code><a href="abc_recovery.html">abc_recovery()</a></code> measures the coverage that the intervals have for a given table, and
+<code><a href="abc_diagnose.html">abc_diagnose()</a></code> gives the effective number of simulations behind a posterior.</p>
     </div>
     <div class="section level2">
     <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>

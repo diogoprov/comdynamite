@@ -86,7 +86,8 @@ parameter that is not recovered from simulated data should not be inferred from 
 <span>  level <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  ntree <span class="op">=</span> <span class="fl">500</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  seed <span class="op">=</span> <span class="fl">1</span></span>
+<span>  seed <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  min_node_size <span class="op">=</span> <span class="fl">5</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -128,6 +129,13 @@ than 1.</p></dd>
 <dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
 <dd><p>Integer for the choice of the pseudo-observations. One finite whole number.</p></dd>
 
+
+<dt id="arg-min-node-size">min_node_size<a class="anchor" aria-label="anchor" href="#arg-min-node-size"></a></dt>
+<dd><p>Smallest number of simulations in a node for it to be split, the
+<code>min.node.size</code> of <code><a href="http://imbs-hl.github.io/ranger/reference/ranger.html" class="external-link">ranger::ranger()</a></code>. One whole number, 1 or more. The default, 5, is that
+of Raynal et al. (2019); larger values give larger leaves, which widen intervals that
+<code>abc_recovery()</code> shows to be too narrow, at the cost of more smoothing.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -135,7 +143,22 @@ than 1.</p></dd>
 variance of the truth), <code>bias</code> and <code>width</code> (mean width of the interval) as fractions of the
 prior range, and <code>coverage</code>, the fraction of intervals that contain the truth, with its
 standard error. The attribute <code>estimates</code> holds every estimate. A coverage near <code>level</code>
-says the intervals are calibrated; R2 says how much the data narrow the prior.</p>
+says the intervals are calibrated, one above it that they are conservative and one below
+it that they are too narrow (see Details); R2 says how much the data narrow the prior.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The credible intervals of <code><a href="abc_fit.html">abc_fit()</a></code> are approximate, so their coverage is something to
+measure and not to assume, and <code>coverage</code> is that measure for this table: the fraction of
+pseudo-observations, drawn from the prior, whose interval holds the truth. Expect it at or
+above <code>level</code> with several statistics, since the forests smooth the posterior (Raynal et al.
+2019 report slightly conservative intervals; 0.92 to 0.99 at a <code>level</code> of 0.9 in our extended
+tests), and equal to <code>level</code> for a parameter the statistics say nothing about, whose
+posterior is the prior. A coverage below <code>level</code> by more than about two <code>coverage_se</code> says
+the intervals are too narrow, which happens with one or two statistics and small leaves
+(about 0.65 with one statistic and the default <code>min_node_size</code>); a larger <code>min_node_size</code>
+widens them. The coverage is an average over the prior and does not say that the interval
+of one observation is right.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -143,6 +166,9 @@ says the intervals are calibrated; R2 says how much the data narrow the prior.</
 from macroscopic patterns using dynamic eco-evolutionary models and Approximate Bayesian
 Computation (ABC). <em>Methods in Ecology and Evolution</em>, 10, 450–460.
 <a href="https://doi.org/10.1111/2041-210X.13129" class="external-link">doi:10.1111/2041-210X.13129</a></p>
+<p>Raynal, L., Marin, J.-M., Pudlo, P., Ribatet, M., Robert, C. P., &amp; Estoup, A. (2019). ABC
+random forests for Bayesian parameter inference. <em>Bioinformatics</em>, 35, 1720–1728.
+<a href="https://doi.org/10.1093/bioinformatics/bty867" class="external-link">doi:10.1093/bioinformatics/bty867</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

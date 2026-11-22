@@ -86,6 +86,24 @@ predicted median over the predictive standard deviation.
 [`summary()`](https://rdrr.io/r/base/summary.html) averages over folds
 and data sets (`n` rows per statistic): the coverage, the mean of `z`,
 the root mean square of `z` and the fraction of p-values below 0.05.
+Under the model the coverage is at or above `level` and the root mean
+square of `z` below 1 (see Details).
+
+## Details
+
+The predictive intervals are conservative. The rows are drawn with the
+mean of the weights of the forests of all parameters, which is broader
+than the posterior of each parameter, and the forests already smooth the
+posterior (see
+[`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)).
+When the data come from the model, the intervals therefore hold the
+observed value more often than `level` and the root mean square of `z`
+is below 1: in our extended tests, with data sets simulated from the
+model and a `level` of 0.9, the coverage by statistic and fold was 0.91
+to 1.00 and the root mean square of `z` 0.34 to 0.73. The check errs
+towards accepting the model: a statistic outside its interval, or a
+small `p`, is evidence against the model, but a coverage near `level` is
+not by itself evidence of a good fit.
 
 ## See also
 

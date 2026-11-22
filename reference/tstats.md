@@ -16,6 +16,7 @@ tstats(
   n_perm = 99,
   alternative = c("less", "greater", "two.sided"),
   null_ip = c("site", "species"),
+  null_pc = c("individuals", "populations"),
   ...,
   nperm = NULL
 )
@@ -60,6 +61,15 @@ tstats(
   trait values permuted within each site as in Taudiere & Violle (2016),
   or `"species"`, the means of populations exchanged among the
   populations of each species (see the section Null models).
+
+- null_pc:
+
+  Null model of `T_PC.PR` for `method = "base"`: `"individuals"` (the
+  default), the population-level values of individuals permuted among
+  all individuals of the region as in Taudiere & Violle (2016), or
+  `"populations"`, the population means permuted among the populations
+  of the region (see the section Null model of T_PC.PR and the size of
+  populations).
 
 - ...:
 
@@ -115,22 +125,36 @@ implemented in base R from their description:
   site, which keeps the variance of the site and breaks the structure of
   populations within it;
 
-- `T_IC.IR`: each site receives as many individuals as it has, drawn
-  without replacement from all individuals of the region;
+- `T_IC.IR`: trait values are permuted among all individuals of the
+  region, so that each site receives as many values as it has
+  individuals, drawn without replacement from the region (their null
+  model `regional.ind`);
 
-- `T_PC.PR`: each individual takes the mean of its population, and each
-  site then receives as many of these values as it has individuals,
-  drawn without replacement from the region; population means are
-  computed again from the values drawn.
+- `T_PC.PR`: each individual takes the mean of its population, these
+  values are permuted among all individuals of the region, and
+  population means are computed again from the values each population
+  received (their null model `regional.pop`, `null_pc = "individuals"`).
 
-The null model of `T_IC.IR` leaves the regional pool as it is, so its
-denominator (the variance among all individuals) stays that of the
-observed data, and only the variance within sites is randomised. Taking
-the denominator from the values drawn, which repeat individuals across
-sites, biases the null and makes the test anti-conservative. In the null
-model of `T_PC.PR` the population means are themselves computed from the
-values drawn, so their regional variance is computed again from them, as
-in Taudiere & Violle (2016).
+Each randomisation is one permutation of the whole region, so the sites
+of a randomisation share the regional pool without repeating its
+individuals, as the sites of the data do. The null distribution of each
+site is that of a draw without replacement from the region, and the null
+distribution of the mean over sites, tested by
+[`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md),
+keeps the dependence among sites. Up to version 0.10.0 (and in
+[`cati::Tstats()`](https://adrientaudiere.github.io/cati/reference/Tstats.html))
+each site drew from the region on its own, and individuals were repeated
+across the sites of a randomisation: the test of each site of `T_IC.IR`
+had the same null distribution, but the test of the mean at 5% rejected
+in 0 of 600 data sets for `T_IC.IR` and in 7.8% for `T_PC.PR` when
+individuals were placed at random (8 sites, 199 randomisations); with
+one permutation of the region both rates are compatible with 5%.
+
+The denominator of `T_IC.IR` (the variance among all individuals) is not
+changed by the permutation. In the null model of `T_PC.PR` the
+population means are themselves computed from the values drawn, so their
+regional variance is computed again from them, as in Taudiere & Violle
+(2016).
 
 The standardised effect size is \\(T\_{obs} - \bar T\_{null}) /
 s\_{null}\\, and the p-value is \\(1 + r) / (1 + n)\\, with \\n\\ =
@@ -184,6 +208,43 @@ order, so that the null values of a site come from the individuals of
 other sites; its standardised effect sizes for `T_IP.IC` are then wrong
 (<https://github.com/adrientaudiere/cati/issues/12>). `method = "base"`
 is recommended.
+
+## Null model of T_PC.PR and the size of populations
+
+With `null_pc = "individuals"` a null population mean is the mean of as
+many values as the population has individuals, so the null model is that
+of individuals placed at random among species and sites, and the spread
+of the null means depends on the size of the populations: populations of
+one or two individuals vary widely and large ones stay near the regional
+mean. Two consequences follow when species differ in their means. A site
+with large, even populations gets null values well below those of sites
+with small populations, and the other way round, whatever the trait
+values: with species placed at random among sites, a test at 5% for high
+values at a site of six populations of 10 individuals rejected in about
+80% of 200 data sets when other sites had populations of 1 to 45
+individuals, and the test for low values at these sites in 8%. And the
+test asks whether individuals are exchangeable, not whether the species
+of a site are a random draw of the species of the region.
+
+With `null_pc = "populations"` the observed population means are instead
+permuted among the populations of the region, one value per population
+(the null model `regional.pop.prab` of Taudiere & Violle 2016, which
+they do not use for T-statistics). Each site keeps its number of
+populations, the regional variance of the means is that of the data, and
+the size of populations plays no part; in the example above both tests
+rejected in 1 to 5%. Use it when the sizes of populations differ among
+sites. Populations of the same species at different sites have similar
+means, which this permutation treats as independent, so the test tends
+to be conservative when species differ and are placed at random.
+
+Whatever the null model, `T_PC.PR` is a ratio of variances among
+population means that are not weighted by abundance, and the test of one
+site has little power when the site has few populations: the variance
+among three means is so variable that, for normally distributed means,
+5% of the null values of `null_pc = "populations"` fall below about 0.05
+(0.18 with five populations). The test of the mean over sites of
+[`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
+has more power.
 
 ## Local adaptation and character displacement
 
@@ -266,10 +327,10 @@ rbind(none = colMeans(none[ratios], na.rm = TRUE),
 res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
 #>    site     T_IP.IC ses_T_IP.IC p_T_IP.IC
-#> 1 site1 0.016376543  -13.545376      0.01
-#> 2 site2 0.079715195  -22.236577      0.01
-#> 3 site3 0.012470128  -10.490671      0.01
-#> 4 site4 0.019383034  -23.070752      0.01
-#> 5 site5 0.056784711   -6.326309      0.01
-#> 6 site6 0.005298958   -9.945998      0.01
+#> 1 site1 0.016376543  -13.364187      0.01
+#> 2 site2 0.079715195  -26.659673      0.01
+#> 3 site3 0.012470128  -12.135411      0.01
+#> 4 site4 0.019383034  -18.430831      0.01
+#> 5 site5 0.056784711   -5.107812      0.01
+#> 6 site6 0.005298958  -11.778890      0.01
 ```

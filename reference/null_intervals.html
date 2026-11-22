@@ -146,19 +146,19 @@ test that defines <code>deviation</code>. One number between 0 and 1, both exclu
 <span class="r-in"><span><span class="va">ind</span><span class="op">$</span><span class="va">trait</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">10</span>, b <span class="op">=</span> <span class="fl">20</span>, c <span class="op">=</span> <span class="fl">30</span><span class="op">)</span><span class="op">[</span><span class="va">ind</span><span class="op">$</span><span class="va">species</span><span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">120</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu">null_intervals</span><span class="op">(</span><span class="fu"><a href="tstats.html">tstats</a></span><span class="op">(</span><span class="va">ind</span>, n_perm <span class="op">=</span> <span class="fl">99</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   site trait statistic    observed null_median  null_low null_high inner_low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait   T_IP.IC 0.009373208    1.045136 0.6343477  1.132411 0.9543454</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait   T_IP.IC 0.022171031    1.034900 0.6993979  1.218829 0.9206989</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait   T_IP.IC 0.019857632    1.032582 0.5455449  1.537149 0.7933045</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait   T_IP.IC 0.012470624    1.043910 0.6006849  1.199357 0.9239751</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait   T_IP.IC 0.016391403    1.026634 0.6838355  1.131407 0.9220763</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   s6 trait   T_IP.IC 0.014484968    1.016252 0.7254197  1.137528 0.9367842</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   inner_high       ses p_low p_high deviation</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1.085213 -7.629985  0.01      1       low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1.119922 -7.228212  0.01      1       low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1.171645 -3.853109  0.01      1       low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1.084610 -6.616754  0.01      1       low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5   1.077998 -7.816353  0.01      1       low</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6   1.073531 -8.396158  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   s1 trait   T_IP.IC 0.009373208   1.0440345 0.8195053  1.127088 0.9873698</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   s2 trait   T_IP.IC 0.022171031   0.9805714 0.7090052  1.281529 0.8828529</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   s3 trait   T_IP.IC 0.019857632   1.0504774 0.6286985  1.530633 0.8229043</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   s4 trait   T_IP.IC 0.012470624   1.0282965 0.6188825  1.194557 0.8575739</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   s5 trait   T_IP.IC 0.016391403   1.0131464 0.8094459  1.125095 0.9691929</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   s6 trait   T_IP.IC 0.014484968   1.0359621 0.7302357  1.185730 0.9268566</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   inner_high        ses p_low p_high deviation</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1   1.077741 -11.521452  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   1.127371  -6.034711  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   1.168001  -4.154390  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   1.081388  -6.067582  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5   1.068696  -9.505130  0.01      1       low</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6   1.088905  -8.098369  0.01      1       low</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

@@ -143,12 +143,25 @@ than 1.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A data frame with one row per observed data set, fold and statistic: <code>observed</code>, the median and the
-interval of the predicted statistic, <code>inside</code> (whether the observed value is in the
-interval), <code>p</code> (two-sided posterior predictive p-value) and <code>z</code>, the observed value minus
-the predicted median over the predictive standard deviation. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> averages over
-folds and data sets (<code>n</code> rows per statistic): the coverage, the mean of <code>z</code>, the root mean square of <code>z</code> and the fraction of
-p-values below 0.05.</p>
+    <p>A data frame with one row per observed data set, fold and statistic: <code>observed</code>, the
+median and the interval of the predicted statistic, <code>inside</code> (whether the observed value
+is in the interval), <code>p</code> (two-sided posterior predictive p-value) and <code>z</code>, the observed
+value minus the predicted median over the predictive standard deviation. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>
+averages over folds and data sets (<code>n</code> rows per statistic): the coverage, the mean of <code>z</code>,
+the root mean square of <code>z</code> and the fraction of p-values below 0.05. Under the model the
+coverage is at or above <code>level</code> and the root mean square of <code>z</code> below 1 (see Details).</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The predictive intervals are conservative. The rows are drawn with the mean of the weights
+of the forests of all parameters, which is broader than the posterior of each parameter, and
+the forests already smooth the posterior (see <code><a href="abc_fit.html">abc_fit()</a></code>). When the data come from the
+model, the intervals therefore hold the observed value more often than <code>level</code> and the root
+mean square of <code>z</code> is below 1: in our extended tests, with data sets simulated from the
+model and a <code>level</code> of 0.9, the coverage by statistic and fold was 0.91 to 1.00 and the root
+mean square of <code>z</code> 0.34 to 0.73. The check errs towards accepting the model: a statistic
+outside its interval, or a small <code>p</code>, is evidence against the model, but a coverage near
+<code>level</code> is not by itself evidence of a good fit.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

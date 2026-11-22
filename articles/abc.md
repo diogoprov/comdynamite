@@ -187,8 +187,12 @@ information about each parameter.
 leaves 200 simulations out of the reference table, treats each as if it
 were observed, and compares the estimates with the true values. A
 parameter is worth estimating when the estimates follow the truth (R²
-well above zero) and the 90% intervals contain the truth about 90% of
-the time.
+well above zero) and the 90% intervals contain the truth at least about
+90% of the time. The intervals of random forests are approximate: with
+many statistics they tend to be somewhat wider than the exact ones
+(Raynal et al. 2019), so a coverage a little above 90% is expected,
+while one well below it would say that the intervals are too narrow to
+be trusted.
 
 ``` r
 
@@ -220,8 +224,9 @@ Competition (`inter_max`) and emigration are well recovered, and niche
 breadth and tolerance to urban cover reasonably so, while the scale of
 the kernel is only weakly identified and the phylogenetic signal of the
 niche (`lambda`) not at all: with incidence in 40 ponds, its posterior
-will be its prior. The intervals have about the right coverage for all
-six, so the posterior of `lambda` is honest about this, just
+will be its prior. The coverage is at or a little above 90% for all six
+(0.9 to 0.96, with a standard error of about 0.02), so the intervals are
+not too narrow and the posterior of `lambda` is honest about this, just
 uninformative.
 
 ## Which model?
@@ -451,7 +456,10 @@ fits the forests on the statistics of the ponds kept and predicts those
 of the ponds left out.
 [`summary()`](https://rdrr.io/r/base/summary.html) gives, for each
 statistic, the fraction of folds in which the observed value fell inside
-the 90% predictive interval:
+the 90% predictive interval. These intervals are conservative (they hold
+the observed value more often than 90% when the model is true), so a
+statistic outside them counts against the model more than a statistic
+inside them counts for it:
 
 ``` r
 

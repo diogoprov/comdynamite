@@ -13,7 +13,14 @@ any missing statistic.
 ## Usage
 
 ``` r
-abc_fit(table, parameters = NULL, statistics = NULL, ntree = 500, ncores = 1)
+abc_fit(
+  table,
+  parameters = NULL,
+  statistics = NULL,
+  ntree = 500,
+  ncores = 1,
+  min_node_size = 5
+)
 
 # S3 method for class 'mc_abc_fit'
 predict(object, newdata, level = 0.9, ncores = 1, ...)
@@ -45,6 +52,16 @@ abc_importance(x)
 
   Number of threads for the forests. One whole number, 1 or more.
 
+- min_node_size:
+
+  Smallest number of simulations in a node for it to be split, the
+  `min.node.size` of
+  [`ranger::ranger()`](http://imbs-hl.github.io/ranger/reference/ranger.md).
+  One whole number, 1 or more. The default, 5, is that of Raynal et al.
+  (2019); larger values give larger leaves, which widen intervals that
+  [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+  shows to be too narrow, at the cost of more smoothing.
+
 - object:
 
   An `mc_abc_fit`.
@@ -75,7 +92,8 @@ An `mc_abc_fit`, a list with `forests` (one per parameter), `training`,
 
 For [`predict()`](https://rdrr.io/r/stats/predict.html), a data frame
 with `observation`, `parameter`, `estimate` (posterior median), `low`,
-`high` and `mean`.
+`high` and `mean`. The interval from `low` to `high` is approximate; see
+Details.
 
 ## Details
 
@@ -84,6 +102,29 @@ Check with
 that a parameter can be recovered from simulated data before trusting
 its estimate from real data. A good estimate does not validate the model
 either.
+
+The credible intervals are approximate and are not calibrated by
+construction. The forest gives the parameters of the simulations that
+share leaves with the observation, a sample of the posterior given
+statistics near the observed ones and not given the observed statistics
+themselves. With several statistics the leaves are wide along each of
+them, the posterior is smoothed and the intervals are wider than the
+exact ones: Raynal et al. (2019) report fatter tails and slightly
+conservative intervals, and in our extended tests (10 statistics, two
+well identified parameters) the 90% intervals held the truth in 92% to
+99% of 200 pseudo-observations. With one or two statistics the leaves
+are narrow and the sample is small instead: with one statistic and the
+default `min_node_size` about 5 simulations carry the weight, and the
+90% interval of a parameter with a known posterior held the truth in
+about 65% of the cases, whatever the number of simulations. The
+consistency of quantile regression forests asks for leaves that grow
+with the number of simulations (Meinshausen 2006); there, with 5000
+simulations, a `min_node_size` of 50, 200 and 500 brought the coverage
+to 0.85, 0.89 and 0.91.
+[`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+measures the coverage that the intervals have for a given table, and
+[`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
+gives the effective number of simulations behind a posterior.
 
 ## Functions
 
