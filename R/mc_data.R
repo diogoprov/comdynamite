@@ -207,6 +207,7 @@ site_rows <- function(x, sites, name) {
     }
     at <- seq_len(n)
   } else {
+    check_unique_sites(labels, name)
     at <- match(sites, labels)
     if (anyNA(at)) {
       stop(name, " has no row for the sites ", species_list(sites[is.na(at)]), call. = FALSE)

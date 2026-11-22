@@ -11,7 +11,8 @@ trait_flex(
   species = "species",
   abundance = NULL,
   formula = ~1,
-  env = NULL
+  env = NULL,
+  na_action = c("omit", "fail")
 )
 }
 \arguments{
@@ -33,6 +34,11 @@ of squares of the whole model and \code{p} the p-value of its F test.}
 \item{env}{Data frame with one row per site, a column named like \code{site} and the variables of
 \code{formula}; it is matched to the sites by name. Sites with missing values in these
 variables are left out of all sums of squares, with a warning.}
+
+\item{na_action}{What to do with missing values: individuals with a missing trait value are
+left out of that trait's means, with a message giving their number, and sites with missing
+values in \code{env} are left out of the model with a warning (\code{"omit"}, the default); or the
+function stops on either (\code{"fail"}).}
 }
 \value{
 A list with \code{decomposition}, a data frame with one row per trait and component

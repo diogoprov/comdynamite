@@ -134,10 +134,16 @@ subsample_individuals <- function(individuals, n = NULL, fraction = NULL, cover 
 #' rare
 #' # over the share of abundance covered by the species measured
 #' trait_rarefaction(ind, cover = c(0.5, 0.8, 1))
+#' @param na_action What to do with missing values: with the default `statistic`, individuals
+#'   with a missing value in the column `trait` are left out before subsampling, with a message
+#'   giving their number (`"omit"`, the default), or the function stops (`"fail"`). A user-
+#'   supplied `statistic` handles missing values itself.
 #' @export
 trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = NULL,
                               reps = 20, level = 0.95, min_n = 2, site = "site",
-                              species = "species", abundance = NULL) {
+                              species = "species", abundance = NULL,
+                              na_action = c("omit", "fail")) {
+  na_action <- match.arg(na_action)
   check_string(site, "site")
   check_string(species, "species")
   check_data_columns(individuals, c(site, species))
@@ -145,6 +151,9 @@ trait_rarefaction <- function(individuals, statistic = NULL, n = NULL, cover = N
   check_number(level, "level", 0, 1, open = TRUE)
   check_count(min_n, "min_n")
   if (is.null(statistic)) {
+    check_data_columns(individuals, "trait")
+    individuals <- individuals[handle_missing(individuals["trait"], na_action, "`trait`"), ,
+                               drop = FALSE]
     statistic <- function(d) {
       t <- tstats(d, site = site, species = species, n_perm = 0)
       colMeans(t[c("T_IP.IC", "T_IC.IR", "T_PC.PR")], na.rm = TRUE)

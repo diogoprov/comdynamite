@@ -1,5 +1,24 @@
 # comdynamite (development version)
 
+- `tstats()`, `community_index()`, `trait_flex()`, `trait_rarefaction()`, `drift_test()` and
+  `population_shifts()` gain `na_action`. With the default, `"omit"`, rows with missing values
+  are left out as before, but now with a message giving their number (`drift_test()` and
+  `population_shifts()` dropped them silently); `"fail"` stops instead.
+- `trait_flex()` and `population_shifts()` check the collinearity of their predictors: they stop
+  when one is a linear combination of the others (before, `trait_flex()` dropped it silently and
+  `population_shifts()` returned `NA` for its slope), and warn when a variance inflation factor
+  exceeds 10. No variable is removed.
+- Repeated site names now stop `check_sites()`, `mc_data()` (row names of `env`, `coords` and
+  `areas`) and `trait_flex()` (site column of `env`), instead of matching sites by position or
+  to the first repeated name.
+- `trait_gradient_phylo()` warns when the optimiser of the OU model does not converge and adds
+  the column `converged` to `models`.
+- The diagnostics of `trait_gradient_bayes()` count transitions that hit the maximum tree depth
+  (`max_treedepth`); a fit passes only when there are none.
+- The neighbour metrics (`mnnd()`, `sdnnd()`, `cvnnd()`) accept vectors with a class such as
+  `units`, which they drop.
+- `animate_food_web()` adds the suffix `.gif` to `file` when it has none.
+
 - The regional null models of `community_index()` permute the whole region once per
   randomisation, instead of drawing each site from the region independently, as `tstats()` now
   does. The null distribution of each site is unchanged, but null values differ from earlier

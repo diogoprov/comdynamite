@@ -93,6 +93,8 @@ test_that("diagnostics flag poor convergence and divergences", {
   expect_false(tg_diagnostics_table(1.02, 900, 800, 0)$ok)
   expect_false(tg_diagnostics_table(1.005, 300, 800, 0)$ok)
   expect_false(tg_diagnostics_table(1.005, 900, 800, 3)$ok)
+  expect_false(tg_diagnostics_table(1.005, 900, 800, 0, treedepth = 12)$ok)
+  expect_equal(tg_diagnostics_table(1.005, 900, 800, 0, treedepth = 12)$max_treedepth, 12L)
   skip_if_not_installed("posterior")
   set.seed(3)
   arr <- array(rnorm(1000 * 4 * 2), c(1000, 4, 2),
@@ -100,6 +102,7 @@ test_that("diagnostics flag poor convergence and divergences", {
   draws <- posterior::as_draws_array(arr)
   expect_true(tg_diagnostics_from(draws, 0)$ok)
   expect_equal(tg_diagnostics_from(draws, 2)$divergent, 2L)
+  expect_false(tg_diagnostics_from(draws, 0, treedepth = 5)$ok)
   arr[, 1:2, 1] <- arr[, 1:2, 1] + 3 # two chains elsewhere
   expect_gt(tg_diagnostics_from(posterior::as_draws_array(arr), 0)$max_rhat, 1.1)
 })
@@ -130,6 +133,7 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   expect_identical(res$fit, "fit")
   expect_output(print(res), "Brownian motion")
   expect_output(print(res), "CHECK")
+  expect_output(print(res), "at maximum tree depth 0")
   ou <- suppressWarnings(trait_gradient_bayes(d$tg, d$tree, ou_alpha = 0.5,
                                               lambda_prior = c(2, 2)))
   expect_equal(seen$data$lambda_prior, c(2, 2))

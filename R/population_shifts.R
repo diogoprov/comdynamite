@@ -176,12 +176,16 @@
 #' fit <- population_shifts(ind, nboot = 49)
 #' fit
 #' if (requireNamespace("ggplot2", quietly = TRUE)) plot(fit)
+#' @param na_action What to do with missing values: rows with a missing value in the trait,
+#'   site, species, environment or abundance column are left out, with a message giving their
+#'   number (`"omit"`, the default), or the function stops (`"fail"`).
 #' @export
 population_shifts <- function(individuals, trait = "trait", site = "site", species = "species",
                               env = "env", abundance = "abundance", width = NULL,
                               species_slopes = FALSE, community = NULL, nboot = 0,
-                              level = 0.95) {
+                              level = 0.95, na_action = c("omit", "fail")) {
   cite_method("population_shifts")
+  na_action <- match.arg(na_action)
   check_string(trait, "trait")
   check_string(site, "site")
   check_string(species, "species")
@@ -200,7 +204,9 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   }
   columns <- c(trait, site, species, env, if (is.null(community)) abundance)
   check_data_columns(individuals, columns)
-  d <- individuals[stats::complete.cases(individuals[columns]), columns]
+  d <- individuals[handle_missing(individuals[columns], na_action,
+                                  paste0("`", paste(columns, collapse = "`, `"), "`")),
+                   columns]
   env_cols <- paste0(".env", seq_along(env))
   names(d) <- c("trait", "site", "species", env_cols, if (is.null(community)) "abundance")
   numeric_cols <- c("trait", env_cols, if (is.null(community)) "abundance")
@@ -209,6 +215,11 @@ population_shifts <- function(individuals, trait = "trait", site = "site", speci
   }
   d$site <- as.character(d$site)
   d$species <- as.character(d$species)
+  if (length(env) > 1) {
+    site_env <- d[!duplicated(d$site), env_cols, drop = FALSE]
+    names(site_env) <- env
+    check_collinear(cbind(`(Intercept)` = 1, as.matrix(site_env)), "`env`")
+  }
   if (!is.null(community)) community <- check_community(community, d)
   slope_names <- if (length(env) == 1) "local_adaptation" else
     paste0("local_adaptation_", env)

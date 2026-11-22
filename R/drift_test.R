@@ -74,9 +74,14 @@
 #' test <- drift_test(ind, group = rep(1:30, each = 20))
 #' test
 #' plot(test)
+#' @param na_action What to do with missing values: rows with a missing trait value or group
+#'   are left out, with a message giving their number (`"omit"`, the default), or the function
+#'   stops (`"fail"`).
 #' @export
-drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95) {
+drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level = 0.95,
+                       na_action = c("omit", "fail")) {
   cite_method("drift_test")
+  na_action <- match.arg(na_action)
   if (is.data.frame(x)) {
     if (is.character(group) && length(group) == 1 && group %in% names(x)) {
       gname <- group
@@ -108,7 +113,7 @@ drift_test <- function(x, group, traits = NULL, W = NULL, correct = TRUE, level 
   }
   check_flag(correct, "correct")
   check_number(level, "level", 0, 1, open = TRUE)
-  keep <- stats::complete.cases(x) & !is.na(group)
+  keep <- handle_missing(data.frame(x, group = group), na_action, "`x` or `group`", "rows")
   x <- x[keep, , drop = FALSE]
   group <- factor(group[keep])
   sizes <- as.vector(table(group))

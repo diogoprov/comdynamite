@@ -30,6 +30,10 @@ test_that("animate_food_web writes a GIF", {
   file <- tempfile(fileext = ".gif")
   expect_identical(animate_food_web(x, file, frames = 4, width = 200, height = 200), file)
   expect_true(file.size(file) > 0)
+  bare <- tempfile()
+  expect_identical(animate_food_web(x, bare, frames = 2, width = 100, height = 100),
+                   paste0(bare, ".gif"))
+  expect_true(file.exists(paste0(bare, ".gif")))
   expect_error(animate_food_web(x, file, frames = 1000), "`frames`")
   expect_error(animate_food_web(x, file, frames = 4, delay = 0), "`delay`")
 })

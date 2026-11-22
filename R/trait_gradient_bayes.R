@@ -57,7 +57,8 @@
 #' for the total standard deviations among species and for the residuals, `beta(1, 1)` for
 #' both \eqn{\lambda} (change with `lambda_prior`), and `lkj(2)` for the two correlations.
 #' Check convergence (`diagnostics`: R-hat below 1.01, bulk and tail effective sample sizes
-#' above 400 and no divergent transitions, over the intercepts, standard deviations,
+#' above 400, no divergent transitions and no transitions that hit the maximum tree depth of
+#' the sampler, over the intercepts, standard deviations,
 #' \eqn{\lambda}, correlations, species values and `lp__`) and the fit, with
 #' [bayesplot::pp_check()] on the result, before reading the estimates.
 #'
@@ -131,7 +132,8 @@
 #'     \item{species}{posterior median and central interval with probability 0.95 of
 #'       \eqn{\beta}, \eqn{\alpha} and the mean of each species.}
 #'     \item{diagnostics}{largest R-hat, smallest bulk and tail effective sample sizes,
-#'       number of divergent transitions, and `ok`.}
+#'       number of divergent transitions, number of transitions that hit the maximum tree
+#'       depth (`max_treedepth`; raise it through `...` if needed), and `ok`.}
 #'     \item{fit}{the `CmdStanMCMC` object; its draws live in temporary files of the session,
 #'       so save them with `fit$save_object()` to keep them.}
 #'     \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
@@ -193,10 +195,11 @@ trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1
               "`fit`", call. = FALSE)
       list(signal = NULL, variances = NULL, species = NULL)
     })
-  diagnostics <- tg_diagnostics_from(run$draws, run$divergent)
+  treedepth <- if (is.null(run$treedepth)) 0 else run$treedepth
+  diagnostics <- tg_diagnostics_from(run$draws, run$divergent, treedepth)
   if (!diagnostics$ok) {
-    warning("the model has not converged or has divergent transitions; see `diagnostics`",
-            call. = FALSE)
+    warning("the model has not converged, has divergent transitions or hit the maximum tree ",
+            "depth; see `diagnostics`", call. = FALSE)
   }
   structure(c(summary, list(diagnostics = diagnostics, fit = run$fit, data = model$data,
                             A = model$A, ou_alpha = ou_alpha, lambda_prior = lambda_prior)),
@@ -223,11 +226,14 @@ tg_stan_model <- function() {
   cmdstanr::cmdstan_model(local, quiet = TRUE) # nocov end
 }
 
-# sampling, apart so that tests can replace it: the fit, its draws and divergences
+# sampling, apart so that tests can replace it: the fit, its draws, divergences and
+# transitions that hit the maximum tree depth
 run_stan <- function(data, ...) {
   fit <- tg_stan_model()$sample(data = data, ...) # nocov start
+  sampler <- fit$diagnostic_summary(quiet = TRUE)
   list(fit = fit, draws = fit$draws(variables = tg_bayes_variables()),
-       divergent = sum(fit$diagnostic_summary(quiet = TRUE)$num_divergent)) # nocov end
+       divergent = sum(sampler$num_divergent),
+       treedepth = sum(sampler$num_max_treedepth)) # nocov end
 }
 
 # data of the model, phylogenetic correlation matrix and standardisation
@@ -312,16 +318,17 @@ tg_bayes_summary <- function(draws, species, no_beta = character()) {
 }
 
 # convergence over the draws read back: largest R-hat, smallest bulk and tail ESS
-tg_diagnostics_from <- function(draws, divergent) {
+tg_diagnostics_from <- function(draws, divergent, treedepth = 0) {
   s <- posterior::summarise_draws(draws, "rhat", "ess_bulk", "ess_tail")
   tg_diagnostics_table(max(s$rhat, na.rm = TRUE), min(s$ess_bulk, na.rm = TRUE),
-                       min(s$ess_tail, na.rm = TRUE), divergent)
+                       min(s$ess_tail, na.rm = TRUE), divergent, treedepth)
 }
 
-tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent) {
+tg_diagnostics_table <- function(rhat, ess_bulk, ess_tail, divergent, treedepth = 0) {
   data.frame(max_rhat = rhat, min_ess_bulk = ess_bulk, min_ess_tail = ess_tail,
-             divergent = as.integer(divergent),
-             ok = rhat < 1.01 && ess_bulk > 400 && ess_tail > 400 && divergent == 0)
+             divergent = as.integer(divergent), max_treedepth = as.integer(treedepth),
+             ok = rhat < 1.01 && ess_bulk > 400 && ess_tail > 400 && divergent == 0 &&
+               treedepth == 0)
 }
 
 #' @export
@@ -336,7 +343,7 @@ print.mc_trait_gradient_bayes <- function(x, ...) {
   d <- x$diagnostics
   cat("Convergence: max R-hat ", format(round(d$max_rhat, 3)), ", min ESS bulk ",
       round(d$min_ess_bulk), ", tail ", round(d$min_ess_tail), ", divergent transitions ",
-      d$divergent, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
+      d$divergent, ", at maximum tree depth ", d$max_treedepth, if (d$ok) " (ok)" else " (CHECK BEFORE READING)", "\n", sep = "")
   s <- x$signal
   s[-1] <- lapply(s[-1], function(v) round(v, 3))
   print(s, row.names = FALSE)

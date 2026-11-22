@@ -192,10 +192,16 @@ tstats_summary <- function(x, level = 0.95) {
 #' res <- trait_flex(ind, formula = ~ moisture, env = env)
 #' res$decomposition
 #' if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)
+#' @param na_action What to do with missing values: individuals with a missing trait value are
+#'   left out of that trait's means, with a message giving their number, and sites with missing
+#'   values in `env` are left out of the model with a warning (`"omit"`, the default); or the
+#'   function stops on either (`"fail"`).
 #' @export
 trait_flex <- function(individuals, traits = "trait", site = "site", species = "species",
-                       abundance = NULL, formula = ~1, env = NULL) {
+                       abundance = NULL, formula = ~1, env = NULL,
+                       na_action = c("omit", "fail")) {
   cite_method("trait_flex")
+  na_action <- match.arg(na_action)
   check_column_names(traits, "traits")
   check_string(site, "site")
   check_string(species, "species")
@@ -220,15 +226,23 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
     if (length(missing_vars) > 0) {
       stop("`env` has no column ", paste(missing_vars, collapse = ", "), call. = FALSE)
     }
+    check_unique_sites(as.character(env[[site]]), "`env`")
     rows <- match(site_levels, as.character(env[[site]]))
     if (anyNA(rows)) stop("`env` lacks some sites of `individuals`", call. = FALSE)
     env_sites <- env[rows, model_vars, drop = FALSE]
     env_ok <- stats::complete.cases(env_sites)
     if (!all(env_ok)) {
+      if (na_action == "fail") {
+        stop("sites with missing values in `env`: ",
+             paste(site_levels[!env_ok], collapse = ", "),
+             "; remove them or set `na_action = \"omit\"`", call. = FALSE)
+      }
       warning("sites with missing values in `env` are left out of the decomposition: ",
               paste(site_levels[!env_ok], collapse = ", "), call. = FALSE)
     }
     model_formula <- stats::reformulate(attr(stats::terms(formula), "term.labels"), ".y")
+    check_collinear(stats::model.matrix(formula, env_sites[env_ok, , drop = FALSE]),
+                    "`formula`")
   } else {
     env_sites <- data.frame(row.names = seq_along(site_levels))
     env_ok <- rep(TRUE, length(site_levels))
@@ -241,6 +255,8 @@ trait_flex <- function(individuals, traits = "trait", site = "site", species = "
       stop("`abundance` must be the same for all individuals of a population", call. = FALSE)
     }
   }
+  for (trait in traits) check_numeric_traits(individuals[[trait]], trait)
+  handle_missing(individuals[traits], na_action, "`traits`")
   decomposition <- list()
   site_means <- list()
   for (trait in traits) {
@@ -703,14 +719,19 @@ plot.nested_variance <- function(x, min_label = 0.05, colours = NULL, ...) {
 #' # several indices at once, on the same randomised communities
 #' community_index(ind, list(variance = stats::var, MNND = mnnd, kurtosis = trait_kurtosis),
 #'                 null = "regional.ind", n_perm = 99)
+#' @param na_action What to do with missing values: individuals with a missing trait value are
+#'   left out, with a message giving their number (`"omit"`, the default), or the function stops
+#'   (`"fail"`).
 #' @export
 community_index <- function(individuals, index, traits = "trait", site = "site",
                             species = "species",
                             null = c("local", "regional.ind", "regional.pop",
                                      "regional.pop.prab"),
                             n_perm = 99, alternative = c("two.sided", "less", "greater"),
-                            multivariate = FALSE, nperm = NULL) {
+                            multivariate = FALSE, na_action = c("omit", "fail"),
+                            nperm = NULL) {
   cite_method("community_index")
+  na_action <- match.arg(na_action)
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   null <- match.arg(null)
   alternative <- match.arg(alternative)
@@ -746,6 +767,7 @@ community_index <- function(individuals, index, traits = "trait", site = "site",
   site_all <- as.character(individuals[[site]])
   species_all <- as.character(individuals[[species]])
   site_levels <- unique(site_all)
+  handle_missing(individuals[traits], na_action, "`traits`")
   sets <- if (multivariate) list(multivariate = traits) else stats::setNames(as.list(traits), traits)
   per_set <- lapply(names(sets), function(label) {
     values <- as.matrix(individuals[sets[[label]]])

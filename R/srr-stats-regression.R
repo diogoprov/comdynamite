@@ -59,49 +59,46 @@
 #'   not change with the scale of the predictors (tests/testthat/test-phylo-beta.R). No
 #'   label is converted to a factor: non-numeric predictors stop with an error
 #'   (`check_env()`), and `trait_flex()` passes factors of `env` to `stats::lm()` unchanged.
-#' @srrstatsTODO {RE2.1} Missing and infinite values are told apart and handled, but by fixed
-#'   rules without a parameter: `check_comm()` and `check_env()` (R/checks.R) stop on `NA`
-#'   and on `Inf` with separate messages that say to remove the sites; `trait_flex()` leaves
-#'   out individuals without a trait value and, with a warning, sites without predictors;
-#'   `abc_fit()` drops incomplete statistics and simulations (documented); `drift_test()` and
-#'   `population_shifts()` drop incomplete rows without a message and without saying so in
-#'   their help pages. Missing: an argument (for example `na_action = c("fail", "omit")`) in
-#'   the regression functions, and the documentation of the two silent cases.
-#' @srrstatsTODO {RE2.2} Missing values in responses and predictors already follow different
-#'   rules (`trait_flex()`: individuals without a trait value leave the means, sites without
-#'   predictors leave the model; `trait_gradient()`: missing trait values take the species
-#'   mean), but the user cannot choose among them. Missing: the options of RE2.1 set apart
-#'   for the response and for the predictors.
+#' @srrstats {RE2.1} Missing and infinite values are told apart: `check_comm()` and
+#'   `check_env()` (R/checks.R) stop on `NA` and on `Inf` with separate messages; `abc_fit()`
+#'   drops incomplete statistics and simulations (documented); `trait_flex()`, `drift_test()` and
+#'   `population_shifts()` take `na_action = c("omit", "fail")`, where "omit" leaves out
+#'   incomplete rows with a message giving their number and "fail" stops (tests in
+#'   tests/testthat/test-checks.R and tests/testthat/test-population_shifts.R).
+#' @srrstats {RE2.2} Missing values in responses and predictors are handled apart in
+#'   `trait_flex()`: individuals without a trait value leave the means with a message, sites
+#'   without predictors leave the model with a warning, and `na_action = "fail"` stops on either,
+#'   naming the sites with missing predictors. In `population_shifts()` and `drift_test()` a row
+#'   needs both response and predictors, so they share one rule.
 #' @srrstats {RE2.4} `check_env()` in R/checks.R is the pre-processing routine: it stops on
 #'   predictors without variance, found with `no_variance()`, which allows for
 #'   floating-point noise, and on predictors that are linear combinations of the others
 #'   (rank of the centred matrix). The cases it does not cover are listed in RE2.4a and
 #'   RE2.4b.
-#' @srrstatsTODO {RE2.4a} `check_env()` stops `node_test()`, `pcc_test()`,
-#'   `phylo_beta_test()`, `pcps_test()` and `phylo_vector()` on collinear predictors;
-#'   `trait_partition()` accepts them, returns `NA` semipartial correlations and says so in
-#'   its help page; nodes of `node_test()` whose remaining sites make predictors collinear
-#'   get `NA`. Missing: `trait_flex()` passes collinear terms to `stats::lm()`, which drops
-#'   them without a message, and `population_shifts()` returns `NA` for the slope of a
-#'   collinear column of `env` without a message. Both need a check that stops or warns.
+#' @srrstats {RE2.4a} `check_env()` stops `node_test()`, `pcc_test()`, `phylo_beta_test()`,
+#'   `pcps_test()` and `phylo_vector()` on collinear predictors; `trait_partition()` accepts
+#'   them, returns `NA` semipartial correlations and says so in its help page.
+#'   `check_collinear()` (R/checks.R) is used by `trait_flex()` (on the model matrix of
+#'   `formula`) and `population_shifts()` (on the site values of `env`): it stops when a
+#'   predictor is a linear combination of the others, naming it, and warns, without removing any
+#'   variable, when a variance inflation factor exceeds 10 (tests in tests/testthat/test-checks.R
+#'   and tests/testthat/test-population_shifts.R).
 #' @srrstatsTODO {RE2.4b} No function checks whether a response is an exact linear function
 #'   of the predictors. With such data `trait_flex()` only relays the warning of
 #'   `summary.lm()` ("essentially perfect fit"), and `drift_test()` returns an infinite
 #'   statistic when the standard error is zero. Missing: a check of a residual sum of
 #'   squares of zero up to rounding error, with a warning, in `trait_flex()`, `drift_test()`,
 #'   `node_test()` and `pcps_test()`.
-#' @srrstatsTODO {RE3.0} Closed-form fits (`stats::lm()`, `stats::lm.fit()`, QR) need no
-#'   convergence check, and random forests do not iterate to convergence. Of the iterative
-#'   fits, `population_shifts()` warns when the width of the kernel stays at an end of its
-#'   grid or the residual sum of squares is flat along it, and `trait_gradient_phylo()`
-#'   starts the OU fit from three points and marks estimates at a bound in `at_bound`.
-#'   Missing: `gls_known_error()` (R/trait_gradient.R) discards the `convergence` code of
-#'   `stats::optim()`; it should warn when the code is not 0.
-#' @srrstatsTODO {RE3.1} The warning of `population_shifts()` can be silenced with
-#'   `suppressWarnings()` and the result keeps the attribute `profile`, with the residual
-#'   sum of squares and the estimates at each width, and `trait_gradient_phylo()` keeps
-#'   `at_bound`. Missing: the convergence code of `stats::optim()` as a column of the
-#'   `models` table of `trait_gradient_phylo()` (see RE3.0).
+#' @srrstats {RE3.0} Closed-form fits (`stats::lm()`, `stats::lm.fit()`, QR) need no
+#'   convergence check, and random forests do not iterate to convergence. Of the iterative fits,
+#'   `population_shifts()` warns when the width of the kernel stays at an end of its grid or the
+#'   residual sum of squares is flat along it, and `trait_gradient_phylo()` starts the OU fit
+#'   from three points, marks estimates at a bound in `at_bound` and warns when `stats::optim()`
+#'   returns a convergence code other than 0 (test in tests/testthat/test-trait-gradient.R).
+#' @srrstats {RE3.1} The warnings can be silenced with `suppressWarnings()`, and the
+#'   information stays in the result: `population_shifts()` keeps the attribute `profile`, with
+#'   the residual sum of squares and the estimates at each width, and `trait_gradient_phylo()`
+#'   keeps the columns `at_bound` and `converged` of its `models` table.
 #' @srrstatsTODO {RE3.2} The help of `population_shifts()` gives the grid of widths and the
 #'   5% threshold of a flat profile, and that of `trait_gradient_phylo()` the bounds of the
 #'   OU parameter. Missing: the tolerances themselves (defaults of `stats::optimize()` and

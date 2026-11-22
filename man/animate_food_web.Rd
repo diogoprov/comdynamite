@@ -18,7 +18,7 @@ animate_food_web(
 \item{x}{Result of \code{\link[=food_web_dynamics]{food_web_dynamics()}}.}
 
 \item{file}{Path of the GIF to write, one character string; by default a temporary file,
-whose path is returned.}
+whose path is returned. The suffix \code{.gif} is added when the name has no suffix.}
 
 \item{frames}{Number of frames, taken at evenly spaced rows of \code{x}: one whole number, 2 or
 more, that cannot exceed the number of rows.}

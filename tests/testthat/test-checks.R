@@ -127,3 +127,74 @@ test_that("tstats_summary() checks `level`", {
   expect_error(tstats_summary(res, level = 1), "`level` must be one number between 0 and 1")
   expect_error(tstats_summary(res, level = "a"), "`level`")
 })
+
+test_that("repeated site names stop instead of being matched by position", {
+  comm <- matrix(1, 3, 2, dimnames = list(c("a", "b", "c"), c("x", "y")))
+  env <- data.frame(v = 1:3, row.names = c("a", "b", "c"))
+  expect_equal(check_sites(env[c(3, 1, 2), , drop = FALSE], comm, "`env`"), env)
+  bad <- matrix(1:3, dimnames = list(c("a", "a", "c"), "v"))
+  expect_error(check_sites(bad, comm, "`env`"), "site names of `env` are repeated: a")
+  rownames(comm)[2] <- "a"
+  expect_error(check_sites(env, comm, "`env`"), "site names of `comm` are repeated")
+  expect_error(site_rows(c(a = 1, a = 2, c = 3), c("a", "c"), "`areas`"),
+               "site names of `areas` are repeated: a")
+  expect_equal(site_rows(c(c = 3, a = 1), c("a", "c"), "`areas`"), c(a = 1, c = 3))
+})
+
+test_that("trait_flex() refuses repeated sites in `env`", {
+  set.seed(2)
+  ind <- data.frame(site = rep(c("s1", "s2", "s3", "s4"), each = 10),
+                    species = sample(c("a", "b"), 40, replace = TRUE), trait = rnorm(40))
+  env <- data.frame(site = c("s1", "s2", "s3", "s3", "s4"), x = 1:5)
+  expect_error(trait_flex(ind, formula = ~x, env = env), "site names of `env` are repeated: s3")
+})
+
+test_that("check_collinear() stops on aliased predictors and warns on high VIF", {
+  set.seed(1)
+  x1 <- rnorm(30)
+  x2 <- rnorm(30)
+  expect_silent(check_collinear(cbind(`(Intercept)` = 1, x1, x2), "`env`"))
+  expect_error(check_collinear(cbind(`(Intercept)` = 1, x1, x2, x3 = x1 + x2), "`env`"),
+               "collinear: x3 is a linear combination")
+  near <- x1 + rnorm(30, sd = 0.05)
+  expect_warning(vif <- check_collinear(cbind(`(Intercept)` = 1, x1, near), "`env`"),
+                 "variance inflation factor above 10: x1 = .*No variable was removed")
+  expect_named(vif, c("x1", "near"))
+  expect_null(check_collinear(cbind(`(Intercept)` = 1, x1), "`env`"))
+})
+
+test_that("trait_flex() checks the collinearity of its predictors", {
+  set.seed(2)
+  ind <- data.frame(site = rep(paste0("s", 1:8), each = 10),
+                    species = sample(c("a", "b", "c"), 80, replace = TRUE), trait = rnorm(80))
+  env <- data.frame(site = paste0("s", 1:8), x = rnorm(8))
+  env$y <- 2 * env$x
+  expect_error(trait_flex(ind, formula = ~ x + y, env = env), "collinear: y")
+  env$y <- env$x + rnorm(8, sd = 0.01)
+  expect_warning(trait_flex(ind, formula = ~ x + y, env = env), "variance inflation")
+})
+
+test_that("na_action omits with a message or stops", {
+  set.seed(3)
+  ind <- data.frame(site = rep(paste0("s", 1:6), each = 12),
+                    species = rep(c("a", "b", "c"), 24), trait = rnorm(72))
+  ind$trait[c(1, 5)] <- NA
+  expect_message(tstats(ind, n_perm = 0), "2 individuals with missing values in `traits`")
+  expect_error(tstats(ind, n_perm = 0, na_action = "fail"), "2 individuals have missing")
+  expect_message(community_index(ind, stats::var, n_perm = 0), "2 individuals")
+  expect_error(community_index(ind, stats::var, n_perm = 0, na_action = "fail"), "missing")
+  expect_message(trait_flex(ind), "2 individuals")
+  expect_error(trait_flex(ind, na_action = "fail"), "missing")
+  env <- data.frame(site = paste0("s", 1:6), x = c(NA, rnorm(5)))
+  w <- capture_warnings(suppressMessages(trait_flex(ind, formula = ~x, env = env)))
+  expect_true(any(grepl("left out of the decomposition: s1", w)))
+  expect_error(trait_flex(ind[!is.na(ind$trait), ], formula = ~x, env = env,
+                          na_action = "fail"), "sites with missing values in `env`: s1")
+  expect_message(trait_rarefaction(ind, n = 2, reps = 1), "2 individuals")
+  expect_error(trait_rarefaction(ind, n = 2, reps = 1, na_action = "fail"), "missing")
+  x <- matrix(rnorm(60), 20, 3)
+  x[2, 1] <- NA
+  g <- rep(1:4, 5)
+  expect_message(drift_test(x, g, correct = FALSE), "1 rows with missing values")
+  expect_error(drift_test(x, g, correct = FALSE, na_action = "fail"), "1 rows have missing")
+})

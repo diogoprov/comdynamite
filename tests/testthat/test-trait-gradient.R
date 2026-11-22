@@ -288,3 +288,15 @@ test_that("trait_gradient_test() runs the phylogenetic and Brownian nulls", {
   expect_error(suppressWarnings(trait_gradient_test(tg, n_null = 2, null = "bm", tree = twin)),
                "singular|distance 0")
 })
+
+test_that("trait_gradient_phylo() reports OU fits that did not converge", {
+  d <- tg_sim(n_tips = 25, n_sites = 20)
+  tg <- trait_gradient(d$ind, abundance = "abundance")
+  set.seed(5)
+  local_mocked_bindings(ou_optim = function(par, fn, lower, upper) {
+    list(par = par, value = fn(par), convergence = 1L)
+  })
+  expect_warning(ph <- trait_gradient_phylo(tg, d$tree, responses = "beta", n_boot = 9),
+                 "did not converge for beta ~ OU")
+  expect_equal(ph$models$converged, c(TRUE, TRUE, FALSE))
+})

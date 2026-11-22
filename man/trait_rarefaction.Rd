@@ -14,7 +14,8 @@ trait_rarefaction(
   min_n = 2,
   site = "site",
   species = "species",
-  abundance = NULL
+  abundance = NULL,
+  na_action = c("omit", "fail")
 )
 }
 \arguments{
@@ -43,6 +44,11 @@ default) populations of one individual are left out, as in \code{\link[=tstats]{
 
 \item{abundance}{Name of a column with the abundance of each population, used with \code{cover}
 (passed to \code{\link[=subsample_individuals]{subsample_individuals()}}).}
+
+\item{na_action}{What to do with missing values: with the default \code{statistic}, individuals
+with a missing value in the column \code{trait} are left out before subsampling, with a message
+giving their number (\code{"omit"}, the default), or the function stops (\code{"fail"}). A user-
+supplied \code{statistic} handles missing values itself.}
 }
 \value{
 A data frame of class \code{trait_rarefaction} with the columns \code{effort} (\code{n} or

@@ -656,13 +656,18 @@ individuals_at <- function(x, n = 10, fraction = NULL, local_adaptation = 0,
 #' # standardised effect sizes and p-values from the null models
 #' res <- tstats(sample_individuals(sim, intraspecific_sd = 2), n_perm = 99)
 #' head(res[c("site", "T_IP.IC", "ses_T_IP.IC", "p_T_IP.IC")])
+#' @param na_action What to do with missing values: individuals with a missing value in a trait
+#'   are left out of that trait's statistics, with a message giving their number (`"omit"`, the
+#'   default), or the function stops (`"fail"`).
 #' @export
 tstats <- function(individuals, traits = "trait", site = "site", species = "species",
                    method = c("base", "cati"), n_perm = 99,
                    alternative = c("less", "greater", "two.sided"),
                    null_ip = c("site", "species"),
-                   null_pc = c("populations", "individuals"), ..., nperm = NULL) {
+                   null_pc = c("populations", "individuals"), na_action = c("omit", "fail"),
+                   ..., nperm = NULL) {
   cite_method("tstats")
+  na_action <- match.arg(na_action)
   n_perm <- renamed_arg(n_perm, nperm, "n_perm", "nperm")
   method <- match.arg(method)
   alternative <- match.arg(alternative)
@@ -675,6 +680,7 @@ tstats <- function(individuals, traits = "trait", site = "site", species = "spec
   check_count(n_perm, "n_perm", min = 0, null_ok = TRUE)
   values <- as.matrix(individuals[traits])
   check_numeric_traits(values)
+  handle_missing(values, na_action, "`traits`")
   site_id <- as.character(individuals[[site]])
   species_id <- as.character(individuals[[species]])
   if (method == "cati") return(tstats_cati(values, site_id, species_id, n_perm, ...))
