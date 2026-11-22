@@ -89,6 +89,9 @@ test_that("the phylogenetic vector follows a phylogenetic response", {
   expect_identical(names(out$pev), colnames(d$comm))
   expect_gte(abs(out$correlation[["pev"]]), 0.3)
   expect_output(print(out), "PEV-B")
+  if (requireNamespace("ggplot2", quietly = TRUE)) {
+    expect_match(plot(out)$labels$subtitle, "correlation of PEV")
+  }
   # signed weights never fit worse than absolute ones, for orthogonal eigenvectors
   sel <- out$selected
   absolute <- out$eigenvectors[, sel, drop = FALSE] %*% abs(out$eigenvector_correlation[sel])
