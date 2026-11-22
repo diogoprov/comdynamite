@@ -281,6 +281,85 @@ test_that("variance_selection erodes the variance to the mutation-selection-drif
                                  variance_selection = NA), "TRUE or FALSE")
 })
 
+test_that("variance_selection = 'sexual' keeps the Bulmer reduction as transient disequilibrium", {
+  ev <- list(vm = 0, nu = Inf)
+  g <- matrix(10)
+  # without selection (infinite width), the disequilibrium halves each generation
+  up <- variance_update_sexual(g, matrix(-4), matrix(100), matrix(Inf), ev, 1, 1)
+  expect_identical(up$d, matrix(-2))
+  expect_identical(up$g, matrix(12))
+  # half a generation: 2^(-1/2) of it is left
+  up <- variance_update_sexual(g, matrix(-4), matrix(100), matrix(Inf), ev, 1, 0.5)
+  expect_equal(up$d, matrix(-4 / sqrt(2)))
+  # without drift or mutation, d settles at -G^2 / width, G = genic + d
+  st <- list(g = matrix(10), d = matrix(0))
+  for (i in 1:200) st <- variance_update_sexual(st$g, st$d, matrix(100), 20 + st$g, ev, 1, 1)
+  expect_equal(st$d, -st$g^2 / (20 + st$g), tolerance = 1e-8)
+  expect_equal(st$g - st$d, matrix(10), tolerance = 1e-8)
+  # the disequilibrium never takes more than the genic variance
+  up <- variance_update_sexual(matrix(1), matrix(0), matrix(100), matrix(1e-3), ev, 1, 1)
+  expect_gte(up$g[1], 0)
+  # in the engine: the variance settles at the mutation-selection-drift balance with a
+  # transient reduction, far above the clonal one
+  tr <- data.frame(optimum = 50, sigma = 20, r_max = 5, row.names = "sp")
+  ls <- landscape_points(cbind(c(0, 10), c(0, 0)), env = c(50, 50), disp_scale = 1)
+  init <- matrix(400L, 2, 1, dimnames = list(NULL, "sp"))
+  run <- function(vs) {
+    set.seed(2)
+    ev <- evolution_control(genetic_var = 0, env_var = 4, ne_ratio = 0.5, mutation_var = 0.5,
+                            variance_selection = vs)
+    simulate_metacommunity(ls, tr, matrix(0.01, 1, 1, dimnames = list("sp", "sp")),
+                           dispersal = 0, n_steps = 2000, seed_steps = integer(0),
+                           initial = init, evolution = ev)
+  }
+  sex <- run("sexual")
+  g_sex <- sex$evolution$genetic_variance[, 1]
+  d_sex <- sex$evolution$linkage_disequilibrium[, 1]
+  keep <- 1 - 1 / sex$abundance[, 1]
+  # d at its balance given G: d (1 - keep / 2) = -G^2 / (2 (sigma^2 + G + VE))
+  expect_equal(d_sex, -g_sex^2 / ((404 + g_sex) * (2 - keep)), tolerance = 0.01)
+  # the genic variance approaches 2 Ne Vm = N Vm
+  expect_equal(unname(g_sex - d_sex), 0.5 * unname(sex$abundance[, 1]), tolerance = 0.1)
+  expect_true(all(g_sex > 5 * run("clonal")$evolution$genetic_variance[, 1]))
+  # "clonal" is TRUE, and only "sexual" returns the disequilibrium
+  expect_identical(run("clonal")$evolution$genetic_variance, run(TRUE)$evolution$genetic_variance)
+  expect_null(run(TRUE)$evolution$linkage_disequilibrium)
+  expect_error(evolution_control(genetic_var = 1, mutation_var = 1, ne_ratio = 0.5,
+                                 variance_selection = "both"), "TRUE or FALSE")
+  expect_error(evolution_control(genetic_var = 1, variance_selection = "sexual"), "mutation_var")
+})
+
+test_that("variance_selection = 'sexual' with gene flow, seeds, founders and a lottery", {
+  ls <- landscape_points(expand.grid(x = 1:4, y = 1:3), rep(c(40, 60), 6), disp_scale = 1)
+  tr <- data.frame(optimum = c(45, 55), sigma = 20, r_max = 5, row.names = c("sp1", "sp2"))
+  ev <- evolution_control(genetic_var = 10, ne_ratio = 0.5, mutation_var = 0.025,
+                          variance_selection = "sexual")
+  check <- function(sim) {
+    v <- sim$evolution$genetic_variance
+    d <- sim$evolution$linkage_disequilibrium
+    present <- sim$abundance > 0
+    expect_true(any(present))
+    expect_true(all(is.finite(d[present]) & d[present] <= 0 & v[present] >= 0))
+    expect_true(all(is.na(d[!present])))
+    expect_true(any(d[present] < 0))
+  }
+  set.seed(7)
+  check(simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 150,
+                               evolution = ev))
+  set.seed(8)
+  ev_imm <- evolution_control(genetic_var = 10, ne_ratio = 0.5, mutation_var = 0.025,
+                              variance_selection = "sexual", immigrant_selection = TRUE)
+  check(simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 150,
+                               evolution = ev_imm, immigration = "poisson"))
+  set.seed(9)
+  check(simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 60,
+                               evolution = ev, recruitment = "lottery", microsites = 200,
+                               mortality = 0.2))
+  set.seed(10)
+  check(simulate_metacommunity(ls, tr, matrix(0.01, 2, 2), dispersal = 0.05, n_steps = 60,
+                               evolution = ev, recruitment = "lottery", microsites = 200))
+})
+
 test_that("evolution under lottery recruitment: adaptation, drift on recruits and variance", {
   tr <- data.frame(optimum = 40, sigma = 20, r_max = 5, row.names = "sp")
   ls <- landscape_points(cbind(c(0, 10), c(0, 0)), env = c(60, 60), disp_scale = 1)

@@ -140,15 +140,22 @@
 #'   variance of the populations at the start and of seeds. Needs a finite `ne_ratio`; one trait
 #'   only.
 #' @param variance_selection With `mutation_var`, should stabilising selection also remove
-#'   genetic variance? `TRUE` or `FALSE`. With `TRUE`, each generation loses
+#'   genetic variance? `FALSE` (the default) keeps the mutation-drift dynamics alone.
+#'   `TRUE` or `"clonal"` removes each generation
 #'   \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 / (sigma^2 + G + VE)}, the reduction of the genetic
 #'   variance by Gaussian selection of width \eqn{\sigma}{sigma} on a phenotype of variance
-#'   \eqn{G + V_E}{G + VE} (Bulmer 1971). Under sexual reproduction most of this reduction is
-#'   linkage disequilibrium, which recombination restores, so the full loss holds for clonal
-#'   inheritance, as in the model of Urban & De Meester (2009); with mutation, the variance
-#'   then settles near the balance between mutation and selection (Lande 1975; Turelli 1984)
-#'   rather than at \eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of
-#'   carrying a load. `FALSE` (the default) keeps the mutation-drift dynamics alone.
+#'   \eqn{G + V_E}{G + VE} (Bulmer 1971), for good. This holds for clonal inheritance, as in
+#'   the model of Urban & De Meester (2009); with mutation, the variance then settles near the
+#'   balance between mutation and selection (Lande 1975; Turelli 1984) rather than at
+#'   \eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of carrying a load.
+#'   `"sexual"` is the infinitesimal model with free recombination (Bulmer 1971): the
+#'   reduction is linkage disequilibrium \eqn{d}{d}, which gains half of it each generation
+#'   and loses half of itself to recombination, so that \eqn{d}{d} settles at
+#'   \eqn{-G^2 / (\sigma^2 + G + V_E)}{-G^2 / (sigma^2 + G + VE)} and returns to zero when
+#'   selection relaxes. The genic variance \eqn{G - d}{G - d} follows the mutation-drift
+#'   dynamics, and \eqn{G}{G} is the genic variance plus \eqn{d}{d}. Gene flow and founders
+#'   mix \eqn{d}{d} as they mix \eqn{G}{G}, and seeds carry none. The disequilibrium of each
+#'   population at the last step is returned as `linkage_disequilibrium`.
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -208,16 +215,26 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
       stop("`mutation_var` needs drift: a finite `ne_ratio`", call. = FALSE)
     }
   }
-  check_flag(variance_selection, "variance_selection")
-  if (variance_selection && is.null(mutation_var)) {
-    stop("`variance_selection` needs `mutation_var`", call. = FALSE)
-  }
+  check_variance_selection(variance_selection, mutation_var)
   structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
                  env_var = env_var, steps_per_generation = steps_per_generation,
                  founder = founder, env = env, traits = traits,
                  immigrant_selection = immigrant_selection, mutation_var = mutation_var,
                  variance_selection = variance_selection),
             class = "mc_evolution")
+}
+
+#' stops unless `variance_selection` is `FALSE`, `TRUE`, "clonal" or "sexual", and needs
+#' `mutation_var` when it is not `FALSE`
+#' @noRd
+check_variance_selection <- function(variance_selection, mutation_var) {
+  named <- is.character(variance_selection) && length(variance_selection) == 1 &&
+    variance_selection %in% c("clonal", "sexual")
+  if (!named) check_flag(variance_selection, "variance_selection")
+  if (!isFALSE(variance_selection) && is.null(mutation_var)) {
+    stop("`variance_selection` needs `mutation_var`", call. = FALSE)
+  }
+  invisible(variance_selection)
 }
 
 #' is `v` a covariance matrix or a list of them (several traits; checked when the simulation
@@ -279,7 +296,8 @@ evolution_state <- function(evolution, m, k_all, species) {
        imm_sel = isTRUE(evolution$immigrant_selection),
        dyn = !is.null(evolution$mutation_var),
        vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var),
-       vsel = isTRUE(evolution$variance_selection))
+       vsel = !isFALSE(evolution$variance_selection %||% FALSE),
+       sexual = identical(evolution$variance_selection, "sexual"))
 }
 
 #' a setting of `evolution` for every species, from one value or one per species (`k_all`)
@@ -395,4 +413,22 @@ variance_update <- function(g, n, width, ev, alive, f) {
   keep <- pmax(1 - 1 / (2 * ev$nu * n), 0)^f
   sel <- if (isTRUE(ev$vsel)) g^2 / width else 0
   pmax(g * keep + f * (vm - sel), 0)
+}
+
+#' the genetic variance g and its linkage disequilibrium d (sites x species) after a fraction f
+#' of a generation, with sexual reproduction and free recombination: the genic variance g - d
+#' loses 1 / (2 Ne) and gains Vm per generation, and d loses half of itself per generation to
+#' recombination and gains -g^2 / (2 width) from Gaussian selection (Bulmer 1971), so that it
+#' settles at -g^2 / width and returns to zero when selection relaxes; a list of g and d
+#' @noRd
+variance_update_sexual <- function(g, d, n, width, ev, alive, f) {
+  m <- nrow(g)
+  k <- ncol(g)
+  vm <- matrix(ev$vm[alive], m, k, byrow = TRUE)
+  keep <- pmax(1 - 1 / (2 * ev$nu * n), 0)^f
+  half <- 2^(-f)
+  genic <- pmax((g - d) * keep + f * vm, 0)
+  d_new <- pmin(d * keep * half - (1 - half) * g^2 / width, 0)
+  d_new <- pmax(d_new, -genic)
+  list(g = genic + d_new, d = d_new)
 }
