@@ -9,16 +9,16 @@ test_that("food_web_rates() gives each tip the speed of its level", {
                c(mean(web$rate_R[web$R > 0]), mean(web$rate_N[web$N > 0])))
   expect_true(is.na(speed[["P"]]))
   tip_edge <- match(1:3, tree$edge[, 2])
-  expect_equal(r[tip_edge], unname(2 * (1 + 3 * speed[c("R", "N", "R")])))
-  expect_equal(r[-tip_edge], 2)
+  expect_identical(r[tip_edge], unname(2 * (1 + 3 * speed[c("R", "N", "R")])))
+  expect_identical(r[-tip_edge], 2)
   # unnamed levels follow the order of the tips; names are matched to the tips
-  expect_equal(food_web_rates(web, tree, c("R", "N", "R")),
-               food_web_rates(web, tree, c(c = "R", b = "N", a = "R")))
+  expect_identical(food_web_rates(web, tree, c("R", "N", "R")),
+                   food_web_rates(web, tree, c(c = "R", b = "N", a = "R")))
   # half of the branch of c
   r_half <- food_web_rates(web, tree, c("R", "N", "R"), k = 3, window = 1)
   expect_equal(r_half[tip_edge[3]], 1 + 3 * speed[["R"]] * 0.5)
   out <- trait_rates(tree, edge_rates = r)
-  expect_equal(as.numeric(out$edge_rates), as.numeric(r))
+  expect_identical(as.numeric(out$edge_rates), as.numeric(r))
 })
 
 test_that("food_web_rates() checks its input", {

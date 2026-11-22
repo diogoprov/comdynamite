@@ -36,13 +36,13 @@ test_that("the data of the model are standardised and indexed by species", {
   expect_true(all(sd$w_t == 1)) # occurrence weights
   expect_equal(mean(sd$y_t), 0, tolerance = 1e-12)
   expect_equal(stats::sd(sd$y_t), 1, tolerance = 1e-12)
-  expect_equal(sd$N_t, sum(m$data$measured))
-  expect_equal(sd$N_p, sum(!is.na(m$data$site_mean)))
+  expect_identical(sd$N_t, sum(m$data$measured))
+  expect_identical(sd$N_p, sum(!is.na(m$data$site_mean)))
   expect_identical(m$species[sd$sp_t], m$data$species[m$data$measured])
   expect_equal(sd$L_A %*% t(sd$L_A), m$A, ignore_attr = TRUE)
-  expect_equal(unname(diag(m$A)), rep(1, nrow(m$A)))
+  expect_identical(unname(diag(m$A)), rep(1, nrow(m$A)))
   expect_equal(as.vector(sd$scale * sd$y_t + sd$center), m$data$trait[m$data$measured])
-  expect_equal(m$kish, 1)
+  expect_identical(m$kish, 1)
   pruned <- ape::drop.tip(d$tree, m$species[1])
   expect_message(tg_bayes_data(d$tg, pruned), "left out")
   expect_error(tg_bayes_data(d$tg, ape::keep.tip(d$tree, m$species[1:3])), "fewer than 4")
@@ -68,7 +68,7 @@ test_that("the OU matrix tends to Brownian motion and shrinks distant correlatio
   expect_equal(phylo_correlation(tree, sp, 1e-6), bm, tolerance = 1e-5)
   strong <- phylo_correlation(tree, sp, 3)
   expect_lt(strong["a", "b"], bm["a", "b"])
-  expect_equal(unname(diag(strong)), rep(1, 4))
+  expect_identical(unname(diag(strong)), rep(1, 4))
   expect_error(phylo_correlation(tree, sp, -1), "`ou_alpha`")
   expect_error(phylo_correlation(tree, sp, c(1, 2)), "`ou_alpha`")
 })
@@ -76,16 +76,16 @@ test_that("the OU matrix tends to Brownian motion and shrinks distant correlatio
 test_that("the summary reads lambda, variances and species values from the draws", {
   sp <- c("x", "y", "z", "w")
   s <- tg_bayes_summary(fake_draws(4), sp)
-  expect_equal(s$signal$quantity, c("lambda_beta", "lambda_alpha", "lambda_mean",
-                                    "cor_phylo_beta_mean", "cor_phylo_beta_alpha"))
+  expect_identical(s$signal$quantity, c("lambda_beta", "lambda_alpha", "lambda_mean",
+                                        "cor_phylo_beta_mean", "cor_phylo_beta_alpha"))
   expect_equal(s$signal$estimate[2:5], c(0.5, 0.3, 0.6, -0.2))
   expect_gt(s$signal$lower[1], 0.7)
-  expect_equal(s$variances$component, c("phylo_beta", "species_beta", "phylo_alpha",
-                                        "species_alpha", "phylo_mean", "species_mean"))
-  expect_equal(s$variances$estimate[1], 4)
+  expect_identical(s$variances$component, c("phylo_beta", "species_beta", "phylo_alpha",
+                                            "species_alpha", "phylo_mean", "species_mean"))
+  expect_identical(s$variances$estimate[1], 4)
   expect_equal(s$species$beta, 1:4)
   expect_equal(s$species$mean, 2:5)
-  expect_equal(s$species$alpha, rep(1, 4))
+  expect_identical(s$species$alpha, rep(1, 4))
   expect_error(tg_bayes_summary(fake_draws(4)[, -2], sp), "no parameter")
   alone <- tg_bayes_summary(fake_draws(4), sp, no_beta = "y")
   expect_true(all(is.na(alone$species[2, 2:7])))
@@ -106,7 +106,7 @@ test_that("diagnostics flag poor convergence and divergences", {
                dimnames = list(NULL, NULL, c("lambda[1]", "lp__")))
   draws <- posterior::as_draws_array(arr)
   expect_true(tg_diagnostics_from(draws, 0)$ok)
-  expect_equal(tg_diagnostics_from(draws, 2)$divergent, 2L)
+  expect_identical(tg_diagnostics_from(draws, 2)$divergent, 2L)
   expect_false(tg_diagnostics_from(draws, 0, treedepth = 5)$ok)
   arr[, 1:2, 1] <- arr[, 1:2, 1] + 3 # two chains elsewhere
   expect_gt(tg_diagnostics_from(posterior::as_draws_array(arr), 0)$max_rhat, 1.1)
@@ -117,10 +117,10 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   skip_if_not_installed("posterior")
   d <- tgb_sim()
   n_sp <- length(tg_bayes_data(d$tg, d$tree)$species)
-  seen <- NULL
+  seen <- new.env()
   fake_run <- function(draws, treedepth = NULL) {
     function(data, ...) {
-      seen <<- c(list(data = data), list(...))
+      seen$args <- c(list(data = data), list(...))
       list(fit = "fit", draws = posterior::as_draws_array(draws), divergent = 0,
            treedepth = treedepth)
     }
@@ -128,15 +128,15 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)),
                         missing_stan_packages = function() character())
   # constant fake draws have no R-hat, so the fit does not pass
-  expect_warning(res <- trait_gradient_bayes(d$tg, d$tree, chains = 2, seed = 4),
-                 "not converged")
+  res <- expect_warning_value(trait_gradient_bayes(d$tg, d$tree, chains = 2, seed = 4),
+                              "not converged")
   expect_s3_class(res, "mc_trait_gradient_bayes")
-  expect_equal(seen$chains, 2)
-  expect_equal(seen$adapt_delta, 0.95)
-  expect_equal(seen$seed, 4)
+  expect_identical(seen$args$chains, 2)
+  expect_equal(seen$args$adapt_delta, 0.95)
+  expect_identical(seen$args$seed, 4)
   expect_identical(res$seed, 4) # the mocked fit has no metadata
-  expect_equal(seen$data$lambda_prior, c(1, 1))
-  expect_equal(nrow(res$species), n_sp)
+  expect_identical(seen$args$data$lambda_prior, c(1, 1))
+  expect_identical(nrow(res$species), n_sp)
   expect_identical(res$fit, "fit")
   expect_output(print(res), "Brownian motion")
   expect_output(print(res), "CHECK")
@@ -150,21 +150,22 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)))
   ou <- suppressWarnings(trait_gradient_bayes(d$tg, d$tree, ou_alpha = 0.5,
                                               lambda_prior = c(2, 2)))
-  expect_equal(seen$data$lambda_prior, c(2, 2))
+  expect_identical(seen$args$data$lambda_prior, c(2, 2))
   expect_output(print(ou), "Ornstein-Uhlenbeck")
   expect_error(trait_gradient_bayes(d$tg, d$tree, lambda_prior = c(1, -1)), "`lambda_prior`")
   expect_error(trait_gradient_bayes(list(), d$tree), "come from trait_gradient")
   expect_error(trait_gradient_bayes(d$tg, "x"), "`tree`")
   # abundance weights warn; a posterior without the expected variables keeps the fit
   local_mocked_bindings(run_stan = fake_run(fake_draws(n_sp)[, -1]))
-  w <- character()
+  caught <- new.env()
+  caught$w <- character()
   bad <- withCallingHandlers(trait_gradient_bayes(tgb_sim("abundance")$tg, d$tree),
                              warning = function(e) {
-                               w <<- c(w, conditionMessage(e))
+                               caught$w <- c(caught$w, conditionMessage(e))
                                invokeRestart("muffleWarning")
                              })
-  expect_true(any(grepl("effective sample", w)))
-  expect_true(any(grepl("could not summarise", w)))
+  expect_true(any(grepl("effective sample", caught$w, fixed = TRUE)))
+  expect_true(any(grepl("could not summarise", caught$w, fixed = TRUE)))
   expect_null(bad$signal)
   expect_output(print(bad), "could not be summarised")
 })
@@ -213,11 +214,11 @@ test_that("plot() draws the intervals of the signal and of the species", {
   obj <- structure(s, class = "mc_trait_gradient_bayes")
   p <- plot(obj)
   expect_s3_class(p, "ggplot")
-  expect_equal(nrow(ggplot2::ggplot_build(p)$data[[2]]), nrow(s$signal))
+  expect_identical(nrow(ggplot2::ggplot_build(p)$data[[2]]), nrow(s$signal))
   by_species <- plot(obj, species = TRUE)
   expect_s3_class(by_species, "ggplot")
   # beta and alpha of the species without a site mean are left out
-  expect_equal(nrow(ggplot2::ggplot_build(by_species)$data[[1]]), 3 * 4 - 2)
+  expect_identical(nrow(ggplot2::ggplot_build(by_species)$data[[1]]), 3L * 4L - 2L)
   expect_error(plot(obj, species = NA), "species")
   expect_error(plot(structure(list(signal = NULL), class = "mc_trait_gradient_bayes")),
                "not summarised")
@@ -245,6 +246,6 @@ test_that("plot(type = \"trace\") draws the chains, with warmup on request", {
   warm <- plot(obj, type = "trace", variables = "rho_u", inc_warmup = TRUE)
   expect_s3_class(warm, "ggplot")
   ggplot2::ggplot_build(warm)
-  expect_equal(max(warm$data$iteration), 30)
+  expect_identical(max(warm$data$iteration), 30L)
   expect_error(plot(obj, type = "trace", variables = character()), "variables")
 })

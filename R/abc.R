@@ -78,8 +78,7 @@ check_abc_fit <- function(x, name) {
 #' @noRd
 check_seed <- function(seed, name = "seed") {
   limit <- .Machine$integer.max / 2
-  if (!is.numeric(seed) || length(seed) != 1 || !is.finite(seed) || seed != round(seed) ||
-        abs(seed) > limit) {
+  if (!is_whole_number(seed) || abs(seed) > limit) {
     stop("`", name, "` must be one whole number between ", -floor(limit), " and ", floor(limit),
          call. = FALSE)
   }
@@ -96,11 +95,23 @@ check_function_arg <- function(x, name, null_ok = FALSE) {
   invisible(x)
 }
 
+#' TRUE when every element of `x` has a name and no name is repeated
+#' @noRd
+distinct_names <- function(x) {
+  !is.null(names(x)) && all(nzchar(names(x))) && !anyDuplicated(names(x))
+}
+
+#' TRUE when `p` is a pair of finite numbers, the first smaller than the second
+#' @noRd
+is_increasing_pair <- function(p) {
+  is.numeric(p) && length(p) == 2 && all(is.finite(p)) && p[1] < p[2]
+}
+
+#' stops unless `prior` is a named list with one increasing pair of finite limits per parameter
+#' @noRd
 check_prior <- function(prior) {
-  ok <- is.list(prior) && length(prior) >= 1 && !is.null(names(prior)) &&
-    all(nzchar(names(prior))) && !anyDuplicated(names(prior)) &&
-    all(vapply(prior, function(p) is.numeric(p) && length(p) == 2 && all(is.finite(p)) &&
-                 p[1] < p[2], logical(1)))
+  ok <- is.list(prior) && length(prior) >= 1 && distinct_names(prior) &&
+    all(vapply(prior, is_increasing_pair, logical(1)))
   if (!ok) {
     stop("`prior` must be a named list with one increasing pair of finite limits per parameter.",
          call. = FALSE)
@@ -456,15 +467,38 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
   check_count(ntree, "ntree")
   check_flag(lda, "lda")
   check_count(ncores, "ncores")
+  tables <- choice_tables(tables)
+  chosen <- choice_training(tables, statistics)
+  training <- chosen$training
+  forest <- abcrf::abcrf(model ~ ., training, lda = lda, ntree = ntree, paral = ncores > 1,
+                         ncores = ncores)
+  confusion <- forest$model.rf$confusion.matrix
+  confusion <- confusion[, colnames(confusion) != "class.error", drop = FALSE]
+  structure(list(forest = forest, training = training, statistics = chosen$statistics,
+                 models = names(tables), error = forest$prior.err,
+                 confusion = confusion),
+            class = "mc_abc_choice")
+}
+
+#' the reference tables of `abc_choose()` as a named list, one table per model, from a list or
+#' from a data frame with a column `model`
+#' @noRd
+choice_tables <- function(tables) {
   if (is.data.frame(tables)) {
     if (!"model" %in% names(tables)) stop("A data frame needs a column `model`.", call. = FALSE)
     model <- as.character(tables$model)
     tables <- split(as.data.frame(tables)[setdiff(names(tables), "model")], model)
   }
-  if (!is.list(tables) || length(tables) < 2 || is.null(names(tables)) ||
-      !all(nzchar(names(tables))) || anyDuplicated(names(tables))) {
+  if (!is.list(tables) || length(tables) < 2 || !distinct_names(tables)) {
     stop("`tables` must be a named list of at least two reference tables.", call. = FALSE)
   }
+  tables
+}
+
+#' the training set of `abc_choose()`: the complete simulations of all models, with the
+#' statistics that vary; a list with `training` and the `statistics` kept
+#' @noRd
+choice_training <- function(tables, statistics) {
   shared <- Reduce(intersect, lapply(tables, function(t) {
     attr(t, "statistics") %||% setdiff(names(t), attr(t, "parameters"))
   }))
@@ -486,14 +520,7 @@ abc_choose <- function(tables, statistics = NULL, ntree = 500, lda = TRUE, ncore
   training$model <- factor(training$model, levels = names(tables))
   counts <- table(training$model)
   if (any(counts < 10)) stop("Fewer than 10 complete simulations in a model.", call. = FALSE)
-  forest <- abcrf::abcrf(model ~ ., training, lda = lda, ntree = ntree, paral = ncores > 1,
-                         ncores = ncores)
-  confusion <- forest$model.rf$confusion.matrix
-  confusion <- confusion[, colnames(confusion) != "class.error", drop = FALSE]
-  structure(list(forest = forest, training = training, statistics = statistics,
-                 models = names(tables), error = forest$prior.err,
-                 confusion = confusion),
-            class = "mc_abc_choice")
+  list(training = training, statistics = statistics)
 }
 
 #' @describeIn abc_choose Chosen model, votes and posterior probability of the chosen model.

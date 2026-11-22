@@ -58,10 +58,10 @@ test_that("trait_gradient() recovers within-species slopes, better with more sit
   # species must be within 3 / sqrt(n) of 0 and their sd within 0.15 of 1.09 (about 3 times the
   # sd of a sample sd of n such values, near 0.05 with the tails of t with 8 df), and the RMSE
   # with 40 sites, near sqrt(10 / 40) = 0.5 of that with 10 sites, must be below 0.75 of it.
-  rmse <- c()
-  z <- c()
+  rmse <- NULL
+  z <- NULL
   for (n_sites in c(10, 40)) {
-    err <- c()
+    err <- NULL
     for (seed in 1:5) {
       set.seed(seed)
       d <- tg_slope_data(n_sites = n_sites)
@@ -182,7 +182,7 @@ test_that("trait_gradient_bayes() recovers species means and converges", {
   # prior on the standardised scale (exponential(1) among-species sd) puts the species means
   # within about +-2 sd of the trait.
   covered <- 0
-  widths <- c()
+  widths <- NULL
   for (seed in 1:2) {
     set.seed(300 + seed)
     d <- tgb_data(12, 15)
@@ -191,7 +191,7 @@ test_that("trait_gradient_bayes() recovers species means and converges", {
                    signif(fit$diagnostics$max_rhat, 4), ", divergent ",
                    fit$diagnostics$divergent)
     expect_lt(fit$diagnostics$max_rhat, 1.01)
-    expect_equal(fit$diagnostics$divergent, 0)
+    expect_identical(fit$diagnostics$divergent, 0L)
     s <- fit$species
     truth <- d$mean[s$species]
     covered <- covered + sum(s$mean_lower <= truth & truth <= s$mean_upper)
@@ -215,11 +215,11 @@ test_that("trait_gradient_bayes() follows the prior of lambda when data say litt
   # divergent transitions.
   set.seed(311)
   d <- tgb_data(5, 6)
-  medians <- c()
+  medians <- NULL
   for (shape in list(c(2, 8), c(8, 2))) {
     fit <- tgb_fit(d, 1, lambda_prior = shape)
     expect_lt(fit$diagnostics$max_rhat, 1.01)
-    expect_equal(fit$diagnostics$divergent, 0)
+    expect_identical(fit$diagnostics$divergent, 0L)
     est <- fit$signal$estimate[fit$signal$quantity == "lambda_mean"]
     prior <- stats::qbeta(c(0.05, 0.95), shape[1], shape[2])
     expect_gt(est, prior[1])
@@ -322,7 +322,7 @@ test_that("trait_flex(): the intraspecific F test is conservative under turnover
     e <- d$env$env - mean(d$env$env)
     e <- e / sqrt(sum(e^2))
     along <- drop(t(e) %*% v %*% e)
-    true_fixed <- tapply(mu[as.integer(sub("sp", "", d$ind$species))], site, mean)
+    true_fixed <- tapply(mu[as.integer(sub("sp", "", d$ind$species, fixed = TRUE))], site, mean)
     oracle <- res$sites$specific - as.vector(true_fixed)
     c(p = dec$p, explained = dec$explained, mean_square = dec$residual / (n_sites - 2),
       expected_explained = along,
@@ -713,21 +713,23 @@ test_that("trait_gradient_bayes() can run without printing anything", {
                          seed = 1, refresh = 0, show_messages = FALSE, show_exceptions = FALSE)
   }
   suppressWarnings(suppressMessages(quiet()))
-  messages <- character()
-  warnings <- character()
-  printed <- utils::capture.output(fit <- withCallingHandlers(
+  seen <- new.env()
+  seen$messages <- character()
+  seen$warnings <- character()
+  printed <- utils::capture.output(assign("fit", withCallingHandlers(
     quiet(),
     message = function(m) {
-      messages <<- c(messages, conditionMessage(m))
+      seen$messages <- c(seen$messages, conditionMessage(m))
       invokeRestart("muffleMessage")
     },
     warning = function(w) {
-      warnings <<- c(warnings, conditionMessage(w))
+      seen$warnings <- c(seen$warnings, conditionMessage(w))
       invokeRestart("muffleWarning")
     }
-  ))
+  ), envir = seen))
   expect_length(printed, 0)
-  expect_length(messages, 0)
-  expect_length(grep("has not converged", warnings, invert = TRUE, value = TRUE), 0)
-  expect_s3_class(fit, "mc_trait_gradient_bayes")
+  expect_length(seen$messages, 0)
+  expect_length(grep("has not converged", seen$warnings, fixed = TRUE, invert = TRUE,
+                     value = TRUE), 0)
+  expect_s3_class(seen$fit, "mc_trait_gradient_bayes")
 })

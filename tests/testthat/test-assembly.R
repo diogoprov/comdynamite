@@ -6,11 +6,11 @@ test_that("GAUSE removes, from the closest pair, the species with smaller summed
   # a and b are the closest pair; b is closer to the others (c, d), so it goes first
   x <- c(a = 0, b = 0.5, c = 3, d = 4)
   out <- assemble_community(x, size = 3, rule = "limiting_similarity")
-  expect_equal(out$removed, "b")
+  expect_identical(out$removed, "b")
   expect_setequal(out$community, c("a", "c", "d"))
   # next removal: c and d are now the closest pair; c has the smaller sum
   out2 <- assemble_community(x, size = 2, rule = "limiting_similarity")
-  expect_equal(out2$removed, c("b", "c"))
+  expect_identical(out2$removed, c("b", "c"))
 })
 
 test_that("limiting similarity spaces species more evenly than random draws", {
@@ -25,8 +25,8 @@ test_that("limiting similarity spaces species more evenly than random draws", {
 test_that("min_distance stops removal at a limit to similarity", {
   x <- c(a = 0, b = 0.1, c = 1, d = 2.05, e = 3)
   out <- assemble_community(x, size = 1, rule = "limiting_similarity", min_distance = 0.5)
-  expect_equal(out$removed, c("b"))
-  expect_true(min(dist(x[out$community])) >= 0.5)
+  expect_identical(out$removed, "b")
+  expect_gte(min(dist(x[out$community])), 0.5)
 })
 
 test_that("filtering keeps the species nearest the optimum", {
@@ -41,7 +41,7 @@ test_that("multivariate traits and output structure", {
   set.seed(2)
   tr <- ape::rcoal(30)
   x <- trait_ou(tr, n_traits = 3)
-  expect_equal(dim(x), c(30, 3))
+  expect_identical(dim(x), c(30L, 3L))
   for (rule in c("limiting_similarity", "filtering", "neutral")) {
     out <- assemble_community(x, 12, rule)
     expect_length(out$community, 12)
@@ -54,7 +54,7 @@ test_that("multivariate traits and output structure", {
 test_that("traits without row names get default species names", {
   set.seed(1)
   x <- matrix(rnorm(12), 6, 2)
-  expect_warning(out <- assemble_community(x, size = 3, rule = "neutral"), "no names")
+  out <- expect_warning_value(assemble_community(x, size = 3, rule = "neutral"), "no names")
   expect_length(out$community, 3)
   expect_true(all(out$community %in% paste0("sp", 1:6)))
 })
@@ -84,7 +84,7 @@ test_that("distance changes trait space as documented", {
                           trait_cov = diag(apply(x, 2, stats::var)))
   set.seed(3)
   b <- assemble_community(x, 10, distance = "standardized")
-  expect_equal(a[c("community", "removed", "metric")], b[c("community", "removed", "metric")])
+  expect_identical(a[c("community", "removed", "metric")], b[c("community", "removed", "metric")])
 })
 
 test_that("Mahalanobis filtering keeps species inside the niche ellipse", {
@@ -131,9 +131,9 @@ test_that("assemble_community() returns an mc_assembly with the metric", {
   a <- assemble_community(x, 10, distance = "mahalanobis")
   expect_s3_class(a, "mc_assembly")
   expect_equal(a$metric, stats::cov(x))
-  expect_equal(assemble_community(x, 10)$metric, diag(2))
+  expect_identical(assemble_community(x, 10)$metric, diag(2))
   f <- assemble_community(x, 10, "filtering", optimum = c(1, 1), distance = "standardized")
-  expect_equal(f$optimum, c(1, 1))
+  expect_identical(f$optimum, c(1, 1))
   expect_equal(unname(diag(f$metric)), unname(apply(x, 2, var)))
   expect_output(print(a), "limiting_similarity with mahalanobis distances: 10 of 30")
 })

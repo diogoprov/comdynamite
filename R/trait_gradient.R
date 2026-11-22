@@ -146,17 +146,7 @@ tg_populations <- function(data, trait, site, species, abundance) {
                      species = as.character(data[[species]][first]),
                      abundance = 1, trait = as.vector(values), stringsAsFactors = FALSE)
   if (!is.null(abundance)) {
-    a <- data[[abundance]]
-    if (!is.numeric(a) || !all(is.finite(a)) || any(a < 0)) {
-      stop("`", abundance, "` must be finite numbers, 0 or more, without missing values",
-           call. = FALSE)
-    }
-    differs <- tapply(a, index, function(v) diff(range(v)) > 0)
-    if (any(differs)) {
-      stop("`", abundance, "` must have one value per population (species in a site)",
-           call. = FALSE)
-    }
-    pops$abundance <- a[first]
+    pops$abundance <- tg_abundance(data[[abundance]], abundance, index)[first]
     pops <- pops[pops$abundance > 0, , drop = FALSE]
   }
   if (all(is.na(pops$trait))) stop("`", trait, "` has no values", call. = FALSE)
@@ -168,6 +158,22 @@ tg_populations <- function(data, trait, site, species, abundance) {
   if (length(unique(pops$site)) < 2) stop("`data` needs two sites or more", call. = FALSE)
   rownames(pops) <- NULL
   pops
+}
+
+#' the abundances `a` (one per row of the data, in the column named `abundance`) after checking
+#' that they are valid and that each population (`index`) has a single value
+#' @noRd
+tg_abundance <- function(a, abundance, index) {
+  if (!is.numeric(a) || !all(is.finite(a)) || any(a < 0)) {
+    stop("`", abundance, "` must be finite numbers, 0 or more, without missing values",
+         call. = FALSE)
+  }
+  differs <- tapply(a, index, function(v) diff(range(v)) > 0)
+  if (any(differs)) {
+    stop("`", abundance, "` must have one value per population (species in a site)",
+         call. = FALSE)
+  }
+  a
 }
 
 #' the analysis of a table of populations (site, species, abundance, trait)
@@ -194,23 +200,9 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
   alone <- as.vector(table(pops$site)[pops$site]) == 1
   species_ids <- sort(unique(pops$species))
   rows <- split(seq_len(nrow(pops)), factor(pops$species, species_ids))
-  stats <- t(vapply(rows, function(r) {
-    w <- w_species[r]
-    tbar <- sum(w * t_full[r]) / sum(w)
-    ok <- !is.na(p[r])
-    beta <- if (any(ok)) sum(w[ok] * p[r][ok]) / sum(w[ok]) else NA_real_
-    range_p <- if (any(ok)) range(p[r][ok]) else c(NA_real_, NA_real_)
-    fit <- c(NA_real_, NA_real_, NA_real_)
-    use <- ok & measured[r]
-    if (slopes && sum(use) >= settings$min_slope && diff(range(p[r][use])) > 0) {
-      x <- p[r][use]
-      y <- pops$trait[r][use]
-      ww <- w[use]
-      fit <- weighted_slope(x, y, ww)
-    }
-    c(length(r), sum(alone[r]), tbar, beta, tbar - beta, range_p[2] - range_p[1], fit,
-      range_p)
-  }, numeric(11)))
+  stats <- t(vapply(rows, tg_species_stats, numeric(11), pops = pops, measured = measured,
+                    w_species = w_species, t_full = t_full, p = p, alone = alone,
+                    settings = settings, slopes = slopes))
   species_table <- data.frame(species = species_ids, stats, row.names = NULL)
   names(species_table) <- c("species", "n_sites", "n_alone", "mean", "beta", "alpha",
                             "breadth", "intercept", "slope", "slope_se", "min_site",
@@ -228,6 +220,30 @@ tg_compute <- function(pops, settings, slopes = TRUE) {
                             trait = t_full, measured = measured, site_mean = p,
                             stringsAsFactors = FALSE)
   list(species = species_table, sites = sites, populations = populations)
+}
+
+#' the statistics of one species in the trait-gradient analysis, from its populations (the rows
+#' `r` of `pops`): number of sites, of sites where it is alone, mean, beta, alpha, breadth, the
+#' weighted regression of its trait on the site means (intercept, slope, standard error) and
+#' the range of the site means; a vector of 11 numbers
+#' @noRd
+tg_species_stats <- function(r, pops, measured, w_species, t_full, p, alone, settings,
+                             slopes) {
+  w <- w_species[r]
+  tbar <- sum(w * t_full[r]) / sum(w)
+  ok <- !is.na(p[r])
+  beta <- if (any(ok)) sum(w[ok] * p[r][ok]) / sum(w[ok]) else NA_real_
+  range_p <- if (any(ok)) range(p[r][ok]) else c(NA_real_, NA_real_)
+  fit <- c(NA_real_, NA_real_, NA_real_)
+  use <- ok & measured[r]
+  if (slopes && sum(use) >= settings$min_slope && diff(range(p[r][use])) > 0) {
+    x <- p[r][use]
+    y <- pops$trait[r][use]
+    ww <- w[use]
+    fit <- weighted_slope(x, y, ww)
+  }
+  c(length(r), sum(alone[r]), tbar, beta, tbar - beta, range_p[2] - range_p[1], fit,
+    range_p)
 }
 
 #' intercept, slope and standard error of the slope of a weighted least-squares line
@@ -470,24 +486,47 @@ trait_gradient_test <- function(x, n_null = 999,
   settings <- x$settings
   observed <- tg_null_stats(x)
   species_ids <- x$species$species
-  k <- length(species_ids)
-  by_tree <- null %in% c("phylo", "bm")
-  if (by_tree) {
-    if (is.null(tree)) stop("`null = \"", null, "\"` needs `tree`", call. = FALSE)
-    check_tree(tree)
-    absent <- setdiff(species_ids, tree$tip.label)
-    if (length(absent) > 0) {
-      stop("species of `x` not in `tree`: ", toString(absent), call. = FALSE)
-    }
-    check_number(phylo_k, "phylo_k", lower = 1)
-    shared <- ape::vcv(ape::keep.tip(tree, species_ids))[species_ids, species_ids]
+  shared <- NULL
+  if (null %in% c("phylo", "bm")) {
+    shared <- tg_null_covariance(null, tree, species_ids, phylo_k)
   } else {
     phylo_k <- NULL
   }
   site_of <- pops$site
   if (null == "curveball") site_of <- curveball_sites(site_of, pops$species, burn_in)
   means <- stats::setNames(x$species$mean, species_ids)
-  if (null == "phylo") transition <- phylo_transition(shared, phylo_k)
+  model <- tg_null_model(null, means, shared, phylo_k)
+  sims <- tg_null_draws(pops, settings, null, n_null, means, model, site_of, thin)
+  tables <- tg_test_tables(observed, sims, species_ids, null)
+  structure(list(statistics = tables$statistics, species = tables$species,
+                 null = tables$null,
+                 settings = c(settings, list(null = null, n_null = n_null, burn_in = burn_in,
+                                             thin = thin, phylo_k = phylo_k))),
+            class = "mc_trait_gradient_test")
+}
+
+#' the covariance of the species under Brownian motion on `tree`, for the null models that use
+#' the phylogeny, after checking `tree` and `phylo_k`
+#' @noRd
+tg_null_covariance <- function(null, tree, species_ids, phylo_k) {
+  if (is.null(tree)) stop("`null = \"", null, "\"` needs `tree`", call. = FALSE)
+  check_tree(tree)
+  absent <- setdiff(species_ids, tree$tip.label)
+  if (length(absent) > 0) {
+    stop("species of `x` not in `tree`: ", toString(absent), call. = FALSE)
+  }
+  check_number(phylo_k, "phylo_k", lower = 1)
+  ape::vcv(ape::keep.tip(tree, species_ids))[species_ids, species_ids]
+}
+
+#' what the null models that use the phylogeny need to draw species means: the transition
+#' probabilities of the phylogenetic permutations (`transition`, for `null = "phylo"`) or the
+#' root mean and the root of the covariance of Brownian motion (`mu`, `root`, for "bm"); a
+#' list, empty for the other null models
+#' @noRd
+tg_null_model <- function(null, means, shared, phylo_k) {
+  model <- list()
+  if (null == "phylo") model$transition <- phylo_transition(shared, phylo_k)
   if (null == "bm") {
     if (stats::var(means) <= 0) {
       stop("the species means do not vary, so null = \"bm\" cannot estimate a rate",
@@ -497,18 +536,31 @@ trait_gradient_test <- function(x, n_null = 999,
       stop("the covariance of `tree` is singular (tips at distance 0?); null = \"bm\" ",
            "needs distinct tips", call. = FALSE)
     })
-    fit <- gls_known_error(means, rep(0, k), list(shared = shared, depth = diag(shared),
-                                                 height = max(diag(shared))), "BM")
-    root <- sqrt(fit$sigma2) * root # BM uses optimize(), which always returns
+    fit <- gls_known_error(means, rep(0, length(means)),
+                           list(shared = shared, depth = diag(shared),
+                                height = max(diag(shared))), "BM")
+    model$mu <- fit$mu
+    model$root <- sqrt(fit$sigma2) * root # BM uses optimize(), which always returns
   }
+  model
+}
+
+#' the statistics of the trait-gradient analysis (see tg_null_stats()) in `n_null` data sets of
+#' the null model: species means exchanged or simulated ("species", "phylo", "bm"), or
+#' populations moved among sites ("curveball", from `site_of` and every `thin` swaps, or
+#' "permute"); one row per data set
+#' @noRd
+tg_null_draws <- function(pops, settings, null, n_null, means, model, site_of, thin) {
+  species_ids <- names(means)
+  k <- length(species_ids)
   sims <- matrix(NA_real_, n_null, 3 + 2 * k)
   for (b in seq_len(n_null)) {
     moved <- pops
     if (null %in% c("species", "phylo", "bm")) {
       shuffled <- switch(null,
                          species = sample(means),
-                         phylo = phylogenetic_permutation(means, transition),
-                         bm = fit$mu + as.vector(root %*% stats::rnorm(k)))
+                         phylo = phylogenetic_permutation(means, model$transition),
+                         bm = model$mu + as.vector(model$root %*% stats::rnorm(k)))
       shuffled <- stats::setNames(shuffled, species_ids)
       moved$trait <- pops$trait - means[pops$species] + shuffled[pops$species]
     } else {
@@ -518,6 +570,15 @@ trait_gradient_test <- function(x, n_null = 999,
     }
     sims[b, ] <- tg_null_stats(tg_compute(moved, settings, slopes = FALSE))
   }
+  sims
+}
+
+#' the tables of trait_gradient_test(): the tests of the three overall statistics
+#' (`statistics`) and of the beta (and, when species means are exchanged, alpha) of each
+#' species (`species`), and the null values that were tested (`null`); a list
+#' @noRd
+tg_test_tables <- function(observed, sims, species_ids, null) {
+  k <- length(species_ids)
   labels <- c("cor_beta_alpha", "var_beta", "var_alpha", paste0("beta_", species_ids),
               paste0("alpha_", species_ids))
   colnames(sims) <- labels
@@ -539,10 +600,7 @@ trait_gradient_test <- function(x, n_null = 999,
   } else {
     sims <- sims[, seq_len(3 + k), drop = FALSE]
   }
-  structure(list(statistics = statistics, species = species, null = sims,
-                 settings = c(settings, list(null = null, n_null = n_null, burn_in = burn_in,
-                                             thin = thin, phylo_k = phylo_k))),
-            class = "mc_trait_gradient_test")
+  list(statistics = statistics, species = species, null = sims)
 }
 
 #' initial transition probabilities of the phylogenetic permutations of Lapointe & Garland
@@ -791,32 +849,7 @@ ou_optim <- function(par, fn, lower, upper) {
 #' REML fit of y ~ N(mu, sigma2 C + diag(v)) for a covariance model
 #' @noRd
 gls_known_error <- function(y, v, covs, model) {
-  n <- length(y)
-  ones <- rep(1, n)
-  cov_of <- function(a) {
-    switch(model,
-           white = diag(n),
-           BM = covs$shared,
-           OU = {
-             d <- covs$depth
-             s <- covs$shared
-             exp(-a * (outer(d, d, "+") - 2 * s)) * -expm1(-2 * a * s) / (2 * a)
-           })
-  }
-  reml <- function(log_sigma2, a = NULL) {
-    vmat <- exp(log_sigma2) * cov_of(a) + diag(v, n)
-    ch <- tryCatch(chol(vmat), error = function(e) NULL)
-    if (is.null(ch)) return(-1e10) # nocov: a singular covariance (tips at distance 0)
-    vi_1 <- backsolve(ch, forwardsolve(t(ch), ones))
-    vi_y <- backsolve(ch, forwardsolve(t(ch), y))
-    xvx <- sum(ones * vi_1)
-    mu <- sum(ones * vi_y) / xvx
-    r <- y - mu
-    vi_r <- vi_y - mu * vi_1
-    ll <- -0.5 * (2 * sum(log(diag(ch))) + log(xvx) + sum(r * vi_r) + (n - 1) * log(2 * pi))
-    attr(ll, "mu") <- mu
-    ll
-  }
+  reml <- function(log_sigma2, a = NULL) gls_reml(log_sigma2, a, y, v, covs, model)
   scale <- stats::var(y) / if (model == "white") 1 else covs$height
   lower <- log(scale) - 12
   upper <- log(scale) + 8
@@ -846,6 +879,34 @@ gls_known_error <- function(y, v, covs, model) {
              half_life = if (model == "OU" && !at_bound) log(2) / a else NA_real_,
              at_bound = at_bound, converged = converged,
              loglik = as.numeric(ll), n_par = k, aic = -2 * as.numeric(ll) + 2 * k)
+}
+
+#' restricted log-likelihood of y ~ N(mu, sigma2 C + diag(v)), with C the covariance of the
+#' `model` ("white", "BM", or "OU" with rate `a`) and the estimate of mu in the attribute "mu"
+#' @noRd
+gls_reml <- function(log_sigma2, a, y, v, covs, model) {
+  n <- length(y)
+  ones <- rep(1, n)
+  cmat <- switch(model,
+                 white = diag(n),
+                 BM = covs$shared,
+                 OU = {
+                   d <- covs$depth
+                   s <- covs$shared
+                   exp(-a * (outer(d, d, "+") - 2 * s)) * -expm1(-2 * a * s) / (2 * a)
+                 })
+  vmat <- exp(log_sigma2) * cmat + diag(v, n)
+  ch <- tryCatch(chol(vmat), error = function(e) NULL)
+  if (is.null(ch)) return(-1e10) # nocov: a singular covariance (tips at distance 0)
+  vi_1 <- backsolve(ch, forwardsolve(t(ch), ones))
+  vi_y <- backsolve(ch, forwardsolve(t(ch), y))
+  xvx <- sum(ones * vi_1)
+  mu <- sum(ones * vi_y) / xvx
+  r <- y - mu
+  vi_r <- vi_y - mu * vi_1
+  ll <- -0.5 * (2 * sum(log(diag(ch))) + log(xvx) + sum(r * vi_r) + (n - 1) * log(2 * pi))
+  attr(ll, "mu") <- mu
+  ll
 }
 
 #' @export

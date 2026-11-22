@@ -68,9 +68,9 @@ test_that("the tables of the functions for individuals have fixed column classes
 
 test_that("factor labels come back as character columns", {
   ind <- individuals_data(factors = TRUE)
-  expect_identical(class(tstats(ind, n_perm = 0)$site), "character")
-  expect_identical(class(community_index(ind, stats::var, n_perm = 0)$site), "character")
-  expect_identical(class(trait_densities(ind)$species), "character")
+  expect_type(tstats(ind, n_perm = 0)$site, "character")
+  expect_type(community_index(ind, stats::var, n_perm = 0)$site, "character")
+  expect_type(trait_densities(ind)$species, "character")
 })
 
 test_that("as.data.frame() of node_test() has fixed column classes", {
@@ -106,11 +106,11 @@ test_that("columns of class units give the same results as plain columns", {
   ind <- individuals_data()
   measured <- ind
   measured$trait <- units::set_units(measured$trait, "mm")
-  expect_equal(tstats(measured, n_perm = 0), tstats(ind, n_perm = 0))
-  expect_equal(as.data.frame(trait_gradient(measured)), as.data.frame(trait_gradient(ind)))
+  expect_identical(tstats(measured, n_perm = 0), tstats(ind, n_perm = 0))
+  expect_identical(as.data.frame(trait_gradient(measured)), as.data.frame(trait_gradient(ind)))
   comm <- matrix(1:12, 4, 3, dimnames = list(paste0("s", 1:4), c("a", "b", "c")))
   env <- data.frame(x = c(1, 4, 2, 8), row.names = paste0("s", 1:4))
   env_units <- env
   env_units$x <- units::set_units(env_units$x, "degC")
-  expect_equal(check_env(env_units, comm), check_env(env, comm))
+  expect_identical(check_env(env_units, comm), check_env(env, comm))
 })

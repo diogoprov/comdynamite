@@ -50,24 +50,7 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
   colours <- stats::setNames(unname(colours), c("Resource", "Consumer", "Predator"))
   levels <- c("R", "N", "P")[vapply(c("R", "N", "P"), function(l) any(x[[l]] > 0), logical(1))]
   if (length(levels) == 0) stop("every level is absent during the run", call. = FALSE)
-  level_names <- c(R = "Resource", N = "Consumer", P = "Predator")
-  titles <- c(abundance = if (log_abundance) "Abundance (log10)" else "Abundance",
-              trait = "Mean trait", rate = "Rate of trait change")
-  columns <- list(abundance = levels, trait = paste0("z_", levels),
-                  rate = paste0("rate_", levels))
-  long <- do.call(rbind, lapply(panels, function(panel) {
-    values <- as.matrix(x[columns[[panel]]])
-    # an absent level has no trait or rate to show
-    values[as.matrix(x[levels]) <= 0] <- NA
-    if (panel == "abundance" && log_abundance) {
-      values[values <= 0] <- NA
-      values <- log10(values)
-    }
-    data.frame(time = rep(x$time, length(levels)), value = as.vector(values),
-               level = rep(unname(level_names[levels]), each = nrow(x)), panel = titles[[panel]])
-  }))
-  long$panel <- factor(long$panel, unname(titles[panels]))
-  long$level <- factor(long$level, unname(level_names[levels]))
+  long <- food_web_long(x, panels, levels, log_abundance)
   shown <- if (is.null(time)) long else long[long$time <= time, , drop = FALSE]
   .data <- ggplot2::.data
   p <- ggplot2::ggplot(shown, ggplot2::aes(.data$time, .data$value, colour = .data$level)) +
@@ -90,6 +73,31 @@ plot.food_web <- function(x, panels = c("abundance", "trait", "rate"), time = NU
     ggplot2::labs(x = "Time", y = NULL) +
     ggplot2::theme_minimal() +
     ggplot2::theme(strip.placement = "outside", legend.position = "top")
+}
+
+#' the trajectories of a food web in long format, for the `panels` and the `levels` present:
+#' a data frame with `time`, `value`, `level` and `panel` (the last two as factors)
+#' @noRd
+food_web_long <- function(x, panels, levels, log_abundance) {
+  level_names <- c(R = "Resource", N = "Consumer", P = "Predator")
+  titles <- c(abundance = if (log_abundance) "Abundance (log10)" else "Abundance",
+              trait = "Mean trait", rate = "Rate of trait change")
+  columns <- list(abundance = levels, trait = paste0("z_", levels),
+                  rate = paste0("rate_", levels))
+  long <- do.call(rbind, lapply(panels, function(panel) {
+    values <- as.matrix(x[columns[[panel]]])
+    # an absent level has no trait or rate to show
+    values[as.matrix(x[levels]) <= 0] <- NA
+    if (panel == "abundance" && log_abundance) {
+      values[values <= 0] <- NA
+      values <- log10(values)
+    }
+    data.frame(time = rep(x$time, length(levels)), value = as.vector(values),
+               level = rep(unname(level_names[levels]), each = nrow(x)), panel = titles[[panel]])
+  }))
+  long$panel <- factor(long$panel, unname(titles[panels]))
+  long$level <- factor(long$level, unname(level_names[levels]))
+  long
 }
 
 #' Animate the dynamics of a food web

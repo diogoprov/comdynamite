@@ -23,13 +23,13 @@ test_that("single-optimum OU has the expected tip mean and variance", {
 test_that("multi-peak OU pulls each clade towards its own optimum", {
   set.seed(3)
   reg <- paint_regimes(tr4, nodes = 7)  # clade (c, d)
-  expect_equal(sum(reg == "1"), 2)
+  expect_identical(sum(reg == "1"), 2L)
   x <- trait_ou(tr4, n_traits = 5000, alpha = 5, sigma2 = 0.1,
                  theta = c(`0` = 0, `1` = 10), regimes = reg)
   expect_equal(unname(rowMeans(x)[c("a", "b")]), c(0, 0), tolerance = 0.05)
   expect_equal(unname(rowMeans(x)[c("c", "d")]), c(10, 10) * (1 - exp(-5)), tolerance = 0.05)
   stem <- paint_regimes(tr4, nodes = 7, stem = TRUE)
-  expect_equal(sum(stem == "1"), 3)
+  expect_identical(sum(stem == "1"), 3L)
 })
 
 test_that("trait_ou checks its inputs", {
@@ -38,7 +38,7 @@ test_that("trait_ou checks its inputs", {
   expect_error(trait_ou(tr4, alpha = -1))
   expect_error(paint_regimes(tr4, nodes = 2))
   x <- trait_ou(ape::rcoal(10), n_traits = 2)
-  expect_equal(dim(x), c(10, 2))
+  expect_identical(dim(x), c(10L, 2L))
 })
 
 test_that("one unnamed optimum applies to all regimes", {

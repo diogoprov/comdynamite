@@ -96,7 +96,13 @@ env_surrogates <- function(env, coords, n = 99, method = c("variogram", "paramet
   if (length(strata) != nrow(env) || anyNA(strata)) {
     stop("`strata` needs one value per site, without NA", call. = FALSE)
   }
-  # each stratum on its own, so values never move between strata
+  surrogates_by_strata(env, strata, distances, n, method)
+}
+
+#' surrogates drawn in each stratum on its own, so values never move between strata;
+#' `distances` gives the distance matrix of a set of rows. Returns a list of `n` matrices
+#' @noRd
+surrogates_by_strata <- function(env, strata, distances, n, method) {
   groups <- split(seq_len(nrow(env)), strata, drop = TRUE)
   small <- vapply(groups, length, 1L) < 5
   if (any(small)) {

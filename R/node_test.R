@@ -44,31 +44,9 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
   n_tips <- length(tree$tip.label)
   children <- split(tree$edge[, 2], tree$edge[, 1])
   if (any(lengths(children) != 2)) stop("the tree must be dichotomous and rooted", call. = FALSE)
-  # value of each tip below a node, starting from the value of the node
-  spread <- function(node, value) {
-    if (node <= n_tips) return(stats::setNames(value, node))
-    unlist(lapply(children[[as.character(node)]], spread, value = value / 2),
-           use.names = TRUE)
-  }
   edge_length <- numeric(max(tree$edge))
   if (branch_lengths) edge_length[tree$edge[, 2]] <- tree$edge.length
-  n_below <- function(node) {
-    if (node <= n_tips) return(1)
-    sum(vapply(children[[as.character(node)]], n_below, numeric(1)))
-  }
-  # branch lengths on the way to each tip, shared among the species below each branch
-  shared <- function(node, value) {
-    value <- value + edge_length[node] / n_below(node)
-    if (node <= n_tips) return(stats::setNames(value, node))
-    unlist(lapply(children[[as.character(node)]], shared, value = value), use.names = TRUE)
-  }
-  side_values <- function(node, sign) {
-    if (!branch_lengths) return(spread(node, sign))
-    values <- shared(node, 0)
-    # a clade with branches of length zero has equal weights
-    if (sum(values) == 0) values[] <- 1
-    sign * values / sum(values)
-  }
+  side_values <- contrast_sides(children, n_tips, edge_length, branch_lengths)
   informative <- Filter(function(node) cherries || any(children[[node]] > n_tips), names(children))
   contrasts <- vapply(informative, function(node) {
     pair <- children[[node]]
@@ -80,6 +58,35 @@ node_contrasts <- function(tree, cherries = TRUE, branch_lengths = FALSE) {
     out
   }, numeric(n_tips))
   matrix(contrasts, n_tips, dimnames = list(tree$tip.label, informative))
+}
+
+#' the function that gives the values of the tips on one side of a node, from the node at the
+#' top of that side and its sign: halved at each node, or weighted by the branch lengths
+#' @noRd
+contrast_sides <- function(children, n_tips, edge_length, branch_lengths) {
+  # value of each tip below a node, starting from the value of the node
+  spread <- function(node, value) {
+    if (node <= n_tips) return(stats::setNames(value, node))
+    unlist(lapply(children[[as.character(node)]], spread, value = value / 2),
+           use.names = TRUE)
+  }
+  n_below <- function(node) {
+    if (node <= n_tips) return(1)
+    sum(vapply(children[[as.character(node)]], n_below, numeric(1)))
+  }
+  # branch lengths on the way to each tip, shared among the species below each branch
+  shared <- function(node, value) {
+    value <- value + edge_length[node] / n_below(node)
+    if (node <= n_tips) return(stats::setNames(value, node))
+    unlist(lapply(children[[as.character(node)]], shared, value = value), use.names = TRUE)
+  }
+  function(node, sign) {
+    if (!branch_lengths) return(spread(node, sign))
+    values <- shared(node, 0)
+    # a clade with branches of length zero has equal weights
+    if (sum(values) == 0) values[] <- 1
+    sign * values / sum(values)
+  }
 }
 
 #' Test clades against the environment, node by node
@@ -251,6 +258,42 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   check_count(n_perm, "n_perm")
   check_count(cores, "cores")
   if (!is.null(coords)) check_coords(coords)
+  data <- node_test_data(comm, nodes, env, biogeography, site_permutations, area_permutations)
+  comm <- data$comm
+  nodes <- data$nodes
+  env <- data$env
+  node_names <- colnames(nodes) %||% seq_len(ncol(nodes))
+  env_names <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
+  # forking is not available on Windows
+  workers <- if (.Platform$OS.type == "windows") 1L else cores
+  # with surrogates, the predictors move instead, the same draw for each node
+  surrogates <- if (!identical(null, "permutation")) {
+    site_null(null, list(occupied = rep(TRUE, nrow(comm))), env, env, coords, n_perm)
+  }
+  shuffle_sites <- site_shuffle(comm, env, surrogates, site_permutations)
+  n_site <- if (!is.null(surrogates)) surrogates$n else if (is.null(site_permutations)) n_perm else
+    nrow(site_permutations)
+  results <- map_nodes(nodes, function(contrast) {
+    one_node(comm, contrast, env, n_perm, shuffle_sites, n_site)
+  }, "Nodes", workers)
+  matrix_of <- function(field) node_matrix(results, field, node_names, env_names)
+  structure(list(nodes = node_table(results, node_names), semipartial = matrix_of("semipartial"),
+                 p_partial_max = matrix_of("p_partial_max"),
+                 p_partial_site = matrix_of("p_partial_site"),
+                 p_partial_joint = matrix_of("p_partial_joint"),
+                 biogeography = if (!is.null(data$biogeography)) {
+                   node_test_events(data, n_perm, site_permutations, area_permutations, workers)
+                 },
+                 permutations = permutation_record(n_perm, site_permutations,
+                                                   area_permutations, null = null)),
+            class = "mc_node_test")
+}
+
+#' the data of `node_test()` after its checks, with species in the order of `comm` and sites in
+#' that of `comm`: a list with `comm`, `nodes`, `env` and `biogeography`
+#' @noRd
+node_test_data <- function(comm, nodes, env, biogeography, site_permutations,
+                           area_permutations) {
   if (inherits(nodes, "phylo")) {
     stop("`nodes` is a tree: use `node_contrasts()` on it first", call. = FALSE)
   }
@@ -265,56 +308,33 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
   if (!is.null(biogeography)) biogeography <- check_biogeography(biogeography, comm)
   check_area_permutations(area_permutations, biogeography, comm)
   species <- match_species(comm, rownames(nodes), "`nodes`")
-  comm <- comm[, species, drop = FALSE]
-  nodes <- nodes[species, , drop = FALSE]
-  node_names <- colnames(nodes) %||% seq_len(ncol(nodes))
-  env_names <- colnames(env) %||% paste0("predictor", seq_len(ncol(env)))
-  # forking is not available on Windows
-  workers <- if (.Platform$OS.type == "windows") 1L else cores
-  # nodes run in batches, one per worker, so the progress bar can follow them
-  per_node <- function(run, name) {
-    columns <- seq_len(ncol(nodes))
-    batches <- unname(split(columns, (columns - 1) %/% workers))
-    results <- progress_map(batches, function(batch) {
-      # moves the parent generator on, so each batch gets its own streams
-      if (workers > 1) stats::runif(1)
-      parallel::mclapply(batch, function(i) run(nodes[, i]), mc.cores = workers)
-    }, name, parallel = FALSE)
-    results <- unlist(results, recursive = FALSE)
-    failed <- vapply(results, inherits, logical(1), "try-error")
-    if (any(failed)) {
-      stop("a node failed in a parallel worker: ", conditionMessage(attr(results[[which(failed)[1]]],
-                                                                         "condition")), call. = FALSE)
-    }
-    results
+  list(comm = comm[, species, drop = FALSE], nodes = nodes[species, , drop = FALSE], env = env,
+       biogeography = biogeography)
+}
+
+#' runs `run` on each column of `nodes`, in batches of one node per worker, so that the progress
+#' bar can follow them; a list with one result per node
+#' @noRd
+map_nodes <- function(nodes, run, name, workers) {
+  columns <- seq_len(ncol(nodes))
+  batches <- unname(split(columns, (columns - 1) %/% workers))
+  results <- progress_map(batches, function(batch) {
+    # moves the parent generator on, so each batch gets its own streams
+    if (workers > 1) stats::runif(1)
+    parallel::mclapply(batch, function(i) run(nodes[, i]), mc.cores = workers)
+  }, name, parallel = FALSE)
+  results <- unlist(results, recursive = FALSE)
+  failed <- vapply(results, inherits, logical(1), "try-error")
+  if (any(failed)) {
+    stop("a node failed in a parallel worker: ", conditionMessage(attr(results[[which(failed)[1]]],
+                                                                       "condition")), call. = FALSE)
   }
-  matrix_of <- function(results, field, names) {
-    matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
-           dimnames = list(node_names, names))
-  }
-  # one draw of the null model of sites: rows of the community or areas moved across sites
-  # with surrogates, the predictors move instead, the same draw for each node
-  surrogates <- if (!identical(null, "permutation")) {
-    site_null(null, list(occupied = rep(TRUE, nrow(comm))), env, env, coords, n_perm)
-  }
-  shuffle_sites <- function(r) {
-    if (!is.null(surrogates)) return(list(comm = comm, env = surrogates$env_at(r)))
-    rows <- if (is.null(site_permutations)) sample.int(nrow(comm)) else site_permutations[r, ]
-    list(comm = comm[rows, , drop = FALSE], env = env)
-  }
-  shuffle_areas <- function(event, permutations) {
-    function(r) {
-      moved <- event[permutations[r, ]]
-      sites <- moved != 0
-      list(comm = comm[sites, , drop = FALSE],
-           env = cbind(moved[sites], env[sites, , drop = FALSE]))
-    }
-  }
-  n_site <- if (!is.null(surrogates)) surrogates$n else if (is.null(site_permutations)) n_perm else
-    nrow(site_permutations)
-  results <- per_node(function(contrast) {
-    one_node(comm, contrast, env, n_perm, shuffle_sites, n_site)
-  }, "Nodes")
+  results
+}
+
+#' the table of `node_test()` with one row per node, with a warning for nodes fitted exactly
+#' @noRd
+node_table <- function(results, node_names) {
   table <- data.frame(node = node_names, do.call(rbind, lapply(results, `[[`, "summary")))
   table$p_adjusted <- stats::p.adjust(table$p_max, "BH")
   # explained over explained plus residual sum of squares of the weighted fit
@@ -322,46 +342,78 @@ node_test <- function(comm, nodes, env, biogeography = NULL, n_perm = 999, cores
                          table$statistic / (1 + table$statistic))
   warn_perfect_fit(fitted_share, paste("node", table$node),
                    "the predictors and the composition of")
-  structure(list(nodes = table, semipartial = matrix_of(results, "semipartial", env_names),
-                 p_partial_max = matrix_of(results, "p_partial_max", env_names),
-                 p_partial_site = matrix_of(results, "p_partial_site", env_names),
-                 p_partial_joint = matrix_of(results, "p_partial_joint", env_names),
-                 biogeography = if (!is.null(biogeography)) {
-                   events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
-                   by_event <- lapply(seq_len(ncol(biogeography)), function(e) {
-                     sites <- biogeography[, e] != 0
-                     predictors <- cbind(biogeography[sites, e], env[sites, , drop = FALSE])
-                     local_comm <- comm[sites, , drop = FALSE]
-                     permutations <- area_permutations[[e]] %||% site_permutations
-                     shuffle <- if (is.null(permutations)) {
-                       function(r) {
-                         list(comm = local_comm[sample.int(nrow(local_comm)), , drop = FALSE],
-                              env = predictors)
-                       }
-                     } else {
-                       shuffle_areas(biogeography[, e], permutations)
-                     }
-                     n_area <- if (is.null(permutations)) n_perm else nrow(permutations)
-                     per_node(function(contrast) {
-                       one_node(local_comm, contrast, predictors, n_perm, shuffle, n_area)
-                     }, paste("Nodes,", events[e]))
-                   })
-                   first <- function(field) {
-                     vapply(by_event, function(event) {
-                       vapply(event, function(node) node[[field]][1], numeric(1))
-                     }, numeric(ncol(nodes)))
-                   }
-                   shaped <- function(x) {
-                     matrix(x, ncol(nodes), length(events), dimnames = list(node_names, events))
-                   }
-                   list(semipartial = shaped(first("semipartial")),
-                        p_partial_max = shaped(first("p_partial_max")),
-                        p_partial_site = shaped(first("p_partial_site")),
-                        p_partial_joint = shaped(first("p_partial_joint")))
-                 },
-                 permutations = permutation_record(n_perm, site_permutations,
-                                                   area_permutations, null = null)),
-            class = "mc_node_test")
+  table
+}
+
+#' one field of the results of the nodes as a matrix with one row per node
+#' @noRd
+node_matrix <- function(results, field, node_names, names) {
+  matrix(unlist(lapply(results, `[[`, field)), length(results), byrow = TRUE,
+         dimnames = list(node_names, names))
+}
+
+#' the function that gives draw `r` of the null model of sites: the rows of the community are
+#' permuted, freely or as in `site_permutations`, or the predictors take a surrogate
+#' @noRd
+site_shuffle <- function(comm, env, surrogates, site_permutations) {
+  function(r) {
+    if (!is.null(surrogates)) return(list(comm = comm, env = surrogates$env_at(r)))
+    rows <- if (is.null(site_permutations)) sample.int(nrow(comm)) else site_permutations[r, ]
+    list(comm = comm[rows, , drop = FALSE], env = env)
+  }
+}
+
+#' the function that gives draw `r` of a restricted null model of an event: its areas move
+#' across the sites, which keep their community and predictors
+#' @noRd
+area_shuffle <- function(comm, env, event, permutations) {
+  function(r) {
+    moved <- event[permutations[r, ]]
+    sites <- moved != 0
+    list(comm = comm[sites, , drop = FALSE],
+         env = cbind(moved[sites], env[sites, , drop = FALSE]))
+  }
+}
+
+#' the tests of the biogeographic events of `node_test()`, each in its sites and controlling for
+#' the predictors; `data` comes from `node_test_data()`. A list of four matrices of nodes by
+#' events
+#' @noRd
+node_test_events <- function(data, n_perm, site_permutations, area_permutations, workers) {
+  biogeography <- data$biogeography
+  nodes <- data$nodes
+  events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
+  by_event <- lapply(seq_len(ncol(biogeography)), function(e) {
+    sites <- biogeography[, e] != 0
+    predictors <- cbind(biogeography[sites, e], data$env[sites, , drop = FALSE])
+    local_comm <- data$comm[sites, , drop = FALSE]
+    permutations <- area_permutations[[e]] %||% site_permutations
+    shuffle <- if (is.null(permutations)) {
+      function(r) {
+        list(comm = local_comm[sample.int(nrow(local_comm)), , drop = FALSE],
+             env = predictors)
+      }
+    } else {
+      area_shuffle(data$comm, data$env, biogeography[, e], permutations)
+    }
+    n_area <- if (is.null(permutations)) n_perm else nrow(permutations)
+    map_nodes(nodes, function(contrast) {
+      one_node(local_comm, contrast, predictors, n_perm, shuffle, n_area)
+    }, paste("Nodes,", events[e]), workers)
+  })
+  first <- function(field) {
+    vapply(by_event, function(event) {
+      vapply(event, function(node) node[[field]][1], numeric(1))
+    }, numeric(ncol(nodes)))
+  }
+  node_names <- colnames(nodes) %||% seq_len(ncol(nodes))
+  shaped <- function(x) {
+    matrix(x, ncol(nodes), length(events), dimnames = list(node_names, events))
+  }
+  list(semipartial = shaped(first("semipartial")),
+       p_partial_max = shaped(first("p_partial_max")),
+       p_partial_site = shaped(first("p_partial_site")),
+       p_partial_joint = shaped(first("p_partial_joint")))
 }
 
 #' Matrix of biogeographic events
@@ -482,6 +534,8 @@ check_biogeography <- function(biogeography, comm) {
   biogeography
 }
 
+#' stops unless `area_permutations` has one matrix of permutations of the sites per event
+#' @noRd
 check_area_permutations <- function(permutations, biogeography, comm) {
   if (is.null(permutations)) return(invisible())
   if (is.null(biogeography)) {
@@ -493,10 +547,16 @@ check_area_permutations <- function(permutations, biogeography, comm) {
   }
   for (event in permutations) {
     check_permutations(event, comm, "`area_permutations`")
-    if (!is.null(colnames(event)) && !is.null(rownames(comm)) &&
-          !identical(colnames(event), rownames(comm))) {
-      stop("sites of `area_permutations` are not in the order of `comm`", call. = FALSE)
-    }
+    check_area_order(event, comm)
+  }
+}
+
+#' stops when the permutations of an event name the sites in another order than `comm`
+#' @noRd
+check_area_order <- function(event, comm) {
+  if (!is.null(colnames(event)) && !is.null(rownames(comm)) &&
+        !identical(colnames(event), rownames(comm))) {
+    stop("sites of `area_permutations` are not in the order of `comm`", call. = FALSE)
   }
 }
 
@@ -515,21 +575,31 @@ print.mc_node_test <- function(x, ...) {
   invisible(x)
 }
 
+#' the result of `one_node()` for a node whose model cannot be fitted: all NA but the numbers
+#' of species and sites
+#' @noRd
+untested_node <- function(n_species, n_sites, n_env) {
+  blank <- rep(NA_real_, n_env)
+  list(summary = data.frame(n_species = n_species, n_sites = n_sites,
+                            r2 = NA_real_, r2_adjusted = NA_real_,
+                            r2_original = NA_real_,
+                            r2_adjusted_original = NA_real_,
+                            r2_weighted = NA_real_, statistic = NA_real_,
+                            p_site = NA_real_, p_species = NA_real_, p_max = NA_real_,
+                            p_joint = NA_real_, n_draws = NA_integer_),
+       semipartial = blank, p_partial_max = blank, p_partial_site = blank,
+       p_partial_joint = blank)
+}
+
+#' the test of one node: the fit of its contrast, the three null models and their p-values; a
+#' list with `summary`, a data frame of one row, and the values of each predictor
+#' @noRd
 one_node <- function(comm, contrast, env, n_perm, shuffle, n_site) {
   members <- which(contrast != 0)
   values <- contrast[members]
   observed <- node_fit(comm[, members, drop = FALSE], values, env)
-  blank <- rep(NA_real_, ncol(env))
   if (is.na(observed$statistic)) {
-    return(list(summary = data.frame(n_species = length(members), n_sites = observed$n_sites,
-                                     r2 = NA_real_, r2_adjusted = NA_real_,
-                                     r2_original = NA_real_,
-                                     r2_adjusted_original = NA_real_,
-                                     r2_weighted = NA_real_, statistic = NA_real_,
-                                     p_site = NA_real_, p_species = NA_real_, p_max = NA_real_,
-                                     p_joint = NA_real_, n_draws = NA_integer_),
-                semipartial = blank, p_partial_max = blank, p_partial_site = blank,
-                p_partial_joint = blank))
+    return(untested_node(length(members), observed$n_sites, ncol(env)))
   }
   null_of <- function(n, draw) {
     t(vapply(seq_len(n), function(r) {

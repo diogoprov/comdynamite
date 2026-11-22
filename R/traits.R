@@ -58,32 +58,68 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
   check_number(lambda, "lambda", 0, 1)
   check_range_pair(optima_range, "optima_range")
   check_range_pair(rmax_range, "rmax_range", lower = 0)
+  check_breadth_moments(sigma_mean, sigma_sd)
+  for (flag in c("uniform_optima", "sigma_signal", "rmax_signal", "rescale_optima", "nodes")) {
+    check_flag(get(flag), flag)
+  }
+  has_tree <- inherits(species, "phylo")
+  sp <- species_labels(species, sigma_signal || rmax_signal)
+  k <- length(sp)
+  if (nodes && (!has_tree || !is.null(optima) || uniform_optima)) {
+    stop("`nodes` needs a tree and optima drawn by `species_traits()` without `uniform_optima`",
+         call. = FALSE)
+  }
+  given <- given_traits(optima, sigma, r_max, sp)
+  # values are drawn even when given, so the other traits do not depend on what was given
+  drawn <- if (has_tree) trait_bm(species, lambda) else stats::rnorm(k)
+  u <- scale_optima(drawn, given$optima, rescale_optima, uniform_optima, optima_range)
+  breadth <- draw_breadth(k, sigma_mean, sigma_sd)
+  growth <- stats::runif(k, rmax_range[1], rmax_range[2])
+  breadth <- with_signal(breadth, species, sigma_signal)
+  growth <- with_signal(growth, species, rmax_signal)
+  sigma <- given$sigma %||% breadth
+  r_max <- given$r_max %||% growth
+  out <- data.frame(optimum = unname(u), sigma = unname(sigma), r_max = unname(r_max),
+                    row.names = sp)
+  if (has_tree) attr(out, "tree") <- species
+  if (nodes) {
+    at_nodes <- bm_nodes(species, lambda, drawn)
+    attr(out, "nodes") <- optima_range[1] + (at_nodes - min(drawn)) / diff(range(drawn)) *
+      diff(optima_range)
+  }
+  out
+}
+
+#' stops unless `sigma_mean` and `sigma_sd` can give positive niche breadths
+#' @noRd
+check_breadth_moments <- function(sigma_mean, sigma_sd) {
   check_number(sigma_mean, "sigma_mean")
   check_number(sigma_sd, "sigma_sd", lower = 0)
   if (sigma_sd == 0 && sigma_mean <= 0) {
     stop("with `sigma_sd = 0`, `sigma_mean` must be greater than 0", call. = FALSE)
   }
-  for (flag in c("uniform_optima", "sigma_signal", "rmax_signal", "rescale_optima", "nodes")) {
-    check_flag(get(flag), flag)
+  invisible(TRUE)
+}
+
+#' names of the species of species_traits(): the tips of a tree, or sp1, sp2, ... for a number
+#' of species, which cannot have phylogenetic `signal`
+#' @noRd
+species_labels <- function(species, signal) {
+  if (inherits(species, "phylo")) return(species$tip.label)
+  not_number <- !is.numeric(species) || length(species) != 1 || !is.finite(species)
+  if (not_number || species < 1 || species != round(species)) {
+    stop("`species` must be a `phylo` tree or the number of species (one whole number, 1 or ",
+         "more)", call. = FALSE)
   }
-  if (inherits(species, "phylo")) {
-    k <- ape::Ntip(species)
-    sp <- species$tip.label
-  } else {
-    if (!is.numeric(species) || length(species) != 1 || !is.finite(species) || species < 1 ||
-          species != round(species)) {
-      stop("`species` must be a `phylo` tree or the number of species (one whole number, 1 or ",
-           "more)", call. = FALSE)
-    }
-    if (sigma_signal || rmax_signal)
-      stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`", call. = FALSE)
-    k <- as.integer(species)
-    sp <- paste0("sp", seq_len(k))
-  }
-  if (nodes && (!inherits(species, "phylo") || !is.null(optima) || uniform_optima)) {
-    stop("`nodes` needs a tree and optima drawn by `species_traits()` without `uniform_optima`",
-         call. = FALSE)
-  }
+  if (signal)
+    stop("phylogenetic signal needs a tree: pass a 'phylo' object as `species`", call. = FALSE)
+  paste0("sp", seq_len(as.integer(species)))
+}
+
+#' the traits given to species_traits(), checked and in the order of the species `sp`: a list
+#' with `optima`, `sigma` and `r_max`, each NULL when not given
+#' @noRd
+given_traits <- function(optima, sigma, r_max, sp) {
   given <- list(optima = external_trait(optima, sp, "optima"),
                 sigma = external_trait(sigma, sp, "sigma", finite = FALSE),
                 r_max = external_trait(r_max, sp, "r_max"))
@@ -93,37 +129,39 @@ species_traits <- function(species, lambda = 1, optima_range = c(0, 100),
   if (!is.null(given$r_max) && any(given$r_max < 0)) {
     stop("`r_max` cannot be negative", call. = FALSE)
   }
-  # values are drawn even when given, so the other traits do not depend on what was given
-  u <- if (inherits(species, "phylo")) trait_bm(species, lambda) else stats::rnorm(k)
-  drawn <- u
-  if (!is.null(given$optima)) u <- given$optima
-  if (is.null(given$optima) || rescale_optima) {
-    u <- if (uniform_optima) {
-      rank_to_marginal(u, seq(optima_range[1], optima_range[2], length.out = k))
-    } else {
-      rescale(u, optima_range)
-    }
+  given
+}
+
+#' optima of species_traits(): the `given` ones, or else the `drawn` values, placed within
+#' `optima_range`, unless given and kept as they are
+#' @noRd
+scale_optima <- function(drawn, given, rescale_optima, uniform_optima, optima_range) {
+  u <- given %||% drawn
+  if (!is.null(given) && !rescale_optima) return(u)
+  if (uniform_optima) {
+    return(rank_to_marginal(u, seq(optima_range[1], optima_range[2],
+                                   length.out = length(drawn))))
   }
+  rescale(u, optima_range)
+}
+
+#' the values `x` reordered among the species to follow a trait evolved by Brownian motion on
+#' the tree `species`, when `signal` is TRUE; otherwise `x` as it is
+#' @noRd
+with_signal <- function(x, species, signal) {
+  if (!signal) return(x)
+  rank_to_marginal(trait_bm(species, 1), x)
+}
+
+#' `k` niche breadths from a normal distribution truncated at zero
+#' @noRd
+draw_breadth <- function(k, sigma_mean, sigma_sd) {
   breadth <- numeric(0)
   while (length(breadth) < k) {
     s <- stats::rnorm(2 * k, sigma_mean, sigma_sd)
     breadth <- c(breadth, s[s > 0])
   }
-  breadth <- breadth[seq_len(k)]
-  growth <- stats::runif(k, rmax_range[1], rmax_range[2])
-  if (sigma_signal) breadth <- rank_to_marginal(trait_bm(species, 1), breadth)
-  if (rmax_signal) growth <- rank_to_marginal(trait_bm(species, 1), growth)
-  sigma <- given$sigma %||% breadth
-  r_max <- given$r_max %||% growth
-  out <- data.frame(optimum = unname(u), sigma = unname(sigma), r_max = unname(r_max),
-                    row.names = sp)
-  if (inherits(species, "phylo")) attr(out, "tree") <- species
-  if (nodes) {
-    at_nodes <- bm_nodes(species, lambda, drawn)
-    attr(out, "nodes") <- optima_range[1] + (at_nodes - min(drawn)) / diff(range(drawn)) *
-      diff(optima_range)
-  }
-  out
+  breadth[seq_len(k)]
 }
 
 #' Trait evolution by Brownian motion with Pagel's lambda
@@ -196,30 +234,7 @@ trait_bm <- function(tree, lambda = 1, nodes = FALSE) {
 #' round(g, 2)
 #' @export
 growth_rates <- function(env, traits) {
-  if (is.list(traits) && !is.data.frame(traits)) {
-    traits_in <- traits
-    traits <- lapply(traits, as_traits)
-    axes <- if (is.matrix(env)) as.data.frame(env) else as.list(env)
-    if (length(axes) != length(traits)) {
-      stop("`env` has ", length(axes), " axes and `traits` ", length(traits), " sets of traits",
-           call. = FALSE)
-    }
-    species <- rownames(traits[[1]])
-    if (!all(vapply(traits, function(x) setequal(rownames(x), species), logical(1)))) {
-      stop("growth_rates(): sets of traits have different species", call. = FALSE)
-    }
-    sites <- if (is.matrix(env) || is.data.frame(env)) rownames(env)
-    if (is.data.frame(env) && .row_names_info(env) < 0) sites <- NULL
-    traits <- lapply(traits, function(x) x[species, , drop = FALSE])
-    cor <- attr(traits_in, "niche_cor")
-    r <- if (is.null(cor)) {
-      Reduce(`*`, Map(function(e, x) growth_rates(unname(e), x), unname(as.list(axes)), traits))
-    } else {
-      correlated_growth(axes, traits, cor, species)
-    }
-    rownames(r) <- sites
-    return(r)
-  }
+  if (is.list(traits) && !is.data.frame(traits)) return(growth_rates_axes(env, traits))
   if (is.data.frame(env) || is.matrix(env)) {
     if (ncol(env) != 1) stop("several axes in `env` need a list of traits", call. = FALSE)
     env <- stats::setNames(if (is.data.frame(env)) env[[1]] else env[, 1], rownames(env))
@@ -228,6 +243,34 @@ growth_rates <- function(env, traits) {
   r <- exp(-sweep(outer(env, traits$optimum, "-")^2, 2, 2 * traits$sigma^2, "/"))
   r <- sweep(r, 2, traits$r_max, "*")
   dimnames(r) <- list(names(env), rownames(traits))
+  r
+}
+
+#' growth rates over several niche axes, one set of traits per axis: the product of the
+#' responses to each axis, or the multivariate response with niche_correlation()
+#' @noRd
+growth_rates_axes <- function(env, traits) {
+  traits_in <- traits
+  traits <- lapply(traits, as_traits)
+  axes <- if (is.matrix(env)) as.data.frame(env) else as.list(env)
+  if (length(axes) != length(traits)) {
+    stop("`env` has ", length(axes), " axes and `traits` ", length(traits), " sets of traits",
+         call. = FALSE)
+  }
+  species <- rownames(traits[[1]])
+  if (!all(vapply(traits, function(x) setequal(rownames(x), species), logical(1)))) {
+    stop("growth_rates(): sets of traits have different species", call. = FALSE)
+  }
+  sites <- if (is.matrix(env) || is.data.frame(env)) rownames(env)
+  if (is.data.frame(env) && .row_names_info(env) < 0) sites <- NULL
+  traits <- lapply(traits, function(x) x[species, , drop = FALSE])
+  cor <- attr(traits_in, "niche_cor")
+  r <- if (is.null(cor)) {
+    Reduce(`*`, Map(function(e, x) growth_rates(unname(e), x), unname(as.list(axes)), traits))
+  } else {
+    correlated_growth(axes, traits, cor, species)
+  }
+  rownames(r) <- sites
   r
 }
 
@@ -352,29 +395,34 @@ niche_correlation <- function(traits, cor) {
   }
   q <- length(traits)
   species <- rownames(as_traits(traits[[1]]))
-  check <- function(m, what) {
-    if (!is.matrix(m) || !identical(dim(m), c(q, q)) || !is.numeric(m) || anyNA(m)) {
-      stop(what, " must be a ", q, " x ", q, " numeric matrix", call. = FALSE)
-    }
-    if (max(abs(m - t(m))) > 1e-10 || max(abs(diag(m) - 1)) > 1e-10) {
-      stop(what, " must be symmetric with ones on the diagonal", call. = FALSE)
-    }
-    if (min(eigen(m, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
-      stop(what, " must be positive definite", call. = FALSE)
-    }
-    unname(m)
-  }
   if (is.list(cor)) {
     if (is.null(names(cor)) || !setequal(names(cor), species)) {
       stop("a list of `cor` needs one matrix per species, named by species", call. = FALSE)
     }
     cor <- lapply(stats::setNames(names(cor), names(cor)),
-                  function(sp) check(cor[[sp]], paste0("`cor` of ", sp)))
+                  function(sp) check_niche_cor(cor[[sp]], paste0("`cor` of ", sp), q))
   } else {
-    cor <- check(cor, "`cor`")
+    cor <- check_niche_cor(cor, "`cor`", q)
   }
   attr(traits, "niche_cor") <- cor
   traits
+}
+
+#' stops unless `m` is a positive definite correlation matrix among `q` axes; returns it
+#' without names. `what` names it in the messages
+#' @noRd
+check_niche_cor <- function(m, what, q) {
+  not_square <- !is.matrix(m) || !identical(dim(m), c(q, q))
+  if (not_square || !is.numeric(m) || anyNA(m)) {
+    stop(what, " must be a ", q, " x ", q, " numeric matrix", call. = FALSE)
+  }
+  if (max(abs(m - t(m))) > 1e-10 || max(abs(diag(m) - 1)) > 1e-10) {
+    stop(what, " must be symmetric with ones on the diagonal", call. = FALSE)
+  }
+  if (min(eigen(m, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+    stop(what, " must be positive definite", call. = FALSE)
+  }
+  unname(m)
 }
 
 #' traits of species_traits() as a data frame with names of species, also from a matrix or a
@@ -383,12 +431,7 @@ niche_correlation <- function(traits, cor) {
 #' @noRd
 external_trait <- function(x, species, name, finite = TRUE) {
   if (is.null(x)) return(NULL)
-  if (!is.null(dim(x))) {
-    if (ncol(x) != 1) stop("`", name, "` needs one column", call. = FALSE)
-    labels <- rownames(x)
-    if (is.data.frame(x) && .row_names_info(x) < 0) labels <- NULL
-    x <- stats::setNames(if (is.data.frame(x)) x[[1]] else x[, 1], labels)
-  }
+  if (!is.null(dim(x))) x <- trait_column(x, name)
   if (!is.numeric(x) || anyNA(x)) stop("`", name, "` must be numbers without NA", call. = FALSE)
   if (finite && any(is.infinite(x))) stop("`", name, "` must be finite numbers", call. = FALSE)
   if (is.null(names(x))) {
@@ -403,6 +446,16 @@ external_trait <- function(x, species, name, finite = TRUE) {
     stop("`", name, "` lacks values for ", species_list(missing_species), call. = FALSE)
   }
   unname(x[species])
+}
+
+#' the single column of a matrix or data frame `x` as a vector, named by its row names when it
+#' has them
+#' @noRd
+trait_column <- function(x, name) {
+  if (ncol(x) != 1) stop("`", name, "` needs one column", call. = FALSE)
+  labels <- rownames(x)
+  if (is.data.frame(x) && .row_names_info(x) < 0) labels <- NULL
+  stats::setNames(if (is.data.frame(x)) x[[1]] else x[, 1], labels)
 }
 
 as_traits <- function(traits) {
@@ -420,7 +473,8 @@ as_traits <- function(traits) {
 #' more
 #' @noRd
 check_range_pair <- function(x, name, lower = -Inf) {
-  if (!is.numeric(x) || length(x) != 2 || !all(is.finite(x)) || x[1] > x[2] || any(x < lower)) {
+  not_pair <- !is.numeric(x) || length(x) != 2 || !all(is.finite(x))
+  if (not_pair || x[1] > x[2] || any(x < lower)) {
     stop("`", name, "` must be two finite numbers, the first not larger than the second",
          if (is.finite(lower)) paste0(", both ", lower, " or more"), call. = FALSE)
   }

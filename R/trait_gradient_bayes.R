@@ -172,23 +172,15 @@
 #' longer <- trait_gradient_bayes(tg, tree, parallel_chains = 4, iter_sampling = 2000,
 #'                                init = bayes$fit)
 #' @export
-trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1), chains = 4,
+trait_gradient_bayes <- function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1), chains = 4,
                                  parallel_chains = 1, iter_warmup = 1000,
-                                 iter_sampling = 1000, adapt_delta = 0.95, seed = NULL, ...) {
+                                 iter_sampling = 1000, adapt_delta = 0.95, seed = NULL,
+                                 ...) {
   if (!inherits(x, "mc_trait_gradient")) {
     stop("trait_gradient_bayes(): `x` must come from trait_gradient()", call. = FALSE)
   }
-  check_number(ou_alpha, "ou_alpha", lower = 0, open = TRUE, null_ok = TRUE)
-  check_count(chains, "chains")
-  check_count(parallel_chains, "parallel_chains")
-  check_count(iter_warmup, "iter_warmup", min = 0)
-  check_count(iter_sampling, "iter_sampling")
-  check_number(adapt_delta, "adapt_delta", lower = 0, upper = 1, open = TRUE)
-  check_count(seed, "seed", min = 0, null_ok = TRUE)
-  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || !all(is.finite(lambda_prior)) ||
-      any(lambda_prior <= 0)) {
-    stop("`lambda_prior` must be two positive finite numbers", call. = FALSE)
-  }
+  check_bayes_arguments(ou_alpha, chains, parallel_chains, iter_warmup, iter_sampling,
+                        adapt_delta, seed, lambda_prior)
   absent <- missing_stan_packages()
   if (length(absent) > 0) {
     stop("trait_gradient_bayes() needs the package ", absent[1], # nocov
@@ -224,6 +216,24 @@ trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1)
                             data = model$data,
                             A = model$A, ou_alpha = ou_alpha, lambda_prior = lambda_prior)),
             class = "mc_trait_gradient_bayes")
+}
+
+#' checks the arguments of trait_gradient_bayes() that set the model and the sampler
+#' @noRd
+check_bayes_arguments <- function(ou_alpha, chains, parallel_chains, iter_warmup,
+                                  iter_sampling, adapt_delta, seed, lambda_prior) {
+  check_number(ou_alpha, "ou_alpha", lower = 0, open = TRUE, null_ok = TRUE)
+  check_count(chains, "chains")
+  check_count(parallel_chains, "parallel_chains")
+  check_count(iter_warmup, "iter_warmup", min = 0)
+  check_count(iter_sampling, "iter_sampling")
+  check_number(adapt_delta, "adapt_delta", lower = 0, upper = 1, open = TRUE)
+  check_count(seed, "seed", min = 0, null_ok = TRUE)
+  if (!is.numeric(lambda_prior) || length(lambda_prior) != 2 || !all(is.finite(lambda_prior)) ||
+      any(lambda_prior <= 0)) {
+    stop("`lambda_prior` must be two positive finite numbers", call. = FALSE)
+  }
+  invisible(NULL)
 }
 
 #' packages needed to sample, apart so that tests can run without cmdstanr

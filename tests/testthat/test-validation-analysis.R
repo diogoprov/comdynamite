@@ -21,7 +21,7 @@ test_that("metrics of trait spacing check their flags and refuse Inf", {
   expect_error(mnnd(c(1, Inf, 3)), "`x` has infinite values")
   expect_error(trait_kurtosis(c(1, 2, 3, -Inf)), "`x` has infinite values")
   expect_error(mnd(stats::as.dist(matrix(c(0, Inf, Inf, 0), 2))), "infinite distances")
-  expect_equal(mnnd(c(1, NA, 3), na.rm = TRUE), 2)
+  expect_identical(mnnd(c(1, NA, 3), na.rm = TRUE), 2)
 })
 
 test_that("node_contrasts() and biogeography_matrix() check their scalars", {

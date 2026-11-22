@@ -402,6 +402,24 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0
   }
   fit <- fit_with(regimes)
   observed <- damocles_lrt(constant, fit)
+  random <- partition_random(tree, regimes, n_rand, tolerance, max_overlap, constant, fit_with,
+                             observed$statistic[2], cores)
+  boot <- partition_bootstrap(presence, tree, regimes, n_boot, vary, root, sympatry, constant,
+                              observed$statistic[2], cores)
+  structure(list(statistic = observed$statistic[2], df = observed$df[2],
+                 p_chisq = observed$p_value[2], p_random = random$p, null = random$null,
+                 n_distinct = length(random$null), n_rand = n_rand, p_boot = boot$p,
+                 null_boot = boot$null,
+                 fit = fit),
+            class = "mc_damocles_partition")
+}
+
+#' the test of damocles_partition_test() against random partitions: a list with the
+#' likelihood-ratio statistics of the distinct ones (`null`) and the p-value of `statistic`
+#' (`p`, NA when none could be drawn). `fit_with` fits the model with a partition
+#' @noRd
+partition_random <- function(tree, regimes, n_rand, tolerance, max_overlap, constant, fit_with,
+                             statistic, cores) {
   # Draw the random partitions first, then fit each distinct one once: the p-value does not
   # depend on the number of cores.
   draws <- lapply(seq_len(n_rand), function(i) {
@@ -422,7 +440,7 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0
   # Each distinct partition counts once: repeated draws of a few partitions would otherwise let
   # the p-value fall below what the number of distinct alternatives allows.
   p_random <- if (length(null)) {
-    (sum(null >= observed$statistic[2] - 1e-8) + 1) / (length(null) + 1)
+    (sum(null >= statistic - 1e-8) + 1) / (length(null) + 1)
   } else {
     NA_real_
   }
@@ -431,39 +449,40 @@ damocles_partition_test <- function(comm, tree, regimes, n_rand = 99, n_boot = 0
             "tree has few places for clades like those of `regimes`, and `p_random` cannot be ",
             "below ", format(1 / (length(null) + 1), digits = 2), call. = FALSE)
   }
-  # Parametric bootstrap: communities simulated with the constant rates estimated, refitted
-  # with and without `regimes`. All communities are simulated before the fits, so the p-value
-  # does not depend on the number of cores.
-  null_boot <- numeric(0)
-  p_boot <- NA_real_
-  if (n_boot > 0) {
-    sims <- lapply(seq_len(n_boot), function(i) {
-      simulate_damocles(tree, constant$gamma[1], constant$mu[1], n = nrow(presence),
-                        root = root, sympatry = constant$sympatry[1])
-    })
-    null_boot <- unlist(damocles_apply(sims, function(sim) {
-      tryCatch({
-        base <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry)
-        alt <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry,
-                            regimes = regimes, vary = vary)
-        damocles_lrt(base, alt)$statistic[2]
-      }, error = function(e) NA_real_)
-    }, cores))
-    null_boot <- unname(null_boot[is.finite(null_boot)])
-    if (length(null_boot) < n_boot) {
-      warning(n_boot - length(null_boot), " of ", n_boot, " bootstrap fits failed and were ",
-              "left out", call. = FALSE)
-    }
-    if (length(null_boot)) {
-      p_boot <- (sum(null_boot >= observed$statistic[2] - 1e-8) + 1) / (length(null_boot) + 1)
-    }
+  list(null = null, p = p_random)
+}
+
+#' the parametric bootstrap of damocles_partition_test(): communities simulated with the
+#' `constant` rates estimated, refitted with and without `regimes`. A list with the simulated
+#' statistics (`null`) and the p-value of `statistic` (`p`, NA without simulations)
+#' @noRd
+partition_bootstrap <- function(presence, tree, regimes, n_boot, vary, root, sympatry,
+                                constant, statistic, cores) {
+  if (n_boot == 0) return(list(null = numeric(0), p = NA_real_))
+  # All communities are simulated before the fits, so the p-value does not depend on the
+  # number of cores.
+  sims <- lapply(seq_len(n_boot), function(i) {
+    simulate_damocles(tree, constant$gamma[1], constant$mu[1], n = nrow(presence),
+                      root = root, sympatry = constant$sympatry[1])
+  })
+  null_boot <- unlist(damocles_apply(sims, function(sim) {
+    tryCatch({
+      base <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry)
+      alt <- damocles_fit(sim, tree, root = root, shared = TRUE, sympatry = sympatry,
+                          regimes = regimes, vary = vary)
+      damocles_lrt(base, alt)$statistic[2]
+    }, error = function(e) NA_real_)
+  }, cores))
+  null_boot <- unname(null_boot[is.finite(null_boot)])
+  if (length(null_boot) < n_boot) {
+    warning(n_boot - length(null_boot), " of ", n_boot, " bootstrap fits failed and were ",
+            "left out", call. = FALSE)
   }
-  structure(list(statistic = observed$statistic[2], df = observed$df[2],
-                 p_chisq = observed$p_value[2], p_random = p_random, null = null,
-                 n_distinct = length(null), n_rand = n_rand, p_boot = p_boot,
-                 null_boot = null_boot,
-                 fit = fit),
-            class = "mc_damocles_partition")
+  p_boot <- NA_real_
+  if (length(null_boot)) {
+    p_boot <- (sum(null_boot >= statistic - 1e-8) + 1) / (length(null_boot) + 1)
+  }
+  list(null = null_boot, p = p_boot)
 }
 
 #' @export

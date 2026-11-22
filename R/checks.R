@@ -31,13 +31,18 @@ check_tree <- function(tree, branch_lengths = TRUE, name = "`tree`") {
 #' @noRd
 check_count <- function(x, name, min = 1, max = Inf, null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
-  if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x != round(x) || x < min ||
-        x > max) {
+  if (!is_whole_number(x) || x < min || x > max) {
     range <- if (is.finite(max)) paste0(" between ", min, " and ", max) else
       paste0(", ", min, " or more")
     stop("`", name, "` must be one whole number", range, call. = FALSE)
   }
   invisible(x)
+}
+
+#' TRUE when `x` is one finite whole number
+#' @noRd
+is_whole_number <- function(x) {
+  is.numeric(x) && length(x) == 1 && is.finite(x) && x == round(x)
 }
 
 #' stops unless `x` is one number (not NA) between `lower` and `upper`, which are excluded when
@@ -48,11 +53,22 @@ check_number <- function(x, name, lower = -Inf, upper = Inf, open = FALSE, finit
                          null_ok = FALSE) {
   if (null_ok && is.null(x)) return(invisible(x))
   open <- rep_len(open, 2)
-  ok <- is.numeric(x) && length(x) == 1 && !is.na(x) && (!finite || is.finite(x)) &&
-    (if (open[1]) x > lower else x >= lower) && (if (open[2]) x < upper else x <= upper)
+  ok <- is_one_number(x, finite) && number_within(x, lower, upper, open)
   if (!ok) stop("`", name, "` must be ", number_range(lower, upper, open, finite),
                 call. = FALSE)
   invisible(x)
+}
+
+#' TRUE when `x` is one number that is not NA and, when `finite` is TRUE, not infinite
+#' @noRd
+is_one_number <- function(x, finite) {
+  is.numeric(x) && length(x) == 1 && !is.na(x) && (!finite || is.finite(x))
+}
+
+#' TRUE when the number `x` lies between `lower` and `upper`, excluded where `open` is TRUE
+#' @noRd
+number_within <- function(x, lower, upper, open) {
+  (if (open[1]) x > lower else x >= lower) && (if (open[2]) x < upper else x <= upper)
 }
 
 #' the range of `check_number()` in words
@@ -61,16 +77,25 @@ number_range <- function(lower, upper, open, finite) {
   kind <- if (finite) "one finite number" else "one number"
   low <- if (open[1]) "greater than " else ""
   high <- if (open[2]) "less than " else ""
-  if (is.finite(lower) && is.finite(upper)) {
-    if (!any(open)) return(paste0(kind, " between ", lower, " and ", upper))
-    return(paste0(kind, " ", if (open[1]) "greater than " else "from ", lower, " and ",
-                  if (open[2]) "less than " else "up to ", upper))
-  }
-  if (is.finite(lower)) return(paste0(kind, ", ", if (open[1]) low else "", lower,
-                                      if (open[1]) "" else " or more"))
-  if (is.finite(upper)) return(paste0(kind, ", ", if (open[2]) high else "", upper,
-                                      if (open[2]) "" else " or less"))
+  if (is.finite(lower) && is.finite(upper)) return(two_sided_range(kind, lower, upper, open))
+  one_sided_range(kind, lower, upper, open, low, high)
+}
+
+#' the words of `number_range()` when at most one limit is finite; `low` and `high` are the
+#' words that go before an excluded limit
+#' @noRd
+one_sided_range <- function(kind, lower, upper, open, low, high) {
+  if (is.finite(lower)) return(paste0(kind, ", ", low, lower, if (open[1]) "" else " or more"))
+  if (is.finite(upper)) return(paste0(kind, ", ", high, upper, if (open[2]) "" else " or less"))
   kind
+}
+
+#' the words of `number_range()` when both limits are finite
+#' @noRd
+two_sided_range <- function(kind, lower, upper, open) {
+  if (!any(open)) return(paste0(kind, " between ", lower, " and ", upper))
+  paste0(kind, " ", if (open[1]) "greater than " else "from ", lower, " and ",
+         if (open[2]) "less than " else "up to ", upper)
 }
 
 #' stops unless `x` is one TRUE or FALSE

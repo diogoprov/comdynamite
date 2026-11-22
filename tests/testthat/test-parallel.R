@@ -23,8 +23,8 @@ test_that("permutations under a future plan repeat with a seed, for any number o
   expect_identical(two, run(2))
   expect_identical(two, run(3))
   future::plan(future::sequential)
-  expect_equal(future_workers(), 1)
-  expect_equal(future_workers(installed = FALSE), 1)
+  expect_identical(future_workers(), 1L)
+  expect_identical(future_workers(installed = FALSE), 1)
 })
 
 test_that("tibbles enter and results leave as tables", {
@@ -36,7 +36,7 @@ test_that("tibbles enter and results leave as tables", {
   set.seed(4)
   tidy <- pcc_test(comm, d$tree, env, n_perm = 9)
   set.seed(4)
-  expect_equal(as.data.frame(tidy), as.data.frame(pcc_test(d$comm, d$tree, d$env, n_perm = 9)))
+  expect_identical(as.data.frame(tidy), as.data.frame(pcc_test(d$comm, d$tree, d$env, n_perm = 9)))
   expect_s3_class(tibble::as_tibble(as.data.frame(tidy)), "tbl_df")
   expect_s3_class(tibble::as_tibble(pcps_test(comm, d$tree, env, n_perm = 3)), "tbl_df")
   expect_s3_class(phylo_beta_test(comm, d$tree, env, n_perm = 3), "mc_phylo_beta")

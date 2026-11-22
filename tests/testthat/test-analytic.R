@@ -11,7 +11,7 @@ test_that("a species alone converges to (r - 1) / alpha and dies out if r < 1", 
   out <- mc_dynamics(matrix(3, 60, 1), matrix(0.02), dispersal = 0, n_steps = 300)
   expect_equal(mean(out$abundance), (3 - 1) / 0.02, tolerance = 0.02)
   lost <- mc_dynamics(matrix(0.8, 20, 1), matrix(0.02), dispersal = 0, n_steps = 300)
-  expect_equal(sum(lost$abundance), 0)
+  expect_identical(sum(lost$abundance), 0L)
 })
 
 test_that("coexisting species reach the solution of alpha N = r - 1", {
@@ -32,7 +32,7 @@ test_that("a species that cannot invade is excluded", {
                     1.5, 1), 2, byrow = TRUE) * 0.02
   # species 2 cannot invade: at N1* its growth is r / (1 + alpha21 N1*) < 1
   out <- mc_dynamics(matrix(5, 30, 2), alpha, dispersal = 0, n_steps = 600)
-  expect_equal(sum(out$abundance[, 2]), 0)
+  expect_identical(sum(out$abundance[, 2]), 0L)
   expect_equal(mean(out$abundance[, 1]), 4 / 0.02, tolerance = 0.02)
 })
 

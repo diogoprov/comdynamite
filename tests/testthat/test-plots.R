@@ -13,7 +13,7 @@ test_that("each significant test gets a symbol, with the correction per set", {
   expect_equal(sum(marks$set == "biogeography"),
                sum(out$biogeography$p_partial_site <= 0.2, na.rm = TRUE))
   expected <- sum(p.adjust(p, "BH") <= 0.2, na.rm = TRUE)
-  expect_equal(sum(marks$corrected[marks$set == "environment"]), expected)
+  expect_identical(sum(marks$corrected[marks$set == "environment"]), expected)
   expect_true(all(c("node", "variable", "p", "p_adjusted") %in% names(marks)))
 })
 
@@ -30,10 +30,10 @@ test_that("nodes are drawn in both layouts, with or without symbols", {
   expect_gt(nrow(marks), 0)
   # one symbol per node, set and level, predictors above the node and events below
   points <- ggplot2::layer_data(p, 4)
-  expect_equal(nrow(points), nrow(unique(marks[c("node", "set", "corrected")])))
+  expect_identical(nrow(points), nrow(unique(marks[c("node", "set", "corrected")])))
   expect_ggplot(plot_node_test(out, daphniids$tree, test = "site", type = "fan", level = 0.2,
                                legend = FALSE))
-  expect_equal(nrow(attr(plot_node_test(out, daphniids$tree, level = 0), "marks")), 0)
+  expect_identical(nrow(attr(plot_node_test(out, daphniids$tree, level = 0), "marks")), 0L)
   expect_warning(plot_node_test(out, daphniids$tree, col = c("red", "blue"), level = 0.2),
                  "`col` is deprecated")
   expect_warning(plot_node_test(out, daphniids$tree, cex = 1, level = 0.2), "`cex` is deprecated")
@@ -57,11 +57,11 @@ test_that("the partition plot returns the three fractions in order", {
   colnames(comm) <- names(trait)
   out <- trait_partition(comm, trait, env, space, n_perm = 9)
   shown <- attr(expect_ggplot(plot_trait_partition(out)), "fractions")
-  expect_equal(shown$fraction, c("a", "b", "c", "d"))
-  expect_equal(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c", "d"),
-                                                                  out$fractions$fraction)])
+  expect_identical(shown$fraction, c("a", "b", "c", "d"))
+  expect_identical(shown$r2_adjusted, out$fractions$r2_adjusted[match(c("a", "b", "c", "d"),
+                                                                      out$fractions$fraction)])
   expect_true(any(shown$r2_adjusted < 0))
-  expect_equal(shown$shown, pmax(shown$r2_adjusted, 0))
+  expect_identical(shown$shown, pmax(shown$r2_adjusted, 0))
   expect_ggplot(plot_trait_partition(out, value = "r2", test = "site"))
   expect_error(plot_trait_partition(list()), "trait_partition")
   expect_error(plot_trait_partition(out, labels = "a"), "two names")
@@ -72,12 +72,12 @@ test_that("the partition plot returns the three fractions in order", {
 test_that("the heatmap holds predictors and events, with blanks where there is no value", {
   out <- daphniid_result()
   values <- attr(expect_ggplot(plot_node_heatmap(out, test = "site", level = 0.2)), "values")
-  expect_equal(colnames(values), c(colnames(daphniids$env), colnames(daphniids$biogeography)))
-  expect_equal(rownames(values), as.character(out$nodes$node))
+  expect_identical(colnames(values), c(colnames(daphniids$env), colnames(daphniids$biogeography)))
+  expect_identical(rownames(values), as.character(out$nodes$node))
   expect_true(anyNA(values))
   only_env <- daphniid_result(NULL)
-  expect_equal(ncol(attr(plot_node_heatmap(only_env, level = 0), "values")),
-               ncol(daphniids$env))
+  expect_identical(ncol(attr(plot_node_heatmap(only_env, level = 0), "values")),
+                   ncol(daphniids$env))
   expect_error(plot_node_heatmap(list()), "node_test")
   expect_warning(plot_node_heatmap(out, level = 0.2, cex = 1), "`cex` is deprecated")
 })
@@ -98,7 +98,7 @@ test_that("the second label goes to the side with more room", {
   p <- plot_trait_partition(x)
   expect_equal(attr(p, "fractions")$shown, c(0.5, 0.1, 0.3, 0.1))
   # c (0.3) on the right of the bar of space has more room than a (0.5) on its left? no
-  expect_equal(ggplot2::layer_data(p, 2)$hjust[2], 1)
+  expect_identical(ggplot2::layer_data(p, 2)$hjust[2], 1)
   # a tested shared fraction is coloured like the others
   x$fractions$p_max[2] <- 0.01
   expect_ggplot(plot_trait_partition(x))
@@ -119,7 +119,7 @@ test_that("plot_phylo_beta() orders sites and species", {
   # the columns follow the tips of the ladderized tree
   ladder <- ape::ladderize(tree)
   tips <- ladder$edge[ladder$edge[, 2] <= 8, 2]
-  expect_equal(colnames(shown), intersect(ladder$tip.label[tips], colnames(shown)))
+  expect_identical(colnames(shown), intersect(ladder$tip.label[tips], colnames(shown)))
   expect_error(plot_phylo_beta(out, comm[keep, ][-1, ], tree), "occupied sites")
   expect_error(plot_phylo_beta(out, comm[keep, ], tree, axis = 99), "`axis`")
   expect_warning(plot_phylo_beta(out, comm[keep, ], tree, cex = 1), "`cex` is deprecated")

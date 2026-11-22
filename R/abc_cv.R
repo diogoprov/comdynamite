@@ -157,15 +157,7 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   parameters <- parameters %||% attr(table, "parameters")
   if (is.null(parameters)) stop("abc_cv(): Give `parameters` for a plain data frame.",
                                 call. = FALSE)
-  pattern <- "^f([0-9]+)_(train|test)_(.+)$"
-  columns <- grep(pattern, names(table), value = TRUE)
-  if (!length(columns)) {
-    stop("`table` has no statistics by fold; see fold_summarise().", call. = FALSE)
-  }
-  info <- data.frame(column = columns, fold = as.integer(sub(pattern, "\\1", columns)),
-                     part = sub(pattern, "\\2", columns), statistic = sub(pattern, "\\3", columns))
-  if (!is.null(statistics)) info <- info[info$statistic %in% statistics, , drop = FALSE]
-  if (!nrow(info)) stop("None of `statistics` is in `table`.", call. = FALSE)
+  info <- fold_columns(table, statistics)
   if (!is.data.frame(observed)) observed <- as.data.frame(as.list(observed))
   missing <- setdiff(info$column, names(observed))
   if (length(missing)) {
@@ -177,31 +169,7 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   on.exit(if (is.null(old)) rm(".Random.seed", envir = globalenv()) else
     assign(".Random.seed", old, envir = globalenv()), add = TRUE)
   out <- lapply(sort(unique(info$fold)), function(f) {
-    train <- info[info$fold == f & info$part == "train", ]
-    test <- info[info$fold == f & info$part == "test", ]
-    finite <- colSums(!is.finite(as.matrix(observed[, train$column, drop = FALSE]))) == 0
-    train <- train[finite, , drop = FALSE]
-    fold_table <- as.data.frame(table)[, c(parameters, train$column), drop = FALSE]
-    fit <- abc_fit(fold_table, parameters, train$column, ntree = ntree, ncores = ncores)
-    weights <- forest_weights(fit, observed[, fit$statistics, drop = FALSE])
-    rows <- match(rownames(fit$training), rownames(table))
-    do.call(rbind, lapply(seq_len(nrow(observed)), function(o) {
-      cell_seed(seed + 1000 * f + o)
-      drawn <- rows[sample.int(length(rows), n, replace = TRUE, prob = weights[, o])]
-      do.call(rbind, lapply(seq_len(nrow(test)), function(i) {
-        v <- table[[test$column[i]]][drawn]
-        v <- v[is.finite(v)]
-        obs <- observed[[test$column[i]]][o]
-        if (!length(v) || !is.finite(obs)) return(NULL)
-        interval <- unname(stats::quantile(v, probs))
-        spread <- stats::sd(v)
-        data.frame(observation = o, fold = f, statistic = test$statistic[i], observed = obs,
-                   median = stats::median(v), low = interval[1], high = interval[2],
-                   inside = obs >= interval[1] & obs <= interval[2],
-                   p = min(1, 2 * min(mean(v >= obs), mean(v <= obs))),
-                   z = if (isTRUE(spread > 0)) (obs - stats::median(v)) / spread else NA_real_)
-      }))
-    }))
+    cv_fold(f, info, table, observed, parameters, probs, n, ntree, ncores, seed)
   })
   out <- do.call(rbind, out)
   out <- out[order(out$observation, out$fold), , drop = FALSE]
@@ -209,6 +177,60 @@ abc_cv <- function(table, observed, parameters = NULL, statistics = NULL, level 
   attr(out, "seed") <- seed
   class(out) <- c("mc_abc_cv", "data.frame")
   out
+}
+
+#' the columns of `table` with statistics by fold, as written by `fold_summarise()`: a data frame
+#' with `column`, `fold`, `part` ("train" or "test") and `statistic`, for the `statistics` asked
+#' @noRd
+fold_columns <- function(table, statistics) {
+  pattern <- "^f([0-9]+)_(train|test)_(.+)$"
+  columns <- grep(pattern, names(table), value = TRUE)
+  if (!length(columns)) {
+    stop("`table` has no statistics by fold; see fold_summarise().", call. = FALSE)
+  }
+  info <- data.frame(column = columns, fold = as.integer(sub(pattern, "\\1", columns)),
+                     part = sub(pattern, "\\2", columns), statistic = sub(pattern, "\\3", columns))
+  if (!is.null(statistics)) info <- info[info$statistic %in% statistics, , drop = FALSE]
+  if (!nrow(info)) stop("None of `statistics` is in `table`.", call. = FALSE)
+  info
+}
+
+#' the check of fold `f` of `abc_cv()`: fits on the statistics of the kept sites and, for each
+#' observation, compares those of the sites left out with `n` draws from the posterior; a data
+#' frame with one row per observation and statistic, or NULL
+#' @noRd
+cv_fold <- function(f, info, table, observed, parameters, probs, n, ntree, ncores, seed) {
+  train <- info[info$fold == f & info$part == "train", ]
+  test <- info[info$fold == f & info$part == "test", ]
+  finite <- colSums(!is.finite(as.matrix(observed[, train$column, drop = FALSE]))) == 0
+  train <- train[finite, , drop = FALSE]
+  fold_table <- as.data.frame(table)[, c(parameters, train$column), drop = FALSE]
+  fit <- abc_fit(fold_table, parameters, train$column, ntree = ntree, ncores = ncores)
+  weights <- forest_weights(fit, observed[, fit$statistics, drop = FALSE])
+  rows <- match(rownames(fit$training), rownames(table))
+  do.call(rbind, lapply(seq_len(nrow(observed)), function(o) {
+    cell_seed(seed + 1000 * f + o)
+    drawn <- rows[sample.int(length(rows), n, replace = TRUE, prob = weights[, o])]
+    do.call(rbind, lapply(seq_len(nrow(test)), function(i) {
+      cv_statistic(table[[test$column[i]]][drawn], observed[[test$column[i]]][o], probs,
+                   o, f, test$statistic[i])
+    }))
+  }))
+}
+
+#' one row of `abc_cv()`: the observed value `obs` of a statistic of the sites left out against
+#' its posterior predictive draws `v`; NULL when either has no finite value
+#' @noRd
+cv_statistic <- function(v, obs, probs, o, f, statistic) {
+  v <- v[is.finite(v)]
+  if (!length(v) || !is.finite(obs)) return(NULL)
+  interval <- unname(stats::quantile(v, probs))
+  spread <- stats::sd(v)
+  data.frame(observation = o, fold = f, statistic = statistic, observed = obs,
+             median = stats::median(v), low = interval[1], high = interval[2],
+             inside = obs >= interval[1] & obs <= interval[2],
+             p = min(1, 2 * min(mean(v >= obs), mean(v <= obs))),
+             z = if (isTRUE(spread > 0)) (obs - stats::median(v)) / spread else NA_real_)
 }
 
 #' @export

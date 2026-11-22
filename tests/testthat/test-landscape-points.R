@@ -2,9 +2,9 @@ test_that("landscape_points gives Euclidean or great-circle distances and a kern
   xy <- cbind(x = c(0, 3, 0), y = c(0, 4, 1))
   ls <- landscape_points(xy, env = c(1, 2, 3), disp_scale = 1)
   expect_s3_class(ls, "mc_landscape")
-  expect_equal(ls$dist[1, 2], 5)
+  expect_identical(ls$dist[1, 2], 5)
   expect_equal(unname(rowSums(ls$dispersal)), rep(1, 3))
-  expect_equal(unname(diag(ls$dispersal)), rep(0, 3))
+  expect_identical(unname(diag(ls$dispersal)), rep(0, 3))
   expect_output(print(ls), "points")
   # one degree of latitude is about 111.2 km
   ll <- landscape_points(cbind(c(-72, -72), c(43, 44)), c(0, 1), 10, lonlat = TRUE)
@@ -21,7 +21,7 @@ test_that("landscape_points drives simulations and the daphniid lakes", {
   tree <- treeshapesim::sim_tree_shape(6)
   sim <- simulate_metacommunity(ls, species_traits(tree, 0.5), competition_matrix(tree, "none"),
                                 dispersal = 0.05, n_steps = 20)
-  expect_equal(dim(sim$abundance), c(20, 6))
+  expect_identical(dim(sim$abundance), c(20L, 6L))
 })
 
 test_that("landscape_matrix() keeps a given dispersal matrix, rescaled by rows", {
@@ -29,7 +29,7 @@ test_that("landscape_matrix() keeps a given dispersal matrix, rescaled by rows",
   diag(w) <- 5
   ls <- landscape_matrix(w, env = c(1, 2, 3), coords = cbind(1:3, 0), dist = matrix(1, 3, 3))
   expect_s3_class(ls, "mc_landscape")
-  expect_equal(diag(ls$dispersal), rep(0, 3))
+  expect_identical(diag(ls$dispersal), rep(0, 3))
   expect_equal(rowSums(ls$dispersal), rep(1, 3))
   expect_equal(ls$dispersal[2, ], c(1, 0, 3) / 4)
   expect_output(print(ls), "dispersal matrix")

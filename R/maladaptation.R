@@ -141,35 +141,13 @@ maladaptation_mv <- function(x, step) {
   sigma <- matrix(sigma, length(species), q)
   # Omega of each species on its selected axes: diagonal, or D R D with niche_correlation()
   cor <- niche_cor_species(attr(x$traits, "niche_cor"), species, q)
-  omega <- function(k, s) {
-    if (is.null(cor)) diag(sigma[k, s]^2, length(s)) else niche_omega(sigma[k, ], cor[[k]], s)
-  }
   present <- abundance > 0 & !is.na(state$mean[, , 1])
   cell <- which(present)
   i <- (cell - 1) %% length(sites) + 1
   j <- (cell - 1) %/% length(sites) + 1
   phen <- matrix(state$mean, ncol = q)[cell, , drop = FALSE]
   dev <- state$env[i, , drop = FALSE] - phen
-  distance <- numeric(length(cell))
-  for (k in unique(j)) {
-    rows <- which(j == k)
-    s <- which(is.finite(sigma[k, ]))
-    if (!length(s)) next
-    g <- match(species[k], names(ev$genetic_var))
-    p <- ev$genetic_var[[g]] + ev$env_var[[g]]
-    d <- dev[rows, s, drop = FALSE]
-    if (is.null(state$within)) {
-      A <- solve(omega(k, s) + p[s, s, drop = FALSE])
-      distance[rows] <- sqrt(rowSums((d %*% A) * d))
-    } else {
-      # the variance among lineages in each site adds to the diagonal of P
-      w <- matrix(state$within, ncol = q)[cell[rows], , drop = FALSE]
-      for (r in seq_along(rows)) {
-        A <- solve(omega(k, s) + diag(w[r, s], length(s)) + p[s, s, drop = FALSE])
-        distance[rows[r]] <- sqrt(sum((d[r, ] %*% A) * d[r, ]))
-      }
-    }
-  }
+  distance <- maladaptation_distance(ev, state$within, sigma, cor, dev, cell, j, species)
   out <- data.frame(site = sites[i], species = species[j], abundance = abundance[cell],
                     stringsAsFactors = FALSE)
   for (a in seq_len(q)) {
@@ -184,4 +162,37 @@ maladaptation_mv <- function(x, step) {
   out <- out[ord, , drop = FALSE]
   rownames(out) <- NULL
   out
+}
+
+#' Mahalanobis distance of each population (the cells `cell`, of species `j`) to its optimum,
+#' from the deviations `dev` (populations x traits), under Omega + P of its species; `within`
+#' is the variance among lineages in each site, added to the diagonal of P, or NULL
+#' @noRd
+maladaptation_distance <- function(ev, within, sigma, cor, dev, cell, j, species) {
+  q <- ncol(sigma)
+  # Omega of each species on its selected axes: diagonal, or D R D with niche_correlation()
+  omega <- function(k, s) {
+    if (is.null(cor)) diag(sigma[k, s]^2, length(s)) else niche_omega(sigma[k, ], cor[[k]], s)
+  }
+  distance <- numeric(length(cell))
+  for (k in unique(j)) {
+    rows <- which(j == k)
+    s <- which(is.finite(sigma[k, ]))
+    if (!length(s)) next
+    g <- match(species[k], names(ev$genetic_var))
+    p <- ev$genetic_var[[g]] + ev$env_var[[g]]
+    d <- dev[rows, s, drop = FALSE]
+    if (is.null(within)) {
+      A <- solve(omega(k, s) + p[s, s, drop = FALSE])
+      distance[rows] <- sqrt(rowSums((d %*% A) * d))
+    } else {
+      # the variance among lineages in each site adds to the diagonal of P
+      w <- matrix(within, ncol = q)[cell[rows], , drop = FALSE]
+      for (r in seq_along(rows)) {
+        A <- solve(omega(k, s) + diag(w[r, s], length(s)) + p[s, s, drop = FALSE])
+        distance[rows[r]] <- sqrt(sum((d[r, ] %*% A) * d[r, ]))
+      }
+    }
+  }
+  distance
 }

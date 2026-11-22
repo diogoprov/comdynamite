@@ -133,5 +133,5 @@ test_that("persistence() checks `window`", {
   expect_error(persistence(x, window = 0), "`window`")
   expect_error(persistence(x, window = c(1, 2)), "`window`")
   expect_error(persistence(x, window = NA), "`window`")
-  expect_equal(nrow(persistence(x, window = 2)), 2)
+  expect_identical(nrow(persistence(x, window = 2)), 2L)
 })

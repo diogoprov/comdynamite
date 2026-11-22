@@ -186,14 +186,7 @@ trait_kurtosis <- function(x, na.rm = FALSE) {
 #' @noRd
 metric_input <- function(x, na.rm) {
   check_flag(na.rm, "na.rm")
-  if (inherits(x, "dist")) {
-    if (any(is.infinite(x))) stop("`x` has infinite distances", call. = FALSE)
-    if (anyNA(x)) {
-      if (na.rm) stop("a `dist` object with missing values cannot be used", call. = FALSE)
-      return(NULL)
-    }
-    return(x)
-  }
+  if (inherits(x, "dist")) return(metric_dist_input(x, na.rm))
   if (is.data.frame(x)) x <- as.matrix(x)
   # classes such as `units` would send sd() and friends to their own methods
   kept <- intersect(names(attributes(x)), c("dim", "dimnames", "names"))
@@ -202,6 +195,13 @@ metric_input <- function(x, na.rm) {
   if (!is.numeric(x)) stop("`x` must be numeric, a numeric matrix or a dist object", call. = FALSE)
   no_infinite_trait(x)
   if (is.matrix(x) && ncol(x) == 1) x <- as.vector(x)
+  metric_complete(x, na.rm)
+}
+
+#' the values (a vector, or the rows of a matrix) without missing values; NULL when there are
+#' missing values and they are not to be dropped
+#' @noRd
+metric_complete <- function(x, na.rm) {
   if (is.matrix(x)) {
     complete <- stats::complete.cases(x)
     if (!all(complete)) {
@@ -211,6 +211,18 @@ metric_input <- function(x, na.rm) {
   } else if (anyNA(x)) {
     if (!na.rm) return(NULL)
     x <- x[!is.na(x)]
+  }
+  x
+}
+
+#' a `dist` object given to a metric, after checking it; NULL when it has missing values
+#' (which cannot be dropped: with `na.rm` the function stops)
+#' @noRd
+metric_dist_input <- function(x, na.rm) {
+  if (any(is.infinite(x))) stop("`x` has infinite distances", call. = FALSE)
+  if (anyNA(x)) {
+    if (na.rm) stop("a `dist` object with missing values cannot be used", call. = FALSE)
+    return(NULL)
   }
   x
 }
@@ -265,10 +277,9 @@ mst_edges <- function(x, na.rm) {
 
 single_trait <- function(x, na.rm) {
   check_flag(na.rm, "na.rm")
-  if (inherits(x, "dist") || (is.matrix(x) && ncol(x) > 1) ||
-      (is.data.frame(x) && ncol(x) > 1)) {
-    stop("this metric takes a single trait", call. = FALSE)
-  }
+  several <- inherits(x, "dist") || (is.matrix(x) && ncol(x) > 1) ||
+    (is.data.frame(x) && ncol(x) > 1)
+  if (several) stop("this metric takes a single trait", call. = FALSE)
   x <- unlist(x, use.names = FALSE)
   if (!is.numeric(x) || length(dim(x)) > 2) {
     stop("`x` must be a numeric vector or a one-column matrix", call. = FALSE)

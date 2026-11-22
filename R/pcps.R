@@ -100,10 +100,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
     comm <- comm$comm
   }
   check_count(n_perm, "n_perm")
-  if (!is.numeric(axes) || length(axes) < 1 || !all(is.finite(axes)) || any(axes < 1) ||
-        any(axes != round(axes)) || anyDuplicated(axes) > 0) {
-    stop("`axes` must be distinct whole numbers, 1 or more", call. = FALSE)
-  }
+  check_pcps_axes(axes)
   if (!is.null(coords)) check_coords(coords)
   matched <- present_species(check_phylo_comm(comm, tree, !is.null(site_permutations)),
                              minimum = 3)
@@ -120,11 +117,7 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   belonging <- fuzzy_belonging(tree)
   gower <- pcps_gower(weights, belonging)
   ordination <- pcps_axes(gower)
-  if (max(axes) > ncol(ordination$scores)) {
-    stop("`axes` asks for axis ", max(axes), " and there are ", ncol(ordination$scores),
-         " with positive eigenvalues", call. = FALSE)
-  }
-  scores <- ordination$scores[, axes, drop = FALSE]
+  scores <- pcps_chosen_axes(ordination$scores, axes)
   observed <- pcps_fit(gower, scores, env)
   warn_perfect_fit(observed$r2, c("the whole dissimilarity", colnames(scores)),
                    "the predictors and the response")
@@ -132,8 +125,56 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   null_site <- progress_map(seq_len(site$n), function(r) {
     pcps_fit(gower, scores, site$env_at(r))$statistic
   }, "Sites")
-  null_species <- progress_map(seq_len(n_perm), function(r) {
-    moved <- sample.int(ncol(comm))
+  null_species <- pcps_species_null(weights, belonging, axes, env, n_perm)
+  tests <- pcps_tests(observed, null_site, null_species, axes, ordination$share)
+  species <- pcps_species_cor(weights, belonging, ordination$scores)
+  rownames(ordination$scores) <- rownames(comm)
+  structure(list(tests = tests, scores = ordination$scores, share = ordination$share,
+                 species = species, env = env, tree = tree,
+                 permutations = permutation_record(n_perm, site_permutations, null = null)),
+            class = "mc_pcps")
+}
+
+#' stops unless `axes` of `pcps_test()` are distinct whole numbers, 1 or more
+#' @noRd
+check_pcps_axes <- function(axes) {
+  if (not_finite_numbers(axes) || any(axes < 1) || any(axes != round(axes)) ||
+        anyDuplicated(axes) > 0) {
+    stop("`axes` must be distinct whole numbers, 1 or more", call. = FALSE)
+  }
+}
+
+#' TRUE unless `x` holds one or more finite numbers
+#' @noRd
+not_finite_numbers <- function(x) {
+  !is.numeric(x) || length(x) < 1 || !all(is.finite(x))
+}
+
+#' the scores of the `axes` asked of `pcps_test()`, which must be among those of the ordination
+#' @noRd
+pcps_chosen_axes <- function(scores, axes) {
+  if (max(axes) > ncol(scores)) {
+    stop("`axes` asks for axis ", max(axes), " and there are ", ncol(scores),
+         " with positive eigenvalues", call. = FALSE)
+  }
+  scores[, axes, drop = FALSE]
+}
+
+#' correlations between the columns of the matrix P, one per species, and the axes
+#' @noRd
+pcps_species_cor <- function(weights, belonging, scores) {
+  species <- suppressWarnings(stats::cor(weights %*% belonging, scores))
+  rownames(species) <- colnames(weights)
+  species
+}
+
+#' statistics of `pcps_test()` with the species permuted on the tree, `n_perm` times: a list of
+#' vectors with the statistic of the whole dissimilarity and of each of `axes`, NA for axes
+#' that a permutation does not have
+#' @noRd
+pcps_species_null <- function(weights, belonging, axes, env, n_perm) {
+  progress_map(seq_len(n_perm), function(r) {
+    moved <- sample.int(ncol(weights))
     null_gower <- pcps_gower(weights, belonging[moved, moved])
     null_scores <- pcps_axes(null_gower)$scores
     present <- axes <= ncol(null_scores)
@@ -142,6 +183,12 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
                                             env)$statistic
     statistic
   }, "Species")
+}
+
+#' the table of tests of `pcps_test()`, with the p-values of the observed statistics against
+#' the draws of sites and of species
+#' @noRd
+pcps_tests <- function(observed, null_site, null_species, axes, share) {
   p_value <- function(nulls) {
     vapply(seq_along(observed$statistic), function(i) {
       permutation_p(vapply(nulls, `[`, numeric(1), i), observed$statistic[i])
@@ -149,18 +196,10 @@ pcps_test <- function(comm, tree, env, axes = 1:2, n_perm = 999, site_permutatio
   }
   p_site <- p_value(null_site)
   p_species <- p_value(null_species)
-  tests <- data.frame(test = c("whole", paste0("pcps", axes)),
-                      share = c(1, ordination$share[axes]), r2 = observed$r2,
-                      statistic = observed$statistic, p_site = p_site, p_species = p_species,
-                      p_max = pmax(p_site, p_species))
-  composition <- weights %*% belonging
-  species <- suppressWarnings(stats::cor(composition, ordination$scores))
-  rownames(species) <- colnames(comm)
-  rownames(ordination$scores) <- rownames(comm)
-  structure(list(tests = tests, scores = ordination$scores, share = ordination$share,
-                 species = species, env = env, tree = tree,
-                 permutations = permutation_record(n_perm, site_permutations, null = null)),
-            class = "mc_pcps")
+  data.frame(test = c("whole", paste0("pcps", axes)),
+             share = c(1, share[axes]), r2 = observed$r2,
+             statistic = observed$statistic, p_site = p_site, p_species = p_species,
+             p_max = pmax(p_site, p_species))
 }
 
 #' @export
@@ -262,11 +301,7 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
   if (is.null(x$species)) {
     stop("`x` comes from an older version of pcps_test(); run it again", call. = FALSE)
   }
-  n_axes <- ncol(x$scores)
-  if (!is.numeric(axes) || length(axes) != 2 || any(axes < 1) || any(axes > n_axes) ||
-      any(axes != round(axes)) || axes[1] == axes[2]) {
-    stop("`axes` must be two different axes between 1 and ", n_axes, call. = FALSE)
-  }
+  check_plot_axes(axes, ncol(x$scores))
   check_flag(species, "species")
   check_flag(species_labels, "species_labels")
   check_string(palette, "palette")
@@ -275,15 +310,9 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
   sites <- data.frame(a1 = x$scores[, axes[1]], a2 = x$scores[, axes[2]])
   colour_name <- NULL
   if (!is.null(env)) {
-    predictors <- as.data.frame(x$env)
-    if (is.null(colnames(x$env))) names(predictors) <- paste0("env", seq_along(predictors))
-    if (length(env) != 1 || !(env %in% names(predictors) ||
-                              (is.numeric(env) && env >= 1 && env <= ncol(predictors)))) {
-      stop("`env` must be one column of the predictors given to pcps_test(), or NULL",
-           call. = FALSE)
-    }
-    colour_name <- if (is.numeric(env)) names(predictors)[env] else env
-    sites$env <- predictors[[env]]
+    predictor <- pcps_predictor(x, env)
+    colour_name <- predictor$name
+    sites$env <- predictor$values
   }
   .data <- ggplot2::.data
   p <- ggplot2::ggplot(sites, ggplot2::aes(x = .data$a1, y = .data$a2)) +
@@ -297,67 +326,90 @@ plot.mc_pcps <- function(x, axes = c(1, 2), env = 1, species = TRUE, species_lab
     }
     group <- pcps_clades(clades, x$tree, rownames(x$species))
   }
-  if (is.null(colour_name)) {
-    p <- p + ggplot2::geom_point(size = point_size)
-  } else if (is.null(group) || !species) {
-    p <- p + ggplot2::geom_point(ggplot2::aes(colour = .data$env), size = point_size) +
-      ggplot2::scale_colour_gradientn(colours = grDevices::hcl.colors(30, palette),
-                                      name = colour_name)
-  } else {
-    # the colour scale belongs to the clades, so the predictor fills the sites
-    p <- p + ggplot2::geom_point(ggplot2::aes(fill = .data$env), shape = 21, colour = "grey30",
-                                 stroke = 0.3, size = point_size) +
-      ggplot2::scale_fill_gradientn(colours = grDevices::hcl.colors(30, palette),
-                                    name = colour_name)
-  }
-  if (species) {
-    # species scaled to the spread of the sites, as in a biplot
-    scale <- 0.9 * max(abs(as.matrix(sites[c("a1", "a2")]))) /
-      max(abs(x$species[, axes]), na.rm = TRUE)
-    sp <- data.frame(a1 = x$species[, axes[1]] * scale, a2 = x$species[, axes[2]] * scale,
-                     label = rownames(x$species))
-    if (!is.null(group)) sp$clade <- group
-    sp <- sp[stats::complete.cases(sp[c("a1", "a2")]), , drop = FALSE]
-    if (is.null(group)) {
-      p <- p + ggplot2::geom_segment(data = sp, ggplot2::aes(x = 0, y = 0, xend = .data$a1,
-                                                             yend = .data$a2),
-                                     colour = "grey50", linewidth = 0.4,
-                                     arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "cm")))
-    } else {
-      p <- p + pcps_clade_layers(sp)
-    }
-    if (species_labels) {
-      p <- p + ggplot2::geom_text(data = sp, ggplot2::aes(label = .data$label),
-                                  colour = "grey30", size = 3, vjust = -0.4)
-    }
-  }
+  p <- p + pcps_site_layers(colour_name, !is.null(group) && species, palette, point_size)
+  if (species) p <- p + pcps_species_layers(x, axes, sites, group, species_labels)
   p + ggplot2::labs(x = axis_label(axes[1]), y = axis_label(axes[2])) +
     ggplot2::coord_equal() + ggplot2::theme_minimal()
+}
+
+#' stops unless `axes` are two different axes among the `n_axes` of `x`
+#' @noRd
+check_plot_axes <- function(axes, n_axes) {
+  if (not_pair_within(axes, n_axes) || any(axes != round(axes)) || axes[1] == axes[2]) {
+    stop("`axes` must be two different axes between 1 and ", n_axes, call. = FALSE)
+  }
+}
+
+#' TRUE unless `x` holds two numbers between 1 and `n`
+#' @noRd
+not_pair_within <- function(x, n) {
+  !is.numeric(x) || length(x) != 2 || any(x < 1) || any(x > n)
+}
+
+#' the predictor that colours the sites, from its column number or name: a list with its `name`
+#' and `values`
+#' @noRd
+pcps_predictor <- function(x, env) {
+  predictors <- as.data.frame(x$env)
+  if (is.null(colnames(x$env))) names(predictors) <- paste0("env", seq_along(predictors))
+  if (length(env) != 1 || !(env %in% names(predictors) ||
+                            (is.numeric(env) && env >= 1 && env <= ncol(predictors)))) {
+    stop("`env` must be one column of the predictors given to pcps_test(), or NULL",
+         call. = FALSE)
+  }
+  list(name = if (is.numeric(env)) names(predictors)[env] else env, values = predictors[[env]])
+}
+
+#' the points of the sites: plain without a predictor, and otherwise coloured by it, or filled
+#' with `by_fill`, when the colour scale belongs to the clades
+#' @noRd
+pcps_site_layers <- function(colour_name, by_fill, palette, point_size) {
+  .data <- ggplot2::.data
+  if (is.null(colour_name)) return(list(ggplot2::geom_point(size = point_size)))
+  if (!by_fill) {
+    return(list(ggplot2::geom_point(ggplot2::aes(colour = .data$env), size = point_size),
+                ggplot2::scale_colour_gradientn(colours = grDevices::hcl.colors(30, palette),
+                                                name = colour_name)))
+  }
+  # the colour scale belongs to the clades, so the predictor fills the sites
+  list(ggplot2::geom_point(ggplot2::aes(fill = .data$env), shape = 21, colour = "grey30",
+                           stroke = 0.3, size = point_size),
+       ggplot2::scale_fill_gradientn(colours = grDevices::hcl.colors(30, palette),
+                                     name = colour_name))
+}
+
+#' the species as arrows, or as stars by clade when `group` gives the clade of each, with
+#' their names when `species_labels` is TRUE; a list of layers
+#' @noRd
+pcps_species_layers <- function(x, axes, sites, group, species_labels) {
+  .data <- ggplot2::.data
+  # species scaled to the spread of the sites, as in a biplot
+  scale <- 0.9 * max(abs(as.matrix(sites[c("a1", "a2")]))) /
+    max(abs(x$species[, axes]), na.rm = TRUE)
+  sp <- data.frame(a1 = x$species[, axes[1]] * scale, a2 = x$species[, axes[2]] * scale,
+                   label = rownames(x$species))
+  if (!is.null(group)) sp$clade <- group
+  sp <- sp[stats::complete.cases(sp[c("a1", "a2")]), , drop = FALSE]
+  layers <- if (is.null(group)) {
+    list(ggplot2::geom_segment(data = sp, ggplot2::aes(x = 0, y = 0, xend = .data$a1,
+                                                       yend = .data$a2),
+                               colour = "grey50", linewidth = 0.4,
+                               arrow = ggplot2::arrow(length = ggplot2::unit(0.15, "cm"))))
+  } else {
+    pcps_clade_layers(sp)
+  }
+  if (species_labels) {
+    layers <- c(layers, list(ggplot2::geom_text(data = sp, ggplot2::aes(label = .data$label),
+                                                colour = "grey30", size = 3, vjust = -0.4)))
+  }
+  layers
 }
 
 #' clade of each species, from a number of clades or a vector named by species
 #' @noRd
 pcps_clades <- function(clades, tree, species) {
   if (is.numeric(clades) && length(clades) == 1 && is.null(names(clades))) {
-    n_tip <- ape::Ntip(tree)
-    if (is.na(clades) || clades != round(clades) || clades < 2 || clades > n_tip) {
-      stop("`clades` as a number must be a whole number between 2 and ", n_tip, call. = FALSE)
-    }
-    depth <- ape::node.depth.edgelength(tree)
-    groups <- n_tip + 1
-    while (length(groups) < clades) {
-      internal <- groups[groups > n_tip]
-      split <- internal[which.min(depth[internal])]
-      groups <- c(setdiff(groups, split), tree$edge[tree$edge[, 1] == split, 2])
-    }
-    groups <- groups[order(depth[groups])]
-    member <- character(n_tip)
-    for (g in seq_along(groups)) {
-      tips <- if (groups[g] <= n_tip) tree$tip.label[groups[g]] else
-        ape::extract.clade(tree, groups[g])$tip.label
-      member[match(tips, tree$tip.label)] <- LETTERS[(g - 1) %% 26 + 1]
-    }
-    return(factor(member[match(species, tree$tip.label)], levels = LETTERS[seq_along(groups)]))
+    return(deepest_clades(clades, tree, species))
   }
   if (is.null(names(clades)) || length(clades) == 0) {
     stop("`clades` must be a number of clades or a vector of clade names named by species",
@@ -367,6 +419,39 @@ pcps_clades <- function(clades, tree, species) {
     stop("no species of `x` is among the names of `clades`", call. = FALSE)
   }
   factor(as.character(clades)[match(species, names(clades))])
+}
+
+#' the `k` deepest clades of the tree, named by letters from the oldest crown, as a factor with
+#' the clade of each of `species`
+#' @noRd
+deepest_clades <- function(k, tree, species) {
+  n_tip <- ape::Ntip(tree)
+  if (is.na(k) || k != round(k) || k < 2 || k > n_tip) {
+    stop("`clades` as a number must be a whole number between 2 and ", n_tip, call. = FALSE)
+  }
+  depth <- ape::node.depth.edgelength(tree)
+  groups <- split_deepest(tree, depth, k)
+  member <- character(n_tip)
+  for (g in seq_along(groups)) {
+    tips <- if (groups[g] <= n_tip) tree$tip.label[groups[g]] else
+      ape::extract.clade(tree, groups[g])$tip.label
+    member[match(tips, tree$tip.label)] <- LETTERS[(g - 1) %% 26 + 1]
+  }
+  factor(member[match(species, tree$tip.label)], levels = LETTERS[seq_along(groups)])
+}
+
+#' the crown nodes (or tips) of the `k` clades left after splitting, one at a time, the clade
+#' whose crown is nearest the root; ordered by the depth of the crown
+#' @noRd
+split_deepest <- function(tree, depth, k) {
+  n_tip <- ape::Ntip(tree)
+  groups <- n_tip + 1
+  while (length(groups) < k) {
+    internal <- groups[groups > n_tip]
+    split <- internal[which.min(depth[internal])]
+    groups <- c(setdiff(groups, split), tree$edge[tree$edge[, 1] == split, 2])
+  }
+  groups[order(depth[groups])]
 }
 
 #' stars coloured by clade, convex hulls of clades with three or more species and their names

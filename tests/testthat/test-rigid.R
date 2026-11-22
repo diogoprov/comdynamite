@@ -9,23 +9,23 @@ test_that("rigid_permutations() keeps shape and distances, without repeats", {
   event <- (area(2:4, 2:3) | area(2, 4:5)) * 1 - area(7:8, 7:8) * 1
   drawn <- rigid_permutations(square, cbind(a = event), n_perm = 40, outside = 0)
   expect_named(drawn, "a")
-  expect_equal(dim(drawn$a), c(40, 144))
+  expect_identical(dim(drawn$a), c(40L, 144L))
   expect_true(all(apply(drawn$a, 1, function(row) all(sort(row) == 1:144))))
   moved <- apply(drawn$a, 1, function(row) event[row])
   expect_true(all(apply(moved, 2, function(m) identical(apart(m), apart(event)))))
   # layouts are distinct up to the sign, and none is the observed
   keys <- apply(moved, 2, function(m) paste(m * m[m != 0][1], collapse = ""))
-  expect_equal(anyDuplicated(keys), 0)
+  expect_identical(anyDuplicated(keys), 0L)
   expect_false(paste(event * event[event != 0][1], collapse = "") %in% keys)
 })
 
 test_that("few placements give fewer rows and a warning, and none an error", {
   halves <- ifelse(square$x <= 6, 1, -1)
-  expect_warning(drawn <- rigid_permutations(square, cbind(h = halves), n_perm = 9),
-                 "h has 1")
-  expect_equal(nrow(drawn$h), 1)
+  drawn <- expect_warning_value(rigid_permutations(square, cbind(h = halves), n_perm = 9),
+                                "h has 1")
+  expect_identical(nrow(drawn$h), 1L)
   row <- expand.grid(x = 1:9, y = 1)
-  ends <- ifelse(row$x <= 4, 1, ifelse(row$x >= 6, -1, 0))
+  ends <- as.numeric(row$x <= 4) - as.numeric(row$x >= 6)
   expect_error(rigid_permutations(row, cbind(e = ends), n_perm = 9, outside = 0),
                "no placement of e")
 })
@@ -43,7 +43,7 @@ test_that("independent parts move on their own and stay apart", {
   event <- area(1:3, 1:3) * 1 - area(10:12, 10:12) * 1
   expect_lt(nrow(suppressWarnings(rigid_permutations(square, cbind(e = event), 30))$e), 30)
   drawn <- rigid_permutations(square, cbind(e = event), n_perm = 30, independent = 5)$e
-  expect_equal(nrow(drawn), 30)
+  expect_identical(nrow(drawn), 30L)
   xy <- as.matrix(square)
   gaps <- apply(drawn, 1, function(row) {
     m <- event[row]
@@ -80,7 +80,7 @@ test_that("node_test() reports the permutations of each event", {
   drawn <- suppressWarnings(rigid_permutations(square, events, n_perm = 9))
   out <- node_test(comm, node_contrasts(tree), cbind(x = rnorm(144)), events, n_perm = 9,
                    area_permutations = drawn)
-  expect_equal(out$permutations$areas, c(a = 9L, b = 1L))
+  expect_identical(out$permutations$areas, c(a = 9L, b = 1L))
   expect_output(print(out), "of areas a 9, b 1")
 })
 
@@ -89,7 +89,7 @@ test_that("off a lattice, the moves are enumerated and the placements keep the s
   coords <- as.matrix(square) + matrix(runif(288, -0.2, 0.2), ncol = 2)
   event <- area(2:4, 2:4) * 1 - area(6:8, 2:4) * 1
   drawn <- rigid_permutations(coords, cbind(e = event), n_perm = 10)$e
-  expect_equal(nrow(drawn), 10)
+  expect_identical(nrow(drawn), 10L)
   expect_true(all(apply(drawn, 1, function(row) all(sort(row) == 1:144))))
   expect_true(all(apply(drawn, 1, function(row) sum(event[row] == 1)) == 9))
   # each moved site is within twice `gap` of where the rigid move put it, so the pairwise
@@ -104,14 +104,14 @@ test_that("off a lattice, the moves are enumerated and the placements keep the s
   }
   # the moves do not depend on the seed: the same landscape gives the same count
   landscape <- landscape_of(coords, gap)
-  expect_equal(landscape$kind, "raster")
+  expect_identical(landscape$kind, "raster")
   moves <- landscape_moves(which(event != 0), coords, landscape, 0.1)
   expect_identical(moves, landscape_moves(which(event != 0), coords, landscape, 0.1))
   expect_gt(nrow(moves), 10)
   # the orientations: a multiple of four rotations, each with a reflection
   orientation <- attr(moves, "orientation")
-  expect_equal(length(orientation$rotations) %% 8, 0)
-  expect_equal(orientation$rotations[[1]], diag(2))
+  expect_identical(length(orientation$rotations) %% 8, 0)
+  expect_identical(orientation$rotations[[1]], diag(2))
   # a group of one site has one orientation
   expect_length(group_orientations(1, coords, gap)$rotations, 1)
   expect_false(is.null(lattice_of(as.matrix(square), 1)))
@@ -122,16 +122,16 @@ test_that("off a lattice, the moves are enumerated and the placements keep the s
 test_that("a sparse lattice places sites in the holes within reach", {
   set.seed(5)
   keep <- sort(sample(144, 90))
-  event <- ifelse(square$x[keep] <= 4 & square$y[keep] <= 4, 1,
-                  ifelse(square$x[keep] %in% 6:9 & square$y[keep] <= 4, -1, 0))
+  event <- as.numeric(square$x[keep] <= 4 & square$y[keep] <= 4) -
+    as.numeric(square$x[keep] %in% 6:9 & square$y[keep] <= 4)
   # the default `gap` follows the fourth nearest site, so the holes count as inside
   drawn <- rigid_permutations(square[keep, ], cbind(e = event), n_perm = 10)$e
-  expect_equal(nrow(drawn), 10)
+  expect_identical(nrow(drawn), 10L)
   expect_true(all(apply(drawn, 1, function(row) all(sort(row) == 1:90))))
   # the rim beyond the edge does not count as inside, the holes do
   coords <- as.matrix(square[keep, ])
   lattice <- lattice_of(coords, 1.5)
-  expect_equal(lattice$kind, "lattice")
+  expect_identical(lattice$kind, "lattice")
   rim <- cbind(lattice$cells[, 1], 1)
   expect_false(any(lattice$near[rim]))
   holes <- lattice$near & lattice$index == 0
@@ -143,7 +143,7 @@ test_that("the inside of a landscape keeps holes and drops the rim", {
   coords <- as.matrix(expand.grid(1:5, 1:5))[-13, ]
   lattice <- lattice_of(coords, 1.5 * (1 - 1e-6))
   expect_true(lattice$near[lattice$cells[1, 1] + 2, lattice$cells[1, 2] + 2])
-  expect_equal(sum(lattice$near), 25)
+  expect_identical(sum(lattice$near), 25L)
   # an isolated site stays inside off a lattice
   coords <- rbind(cbind(runif(20, 0, 5), runif(20, 0, 5)), c(50, 50))
   raster <- raster_of(coords, 1)
@@ -155,7 +155,7 @@ test_that("images without a free site within reach are dropped", {
   image <- list(xy = rbind(c(0, 0), c(10, 10)), site = c(0L, 0L))
   coords <- rbind(c(0, 0), c(0.5, 0), c(10, 10))
   expect_null(place_image(image, coords, c(TRUE, TRUE, FALSE), 1))
-  expect_equal(place_image(image, coords, c(FALSE, TRUE, TRUE), 1), c(2L, 3L))
+  expect_identical(place_image(image, coords, c(FALSE, TRUE, TRUE), 1), c(2L, 3L))
   expect_null(place_image(image, coords, c(FALSE, FALSE, TRUE), 1))
 })
 
@@ -170,7 +170,7 @@ test_that("coordinates that only look like a lattice are not treated as one", {
 test_that("an orientation that fits nowhere has no moves", {
   set.seed(10)
   strip <- as.matrix(expand.grid(1:15, 1:3)) + matrix(runif(90, -0.2, 0.2), ncol = 2)
-  event <- ifelse(strip[, 1] <= 4, 1, ifelse(strip[, 1] >= 7 & strip[, 1] <= 9, -1, 0))
+  event <- as.numeric(strip[, 1] <= 4) - as.numeric(strip[, 1] >= 7 & strip[, 1] <= 9)
   landscape <- landscape_of(strip, 1)
   moves <- landscape_moves(which(event != 0), strip, landscape, 0)
   # the rotations by a quarter turn do not fit a strip of three rows
@@ -182,7 +182,7 @@ test_that("an orientation that fits nowhere has no moves", {
 test_that("off a lattice, an event with no other placement stops", {
   set.seed(7)
   row <- cbind(1:9, runif(9, -0.1, 0.1))
-  ends <- ifelse(row[, 1] <= 4, 1, ifelse(row[, 1] >= 6, -1, 0))
+  ends <- as.numeric(row[, 1] <= 4) - as.numeric(row[, 1] >= 6)
   expect_error(rigid_permutations(row, cbind(e = ends), n_perm = 5, outside = 0),
                "no placement of e")
 })
@@ -192,8 +192,8 @@ test_that("more moves are tried when placements fail or repeat", {
   # a crowded event on sparse sites: many moves land on holes beyond reach
   keep <- sort(sample(144, 100))
   coords <- as.matrix(square[keep, ])
-  event <- ifelse(square$x[keep] <= 6 & square$y[keep] <= 6, 1,
-                  ifelse(square$x[keep] >= 7 & square$y[keep] <= 6, -1, 0))
+  event <- as.numeric(square$x[keep] <= 6 & square$y[keep] <= 6) -
+    as.numeric(square$x[keep] >= 7 & square$y[keep] <= 6)
   few <- suppressWarnings(rigid_permutations(coords, cbind(e = event), n_perm = 40,
                                              max_tries = 80))$e
   more <- suppressWarnings(rigid_permutations(coords, cbind(e = event), n_perm = 40))$e
@@ -208,7 +208,8 @@ test_that("patch_permutations() follows the fourth nearest site with sparse site
   d <- as.matrix(dist(coords))
   gap <- 1.5 * neighbour_distance(d, 4)
   expect_gt(gap, 2)
-  event <- ifelse(coords[, 1] <= 6 & coords[, 2] <= 6, 1, ifelse(coords[, 1] >= 15 & coords[, 2] >= 15, -1, 0))
+  event <- as.numeric(coords[, 1] <= 6 & coords[, 2] <= 6) -
+    as.numeric(coords[, 1] >= 15 & coords[, 2] >= 15)
   drawn <- patch_permutations(coords, cbind(e = event), n_perm = 20)$e
   # patches are those of the default gap: sites of a side stay within reach of each other
   n_patches <- length(area_patches(event == 1, d, gap)) + length(area_patches(event == -1, d, gap))
@@ -218,5 +219,5 @@ test_that("patch_permutations() follows the fourth nearest site with sparse site
   # on a full grid of at least 8 by 8 the default is still 1.5; with fewer than five sites
   # the nearest that exists is used
   expect_equal(1.5 * neighbour_distance(as.matrix(dist(expand.grid(1:8, 1:8))), 4), 1.5)
-  expect_equal(neighbour_distance(as.matrix(dist(cbind(c(0, 1, 3), 0))), 4), 3)
+  expect_identical(neighbour_distance(as.matrix(dist(cbind(c(0, 1, 3), 0))), 4), 3)
 })

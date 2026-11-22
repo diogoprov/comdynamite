@@ -5,7 +5,7 @@ test_that("mean abundance matches the Gaussian response", {
   env <- c(20, 30, 80)
   sims <- replicate(2000, simulate_static(traits, env)$abundance)
   expected <- cbind(30 * exp(-c(0, 10, 60)^2 / 200), 10 * exp(-c(60, 50, 0)^2 / 50))
-  expect_equal(unname(apply(sims, 1:2, mean)), expected, tolerance = 0.02)
+  expect_equal(unname(rowMeans(sims, dims = 2)), expected, tolerance = 0.02)
 })
 
 test_that("output has sites by species, with names and class", {
@@ -13,9 +13,9 @@ test_that("output has sites by species, with names and class", {
   traits <- species_traits(ape::rcoal(5), rmax_range = c(0, 30))
   sim <- simulate_static(traits, runif(7, 0, 100))
   expect_s3_class(sim, "mc_sim")
-  expect_equal(dim(sim$abundance), c(7L, 5L))
-  expect_equal(colnames(sim$abundance), rownames(traits))
-  expect_equal(rownames(sim$abundance), paste0("site", 1:7))
+  expect_identical(dim(sim$abundance), c(7L, 5L))
+  expect_identical(colnames(sim$abundance), rownames(traits))
+  expect_identical(rownames(sim$abundance), paste0("site", 1:7))
   expect_output(print(sim), "7 sites x 5 species")
 })
 
@@ -36,9 +36,9 @@ test_that("several gradients multiply the responses", {
   env <- data.frame(e = c(20, 30, 80), s = c(0, 10, 20))
   sims <- replicate(2000, simulate_static(list(a, b), env)$abundance)
   expected <- growth_rates(env$e, a) * growth_rates(env$s, b)
-  expect_equal(unname(apply(sims, 1:2, mean)), unname(expected), tolerance = 0.03)
+  expect_equal(unname(rowMeans(sims, dims = 2)), unname(expected), tolerance = 0.03)
   one <- simulate_static(list(a), list(env$e))
-  expect_equal(dim(one$abundance), c(3L, 2L))
+  expect_identical(dim(one$abundance), c(3L, 2L))
 })
 
 test_that("gradients and traits must match", {
@@ -63,10 +63,10 @@ test_that("logistic presences follow their probabilities", {
   g <- logistic_gradients(1)[c("x", "y")]
   sim <- simulate_logistic(tr, g, slope_sd = 0.3)
   expect_s3_class(sim, "mc_sim")
-  expect_equal(dim(sim$abundance), c(31L, 8L))
+  expect_identical(dim(sim$abundance), c(31L, 8L))
   expect_true(all(sim$abundance %in% 0:1))
   expect_true(all(sim$probability >= 0 & sim$probability <= 1))
-  expect_equal(dim(sim$traits$slope), c(8L, 2L))
+  expect_identical(dim(sim$traits$slope), c(8L, 2L))
   # no slopes, no intercepts, no reduction: every probability is 0.25
   flat <- simulate_logistic(tr, g, intercept_sd = 0, slope_sd = 0, reduction = c(1, 1))
   expect_equal(unname(flat$probability), matrix(0.25, 31, 8))
@@ -88,7 +88,7 @@ test_that("slopes carry phylogenetic signal and centring makes no difference", {
   expect_equal(mean(apply(b, 1, sd)), 1, tolerance = 0.1)
   set.seed(7); p1 <- simulate_logistic(tr, 1:5)$probability
   set.seed(7); p2 <- simulate_logistic(tr, 101:105)$probability
-  expect_equal(p1, p2)
+  expect_identical(p1, p2)
 })
 
 test_that("the seven scenarios have the expected gradients", {
@@ -105,7 +105,7 @@ test_that("the seven scenarios have the expected gradients", {
   expect_equal(crossings(s[[5]]$y - mean(s[[5]]$y)), 1)
   expect_equal(crossings(s[[6]]$y - mean(s[[6]]$y)), 3)
   expect_equal(crossings(s[[7]]$x - mean(s[[7]]$x)), 1)
-  expect_equal(range(s[[7]]$y), c(-15, 15))
+  expect_identical(range(s[[7]]$y), c(-15, 15))
   expect_error(logistic_gradients(8))
 })
 

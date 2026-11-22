@@ -135,6 +135,38 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
   check_number(hatch_density, "hatch_density", lower = 0, open = TRUE)
   check_string(scales, "scales")
   d <- null_intervals(x, level, inner)
+  d <- order_intervals(keep_intervals(d, statistics, traits, sites), order)
+  labels <- c(low = "Below the null", none = "Within the null", high = "Above the null")
+  d$result <- factor(labels[ifelse(is.na(d$deviation), "none", d$deviation)], labels)
+  d$tested <- !is.na(d$deviation)
+  fill <- stats::setNames(colours, labels)
+  .data <- ggplot2::.data
+  band <- stats::qnorm(1 - (1 - level) / 2)
+  boxes <- null_boxes(d, type, band)
+  p <- ggplot2::ggplot(d, ggplot2::aes(y = .data$site))
+  if (hatch) p <- add_hatching(p, boxes$rects, boxes$span / hatch_density)
+  p <- if (type == "intervals") add_null_intervals(p, hatch, interval_width) else
+    add_null_band(p, hatch, band)
+  x_value <- if (type == "intervals") "observed" else "ses"
+  p +
+    ggplot2::geom_point(data = d[d$tested, , drop = FALSE],
+                        ggplot2::aes(x = .data[[x_value]], fill = .data$result), shape = 21,
+                        size = point_size, colour = "white", stroke = 0.3, na.rm = TRUE,
+                        show.legend = TRUE) +
+    ggplot2::geom_point(data = d[!d$tested, , drop = FALSE],
+                        ggplot2::aes(x = .data[[x_value]]), shape = 21, size = point_size,
+                        colour = "grey40", fill = NA, na.rm = TRUE) +
+    ggplot2::scale_fill_manual(values = fill, limits = names(fill), drop = FALSE, name = NULL) +
+    ggplot2::facet_grid(ggplot2::vars(.data$trait), ggplot2::vars(.data$statistic),
+                        scales = scales) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), legend.position = "top")
+}
+
+#' the rows of the table of null_intervals() of the statistics, traits and sites asked for
+#' (all of them when NULL), after checking that they are in the table
+#' @noRd
+keep_intervals <- function(d, statistics, traits, sites) {
   for (arg in c("statistics", "traits", "sites")) {
     keep <- get(arg)
     column <- c(statistics = "statistic", traits = "trait", sites = "site")[[arg]]
@@ -147,6 +179,13 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
       d <- d[d[[column]] %in% keep, , drop = FALSE]
     }
   }
+  d
+}
+
+#' the table of null_intervals() with sites, traits and statistics as factors in the order of
+#' the plot: sites as in the data, or by their mean effect size or observed value (`order`)
+#' @noRd
+order_intervals <- function(d, order) {
   site_levels <- unique(d$site)
   if (order != "data") {
     key <- tapply(d[[if (order == "ses") "ses" else "observed"]], d$site, mean, na.rm = TRUE)
@@ -156,12 +195,15 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
   d$site <- factor(d$site, site_levels)
   d$trait <- factor(d$trait, unique(d$trait))
   d$statistic <- factor(d$statistic, unique(d$statistic))
-  labels <- c(low = "Below the null", none = "Within the null", high = "Above the null")
-  d$result <- factor(labels[ifelse(is.na(d$deviation), "none", d$deviation)], labels)
-  d$tested <- !is.na(d$deviation)
-  fill <- stats::setNames(colours, labels)
-  .data <- ggplot2::.data
-  band <- stats::qnorm(1 - (1 - level) / 2)
+  d
+}
+
+#' the rectangles that mark the null distribution in plot.tstats(): the null interval of each
+#' site (`type = "intervals"`) or the band of effect sizes of each panel (`rects`), and the
+#' range of the values drawn for the statistic of each rectangle (`span`), which sets the
+#' spacing of the hatching; a list
+#' @noRd
+null_boxes <- function(d, type, band) {
   # spacing of the hatching lines: a fixed fraction of the range of each statistic (facet column)
   span_of <- if (type == "intervals") {
     tapply(c(d$null_low, d$null_high, d$observed), rep(d$statistic, 3),
@@ -184,54 +226,54 @@ plot.tstats <- function(x, type = c("intervals", "ses"), level = 0.95, inner = 0
     rects$xmin <- -band
     rects$xmax <- band
   }
-  p <- ggplot2::ggplot(d, ggplot2::aes(y = .data$site))
-  if (hatch) {
-    lines <- hatch_lines(rects, span_of[as.character(rects$statistic)] / hatch_density)
-    p <- p +
-      ggplot2::geom_blank() +
-      ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax,
-                                                    ymin = .data$ymin, ymax = .data$ymax),
-                         inherit.aes = FALSE, fill = NA, colour = "grey70", linewidth = 0.3) +
-      ggplot2::geom_segment(data = lines, ggplot2::aes(x = .data$x, xend = .data$xend,
-                                                       y = .data$y, yend = .data$yend),
-                            inherit.aes = FALSE, colour = "grey70", linewidth = 0.25)
-  }
-  if (type == "intervals") {
-    if (!hatch) {
-      p <- p + ggplot2::geom_linerange(ggplot2::aes(xmin = .data$null_low,
-                                                    xmax = .data$null_high),
-                                       colour = "grey75", linewidth = 0.5, na.rm = TRUE)
-    }
-    p <- p +
-      ggplot2::geom_linerange(ggplot2::aes(xmin = .data$inner_low, xmax = .data$inner_high),
-                              colour = "grey75", linewidth = interval_width, na.rm = TRUE) +
-      ggplot2::geom_point(ggplot2::aes(x = .data$null_median), shape = "|", size = 3,
-                          colour = "grey40", na.rm = TRUE) +
-      ggplot2::labs(x = "Observed value and null distribution", y = NULL)
-    x_value <- "observed"
-  } else {
-    if (!hatch) {
-      p <- p + ggplot2::annotate("rect", xmin = -band, xmax = band, ymin = -Inf, ymax = Inf,
-                                 fill = "grey92")
-    }
-    p <- p +
-      ggplot2::geom_vline(xintercept = 0, colour = "grey60") +
-      ggplot2::labs(x = "Standardised effect size", y = NULL)
-    x_value <- "ses"
+  list(rects = rects, span = span_of[as.character(rects$statistic)])
+}
+
+#' adds to the plot `p` the outline of the rectangles `rects` and their hatching, with lines
+#' `spacing` apart
+#' @noRd
+add_hatching <- function(p, rects, spacing) {
+  .data <- ggplot2::.data
+  lines <- hatch_lines(rects, spacing)
+  p +
+    ggplot2::geom_blank() +
+    ggplot2::geom_rect(data = rects, ggplot2::aes(xmin = .data$xmin, xmax = .data$xmax,
+                                                  ymin = .data$ymin, ymax = .data$ymax),
+                       inherit.aes = FALSE, fill = NA, colour = "grey70", linewidth = 0.3) +
+    ggplot2::geom_segment(data = lines, ggplot2::aes(x = .data$x, xend = .data$xend,
+                                                     y = .data$y, yend = .data$yend),
+                          inherit.aes = FALSE, colour = "grey70", linewidth = 0.25)
+}
+
+#' adds to the plot `p` the null interval of each site (when it is not hatched), its inner
+#' interval and its median
+#' @noRd
+add_null_intervals <- function(p, hatch, interval_width) {
+  .data <- ggplot2::.data
+  if (!hatch) {
+    p <- p + ggplot2::geom_linerange(ggplot2::aes(xmin = .data$null_low,
+                                                  xmax = .data$null_high),
+                                     colour = "grey75", linewidth = 0.5, na.rm = TRUE)
   }
   p +
-    ggplot2::geom_point(data = d[d$tested, , drop = FALSE],
-                        ggplot2::aes(x = .data[[x_value]], fill = .data$result), shape = 21,
-                        size = point_size, colour = "white", stroke = 0.3, na.rm = TRUE,
-                        show.legend = TRUE) +
-    ggplot2::geom_point(data = d[!d$tested, , drop = FALSE],
-                        ggplot2::aes(x = .data[[x_value]]), shape = 21, size = point_size,
-                        colour = "grey40", fill = NA, na.rm = TRUE) +
-    ggplot2::scale_fill_manual(values = fill, limits = names(fill), drop = FALSE, name = NULL) +
-    ggplot2::facet_grid(ggplot2::vars(.data$trait), ggplot2::vars(.data$statistic),
-                        scales = scales) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(panel.grid.major.y = ggplot2::element_blank(), legend.position = "top")
+    ggplot2::geom_linerange(ggplot2::aes(xmin = .data$inner_low, xmax = .data$inner_high),
+                            colour = "grey75", linewidth = interval_width, na.rm = TRUE) +
+    ggplot2::geom_point(ggplot2::aes(x = .data$null_median), shape = "|", size = 3,
+                        colour = "grey40", na.rm = TRUE) +
+    ggplot2::labs(x = "Observed value and null distribution", y = NULL)
+}
+
+#' adds to the plot `p` of effect sizes the band of the null distribution (when it is not
+#' hatched) and the line of zero
+#' @noRd
+add_null_band <- function(p, hatch, band) {
+  if (!hatch) {
+    p <- p + ggplot2::annotate("rect", xmin = -band, xmax = band, ymin = -Inf, ymax = Inf,
+                               fill = "grey92")
+  }
+  p +
+    ggplot2::geom_vline(xintercept = 0, colour = "grey60") +
+    ggplot2::labs(x = "Standardised effect size", y = NULL)
 }
 
 #' @rdname plot.tstats
@@ -350,26 +392,7 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
   }
   pop_site <- site_id[first]
   weight <- weight / stats::ave(weight, pop_site, FUN = sum)
-  if (is.null(bw)) {
-    deviation <- z - stats::ave(z, pop)
-    used <- size[match(pop, pop_levels)] > 1
-    if (sum(used) < 2) {
-      stop("no population has two or more individuals: give `bw`", call. = FALSE)
-    }
-    # deviations from the population mean underestimate the spread by sqrt((n - 1) / n):
-    # the standard deviation is pooled with n - 1 degrees of freedom per population and the
-    # interquartile range is taken on deviations rescaled by sqrt(n / (n - 1))
-    n_i <- size[match(pop, pop_levels)][used]
-    d <- deviation[used]
-    pooled_sd <- sqrt(sum(d^2) / (length(d) - sum(size > 1)))
-    spread <- min(pooled_sd, stats::IQR(d * sqrt(n_i / (n_i - 1))) / 1.34)
-    if (spread <= 0) spread <- pooled_sd
-    if (spread <= 0) {
-      stop("the individuals of each population have identical values: give `bw`", call. = FALSE)
-    }
-    bw <- 0.9 * spread * mean(size)^(-1 / 5)
-    check_spread_scale(z, pop)
-  }
+  if (is.null(bw)) bw <- pooled_bandwidth(z, pop, size[match(pop, pop_levels)], size)
   grid <- seq(min(z) - 3 * bw, max(z) + 3 * bw, length.out = n)
   densities <- vapply(split(z, factor(pop, pop_levels)), function(v) {
     rowMeans(matrix(stats::dnorm(grid, rep(v, each = n), bw), n))
@@ -380,17 +403,52 @@ trait_densities <- function(individuals, trait = "trait", site = "site", species
                             level = "population", weight = rep(weight, each = n),
                             trait = grid, density = as.vector(densities),
                             stringsAsFactors = FALSE)
-  site_levels <- unique(site_id)
+  communities <- community_densities(densities, weight, pop_site, unique(site_id), grid)
+  out <- rbind(populations, communities)
+  attr(out, "bw") <- bw
+  out
+}
+
+#' bandwidth of the kernel of trait_densities() from the spread of the trait values `z` within
+#' their populations (`pop`): Silverman's rule with the pooled standard deviation or the
+#' interquartile range; `size_of` is the size of the population of each individual and `size`
+#' that of each population
+#' @noRd
+pooled_bandwidth <- function(z, pop, size_of, size) {
+  deviation <- z - stats::ave(z, pop)
+  used <- size_of > 1
+  if (sum(used) < 2) {
+    stop("no population has two or more individuals: give `bw`", call. = FALSE)
+  }
+  # deviations from the population mean underestimate the spread by sqrt((n - 1) / n):
+  # the standard deviation is pooled with n - 1 degrees of freedom per population and the
+  # interquartile range is taken on deviations rescaled by sqrt(n / (n - 1))
+  n_i <- size_of[used]
+  d <- deviation[used]
+  pooled_sd <- sqrt(sum(d^2) / (length(d) - sum(size > 1)))
+  spread <- min(pooled_sd, stats::IQR(d * sqrt(n_i / (n_i - 1))) / 1.34)
+  if (spread <= 0) spread <- pooled_sd
+  if (spread <= 0) {
+    stop("the individuals of each population have identical values: give `bw`", call. = FALSE)
+  }
+  bw <- 0.9 * spread * mean(size)^(-1 / 5)
+  check_spread_scale(z, pop)
+  bw
+}
+
+#' the density of each community: the densities of its populations (columns of `densities`,
+#' at the trait values `grid`) weighted by their relative abundance; a table as that of
+#' trait_densities()
+#' @noRd
+community_densities <- function(densities, weight, pop_site, site_levels, grid) {
+  n <- length(grid)
   community <- vapply(site_levels, function(s) {
     i <- pop_site == s
     as.vector(densities[, i, drop = FALSE] %*% weight[i])
   }, numeric(n))
-  communities <- data.frame(site = rep(site_levels, each = n), species = NA_character_,
-                            level = "community", weight = 1, trait = grid,
-                            density = as.vector(community), stringsAsFactors = FALSE)
-  out <- rbind(populations, communities)
-  attr(out, "bw") <- bw
-  out
+  data.frame(site = rep(site_levels, each = n), species = NA_character_,
+             level = "community", weight = 1, trait = grid,
+             density = as.vector(community), stringsAsFactors = FALSE)
 }
 
 #' warns when the spread within populations rises with their mean, so that one bandwidth fits
@@ -487,34 +545,60 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
     site_levels <- site_levels[site_levels %in% sites]
   }
   species_levels <- unique(points$species)
-  if (!is.null(highlight)) {
-    if (!is.character(highlight) || length(highlight) == 0 || anyNA(highlight) ||
-          anyDuplicated(highlight)) {
-      stop("`highlight` must be names of species, each given once", call. = FALSE)
-    }
-    unknown <- setdiff(highlight, species_levels)
-    if (length(unknown) > 0) {
-      stop("`highlight` has species not in the data: ", toString(unknown),
-           call. = FALSE)
-    }
-    if (is.null(colours)) {
-      colours <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9",
-                   "#F0E442")
-      if (length(highlight) > length(colours)) {
-        stop("give `colours` to highlight more than seven species", call. = FALSE)
-      }
-      colours <- colours[seq_along(highlight)]
-    }
-    if (is.null(names(colours))) {
-      check_colours(colours, length(highlight))
-      names(colours) <- highlight
-    }
-    if (anyNA(colours[highlight])) {
-      stop("`colours` has no colour for some highlighted species", call. = FALSE)
-    }
-    others <- setdiff(species_levels, highlight)
-    colours <- c(colours[highlight], stats::setNames(rep("grey75", length(others)), others))
+  if (!is.null(highlight)) colours <- highlight_colours(highlight, colours, species_levels)
+  colours <- species_colours(colours, species_levels)
+  d <- d[d$site %in% site_levels, , drop = FALSE]
+  points <- points[points$site %in% site_levels, , drop = FALSE]
+  d$site <- factor(d$site, site_levels)
+  points$site <- factor(points$site, site_levels)
+  points$species <- factor(points$species, species_levels)
+  pops <- population_areas(d, weighted, site_levels, species_levels, highlight)
+  .data <- ggplot2::.data
+  draw_densities(pops, d[d$level == "community", , drop = FALSE], points, colours,
+                 highlight, alpha, community, rug) +
+    ggplot2::facet_wrap(ggplot2::vars(.data$site), ncol = ncol, scales = scales) +
+    ggplot2::labs(x = trait, y = if (weighted) "Density (weighted by abundance)" else
+      "Density") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
+}
+
+#' the colours of plot_population_traits() with highlighted species: those given or of the
+#' default palette for the species of `highlight`, and grey for the others; a vector named
+#' after the species
+#' @noRd
+highlight_colours <- function(highlight, colours, species_levels) {
+  valid <- is.character(highlight) && length(highlight) > 0 && !anyNA(highlight) &&
+    !anyDuplicated(highlight)
+  if (!valid) stop("`highlight` must be names of species, each given once", call. = FALSE)
+  unknown <- setdiff(highlight, species_levels)
+  if (length(unknown) > 0) {
+    stop("`highlight` has species not in the data: ", toString(unknown),
+         call. = FALSE)
   }
+  if (is.null(colours)) {
+    colours <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9",
+                 "#F0E442")
+    if (length(highlight) > length(colours)) {
+      stop("give `colours` to highlight more than seven species", call. = FALSE)
+    }
+    colours <- colours[seq_along(highlight)]
+  }
+  if (is.null(names(colours))) {
+    check_colours(colours, length(highlight))
+    names(colours) <- highlight
+  }
+  if (anyNA(colours[highlight])) {
+    stop("`colours` has no colour for some highlighted species", call. = FALSE)
+  }
+  others <- setdiff(species_levels, highlight)
+  c(colours[highlight], stats::setNames(rep("grey75", length(others)), others))
+}
+
+#' one colour per species, named after it: the colours given (in the order of the species
+#' when they have no names) or a default palette
+#' @noRd
+species_colours <- function(colours, species_levels) {
   if (is.null(colours)) {
     okabe_ito <- c("#0072B2", "#E69F00", "#009E73", "#CC79A7", "#D55E00", "#56B4E9", "#F0E442")
     colours <- if (length(species_levels) <= length(okabe_ito)) {
@@ -535,10 +619,13 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
     colours <- colours[species_levels]
     check_colours(unname(colours), length(species_levels))
   }
-  d <- d[d$site %in% site_levels, , drop = FALSE]
-  points <- points[points$site %in% site_levels, , drop = FALSE]
-  d$site <- factor(d$site, site_levels)
-  points$site <- factor(points$site, site_levels)
+  colours
+}
+
+#' the densities of the populations of the table of trait_densities() (with sites as a factor),
+#' weighted by abundance when asked, with the group of each population in drawing order
+#' @noRd
+population_areas <- function(d, weighted, site_levels, species_levels, highlight) {
   pops <- d[d$level == "population", , drop = FALSE]
   if (weighted) pops$density <- pops$density * pops$weight
   pops$species <- factor(pops$species, species_levels)
@@ -548,15 +635,21 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   pops$group <- factor(paste(pops$site, pops$species),
                        unique(paste(rep(site_levels, each = length(draw_order)),
                                     rep(draw_order, length(site_levels)))))
-  points$species <- factor(points$species, species_levels)
+  pops
+}
+
+#' the layers of plot_population_traits(): the density of each population (`pops`), of each
+#' community and the trait values of the individuals (`points`) when asked, and the colours
+#' @noRd
+draw_densities <- function(pops, communities, points, colours, highlight, alpha, community,
+                           rug) {
   .data <- ggplot2::.data
   p <- ggplot2::ggplot(pops, ggplot2::aes(x = .data$trait, y = .data$density)) +
     ggplot2::geom_area(ggplot2::aes(fill = .data$species, colour = .data$species,
                                     group = .data$group),
                        position = "identity", alpha = alpha, linewidth = 0.3)
   if (community) {
-    p <- p + ggplot2::geom_line(data = d[d$level == "community", , drop = FALSE],
-                                colour = "black", linewidth = 0.6)
+    p <- p + ggplot2::geom_line(data = communities, colour = "black", linewidth = 0.6)
   }
   if (rug) {
     p <- p + ggplot2::geom_rug(data = points, ggplot2::aes(x = .data$trait,
@@ -567,10 +660,5 @@ plot_population_traits <- function(individuals, trait = "trait", site = "site",
   breaks <- if (is.null(highlight)) ggplot2::waiver() else highlight
   p +
     ggplot2::scale_fill_manual(values = colours, breaks = breaks, name = "Species") +
-    ggplot2::scale_colour_manual(values = colours, breaks = breaks, name = "Species") +
-    ggplot2::facet_wrap(ggplot2::vars(.data$site), ncol = ncol, scales = scales) +
-    ggplot2::labs(x = trait, y = if (weighted) "Density (weighted by abundance)" else
-      "Density") +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(panel.grid.minor = ggplot2::element_blank())
+    ggplot2::scale_colour_manual(values = colours, breaks = breaks, name = "Species")
 }

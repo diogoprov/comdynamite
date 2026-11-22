@@ -5,8 +5,8 @@ NULL
 test_that("food_web_params checks its values and keeps the names of the book", {
   p <- food_web_params()
   expect_s3_class(p, "food_web_params")
-  expect_equal(p$c0, 1)
-  expect_equal(food_web_params(c0 = 10)$c0, 10)
+  expect_identical(p$c0, 1)
+  expect_identical(food_web_params(c0 = 10)$c0, 10)
   expect_error(food_web_params(c0 = -1), "zero or more")
   expect_error(food_web_params(beta = 0), "positive")
   expect_error(food_web_params(d = "a"), "one finite number")
@@ -18,28 +18,28 @@ test_that("food_web_params checks its values and keeps the names of the book", {
 test_that("food_web_dynamics returns one row per time with the expected columns", {
   x <- food_web_dynamics(c(0, 10, 20), dt = 0.5)
   expect_s3_class(x, c("food_web", "data.frame"))
-  expect_equal(nrow(x), 3)
-  expect_equal(x$time, c(0, 10, 20))
+  expect_identical(nrow(x), 3L)
+  expect_identical(x$time, c(0, 10, 20))
   expect_named(x, c("time", "R", "N", "P", "z_R", "z_N", "z_P", "grad_R", "grad_N", "grad_P",
                     "rate_R", "rate_N", "rate_P", "a_RN", "m_NP", "v_RP"))
   expect_equal(x$rate_N, abs(0.2 * x$grad_N))
-  expect_equal(attr(x, "attack"), "gaussian")
+  expect_identical(attr(x, "attack"), "gaussian")
   expect_s3_class(attr(x, "params"), "food_web_params")
   expect_output(print(x), "<food_web>")
   # unnamed vectors are read in the order R, N, P
   y <- food_web_dynamics(c(0, 10, 20), init = c(50, 0.1, 0), traits = c(10, 4, 1), dt = 0.5)
-  expect_equal(y$z_N, x$z_N)
+  expect_identical(y$z_N, x$z_N)
   z <- food_web_dynamics(c(0, 10, 20), init = c(N = 0.1, P = 0, R = 50), dt = 0.5)
-  expect_equal(z$R, x$R)
+  expect_identical(z$R, x$R)
 })
 
 test_that("an equilibrium stays put", {
   # the resource alone at its optimum and R* = c0 / d
   alone <- food_web_dynamics(c(0, 100, 500), init = c(R = 50, N = 0, P = 0),
                              traits = c(R = 10, N = 4, P = 1), dt = 0.5)
-  expect_equal(alone$R, rep(50, 3))
-  expect_equal(alone$z_R, rep(10, 3))
-  expect_equal(alone$rate_R, rep(0, 3))
+  expect_identical(alone$R, rep(50, 3))
+  expect_identical(alone$z_R, rep(10, 3))
+  expect_identical(alone$rate_R, rep(0, 3))
   # the consumer-resource equilibrium of figure 3.2, reached by a long run
   long <- food_web_dynamics(c(0, 8000), init = c(R = 50, N = 0.01, P = 0),
                             traits = c(R = 10, N = 4, P = 1), dt = 0.5)
@@ -55,20 +55,20 @@ test_that("an equilibrium stays put", {
 test_that("absent levels stay at zero with their traits held", {
   x <- food_web_dynamics(seq(0, 300, by = 100), init = c(R = 50, N = 0.1, P = 0),
                          traits = c(R = 10, N = 4, P = 7), dt = 0.5)
-  expect_equal(x$P, rep(0, 4))
-  expect_equal(x$z_P, rep(7, 4))
-  expect_equal(x$rate_P, rep(0, 4))
-  expect_equal(x$grad_P, rep(0, 4))
+  expect_identical(x$P, rep(0, 4))
+  expect_identical(x$z_P, rep(7, 4))
+  expect_identical(x$rate_P, rep(0, 4))
+  expect_identical(x$grad_P, rep(0, 4))
   expect_true(all(x$N > 0))
   # nothing at all
   none <- food_web_dynamics(c(0, 50), init = c(R = 0, N = 0, P = 0), dt = 0.5)
-  expect_equal(unlist(none[2, c("R", "N", "P")]), c(R = 0, N = 0, P = 0))
+  expect_identical(unlist(none[2, c("R", "N", "P")]), c(R = 0, N = 0, P = 0))
   # an abundance below `extinction` is set to zero and stays there
   dying <- food_web_dynamics(c(0, 50, 100), init = c(R = 50, N = 1e-5, P = 0),
                              traits = c(R = 10, N = 40, P = 1), dt = 0.5, extinction = 1e-4)
   expect_equal(dying$N, c(1e-5, 0, 0))
-  expect_equal(dying$z_N[3], dying$z_N[2])
-  expect_equal(dying$rate_N[2:3], c(0, 0))
+  expect_identical(dying$z_N[3], dying$z_N[2])
+  expect_identical(dying$rate_N[2:3], c(0, 0))
 })
 
 test_that("halving the step changes the result little", {
@@ -87,21 +87,21 @@ test_that("halving the step changes the result little", {
   expect_lt(err2, err1)
   # the output times need not be multiples of the step
   odd <- food_web_dynamics(c(0, 0.3, 1.7), dt = 0.5)
-  expect_equal(nrow(odd), 3)
+  expect_identical(nrow(odd), 3L)
 })
 
 test_that("traits do not move when V is zero", {
   x <- food_web_dynamics(seq(0, 300, by = 100), init = c(R = 50, N = 0.1, P = 0),
                          traits = c(R = 10, N = 4, P = 1), V = 0, dt = 0.5)
-  expect_equal(x$z_R, rep(10, 4))
-  expect_equal(x$z_N, rep(4, 4))
-  expect_equal(x$rate_R, rep(0, 4))
+  expect_identical(x$z_R, rep(10, 4))
+  expect_identical(x$z_N, rep(4, 4))
+  expect_identical(x$rate_R, rep(0, 4))
   expect_true(any(x$grad_N != 0))  # selection acts, but there is no variance to respond
   expect_true(all(diff(x$N) != 0))  # the ecology still runs
   one <- food_web_dynamics(seq(0, 300, by = 100), init = c(R = 50, N = 0.1, P = 0),
                            traits = c(R = 10, N = 4, P = 1), V = c(R = 0, N = 0.2, P = 0),
                            dt = 0.5)
-  expect_equal(one$z_R, rep(10, 4))
+  expect_identical(one$z_R, rep(10, 4))
   expect_true(all(diff(one$z_N) > 0))
 })
 
@@ -109,21 +109,21 @@ test_that("introductions happen at the given time with the given state", {
   x <- food_web_dynamics(seq(0, 500, by = 50), init = c(R = 50, N = 0.01, P = 0.5),
                          traits = c(R = 10, N = 4, P = 6), introductions = c(P = 300),
                          dt = 0.5)
-  expect_equal(x$P[x$time < 300], rep(0, 6))
+  expect_identical(x$P[x$time < 300], rep(0, 6))
   expect_equal(x$P[x$time == 300], 0.5)
-  expect_equal(x$z_P[x$time == 300], 6)
-  expect_equal(x$z_P[x$time < 300], rep(6, 6))
-  expect_true(x$rate_P[x$time == 300] > 0)
-  expect_equal(attr(x, "introductions"), c(P = 300))
+  expect_identical(x$z_P[x$time == 300], 6)
+  expect_identical(x$z_P[x$time < 300], rep(6, 6))
+  expect_gt(x$rate_P[x$time == 300], 0)
+  expect_identical(attr(x, "introductions"), c(P = 300))
   # before the introduction the run is the one without the predator
   without <- food_web_dynamics(seq(0, 250, by = 50), init = c(R = 50, N = 0.01, P = 0),
                                traits = c(R = 10, N = 4, P = 6), dt = 0.5)
-  expect_equal(x[1:6, c("R", "N", "z_R", "z_N")], without[, c("R", "N", "z_R", "z_N")])
+  expect_identical(x[1:6, c("R", "N", "z_R", "z_N")], without[, c("R", "N", "z_R", "z_N")])
   # an introduction time that is not an output time still takes effect
   y <- food_web_dynamics(c(0, 250, 350), init = c(R = 50, N = 0.01, P = 0.5),
                          traits = c(R = 10, N = 4, P = 6), introductions = c(P = 300),
                          dt = 0.5)
-  expect_equal(y$P[2], 0)
+  expect_identical(y$P[2], 0)
   expect_gt(y$P[3], 0)
   # consumer and then predator
   both <- food_web_dynamics(c(0, 100, 200, 300), init = c(R = 50, N = 0.1, P = 0.1),
@@ -131,7 +131,7 @@ test_that("introductions happen at the given time with the given state", {
                             introductions = c(N = 100, P = 200), dt = 0.5)
   expect_equal(both$N[1:2], c(0, 0.1))
   expect_equal(both$P[1:3], c(0, 0, 0.1))
-  expect_equal(both$R[1:2], c(50, 50))
+  expect_identical(both$R[1:2], c(50, 50))
 })
 
 test_that("the three attack forms and omnivory run", {
@@ -141,7 +141,7 @@ test_that("the three attack forms and omnivory run", {
     expect_true(all(is.finite(unlist(x))))
     expect_true(all(x$a_RN > 0))
     expect_true(all(x$m_NP > 0))
-    expect_equal(x$v_RP, rep(0, 3))
+    expect_identical(x$v_RP, rep(0, 3))
   }
   omni <- food_web_dynamics(c(0, 50, 100), init = c(R = 50, N = 0.1, P = 0.1),
                             traits = c(R = 10, N = 4, P = 6), omnivory = TRUE, dt = 0.5)
@@ -190,7 +190,8 @@ test_that("input errors are reported", {
   expect_error(food_web_dynamics(c(0, 10), extinction = -1), "zero or more")
   expect_error(food_web_dynamics(c(0, 10), introductions = 5), "named")
   expect_error(food_web_dynamics(c(0, 10), introductions = c(Q = 5)), "named")
-  expect_error(food_web_dynamics(c(0, 10), introductions = c(P = 5, P = 6)), "each once")
+  expect_error(food_web_dynamics(c(0, 10), introductions = stats::setNames(c(5, 6), c("P", "P"))),
+               "each once")
   expect_error(food_web_dynamics(c(0, 10), init = c(R = 50, N = 0.1, P = 1),
                                  introductions = c(P = 0)), "after the first time")
   expect_error(food_web_dynamics(c(0, 10), init = c(R = 50, N = 0.1, P = 1),

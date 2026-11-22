@@ -153,16 +153,16 @@ test_that("power of the whole-tree tests grows with the number of sites and of s
       beta = phylo_beta_test(d$comm, d$tree, d$env, n_perm = 99)[[column]],
       pcps = pcps_test(d$comm, d$tree, d$env, axes = 1, n_perm = 99)$tests[[column]][1])
   }
-  sites <- sapply(c(15, 30, 60), function(n) {
+  sites <- vapply(c(15, 30, 60), function(n) {
     rowMeans(replicate(n_rep, {
       d <- whole_tree_data(n, 20, TRUE, FALSE)
       d$env <- d$env + stats::rnorm(length(d$env), 0, 100)
       three(d, "p_site")
     }) <= 0.05)
-  })
-  species <- sapply(c(8, 16, 32), function(k) {
+  }, numeric(3))
+  species <- vapply(c(8, 16, 32), function(k) {
     rowMeans(replicate(n_rep, three(whole_tree_data(60, k, TRUE, TRUE), "p_max")) <= 0.05)
-  })
+  }, numeric(3))
   colnames(sites) <- paste0("sites_", c(15, 30, 60))
   colnames(species) <- paste0("species_", c(8, 16, 32))
   se <- sqrt(2 * 0.25 / n_rep)

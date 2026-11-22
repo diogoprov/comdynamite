@@ -110,89 +110,123 @@ trait_rates <- function(tree, model = c("shift", "gbm", "iid"), sigma2 = 1, shif
   check_number(shift_rate, "shift_rate", lower = 0, null_ok = TRUE)
   check_flag(shift_branch, "shift_branch")
   check_flag(relative, "relative")
-  n_tip <- ape::Ntip(tree)
   n_edge <- nrow(tree$edge)
   check_count(shifts, "shifts", min = 0, max = n_edge)
   cladewise <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)  # parents first
-  root <- n_tip + 1
-  node_rate <- NULL
-  shift_table <- NULL
-
-  if (model == "given") {
-    if (!is.numeric(edge_rates) || length(edge_rates) != n_edge ||
-        !all(is.finite(edge_rates)) || any(edge_rates <= 0)) {
-      stop("`edge_rates` needs one positive number per row of `tree$edge`", call. = FALSE)
-    }
-    edge_rate <- unname(edge_rates)
-  } else if (model == "shift") {
-    if (!is.null(shift_rate)) {
-      n_shifts <- stats::rpois(1, shift_rate * sum(tree$edge.length))
-      shift_edges <- sample.int(n_edge, n_shifts, replace = TRUE, prob = tree$edge.length)
-      position <- stats::runif(n_shifts) * tree$edge.length[shift_edges]
-    } else {
-      if (is.null(shift_edges)) {
-        shift_edges <- if (shifts == 0) integer(0) else {
-          sample.int(n_edge, shifts, prob = tree$edge.length)
-        }
-      }
-      shift_edges <- as.integer(shift_edges)
-      if (anyNA(shift_edges) || any(shift_edges < 1 | shift_edges > n_edge) ||
-          anyDuplicated(shift_edges)) {
-        stop("`shift_edges` must be different row numbers of `tree$edge`", call. = FALSE)
-      }
-      position <- numeric(length(shift_edges))
-    }
-    n_shifts <- length(shift_edges)
-    size <- if (is.function(shift_size)) shift_size(n_shifts) else {
-      rep_len(shift_size, n_shifts)
-    }
-    if (n_shifts > 0 && (!is.numeric(size) || length(size) != n_shifts ||
-                         !all(is.finite(size)) || any(size <= 0))) {
-      stop("`shift_size` must give one positive multiplier per shift", call. = FALSE)
-    }
-    at_node <- rep(sigma2, n_tip + tree$Nnode)
-    edge_rate <- numeric(n_edge)
-    after <- numeric(n_shifts)
-    for (e in cladewise) {
-      start <- at_node[tree$edge[e, 1]]
-      here <- which(shift_edges == e)
-      here <- here[order(position[here])]
-      rate <- start
-      integral <- 0
-      from <- 0
-      for (k in here) {
-        integral <- integral + rate * (position[k] - from)
-        rate <- if (relative) rate * size[k] else sigma2 * size[k]
-        after[k] <- rate
-        from <- position[k]
-      }
-      integral <- integral + rate * (tree$edge.length[e] - from)
-      edge_rate[e] <- if (tree$edge.length[e] > 0) integral / tree$edge.length[e] else rate
-      at_node[tree$edge[e, 2]] <- if (shift_branch) start else rate
-    }
-    shift_table <- data.frame(edge = shift_edges, node = tree$edge[shift_edges, 2],
-                              position = position, multiplier = size, rate = after)
-    shift_table <- shift_table[order(shift_table$edge, shift_table$position), , drop = FALSE]
-    rownames(shift_table) <- NULL
-  } else if (model == "gbm") {
-    log_rate <- numeric(n_tip + tree$Nnode)
-    log_rate[root] <- log(sigma2)
-    steps <- stats::rnorm(n_edge, 0, rate_sd * sqrt(tree$edge.length))
-    for (e in cladewise) log_rate[tree$edge[e, 2]] <- log_rate[tree$edge[e, 1]] + steps[e]
-    edge_rate <- exp((log_rate[tree$edge[, 1]] + log_rate[tree$edge[, 2]]) / 2)
-    node_rate <- stats::setNames(exp(log_rate), seq_along(log_rate))
-  } else {
-    edge_rate <- sigma2 * exp(stats::rnorm(n_edge, 0, rate_sd))
-  }
-
+  rates <- switch(model,
+    given = list(edge_rate = given_edge_rates(edge_rates, n_edge)),
+    shift = {
+      at <- shift_places(tree, shifts, shift_edges, shift_rate)
+      size <- shift_sizes(shift_size, length(at$edges))
+      shift_rates(tree, cladewise, sigma2, at$edges, at$position, size, relative, shift_branch)
+    },
+    gbm = gbm_rates(tree, cladewise, sigma2, rate_sd),
+    iid = list(edge_rate = sigma2 * exp(stats::rnorm(n_edge, 0, rate_sd))))
+  edge_rate <- rates$edge_rate
   scaled <- tree
   scaled$edge.length <- tree$edge.length * edge_rate
   tips <- trait_bm(scaled, 1, nodes = TRUE)
   nodes <- attr(tips, "nodes") + root_value
   attr(tips, "nodes") <- NULL
   list(tips = tips + root_value, nodes = nodes, edge_rates = edge_rate, edge_rate = edge_rate,
-       node_rate = node_rate,
-       shifts = shift_table, tree = tree, scaled = scaled)
+       node_rate = rates$node_rate,
+       shifts = rates$shifts, tree = tree, scaled = scaled)
+}
+
+#' the `edge_rates` given to trait_rates() without names, checked: one positive number for
+#' each of the `n_edge` branches
+#' @noRd
+given_edge_rates <- function(edge_rates, n_edge) {
+  not_numbers <- !is.numeric(edge_rates) || length(edge_rates) != n_edge
+  if (not_numbers || !all(is.finite(edge_rates)) || any(edge_rates <= 0)) {
+    stop("`edge_rates` needs one positive number per row of `tree$edge`", call. = FALSE)
+  }
+  unname(edge_rates)
+}
+
+#' where the shifts in rate happen: a list with their `edges` (rows of `tree$edge`) and their
+#' `position` along them. A Poisson process along the branches with `shift_rate`; otherwise
+#' at the start of `shift_edges`, or of `shifts` branches drawn with weight equal to length
+#' @noRd
+shift_places <- function(tree, shifts, shift_edges, shift_rate) {
+  n_edge <- nrow(tree$edge)
+  if (!is.null(shift_rate)) {
+    n_shifts <- stats::rpois(1, shift_rate * sum(tree$edge.length))
+    shift_edges <- sample.int(n_edge, n_shifts, replace = TRUE, prob = tree$edge.length)
+    position <- stats::runif(n_shifts) * tree$edge.length[shift_edges]
+    return(list(edges = shift_edges, position = position))
+  }
+  if (is.null(shift_edges)) {
+    shift_edges <- if (shifts == 0) integer(0) else {
+      sample.int(n_edge, shifts, prob = tree$edge.length)
+    }
+  }
+  shift_edges <- as.integer(shift_edges)
+  if (anyNA(shift_edges) || any(shift_edges < 1 | shift_edges > n_edge) ||
+        anyDuplicated(shift_edges)) {
+    stop("`shift_edges` must be different row numbers of `tree$edge`", call. = FALSE)
+  }
+  list(edges = shift_edges, position = numeric(length(shift_edges)))
+}
+
+#' the multiplier of each of `n_shifts` shifts from `shift_size` (values, recycled, or a
+#' function of the number of shifts), checked when there are shifts
+#' @noRd
+shift_sizes <- function(shift_size, n_shifts) {
+  size <- if (is.function(shift_size)) shift_size(n_shifts) else {
+    rep_len(shift_size, n_shifts)
+  }
+  if (n_shifts == 0) return(size)
+  not_numbers <- !is.numeric(size) || length(size) != n_shifts
+  if (not_numbers || !all(is.finite(size)) || any(size <= 0)) {
+    stop("`shift_size` must give one positive multiplier per shift", call. = FALSE)
+  }
+  size
+}
+
+#' rates of the branches with shifts at `position` along `shift_edges`: a list with the mean
+#' rate of each branch over time (`edge_rate`) and the table of `shifts`
+#' @noRd
+shift_rates <- function(tree, cladewise, sigma2, shift_edges, position, size, relative,
+                        shift_branch) {
+  at_node <- rep(sigma2, ape::Ntip(tree) + tree$Nnode)
+  edge_rate <- numeric(nrow(tree$edge))
+  after <- numeric(length(shift_edges))
+  for (e in cladewise) {
+    start <- at_node[tree$edge[e, 1]]
+    here <- which(shift_edges == e)
+    here <- here[order(position[here])]
+    rate <- start
+    integral <- 0
+    from <- 0
+    for (k in here) {
+      integral <- integral + rate * (position[k] - from)
+      rate <- if (relative) rate * size[k] else sigma2 * size[k]
+      after[k] <- rate
+      from <- position[k]
+    }
+    integral <- integral + rate * (tree$edge.length[e] - from)
+    edge_rate[e] <- if (tree$edge.length[e] > 0) integral / tree$edge.length[e] else rate
+    at_node[tree$edge[e, 2]] <- if (shift_branch) start else rate
+  }
+  shift_table <- data.frame(edge = shift_edges, node = tree$edge[shift_edges, 2],
+                            position = position, multiplier = size, rate = after)
+  shift_table <- shift_table[order(shift_table$edge, shift_table$position), , drop = FALSE]
+  rownames(shift_table) <- NULL
+  list(edge_rate = edge_rate, shifts = shift_table)
+}
+
+#' rates under geometric Brownian motion: the logarithm of the rate evolves from `log(sigma2)`
+#' at the root. A list with the rate of each branch (`edge_rate`, the geometric mean of the
+#' rates at its ends) and at each node (`node_rate`)
+#' @noRd
+gbm_rates <- function(tree, cladewise, sigma2, rate_sd) {
+  log_rate <- numeric(ape::Ntip(tree) + tree$Nnode)
+  log_rate[ape::Ntip(tree) + 1] <- log(sigma2)
+  steps <- stats::rnorm(nrow(tree$edge), 0, rate_sd * sqrt(tree$edge.length))
+  for (e in cladewise) log_rate[tree$edge[e, 2]] <- log_rate[tree$edge[e, 1]] + steps[e]
+  list(edge_rate = exp((log_rate[tree$edge[, 1]] + log_rate[tree$edge[, 2]]) / 2),
+       node_rate = stats::setNames(exp(log_rate), seq_along(log_rate)))
 }
 
 #' Rates of trait evolution from a history along the tree

@@ -75,22 +75,9 @@ rate_matrix <- function(variance = 1, correlation = 0,
                         n_traits = NULL, scale = NULL, eigenvalues = NULL) {
   constraint <- match.arg(constraint)
   check_count(n_traits, "n_traits", null_ok = TRUE)
-  first <- function(x) if (is.list(x)) x[[1]] else x
-  p <- n_traits %||% {
-    rho <- first(correlation)
-    if (is.matrix(rho)) nrow(rho) else length(first(variance))
-  }
-  if (p < 1) stop("`variance` or `correlation` must give at least one trait", call. = FALSE)
-  p <- as.integer(p)
+  p <- rate_matrix_size(variance, correlation, n_traits)
   if (p == 1 && is.null(n_traits) && constraint != "default") {
     stop("give `n_traits`, or one variance per trait", call. = FALSE)
-  }
-  regime_list <- function(x, what) {
-    if (!is.list(x) || is.null(names(x)) || any(names(x) == "") || anyDuplicated(names(x))) {
-      stop("for \"", constraint, "\", `", what, "` must be a list named by regime",
-           call. = FALSE)
-    }
-    x
   }
   if (is.list(variance) && constraint != "correlation") {
     stop("`variance` can be a list only with constraint \"correlation\"", call. = FALSE)
@@ -98,7 +85,47 @@ rate_matrix <- function(variance = 1, correlation = 0,
   if (is.list(correlation) && constraint != "variance") {
     stop("`correlation` can be a list only with constraint \"variance\"", call. = FALSE)
   }
-  out <- switch(constraint,
+  out <- constrained_rates(constraint, variance, correlation, p, scale, eigenvalues)
+  names_traits <- paste0("trait", seq_len(p))
+  name_it <- function(m) {
+    dimnames(m) <- list(names_traits, names_traits)
+    m
+  }
+  out <- if (is.list(out)) lapply(out, name_it) else name_it(out)
+  attr(out, "constraint") <- constraint
+  class(out) <- c("rate_matrix", class(out))
+  out
+}
+
+#' the number of traits of rate_matrix(): `n_traits`, or else the size of the correlation
+#' matrix or the number of variances (of the first regime when they are lists)
+#' @noRd
+rate_matrix_size <- function(variance, correlation, n_traits) {
+  first <- function(x) if (is.list(x)) x[[1]] else x
+  p <- n_traits %||% {
+    rho <- first(correlation)
+    if (is.matrix(rho)) nrow(rho) else length(first(variance))
+  }
+  if (p < 1) stop("`variance` or `correlation` must give at least one trait", call. = FALSE)
+  as.integer(p)
+}
+
+#' stops unless `x` is a list named by regime, with different names; returns it. `what` names
+#' it in the message
+#' @noRd
+check_regime_list <- function(x, what, constraint) {
+  if (!is.list(x) || is.null(names(x)) || any(names(x) == "") || anyDuplicated(names(x))) {
+    stop("for \"", constraint, "\", `", what, "` must be a list named by regime",
+         call. = FALSE)
+  }
+  x
+}
+
+#' the rate matrix of `p` traits under a `constraint` of rate_matrix(), or a list with one per
+#' regime, without names of traits
+#' @noRd
+constrained_rates <- function(constraint, variance, correlation, p, scale, eigenvalues) {
+  switch(constraint,
     default = build_rate_matrix(variance, correlation, p),
     diagonal = {
       if (!all(correlation == 0)) stop("\"diagonal\" has no correlations", call. = FALSE)
@@ -113,42 +140,43 @@ rate_matrix <- function(variance = 1, correlation = 0,
       if (length(variance) != 1) stop("\"equal\" has one variance", call. = FALSE)
       build_rate_matrix(variance, correlation, p)
     },
-    proportional = {
-      if (!is.numeric(scale) || is.null(names(scale)) || !all(is.finite(scale)) ||
-            any(scale <= 0)) {
-        stop("for \"proportional\", `scale` must be positive numbers named by regime",
-             call. = FALSE)
-      }
-      base <- build_rate_matrix(variance, correlation, p)
-      lapply(as.list(scale), function(s) base * s)
-    },
-    shared = {
-      eigenvalues <- regime_list(eigenvalues, "eigenvalues")
-      q <- eigen(build_rate_matrix(variance, correlation, p), symmetric = TRUE)$vectors
-      lapply(eigenvalues, function(l) {
-        if (!is.numeric(l) || length(l) != p || !all(is.finite(l)) || any(l < 0)) {
-          stop("`eigenvalues` needs ", p, " values, zero or more, per regime", call. = FALSE)
-        }
-        m <- q %*% diag(l, p) %*% t(q)
-        (m + t(m)) / 2
-      })
-    },
+    proportional = proportional_rates(variance, correlation, p, scale),
+    shared = shared_rates(variance, correlation, p, eigenvalues),
     variance = {
-      lapply(regime_list(correlation, "correlation"),
+      lapply(check_regime_list(correlation, "correlation", constraint),
              function(r) build_rate_matrix(variance, r, p))
     },
     correlation = {
-      lapply(regime_list(variance, "variance"), build_rate_matrix, correlation, p)
+      lapply(check_regime_list(variance, "variance", constraint), build_rate_matrix,
+             correlation, p)
     })
-  names_traits <- paste0("trait", seq_len(p))
-  name_it <- function(m) {
-    dimnames(m) <- list(names_traits, names_traits)
-    m
+}
+
+#' rate matrices proportional among regimes: one matrix times the `scale` of each regime
+#' @noRd
+proportional_rates <- function(variance, correlation, p, scale) {
+  if (!is.numeric(scale) || is.null(names(scale)) || !all(is.finite(scale)) ||
+        any(scale <= 0)) {
+    stop("for \"proportional\", `scale` must be positive numbers named by regime",
+         call. = FALSE)
   }
-  out <- if (is.list(out)) lapply(out, name_it) else name_it(out)
-  attr(out, "constraint") <- constraint
-  class(out) <- c("rate_matrix", class(out))
-  out
+  base <- build_rate_matrix(variance, correlation, p)
+  lapply(as.list(scale), function(s) base * s)
+}
+
+#' rate matrices with shared eigenvectors (those of one matrix) and the `eigenvalues` of each
+#' regime
+#' @noRd
+shared_rates <- function(variance, correlation, p, eigenvalues) {
+  eigenvalues <- check_regime_list(eigenvalues, "eigenvalues", "shared")
+  q <- eigen(build_rate_matrix(variance, correlation, p), symmetric = TRUE)$vectors
+  lapply(eigenvalues, function(l) {
+    if (!is.numeric(l) || length(l) != p || !all(is.finite(l)) || any(l < 0)) {
+      stop("`eigenvalues` needs ", p, " values, zero or more, per regime", call. = FALSE)
+    }
+    m <- q %*% diag(l, p) %*% t(q)
+    (m + t(m)) / 2
+  })
 }
 
 #' @rdname rate_matrix
@@ -186,25 +214,14 @@ strip_rate_matrix <- function(x) {
 #' rate matrix from the variances and a common correlation or a correlation matrix
 #' @noRd
 build_rate_matrix <- function(variance, correlation, p) {
-  if (!is.numeric(variance) || !all(is.finite(variance)) || any(variance < 0) ||
-      !length(variance) %in% c(1, p)) {
+  not_numbers <- !is.numeric(variance) || !all(is.finite(variance))
+  if (not_numbers || any(variance < 0) || !length(variance) %in% c(1, p)) {
     stop("`variance` needs 1 or ", p, " values, zero or more", call. = FALSE)
   }
-  if (is.matrix(correlation)) {
-    rho <- unname(correlation)
-    if (any(dim(rho) != p) || anyNA(rho) || !isSymmetric(rho) || any(diag(rho) != 1) ||
-        any(abs(rho) > 1)) {
-      stop("`correlation` must be a symmetric ", p, " x ", p, " matrix with ones on the ",
-           "diagonal and values in [-1, 1]", call. = FALSE)
-    }
+  rho <- if (is.matrix(correlation)) {
+    check_rate_correlation(unname(correlation), p)
   } else {
-    if (!is.numeric(correlation) || length(correlation) != 1 || is.na(correlation) ||
-        abs(correlation) > 1) {
-      stop("`correlation` must be one number in [-1, 1] or a correlation matrix",
-           call. = FALSE)
-    }
-    rho <- matrix(correlation, p, p)
-    diag(rho) <- 1
+    common_correlation(correlation, p)
   }
   if (min(eigen(rho, symmetric = TRUE, only.values = TRUE)$values) < -1e-10) {
     stop("the correlations do not form a valid correlation matrix (not positive ",
@@ -212,4 +229,29 @@ build_rate_matrix <- function(variance, correlation, p) {
   }
   s <- sqrt(rep_len(variance, p))
   rho * outer(s, s)
+}
+
+#' stops unless `rho` is a symmetric matrix among `p` traits with ones on the diagonal and
+#' values from -1 to 1; returns it
+#' @noRd
+check_rate_correlation <- function(rho, p) {
+  not_square <- any(dim(rho) != p) || anyNA(rho) || !isSymmetric(rho)
+  if (not_square || any(diag(rho) != 1) || any(abs(rho) > 1)) {
+    stop("`correlation` must be a symmetric ", p, " x ", p, " matrix with ones on the ",
+         "diagonal and values in [-1, 1]", call. = FALSE)
+  }
+  rho
+}
+
+#' the correlation matrix among `p` traits with one `correlation` for all pairs, checked
+#' @noRd
+common_correlation <- function(correlation, p) {
+  not_number <- !is.numeric(correlation) || length(correlation) != 1
+  if (not_number || is.na(correlation) || abs(correlation) > 1) {
+    stop("`correlation` must be one number in [-1, 1] or a correlation matrix",
+         call. = FALSE)
+  }
+  rho <- matrix(correlation, p, p)
+  diag(rho) <- 1
+  rho
 }

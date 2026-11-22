@@ -21,8 +21,8 @@ test_that("without a split, the simulation is simulate_metacommunity()", {
                                 dispersal = 0.01, n_steps = 120, extirpation = 0.01,
                                 seed_steps = numeric(0), evolution = ev, immigration = imm)
     expect_identical(unname(a$abundance), unname(b$abundance))
-    expect_equal(unname(a$genetic), unname(b$evolution$genetic))
-    expect_equal(nrow(a$species), 1)
+    expect_identical(unname(a$genetic), unname(b$evolution$genetic))
+    expect_identical(nrow(a$species), 1L)
     expect_null(a$tree)
   }
 })
@@ -34,18 +34,18 @@ test_that("isolated groups of populations bud when their divergence reaches the 
                                          dispersal = 0.05, n_steps = 60,
                                          initial = matrix(50L, 8, 1,
                                                           dimnames = list(NULL, "sp1")))
-  expect_equal(sim$events$time, 30)
-  expect_equal(sim$events$parent, "sp1")
-  expect_equal(sim$events$new, "sp2")
+  expect_identical(sim$events$time, 30)
+  expect_identical(sim$events$parent, "sp1")
+  expect_identical(sim$events$new, "sp2")
   # the mother keeps one island and its age; the bud takes the other
-  expect_equal(sort(sim$species$species[sim$species$fate == "extant"]), c("sp1", "sp2"))
-  expect_equal(sim$species$birth, c(0, 30))
+  expect_identical(sort(sim$species$species[sim$species$fate == "extant"]), c("sp1", "sp2"))
+  expect_identical(sim$species$birth, c(0, 30))
   occupied <- lapply(c("sp1", "sp2"), function(s) which(sim$abundance[, s] > 0))
   expect_setequal(lapply(occupied, function(x) unique(x > 4)), list(FALSE, TRUE))
   expect_true(ape::is.ultrametric(sim$tree))
-  expect_equal(unname(ape::branching.times(sim$tree)), 60 - 30)
+  expect_identical(unname(ape::branching.times(sim$tree)), 60 - 30)
   # within each island, populations exchange migrants and never split
-  expect_equal(nrow(sim$events), 1)
+  expect_identical(nrow(sim$events), 1L)
 })
 
 test_that("several groups at once bud in order, with internal branches of length zero", {
@@ -56,12 +56,12 @@ test_that("several groups at once bud in order, with internal branches of length
                                          dispersal = 0.05, n_steps = 40,
                                          initial = matrix(50L, 9, 1,
                                                           dimnames = list(NULL, "sp1")))
-  expect_equal(nrow(sim$events), 1)
-  expect_equal(sim$events$new, "sp2,sp3")
-  expect_equal(sim$species$order, c(0L, 1L, 2L))
-  expect_equal(ape::Ntip(sim$tree), 3)
+  expect_identical(nrow(sim$events), 1L)
+  expect_identical(sim$events$new, "sp2,sp3")
+  expect_identical(sim$species$order, c(0L, 1L, 2L))
+  expect_identical(ape::Ntip(sim$tree), 3L)
   expect_true(ape::is.binary(sim$tree))
-  expect_equal(sort(unname(ape::branching.times(sim$tree))), c(20, 20))
+  expect_identical(sort(unname(ape::branching.times(sim$tree))), c(20, 20))
   expect_true(any(sim$tree$edge.length == 0))
   # a record at the step of the budding shows the new species
   set.seed(10)
@@ -69,7 +69,7 @@ test_that("several groups at once bud in order, with internal branches of length
                                          dispersal = 0.05, n_steps = 20, record_steps = 20,
                                          initial = matrix(50L, 9, 1,
                                                           dimnames = list(NULL, "sp1")))
-  expect_equal(unname(rec$history[, , 1]), unname(rec$abundance))
+  expect_identical(unname(rec$history[, , 1]), unname(rec$abundance))
 })
 
 test_that("pruning keeps the emigrants aligned with the alive species", {
@@ -81,8 +81,8 @@ test_that("pruning keeps the emigrants aligned with the alive species", {
   st$at <- diag(2)
   st$em <- matrix(c(0, 0, 3, 4), 2, 2)
   st$dispersal <- st$extirpation <- c(0.1, 0.1)
-  expect_equal(evolving_prune(st), 1L)
-  expect_equal(st$em, matrix(c(3, 4), 2, 1))
+  expect_identical(evolving_prune(st), 1L)
+  expect_identical(st$em, matrix(c(3, 4), 2, 1))
 })
 
 test_that("gradual divergence lets strong gene flow hold a species together", {
@@ -94,7 +94,7 @@ test_that("gradual divergence lets strong gene flow hold a species together", {
                                                        homogenization = h),
                                     dispersal = 0.05, n_steps = 100)
   }
-  expect_equal(nrow(run(10)$events), 0)
+  expect_identical(nrow(run(10)$events), 0L)
   expect_gt(nrow(run(0)$events), 0)
 })
 
@@ -107,7 +107,7 @@ test_that("ecological speciation follows divergence of genetic means despite gen
                                          dispersal = 0.01, n_steps = 100,
                                          initial = matrix(50L, 8, 1,
                                                           dimnames = list(NULL, "sp1")))
-  expect_equal(nrow(sim$events), 1)
+  expect_identical(nrow(sim$events), 1L)
   means <- sim$traits$optimum
   expect_gt(diff(range(means)), 30)
 })
@@ -122,16 +122,16 @@ test_that("the trees and tables agree", {
                                          evolution = ev, dispersal = 0.005, n_steps = 300,
                                          extirpation = 0.005, max_species = 2000)
   sp <- sim$species
-  expect_equal(nrow(sp) - 1, sum(lengths(strsplit(sim$events$new, ","))))
+  expect_equal(nrow(sp) - 1, sum(lengths(strsplit(sim$events$new, ",", fixed = TRUE))))
   extant <- sp$species[sp$fate == "extant"]
   expect_setequal(colnames(sim$abundance), extant)
   expect_true(all(colSums(sim$abundance) > 0))
   expect_setequal(sim$tree$tip.label, extant)
   expect_setequal(sim$tree_full$tip.label, sp$species)
   expect_true(ape::is.ultrametric(sim$tree))
-  expect_equal(max(ape::node.depth.edgelength(sim$tree_full)) + sim$tree_full$root.edge, 300)
-  expect_equal(length(sim$richness), 300)
-  expect_equal(dim(sim$alpha), rep(length(extant), 2))
+  expect_identical(max(ape::node.depth.edgelength(sim$tree_full)) + sim$tree_full$root.edge, 300)
+  expect_length(sim$richness, 300)
+  expect_identical(dim(sim$alpha), rep(length(extant), 2))
   x <- as_metacommunity(sim)
   expect_s3_class(x, "mc_sim")
   expect_s3_class(as_mc_data(x), "mc_data")
@@ -148,7 +148,7 @@ test_that("several species at the start hang from their tree", {
                                          dispersal = 0.05, n_steps = 50, competition = "none",
                                          initial = matrix(50L, 8, 2,
                                                           dimnames = list(NULL, c("a", "b"))))
-  expect_equal(max(ape::node.depth.edgelength(sim$tree_full)), 150)
+  expect_identical(max(ape::node.depth.edgelength(sim$tree_full)), 150)
   expect_true(all(c("a", "b") %in% sim$species$species))
   expect_error(simulate_evolving_metacommunity(ls, rbind(ancestor(), sp2 = ancestor()),
                                                speciation_control("geographic", 30)), "tree")
@@ -184,8 +184,8 @@ test_that("edge cases of names, extinction, records and trees are handled", {
   set.seed(8)
   sim <- simulate_evolving_metacommunity(ls, anc2, speciation_control("geographic", 30),
                                          dispersal = 0.05, n_steps = 60, initial = start("sp2"))
-  expect_equal(anyDuplicated(sim$species$species), 0)
-  expect_equal(nrow(sim$events), 1)
+  expect_identical(anyDuplicated(sim$species$species), 0L)
+  expect_identical(nrow(sim$events), 1L)
   # heavy extirpation: every extant species has individuals, richness has one value per
   # generation, and the table agrees with it
   for (seed in 1:10) {
@@ -195,7 +195,7 @@ test_that("edge cases of names, extinction, records and trees are handled", {
                                          dispersal = 0.001, extirpation = 0.15, n_steps = 30)
     expect_true(all(colSums(s$abundance) > 0))
     expect_length(s$richness, 30)
-    expect_equal(s$richness[30], ncol(s$abundance))
+    expect_identical(s$richness[30], ncol(s$abundance))
     expect_false(anyNA(s$traits$optimum))
   }
   # records reach the output and the colonisation history
@@ -203,7 +203,7 @@ test_that("edge cases of names, extinction, records and trees are handled", {
   s <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("geographic", 30),
                                        dispersal = 0.05, n_steps = 60, record_steps = c(20, 60),
                                        initial = start("sp1"))
-  expect_equal(dim(s$history), c(8, ncol(s$abundance), 2))
+  expect_identical(dim(s$history), c(8L, ncol(s$abundance), 2L))
   expect_s3_class(colonisation_history(as_metacommunity(s)), "data.frame")
   expect_error(simulate_evolving_metacommunity(ls, ancestor(),
                                                speciation_control("geographic", 30),
@@ -229,9 +229,9 @@ test_that("migrants between sites of implicit landscapes are e / (m - 1)", {
   st$alive <- 1
   flow <- evolving_flow(st, list(matrix(0, 5, 5)), NULL)[[1]]
   expect_equal(flow[1, 2], 10 / 4)
-  expect_equal(flow[3, 1], 0)
+  expect_identical(flow[3, 1], 0)
   expect_equal(flow[1, 3], 10 / 4)
-  expect_equal(unname(diag(flow)), rep(0, 5))
+  expect_identical(unname(diag(flow)), rep(0, 5))
 })
 
 test_that("flow without emigrants is unchanged", {
@@ -253,16 +253,16 @@ test_that("divergence within a cluster is frozen and resets after reset_generati
   apart <- matrix(c(0, 0.1, 0.1, 0), 2, 2)
   step <- function(d, tg, f) evolving_divergence(st, list(d), list(tg), list(f), sp)
   one <- step(d, tg, linked)
-  expect_equal(one$divergence[[1]][1, 2], 25)
-  expect_equal(one$together[[1]][1, 2], 1)
+  expect_identical(one$divergence[[1]][1, 2], 25)
+  expect_identical(one$together[[1]][1, 2], 1)
   two <- step(one$divergence[[1]], one$together[[1]], linked)
-  expect_equal(two$divergence[[1]][1, 2], 25)
+  expect_identical(two$divergence[[1]][1, 2], 25)
   three <- step(two$divergence[[1]], two$together[[1]], linked)
-  expect_equal(three$divergence[[1]][1, 2], 0)
+  expect_identical(three$divergence[[1]][1, 2], 0)
   # a generation apart restarts the count and adds to divergence
   back <- step(two$divergence[[1]], two$together[[1]], apart)
-  expect_equal(back$divergence[[1]][1, 2], 26)
-  expect_equal(back$together[[1]][1, 2], 0)
+  expect_identical(back$divergence[[1]][1, 2], 26)
+  expect_identical(back$together[[1]][1, 2], 0)
 })
 
 test_that("ecological groups need a lasting difference with reduced gene flow", {
@@ -277,13 +277,13 @@ test_that("ecological groups need a lasting difference with reduced gene flow", 
   low <- matrix(c(0, 0.1, 0.1, 0), 2, 2)
   high <- matrix(c(0, 50, 50, 0), 2, 2)
   one <- evolving_divergence(st, list(d), list(d), list(low), sp)$divergence[[1]]
-  expect_equal(one[1, 2], 1)
+  expect_identical(one[1, 2], 1)
   expect_length(evolving_groups(st, 1, one, sp), 0)
   two <- evolving_divergence(st, list(one), list(d), list(low), sp)$divergence[[1]]
   expect_length(evolving_groups(st, 1, two, sp), 2)
   # gene flow above migration_max restarts the count
   reset <- evolving_divergence(st, list(one), list(d), list(high), sp)$divergence[[1]]
-  expect_equal(reset[1, 2], 0)
+  expect_identical(reset[1, 2], 0)
 })
 
 test_that("drift alone does not split species in a uniform environment", {
@@ -294,7 +294,7 @@ test_that("drift alone does not split species in a uniform environment", {
     simulate_evolving_metacommunity(ls, ancestor(), sp, evolution = ev, dispersal = 0.05,
                                     n_steps = n_steps)
   }
-  expect_equal(nrow(run(speciation_control("ecological", 5), 100)$events), 0)
+  expect_identical(nrow(run(speciation_control("ecological", 5), 100)$events), 0L)
   # without the guard, drift and founder sampling split it at once
   expect_gt(nrow(run(speciation_control("ecological", 5, min_generations = 1,
                                         migration_max = Inf), 10)$events), 0)
@@ -329,17 +329,18 @@ test_that("point mutation starts new species from single individuals", {
   expect_identical(run(0)$abundance, none$abundance)
   sim <- run(5e-4)
   expect_gt(nrow(sim$events), 0)
-  expect_equal(nrow(sim$species) - 1, sum(lengths(strsplit(sim$events$new, ","))))
+  expect_equal(nrow(sim$species) - 1,
+               sum(lengths(strsplit(sim$events$new, ",", fixed = TRUE))))
   expect_true(ape::is.ultrametric(sim$tree))
   expect_setequal(sim$tree$tip.label, colnames(sim$abundance))
   expect_true(all(colSums(sim$abundance) > 0))
-  expect_equal(max(ape::node.depth.edgelength(sim$tree)) + sim$tree$root.edge, 200)
+  expect_identical(max(ape::node.depth.edgelength(sim$tree)) + sim$tree$root.edge, 200)
   # mothers emptied by mutants go extinct
   set.seed(1)
   hot <- simulate_evolving_metacommunity(ls, ancestor(), speciation_control("point", rate = 0.003),
                                          dispersal = 0.05, n_steps = 200, max_species = 5000)
   expect_true(all(colSums(hot$abundance) > 0))
-  expect_equal(tail(hot$richness, 1), ncol(hot$abundance))
+  expect_identical(tail(hot$richness, 1), ncol(hot$abundance))
   # a mutant takes one individual from its mother
   st <- new.env()
   st$m <- 2
@@ -357,14 +358,14 @@ test_that("point mutation starts new species from single individuals", {
   st$ev <- list(g = 1, b = 0, ve = 0, optimum = 50, sigma = 10, r_max = 5)
   st$fixed_z <- FALSE
   evolving_split(st, 1, list(2L, 2L), c("sp2", "sp3"), list(1L, 1L))
-  expect_equal(st$n, matrix(c(5L, 1L, 0L, 1L, 0L, 1L), 2, 3))
+  expect_identical(st$n, matrix(c(5L, 1L, 0L, 1L, 0L, 1L), 2, 3))
   st$step <- 7
   evolving_split(st, 1, list(2L), "sp4", list(1L), mutants = TRUE)
-  expect_equal(st$arrival[2, 4], 7L)
-  expect_equal(st$propagule[2, 4], 1L)
-  expect_equal(st$n[2, 1], 0L)
+  expect_identical(st$arrival[2, 4], 7L)
+  expect_identical(st$propagule[2, 4], 1L)
+  expect_identical(st$n[2, 1], 0L)
   expect_false(st$present[2, 1])
-  expect_equal(st$z[2, 2:4], c(50, 50, 50))
+  expect_identical(st$z[2, 2:4], c(50, 50, 50))
   expect_true(all(is.na(st$z[1, 2:3])))
 })
 
@@ -388,9 +389,9 @@ test_that("new species can shift their genetic means", {
   evolving_split(st, 1, list(1:2), "sp2", jump_var = 100)
   shift <- st$z[1, 2] - 40
   expect_gt(abs(shift), 0)
-  expect_equal(st$z[2, 2] - 60, shift)
-  expect_equal(st$ev$optimum[2] - 50, shift)
-  expect_equal(st$n[, 1], c(0L, 0L))
+  expect_identical(st$z[2, 2] - 60, shift)
+  expect_identical(st$ev$optimum[2] - 50, shift)
+  expect_identical(st$n[, 1], c(0L, 0L))
 })
 
 test_that("fission splits species into spatial or random groups", {
@@ -400,12 +401,14 @@ test_that("fission splits species into spatial or random groups", {
   for (seed in 1:20) {
     set.seed(seed)
     g <- evolving_partition(1:10, "spatial", ls$dispersal)
-    expect_equal(sort(c(g[[1]], g[[2]])), 1:10)
-    expect_true(length(g[[1]]) > 0 && length(g[[2]]) > 0)
+    expect_identical(sort(c(g[[1]], g[[2]])), 1:10)
+    expect_gt(length(g[[1]]), 0)
+    expect_gt(length(g[[2]]), 0)
     expect_true(all(diff(g[[2]]) == 1))
     r <- evolving_partition(c(2, 5, 7), "random", NULL)
     expect_setequal(c(r[[1]], r[[2]]), c(2, 5, 7))
-    expect_true(length(r[[1]]) > 0 && length(r[[2]]) > 0)
+    expect_gt(length(r[[1]]), 0)
+    expect_gt(length(r[[2]]), 0)
   }
   set.seed(14)
   sim <- simulate_evolving_metacommunity(landscape_grid(4, disp_scale = 0.5), ancestor(),
@@ -425,9 +428,9 @@ test_that("incipient lineages belong to the nearest good species", {
                    status = c("good", "incipient", "good", "good", "incipient"),
                    stringsAsFactors = FALSE)
   obs <- evolving_observed(sp)
-  expect_equal(unname(obs$group[c("sp1", "sp2", "sp3", "sp5")]), c("sp1", "sp1", "sp3", "sp4"))
+  expect_identical(unname(obs$group[c("sp1", "sp2", "sp3", "sp5")]), c("sp1", "sp1", "sp3", "sp4"))
   # sp4 is extinct, so its incipient daughter sp5 represents it
-  expect_equal(obs$rep, c(sp1 = "sp1", sp3 = "sp3", sp4 = "sp5"))
+  expect_identical(obs$rep, c(sp1 = "sp1", sp3 = "sp3", sp4 = "sp5"))
   ls <- landscape_grid(4, disp_scale = 0.5)
   run <- function(completion, dist = "fixed") {
     set.seed(15)
@@ -440,14 +443,14 @@ test_that("incipient lineages belong to the nearest good species", {
   inst <- run(0)
   never <- run(1000)
   expect_identical(nrow(never$species), nrow(inst$species))
-  expect_equal(colnames(never$abundance), "sp1")
+  expect_identical(colnames(never$abundance), "sp1")
   expect_equal(unname(never$abundance[, 1]), unname(rowSums(inst$abundance)))
   expect_null(never$tree)
   expect_true(all(never$richness_good == 1))
   some <- run(30, "exponential")
   expect_output(print(some), "good species")
   expect_true(all(some$lineage_species %in% colnames(some$abundance)))
-  expect_equal(sum(some$abundance), sum(some$lineages))
+  expect_identical(sum(some$abundance), sum(some$lineages))
   if (!is.null(some$tree)) expect_setequal(some$tree$tip.label, colnames(some$abundance))
   # an incipient lineage keeps the species of its parent at its birth, even if the parent
   # completes later
@@ -455,7 +458,7 @@ test_that("incipient lineages belong to the nearest good species", {
                     birth = c(0, 10, 20), end = 50, fate = "extant",
                     completion = c(0, 30, 80), status = c("good", "good", "incipient"),
                     stringsAsFactors = FALSE)
-  expect_equal(unname(evolving_observed(sp2)$group["sp3"]), "sp1")
+  expect_identical(unname(evolving_observed(sp2)$group["sp3"]), "sp1")
   expect_s3_class(as_mc_data(as_metacommunity(some)), "mc_data")
   # records sum the lineages of each species
   set.seed(15)
@@ -489,13 +492,13 @@ test_that("settings of the new modes are checked", {
 test_that("split times of several buddings at once agree with one at a time", {
   st0 <- matrix(c(0, -5, -5, 0), 2, 2, dimnames = list(c("a", "b"), c("a", "b")))
   many <- evolving_split_time(st0, c("a", "a", "b"), c("c", "d", "e"), 10)
-  expect_equal(many["c", "a"], 10)
-  expect_equal(many["c", "d"], 10)
-  expect_equal(many["c", "b"], -5)
-  expect_equal(many["c", "e"], -5)
-  expect_equal(many["e", "b"], 10)
-  expect_equal(many, t(many))
-  expect_equal(unname(diag(many)), rep(0, 5))
+  expect_identical(many["c", "a"], 10)
+  expect_identical(many["c", "d"], 10)
+  expect_identical(many["c", "b"], -5)
+  expect_identical(many["c", "e"], -5)
+  expect_identical(many["e", "b"], 10)
+  expect_identical(many, t(many))
+  expect_identical(unname(diag(many)), rep(0, 5))
 })
 
 test_that("the evolving engine takes dispersal_time and kernels", {
@@ -524,7 +527,7 @@ test_that("the evolving engine takes dispersal_time and kernels", {
                                            seed_mean = 0, dispersal_time = rep(0, 60))
   expect_gt(nrow(still$events), 0)
   expect_true(all(rowSums(still$abundance)[-c(1, 25)] == 0))
-  expect_equal(still$dispersal_time, rep(0, 60))
+  expect_identical(still$dispersal_time, rep(0, 60))
   # two kernels in turn run, and the kernels are returned
   dry <- landscape_grid(5, disp_scale = 0.1)$dispersal
   two <- run(kernels = list(wet = ls$dispersal, dry = dry),
@@ -554,7 +557,7 @@ test_that("the evolving engine filters immigrants by their fitness", {
   st$e_now <- c(50, 55, 60)
   w <- evolving_immigrant_fitness(st, 1, 1)
   expect_equal(w[1, ], exp(-(c(50, 55, 60) - 50)^2 / 20))
-  expect_equal(dim(w), c(3L, 3L))
+  expect_identical(dim(w), c(3L, 3L))
 })
 
 test_that("immigrant fitness in the evolving engine covers several traits and wide niches", {
@@ -563,7 +566,7 @@ test_that("immigrant fitness in the evolving engine covers several traits and wi
   st$ev <- list(g = 1, sigma = Inf, ve = 0)
   st$pa_em <- matrix(c(50, NA, 60), 3, 1)
   st$e_now <- c(50, 55, 60)
-  expect_equal(evolving_immigrant_fitness(st, 1, 1), matrix(1, 3, 3))
+  expect_identical(evolving_immigrant_fitness(st, 1, 1), matrix(1, 3, 3))
   # several traits: the weights of mv_fitness() for the phenotypes of the emigrants
   control <- evolution_control(diag(c(4, 0)), env_var = diag(c(1, 0)))
   control$traits <- list(
@@ -604,8 +607,8 @@ test_that("evolving_prune drops the phenotypes of emigrants with their species",
     st$dispersal <- c(0.1, 0.1)
     st$extirpation <- c(0, 0)
     st$pa_em <- if (three) array(1:8, c(2, 2, 2)) else matrix(1:4, 2)
-    expect_equal(evolving_prune(st), 2L)
-    expect_equal(dim(st$pa_em), if (three) c(2L, 1L, 2L) else c(2L, 1L))
+    expect_identical(evolving_prune(st), 2L)
+    expect_identical(dim(st$pa_em), if (three) c(2L, 1L, 2L) else c(2L, 1L))
   }
 })
 
@@ -622,8 +625,8 @@ test_that("mothers emptied by point mutants leave with immigrant selection", {
       env = if (several) cbind(a = rep(50, 3), b = 0),
       evolution = evolution_control(if (several) diag(2) else 1, immigrant_selection = TRUE),
       dispersal = 0.1, n_steps = 2, initial = init)
-    expect_equal(sim$species$fate[1], "extinct")
-    expect_equal(sim$species$end[1], 1)
+    expect_identical(sim$species$fate[1], "extinct")
+    expect_identical(sim$species$end[1], 1)
     expect_gt(ncol(sim$abundance), 1)
   }
 })

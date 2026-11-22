@@ -54,7 +54,21 @@ range_history <- function(x, areas, tree = c("reconstructed", "full")) {
   }
   tree <- match.arg(tree)
   if (tree == "reconstructed" && is.null(x$tree)) return(NULL)
-  m <- nrow(x$abundance)
+  areas <- range_areas(areas, nrow(x$abundance))
+  full <- x$tree_full
+  timeline <- range_timelines(x$ranges, areas)
+  mapped <- range_full_maps(full, x$species, timeline, levels(areas))
+  if (tree == "full") return(ranges_simmap(full, mapped$maps, mapped$nodes[ape::Ntip(full) + 1]))
+  rec <- x$tree
+  rep <- range_representatives(x)
+  projected <- range_project_maps(full, mapped$maps, rec, rep[rec$tip.label])
+  ranges_simmap(rec, projected$maps, mapped$nodes[projected$root_full])
+}
+
+#' the area of each of the `m` sites as a factor, in the order of the sites when `areas` is named
+#' by site
+#' @noRd
+range_areas <- function(areas, m) {
   if (!is.null(names(areas))) {
     at <- match(as.character(seq_len(m)), names(areas))
     if (anyNA(at)) at <- match(paste0("site", seq_len(m)), names(areas))
@@ -68,14 +82,7 @@ range_history <- function(x, areas, tree = c("reconstructed", "full")) {
   if (any(grepl("+", levels(areas), fixed = TRUE))) {
     stop("area names may not contain \"+\"", call. = FALSE)
   }
-  full <- x$tree_full
-  timeline <- range_timelines(x$ranges, areas)
-  mapped <- range_full_maps(full, x$species, timeline, levels(areas))
-  if (tree == "full") return(ranges_simmap(full, mapped$maps, mapped$nodes[ape::Ntip(full) + 1]))
-  rec <- x$tree
-  rep <- range_representatives(x)
-  projected <- range_project_maps(full, mapped$maps, rec, rep[rec$tip.label])
-  ranges_simmap(rec, projected$maps, mapped$nodes[projected$root_full])
+  areas
 }
 
 #' for each lineage, the times (generations) at which its range changed and the range from then
@@ -165,26 +172,17 @@ range_full_maps <- function(full, sp, timeline, levels) {
     timeline[[lineage]] %||% data.frame(time = 0, state = "", stringsAsFactors = FALSE)
   }
   key <- order(order(sp$birth[tip_sp], sp$order[tip_sp], tip_sp))
-  first <- c(seq_len(n_tip), rep(NA_integer_, full$Nnode))
-  post <- if (nrow(full$edge) > 1) {
-    ape::reorder.phylo(full, "postorder", index.only = TRUE)
-  } else {
-    seq_len(nrow(full$edge))
-  }
+  post <- range_postorder(full)
   # the start ranges of the species below each node, for nodes before the start
   below_start <- vector("list", n_node)
   for (i in which(sp$birth[tip_sp] == 0)) {
     below_start[[i]] <- range_before(tl_of(full$tip.label[i]), 2 * range_eps)
   }
-  for (e in post) {
-    p <- full$edge[e, 1]
-    c <- full$edge[e, 2]
-    if (is.na(first[p]) || key[first[c]] < key[first[p]]) first[p] <- first[c]
-    below_start[p] <- list(c(below_start[[p]], below_start[[c]]))
-  }
+  followed <- range_followed(full, post, key, below_start)
+  first <- followed$first
   node_state <- character(n_node)
   for (v in seq_len(n_node)[-seq_len(n_tip)]) {
-    node_state[v] <- if (t[v] < -range_eps) range_union(below_start[[v]], levels) else
+    node_state[v] <- if (t[v] < -range_eps) range_union(followed$below_start[[v]], levels) else
       range_before(tl_of(full$tip.label[first[v]]), t[v])
   }
   maps <- lapply(seq_len(nrow(full$edge)), function(e) {
@@ -194,6 +192,31 @@ range_full_maps <- function(full, sp, timeline, levels) {
     range_segment(tl_of(full$tip.label[first[c]]), t[p], t[c], terminal = c <= n_tip)
   })
   list(maps = maps, nodes = node_state)
+}
+
+#' the edges of the full tree from the tips to the root, as row numbers of its edge matrix
+#' @noRd
+range_postorder <- function(full) {
+  if (nrow(full$edge) > 1) {
+    ape::reorder.phylo(full, "postorder", index.only = TRUE)
+  } else {
+    seq_len(nrow(full$edge))
+  }
+}
+
+#' walks the edges `post` of the full tree towards the root; a list with `first`, the tip that
+#' each node follows (the one with the smallest `key` below it), and `below_start`, the start
+#' ranges of the species below each node, from those of the tips
+#' @noRd
+range_followed <- function(full, post, key, below_start) {
+  first <- c(seq_len(ape::Ntip(full)), rep(NA_integer_, full$Nnode))
+  for (e in post) {
+    p <- full$edge[e, 1]
+    c <- full$edge[e, 2]
+    if (is.na(first[p]) || key[first[c]] < key[first[p]]) first[p] <- first[c]
+    below_start[p] <- list(c(below_start[[p]], below_start[[c]]))
+  }
+  list(first = first, below_start = below_start)
 }
 
 #' the lineage of the full tree that represents each species of the reconstructed tree

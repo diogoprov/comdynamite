@@ -9,7 +9,7 @@ comm <- matrix(c(1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1), 4,
 
 test_that("the order of the species does not matter", {
   shuffled <- comm[, c("d", "b", "a", "c")]
-  expect_equal(phylo_beta(shuffled, tree), phylo_beta(comm, tree))
+  expect_identical(phylo_beta(shuffled, tree), phylo_beta(comm, tree))
   trait <- c(a = 1, b = 2, c = 3, d = 5)
   env <- c(1, 4, 2, 7)
   expect_equal(trait_partition(shuffled, rev(trait), env, c(2, 1, 1, 3), n_perm = 1)$fractions$r2,
@@ -18,10 +18,11 @@ test_that("the order of the species does not matter", {
 
 test_that("species in only one source are named and dropped", {
   extra <- cbind(comm, e = c(1, 0, 0, 1))
-  expect_warning(out <- phylo_beta(extra, tree), "1 species of `comm` not in the phylogeny dropped: e")
-  expect_equal(out, phylo_beta(comm, tree))
-  expect_warning(pruned <- phylo_beta(comm[, -4], tree), "not in `comm` dropped: d")
-  expect_equal(pruned, phylo_beta(comm[, -4], ape::drop.tip(tree, "d")))
+  out <- expect_warning_value(phylo_beta(extra, tree),
+                              "1 species of `comm` not in the phylogeny dropped: e")
+  expect_identical(out, phylo_beta(comm, tree))
+  pruned <- expect_warning_value(phylo_beta(comm[, -4], tree), "not in `comm` dropped: d")
+  expect_identical(pruned, phylo_beta(comm[, -4], ape::drop.tip(tree, "d")))
   expect_warning(trait_partition(comm, c(a = 1, b = 2, c = 3), 1:4, c(1, 3, 2, 2), n_perm = 1),
                  "`comm` not in `traits`")
   expect_warning(pcc_test(comm[, -4], tree, 1:4, n_perm = 2), "not in `comm` dropped: d")

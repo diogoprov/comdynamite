@@ -21,8 +21,8 @@ test_that("without genetic variance, evolution leaves abundances as they were", 
                                  evolution = evolution_control(0, ne_ratio = nu))
     expect_identical(s1$abundance, s0$abundance)
     present <- s1$abundance > 0
-    expect_equal(s1$evolution$genetic[present],
-                 matrix(traits$optimum, 15, 6, byrow = TRUE)[present])
+    expect_identical(s1$evolution$genetic[present],
+                     matrix(traits$optimum, 15, 6, byrow = TRUE)[present])
     expect_true(all(is.na(s1$evolution$genetic[!present])))
   }
 })
@@ -63,7 +63,7 @@ test_that("full plasticity around the optimum removes selection on the genetic m
   out <- mc_dynamics(matrix(5, 2, 1), matrix(0.01), dispersal = 0.01, n_steps = 200,
                      seed_steps = numeric(0), initial = start(100L, 2), evolution = ev)
   expect_equal(out$evolution$genetic[, 1], c(site1 = 5, site2 = 5))
-  expect_equal(unname(out$evolution$plastic[, 1]), c(-5, 5))
+  expect_identical(unname(out$evolution$plastic[, 1]), c(-5, 5))
 })
 
 test_that("founder sampling makes new populations differ from their source", {
@@ -77,7 +77,7 @@ test_that("founder sampling makes new populations differ from their source", {
   }
   without <- run(FALSE)$evolution$genetic[, 1]
   with <- run(TRUE)$evolution$genetic[, 1]
-  expect_equal(unique(stats::na.omit(without)), 0)
+  expect_identical(unique(stats::na.omit(without)), 0)
   expect_gt(stats::sd(with, na.rm = TRUE), 0.05)
 })
 
@@ -104,8 +104,8 @@ test_that("evolution is recorded and checked", {
   a <- competition_matrix(tr, "phylo")
   sim <- simulate_metacommunity(ls, traits, a, n_steps = 60, record_steps = c(30, 60),
                                 evolution = evolution_control(1))
-  expect_equal(dim(sim$evolution$history), c(16, 4, 2))
-  expect_equal(sim$evolution$history[, , 2], sim$evolution$genetic)
+  expect_identical(dim(sim$evolution$history), c(16L, 4L, 2L))
+  expect_identical(sim$evolution$history[, , 2], sim$evolution$genetic)
   expect_s3_class(sim$evolution$settings, "mc_evolution")
   expect_output(print(evolution_control(1)), "mc_evolution")
   expect_error(evolution_control(), "genetic_var")
@@ -115,7 +115,7 @@ test_that("evolution is recorded and checked", {
   # several axes: one trait per axis, with G = diag(1)
   two <- simulate_metacommunity(ls, list(traits, traits), a, n_steps = 5,
                                 env = cbind(ls$env, ls$env), evolution = evolution_control(1))
-  expect_equal(dim(two$evolution$genetic), c(16, 4, 2))
+  expect_identical(dim(two$evolution$genetic), c(16L, 4L, 2L))
   expect_error(mc_dynamics(matrix(5, 2, 1), matrix(0.05), 0, n_steps = 5,
                            evolution = evolution_control(1)), "env")
 })
@@ -125,8 +125,8 @@ test_that("founders from divergent sources carry the variance among them", {
   z <- matrix(c(0, 10, NA))
   mean_in <- immigrant_mean(em, z, NULL, z)
   between <- immigrant_mean(em, z^2, NULL, z^2) - mean_in^2
-  expect_equal(mean_in[3], 5)
-  expect_equal(between[3], 25)
+  expect_identical(mean_in[3], 5)
+  expect_identical(between[3], 25)
 })
 
 test_that("evolution follows env_time and checks its settings", {
@@ -192,12 +192,12 @@ test_that("immigrant_selection filters maladapted immigrants source by source", 
   sel <- immigrants_selected(matrix(c(10, 0), 2, 1), matrix(c(40, 0), 2, 1),
                              matrix(c(40, 0), 2, 1), c(40, 60), 25, disp)
   expect_equal(sel$lambda[2, 1], 10 * exp(-400 / 50))
-  expect_equal(sel$mean[2, 1], 40)
+  expect_identical(sel$mean[2, 1], 40)
   # a species without emigrants sends no one and keeps its own mean
   none <- immigrants_selected(matrix(0, 2, 1), matrix(c(40, 45), 2, 1), matrix(c(40, 45), 2, 1),
                               c(40, 60), 25, disp)
-  expect_equal(none$lambda, matrix(0, 2, 1))
-  expect_equal(none$mean, matrix(c(40, 45), 2, 1))
+  expect_identical(none$lambda, matrix(0, 2, 1))
+  expect_identical(none$mean, matrix(c(40, 45), 2, 1))
   expect_error(evolution_control(1, immigrant_selection = NA))
   expect_error(simulate_metacommunity(landscape_implicit(5), tr, matrix(0.04, 2, 2),
                                       n_steps = 5,
@@ -242,8 +242,8 @@ test_that("mutation_var gives each population a genetic variance with mutation-d
   expect_true(any(v[-1] < v[1], na.rm = TRUE))
   # growth with one variance per population matches the vector version
   p <- matrix(c(40, 55), 2, 1)
-  expect_equal(evolution_growth_cells(p, c(50, 50), 20, 5, matrix(3, 2, 1)),
-               evolution_growth(p, c(50, 50), 20, 5, 3))
+  expect_identical(evolution_growth_cells(p, c(50, 50), 20, 5, matrix(3, 2, 1)),
+                   evolution_growth(p, c(50, 50), 20, 5, 3))
 })
 
 test_that("mutation_var works with seeding and with gene flow without immigrant selection", {

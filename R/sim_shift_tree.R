@@ -48,73 +48,112 @@ sim_shift_tree <- function(n_tips, n_shifts = 1, ratio = 2, lambda0 = 1, epsilon
 shift_tree_once <- function(n_tips, n_shifts, ratio, lambda0, epsilon, gsa_factor, gsa_scale) {
   thresholds <- sort(sample(3:max(4, floor(n_tips / 4)), n_shifts, replace = TRUE))
   m <- ceiling(gsa_factor * n_tips)
-  # Lineages alive: node they start from, start time, speciation rate, regime.
-  from <- 0L
-  start <- 0
-  rate <- lambda0
-  regime <- 0L
-  alive <- 1L
-  # Segments of lineages that ended: from, to (node ids), start, end, regime, kind of end
-  # (1 speciation or shift, 2 extinction). Node ids are the row numbers.
-  acc <- new.env(parent = emptyenv())
-  acc$segments <- matrix(0, 64, 6)
-  acc$n <- 0L
-  close <- function(i, time, kind) {
-    n <- acc$n + 1L
-    if (n > nrow(acc$segments)) acc$segments <- rbind(acc$segments, matrix(0, nrow(acc$segments), 6))
-    acc$segments[n, ] <- c(from[i], n, start[i], time, regime[i], kind)
-    acc$n <- n
-    n
-  }
-  rates <- lambda0
-  t <- 0
-  shifts <- 0L
+  s <- shift_tree_state(lambda0)
   # Intervals with exactly n_tips lineages alive.
   n_start <- numeric(0)
   n_end <- numeric(0)
-  while (length(alive) < m) {
-    while (shifts < n_shifts && length(alive) >= thresholds[shifts + 1]) {
-      shifts <- shifts + 1L
-      i <- alive[sample.int(length(alive), 1)]
-      from[i] <- close(i, t, 1)
-      start[i] <- t
-      rate[i] <- rate[i] * ratio
-      regime[i] <- shifts
-      rates[shifts + 1] <- rate[i]
+  while (length(s$alive) < m) {
+    while (s$shifts < n_shifts && length(s$alive) >= thresholds[s$shifts + 1]) {
+      shift_tree_shift(s, ratio)
     }
-    dt <- stats::rexp(1, sum(rate[alive]) * (1 + epsilon))
-    if (length(alive) == n_tips) {
-      n_start <- c(n_start, t)
-      n_end <- c(n_end, t + dt)
+    dt <- stats::rexp(1, sum(s$rate[s$alive]) * (1 + epsilon))
+    if (length(s$alive) == n_tips) {
+      n_start <- c(n_start, s$t)
+      n_end <- c(n_end, s$t + dt)
     }
-    t <- t + dt
-    i <- alive[if (length(alive) == 1) 1 else sample.int(length(alive), 1, prob = rate[alive])]
-    if (stats::runif(1) < 1 / (1 + epsilon)) {
-      node <- close(i, t, 1)
-      new <- length(from) + 1:2
-      from[new] <- node
-      start[new] <- t
-      rate[new] <- rate[i]
-      regime[new] <- regime[i]
-      alive <- c(alive[alive != i], new)
-    } else {
-      close(i, t, 2)
-      alive <- alive[alive != i]
-      # Extinct: intervals with n_tips lineages before extinction still count.
-      if (!length(alive)) break
-    }
+    s$t <- s$t + dt
+    shift_tree_event(s, epsilon)
+    # Extinct: intervals with n_tips lineages before extinction still count.
+    if (!length(s$alive)) break
   }
-  if (shifts < n_shifts || !length(n_start)) return(NULL)
+  if (s$shifts < n_shifts) return(NULL)
+  shift_tree_sample(s, n_start, n_end, gsa_scale / (n_tips * lambda0 * (1 + epsilon)))
+}
+
+#' the tree of a run `s` cut at a time drawn within the intervals with the number of tips
+#' wanted (from `n_start` to `n_end`), or NULL when the run had none or is not sampled: it is
+#' kept with probability equal to the total length of those intervals over `phi_ref`
+#' @noRd
+shift_tree_sample <- function(s, n_start, n_end, phi_ref) {
+  if (!length(n_start)) return(NULL)
   phi <- sum(n_end - n_start)
-  phi_ref <- gsa_scale / (n_tips * lambda0 * (1 + epsilon))
   if (stats::runif(1) > phi / phi_ref) return(NULL)
   # Cut time: uniform over the intervals with n_tips lineages.
   k <- if (length(n_start) == 1) 1 else sample.int(length(n_start), 1, prob = n_end - n_start)
   cut <- stats::runif(1, n_start[k], n_end[k])
-  for (i in alive) close(i, t, 1)
-  out <- shift_tree_cut(acc$segments[seq_len(acc$n), , drop = FALSE], cut, rates)
+  for (i in s$alive) shift_tree_close(s, i, s$t, 1)
+  out <- shift_tree_cut(s$segments[seq_len(s$n), , drop = FALSE], cut, s$rates)
   attr(out, "capped") <- phi > phi_ref
   out
+}
+
+#' the state of a run of shift_tree_once() at time zero, as an environment that the steps of
+#' the run change in place. Lineages: the node they start `from`, their `start` time,
+#' speciation `rate` and `regime`, and which are `alive`. `segments` holds the `n` lineages
+#' that ended: from, to (node ids, the row numbers), start, end, regime and kind of end (1
+#' speciation or shift, 2 extinction). `rates` is the speciation rate of each regime, `t` the
+#' time and `shifts` the number of shifts so far
+#' @noRd
+shift_tree_state <- function(lambda0) {
+  s <- new.env(parent = emptyenv())
+  s$from <- 0L
+  s$start <- 0
+  s$rate <- lambda0
+  s$regime <- 0L
+  s$alive <- 1L
+  s$segments <- matrix(0, 64, 6)
+  s$n <- 0L
+  s$rates <- lambda0
+  s$t <- 0
+  s$shifts <- 0L
+  s
+}
+
+#' ends lineage `i` of the run `s` at `time`, with the `kind` of end; returns the id of the
+#' node where it ends
+#' @noRd
+shift_tree_close <- function(s, i, time, kind) {
+  n <- s$n + 1L
+  if (n > nrow(s$segments)) s$segments <- rbind(s$segments, matrix(0, nrow(s$segments), 6))
+  s$segments[n, ] <- c(s$from[i], n, s$start[i], time, s$regime[i], kind)
+  s$n <- n
+  n
+}
+
+#' a shift in the run `s`: the speciation rate of one living lineage, drawn at random, is
+#' multiplied by `ratio` and the lineage starts a new regime
+#' @noRd
+shift_tree_shift <- function(s, ratio) {
+  s$shifts <- s$shifts + 1L
+  i <- s$alive[sample.int(length(s$alive), 1)]
+  node <- shift_tree_close(s, i, s$t, 1)
+  s$from[i] <- node
+  s$start[i] <- s$t
+  s$rate[i] <- s$rate[i] * ratio
+  s$regime[i] <- s$shifts
+  s$rates[s$shifts + 1] <- s$rate[i]
+  invisible(s)
+}
+
+#' an event of the run `s` at its current time: one living lineage, drawn with weight equal to
+#' its rate, splits in two or goes extinct
+#' @noRd
+shift_tree_event <- function(s, epsilon) {
+  alive <- s$alive
+  i <- alive[if (length(alive) == 1) 1 else sample.int(length(alive), 1, prob = s$rate[alive])]
+  if (stats::runif(1) < 1 / (1 + epsilon)) {
+    node <- shift_tree_close(s, i, s$t, 1)
+    new <- length(s$from) + 1:2
+    s$from[new] <- node
+    s$start[new] <- s$t
+    s$rate[new] <- s$rate[i]
+    s$regime[new] <- s$regime[i]
+    s$alive <- c(alive[alive != i], new)
+  } else {
+    shift_tree_close(s, i, s$t, 2)
+    s$alive <- alive[alive != i]
+  }
+  invisible(s)
 }
 
 #' Keep the segments that start before `cut`; segments that span it end there, as living tips.

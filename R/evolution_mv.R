@@ -12,19 +12,6 @@ evolution_is_mv <- function(evolution) {
 #' list with one matrix per species
 #' @noRd
 evolution_matrices <- function(x, q, species, name) {
-  as_one <- function(v) {
-    v <- if (length(v) == 1 && is.null(dim(v))) diag(v, q) else as.matrix(v)
-    if (!is.numeric(v) || !identical(dim(v), c(q, q)) || anyNA(v) ||
-        max(abs(v - t(v))) > 1e-8 * max(1, abs(v))) {
-      stop("`", name, "` needs symmetric ", q, " x ", q, " matrices (one trait per axis)",
-           call. = FALSE)
-    }
-    if (min(eigen(v, symmetric = TRUE, only.values = TRUE)$values) < -1e-8 * max(1, abs(v))) {
-      stop("`", name, "` must be positive semidefinite", call. = FALSE)
-    }
-    dimnames(v) <- NULL
-    v
-  }
   if (is.list(x)) {
     if (!is.null(names(x))) {
       if (!all(species %in% names(x))) {
@@ -37,9 +24,26 @@ evolution_matrices <- function(x, q, species, name) {
       stop("`", name, "` as a list needs one matrix per species (", length(species), ")",
            call. = FALSE)
     }
-    return(lapply(x, as_one))
+    return(lapply(x, evolution_matrix, q = q, name = name))
   }
-  rep(list(as_one(x)), length(species))
+  rep(list(evolution_matrix(x, q, name)), length(species))
+}
+
+#' one covariance matrix of q x q, without names, from a number (times the identity) or a
+#' matrix; stops unless it is symmetric and positive semidefinite
+#' @noRd
+evolution_matrix <- function(v, q, name) {
+  v <- if (length(v) == 1 && is.null(dim(v))) diag(v, q) else as.matrix(v)
+  if (!is.numeric(v) || !identical(dim(v), c(q, q)) || anyNA(v) ||
+      max(abs(v - t(v))) > 1e-8 * max(1, abs(v))) {
+    stop("`", name, "` needs symmetric ", q, " x ", q, " matrices (one trait per axis)",
+         call. = FALSE)
+  }
+  if (min(eigen(v, symmetric = TRUE, only.values = TRUE)$values) < -1e-8 * max(1, abs(v))) {
+    stop("`", name, "` must be positive semidefinite", call. = FALSE)
+  }
+  dimnames(v) <- NULL
+  v
 }
 
 #' a matrix W with W' P W = I on the range of P, so that distances between rows of z %*% W are
@@ -71,9 +75,46 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     stop("`mutation_var` is not yet available with several traits", call. = FALSE)
   }
   niche_cor <- attr(evolution$traits, "niche_cor")
-  traits <- lapply(evolution$traits, as_traits)
+  traits <- mv_state_traits(evolution, k_all, species)
   q <- length(traits)
-  axes <- names(evolution$traits) %||% paste0("axis", seq_len(q))
+  env <- mv_state_env(evolution, m, q)
+  optimum <- vapply(traits, function(t) t$optimum, numeric(k_all))
+  sigma <- vapply(traits, function(t) t$sigma, numeric(k_all))
+  optimum <- matrix(optimum, k_all, q)
+  sigma <- matrix(sigma, k_all, q)
+  r_axis <- matrix(vapply(traits, function(t) t$r_max, numeric(k_all)), k_all, q)
+  r_max <- Reduce(`*`, lapply(traits, function(t) t$r_max))
+  sp <- rownames(traits[[1]])
+  G <- evolution_matrices(evolution$genetic_var, q, sp, "genetic_var")
+  E <- evolution_matrices(evolution$env_var, q, sp, "env_var")
+  b <- mv_state_plasticity(evolution$plasticity, sp, k_all, q)
+  # the correlation between the axes of the niche of each species (niche_correlation()); a
+  # species whose matrix is the identity follows the code of independent axes, to the last bit
+  cor <- niche_cor_species(niche_cor, sp, q)
+  correlated <- vapply(cor, function(m) any(m[row(m) != col(m)] != 0), logical(1))
+  if (any(correlated) && any(sigma == 0)) {
+    stop("a niche breadth `sigma` of 0 cannot be combined with correlated axes ",
+         "(`niche_correlation()`)", call. = FALSE)
+  }
+  sel <- lapply(seq_len(k_all), function(j) {
+    mv_state_selection(j, sigma, G, E, cor, correlated, r_max, r_axis)
+  })
+  list(mv = TRUE, q = q, axes = names(evolution$traits) %||% paste0("axis", seq_len(q)),
+       env = env$now, ref = colMeans(env$first),
+       optimum = optimum, sigma = sigma, r_max = r_max, r_axis = r_axis, G = G, E = E, b = b,
+       sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
+       L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
+       nu = evolution$ne_ratio, per = evolution$steps_per_generation,
+       founder = evolution$founder, imm_sel = isTRUE(evolution$immigrant_selection),
+       niche_cor = niche_cor, correlated = any(correlated))
+}
+
+#' the tables of traits of `evolution`, one per axis of the niche, with one row per species in
+#' the order of `species` when all axes name them; stops when the names of the axes are not valid
+#' @noRd
+mv_state_traits <- function(evolution, k_all, species) {
+  traits <- lapply(evolution$traits, as_traits)
+  axes <- names(evolution$traits) %||% paste0("axis", seq_along(traits))
   if (anyDuplicated(axes) || any(axes %in% c("site", "species", "individual", "abundance",
                                               "step", ""))) {
     stop("the axes of `env` need distinct names other than `site`, `species`, ",
@@ -87,6 +128,13 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
     stop("`traits` of `evolution` need one row per species (", k_all, ") on every axis",
          call. = FALSE)
   }
+  traits
+}
+
+#' the environment of `evolution` with several traits: `first`, the matrix (sites x traits) of
+#' the first step, without names, and `now`, a function of the step that returns such a matrix
+#' @noRd
+mv_state_env <- function(evolution, m, q) {
   env_fun <- if (is.function(evolution$env)) evolution$env else {
     fixed_env <- evolution$env
     function(step) fixed_env
@@ -97,67 +145,6 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
          ")", call. = FALSE)
   }
   dimnames(env) <- NULL
-  optimum <- vapply(traits, function(t) t$optimum, numeric(k_all))
-  sigma <- vapply(traits, function(t) t$sigma, numeric(k_all))
-  optimum <- matrix(optimum, k_all, q)
-  sigma <- matrix(sigma, k_all, q)
-  r_axis <- matrix(vapply(traits, function(t) t$r_max, numeric(k_all)), k_all, q)
-  r_max <- Reduce(`*`, lapply(traits, function(t) t$r_max))
-  sp <- rownames(traits[[1]])
-  G <- evolution_matrices(evolution$genetic_var, q, sp, "genetic_var")
-  E <- evolution_matrices(evolution$env_var, q, sp, "env_var")
-  b <- evolution$plasticity
-  if (is.matrix(b) && !is.null(rownames(b)) && all(sp %in% rownames(b))) {
-    b <- b[sp, , drop = FALSE]
-  }
-  b <- if (is.matrix(b)) b else if (length(b) == 1) matrix(b, k_all, q) else
-    if (length(b) == q) matrix(b, k_all, q, byrow = TRUE) else NULL
-  if (!is.numeric(b) || !identical(dim(b), c(k_all, q)) || anyNA(b)) {
-    stop("`plasticity` needs one value, one per trait (", q, ") or a matrix of species x traits",
-         call. = FALSE)
-  }
-  dimnames(b) <- NULL
-  # the correlation between the axes of the niche of each species (niche_correlation()); a
-  # species whose matrix is the identity follows the code of independent axes, to the last bit
-  cor <- niche_cor_species(niche_cor, sp, q)
-  correlated <- vapply(cor, function(m) any(m[row(m) != col(m)] != 0), logical(1))
-  if (any(correlated) && any(sigma == 0)) {
-    stop("a niche breadth `sigma` of 0 cannot be combined with correlated axes ",
-         "(`niche_correlation()`)", call. = FALSE)
-  }
-  # selection on the axes with a finite niche breadth: the response of each population is
-  # K (E - p), K = G[, S] (Omega + P)[S, S]^-1, and growth falls with the Mahalanobis distance
-  sel <- lapply(seq_len(k_all), function(j) {
-    om <- sigma[j, ]^2
-    s <- which(is.finite(om))
-    p <- G[[j]] + E[[j]]
-    # `cor` and `correlated` are kept for the species that descend from this one
-    rj <- if (length(cor)) list(cor = cor[[j]], correlated = correlated[j])
-    if (!length(s)) {
-      return(c(list(s = s, A = matrix(0, 0, 0), K = matrix(0, q, 0), c = r_max[j]), rj))
-    }
-    if (isTRUE(rj$correlated)) {
-      # Omega = D R D on the selected axes, in place of the diagonal matrix of the breadths
-      Om <- niche_omega(sigma[j, ], rj$cor, s)
-      Q <- Om + p[s, s, drop = FALSE]
-      A <- solve(Q)
-      logc <- 0.5 * as.numeric(determinant(Om)$modulus - determinant(Q)$modulus)
-      return(c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A,
-                    c = r_max[j] * exp(logc), diagonal = FALSE, width = om + diag(p),
-                    om = om, r_axis = r_axis[j, ]), rj))
-    }
-    Q <- diag(om[s], length(s)) + p[s, s, drop = FALSE]
-    if (any(diag(Q) <= 0)) {
-      stop("a niche breadth `sigma` of 0 needs phenotypic variance on that axis", call. = FALSE)
-    }
-    A <- solve(Q)
-    # without covariances among the selected axes, growth is computed axis by axis as in
-    # growth_rates(), so that G = E = 0 gives the same numbers to the last bit
-    diagonal <- all(Q[row(Q) != col(Q)] == 0)
-    logc <- 0.5 * (sum(log(om[s])) - as.numeric(determinant(Q)$modulus))
-    c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
-           diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ]), rj)
-  })
   env_now <- if (is.function(evolution$env)) {
     function(step) {
       e <- as.matrix(env_fun(step))
@@ -167,13 +154,60 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   } else {
     function(step) env
   }
-  list(mv = TRUE, q = q, axes = axes, env = env_now, ref = colMeans(env),
-       optimum = optimum, sigma = sigma, r_max = r_max, r_axis = r_axis, G = G, E = E, b = b,
-       sel = sel, whiten = Map(function(g, e) evolution_whiten(g + e), G, E),
-       L = lapply(G, evolution_root), fixed = vapply(G, function(g) all(g == 0), logical(1)),
-       nu = evolution$ne_ratio, per = evolution$steps_per_generation,
-       founder = evolution$founder, imm_sel = isTRUE(evolution$immigrant_selection),
-       niche_cor = niche_cor, correlated = any(correlated))
+  list(first = env, now = env_now)
+}
+
+#' the plasticity of every species on every trait (species x traits, without names) from one
+#' value, one per trait or a matrix, whose rows follow the species `sp` when they are named
+#' @noRd
+mv_state_plasticity <- function(b, sp, k_all, q) {
+  named <- is.matrix(b) && !is.null(rownames(b))
+  if (named && all(sp %in% rownames(b))) b <- b[sp, , drop = FALSE]
+  b <- if (is.matrix(b)) b else if (length(b) == 1) matrix(b, k_all, q) else
+    if (length(b) == q) matrix(b, k_all, q, byrow = TRUE) else NULL
+  if (!is.numeric(b) || !identical(dim(b), c(k_all, q)) || anyNA(b)) {
+    stop("`plasticity` needs one value, one per trait (", q, ") or a matrix of species x traits",
+         call. = FALSE)
+  }
+  dimnames(b) <- NULL
+  b
+}
+
+#' selection on species j, on the axes with a finite niche breadth: the response of each
+#' population is K (E - p), K = G[, S] (Omega + P)[S, S]^-1, and growth falls with the
+#' Mahalanobis distance; returns the list of matrices and constants that the loop uses
+#' @noRd
+mv_state_selection <- function(j, sigma, G, E, cor, correlated, r_max, r_axis) {
+  q <- ncol(sigma)
+  om <- sigma[j, ]^2
+  s <- which(is.finite(om))
+  p <- G[[j]] + E[[j]]
+  # `cor` and `correlated` are kept for the species that descend from this one
+  rj <- if (length(cor)) list(cor = cor[[j]], correlated = correlated[j])
+  if (!length(s)) {
+    return(c(list(s = s, A = matrix(0, 0, 0), K = matrix(0, q, 0), c = r_max[j]), rj))
+  }
+  if (isTRUE(rj$correlated)) {
+    # Omega = D R D on the selected axes, in place of the diagonal matrix of the breadths
+    Om <- niche_omega(sigma[j, ], rj$cor, s)
+    Q <- Om + p[s, s, drop = FALSE]
+    A <- solve(Q)
+    logc <- 0.5 * as.numeric(determinant(Om)$modulus - determinant(Q)$modulus)
+    return(c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A,
+                  c = r_max[j] * exp(logc), diagonal = FALSE, width = om + diag(p),
+                  om = om, r_axis = r_axis[j, ]), rj))
+  }
+  Q <- diag(om[s], length(s)) + p[s, s, drop = FALSE]
+  if (any(diag(Q) <= 0)) {
+    stop("a niche breadth `sigma` of 0 needs phenotypic variance on that axis", call. = FALSE)
+  }
+  A <- solve(Q)
+  # without covariances among the selected axes, growth is computed axis by axis as in
+  # growth_rates(), so that G = E = 0 gives the same numbers to the last bit
+  diagonal <- all(Q[row(Q) != col(Q)] == 0)
+  logc <- 0.5 * (sum(log(om[s])) - as.numeric(determinant(Q)$modulus))
+  c(list(s = s, A = A, K = G[[j]][, s, drop = FALSE] %*% A, c = r_max[j] * exp(logc),
+         diagonal = diagonal, width = om + diag(p), om = om, r_axis = r_axis[j, ]), rj)
 }
 
 #' phenotypes: genetic means plus the plastic response to the environment e (sites x traits)
@@ -428,37 +462,43 @@ genetic_matrices <- function(species, n_traits = 2,
   }
   labels <- dimnames(as.matrix(P))
   P <- evolution_matrices(P, nrow(as.matrix(P)), "P", "P")[[1]]
-  q <- nrow(P)
   eig <- eigen(P, symmetric = TRUE)
   if (min(eig$values) <= 0) stop("`P` must be positive definite", call. = FALSE)
-  build <- function(vectors, values) {
-    m <- vectors %*% diag(values, q) %*% t(vectors)
-    (m + t(m)) / 2
-  }
-  rotation <- function() qr.Q(qr(matrix(stats::rnorm(q * q), q)))
-  spread <- function() exp(stats::rnorm(q, 0, divergence))
-  one <- function() {
-    switch(family,
-      proportional = {
-        s <- exp(stats::rnorm(1, 0, divergence))
-        list(G = heritability * s * P, E = (1 - heritability) * s * P)
-      },
-      independent = {
-        total <- sum(eig$values)
-        vg <- eig$values[sample.int(q)] * spread()
-        ve <- eig$values[sample.int(q)] * spread()
-        list(G = build(rotation(), heritability * total * vg / sum(vg)),
-             E = build(rotation(), (1 - heritability) * total * ve / sum(ve)))
-      },
-      shared = list(G = build(eig$vectors, heritability * eig$values * spread()),
-                    E = build(eig$vectors, (1 - heritability) * eig$values * spread()))
-    )
-  }
-  mats <- lapply(species, function(s) one())
+  mats <- lapply(species, function(s) {
+    genetic_matrix_pair(family, P, eig, heritability, divergence)
+  })
   name <- function(m) {
     dimnames(m) <- labels
     m
   }
   list(genetic_var = stats::setNames(lapply(mats, function(m) name(m$G)), species),
        env_var = stats::setNames(lapply(mats, function(m) name(m$E)), species))
+}
+
+#' the genetic (`G`) and environmental (`E`) covariance matrices of one species, drawn around
+#' the phenotypic matrix `P` (with eigen decomposition `eig`) under the `family` of divergence
+#' @noRd
+genetic_matrix_pair <- function(family, P, eig, heritability, divergence) {
+  q <- nrow(P)
+  build <- function(vectors, values) {
+    m <- vectors %*% diag(values, q) %*% t(vectors)
+    (m + t(m)) / 2
+  }
+  rotation <- function() qr.Q(qr(matrix(stats::rnorm(q * q), q)))
+  spread <- function() exp(stats::rnorm(q, 0, divergence))
+  switch(family,
+    proportional = {
+      s <- exp(stats::rnorm(1, 0, divergence))
+      list(G = heritability * s * P, E = (1 - heritability) * s * P)
+    },
+    independent = {
+      total <- sum(eig$values)
+      vg <- eig$values[sample.int(q)] * spread()
+      ve <- eig$values[sample.int(q)] * spread()
+      list(G = build(rotation(), heritability * total * vg / sum(vg)),
+           E = build(rotation(), (1 - heritability) * total * ve / sum(ve)))
+    },
+    shared = list(G = build(eig$vectors, heritability * eig$values * spread()),
+                  E = build(eig$vectors, (1 - heritability) * eig$values * spread()))
+  )
 }

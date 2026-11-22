@@ -102,17 +102,7 @@ assemble_community <- function(traits, size,
                                trait_cov = NULL) {
   rule <- match.arg(rule)
   distance <- match.arg(distance)
-  x <- as.matrix(traits)
-  if (!is.numeric(x)) stop("`traits` must be numeric (one column per trait)", call. = FALSE)
-  if (anyNA(x)) stop("assemble_community(): `traits` has missing values", call. = FALSE)
-  if (any(is.infinite(x))) stop("assemble_community(): `traits` has infinite values", call. = FALSE)
-  if (is.null(rownames(x))) {
-    named <- if (is.null(dim(traits))) names(traits)
-    if (is.null(named)) {
-      warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
-    }
-    rownames(x) <- named %||% paste0("sp", seq_len(nrow(x)))
-  }
+  x <- assembly_traits(traits)
   sp <- rownames(x)
   n <- nrow(x)
   check_count(size, "size", min = 1, max = n)
@@ -125,17 +115,10 @@ assemble_community <- function(traits, size,
     stop("`optimum` must hold finite numbers", call. = FALSE)
   }
   w <- trait_whitening(x, distance, trait_cov)  # Euclidean distances on x %*% w
-  opt <- NULL
+  opt <- if (rule == "filtering") filtering_optimum(optimum, x)
   removed <- switch(rule,
     neutral = sample(sp, n - size),
     filtering = {
-      opt <- if (is.numeric(optimum)) optimum else switch(
-        match.arg(optimum, c("ancestral", "derived")),
-        ancestral = rep(0, ncol(x)),
-        derived = apply(x, 2, max))
-      if (length(opt) != ncol(x)) {
-        stop("`optimum` needs one value per trait (", ncol(x), ")", call. = FALSE)
-      }
       d <- sqrt(rowSums((sweep(x, 2, opt) %*% w)^2))
       ord <- order(-d, stats::runif(n))  # farthest first, random tie-break
       sp[ord[seq_len(n - size)]]
@@ -145,6 +128,38 @@ assemble_community <- function(traits, size,
                  distance = distance, optimum = opt, traits = x,
                  metric = solve(tcrossprod(w))),
             class = "mc_assembly")
+}
+
+#' the traits of the species pool as a numeric matrix with the species as row names, after
+#' checking it; species without names are called sp1, sp2, ..., with a warning
+#' @noRd
+assembly_traits <- function(traits) {
+  x <- as.matrix(traits)
+  if (!is.numeric(x)) stop("`traits` must be numeric (one column per trait)", call. = FALSE)
+  if (anyNA(x)) stop("assemble_community(): `traits` has missing values", call. = FALSE)
+  if (any(is.infinite(x))) stop("assemble_community(): `traits` has infinite values", call. = FALSE)
+  if (is.null(rownames(x))) {
+    named <- if (is.null(dim(traits))) names(traits)
+    if (is.null(named)) {
+      warning("`traits` has no names of species: using sp1, sp2, ...", call. = FALSE)
+    }
+    rownames(x) <- named %||% paste0("sp", seq_len(nrow(x)))
+  }
+  x
+}
+
+#' the optimum of the filter, one value per trait (column of `x`): the numbers given, zero
+#' ("ancestral") or the largest value of each trait ("derived")
+#' @noRd
+filtering_optimum <- function(optimum, x) {
+  opt <- if (is.numeric(optimum)) optimum else switch(
+    match.arg(optimum, c("ancestral", "derived")),
+    ancestral = rep(0, ncol(x)),
+    derived = apply(x, 2, max))
+  if (length(opt) != ncol(x)) {
+    stop("`optimum` needs one value per trait (", ncol(x), ")", call. = FALSE)
+  }
+  opt
 }
 
 #' @rdname assemble_community
@@ -175,25 +190,31 @@ trait_whitening <- function(x, distance, trait_cov = NULL) {
       }
       diag(1 / s, p)
     },
-    mahalanobis = {
-      cv <- trait_cov %||% {
-        if (nrow(x) <= p) {
-          stop("the pool needs more species than traits for Mahalanobis distances; ",
-               "give `trait_cov`", call. = FALSE)
-        }
-        stats::cov(x)
-      }
-      cv <- as.matrix(cv)
-      if (!is.numeric(cv) || any(dim(cv) != p) || anyNA(cv) || !isSymmetric(unname(cv))) {
-        stop("`trait_cov` must be a symmetric matrix with one row and column per trait",
-             call. = FALSE)
-      }
-      u <- tryCatch(chol(cv), error = function(e) {
-        stop("the covariance matrix of the traits is singular: Mahalanobis distances ",
-             "need traits that are not linear combinations of each other", call. = FALSE)
-      })
-      backsolve(u, diag(p))  # (x %*% u^-1) has identity covariance when cv is that of x
-    })
+    mahalanobis = mahalanobis_whitening(x, trait_cov))
+}
+
+#' matrix w such that Euclidean distances between the rows of x %*% w are Mahalanobis
+#' distances, with the covariance `trait_cov` or, when NULL, that of the traits in `x`
+#' @noRd
+mahalanobis_whitening <- function(x, trait_cov) {
+  p <- ncol(x)
+  cv <- trait_cov %||% {
+    if (nrow(x) <= p) {
+      stop("the pool needs more species than traits for Mahalanobis distances; ",
+           "give `trait_cov`", call. = FALSE)
+    }
+    stats::cov(x)
+  }
+  cv <- as.matrix(cv)
+  if (!is.numeric(cv) || any(dim(cv) != p) || anyNA(cv) || !isSymmetric(unname(cv))) {
+    stop("`trait_cov` must be a symmetric matrix with one row and column per trait",
+         call. = FALSE)
+  }
+  u <- tryCatch(chol(cv), error = function(e) {
+    stop("the covariance matrix of the traits is singular: Mahalanobis distances ",
+         "need traits that are not linear combinations of each other", call. = FALSE)
+  })
+  backsolve(u, diag(p))  # (x %*% u^-1) has identity covariance when cv is that of x
 }
 
 #' GAUSE (Colwell & Winkler 1984): remove, from the closest pair, the species

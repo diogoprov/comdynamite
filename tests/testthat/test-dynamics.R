@@ -22,7 +22,7 @@ test_that("recorded history matches the final state and keeps extinct species at
   sim <- simulate_metacommunity(ls, species_traits(tr), competition_matrix(tr, "random", 0.5),
                                 n_steps = 150, record_steps = c(50, 150))
   expect_s3_class(sim, "mc_sim")
-  expect_equal(dim(sim$history), c(15, 12, 2))
+  expect_identical(dim(sim$history), c(15L, 12L, 2L))
   expect_equal(sim$history[, , 2], sim$abundance, ignore_attr = TRUE)
   expect_identical(colnames(sim$abundance), tr$tip.label)
   expect_true(all(sim$abundance >= 0))
@@ -33,9 +33,9 @@ test_that("time-varying environment and growth-rate functions run", {
   ls <- landscape_implicit(10)
   tr <- species_traits(8)
   et <- env_over_time(ls$env, 100, rho = 0.9, sd = 5)
-  expect_equal(dim(et), c(10, 100))
+  expect_identical(dim(et), c(10L, 100L))
   sim <- simulate_metacommunity(ls, tr, competition_matrix(8), n_steps = 100, env_time = et)
-  expect_equal(dim(sim$abundance), c(10, 8))
+  expect_identical(dim(sim$abundance), c(10L, 8L))
   expect_error(simulate_metacommunity(ls, tr, competition_matrix(8), n_steps = 100,
                                       env_time = et[, 1:50]))
 })
@@ -46,7 +46,7 @@ test_that("spatially explicit simulation runs on a grid", {
   tr <- ape::rcoal(10)
   sim <- simulate_metacommunity(ls, species_traits(tr), competition_matrix(tr),
                                 dispersal = 0.3, n_steps = 80)
-  expect_equal(dim(sim$abundance), c(25, 10))
+  expect_identical(dim(sim$abundance), c(25L, 10L))
   expect_output(print(sim), "25 sites x 10 species")
 })
 
@@ -56,7 +56,7 @@ test_that("print.mc_sim reports the simulation and returns it invisibly", {
   sim <- simulate_metacommunity(landscape_implicit(3), species_traits(tr),
                                 competition_matrix(tr, "none"), dispersal = 0.01,
                                 n_steps = 3, record_steps = 1:3)
-  expect_output(out <- print(sim), "3 sites x 4 species")
+  out <- expect_output(print(sim), "3 sites x 4 species")
   expect_output(print(sim), "recorded steps: 3")
   expect_identical(out, sim)
 })
@@ -120,7 +120,7 @@ test_that("a niche with several axes multiplies the responses to each axis", {
   env <- cbind(e1 = c(10, 50, 90), e2 = c(30, 30, 70))
   g <- growth_rates(env, list(t1, t2))
   expect_equal(g, growth_rates(env[, 1], t1) * growth_rates(env[, 2], t2), ignore_attr = TRUE)
-  expect_equal(growth_rates(as.data.frame(env), list(t1, t2)), g)
+  expect_identical(growth_rates(as.data.frame(env), list(t1, t2)), g)
   expect_equal(growth_rates(env[, 1, drop = FALSE], t1), growth_rates(env[, 1], t1),
                ignore_attr = TRUE)
   expect_error(growth_rates(env, list(t1)), "2 axes")
@@ -137,15 +137,15 @@ test_that("a niche with several axes multiplies the responses to each axis", {
   set.seed(1)
   b <- mc_dynamics(growth_rates(cbind(ls$env, rep(50, 5)), list(t1, t2)), alpha,
                    dispersal = 0.01, n_steps = 20)
-  expect_equal(unname(a$abundance), unname(b$abundance))
+  expect_identical(unname(a$abundance), unname(b$abundance))
   expect_length(a$traits, 2)
-  expect_equal(ncol(as_mc_data(a)$env), 2)
+  expect_identical(ncol(as_mc_data(a)$env), 2L)
   # one axis given as env reproduces the landscape
   set.seed(2)
   c1 <- simulate_metacommunity(ls, t1, alpha, n_steps = 20)
   set.seed(2)
   c2 <- simulate_metacommunity(ls, t1, alpha, n_steps = 20, env = matrix(ls$env))
-  expect_equal(c1$abundance, c2$abundance)
+  expect_identical(c1$abundance, c2$abundance)
   expect_error(simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 5), "needs `env`")
   expect_error(simulate_metacommunity(ls, list(t1, t2), alpha, n_steps = 5,
                                       env = cbind(1:4, 1:4)), "one row per site")
@@ -171,14 +171,14 @@ test_that("a simulation with several niche axes keeps the tree and works downstr
   d <- as_mc_data(sim)
   expect_identical(d$tree, sim$tree)
   expect_named(d$traits, c("optimum_axis1", "optimum_axis2"))
-  expect_equal(d$traits$optimum_axis2, t2$optimum)
+  expect_identical(d$traits$optimum_axis2, t2$optimum)
   # summary_stats() uses the first axis, as if given its trait and environment
   set.seed(3)
   s <- summary_stats(sim, n_null = 5)
   set.seed(3)
   s1 <- summary_stats(sim, trait = stats::setNames(t1$optimum, rownames(t1)),
                       env = sim$env$axis1, n_null = 5)
-  expect_equal(s, s1)
+  expect_identical(s, s1)
   expect_error(sample_individuals(sim), "one environmental axis")
 })
 
@@ -193,9 +193,9 @@ test_that("summary_stats() and sample_individuals() use the env that set growth"
   set.seed(4)
   s <- summary_stats(sim, n_null = 5)
   set.seed(4)
-  expect_equal(s, summary_stats(sim, env = e, n_null = 5))
+  expect_identical(s, summary_stats(sim, env = e, n_null = 5))
   ind <- sample_individuals(sim, n = 2)
-  expect_equal(ind$env, e[match(ind$site, rownames(sim$abundance))])
+  expect_identical(ind$env, e[match(ind$site, rownames(sim$abundance))])
 })
 
 test_that("disturbance empties whole sites and is validated", {
@@ -210,7 +210,8 @@ test_that("disturbance empties whole sites and is validated", {
   out <- mc_dynamics(r, a, dispersal = 0, n_steps = 50, seed_steps = integer(0),
                      initial = matrix(10L, 30, 2, dimnames = list(NULL, c("sp1", "sp2"))), disturbance = 0.02)
   empty <- rowSums(out$abundance) == 0
-  expect_true(any(empty) && !all(empty))
+  expect_true(any(empty))
+  expect_false(all(empty))
   # no draws with disturbance = 0
   set.seed(3)
   a0 <- mc_dynamics(r, a, dispersal = 0.05, n_steps = 30)
@@ -278,7 +279,7 @@ test_that("a site closed by pool_from is not a sink for emigrants", {
                                 seed_steps = integer(0), initial = init,
                                 pool_from = cbind(sp1 = c(1, 1, 100)))
   expect_true(all(sim$abundance[1:2, 1] > 800))
-  expect_equal(sim$abundance[3, 1], 0L)
+  expect_identical(sim$abundance[3, 1], 0L)
 })
 
 test_that("lottery recruitment fills the microsites and emigration does not empty the source", {
@@ -292,7 +293,7 @@ test_that("lottery recruitment fills the microsites and emigration does not empt
                                 microsites = 500, record_steps = 1:30)
   # half of the offspring are lost to the closed site, but they still outnumber the vacancies
   expect_true(all(sim$history[1, 1, 2:30] == 500))
-  expect_equal(sim$recruitment, "lottery")
+  expect_identical(sim$recruitment, "lottery")
   # Beverton-Holt with the same loss stays well below (5 * 0.5 - 1) / 0.004 = 375
   set.seed(1)
   bh <- simulate_metacommunity(ls, tr, matrix(0.004, 1, 1), dispersal = 0.5, n_steps = 30,
@@ -321,7 +322,7 @@ test_that("lottery_draw fills vacancies without exceeding the offspring", {
   out <- lottery_draw(pool, c(4, 3, 100))
   expect_true(all(out <= pool))
   expect_equal(rowSums(out), c(4, 0, 90))
-  expect_equal(out[3, ], pool[3, ])
+  expect_identical(out[3, ], pool[3, ])
 })
 
 test_that("lottery keeps the microsites, counts immigrant recruits and checks its settings", {
@@ -336,8 +337,8 @@ test_that("lottery keeps the microsites, counts immigrant recruits and checks it
   expect_true(all(apply(sim$history, c(1, 3), sum) <= 10))
   expect_true(all(sim$migrant_load <= 40, na.rm = TRUE))
   expect_true(all(sim$propagule <= 10, na.rm = TRUE))
-  expect_true(is.integer(sim$abundance))
-  expect_equal(sim$microsites, 10)
+  expect_type(sim$abundance, "integer")
+  expect_identical(sim$microsites, 10)
   expect_error(simulate_metacommunity(ls, tr, matrix(0.004, 2, 2), recruitment = "lottery",
                                       microsites = 5, seed_steps = integer(0),
                                       initial = cbind(a = rep(4L, 12), b = rep(4L, 12))),
@@ -358,5 +359,5 @@ test_that("lottery keeps the microsites, counts immigrant recruits and checks it
                                 evolution = evolution_control(genetic_var = 4, ne_ratio = 0.5,
                                                               founder = FALSE))
   expect_true(all(sim$history[3, , 1:9] == 0))
-  expect_equal(sum(sim$abundance[3, ]), 50)
+  expect_identical(sum(sim$abundance[3, ]), 50L)
 })

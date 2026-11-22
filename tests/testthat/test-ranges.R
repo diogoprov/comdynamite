@@ -21,7 +21,7 @@ test_that("the log of ranges rebuilds the presence of every lineage", {
                  dimnames = list(NULL, sim$species$species))
   for (i in seq_len(nrow(g))) pres[g$site[i], g$lineage[i]] <- g$present[i]
   extant <- colnames(sim$lineages)
-  expect_equal(unname(pres[, extant]), unname(sim$lineages > 0))
+  expect_identical(unname(pres[, extant]), unname(sim$lineages > 0))
   expect_false(any(pres[, setdiff(colnames(pres), extant)]))
   # changes alternate in each site
   key <- paste(g$lineage, g$site)
@@ -30,7 +30,7 @@ test_that("the log of ranges rebuilds the presence of every lineage", {
   # new lineages start at their birth
   first <- tapply(g$generation, g$lineage, min)
   births <- stats::setNames(sim$species$birth, sim$species$species)
-  expect_equal(as.vector(first), unname(births[names(first)]))
+  expect_identical(as.vector(first), unname(births[names(first)]))
 })
 
 test_that("range_history() maps ranges of areas along the full and reconstructed trees", {
@@ -41,7 +41,7 @@ test_that("range_history() maps ranges of areas along the full and reconstructed
       h <- range_history(sim, r$areas, tree = tt)
       expect_s3_class(h, "simmap")
       expect_equal(unname(rowSums(h$mapped.edge)), h$edge.length)
-      expect_equal(vapply(h$maps, sum, numeric(1)), h$edge.length)
+      expect_identical(vapply(h$maps, sum, numeric(1)), h$edge.length)
       expect_true(all(colnames(h$mapped.edge) %in% c("W", "E", "W+E")))
     }
     # tips of the full tree end in the ranges of the extant lineages
@@ -50,7 +50,7 @@ test_that("range_history() maps ranges of areas along the full and reconstructed
     final <- vapply(extant, function(l) {
       paste(intersect(c("W", "E"), unique(r$areas[sim$lineages[, l] > 0])), collapse = "+")
     }, character(1))
-    expect_equal(history_states(h)$tips[extant], final)
+    expect_identical(history_states(h)$tips[extant], final)
     hr <- range_history(sim, r$areas)
     expect_setequal(hr$tip.label, colnames(sim$abundance))
   }
@@ -59,10 +59,10 @@ test_that("range_history() maps ranges of areas along the full and reconstructed
   h <- range_history(r$sim, factor(r$areas, c("E", "W")), tree = "full")
   expect_true(all(colnames(h$mapped.edge) %in% c("W", "E", "E+W")))
   expect_error(range_history(r$sim, r$areas[-1]), "one area per site")
-  expect_error(range_history(r$sim, sub("W", "W+", r$areas)), "\\+")
+  expect_error(range_history(r$sim, sub("W", "W+", r$areas, fixed = TRUE)), "\\+")
   expect_error(range_history(as_metacommunity(r$sim), r$areas), "simulate_evolving")
   named <- stats::setNames(rev(r$areas), rev(seq_along(r$areas)))
-  expect_equal(range_history(r$sim, named)$maps, range_history(r$sim, r$areas)$maps)
+  expect_identical(range_history(r$sim, named)$maps, range_history(r$sim, r$areas)$maps)
   old <- r$sim
   old$ranges <- NULL
   expect_error(range_history(old, r$areas), "ranges")
@@ -75,7 +75,7 @@ test_that("a lineage that changes range shows it on its branch", {
   expect_gt(changes, 0)
   # one area per site: the timeline of the root follows its occupancy of each half
   tl <- range_timelines(r$sim$ranges, factor(r$areas, c("W", "E")))
-  expect_equal(tl$sp1$time[1], 0)
+  expect_identical(tl$sp1$time[1], 0)
   expect_true(all(diff(tl$sp1$time) > 0))
   expect_true(all(tl$sp1$state[-1] != tl$sp1$state[-nrow(tl$sp1)]))
 })
@@ -93,15 +93,15 @@ test_that("ranges of several areas feed the functions of histories", {
   mc <- as_metacommunity(sim)
   regions <- r$areas
   input <- suppressWarnings(as_herodotools(sim, regions))
-  expect_equal(input$ancestral.area$area, history_states(h)$nodes)
+  expect_identical(input$ancestral.area$area, history_states(h)$nodes)
   expect_identical(suppressWarnings(as_herodotools(sim, regions, history = h)), input)
   pool <- region_pool(h, regions)
   tips <- history_states(h)$tips
-  expect_equal(unname(pool[regions == "W", "sp1"]), rep(grepl("W", tips[["sp1"]]),
-                                                        sum(regions == "W")))
+  expect_identical(unname(pool[regions == "W", "sp1"]), rep(grepl("W", tips[["sp1"]], fixed = TRUE),
+                                                            sum(regions == "W")))
   ages <- arrival_ages(h, mc, regions)
   present <- mc$abundance > 0
-  expect_true(all(!is.na(ages[present])))
+  expect_false(anyNA(ages[present]))
   expect_true(all(is.na(ages[!present])))
   expect_true(all(ages[present] >= 0))
 })
@@ -122,8 +122,8 @@ test_that("range_history() follows the representative lineages with protracted s
   expect_equal(unname(rowSums(h$mapped.edge)), sim$tree$edge.length)
   rep <- range_representatives(sim)
   full <- range_history(sim, r$areas, tree = "full")
-  expect_equal(unname(history_states(h)$tips[names(rep)]),
-               unname(history_states(full)$tips[rep]))
+  expect_identical(unname(history_states(h)$tips[names(rep)]),
+                   unname(history_states(full)$tips[rep]))
 })
 
 test_that("nodes have the range of the mother before the split", {
@@ -143,7 +143,7 @@ test_that("nodes have the range of the mother before the split", {
     nodes <- nodes[nodes > ape::Ntip(h)]
     expect_true(range_before(tl[[mother]], g) %in% st$nodes[nodes - ape::Ntip(h)])
   }
-  expect_equal(st$nodes[1], range_before(tl$sp1, min(sim$species$birth[-1])))
+  expect_identical(st$nodes[1], range_before(tl$sp1, min(sim$species$birth[-1])))
   # inner pieces of the reconstructed maps all have a duration
   hr <- range_history(sim, r$areas)
   inner <- unlist(lapply(hr$maps, function(m) m[-length(m)]))
@@ -160,7 +160,7 @@ test_that("range_history() handles one lineage, starting trees and named factors
   expect_null(range_history(one, areas))
   h1 <- range_history(one, areas, tree = "full")
   expect_length(h1$maps, 1)
-  expect_equal(sum(h1$maps[[1]]), h1$edge.length)
+  expect_identical(sum(h1$maps[[1]]), h1$edge.length)
   # a starting tree of four species
   set.seed(2)
   tr <- ape::rcoal(4)
@@ -174,13 +174,13 @@ test_that("range_history() handles one lineage, starting trees and named factors
   final <- vapply(extant, function(l) {
     paste(intersect(c("W", "E"), unique(areas[sim$lineages[, l] > 0])), collapse = "+")
   }, character(1))
-  expect_equal(unname(history_states(full)$tips[extant]), unname(final))
+  expect_identical(unname(history_states(full)$tips[extant]), unname(final))
   pieces <- unlist(lapply(full$maps, function(m) m[-length(m)]))
   expect_true(all(pieces > 1e-6))
   # names reorder factors too
   f <- factor(areas, c("E", "W"))
   named <- stats::setNames(rev(f), rev(seq_along(f)))
-  expect_equal(range_history(sim, named, "full")$maps, range_history(sim, f, "full")$maps)
+  expect_identical(range_history(sim, named, "full")$maps, range_history(sim, f, "full")$maps)
 })
 
 test_that("overlap in history_rates() counts lineages that share an area", {

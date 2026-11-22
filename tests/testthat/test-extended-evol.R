@@ -196,7 +196,7 @@ test_that("trait_ou() recovers alpha and sigma2, and the error shrinks with more
       mvn_loglik(x, V)
     }
   }
-  starts <- list(c(0, 0), c(log(5), log(3)), c(log(0.5), log(0.5)))
+  starts <- list(c(0, 0), log(c(5, 3)), log(c(0.5, 0.5)))
   # G5.4, G5.6, G5.6b: alpha = 2, sigma2 = 1, 80 replicates of 150 tips; the true pair must
   # fall outside the 95% likelihood region (2 df) at the nominal rate.
   set.seed(301)
@@ -228,7 +228,7 @@ test_that("trait_ou() recovers alpha and sigma2, and the error shrinks with more
   set.seed(303)
   a <- trait_ou(tree, alpha = 2)
   set.seed(303)
-  expect_warning(b <- traits_ou(tree, alpha = 2), "deprecated")
+  b <- expect_warning_value(traits_ou(tree, alpha = 2), "deprecated")
   expect_identical(a, b)
 })
 
@@ -280,7 +280,7 @@ test_that("history_rates() with trait_rates() gives Brownian motion with a rate 
     })
     x <- x[rownames(Ck[[1]])]
     f <- function(p) mvn_loglik(x, exp(p[1]) * Ck[[1]] + exp(p[2]) * Ck[[2]])
-    best <- max_loglik(f, list(c(0, 0), c(0, log(5)), c(log(3), log(3))))
+    best <- max_loglik(f, list(c(0, 0), c(0, log(5)), log(c(3, 3))))
     2 * (best - f(log(c(1, 5)))) > stats::qchisq(0.95, 2)
   }, logical(1))
   expect_true(rejection_compatible(sum(outside), 80))
@@ -334,7 +334,7 @@ test_that("trait_mk() recovers q from its history and from the tips", {
   outside <- vapply(seq_len(100), function(i) {
     tree <- evol_tree(150)
     f <- mk_loglik(tree, trait_mk(tree, q = 1)$states)
-    best <- stats::optimize(function(lq) f(exp(lq)), c(log(0.01), log(100)),
+    best <- stats::optimize(function(lq) f(exp(lq)), log(c(0.01, 100)),
                             maximum = TRUE)$objective
     2 * (best - f(1)) > stats::qchisq(0.95, 1)
   }, logical(1))
@@ -427,8 +427,8 @@ test_that("persistence() recovers colonisation and extirpation and converges wit
     set.seed(seed)
     x <- markov(100, 31, 0.15, 0.25)
     p <- persistence(x)
-    absent <- apply(!(x[, , -31] > 0), 2, sum)
-    present <- apply(x[, , -31] > 0, 2, sum)
+    absent <- rowSums(colSums(x[, , -31] <= 0))
+    present <- rowSums(colSums(x[, , -31] > 0))
     expect_true(all(abs(p$colonisation - 0.15) < 4 * sqrt(0.15 * 0.85 / absent)))
     expect_true(all(abs(p$extirpation - 0.25) < 4 * sqrt(0.25 * 0.75 / present)))
   }

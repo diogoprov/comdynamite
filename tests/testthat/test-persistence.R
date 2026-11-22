@@ -17,7 +17,7 @@ test_that("persistence() recovers the rates of a known two-state Markov chain", 
   expect_equal(p$extirpation, c(e_true, e_true), tolerance = 0.05)
   expect_equal(p$epsilon, rep(stats::qlogis(c_true / (c_true + e_true)), 2), tolerance = 0.05)
   expect_equal(p$tau, rep(log(c_true + e_true), 2), tolerance = 0.05)
-  expect_equal(persistence(x, window = 10)$intervals, c(10L, 10L))
+  expect_identical(persistence(x, window = 10)$intervals, c(10L, 10L))
 })
 
 test_that("persistence() counts transitions by hand and handles edge cases", {
@@ -30,7 +30,7 @@ test_that("persistence() counts transitions by hand and handles edge cases", {
   # present exposures: site 1 at 1; site 2 at 2, 3 -> 3, two extirpations
   expect_equal(p$colonisation, 1 / 3)
   expect_equal(p$extirpation, 2 / 3)
-  expect_equal(p$species, "sp1")
+  expect_identical(p$species, "sp1")
   always <- array(1L, c(3, 1, 5))
   expect_true(is.na(persistence(always)$colonisation))
   expect_true(is.na(persistence(always)$epsilon))
@@ -44,7 +44,7 @@ test_that("persistence() works on simulate_metacommunity() and its records", {
                                 competition_matrix(tr, "phylo"), n_steps = 100,
                                 dispersal = 0.01, extirpation = 0.05, record_steps = 1:100)
   p <- persistence(sim)
-  expect_equal(nrow(p), 4)
+  expect_identical(nrow(p), 4L)
   expect_identical(p, persistence(sim$history))
   expect_true(all(p$intervals == 99L))
   sim$history <- NULL
@@ -77,8 +77,8 @@ test_that("persistence() of an evolving metacommunity follows its lineage series
   # occupancy changes by colonisations minus extirpations, apart from sites given to buds
   p <- persistence(sim)
   expect_setequal(p$species, sim$species$species)
-  expect_equal(p$extant, p$species %in% extant)
-  expect_equal(p$good_species[p$extant], unname(sim$lineage_species[p$species[p$extant]]))
+  expect_identical(p$extant, p$species %in% extant)
+  expect_identical(p$good_species[p$extant], unname(sim$lineage_species[p$species[p$extant]]))
   sp1 <- s[s$lineage == "sp1" & ok, ]
   expect_equal(p$colonisation[p$species == "sp1"],
                sum(sp1$colonised) / sum(sp1$absent_before))
@@ -100,9 +100,9 @@ test_that("the series records the last losses of lineages that die out", {
     final <- rows[which.max(rows$generation), ]
     end <- sim$species$end[sim$species$species == l]
     if (nrow(rows) > 1 || !is.na(final$present_before)) {
-      expect_equal(final$generation, end)
-      expect_equal(final$occupancy, 0)
-      expect_equal(final$abundance, 0)
+      expect_identical(final$generation, end)
+      expect_identical(final$occupancy, 0)
+      expect_identical(final$abundance, 0)
     }
   }
   # every lineage present at the start of a generation is accounted for, and occupancy moves
@@ -118,10 +118,10 @@ test_that("losses are recorded when every lineage dies out", {
   anc <- data.frame(optimum = 50, sigma = 20, r_max = 0.5, row.names = "sp1")
   sim <- simulate_evolving_metacommunity(ls, anc, speciation_control("geographic", Inf),
                                          dispersal = 0, extirpation = 0.5, n_steps = 60)
-  expect_equal(sum(sim$abundance), 0)
+  expect_identical(sum(sim$abundance), 0L)
   s <- sim$series
   final <- s[nrow(s), ]
-  expect_equal(final$occupancy, 0)
+  expect_identical(final$occupancy, 0)
   expect_gt(final$extirpated, 0)
   p <- persistence(sim)
   expect_equal(p$extirpation, sum(s$extirpated, na.rm = TRUE) / sum(s$present_before, na.rm = TRUE))

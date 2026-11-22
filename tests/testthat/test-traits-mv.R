@@ -6,7 +6,7 @@ tip_cov <- function(n, fun, tip = "a") stats::cov(t(replicate(n, fun()[tip, ])))
 test_that("rate_matrix builds each single-matrix structure", {
   m <- rate_matrix(c(1, 4), correlation = 0.5)
   expect_equal(unname(m), matrix(c(1, 1, 1, 4), 2), ignore_attr = TRUE)
-  expect_equal(dimnames(m), list(c("trait1", "trait2"), c("trait1", "trait2")))
+  expect_identical(dimnames(m), list(c("trait1", "trait2"), c("trait1", "trait2")))
   expect_identical(attr(m, "constraint"), "default")
   expect_equal(unname(rate_matrix(c(1, 2, 3), constraint = "diagonal")), diag(c(1, 2, 3)),
                ignore_attr = TRUE)
@@ -24,7 +24,7 @@ test_that("rate_matrix builds each multi-regime structure", {
   p <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "proportional",
                    scale = c(a = 1, b = 3))
   expect_named(p, c("a", "b"))
-  expect_equal(p$b, 3 * p$a)
+  expect_identical(p$b, 3 * p$a)
   s <- rate_matrix(c(1, 2), correlation = 0.5, constraint = "shared",
                    eigenvalues = list(a = c(3, 1), b = c(1, 2)))
   va <- eigen(s$a, symmetric = TRUE)
@@ -33,12 +33,12 @@ test_that("rate_matrix builds each multi-regime structure", {
   expect_equal(sort(vb$values), c(1, 2))
   expect_equal(abs(crossprod(va$vectors, vb$vectors)), diag(2)[, 2:1])
   v <- rate_matrix(c(1, 2), correlation = list(a = 0.5, b = -0.5), constraint = "variance")
-  expect_equal(diag(v$a), diag(v$b))
-  expect_equal(v$b[1, 2], -v$a[1, 2])
+  expect_identical(diag(v$a), diag(v$b))
+  expect_identical(v$b[1, 2], -v$a[1, 2])
   k <- rate_matrix(variance = list(a = c(1, 2), b = c(4, 1)), correlation = 0.3,
                    constraint = "correlation")
   expect_equal(stats::cov2cor(k$a), stats::cov2cor(k$b))
-  expect_equal(unname(diag(k$b)), c(4, 1))
+  expect_identical(unname(diag(k$b)), c(4, 1))
 })
 
 test_that("rate_matrix checks its inputs", {
@@ -72,8 +72,8 @@ test_that("a rate matrix gives correlated traits with covariance R times the pat
   v <- tip_cov(20000, function() trait_ou(tr4, sigma2 = r))
   expect_equal(unname(v), unname(r) * 2, tolerance = 0.05, ignore_attr = TRUE)
   x <- trait_ou(tr4, sigma2 = r)
-  expect_equal(colnames(x), c("trait1", "trait2"))
-  expect_equal(dim(attr(x, "nodes")), c(3, 2))
+  expect_identical(colnames(x), c("trait1", "trait2"))
+  expect_identical(dim(attr(x, "nodes")), c(3L, 2L))
 })
 
 test_that("a diagonal rate matrix with equal rates reproduces scalar sigma2", {
@@ -140,7 +140,7 @@ test_that("trait_ou checks rate matrices and mapped regimes", {
   # a singular matrix (perfectly correlated traits) is allowed
   set.seed(6)
   x <- trait_ou(tr4, sigma2 = matrix(1, 2, 2))
-  expect_equal(x[, 1], x[, 2])
+  expect_identical(x[, 1], x[, 2])
 })
 
 test_that("a named theta or sigma2 must name every regime", {
@@ -151,7 +151,7 @@ test_that("a named theta or sigma2 must name every regime", {
   set.seed(1)
   a <- trait_ou(tr4, alpha = 1, theta = c(`0` = 3))
   set.seed(1)
-  expect_equal(a, trait_ou(tr4, alpha = 1, theta = 3))
+  expect_identical(a, trait_ou(tr4, alpha = 1, theta = 3))
 })
 
 test_that("theta can differ between traits", {
@@ -163,7 +163,7 @@ test_that("theta can differ between traits", {
   expect_equal(unname(x["a", ]), c(0, 0), tolerance = 1e-3)
   # the number of traits comes from theta when sigma2 is a number
   y <- trait_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = th, regimes = reg)
-  expect_equal(dim(y), c(4, 2))
+  expect_identical(dim(y), c(4L, 2L))
   # one unnamed row for a single optimum
   z <- trait_ou(tr4, alpha = 50, sigma2 = 1e-6, theta = matrix(c(1, 2), 1))
   expect_equal(unname(z["d", ]), c(1, 2), tolerance = 1e-3)
@@ -173,7 +173,7 @@ test_that("theta can differ between traits", {
 
 test_that("root can be one value per trait and is checked", {
   x <- trait_ou(tr4, n_traits = 2, sigma2 = 0, root = c(1, 5))
-  expect_equal(unname(x[1, ]), c(1, 5))
+  expect_identical(unname(x[1, ]), c(1, 5))
   expect_error(trait_ou(tr4, n_traits = 2, root = 1:3), "1 or 2 numbers")
 })
 
@@ -186,7 +186,7 @@ test_that("a mapped history in another order of edges is accepted", {
   set.seed(4)
   x <- trait_ou(post, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h)
   set.seed(4)
-  expect_equal(x, trait_ou(tr4, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h))
+  expect_identical(x, trait_ou(tr4, n_traits = 2, sigma2 = c(a = 1, b = 5), regimes = h))
   other <- ape::read.tree(text = "((a:1,c:1):1,(b:1,d:1):1);")
   other$edge <- other$edge[, 2:1]
   other$maps <- h$maps
@@ -205,5 +205,5 @@ test_that("rate_matrix() has a class that prints, and trait_ou() takes it", {
   a <- trait_ou(tr4, sigma2 = r, regimes = reg)
   set.seed(1)
   b <- trait_ou(tr4, sigma2 = lapply(unclass(r), unclass), regimes = reg)
-  expect_equal(a, b)
+  expect_identical(a, b)
 })
