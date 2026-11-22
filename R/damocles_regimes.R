@@ -33,40 +33,52 @@ clade_regimes <- function(tree, clades, background = "background", stem = FALSE)
   check_tree(tree, branch_lengths = FALSE)
   check_string(background, "background")
   check_flag(stem, "stem")
-  if (!is.list(clades) || length(clades) == 0 || is.null(names(clades)) ||
-      any(names(clades) == "") || anyDuplicated(names(clades))) {
+  not_named <- !is.list(clades) || length(clades) == 0 || is.null(names(clades))
+  if (not_named || any(names(clades) == "") || anyDuplicated(names(clades))) {
     stop("`clades` must be a list of tip labels with different names", call. = FALSE)
   }
   if (background %in% names(clades)) {
     stop("`background` must differ from the names of `clades`", call. = FALSE)
   }
-  n_tip <- ape::Ntip(tree)
   out <- rep(background, nrow(tree$edge))
   for (name in names(clades)) {
-    tips <- clades[[name]]
-    if (is.numeric(tips)) {
-      if (length(tips) != 1 || !tips %in% seq_len(n_tip + tree$Nnode)) {
-        stop("clade ", name, " must be one node of `tree`", call. = FALSE)
-      }
-      node <- tips
-      tips <- NULL
-    } else {
-      unknown <- setdiff(tips, tree$tip.label)
-      if (length(unknown) > 0) {
-        stop("tips of clade ", name, " not in `tree`: ", species_list(unknown), call. = FALSE)
-      }
-      node <- if (length(tips) == 1) match(tips, tree$tip.label) else ape::getMRCA(tree, tips)
-    }
-    inside <- damocles_below(tree, node)
-    if (!is.null(tips) && sum(inside[seq_len(n_tip)]) > length(unique(tips))) {
-      warning("the tips of clade ", name, " are not monophyletic; it covers every ",
-              "descendant of their common ancestor", call. = FALSE)
-    }
-    # a clade of one tip is its terminal edge
-    edges <- inside[tree$edge[, 1]] | ((stem || node <= n_tip) & tree$edge[, 2] == node)
-    out[edges] <- name
+    out[clade_edges(tree, clades[[name]], name, stem)] <- name
   }
   factor(out, levels = intersect(c(background, names(clades)), out))
+}
+
+#' the edges of `tree` in the clade called `name`, given by its `tips` or by one node: those
+#' below their common ancestor, with its stem edge when `stem` is TRUE. Warns when the tips
+#' are not monophyletic
+#' @noRd
+clade_edges <- function(tree, tips, name, stem) {
+  n_tip <- ape::Ntip(tree)
+  node <- clade_node(tree, tips, name)
+  inside <- damocles_below(tree, node)
+  by_tips <- !is.null(tips) && !is.numeric(tips)
+  if (by_tips && sum(inside[seq_len(n_tip)]) > length(unique(tips))) {
+    warning("the tips of clade ", name, " are not monophyletic; it covers every ",
+            "descendant of their common ancestor", call. = FALSE)
+  }
+  # a clade of one tip is its terminal edge
+  inside[tree$edge[, 1]] | ((stem || node <= n_tip) & tree$edge[, 2] == node)
+}
+
+#' the node at the base of the clade called `name`: the node given, checked, or the most
+#' recent common ancestor of its `tips`, which must be in `tree`
+#' @noRd
+clade_node <- function(tree, tips, name) {
+  if (is.numeric(tips)) {
+    if (length(tips) != 1 || !tips %in% seq_len(ape::Ntip(tree) + tree$Nnode)) {
+      stop("clade ", name, " must be one node of `tree`", call. = FALSE)
+    }
+    return(tips)
+  }
+  unknown <- setdiff(tips, tree$tip.label)
+  if (length(unknown) > 0) {
+    stop("tips of clade ", name, " not in `tree`: ", species_list(unknown), call. = FALSE)
+  }
+  if (length(tips) == 1) match(tips, tree$tip.label) else ape::getMRCA(tree, tips)
 }
 
 #' Likelihood-ratio test between nested DAMOCLES fits

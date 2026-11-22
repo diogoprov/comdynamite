@@ -72,6 +72,38 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
   root <- renamed_arg(root_state, root, "root_state", "root")
   check_number(alpha, "alpha", lower = 0, open = TRUE, null_ok = TRUE)
   check_number(class_switch, "class_switch", lower = 0)
+  model <- mk_rate_matrix(q, states)
+  q <- model$q
+  states <- model$states
+  edge_rates <- mk_edge_rates(tree, alpha, edge_rates)
+  observed_q <- q
+  diag(observed_q) <- -rowSums(q)
+  root <- root %||% sample(states, 1)
+  if (length(root) != 1 || !root %in% states) {
+    stop("`root_state` must be one of the states", call. = FALSE)
+  }
+  hidden <- if (!is.null(rate_classes)) {
+    mk_hidden(q, states, root, mk_classes(rate_classes), class_switch)
+  }
+  order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
+  tree <- ape::reorder.phylo(tree, "cladewise")
+  if (!is.null(edge_rates)) edge_rates <- edge_rates[order]
+  run <- mk_history(tree, hidden$q %||% q, hidden$start %||% root,
+                    edge_rates %||% rep(1, nrow(tree$edge)))
+  out <- if (is.null(hidden)) {
+    as_simmap(tree, run$maps, run$at_node, states)
+  } else {
+    mk_observed(tree, run, hidden, states)
+  }
+  out$Q <- observed_q
+  if (!is.null(edge_rates)) out$edge_rates <- edge_rates
+  out
+}
+
+#' the rates of change among states with a zero diagonal, checked, and the names of the
+#' states: a list with `q` and `states`. From a matrix named by state, or one rate and `states`
+#' @noRd
+mk_rate_matrix <- function(q, states) {
   if (is.matrix(q)) {
     states <- rownames(q)
     if (is.null(states) || !identical(states, colnames(q))) {
@@ -86,6 +118,13 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
   }
   diag(q) <- 0
   if (!all(is.finite(q)) || any(q < 0)) stop("rates in `q` must be zero or more", call. = FALSE)
+  list(q = q, states = states)
+}
+
+#' the multiplier of the rates on each branch of trait_mk(): drawn from a gamma distribution
+#' with shape and rate `alpha`, or the `edge_rates` given, checked; NULL with neither
+#' @noRd
+mk_edge_rates <- function(tree, alpha, edge_rates) {
   if (!is.null(alpha) && !is.null(edge_rates)) {
     stop("give `alpha` or `edge_rates`, not both", call. = FALSE)
   }
@@ -94,66 +133,68 @@ trait_mk <- function(tree, q = 1, states = c("0", "1"), root_state = NULL, alpha
     edge_rates <- stats::rgamma(n_edge, shape = alpha, rate = alpha)
   }
   if (!is.null(edge_rates) &&
-      (length(edge_rates) != n_edge || !all(is.finite(edge_rates)) || any(edge_rates < 0))) {
+        (length(edge_rates) != n_edge || !all(is.finite(edge_rates)) || any(edge_rates < 0))) {
     stop("`edge_rates` needs one number, zero or more, per row of `tree$edge`", call. = FALSE)
   }
-  observed_q <- q
-  diag(observed_q) <- -rowSums(q)
-  root <- root %||% sample(states, 1)
-  if (length(root) != 1 || !root %in% states) {
-    stop("`root_state` must be one of the states", call. = FALSE)
-  }
+  edge_rates
+}
 
-  if (!is.null(rate_classes)) {
-    if (!is.numeric(rate_classes) || length(rate_classes) < 2 ||
-        !all(is.finite(rate_classes)) || any(rate_classes < 0)) {
-      stop("`rate_classes` needs two or more multipliers, zero or more", call. = FALSE)
-    }
-    classes <- names(rate_classes) %||% paste0("R", seq_along(rate_classes))
-    if (anyDuplicated(classes) || any(classes == "")) {
-      stop("`rate_classes` needs different names", call. = FALSE)
-    }
-    names(rate_classes) <- classes
-    full <- expand.grid(state = states, class = classes, stringsAsFactors = FALSE)
-    labels <- paste(full$state, full$class, sep = "|")
-    hidden_q <- matrix(0, nrow(full), nrow(full), dimnames = list(labels, labels))
-    for (i in seq_len(nrow(full))) for (j in seq_len(nrow(full))) {
-      if (full$class[i] == full$class[j]) {
-        hidden_q[i, j] <- q[full$state[i], full$state[j]] * rate_classes[[full$class[i]]]
-      } else if (full$state[i] == full$state[j]) {
-        hidden_q[i, j] <- class_switch
-      }
-    }
-    diag(hidden_q) <- 0
-    start <- paste(root, sample(classes, 1), sep = "|")
-  } else {
-    hidden_q <- q
-    start <- root
+#' the `rate_classes` of trait_mk() with names (R1, R2, ... when they have none), checked
+#' @noRd
+mk_classes <- function(rate_classes) {
+  not_numbers <- !is.numeric(rate_classes) || length(rate_classes) < 2
+  if (not_numbers || !all(is.finite(rate_classes)) || any(rate_classes < 0)) {
+    stop("`rate_classes` needs two or more multipliers, zero or more", call. = FALSE)
   }
+  classes <- names(rate_classes) %||% paste0("R", seq_along(rate_classes))
+  if (anyDuplicated(classes) || any(classes == "")) {
+    stop("`rate_classes` needs different names", call. = FALSE)
+  }
+  names(rate_classes) <- classes
+  rate_classes
+}
 
-  order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
-  tree <- ape::reorder.phylo(tree, "cladewise")
-  if (!is.null(edge_rates)) edge_rates <- edge_rates[order]
-  run <- mk_history(tree, hidden_q, start, edge_rates %||% rep(1, n_edge))
-  if (is.null(rate_classes)) {
-    out <- as_simmap(tree, run$maps, run$at_node, states)
-  } else {
-    observed <- stats::setNames(full$state, labels)
-    collapsed <- lapply(run$maps, function(m) {
-      runs <- rle(unname(observed[names(m)]))
-      stats::setNames(vapply(split(unname(m), rep(seq_along(runs$lengths), runs$lengths)), sum,
-                             numeric(1)), runs$values)
-    })
-    out <- as_simmap(tree, collapsed, unname(observed[run$at_node]), states)
-    hidden <- as_simmap(tree, run$maps, run$at_node, labels)
-    diag(hidden_q) <- -rowSums(hidden_q)
-    hidden$Q <- hidden_q
-    out$hidden <- hidden
-    out$classes <- stats::setNames(full$class[match(run$at_node[seq_len(ape::Ntip(tree))],
-                                                    labels)], tree$tip.label)
+#' the chain of trait_mk() with hidden rate classes: a list with the rates `q` among the
+#' combinations of state and class (zero diagonal), these combinations (`full`) and their
+#' `labels`, and the combination at the root (`start`), with its class drawn at random
+#' @noRd
+mk_hidden <- function(q, states, root, rate_classes, class_switch) {
+  classes <- names(rate_classes)
+  full <- expand.grid(state = states, class = classes, stringsAsFactors = FALSE)
+  labels <- paste(full$state, full$class, sep = "|")
+  hidden_q <- matrix(0, nrow(full), nrow(full), dimnames = list(labels, labels))
+  for (i in seq_len(nrow(full))) for (j in seq_len(nrow(full))) {
+    if (full$class[i] == full$class[j]) {
+      hidden_q[i, j] <- q[full$state[i], full$state[j]] * rate_classes[[full$class[i]]]
+    } else if (full$state[i] == full$state[j]) {
+      hidden_q[i, j] <- class_switch
+    }
   }
-  out$Q <- observed_q
-  if (!is.null(edge_rates)) out$edge_rates <- edge_rates
+  diag(hidden_q) <- 0
+  list(q = hidden_q, full = full, labels = labels,
+       start = paste(root, sample(classes, 1), sep = "|"))
+}
+
+#' the history of the observed states from a `run` of the chain with hidden rate classes: a
+#' `simmap` with the full history in `hidden` and the class of each tip in `classes`
+#' @noRd
+mk_observed <- function(tree, run, hidden, states) {
+  full <- hidden$full
+  labels <- hidden$labels
+  observed <- stats::setNames(full$state, labels)
+  collapsed <- lapply(run$maps, function(m) {
+    runs <- rle(unname(observed[names(m)]))
+    stats::setNames(vapply(split(unname(m), rep(seq_along(runs$lengths), runs$lengths)), sum,
+                           numeric(1)), runs$values)
+  })
+  out <- as_simmap(tree, collapsed, unname(observed[run$at_node]), states)
+  history <- as_simmap(tree, run$maps, run$at_node, labels)
+  hidden_q <- hidden$q
+  diag(hidden_q) <- -rowSums(hidden_q)
+  history$Q <- hidden_q
+  out$hidden <- history
+  out$classes <- stats::setNames(full$class[match(run$at_node[seq_len(ape::Ntip(tree))],
+                                                  labels)], tree$tip.label)
   out
 }
 

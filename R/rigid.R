@@ -128,43 +128,16 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
   check_event_coords(coords, biogeography)
   coords <- as.matrix(coords)
   biogeography <- as.matrix(biogeography)
-  n <- nrow(coords)
   distances <- as.matrix(stats::dist(coords))
-  if (is.null(gap)) {
-    gap <- neighbour_distance(distances, 4)
-    if (gap == 0) {
-      stop("rigid_permutations(): most sites share their coordinates with other sites: remove ",
-           "repeated sites or ",
-           "give `gap`", call. = FALSE)
-    }
-  }
+  if (is.null(gap)) gap <- default_gap(distances)
   # strictly closer than `gap`, so that a site one step beyond a regular grid is outside
   gap <- gap * (1 - 1e-6)
   landscape <- landscape_of(coords, gap)
-  sites <- rownames(biogeography)
   events <- colnames(biogeography) %||% paste0("event", seq_len(ncol(biogeography)))
   out <- lapply(seq_len(ncol(biogeography)), function(e) {
-    event <- biogeography[, e]
-    moving <- seq_len(n) %in% moving_sites(event)
-    groups <- if (is.finite(independent)) {
-      area_patches(moving, distances, independent)
-    } else {
-      list(which(moving))
-    }
-    drawn <- event_draws(coords, distances, landscape, groups, event, n_perm, gap, outside,
-                         independent, max_tries)
-    if (is.null(drawn)) {
-      stop("no placement of ", events[e], " other than the observed one fits the landscape: ",
-           "raise `outside` or `max_tries`, or lower `independent`", call. = FALSE)
-    }
-    moves <- attr(drawn, "moves")
-    attr(drawn, "moves") <- NULL
-    if (length(groups) > 1 && min(moves) < 20) {
-      warning("a part of ", events[e], " with ", lengths(groups)[which.min(moves)], " sites has ",
-              "only ", min(moves), " moves, so it stays nearly in place among the permutations: ",
-              "lower `independent` or raise `max_tries`", call. = FALSE)
-    }
-    colnames(drawn) <- sites
+    drawn <- event_placements(biogeography[, e], events[e], coords, distances, landscape,
+                              n_perm, gap, outside, independent, max_tries)
+    colnames(drawn) <- rownames(biogeography)
     drawn
   })
   names(out) <- events
@@ -176,6 +149,46 @@ rigid_permutations <- function(coords, biogeography, n_perm = 999, gap = NULL, o
             "; the smallest attainable p-value is 1 / (placements + 1)", call. = FALSE)
   }
   out
+}
+
+#' the default `gap` of rigid_permutations(): the median distance from a site to its fourth
+#' nearest site, which must not be zero
+#' @noRd
+default_gap <- function(distances) {
+  gap <- neighbour_distance(distances, 4)
+  if (gap == 0) {
+    stop("rigid_permutations(): most sites share their coordinates with other sites: remove ",
+         "repeated sites or ",
+         "give `gap`", call. = FALSE)
+  }
+  gap
+}
+
+#' the distinct permutations of the event called `name`, one per row; stops when there is
+#' none, and warns when a part that moves independently has few moves
+#' @noRd
+event_placements <- function(event, name, coords, distances, landscape, n_perm, gap, outside,
+                             independent, max_tries) {
+  moving <- seq_len(nrow(coords)) %in% moving_sites(event)
+  groups <- if (is.finite(independent)) {
+    area_patches(moving, distances, independent)
+  } else {
+    list(which(moving))
+  }
+  drawn <- event_draws(coords, distances, landscape, groups, event, n_perm, gap, outside,
+                       independent, max_tries)
+  if (is.null(drawn)) {
+    stop("no placement of ", name, " other than the observed one fits the landscape: ",
+         "raise `outside` or `max_tries`, or lower `independent`", call. = FALSE)
+  }
+  moves <- attr(drawn, "moves")
+  attr(drawn, "moves") <- NULL
+  if (length(groups) > 1 && min(moves) < 20) {
+    warning("a part of ", name, " with ", lengths(groups)[which.min(moves)], " sites has ",
+            "only ", min(moves), " moves, so it stays nearly in place among the permutations: ",
+            "lower `independent` or raise `max_tries`", call. = FALSE)
+  }
+  drawn
 }
 
 #' sites that move: the sites of the event, or only the smaller side when the other side is
@@ -336,34 +349,43 @@ landscape_image <- function(group, moves, pick, coords, landscape) {
 #' @noRd
 lattice_moves <- function(group, lattice, outside) {
   cells <- lattice$cells[group, , drop = FALSE]
+  accepted <- list()
+  for (s in seq_along(lattice$maps)) {
+    accepted <- c(accepted, symmetry_moves(s, cells, lattice, outside))
+  }
+  do.call(rbind, accepted)
+}
+
+#' the moves of a lattice under its symmetry `s` that keep enough of the `cells` of a group
+#' inside the landscape: a list of vectors with the symmetry and the translation in cells
+#' @noRd
+symmetry_moves <- function(s, cells, lattice, outside) {
   m <- nrow(cells)
   extent <- lattice$extent
   near <- lattice$near
   land <- lattice$land
   reach <- lattice$reach
   accepted <- list()
-  for (s in seq_along(lattice$maps)) {
-    image <- lattice$maps[[s]](cells[, 1], cells[, 2])
-    box <- apply(image, 2, range)
-    # translations that keep the group within `gap` of the sites
-    tx <- seq(land[1, 1] - reach[1] - box[2, 1], land[2, 1] + reach[1] - box[1, 1])
-    ty <- seq(land[1, 2] - reach[2] - box[2, 2], land[2, 2] + reach[2] - box[1, 2])
-    for (dx in tx) {
-      ix <- image[, 1] + dx
-      in_x <- ix >= 1 & ix <= extent[1]
-      if (sum(!in_x) > outside * m) next
-      for (dy in ty) {
-        iy <- image[, 2] + dy
-        inside <- in_x & iy >= 1 & iy <= extent[2]
-        far <- m - sum(inside)
-        if (far > outside * m) next
-        far <- far + sum(!near[cbind(ix[inside], iy[inside])])
-        if (far > outside * m) next
-        accepted[[length(accepted) + 1]] <- c(s, dx, dy)
-      }
+  image <- lattice$maps[[s]](cells[, 1], cells[, 2])
+  box <- apply(image, 2, range)
+  # translations that keep the group within `gap` of the sites
+  tx <- seq(land[1, 1] - reach[1] - box[2, 1], land[2, 1] + reach[1] - box[1, 1])
+  ty <- seq(land[1, 2] - reach[2] - box[2, 2], land[2, 2] + reach[2] - box[1, 2])
+  for (dx in tx) {
+    ix <- image[, 1] + dx
+    in_x <- ix >= 1 & ix <= extent[1]
+    if (sum(!in_x) > outside * m) next
+    for (dy in ty) {
+      iy <- image[, 2] + dy
+      inside <- in_x & iy >= 1 & iy <= extent[2]
+      far <- m - sum(inside)
+      if (far > outside * m) next
+      far <- far + sum(!near[cbind(ix[inside], iy[inside])])
+      if (far > outside * m) next
+      accepted[[length(accepted) + 1]] <- c(s, dx, dy)
     }
   }
-  do.call(rbind, accepted)
+  accepted
 }
 
 #' the image of a group under a move of the lattice
@@ -469,55 +491,16 @@ place_image <- function(image, coords, free, reach) {
 #' @noRd
 event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap, outside,
                         independent, max_tries) {
-  n <- nrow(coords)
-  moving <- unlist(groups)
-  rest <- setdiff(seq_len(n), moving)
-  observed <- layout_key(event, seq_len(n))
+  observed <- layout_key(event, seq_len(nrow(coords)))
   moves <- lapply(groups, landscape_moves, coords, landscape, outside)
   acc <- new.env(parent = emptyenv())
   acc$perms <- vector("list", n_perm)
   acc$keys <- character(n_perm)
   acc$found <- 0
-  # one try: the groups placed, or NULL when one does not fit after the others. With one
-  # group `pick` is its move; with several, each group draws its own until they stay apart
   one_try <- function(pick) {
-    free <- rep(TRUE, n)
-    target <- integer(n)
-    for (g in seq_along(groups)) {
-      group <- groups[[g]]
-      attempt <- 0
-      repeat {
-        attempt <- attempt + 1
-        if (length(groups) > 1) pick <- sample.int(nrow(moves[[g]]), 1)
-        image <- landscape_image(group, moves[[g]], pick, coords, landscape)
-        where <- place_image(image, coords, free, 2 * gap)
-        if (!is.null(where)) {
-          apart <- g == 1 || min(distances[where, target[target > 0], drop = FALSE]) > independent
-          if (apart) break
-        }
-        if (attempt >= 30) return(NULL)
-      }
-      target[group] <- where
-      free[where] <- FALSE
-    }
-    permutation <- integer(n)
-    permutation[target[moving]] <- moving
-    permutation[free] <- rest[sample.int(length(rest))]
-    permutation
+    place_groups(pick, groups, moves, coords, distances, landscape, gap, independent)
   }
-  # the distinct layouts among the tries, until `n_perm` are found
-  draw <- function(picks) {
-    for (pick in picks) {
-      permutation <- one_try(pick)
-      if (is.null(permutation)) next
-      key <- layout_key(event, permutation)
-      if (key == observed || key %in% acc$keys[seq_len(acc$found)]) next
-      acc$found <- acc$found + 1
-      acc$perms[[acc$found]] <- permutation
-      acc$keys[acc$found] <- key
-      if (acc$found == n_perm) break
-    }
-  }
+  draw <- function(picks) collect_layouts(picks, one_try, acc, event, observed, n_perm)
   if (length(groups) > 1) {
     draw(rep(NA_integer_, max_tries))
   } else {
@@ -528,10 +511,62 @@ event_draws <- function(coords, distances, landscape, groups, event, n_perm, gap
     draw(first)
     if (acc$found < n_perm && rows > length(first)) {
       others <- setdiff(seq_len(rows), first)
-      others <- others[sample.int(length(others), min(length(others), max_tries - length(first)))]
+      n_others <- min(length(others), max_tries - length(first))
+      others <- others[sample.int(length(others), n_others)]
       draw(others)
     }
   }
   if (acc$found == 0) return(NULL)
-  structure(do.call(rbind, acc$perms[seq_len(acc$found)]), moves = vapply(moves, nrow, integer(1)))
+  structure(do.call(rbind, acc$perms[seq_len(acc$found)]),
+            moves = vapply(moves, nrow, integer(1)))
+}
+
+#' one try at placing an event: the permutation with its groups placed, or NULL when one does
+#' not fit after the others. With one group `pick` is its move; with several, each group draws
+#' its own until they stay apart
+#' @noRd
+place_groups <- function(pick, groups, moves, coords, distances, landscape, gap, independent) {
+  n <- nrow(coords)
+  moving <- unlist(groups)
+  rest <- setdiff(seq_len(n), moving)
+  free <- rep(TRUE, n)
+  target <- integer(n)
+  for (g in seq_along(groups)) {
+    group <- groups[[g]]
+    attempt <- 0
+    repeat {
+      attempt <- attempt + 1
+      if (length(groups) > 1) pick <- sample.int(nrow(moves[[g]]), 1)
+      image <- landscape_image(group, moves[[g]], pick, coords, landscape)
+      where <- place_image(image, coords, free, 2 * gap)
+      if (!is.null(where)) {
+        apart <- g == 1 ||
+          min(distances[where, target[target > 0], drop = FALSE]) > independent
+        if (apart) break
+      }
+      if (attempt >= 30) return(NULL)
+    }
+    target[group] <- where
+    free[where] <- FALSE
+  }
+  permutation <- integer(n)
+  permutation[target[moving]] <- moving
+  permutation[free] <- rest[sample.int(length(rest))]
+  permutation
+}
+
+#' adds to `acc` the distinct layouts of an event among the tries `picks` (each given to
+#' `one_try`), other than the `observed` one, until `n_perm` are found
+#' @noRd
+collect_layouts <- function(picks, one_try, acc, event, observed, n_perm) {
+  for (pick in picks) {
+    permutation <- one_try(pick)
+    if (is.null(permutation)) next
+    key <- layout_key(event, permutation)
+    if (key == observed || key %in% acc$keys[seq_len(acc$found)]) next
+    acc$found <- acc$found + 1
+    acc$perms[[acc$found]] <- permutation
+    acc$keys[acc$found] <- key
+    if (acc$found == n_perm) break
+  }
 }

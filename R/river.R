@@ -144,28 +144,10 @@ landscape_river <- function(network = river_network(50), env = NULL, scale_down 
   check_number(overland, "overland", 0, 1)
   check_number(overland_scale, "overland_scale", lower = 0, open = TRUE)
   check_env_range(env_range)
-  xy <- if (all(c("x", "y") %in% names(network))) network[, c("x", "y")]
-  net <- river_table(network$downstream, network$length)
-  if (!is.null(xy)) {
-    if (!is.numeric(xy$x) || !is.numeric(xy$y) || !all(is.finite(c(xy$x, xy$y)))) {
-      stop("columns `x` and `y` of `network` must be finite numbers", call. = FALSE)
-    }
-    net$x <- xy$x
-    net$y <- xy$y
-  }
-  m <- nrow(net)
-  if (is.null(env)) {
-    env <- net$distance / max(net$distance) * diff(env_range) + env_range[1]
-  }
-  if (!is.numeric(env) || length(env) != m || !all(is.finite(env))) {
-    stop("`env` must be NULL or one finite number per site of `network` (", m, ")",
-         call. = FALSE)
-  }
+  net <- river_given_coords(river_table(network$downstream, network$length), network)
+  env <- river_site_env(env, net, env_range)
   down <- river_downstream(net)
-  w <- -down / scale_down - t(down) / scale_up
-  diag(w) <- -Inf
-  channel <- exp(w - apply(w, 1, max))
-  channel <- channel / rowSums(channel)
+  channel <- river_channel(down, scale_down, scale_up)
   coords <- data.frame(x = net$x, y = net$y)
   dispersal <- if (overland > 0) {
     straight <- dispersal_kernel(as.matrix(stats::dist(coords)), overland_scale)
@@ -177,6 +159,45 @@ landscape_river <- function(network = river_network(50), env = NULL, scale_down 
   out$settings <- list(scale_down = scale_down, scale_up = scale_up, overland = overland,
                        overland_scale = overland_scale)
   out
+}
+
+#' the network table `net` with the coordinates given in the columns `x` and `y` of `network`,
+#' checked, in place of the layout of river_table(); `net` as it is without those columns
+#' @noRd
+river_given_coords <- function(net, network) {
+  if (!all(c("x", "y") %in% names(network))) return(net)
+  xy <- network[, c("x", "y")]
+  if (!is.numeric(xy$x) || !is.numeric(xy$y) || !all(is.finite(c(xy$x, xy$y)))) {
+    stop("columns `x` and `y` of `network` must be finite numbers", call. = FALSE)
+  }
+  net$x <- xy$x
+  net$y <- xy$y
+  net
+}
+
+#' the environment of each site of a river: `env` checked, or, when NULL, a gradient over
+#' `env_range` with the distance to the outlet
+#' @noRd
+river_site_env <- function(env, net, env_range) {
+  m <- nrow(net)
+  if (is.null(env)) {
+    env <- net$distance / max(net$distance) * diff(env_range) + env_range[1]
+  }
+  if (!is.numeric(env) || length(env) != m || !all(is.finite(env))) {
+    stop("`env` must be NULL or one finite number per site of `network` (", m, ")",
+         call. = FALSE)
+  }
+  env
+}
+
+#' dispersal along the channel: an exponential kernel of the distances travelled downstream
+#' (`down`) and upstream, each with its scale; rows sum to one and the diagonal is zero
+#' @noRd
+river_channel <- function(down, scale_down, scale_up) {
+  w <- -down / scale_down - t(down) / scale_up
+  diag(w) <- -Inf
+  channel <- exp(w - apply(w, 1, max))
+  channel / rowSums(channel)
 }
 
 #' the network table of river_network() from the downstream neighbour and reach length of each
@@ -202,48 +223,69 @@ river_table <- function(downstream, length) {
     stop("reach lengths must be positive", call. = FALSE)
   }
   length[outlet] <- 0
-  # sites from the outlet upwards: every site after its downstream neighbour
   children <- split(seq_len(m)[-outlet], factor(downstream[-outlet], levels = seq_len(m)))
+  ord <- river_upwards(children, outlet)
+  distance <- numeric(m)
+  for (s in ord[-1]) distance[s] <- distance[downstream[s]] + length[s]
+  size <- river_size(children, ord, length)
+  angle <- river_angle(children, ord, size$magnitude, outlet)
+  data.frame(site = paste0("site", seq_len(m)), downstream = downstream, length = length,
+             distance = distance, magnitude = size$magnitude, upstream_length = size$upstream,
+             order = as.integer(size$order),
+             headwater = lengths(children) == 0, x = distance * cos(angle),
+             y = distance * sin(angle), stringsAsFactors = FALSE)
+}
+
+#' sites from the outlet upwards, every site after its downstream neighbour; stops unless the
+#' `children` of each site form a single tree draining to the `outlet`
+#' @noRd
+river_upwards <- function(children, outlet) {
   ord <- outlet
   i <- 1
-  while (i <= base::length(ord)) {
+  while (i <= length(ord)) {
     ord <- c(ord, children[[ord[i]]])
     i <- i + 1
   }
-  if (base::length(ord) != m) {
+  if (length(ord) != length(children)) {
     stop("`downstream` must form a tree draining to the outlet, without loops", call. = FALSE)
   }
-  distance <- numeric(m)
-  for (s in ord[-1]) distance[s] <- distance[downstream[s]] + length[s]
+  ord
+}
+
+#' size of the network above each site: the `magnitude` (number of headwaters), the `upstream`
+#' length of the reaches, the site included, and the Strahler `order`
+#' @noRd
+river_size <- function(children, ord, reach) {
   n_children <- lengths(children)
   magnitude <- as.numeric(n_children == 0)
-  upstream <- length
+  upstream <- reach
   order <- as.integer(n_children == 0)
   for (s in rev(ord)) {
     ch <- children[[s]]
-    if (!base::length(ch)) next
+    if (!length(ch)) next
     magnitude[s] <- sum(magnitude[ch])
     upstream[s] <- upstream[s] + sum(upstream[ch])
     top <- max(order[ch])
     order[s] <- top + as.integer(sum(order[ch] == top) > 1)
   }
-  # angular layout: each site takes the middle of its wedge, split among branches by magnitude
-  lo <- hi <- numeric(m)
+  list(magnitude = magnitude, upstream = upstream, order = order)
+}
+
+#' angular layout: the angle of each site, in the middle of its wedge, which is split among
+#' the branches above it by their magnitude
+#' @noRd
+river_angle <- function(children, ord, magnitude, outlet) {
+  lo <- hi <- numeric(length(children))
   lo[outlet] <- pi / 6
   hi[outlet] <- 5 * pi / 6
   for (s in ord) {
     ch <- children[[s]]
-    if (!base::length(ch)) next
+    if (!length(ch)) next
     cuts <- lo[s] + (hi[s] - lo[s]) * c(0, cumsum(magnitude[ch])) / sum(magnitude[ch])
-    lo[ch] <- cuts[-base::length(cuts)]
+    lo[ch] <- cuts[-length(cuts)]
     hi[ch] <- cuts[-1]
   }
-  angle <- (lo + hi) / 2
-  data.frame(site = paste0("site", seq_len(m)), downstream = downstream, length = length,
-             distance = distance, magnitude = magnitude, upstream_length = upstream,
-             order = as.integer(order),
-             headwater = n_children == 0, x = distance * cos(angle),
-             y = distance * sin(angle), stringsAsFactors = FALSE)
+  (lo + hi) / 2
 }
 
 #' distance travelled downstream from each site (rows) to each other site (columns): from the
@@ -329,19 +371,11 @@ river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclid
   check_number(nugget, "nugget", lower = 0)
   net <- landscape$network
   m <- nrow(net)
-  component <- function(x, name) {
-    if (is.null(x)) return(NULL)
-    if (!is.numeric(x) || length(x) != 2 || !all(is.finite(x)) || any(x <= 0)) {
-      stop("`", name, "` must be NULL or two positive numbers, the sill and the range",
-           call. = FALSE)
-    }
-    if (!is.null(names(x)) && all(c("sill", "range") %in% names(x))) x <- x[c("sill", "range")]
-    unname(x)
-  }
-  tail_up <- component(tail_up, "tail_up")
-  tail_down <- component(tail_down, "tail_down")
-  euclidean <- component(euclidean, "euclidean")
-  if (is.null(tail_up) && is.null(tail_down) && is.null(euclidean) && nugget == 0) {
+  tail_up <- covariance_component(tail_up, "tail_up")
+  tail_down <- covariance_component(tail_down, "tail_down")
+  euclidean <- covariance_component(euclidean, "euclidean")
+  no_component <- is.null(tail_up) && is.null(tail_down) && is.null(euclidean)
+  if (no_component && nugget == 0) {
     stop("give at least one component or a nugget", call. = FALSE)
   }
   out <- diag(nugget, m)
@@ -359,6 +393,20 @@ river_covariance <- function(landscape, tail_up = NULL, tail_down = NULL, euclid
     out <- out + tail_up[1] * exp(-h / tail_up[2]) * sqrt(ratio) * connected
   }
   out
+}
+
+#' a component of river_covariance() as its sill and range, in that order and without names,
+#' checked; NULL when not given
+#' @noRd
+covariance_component <- function(x, name) {
+  if (is.null(x)) return(NULL)
+  not_pair <- !is.numeric(x) || length(x) != 2
+  if (not_pair || !all(is.finite(x)) || any(x <= 0)) {
+    stop("`", name, "` must be NULL or two positive numbers, the sill and the range",
+         call. = FALSE)
+  }
+  if (!is.null(names(x)) && all(c("sill", "range") %in% names(x))) x <- x[c("sill", "range")]
+  unname(x)
 }
 
 #' Environment along a river network

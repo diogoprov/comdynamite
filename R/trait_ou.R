@@ -96,8 +96,33 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
   if (!is.numeric(theta) || length(theta) == 0 || !all(is.finite(theta))) {
     stop("`theta` must be finite numbers", call. = FALSE)
   }
+  maps <- ou_maps(tree, regimes, theta)
+  tree <- ape::reorder.phylo(tree, "cladewise")
+  states <- unique(unlist(lapply(maps, names), use.names = FALSE))
+  sigma2 <- strip_rate_matrix(sigma2)
+  th <- ou_optima(theta, states)
+  rates <- ou_rates(sigma2, states, n_traits)
+  n_traits <- ou_n_traits(theta, rates$n_traits, rates$multivariate)
+  if (!is.numeric(root) || !all(is.finite(root)) || !length(root) %in% c(1, n_traits)) {
+    stop("`root` needs 1 or ", n_traits, " numbers, all finite", call. = FALSE)
+  }
+  x <- ou_simulate(tree, maps, th, rates$rates, alpha, root, n_traits, rates$multivariate)
+  n_tip <- ape::Ntip(tree)
+  out <- x[seq_len(n_tip), , drop = FALSE]
+  trait_names <- rates$trait_names
+  if (is.null(trait_names)) trait_names <- paste0("trait", seq_len(n_traits))
+  dimnames(out) <- list(tree$tip.label, trait_names)
+  attr(out, "nodes") <- x[-seq_len(n_tip), , drop = FALSE]
+  dimnames(attr(out, "nodes")) <- list(n_tip + seq_len(tree$Nnode), colnames(out))
+  out
+}
+
+#' the history of regimes along each branch of `tree`, in cladewise order: a list with, for
+#' each branch, the time spent in each regime, named by regime. From a mapped history
+#' (`simmap`), from one regime per branch, or a single regime "0" without `regimes`
+#' @noRd
+ou_maps <- function(tree, regimes, theta) {
   order <- ape::reorder.phylo(tree, "cladewise", index.only = TRUE)
-  maps <- NULL
   if (inherits(regimes, "phylo")) {
     # match the edges by parent and child, whatever the order of the edges of each tree
     at <- match(paste(tree$edge[order, 1], tree$edge[order, 2]),
@@ -107,89 +132,111 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
            "the same ",
            "edges as `tree`", call. = FALSE)
     }
-    maps <- regimes$maps[at]
-    regimes <- NULL
+    return(regimes$maps[at])
   }
   tree <- ape::reorder.phylo(tree, "cladewise")
   ne <- nrow(tree$edge)
   t <- tree$edge.length
-  if (is.null(maps)) {
-    if (is.null(regimes) && (if (is.matrix(theta)) nrow(theta) else length(theta)) != 1) {
-      stop("several optima need `regimes`", call. = FALSE)
-    }
-    if (is.null(regimes)) {
-      reg <- rep("0", ne)
-    } else {
-      if (length(regimes) != ne) {
-        stop("`regimes` needs one regime per branch (", ne, ")", call. = FALSE)
-      }
-      reg <- as.character(regimes)
-    }
-    maps <- lapply(seq_len(ne), function(e) stats::setNames(t[e], reg[e]))
+  if (is.null(regimes) && (if (is.matrix(theta)) nrow(theta) else length(theta)) != 1) {
+    stop("several optima need `regimes`", call. = FALSE)
   }
-  states <- unique(unlist(lapply(maps, names), use.names = FALSE))
-  by_regime <- function(value, what) {
-    if (length(value) == 1 && is.null(names(value)) && !is.list(value)) {
-      return(stats::setNames(rep(list(value[[1]]), length(states)), states))
-    }
-    if (is.null(names(value)) || !all(states %in% names(value))) {
-      stop("`", what, "` must be named with every regime: ", toString(states),
-           call. = FALSE)
-    }
-    as.list(value)[states]
-  }
-  sigma2 <- strip_rate_matrix(sigma2)
-  th <- if (is.matrix(theta)) {  # one row per regime, one column per trait
-    if (nrow(theta) == 1 && is.null(rownames(theta))) {
-      stats::setNames(rep(list(theta[1, ]), length(states)), states)
-    } else {
-      by_regime(stats::setNames(lapply(seq_len(nrow(theta)), function(i) theta[i, ]),
-                                rownames(theta)), "theta")
-    }
+  if (is.null(regimes)) {
+    reg <- rep("0", ne)
   } else {
-    by_regime(theta, "theta")
+    if (length(regimes) != ne) {
+      stop("`regimes` needs one regime per branch (", ne, ")", call. = FALSE)
+    }
+    reg <- as.character(regimes)
   }
+  lapply(seq_len(ne), function(e) stats::setNames(t[e], reg[e]))
+}
+
+#' a parameter of trait_ou() as a list with one element per regime in `states`: one unnamed
+#' value for all of them, or values named with every regime. `what` names it in the message
+#' @noRd
+ou_by_regime <- function(value, what, states) {
+  if (length(value) == 1 && is.null(names(value)) && !is.list(value)) {
+    return(stats::setNames(rep(list(value[[1]]), length(states)), states))
+  }
+  if (is.null(names(value)) || !all(states %in% names(value))) {
+    stop("`", what, "` must be named with every regime: ", toString(states),
+         call. = FALSE)
+  }
+  as.list(value)[states]
+}
+
+#' the optima of each regime in `states`, from a vector with one optimum per regime or a
+#' matrix with one row per regime and one column per trait
+#' @noRd
+ou_optima <- function(theta, states) {
+  if (!is.matrix(theta)) return(ou_by_regime(theta, "theta", states))
+  if (nrow(theta) == 1 && is.null(rownames(theta))) {
+    return(stats::setNames(rep(list(theta[1, ]), length(states)), states))
+  }
+  ou_by_regime(stats::setNames(lapply(seq_len(nrow(theta)), function(i) theta[i, ]),
+                               rownames(theta)), "theta", states)
+}
+
+#' the rates of each regime in `states`, checked: a list with `rates` (numbers, or the roots
+#' of the rate matrices when `multivariate`), `n_traits` (the size of the matrices when there
+#' are any) and `trait_names` (those of the matrices, or NULL)
+#' @noRd
+ou_rates <- function(sigma2, states, n_traits) {
   rates <- if (is.matrix(sigma2)) {
     stats::setNames(rep(list(sigma2), length(states)), states)
   } else {
-    by_regime(sigma2, "sigma2")
+    ou_by_regime(sigma2, "sigma2", states)
   }
   is_matrix <- vapply(rates, is.matrix, logical(1))
-  multivariate <- any(is_matrix)
-  if (multivariate) {
-    if (!all(is_matrix)) {
-      stop("`sigma2` must be numbers or rate matrices for all regimes, not both", call. = FALSE)
-    }
-    p <- unique(vapply(rates, ncol, integer(1)))
-    if (length(p) != 1) stop("the rate matrices in `sigma2` must have the same size", call. = FALSE)
-    if (n_traits != 1 && n_traits != p) {
-      stop("`n_traits` is ", n_traits, " but the rate matrices have ", p, " traits",
-           call. = FALSE)
-    }
-    n_traits <- p
-    trait_names <- colnames(rates[[1]])
-    rates <- lapply(rates, matrix_root)
-  } else {
-    trait_names <- NULL
-    if (!all(vapply(rates, function(s) is.numeric(s) && length(s) == 1 && is.finite(s) &&
-                      s >= 0, logical(1)))) {
-      stop("`sigma2` must be zero or more", call. = FALSE)
-    }
+  if (!any(is_matrix)) {
+    check_scalar_rates(rates)
+    return(list(rates = rates, multivariate = FALSE, n_traits = n_traits, trait_names = NULL))
   }
-  if (is.matrix(theta)) {
-    if (n_traits == 1 && !multivariate) n_traits <- ncol(theta)
-    if (ncol(theta) != n_traits) {
-      stop("`theta` has ", ncol(theta), " columns but there are ", n_traits, " traits",
-           call. = FALSE)
-    }
+  if (!all(is_matrix)) {
+    stop("`sigma2` must be numbers or rate matrices for all regimes, not both", call. = FALSE)
   }
-  if (!is.numeric(root) || !all(is.finite(root)) || !length(root) %in% c(1, n_traits)) {
-    stop("`root` needs 1 or ", n_traits, " numbers, all finite", call. = FALSE)
+  p <- unique(vapply(rates, ncol, integer(1)))
+  if (length(p) != 1) stop("the rate matrices in `sigma2` must have the same size", call. = FALSE)
+  if (n_traits != 1 && n_traits != p) {
+    stop("`n_traits` is ", n_traits, " but the rate matrices have ", p, " traits",
+         call. = FALSE)
   }
+  trait_names <- colnames(rates[[1]])
+  list(rates = lapply(rates, matrix_root), multivariate = TRUE, n_traits = p,
+       trait_names = trait_names)
+}
+
+#' stops unless every rate in the list `rates` is one finite number, zero or more
+#' @noRd
+check_scalar_rates <- function(rates) {
+  if (!all(vapply(rates, function(s) is.numeric(s) && length(s) == 1 && is.finite(s) &&
+                    s >= 0, logical(1)))) {
+    stop("`sigma2` must be zero or more", call. = FALSE)
+  }
+  invisible(rates)
+}
+
+#' the number of traits of trait_ou(): the columns of a matrix of optima when neither
+#' `n_traits` nor rate matrices set it; stops when they disagree
+#' @noRd
+ou_n_traits <- function(theta, n_traits, multivariate) {
+  if (!is.matrix(theta)) return(n_traits)
+  if (n_traits == 1 && !multivariate) n_traits <- ncol(theta)
+  if (ncol(theta) != n_traits) {
+    stop("`theta` has ", ncol(theta), " columns but there are ", n_traits, " traits",
+         call. = FALSE)
+  }
+  n_traits
+}
+
+#' the traits at every node of `tree` (cladewise; tips first, one column per trait) under the
+#' Ornstein-Uhlenbeck process, along the regimes in `maps`
+#' @noRd
+ou_simulate <- function(tree, maps, th, rates, alpha, root, n_traits, multivariate) {
   n_tip <- ape::Ntip(tree)
   x <- matrix(0, n_tip + tree$Nnode, n_traits)
   x[n_tip + 1, ] <- root
-  for (e in seq_len(ne)) {  # cladewise: parents before children
+  for (e in seq_len(nrow(tree$edge))) {  # cladewise: parents before children
     value <- x[tree$edge[e, 1], ]
     m <- maps[[e]]
     for (k in seq_along(m)) {
@@ -213,12 +260,7 @@ trait_ou <- function(tree, n_traits = 1, alpha = 0, sigma2 = 1, theta = 0,
     }
     x[tree$edge[e, 2], ] <- value
   }
-  out <- x[seq_len(n_tip), , drop = FALSE]
-  if (is.null(trait_names)) trait_names <- paste0("trait", seq_len(n_traits))
-  dimnames(out) <- list(tree$tip.label, trait_names)
-  attr(out, "nodes") <- x[-seq_len(n_tip), , drop = FALSE]
-  dimnames(attr(out, "nodes")) <- list(n_tip + seq_len(tree$Nnode), colnames(out))
-  out
+  x
 }
 
 #' upper triangular U with crossprod(U) = m, for a symmetric positive semidefinite matrix
@@ -263,8 +305,8 @@ paint_regimes <- function(tree, nodes, stem = FALSE) {
   tree <- ape::reorder.phylo(tree, "cladewise")
   n_tip <- ape::Ntip(tree)
   check_flag(stem, "stem")
-  if (!is.numeric(nodes) || anyNA(nodes) || any(nodes <= n_tip) ||
-        any(nodes > n_tip + tree$Nnode) || any(nodes != round(nodes))) {
+  not_internal <- !is.numeric(nodes) || anyNA(nodes) || any(nodes <= n_tip)
+  if (not_internal || any(nodes > n_tip + tree$Nnode) || any(nodes != round(nodes))) {
     stop("`nodes` must be numbers of internal nodes, from ", n_tip + 1, " to ",
          n_tip + tree$Nnode, call. = FALSE)
   }

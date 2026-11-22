@@ -344,65 +344,87 @@ damocles_test <- function(comm, tree, n_sim = 999, gamma = NULL, mu = NULL,
   if (xor(is.null(gamma), is.null(mu))) {
     stop("give both `gamma` and `mu`, or neither to estimate them", call. = FALSE)
   }
-  if (is.null(gamma)) {
-    fit <- damocles_fit(presence, tree, root = root, shared = shared, sympatry = sympatry,
-                        regimes = regimes, edge_covariate = edge_covariate, vary = vary)
-    parameters <- as.data.frame(unclass(fit))[, attr(fit, "parameters"), drop = FALSE]
-    edge_rates <- attr(fit, "edge_rates")
-    sympatry <- fit$sympatry
-    loglik <- fit$loglik
+  rates <- if (is.null(gamma)) {
+    damocles_fitted_rates(presence, tree, root, shared, sympatry, regimes, edge_covariate, vary)
   } else {
-    if (!is.null(regimes) || !is.null(edge_covariate)) {
-      stop("`regimes` and `edge_covariate` are for estimated rates; give rates per edge ",
-           "as lists in `gamma` and `mu` instead", call. = FALSE)
-    }
-    if (!length(gamma) %in% c(1, n_comm) || !length(mu) %in% c(1, n_comm)) {
-      stop("`gamma` and `mu` need one value or one per community", call. = FALSE)
-    }
-    gamma <- rep_len(as.list(gamma), n_comm)
-    mu <- rep_len(as.list(mu), n_comm)
-    edge_rates <- lapply(seq_len(n_comm), function(i) damocles_edge_rates(tree, gamma[[i]],
-                                                                          mu[[i]]))
-    one <- function(rate) vapply(rate, function(r) if (length(r) == 1) r else NA_real_,
-                                 numeric(1))
-    parameters <- data.frame(gamma = one(gamma), mu = one(mu))
-    if (is.null(sympatry)) {
-      stop("`sympatry = NULL` (estimated) needs `gamma` and `mu` estimated too", call. = FALSE)
-    }
-    check_sympatry(sympatry)
-    sympatry <- rep_len(sympatry, n_comm)
-    loglik <- NA_real_
+    damocles_given_rates(tree, gamma, mu, sympatry, regimes, edge_covariate, n_comm)
   }
   distances <- tip_distances(tree)[colnames(presence), colnames(presence)]
   rows <- lapply(seq_len(n_comm), function(i) {
-    site <- presence[i, , drop = FALSE]
-    observed <- c(mpd = unname(mean_pairwise(site, distances)),
-                  mntd = unname(mean_nearest(site, distances)))
-    dynamic <- simulate_damocles(tree, edge_rates[[i]]$gamma, edge_rates[[i]]$mu, n = n_sim,
-                                 root = root, sympatry = sympatry[i])
-    dynamic <- dynamic[, colnames(presence), drop = FALSE]
-    random <- t(replicate(n_sim, sample(unname(site[1, ]))))
-    null_dynamic <- cbind(mpd = mean_pairwise(dynamic, distances),
-                          mntd = mean_nearest(dynamic, distances))
-    null_random <- cbind(mpd = mean_pairwise(random, distances),
-                         mntd = mean_nearest(random, distances))
-    out <- c(richness = sum(site))
-    for (metric in c("mpd", "mntd")) {
-      d <- null_effect(observed[[metric]], null_dynamic[, metric])
-      r <- null_effect(observed[[metric]], null_random[, metric])
-      out[paste0(c("", "ses_", "p_", "ses_", "p_"), metric,
-                 c("", "_damocles", "_damocles", "_random", "_random"))] <-
-        c(observed[[metric]], d[["ses"]], d[["p"]], r[["ses"]], r[["p"]])
-    }
-    out[["n_valid"]] <- sum(stats::complete.cases(null_dynamic))
-    out
+    damocles_test_row(presence[i, , drop = FALSE], tree, distances, rates$edge_rates[[i]],
+                      n_sim, root, rates$sympatry[i])
   })
   stats <- as.data.frame(do.call(rbind, rows))
-  out <- data.frame(richness = stats$richness, parameters, sympatry = sympatry, loglik = loglik,
-                    stats[, -1], row.names = rownames(presence), check.names = FALSE)
+  out <- data.frame(richness = stats$richness, rates$parameters, sympatry = rates$sympatry,
+                    loglik = rates$loglik, stats[, -1], row.names = rownames(presence),
+                    check.names = FALSE)
   attr(out, "n_sim") <- n_sim
-  attr(out, "parameters") <- colnames(parameters)
+  attr(out, "parameters") <- colnames(rates$parameters)
   class(out) <- c("mc_damocles_test", "data.frame")
+  out
+}
+
+#' rates for damocles_test() estimated with damocles_fit(): a list with the `parameters` of
+#' each community, their `edge_rates`, `sympatry` and `loglik`
+#' @noRd
+damocles_fitted_rates <- function(presence, tree, root, shared, sympatry, regimes,
+                                  edge_covariate, vary) {
+  fit <- damocles_fit(presence, tree, root = root, shared = shared, sympatry = sympatry,
+                      regimes = regimes, edge_covariate = edge_covariate, vary = vary)
+  list(parameters = as.data.frame(unclass(fit))[, attr(fit, "parameters"), drop = FALSE],
+       edge_rates = attr(fit, "edge_rates"), sympatry = fit$sympatry, loglik = fit$loglik)
+}
+
+#' rates for damocles_test() given by the user, checked: a list as from
+#' damocles_fitted_rates(), with `NA` for the parameters given per edge and for `loglik`
+#' @noRd
+damocles_given_rates <- function(tree, gamma, mu, sympatry, regimes, edge_covariate, n_comm) {
+  if (!is.null(regimes) || !is.null(edge_covariate)) {
+    stop("`regimes` and `edge_covariate` are for estimated rates; give rates per edge ",
+         "as lists in `gamma` and `mu` instead", call. = FALSE)
+  }
+  if (!length(gamma) %in% c(1, n_comm) || !length(mu) %in% c(1, n_comm)) {
+    stop("`gamma` and `mu` need one value or one per community", call. = FALSE)
+  }
+  gamma <- rep_len(as.list(gamma), n_comm)
+  mu <- rep_len(as.list(mu), n_comm)
+  edge_rates <- lapply(seq_len(n_comm), function(i) damocles_edge_rates(tree, gamma[[i]],
+                                                                        mu[[i]]))
+  one <- function(rate) vapply(rate, function(r) if (length(r) == 1) r else NA_real_,
+                               numeric(1))
+  parameters <- data.frame(gamma = one(gamma), mu = one(mu))
+  if (is.null(sympatry)) {
+    stop("`sympatry = NULL` (estimated) needs `gamma` and `mu` estimated too", call. = FALSE)
+  }
+  check_sympatry(sympatry)
+  list(parameters = parameters, edge_rates = edge_rates, sympatry = rep_len(sympatry, n_comm),
+       loglik = NA_real_)
+}
+
+#' the row of damocles_test() for one community `site` (a matrix with one row): richness, and
+#' the observed mpd and mntd with their effect sizes and p-values against `n_sim` communities
+#' of the DAMOCLES null and of random draws
+#' @noRd
+damocles_test_row <- function(site, tree, distances, rates, n_sim, root, sympatry) {
+  observed <- c(mpd = unname(mean_pairwise(site, distances)),
+                mntd = unname(mean_nearest(site, distances)))
+  dynamic <- simulate_damocles(tree, rates$gamma, rates$mu, n = n_sim, root = root,
+                               sympatry = sympatry)
+  dynamic <- dynamic[, colnames(site), drop = FALSE]
+  random <- t(replicate(n_sim, sample(unname(site[1, ]))))
+  null_dynamic <- cbind(mpd = mean_pairwise(dynamic, distances),
+                        mntd = mean_nearest(dynamic, distances))
+  null_random <- cbind(mpd = mean_pairwise(random, distances),
+                       mntd = mean_nearest(random, distances))
+  out <- c(richness = sum(site))
+  for (metric in c("mpd", "mntd")) {
+    d <- null_effect(observed[[metric]], null_dynamic[, metric])
+    r <- null_effect(observed[[metric]], null_random[, metric])
+    out[paste0(c("", "ses_", "p_", "ses_", "p_"), metric,
+               c("", "_damocles", "_damocles", "_random", "_random"))] <-
+      c(observed[[metric]], d[["ses"]], d[["p"]], r[["ses"]], r[["p"]])
+  }
+  out[["n_valid"]] <- sum(stats::complete.cases(null_dynamic))
   out
 }
 
@@ -448,8 +470,8 @@ check_branch_lengths <- function(tree) {
 damocles_edge_rates <- function(tree, gamma, mu) {
   n_edge <- nrow(tree$edge)
   for (rate in list(gamma, mu)) {
-    if (!is.numeric(rate) || !length(rate) %in% c(1, n_edge) || !all(is.finite(rate)) ||
-        any(rate < 0)) {
+    wrong_size <- !is.numeric(rate) || !length(rate) %in% c(1, n_edge)
+    if (wrong_size || !all(is.finite(rate)) || any(rate < 0)) {
       stop("`gamma` and `mu` must each be one rate, or one per edge of `tree` in the order of ",
            "`tree$edge`, zero or more", call. = FALSE)
     }
@@ -478,8 +500,8 @@ damocles_postorder <- function(tree) {
 }
 
 check_sympatry <- function(sympatry) {
-  if (length(sympatry) != 1 || !is.numeric(sympatry) || !is.finite(sympatry) ||
-      sympatry < 0 || sympatry > 1) {
+  not_number <- length(sympatry) != 1 || !is.numeric(sympatry) || !is.finite(sympatry)
+  if (not_number || sympatry < 0 || sympatry > 1) {
     stop("`sympatry` must be one probability, between 0 and 1", call. = FALSE)
   }
   invisible(TRUE)
@@ -555,15 +577,11 @@ damocles_prune <- function(presence, tree, gamma, mu, root, sympatry = 0,
   first_absent <- matrix(NA_real_, n_comm, n_tip + tree$Nnode)
   first_present <- first_absent
   loglik <- numeric(n_comm)
-  carry <- function(a, p, t, gamma, mu) {
-    to_present <- damocles_transition(t, gamma, mu)
-    list(absent = (1 - to_present[[1]]) * a + to_present[[1]] * p,
-         present = (1 - to_present[[2]]) * a + to_present[[2]] * p)
-  }
   for (e in seq_len(nrow(tree$edge))) {  # postorder: descendants before ancestors
     parent <- tree$edge[e, 1]
     child <- tree$edge[e, 2]
-    top <- carry(absent[, child], present[, child], tree$edge.length[e], gamma[e], mu[e])
+    top <- damocles_carry(absent[, child], present[, child], tree$edge.length[e], gamma[e],
+                          mu[e])
     if (all(is.na(first_absent[, parent]))) {
       first_absent[, parent] <- top$absent
       first_present[, parent] <- top$present
@@ -584,12 +602,21 @@ damocles_prune <- function(presence, tree, gamma, mu, root, sympatry = 0,
   a <- absent[, crown]
   p <- present[, crown]
   if (!is.null(tree$root.edge)) {
-    top <- carry(a, p, tree$root.edge, root_rates[[1]], root_rates[[2]])
+    top <- damocles_carry(a, p, tree$root.edge, root_rates[[1]], root_rates[[2]])
     a <- top$absent
     p <- top$present
   }
   at_root <- switch(root, both = (a + p) / 2, absent = a, present = p)
   stats::setNames(loglik + log(at_root), rownames(presence))
+}
+
+#' partial likelihoods at the top of a branch of length `t`, given absence and given presence
+#' there, from those at its bottom (`a` given absence and `p` given presence)
+#' @noRd
+damocles_carry <- function(a, p, t, gamma, mu) {
+  to_present <- damocles_transition(t, gamma, mu)
+  list(absent = (1 - to_present[[1]]) * a + to_present[[1]] * p,
+       present = (1 - to_present[[2]]) * a + to_present[[2]] * p)
 }
 
 damocles_starts <- function(tree, start) {
@@ -607,7 +634,6 @@ damocles_starts <- function(tree, start) {
 #' slopes on the covariate, and sympatry on the logit scale when estimated
 #' @noRd
 damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
-  n_edge <- nrow(tree$edge)
   at_root <- tree$edge[, 1] == ape::Ntip(tree) + 1
   root_msg <- paste("the root edge takes the regime of the two edges leaving the root, which",
                     "differ; give them the same one or drop `tree$root.edge`")
@@ -617,26 +643,11 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
   type <- "constant"
   z <- NULL
   if (!is.null(regimes)) {
-    if (length(regimes) != n_edge || anyNA(regimes)) {
-      stop("`regimes` needs one regime for each edge of `tree`, in the order of `tree$edge`, ",
-           "with no missing values", call. = FALSE)
-    }
-    regimes <- droplevels(factor(regimes))
-    if (!is.null(tree$root.edge) && length(unique(regimes[at_root])) > 1) {
-      stop(root_msg, call. = FALSE)
-    }
+    regimes <- design_regimes(tree, regimes, at_root, root_msg)
     type <- "regimes"
   }
   if (!is.null(edge_covariate)) {
-    if (!is.numeric(edge_covariate) || length(edge_covariate) != n_edge ||
-        !all(is.finite(edge_covariate)) || any(edge_covariate <= 0)) {
-      stop("`edge_covariate` needs one positive number for each edge of `tree`, in the order ",
-           "of `tree$edge`", call. = FALSE)
-    }
-    z <- log(edge_covariate) - mean(log(edge_covariate))
-    if (!is.null(tree$root.edge) && length(unique(z[at_root])) > 1) {
-      stop(sub("regime", "covariate", root_msg, fixed = TRUE), call. = FALSE)
-    }
+    z <- design_covariate(tree, edge_covariate, at_root, root_msg)
     type <- "covariate"
   }
   by_regime <- function(rate) type == "regimes" && vary %in% c("both", rate) &&
@@ -645,13 +656,51 @@ damocles_design <- function(tree, regimes, edge_covariate, vary, sympatry) {
   n_mu <- if (by_regime("mu")) nlevels(regimes) else 1L
   beta_gamma <- type == "covariate" && vary %in% c("both", "gamma")
   beta_mu <- type == "covariate" && vary %in% c("both", "mu")
-  names <- c(if (n_gamma > 1) paste0("gamma_", levels(regimes)) else "gamma",
-             if (n_mu > 1) paste0("mu_", levels(regimes)) else "mu",
-             if (beta_gamma) "beta_gamma", if (beta_mu) "beta_mu",
-             if (is.null(sympatry)) "sympatry")
+  names <- design_names(regimes, n_gamma, n_mu, beta_gamma, beta_mu, is.null(sympatry))
   list(type = type, regimes = regimes, z = z, n_gamma = n_gamma, n_mu = n_mu,
        beta_gamma = beta_gamma, beta_mu = beta_mu, estimate_sympatry = is.null(sympatry),
        sympatry = sympatry, names = names, n_par = length(names))
+}
+
+#' names of the parameters of a fit, in the order of the working parameters: the rates (one
+#' per regime when there are several), the slopes on the covariate and sympatry when estimated
+#' @noRd
+design_names <- function(regimes, n_gamma, n_mu, beta_gamma, beta_mu, estimate_sympatry) {
+  c(if (n_gamma > 1) paste0("gamma_", levels(regimes)) else "gamma",
+    if (n_mu > 1) paste0("mu_", levels(regimes)) else "mu",
+    if (beta_gamma) "beta_gamma", if (beta_mu) "beta_mu",
+    if (estimate_sympatry) "sympatry")
+}
+
+#' the `regimes` of a fit as a factor with the levels that occur, checked: one regime per
+#' edge, the same in the edges leaving the root (`at_root`) when the tree has a root edge
+#' @noRd
+design_regimes <- function(tree, regimes, at_root, root_msg) {
+  if (length(regimes) != nrow(tree$edge) || anyNA(regimes)) {
+    stop("`regimes` needs one regime for each edge of `tree`, in the order of `tree$edge`, ",
+         "with no missing values", call. = FALSE)
+  }
+  regimes <- droplevels(factor(regimes))
+  if (!is.null(tree$root.edge) && length(unique(regimes[at_root])) > 1) {
+    stop(root_msg, call. = FALSE)
+  }
+  regimes
+}
+
+#' the `edge_covariate` of a fit on the log scale and centred, checked: one positive number
+#' per edge, the same in the edges leaving the root (`at_root`) when the tree has a root edge
+#' @noRd
+design_covariate <- function(tree, edge_covariate, at_root, root_msg) {
+  wrong_size <- !is.numeric(edge_covariate) || length(edge_covariate) != nrow(tree$edge)
+  if (wrong_size || !all(is.finite(edge_covariate)) || any(edge_covariate <= 0)) {
+    stop("`edge_covariate` needs one positive number for each edge of `tree`, in the order ",
+         "of `tree$edge`", call. = FALSE)
+  }
+  z <- log(edge_covariate) - mean(log(edge_covariate))
+  if (!is.null(tree$root.edge) && length(unique(z[at_root])) > 1) {
+    stop(sub("regime", "covariate", root_msg, fixed = TRUE), call. = FALSE)
+  }
+  z
 }
 
 #' rates of each edge (or one rate for all) and sympatry from the working parameters

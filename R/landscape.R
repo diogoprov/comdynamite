@@ -124,17 +124,25 @@ check_env_vector <- function(env, n = NULL) {
 #' correlation matrix among n axes from one number or a matrix
 #' @noRd
 axis_correlation <- function(axis_cor, n) {
-  if (length(axis_cor) == 1) {
-    if (!is.numeric(axis_cor) || is.na(axis_cor) || axis_cor <= -1 / (n - 1) || axis_cor >= 1) {
-      stop("one `axis_cor` must lie between -1 / (n_axes - 1) and 1", call. = FALSE)
-    }
-    m <- matrix(axis_cor, n, n)
-    diag(m) <- 1
-    return(m)
+  if (length(axis_cor) != 1) return(check_axis_cor_matrix(axis_cor, n))
+  not_number <- !is.numeric(axis_cor) || is.na(axis_cor)
+  if (not_number || axis_cor <= -1 / (n - 1) || axis_cor >= 1) {
+    stop("one `axis_cor` must lie between -1 / (n_axes - 1) and 1", call. = FALSE)
   }
-  if (!is.matrix(axis_cor) || !identical(dim(axis_cor), c(n, n)) ||
-      max(abs(axis_cor - t(axis_cor))) > 1e-10 || max(abs(diag(axis_cor) - 1)) > 1e-10 ||
-      min(eigen(axis_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
+  m <- matrix(axis_cor, n, n)
+  diag(m) <- 1
+  m
+}
+
+#' stops unless `axis_cor` is a positive definite correlation matrix among `n` axes; returns it
+#' without names
+#' @noRd
+check_axis_cor_matrix <- function(axis_cor, n) {
+  not_square <- !is.matrix(axis_cor) || !identical(dim(axis_cor), c(n, n))
+  not_correlation <- not_square || max(abs(axis_cor - t(axis_cor))) > 1e-10 ||
+    max(abs(diag(axis_cor) - 1)) > 1e-10
+  if (not_correlation ||
+        min(eigen(axis_cor, symmetric = TRUE, only.values = TRUE)$values) <= 0) {
     stop("`axis_cor` must be a positive definite correlation matrix of n_axes x n_axes",
          call. = FALSE)
   }
@@ -215,8 +223,8 @@ landscape_points <- function(coords, env, disp_scale, lonlat = FALSE,
 landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
   dispersal <- as.matrix(dispersal)
   m <- nrow(dispersal)
-  if (!is.numeric(dispersal) || m < 2 || ncol(dispersal) != m || !all(is.finite(dispersal)) ||
-        any(dispersal < 0)) {
+  not_square <- !is.numeric(dispersal) || m < 2 || ncol(dispersal) != m
+  if (not_square || !all(is.finite(dispersal)) || any(dispersal < 0)) {
     stop("`dispersal` must be a square matrix of finite, non-negative numbers with at least ",
          "two sites", call. = FALSE)
   }
@@ -228,24 +236,38 @@ landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
   }
   dispersal <- dispersal / rowSums(dispersal)
   dimnames(dispersal) <- NULL
-  if (!is.null(coords)) {
-    coords <- as.data.frame(coords)
-    if (nrow(coords) != m || ncol(coords) != 2) {
-      stop("`coords` must have two columns and one row per site (", m, ")", call. = FALSE)
-    }
-    rownames(coords) <- NULL
-  }
-  if (!is.null(dist)) {
-    dist <- as.matrix(dist)
-    if (!is.numeric(dist) || nrow(dist) != m || ncol(dist) != m) {
-      stop("`dist` must be a numeric matrix of ", m, " x ", m, " sites", call. = FALSE)
-    }
-    dimnames(dist) <- NULL
-  }
+  coords <- matrix_coords(coords, m)
+  dist <- matrix_dist(dist, m)
   out <- new_landscape(env = unname(as.numeric(env)), coords = coords, dist = dist,
                        dispersal = dispersal, torus = FALSE)
   out$matrix <- TRUE
   out
+}
+
+#' the `coords` of landscape_matrix() as a data frame without row names, checked: two columns
+#' and one row for each of the `m` sites; NULL when not given
+#' @noRd
+matrix_coords <- function(coords, m) {
+  if (is.null(coords)) return(NULL)
+  coords <- as.data.frame(coords)
+  if (nrow(coords) != m || ncol(coords) != 2) {
+    stop("`coords` must have two columns and one row per site (", m, ")", call. = FALSE)
+  }
+  rownames(coords) <- NULL
+  coords
+}
+
+#' the `dist` of landscape_matrix() as a matrix without names, checked: numeric, among the `m`
+#' sites; NULL when not given
+#' @noRd
+matrix_dist <- function(dist, m) {
+  if (is.null(dist)) return(NULL)
+  dist <- as.matrix(dist)
+  if (!is.numeric(dist) || nrow(dist) != m || ncol(dist) != m) {
+    stop("`dist` must be a numeric matrix of ", m, " x ", m, " sites", call. = FALSE)
+  }
+  dimnames(dist) <- NULL
+  dist
 }
 
 #' Dispersal kernel
@@ -274,8 +296,8 @@ landscape_matrix <- function(dispersal, env, coords = NULL, dist = NULL) {
 #' @export
 dispersal_kernel <- function(dist, scale, shape = c("exponential", "gaussian")) {
   shape <- match.arg(shape)
-  if (!is.matrix(dist) || !is.numeric(dist) || nrow(dist) != ncol(dist) || nrow(dist) < 2 ||
-        anyNA(dist)) {
+  not_square <- !is.matrix(dist) || !is.numeric(dist) || nrow(dist) != ncol(dist)
+  if (not_square || nrow(dist) < 2 || anyNA(dist)) {
     stop("`dist` must be a square numeric matrix without NA, with at least two sites",
          call. = FALSE)
   }
@@ -317,33 +339,47 @@ dispersal_kernel <- function(dist, scale, shape = c("exponential", "gaussian")) 
 #' dim(torus_permutations(c(6, 4), symmetries = FALSE))
 #' @export
 torus_permutations <- function(side, symmetries = TRUE, n_perm = NULL) {
-  if (!is.numeric(side) || !length(side) %in% 1:2 || !all(is.finite(side)) || any(side < 2) ||
-        any(side != round(side))) {
+  not_sides <- !is.numeric(side) || !length(side) %in% 1:2 || !all(is.finite(side))
+  if (not_sides || any(side < 2) || any(side != round(side))) {
     stop("`side` must be one or two whole numbers, 2 or more", call. = FALSE)
   }
   check_flag(symmetries, "symmetries")
   check_count(n_perm, "n_perm", null_ok = TRUE)
   sides <- rep_len(side, 2)
-  xy <- expand.grid(x = seq_len(sides[1]) - 1, y = seq_len(sides[2]) - 1)
+  perms <- torus_images(torus_maps(symmetries, sides[1] == sides[2]), sides)
+  perms <- perms[!apply(perms, 1, function(p) all(p == seq_len(prod(sides)))), , drop = FALSE]
+  if (is.null(n_perm)) return(perms)
+  perms[sample.int(nrow(perms), min(n_perm, nrow(perms))), , drop = FALSE]
+}
+
+#' the symmetries of a grid as functions of the cell coordinates: the identity, with the
+#' reflections when `symmetries` is TRUE and the rotations when the grid is also `square`
+#' @noRd
+torus_maps <- function(symmetries, square) {
   maps <- list(function(x, y) cbind(x, y))
   if (symmetries) {
     maps <- c(maps, function(x, y) cbind(-x, y), function(x, y) cbind(x, -y),
               function(x, y) cbind(-x, -y))
-    if (sides[1] == sides[2]) {
+    if (square) {
       maps <- c(maps, function(x, y) cbind(y, x), function(x, y) cbind(-y, x),
                 function(x, y) cbind(y, -x), function(x, y) cbind(-y, -x))
     }
   }
+  maps
+}
+
+#' the distinct permutations of the cells of a torus of `sides` under each of `maps` combined
+#' with every translation, one per row
+#' @noRd
+torus_images <- function(maps, sides) {
+  xy <- expand.grid(x = seq_len(sides[1]) - 1, y = seq_len(sides[2]) - 1)
   perms <- list()
   for (f in maps) for (sx in seq_len(sides[1]) - 1) for (sy in seq_len(sides[2]) - 1) {
     p <- f(xy$x, xy$y)
     p <- cbind((p[, 1] + sx) %% sides[1], (p[, 2] + sy) %% sides[2])
     perms[[length(perms) + 1]] <- as.integer(p[, 1] + sides[1] * p[, 2] + 1)
   }
-  perms <- unique(do.call(rbind, perms))
-  perms <- perms[!apply(perms, 1, function(p) all(p == seq_len(prod(sides)))), , drop = FALSE]
-  if (is.null(n_perm)) return(perms)
-  perms[sample.int(nrow(perms), min(n_perm, nrow(perms))), , drop = FALSE]
+  unique(do.call(rbind, perms))
 }
 
 #' Environment that changes over time
@@ -595,24 +631,8 @@ env_seasonal <- function(env, n_steps = NULL, period, amplitude, phase = 0, year
 env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value,
                       every = NULL) {
   out <- env_steps(env, n_steps)
-  m <- nrow(out)
-  if (is.logical(sites)) {
-    if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
-    sites <- which(sites)
-  }
-  if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
-    stop("`sites` must be distinct indices of sites", call. = FALSE)
-  }
-  check_count(start, "start")
-  if (start > ncol(out)) {
-    stop("`start` is after the last step (", ncol(out), ")", call. = FALSE)
-  }
-  # Inf makes the change permanent
-  if (!identical(duration, Inf)) check_count(duration, "duration")
-  if (!is.null(every)) {
-    check_count(every, "every")
-    if (duration >= every) stop("`every` must be longer than `duration`", call. = FALSE)
-  }
+  sites <- pulse_sites(sites, nrow(out))
+  check_pulse_timing(start, duration, every, ncol(out))
   n_values <- if (length(sites) > 0) c(1, length(sites)) else 1
   if (!is.numeric(value) || anyNA(value) || !length(value) %in% n_values) {
     stop("`value` must be one number, or one per disturbed site, without NA", call. = FALSE)
@@ -622,6 +642,36 @@ env_pulse <- function(env, n_steps = NULL, sites, start, duration = Inf, value,
   steps <- unlist(lapply(starts, function(s) seq(s, min(ncol(out), s + duration - 1))))
   out[sites, steps] <- value
   out
+}
+
+#' the disturbed `sites` of env_pulse() as indices among the `m` sites, checked
+#' @noRd
+pulse_sites <- function(sites, m) {
+  if (is.logical(sites)) {
+    if (length(sites) != m) stop("a logical `sites` needs one value per site", call. = FALSE)
+    sites <- which(sites)
+  }
+  if (!all(sites %in% seq_len(m)) || anyDuplicated(sites)) {
+    stop("`sites` must be distinct indices of sites", call. = FALSE)
+  }
+  sites
+}
+
+#' stops unless the pulses of env_pulse() fit in the `n_steps` steps: `start` within them, a
+#' whole or infinite `duration`, and `every` longer than it when given
+#' @noRd
+check_pulse_timing <- function(start, duration, every, n_steps) {
+  check_count(start, "start")
+  if (start > n_steps) {
+    stop("`start` is after the last step (", n_steps, ")", call. = FALSE)
+  }
+  # Inf makes the change permanent
+  if (!identical(duration, Inf)) check_count(duration, "duration")
+  if (!is.null(every)) {
+    check_count(every, "every")
+    if (duration >= every) stop("`every` must be longer than `duration`", call. = FALSE)
+  }
+  invisible(TRUE)
 }
 
 new_landscape <- function(env, coords, dist, dispersal, torus = NA) {
