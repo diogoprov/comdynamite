@@ -156,6 +156,13 @@ test_that("trait_gradient_bayes() samples and builds the result", {
   expect_output(print(bad), "could not be summarised")
 })
 
+test_that("missing_stan_packages() names the absent sampling packages", {
+  absent <- missing_stan_packages()
+  expect_type(absent, "character")
+  expect_true(all(absent %in% c("cmdstanr", "posterior")))
+  expect_identical("posterior" %in% absent, !requireNamespace("posterior", quietly = TRUE))
+})
+
 test_that("pp_check refuses an unknown response", {
   expect_error(pp_check.mc_trait_gradient_bayes(list(), resp = "x"))
 })
