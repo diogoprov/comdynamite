@@ -185,3 +185,46 @@ test_that("pp_check overlays replicated data for either response", {
   expect_s3_class(pp_check.mc_trait_gradient_bayes(obj, ndraws = 10), "ggplot")
   expect_s3_class(pp_check.mc_trait_gradient_bayes(obj, resp = "trait"), "ggplot")
 })
+
+test_that("plot() draws the intervals of the signal and of the species", {
+  skip_if_not_installed("ggplot2")
+  sp <- c("x", "y", "z", "w")
+  s <- tg_bayes_summary(fake_draws(4), sp, no_beta = "y")
+  obj <- structure(s, class = "mc_trait_gradient_bayes")
+  p <- plot(obj)
+  expect_s3_class(p, "ggplot")
+  expect_equal(nrow(ggplot2::ggplot_build(p)$data[[2]]), nrow(s$signal))
+  by_species <- plot(obj, species = TRUE)
+  expect_s3_class(by_species, "ggplot")
+  # beta and alpha of the species without a site mean are left out
+  expect_equal(nrow(ggplot2::ggplot_build(by_species)$data[[1]]), 3 * 4 - 2)
+  expect_error(plot(obj, species = NA), "species")
+  expect_error(plot(structure(list(signal = NULL), class = "mc_trait_gradient_bayes")),
+               "not summarised")
+})
+
+test_that("plot(type = \"trace\") draws the chains, with warmup on request", {
+  skip_if_not_installed("ggplot2")
+  skip_if_not_installed("bayesplot")
+  skip_if_not_installed("posterior")
+  fit <- list(
+    draws = function(variables, inc_warmup = FALSE) {
+      n <- if (inc_warmup) 30 else 20
+      arr <- array(rnorm(n * 2 * length(variables)), c(n, 2, length(variables)),
+                   dimnames = list(NULL, NULL, variables))
+      posterior::as_draws_array(arr)
+    },
+    metadata = function() list(iter_warmup = 10)
+  )
+  obj <- structure(list(fit = fit), class = "mc_trait_gradient_bayes")
+  p <- plot(obj, type = "trace")
+  expect_s3_class(p, "ggplot")
+  ggplot2::ggplot_build(p)
+  expect_setequal(unique(as.character(p$data$parameter)),
+                  c("lambda_beta", "lambda_alpha", "lambda_mean"))
+  warm <- plot(obj, type = "trace", variables = "rho_u", inc_warmup = TRUE)
+  expect_s3_class(warm, "ggplot")
+  ggplot2::ggplot_build(warm)
+  expect_equal(max(warm$data$iteration), 30)
+  expect_error(plot(obj, type = "trace", variables = character()), "variables")
+})

@@ -120,8 +120,8 @@
 #'   model); `mc_damocles_fit` has its estimates in `confint()`. Tests in tests/testthat/test-
 #'   accessors.R, test-population_shifts.R and test-trait-gradient.R.
 #' @srrstats {RE4.3} `confint()` methods for `drift_test` (from the \eqn{t} distribution of its
-#'   regression, at any `level`), `population_shifts` (the basic bootstrap intervals, with `nboot
-#'   > 0`, at the level they were computed) and `mc_damocles_fit`.
+#'   regression, at any `level`), `population_shifts` (the basic bootstrap intervals, with
+#'   `nboot > 0`, at the level they were computed) and `mc_damocles_fit`.
 #' @srrstats {RE4.4} The only model chosen by the user is the `formula` of `trait_flex()`; the
 #'   result keeps it as the element `formula`, returned by `formula()` (R/accessors.R) and shown
 #'   by `print()`.
@@ -196,11 +196,13 @@
 #'   relationship. Missing: a benchmark of the regression functions against the numbers of
 #'   sites, species and permutations (a script in data-raw/ and a table in an article or in
 #'   the README).
-#' @srrstatsTODO {RE6.0} `plot()` methods exist for `mc_node_test`, `mc_pcps`,
-#'   `mc_phylo_beta`, `mc_trait_partition`, `mc_trait_gradient`, `mc_trait_gradient_test`,
-#'   `trait_flex`, `population_shifts` and `drift_test`. Missing: `plot()` methods for
-#'   `mc_pcc`, `mc_phylo_vector`, `mc_trait_gradient_phylo`, `mc_abc_fit` and
-#'   `mc_abc_choice`, which have none.
+#' @srrstats {RE6.0} `plot()` methods exist for every regression class: `mc_node_test`,
+#'   `mc_pcps`, `mc_phylo_beta`, `mc_trait_partition`, `mc_trait_gradient`,
+#'   `mc_trait_gradient_test`, `trait_flex`, `population_shifts` and `drift_test`, and now
+#'   `mc_pcc` (adjusted R2 of each eigenvector), `mc_phylo_vector` (correlation of each
+#'   eigenvector with the predictor, retained ones marked), `mc_trait_gradient_phylo` (Akaike
+#'   weights of the models), `mc_abc_fit` (posterior against prior) and `mc_abc_choice`
+#'   (confusion matrix, or votes for an observation). Tests in the test file of each function.
 #' @srrstats {RE6.1} Where the plot is drawn by a named function, an S3 method sends the
 #'   user to it: `plot.mc_node_test()` calls `plot_node_test()`, `plot.mc_trait_partition()`
 #'   calls `plot_trait_partition()` and `plot.mc_phylo_beta()` calls `plot_phylo_beta()`

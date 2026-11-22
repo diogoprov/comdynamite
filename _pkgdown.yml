@@ -83,12 +83,14 @@ reference:
   - node_contrasts
   - biogeography_matrix
   - node_test
+  - nobs.mc_node_test
   - plot_node_test
   - plot_node_heatmap
 - title: The whole tree
   desc: Does phylogenetic composition follow the environment?
   contents:
   - pcc_test
+  - plot.mc_pcc
   - pcps_test
   - plot.mc_pcps
   - phylo_eigenvectors
@@ -99,6 +101,7 @@ reference:
   desc: Phylogenetic vectors and the partition of trait variation.
   contents:
   - phylo_vector
+  - plot.mc_phylo_vector
   - trait_partition
   - plot_trait_partition
 - title: Restricted null models
@@ -121,8 +124,10 @@ reference:
   - abc_table
   - observe_detection
   - abc_fit
+  - plot.mc_abc_fit
   - abc_recovery
   - abc_choose
+  - plot.mc_abc_choice
   - abc_ppc
   - abc_diagnose
   - spatial_folds
@@ -134,20 +139,26 @@ reference:
   contents:
   - sample_individuals
   - drift_test
+  - coef.drift_test
   - tstats
   - tstats_summary
   - population_shifts
   - plot.population_shifts
+  - coef.population_shifts
   - trait_gradient
   - trait_gradient_weights
   - trait_gradient_test
   - trait_gradient_phylo
+  - plot.mc_trait_gradient_phylo
   - trait_gradient_bayes
   - pp_check.mc_trait_gradient_bayes
+  - plot.mc_trait_gradient_bayes
   - plot.mc_trait_gradient
+  - coef.mc_trait_gradient
   - community_index
   - trait_flex
   - plot.trait_flex
+  - print.trait_flex
   - nested_variance
   - plot.nested_variance
   - null_intervals

@@ -123,6 +123,8 @@ Other inference:
 \code{\link[=fold_summarise]{fold_summarise()}},
 \code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
 \code{\link[=observe_detection]{observe_detection()}},
+\code{\link[=plot.mc_abc_choice]{plot.mc_abc_choice()}},
+\code{\link[=plot.mc_abc_fit]{plot.mc_abc_fit()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}

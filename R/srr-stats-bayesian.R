@@ -212,23 +212,18 @@
 #'   `print.mc_abc_choice()`; `mc_abc_table` and `mc_abc_cv` are data frames and print
 #'   as such. Tested in `tests/testthat/test-trait-gradient-bayes.R` and
 #'   `tests/testthat/test-abc.R`.
-#' @srrstatsTODO {BS6.1} There is no `plot()` method for `mc_trait_gradient_bayes`,
-#'   `mc_abc_fit`, `mc_abc_choice` or `mc_abc_cv`. The only plot is the `pp_check()`
-#'   method for `mc_trait_gradient_bayes`. Missing: `plot()` methods, for instance the
-#'   posterior medians and intervals of `signal` and `species` for the Stan model and
-#'   posterior against prior for `mc_abc_fit` (as drawn by hand in
-#'   `vignettes/abc.Rmd`).
-#' @srrstatsTODO {BS6.2} Applies to the Stan model only. Trace plots are neither
-#'   provided nor documented; they can be drawn from the returned fit with bayesplot
-#'   (`bayesplot::mcmc_trace(x$fit$draws("lambda"))`), and the warmup draws are not
-#'   saved unless `save_warmup = TRUE` is passed through `...`. Missing: a documented
-#'   example, or an option of a `plot()` method (BS6.1), that shows the chains with the
-#'   warmup marked.
-#' @srrstatsTODO {BS6.3} Partly met. `vignettes/abc.Rmd` plots histograms of the
-#'   posterior draws of each ABC parameter against its prior range with ggplot2 code,
-#'   but the package has no function for it, and nothing is documented for the Stan
-#'   model apart from the posterior predictive densities of `pp_check()`. Missing: the
-#'   `plot()` methods of BS6.1, or documented examples with bayesplot on `x$fit`.
+#' @srrstats {BS6.1} `plot()` methods for `mc_trait_gradient_bayes` (posterior medians and
+#'   intervals of `signal`, or of the species values with `species = TRUE`, and trace plots with
+#'   `type = "trace"`), `mc_abc_fit` (weighted posterior against the prior for one observation)
+#'   and `mc_abc_choice` (confusion matrix, or the votes for an observation). Tests in
+#'   tests/testthat/test-trait-gradient-bayes.R and test-abc.R.
+#' @srrstats {BS6.2} `plot(x, type = "trace")` for `mc_trait_gradient_bayes` draws the chains
+#'   with `bayesplot::mcmc_trace()`; with `inc_warmup = TRUE` it includes the warmup draws, which
+#'   the help page says are saved only when the fit was run with `save_warmup = TRUE` passed
+#'   through `...`. ABC has no chains.
+#' @srrstats {BS6.3} The posterior is plotted by `plot()` for `mc_trait_gradient_bayes`
+#'   (medians and intervals) and for `mc_abc_fit` (weighted histograms of the posterior over the
+#'   prior), besides the posterior predictive densities of `pp_check()`.
 #' @srrstats {BS6.4} `summary.mc_abc_cv()` averages the cross-validation over folds and
 #'   data sets. The other objects have no `summary()` method: the tables `signal`,
 #'   `variances` and `species` of `mc_trait_gradient_bayes` and the result of

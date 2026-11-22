@@ -197,3 +197,37 @@ test_that("abc_diagnose flags observations outside the table", {
   expect_lt(few$n_positive, 10)
   expect_true(is.na(few$khat))
 })
+
+test_that("plot() of abc_fit() sets the posterior against the prior", {
+  skip_if_not_installed("abcrf")
+  skip_if_not_installed("ggplot2")
+  table <- toy_table(200)
+  fit <- abc_fit(table, c("a", "b"), ntree = 30)
+  p <- plot(fit, c(s1 = 0.7, s2 = 0), bins = 10)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_setequal(levels(built$plot$data$parameter), c("a", "b"))
+  # with the prior of abc_table(), each panel spans the prior range
+  fit$prior <- list(a = c(-1, 2), b = c(0, 1))
+  built <- ggplot2::ggplot_build(plot(fit, c(s1 = 0.7, s2 = 0)))
+  expect_lte(built$layout$panel_params[[1]]$x.range[1], -1)
+  expect_error(plot(fit, data.frame(s1 = c(0.1, 0.2), s2 = 0)), "one observation")
+  expect_error(plot(fit, c(s1 = 0.1)), "missing")
+})
+
+test_that("plot() of abc_choose() draws the confusion matrix or the votes", {
+  skip_if_not_installed("abcrf")
+  skip_if_not_installed("ggplot2")
+  set.seed(5)
+  a <- data.frame(s1 = rnorm(60, 0), s2 = rnorm(60))
+  b <- data.frame(s1 = rnorm(60, 3), s2 = rnorm(60))
+  choice <- abc_choose(list(neutral = a, niche = b), ntree = 30)
+  p <- plot(choice)
+  expect_s3_class(p, "ggplot")
+  expect_equal(nrow(ggplot2::ggplot_build(p)$data[[1]]), 4)
+  votes <- plot(choice, c(s1 = 3, s2 = 0), ntree = 30)
+  expect_s3_class(votes, "ggplot")
+  bars <- ggplot2::ggplot_build(votes)$data[[1]]
+  expect_equal(sum(bars$y), 30)
+  expect_error(plot(choice, data.frame(s1 = c(0, 3), s2 = 0), ntree = 30), "one observation")
+})

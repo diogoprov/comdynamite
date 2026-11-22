@@ -59,6 +59,8 @@ Other inference:
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
 \code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
+\code{\link[=plot.mc_abc_choice]{plot.mc_abc_choice()}},
+\code{\link[=plot.mc_abc_fit]{plot.mc_abc_fit()}},
 \code{\link[=spatial_folds]{spatial_folds()}}
 }
 \concept{inference}

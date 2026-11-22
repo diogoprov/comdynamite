@@ -358,3 +358,17 @@ test_that("phylo_vector() and phylo_eigenvectors() have oriented eigenvectors", 
   out <- phylo_vector(comm, tree, env = rnorm(10), n_perm = 9, n_sim = 10)
   expect_true(lead_positive(out$eigenvectors))
 })
+
+test_that("plot() draws the correlations of the eigenvectors, retained or not", {
+  skip_if_not_installed("ggplot2")
+  d <- simulated(k = 12)
+  set.seed(3)
+  out <- phylo_vector(d$comm, d$tree, d$env, n_perm = 19, n_sim = 5)
+  p <- plot(out)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(nrow(built$data[[2]]), length(out$eigenvector_correlation))
+  none <- out
+  none$selected <- integer()
+  expect_ggplot(plot(none))
+})

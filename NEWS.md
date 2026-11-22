@@ -8,6 +8,9 @@
   whose result now keeps `formula` and the site-level `model`; `coef()` and `nobs()` for
   `trait_gradient()` and `trait_gradient_phylo()`; `nobs()` for `node_test()` and `abc_fit()`.
 - The `print()` methods of the result classes take `digits`.
+- New `plot()` methods for `pcc_test()`, `phylo_vector()`, `trait_gradient_phylo()`, `abc_fit()`
+  (posterior against prior), `abc_choose()` and `trait_gradient_bayes()` (intervals, or trace
+  plots of the chains with `type = "trace"`).
 - The seed is kept with the result of `trait_gradient_bayes()` (element `seed`) and of
   `abc_table()`, `abc_recovery()`, `abc_ppc()` and `abc_cv()` (attribute `seed`).
 - The `scores` of `phylo_beta_test()` keep the site names of `comm`, and `predict()` of

@@ -91,3 +91,15 @@ test_that("invalid data are rejected", {
   expect_warning(pcc_test(d$comm[, -1], d$tree, d$env, n_perm = 5), "dropped")
   expect_error(pcc_test(d$comm, d$tree, d$env[-1], n_perm = 5))
 })
+
+test_that("plot() draws the adjusted R2 of each eigenvector", {
+  skip_if_not_installed("ggplot2")
+  set.seed(10)
+  d <- simulated(1, n_sites = 30, n_species = 12)
+  out <- pcc_test(d$comm, d$tree, d$env, n_perm = 5)
+  p <- plot(out)
+  expect_s3_class(p, "ggplot")
+  built <- ggplot2::ggplot_build(p)
+  expect_equal(nrow(built$data[[2]]), length(out$r2_adjusted))
+  expect_error(plot(out, colour = "nope"), "colours")
+})
