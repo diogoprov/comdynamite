@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.11.0
 
 - `node_test()`: `r2`, `r2_adjusted` and the semipartial correlations now sum squares with
   the site weights of the fit, so they stay between 0 and 1 (and -1 and 1). Before, they
