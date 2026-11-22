@@ -72,8 +72,8 @@ An object of class `mc_trait_gradient_bayes`, a list with
 
   the phylogenetic share \\\lambda\\ of \\\beta\\, \\\alpha\\ and the
   mean, and the phylogenetic correlations of \\\beta\\ with the mean and
-  with \\\alpha\\: `estimate` (posterior median), `lower`, `upper` (95%
-  interval).
+  with \\\alpha\\: `estimate` (posterior median), `lower`, `upper`
+  (central interval with probability 0.95).
 
 - variances:
 
@@ -82,8 +82,8 @@ An object of class `mc_trait_gradient_bayes`, a list with
 
 - species:
 
-  posterior median and 95% interval of \\\beta\\, \\\alpha\\ and the
-  mean of each species.
+  posterior median and central interval with probability 0.95 of
+  \\\beta\\, \\\alpha\\ and the mean of each species.
 
 - diagnostics:
 

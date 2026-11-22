@@ -138,15 +138,16 @@ number between 0 and 1, both excluded; <code>seed</code> one whole number, 0 or 
     <p>An object of class <code>mc_trait_gradient_bayes</code>, a list with</p><dl><dt>signal</dt>
 <dd><p>the phylogenetic share \(\lambda\) of \(\beta\), \(\alpha\) and the
 mean, and the phylogenetic correlations of \(\beta\) with the mean and with
-\(\alpha\): <code>estimate</code> (posterior median), <code>lower</code>, <code>upper</code> (95% interval).</p></dd>
+\(\alpha\): <code>estimate</code> (posterior median), <code>lower</code>, <code>upper</code> (central interval with
+probability 0.95).</p></dd>
 
 <dt>variances</dt>
 <dd><p>the phylogenetic and species variances of the three quantities, in
 squared trait units.</p></dd>
 
 <dt>species</dt>
-<dd><p>posterior median and 95% interval of \(\beta\), \(\alpha\) and the
-mean of each species.</p></dd>
+<dd><p>posterior median and central interval with probability 0.95 of
+\(\beta\), \(\alpha\) and the mean of each species.</p></dd>
 
 <dt>diagnostics</dt>
 <dd><p>largest R-hat, smallest bulk and tail effective sample sizes,
