@@ -436,3 +436,10 @@ test_that("the heatmap handles repeated names and empty results", {
   out$biogeography$semipartial[] <- NA
   expect_error(plot_node_heatmap(out), "no node was tested")
 })
+
+test_that("patch_permutations() needs `gap` when most sites share coordinates", {
+  coords <- cbind(x = c(rep(0, 8), 1, 2), y = 0)
+  events <- cbind(e = rep(c(1, -1), 5))
+  expect_error(patch_permutations(coords, events, n_perm = 3),
+               "most sites share their coordinates")
+})
