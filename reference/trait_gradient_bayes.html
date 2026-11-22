@@ -130,7 +130,9 @@ number between 0 and 1, both excluded; <code>seed</code> one whole number, 0 or 
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Further arguments to <code>$sample()</code>, such as <code>max_treedepth</code> or <code>refresh</code>.</p></dd>
+<dd><p>Further arguments to <code>$sample()</code>, such as <code>max_treedepth</code>, <code>refresh</code>,
+<code>save_warmup</code> or <code>init</code> (which accepts the <code>fit</code> of an earlier result, to restart the
+chains from where it stopped).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -157,6 +159,10 @@ depth (<code>max_treedepth</code>; raise it through <code>...</code> if needed),
 <dt>fit</dt>
 <dd><p>the <code>CmdStanMCMC</code> object; its draws live in temporary files of the session,
 so save them with <code>fit$save_object()</code> to keep them.</p></dd>
+
+<dt>seed</dt>
+<dd><p>the seed of the sampler, also the one drawn by cmdstanr when <code>seed = NULL</code>
+(from <code>fit$metadata()$seed</code>).</p></dd>
 
 <dt>data, A, ou_alpha, lambda_prior</dt>
 <dd><p>the data of the model, the phylogenetic
@@ -213,7 +219,12 @@ Check convergence (<code>diagnostics</code>: R-hat below 1.01, bulk and tail eff
 above 400, no divergent transitions and no transitions that hit the maximum tree depth of
 the sampler, over the intercepts, standard deviations,
 \(\lambda\), correlations, species values and <code>lp__</code>) and the fit, with
-<code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">bayesplot::pp_check()</a></code> on the result, before reading the estimates.</p>
+<code><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">bayesplot::pp_check()</a></code> on the result, before reading the estimates. R-hat and the bulk
+and tail effective sample sizes are those of Vehtari et al. (2021), computed by
+<code><a href="https://mc-stan.org/posterior/reference/draws_summary.html" class="external-link">posterior::summarise_draws()</a></code>; divergences and transitions at the maximum tree depth are
+counted by cmdstanr. When the chains have not converged, run them longer
+(<code>iter_sampling</code>, <code>iter_warmup</code>), or restart from the end of a previous fit: <code>init</code>, passed
+through <code>...</code>, takes the <code>fit</code> element of an earlier result, as in the examples.</p>
 <p>The model is in <code>system.file("stan", "trait_gradient.stan", package = "comdynamite")</code>. It
 is compiled by cmdstanr the first time it is used and kept in
 <code>tools::R_user_dir("comdynamite", "cache")</code>. The pointwise log-likelihoods are in
@@ -255,21 +266,34 @@ trials). In trials with 18 species the chains of that version did not mix. Use
 <code>diagnostics</code>.</p>
     </div>
     <div class="section level2">
+    <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
+    <p>Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., &amp; Bürkner, P.-C. (2021).
+Rank-normalization, folding, and localization: an improved \(\hat{R}\) for assessing
+convergence of MCMC (with discussion). <em>Bayesian Analysis</em>, 16, 667–718.
+<a href="https://doi.org/10.1214/20-BA1221" class="external-link">doi:10.1214/20-BA1221</a></p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="trait_gradient.html">trait_gradient()</a></code>, <code><a href="trait_gradient_phylo.html">trait_gradient_phylo()</a></code></p>
 <p>Other trait variation among individuals:
+<code><a href="coef.drift_test.html">coef.drift_test()</a></code>,
+<code><a href="coef.mc_trait_gradient.html">coef.mc_trait_gradient()</a></code>,
+<code><a href="coef.population_shifts.html">coef.population_shifts()</a></code>,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="drift_test.html">drift_test()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="nested_variance.html">nested_variance()</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
 <code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
+<code><a href="plot.mc_trait_gradient_bayes.html">plot.mc_trait_gradient_bayes()</a></code>,
+<code><a href="plot.mc_trait_gradient_phylo.html">plot.mc_trait_gradient_phylo()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
 <code><a href="plot.tstats.html">plot.tstats()</a></code>,
 <code><a href="plot_population_traits.html">plot_population_traits()</a></code>,
 <code><a href="population_shifts.html">population_shifts()</a></code>,
+<code><a href="print.trait_flex.html">print.trait_flex()</a></code>,
 <code><a href="sample_individuals.html">sample_individuals()</a></code>,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,
@@ -297,6 +321,11 @@ trials). In trials with 18 species the chains of that version did not mix. Use
 <span class="r-in"><span><span class="va">bayes</span><span class="op">$</span><span class="va">diagnostics</span></span></span>
 <span class="r-in"><span><span class="va">bayes</span><span class="op">$</span><span class="va">signal</span></span></span>
 <span class="r-in"><span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">bayes</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bayes</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bayes</span>, type <span class="op">=</span> <span class="st">"trace"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="co"># longer chains that start where the first ones stopped</span></span></span>
+<span class="r-in"><span><span class="va">longer</span> <span class="op">&lt;-</span> <span class="fu">trait_gradient_bayes</span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span>, iter_sampling <span class="op">=</span> <span class="fl">2000</span>,</span></span>
+<span class="r-in"><span>                               init <span class="op">=</span> <span class="va">bayes</span><span class="op">$</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>

@@ -135,8 +135,12 @@ function stops on either (<code>"fail"</code>).</p></dd>
 (<code>turnover</code>, <code>intraspecific</code>, <code>covariation</code>, <code>total</code>) and the columns <code>explained</code>,
 <code>residual</code>, <code>total</code> (sums of squares) and <code>p</code> (of the regression, <code>NA</code> for the
 covariation and without a model), and <code>sites</code>, a data frame with the specific and fixed
-means and their difference for each site and trait. The list has class <code>trait_flex</code>,
-with a <a href="plot.trait_flex.html">plot()</a> method.</p>
+means and their difference for each site and trait, <code>model</code>, a data frame with the
+site values of each trait and component (<code>turnover</code>, <code>intraspecific</code>, <code>total</code>) as
+<code>response</code>, with their <code>fitted</code> values and residuals (the site mean without a model),
+and <code>formula</code>. The list has class <code>trait_flex</code>, with <a href="print.trait_flex.html">print()</a>,
+<a href="plot.trait_flex.html">plot()</a>, <a href="print.trait_flex.html">formula()</a>, <a href="print.trait_flex.html">fitted()</a>,
+<a href="print.trait_flex.html">residuals()</a> and <a href="print.trait_flex.html">nobs()</a> methods.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -186,18 +190,24 @@ variability effects. <em>Ecography</em>, 34, 856–863. <a href="https://doi.org
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="tstats.html">tstats()</a></code>, <code><a href="nested_variance.html">nested_variance()</a></code>.</p>
 <p>Other trait variation among individuals:
+<code><a href="coef.drift_test.html">coef.drift_test()</a></code>,
+<code><a href="coef.mc_trait_gradient.html">coef.mc_trait_gradient()</a></code>,
+<code><a href="coef.population_shifts.html">coef.population_shifts()</a></code>,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="drift_test.html">drift_test()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="nested_variance.html">nested_variance()</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
 <code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
+<code><a href="plot.mc_trait_gradient_bayes.html">plot.mc_trait_gradient_bayes()</a></code>,
+<code><a href="plot.mc_trait_gradient_phylo.html">plot.mc_trait_gradient_phylo()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
 <code><a href="plot.tstats.html">plot.tstats()</a></code>,
 <code><a href="plot_population_traits.html">plot_population_traits()</a></code>,
 <code><a href="population_shifts.html">population_shifts()</a></code>,
+<code><a href="print.trait_flex.html">print.trait_flex()</a></code>,
 <code><a href="sample_individuals.html">sample_individuals()</a></code>,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,

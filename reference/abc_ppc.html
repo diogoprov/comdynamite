@@ -132,7 +132,8 @@ enter <code>fit</code>, or all if every statistic did.</p></dd>
     <p>A data frame with one row per statistic: <code>observed</code>, the median and the 5% and 95%
 quantiles of the predicted statistic, and <code>p</code>, the two-sided posterior predictive p-value
 (twice the smaller tail). Small p-values point to statistics the model does not reproduce.
-The attribute <code>draws</code> holds the drawn parameters and predicted statistics.</p>
+The attribute <code>draws</code> holds the drawn parameters and predicted statistics, and <code>seed</code>
+the seed.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -157,7 +158,10 @@ Without <code>simulate</code>, the statistics of the drawn rows are used, which 
 <code><a href="abc_recovery.html">abc_recovery()</a></code>,
 <code><a href="abc_table.html">abc_table()</a></code>,
 <code><a href="fold_summarise.html">fold_summarise()</a></code>,
+<code><a href="nobs.mc_node_test.html">nobs.mc_node_test()</a></code>,
 <code><a href="observe_detection.html">observe_detection()</a></code>,
+<code><a href="plot.mc_abc_choice.html">plot.mc_abc_choice()</a></code>,
+<code><a href="plot.mc_abc_fit.html">plot.mc_abc_fit()</a></code>,
 <code><a href="spatial_folds.html">spatial_folds()</a></code></p></div>
     </div>
 

@@ -68,6 +68,9 @@ Other inference:
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
 [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
 [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md),
+[`nobs.mc_node_test()`](https://provetelab.org/comdynamite/reference/nobs.mc_node_test.md),
+[`plot.mc_abc_choice()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_choice.md),
+[`plot.mc_abc_fit()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_fit.md),
 [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
 
 ## Examples

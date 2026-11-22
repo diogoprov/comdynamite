@@ -78,10 +78,10 @@ A data frame with one row per parameter: `n`, `r2` (1 minus the squared
 error over the variance of the truth), `bias` and `width` (mean width of
 the interval) as fractions of the prior range, and `coverage`, the
 fraction of intervals that contain the truth, with its standard error.
-The attribute `estimates` holds every estimate. A coverage near `level`
-says the intervals are calibrated, one above it that they are
-conservative and one below it that they are too narrow (see Details); R2
-says how much the data narrow the prior.
+The attribute `estimates` holds every estimate and `seed` the seed. A
+coverage near `level` says the intervals are calibrated, one above it
+that they are conservative and one below it that they are too narrow
+(see Details); R2 says how much the data narrow the prior.
 
 ## Details
 
@@ -124,7 +124,10 @@ Other inference:
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
 [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md),
+[`nobs.mc_node_test()`](https://provetelab.org/comdynamite/reference/nobs.mc_node_test.md),
 [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md),
+[`plot.mc_abc_choice()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_choice.md),
+[`plot.mc_abc_fit()`](https://provetelab.org/comdynamite/reference/plot.mc_abc_fit.md),
 [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md)
 
 ## Examples

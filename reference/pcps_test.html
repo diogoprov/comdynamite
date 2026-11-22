@@ -114,7 +114,9 @@ Or an <code><a href="mc_data.html">mc_data()</a></code> object, whose parts fill
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Predictor, or matrix or data frame of predictors, with one row per site.</p></dd>
+<dd><p>Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-axes">axes<a class="anchor" aria-label="anchor" href="#arg-axes"></a></dt>
@@ -205,6 +207,7 @@ phylogenetic structure. <em>Ecology Letters</em>, 13, 587–596.
 <code><a href="phylo_beta.html">phylo_beta()</a></code>,
 <code><a href="phylo_beta_test.html">phylo_beta_test()</a></code>,
 <code><a href="phylo_eigenvectors.html">phylo_eigenvectors()</a></code>,
+<code><a href="plot.mc_pcc.html">plot.mc_pcc()</a></code>,
 <code><a href="plot.mc_pcps.html">plot.mc_pcps()</a></code>,
 <code><a href="plot_phylo_beta.html">plot_phylo_beta()</a></code></p></div>
     </div>

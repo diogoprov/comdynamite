@@ -19,6 +19,7 @@ plot_traits(
   tip_labels = FALSE,
   legend = TRUE,
   point_size = 1.8,
+  text_size = 3.5,
   linewidth = 0.7,
   ...,
   labels = NULL
@@ -68,6 +69,12 @@ plot_traits(
 - point_size:
 
   Size of the tips. One number greater than 0.
+
+- text_size:
+
+  Size of the tip labels, in mm (as in
+  [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)).
+  One number greater than 0.
 
 - linewidth:
 

@@ -110,17 +110,23 @@ Letters*, 13, 838–848.
 [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md).
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
@@ -150,8 +156,8 @@ res <- nested_variance(d, "trait", c("region", "site", "population"))
 #> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 res
 #>        level        trait
-#> 1     region 2.551909e-08
-#> 2       site 3.509259e-17
+#> 1     region 1.741575e-08
+#> 2       site 1.125857e-17
 #> 3 population 9.862820e-01
 #> 4     within 1.371800e-02
 if (requireNamespace("ggplot2", quietly = TRUE)) plot(res)

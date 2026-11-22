@@ -158,7 +158,15 @@ replicates, 30 species, 25 sites), AIC chose OU in 22 without the error term and
 it.</p>
 <p>\(a\) is bounded between \(10^{-3}\) and 50 divided by the height of the tree. At the
 lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
-such fits are marked in <code>at_bound</code> and their half-life is <code>NA</code>. AIC differences among three
+such fits are marked in <code>at_bound</code> and their half-life is <code>NA</code>. The restricted likelihood
+is maximised by <code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code> over the logarithm of \(\sigma^2\) for white noise and
+BM, with its default tolerance, and for OU by <code><a href="https://rdrr.io/r/stats/optim.html" class="external-link">stats::optim()</a></code> with method <code>"L-BFGS-B"</code> and
+its default controls (relative tolerance <code>factr = 1e7</code>, at most 100 iterations) from three
+starting values of \(a\) (0.1, 1 and 5 divided by the height of the tree), keeping the
+best. These settings are fixed: the surfaces have one or two parameters on bounded
+intervals, and the several starts guard against local optima better than a tighter
+tolerance would; <code>converged</code> reports the convergence code of the best start. AIC
+differences among three
 models fitted to few species are unstable, and the bootstrap standard error of a species
 seen in \(n\) sites is biased low by about \(\sqrt{(n - 1)/n}\).</p>
     </div>
@@ -172,18 +180,24 @@ components. <em>Ecology Letters</em>, 10, 135–145. <a href="https://doi.org/10
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="trait_gradient.html">trait_gradient()</a></code>, <code><a href="trait_ou.html">trait_ou()</a></code> to simulate traits under these models.</p>
 <p>Other trait variation among individuals:
+<code><a href="coef.drift_test.html">coef.drift_test()</a></code>,
+<code><a href="coef.mc_trait_gradient.html">coef.mc_trait_gradient()</a></code>,
+<code><a href="coef.population_shifts.html">coef.population_shifts()</a></code>,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="drift_test.html">drift_test()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="nested_variance.html">nested_variance()</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
 <code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
+<code><a href="plot.mc_trait_gradient_bayes.html">plot.mc_trait_gradient_bayes()</a></code>,
+<code><a href="plot.mc_trait_gradient_phylo.html">plot.mc_trait_gradient_phylo()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
 <code><a href="plot.tstats.html">plot.tstats()</a></code>,
 <code><a href="plot_population_traits.html">plot_population_traits()</a></code>,
 <code><a href="population_shifts.html">population_shifts()</a></code>,
+<code><a href="print.trait_flex.html">print.trait_flex()</a></code>,
 <code><a href="sample_individuals.html">sample_individuals()</a></code>,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,
@@ -207,10 +221,6 @@ components. <em>Ecology Letters</em>, 10, 135–145. <a href="https://doi.org/10
 <span class="r-in"><span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, n <span class="op">=</span> <span class="fl">5</span>, local_adaptation <span class="op">=</span> <span class="fl">0.5</span>, intraspecific_sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">tg</span> <span class="op">&lt;-</span> <span class="fu"><a href="trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">trait_gradient_phylo</span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, n_boot <span class="op">=</span> <span class="fl">99</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> trait_gradient_phylo() implements the method of:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Please cite these papers together with comdynamite (citation("comdynamite")).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Phylogenetic models of the trait-gradient analysis: 14 species</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  response model     mu sigma2     a half_life at_bound converged loglik n_par</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      beta white 64.600   90.9    NA        NA       NA      TRUE  -49.9     2</span>

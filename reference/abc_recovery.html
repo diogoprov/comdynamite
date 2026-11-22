@@ -142,7 +142,8 @@ of Raynal et al. (2019); larger values give larger leaves, which widen intervals
     <p>A data frame with one row per parameter: <code>n</code>, <code>r2</code> (1 minus the squared error over the
 variance of the truth), <code>bias</code> and <code>width</code> (mean width of the interval) as fractions of the
 prior range, and <code>coverage</code>, the fraction of intervals that contain the truth, with its
-standard error. The attribute <code>estimates</code> holds every estimate. A coverage near <code>level</code>
+standard error. The attribute <code>estimates</code> holds every estimate and <code>seed</code> the seed. A
+coverage near <code>level</code>
 says the intervals are calibrated, one above it that they are conservative and one below
 it that they are too narrow (see Details); R2 says how much the data narrow the prior.</p>
     </div>
@@ -180,7 +181,10 @@ random forests for Bayesian parameter inference. <em>Bioinformatics</em>, 35, 17
 <code><a href="abc_ppc.html">abc_ppc()</a></code>,
 <code><a href="abc_table.html">abc_table()</a></code>,
 <code><a href="fold_summarise.html">fold_summarise()</a></code>,
+<code><a href="nobs.mc_node_test.html">nobs.mc_node_test()</a></code>,
 <code><a href="observe_detection.html">observe_detection()</a></code>,
+<code><a href="plot.mc_abc_choice.html">plot.mc_abc_choice()</a></code>,
+<code><a href="plot.mc_abc_fit.html">plot.mc_abc_fit()</a></code>,
 <code><a href="spatial_folds.html">spatial_folds()</a></code></p></div>
     </div>
 

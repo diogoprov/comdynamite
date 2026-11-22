@@ -95,9 +95,20 @@ with it.
 \\a\\ is bounded between \\10^{-3}\\ and 50 divided by the height of the
 tree. At the lower bound OU is Brownian motion and at the upper bound it
 is the model without phylogeny; such fits are marked in `at_bound` and
-their half-life is `NA`. AIC differences among three models fitted to
-few species are unstable, and the bootstrap standard error of a species
-seen in \\n\\ sites is biased low by about \\\sqrt{(n - 1)/n}\\.
+their half-life is `NA`. The restricted likelihood is maximised by
+[`stats::optimize()`](https://rdrr.io/r/stats/optimize.html) over the
+logarithm of \\\sigma^2\\ for white noise and BM, with its default
+tolerance, and for OU by
+[`stats::optim()`](https://rdrr.io/r/stats/optim.html) with method
+`"L-BFGS-B"` and its default controls (relative tolerance `factr = 1e7`,
+at most 100 iterations) from three starting values of \\a\\ (0.1, 1 and
+5 divided by the height of the tree), keeping the best. These settings
+are fixed: the surfaces have one or two parameters on bounded intervals,
+and the several starts guard against local optima better than a tighter
+tolerance would; `converged` reports the convergence code of the best
+start. AIC differences among three models fitted to few species are
+unstable, and the bootstrap standard error of a species seen in \\n\\
+sites is biased low by about \\\sqrt{(n - 1)/n}\\.
 
 ## References
 
@@ -113,18 +124,24 @@ and among-community components. *Ecology Letters*, 10, 135–145.
 to simulate traits under these models.
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
@@ -148,10 +165,6 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree, lambd
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
 trait_gradient_phylo(tg, tree, n_boot = 99)
-#> trait_gradient_phylo() implements the method of:
-#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
-#> Please cite these papers together with comdynamite (citation("comdynamite")).
-#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 #> Phylogenetic models of the trait-gradient analysis: 14 species
 #>  response model     mu sigma2     a half_life at_bound converged loglik n_par
 #>      beta white 64.600   90.9    NA        NA       NA      TRUE  -49.9     2

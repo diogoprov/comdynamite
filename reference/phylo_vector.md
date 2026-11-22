@@ -40,7 +40,10 @@ phylo_vector(
 - env:
 
   Numeric vector with the value of each site. The authors estimate one
-  vector for each predictor.
+  vector for each predictor. Columns must be numeric or logical: factors
+  and character columns stop with an error, so code a factor as dummy
+  variables first, for example with
+  [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html).
 
 - n_perm:
 
@@ -188,6 +191,7 @@ species traits–environment relationships in the fourth-corner problem.
 ## See also
 
 Other environment and space:
+[`plot.mc_phylo_vector()`](https://provetelab.org/comdynamite/reference/plot.mc_phylo_vector.md),
 [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md),
 [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
 
@@ -209,5 +213,5 @@ phylo_vector(comm[keep, ], tree, env[keep], n_perm = 99, n_sim = 100)
 #> <mc_phylo_vector> 18 eigenvectors, 2 retained
 #> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01
 #> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 
-#> correlation: PEV 0.61  PEV-B -0.595 
+#> correlation: PEV 0.61  PEV-B 0.588 
 ```

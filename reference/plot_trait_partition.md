@@ -19,7 +19,7 @@ plot_trait_partition(
   level = 0.05,
   colours = "#0072B2",
   labels = c("Environment", "Space"),
-  text_size = 3.2,
+  text_size = 3.5,
   ...,
   alpha = NULL,
   col = NULL,
@@ -99,6 +99,7 @@ Plant Ecology*, 1, 3–8.
 
 Other environment and space:
 [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+[`plot.mc_phylo_vector()`](https://provetelab.org/comdynamite/reference/plot.mc_phylo_vector.md),
 [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
 
 ## Examples

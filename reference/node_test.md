@@ -44,7 +44,10 @@ node_test(
 - env:
 
   Predictor, or matrix or data frame of predictors, with one row per
-  site.
+  site. Columns must be numeric or logical: factors and character
+  columns stop with an error, so code a factor as dummy variables first,
+  for example with
+  [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html).
 
 - biogeography:
 

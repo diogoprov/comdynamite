@@ -104,7 +104,27 @@ stops with the list of valid options. Each scalar argument is checked
 for its length, type and range before any computation, and missing or
 infinite values in `comm`, `env` and the other data inputs stop the
 function with a message that names the argument; remove or impute
-missing values before the analysis.
+missing values before the analysis. Factors used as labels (the site and
+species columns of the data on individuals, `group` of
+[`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
+`regimes` of the DAMOCLES functions, `strata` of
+[`env_surrogates()`](https://provetelab.org/comdynamite/reference/env_surrogates.md))
+are taken as unordered: the order of the levels of an ordered factor is
+ignored. Factors and character columns are refused as predictors in
+`env`; code them as dummy variables.
+
+Inputs are converted once, at the start: community tables become double
+matrices (integer counts included, so the `comm` of
+[`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+is double), and site and species labels in results are character, even
+when the input columns were factors. Attributes and classes of numeric
+columns, such as units of the units package, are dropped without a
+message: values are taken in the units given, and results are in those
+units. The analyses take either an
+[`mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
+object, which keeps the parts matched by site and species names, or the
+parts as separate arguments (`comm`, `tree`, `traits`, `env`), which are
+matched by the same names inside each function.
 
 ## Citation
 
@@ -116,6 +136,15 @@ and
 lists them by function; see
 [`method_references()`](https://provetelab.org/comdynamite/reference/method_references.md)
 for how to turn the message off.
+
+## Audience
+
+The package is written for community ecologists, biogeographers and
+evolutionary biologists who analyse species composition, traits and
+phylogenies across sites, and for methodologists who want to check, by
+simulation, whether a method recovers a known process. It assumes
+familiarity with R and with the methods it implements, whose original
+papers each help page cites.
 
 ## Where to start
 

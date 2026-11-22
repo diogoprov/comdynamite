@@ -92,7 +92,16 @@ the columns `local_adaptation` (`h`; with several variables,
 `displacement_corrected`, `displacement_low`, `displacement_high`,
 `p_displacement` and, for each slope, `_low` and `_high` columns. The
 attribute `profile` holds, for each width tried, the residual sum of
-squares, \\R^2\\ and the estimates.
+squares, \\R^2\\ and the estimates; the attribute `model` holds the
+regression at the chosen width, one row per half-sample mean of a
+population (`site`, `species`, `half`), with the `response` and `fitted`
+values and the `residual`, all centred within species. Methods:
+[coef()](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
+[`confint()`](https://rdrr.io/r/stats/confint.html) and
+[`vcov()`](https://rdrr.io/r/stats/vcov.html) (from the bootstrap, with
+`nboot > 0`), [`nobs()`](https://rdrr.io/r/stats/nobs.html),
+[`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+[`residuals()`](https://rdrr.io/r/stats/residuals.html).
 
 ## Details
 
@@ -191,9 +200,12 @@ standard deviation within populations (a kernel narrower than the spread
 of individuals mostly fits sampling noise), but no higher than that
 median, to four times the median, and is refined by
 [`stats::optimize()`](https://rdrr.io/r/stats/optimize.html) around its
-best value. A warning is given when the best width stays at one of the
-ends of the grid after the refinement or when the residual sum of
-squares changes by less than 5% along the grid;
+best value, on the logarithm of the width and with the default tolerance
+of [`optimize()`](https://rdrr.io/r/stats/optimize.html), since the
+residual sum of squares is flat near its minimum and a finer width would
+not change `c` beyond its sampling error. A warning is given when the
+best width stays at one of the ends of the grid after the refinement or
+when the residual sum of squares changes by less than 5% along the grid;
 [`plot()`](https://rdrr.io/r/graphics/plot.default.html) shows the
 profile of the fit and of the estimates along the width. Fix `width`
 from independent knowledge of the niche widths when it is not
@@ -211,11 +223,13 @@ the constants are the means within species of the populations that enter
 as responses, and the variance of populations is the root of a moment
 equation in which each squared residual is net of the sampling variance
 of its mean and weighted by the inverse square of its expected value, so
-that means of few individuals weigh little (in the fitted set, the
-sampling variance is scaled by \\(1 - c_0 D_j)^2\\, with \\D_j\\ the
-derivative of the push on a population with respect to its own mean,
-since the sampling error of the mean also enters the push removed from
-it). Two sets are simulated:
+that means of few individuals weigh little (solved by fixed-point
+iteration to a relative change below \\10^{-8}\\, at most 50 iterations,
+which is ample for one parameter; in the fitted set, the sampling
+variance is scaled by \\(1 - c_0 D_j)^2\\, with \\D_j\\ the derivative
+of the push on a population with respect to its own mean, since the
+sampling error of the mean also enters the push removed from it). Two
+sets are simulated:
 
 - without displacement (`c = 0`), from the fit without displacement (the
   slopes of the full fit carry its error into the residuals, inflate the
@@ -270,17 +284,23 @@ character displacement on an environmental gradient. *Evolution*, 60,
 with `null_ip = "species"`.
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),

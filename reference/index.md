@@ -158,6 +158,9 @@ Which clades respond to the environment or to biogeographic events?
   : Matrix of biogeographic events
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
   : Test clades against the environment, node by node
+- [`nobs(`*`<mc_node_test>`*`)`](https://provetelab.org/comdynamite/reference/nobs.mc_node_test.md)
+  [`nobs(`*`<mc_abc_fit>`*`)`](https://provetelab.org/comdynamite/reference/nobs.mc_node_test.md)
+  : Numbers of observations of the node test and of ABC
 - [`plot_node_test()`](https://provetelab.org/comdynamite/reference/plot_node_test.md)
   : Plot the results of a node test on the phylogeny
 - [`plot_node_heatmap()`](https://provetelab.org/comdynamite/reference/plot_node_heatmap.md)
@@ -169,6 +172,8 @@ Does phylogenetic composition follow the environment?
 
 - [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md)
   : Test phylogenetic community composition against the environment
+- [`plot(`*`<mc_pcc>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_pcc.md)
+  : Plot a test of phylogenetic community composition
 - [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md)
   : Principal coordinates of phylogenetic structure
 - [`plot(`*`<mc_pcps>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md)
@@ -188,6 +193,8 @@ Phylogenetic vectors and the partition of trait variation.
 
 - [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md)
   : Represent a phylogeny by one vector related to a predictor
+- [`plot(`*`<mc_phylo_vector>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_phylo_vector.md)
+  : Plot the phylogenetic eigenvectors related to a predictor
 - [`trait_partition()`](https://provetelab.org/comdynamite/reference/trait_partition.md)
   : Partition trait or phylogenetic variation between environment and
   space
@@ -233,11 +240,15 @@ parameters.
   [`predict(`*`<mc_abc_fit>`*`)`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   [`abc_importance()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
   : Estimate parameters by ABC with random forests
+- [`plot(`*`<mc_abc_fit>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_abc_fit.md)
+  : Plot the posterior of an ABC fit against the prior
 - [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
   : Can the parameters be recovered by ABC?
 - [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   [`predict(`*`<mc_abc_choice>`*`)`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   : Choose among models by ABC with random forests
+- [`plot(`*`<mc_abc_choice>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_abc_choice.md)
+  : Plot an ABC model choice
 - [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md)
   : Posterior predictive check after ABC
 - [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
@@ -259,6 +270,13 @@ analysis, community trait indices and decompositions of trait variation.
 - [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
   : Test whether divergence among groups is proportional to variation
   within them
+- [`coef(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  [`confint(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  [`vcov(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  [`nobs(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  [`fitted(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  [`residuals(`*`<drift_test>`*`)`](https://provetelab.org/comdynamite/reference/coef.drift_test.md)
+  : Coefficients, intervals and fitted values of the test of drift
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md) :
   T-statistics of intraspecific trait variation
 - [`tstats_summary()`](https://provetelab.org/comdynamite/reference/tstats_summary.md)
@@ -267,6 +285,13 @@ analysis, community trait indices and decompositions of trait variation.
   : Local adaptation and character displacement from population means
 - [`plot(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/plot.population_shifts.md)
   : Plot the profile of a fit of population shifts
+- [`coef(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  [`confint(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  [`vcov(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  [`nobs(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  [`fitted(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  [`residuals(`*`<population_shifts>`*`)`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md)
+  : Coefficients, intervals and fitted values of population shifts
 - [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md)
   : Trait-gradient analysis
 - [`trait_gradient_weights()`](https://provetelab.org/comdynamite/reference/trait_gradient_weights.md)
@@ -275,13 +300,23 @@ analysis, community trait indices and decompositions of trait variation.
   : Null models of the trait-gradient analysis
 - [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
   : Phylogenetic models of beta and alpha, with their sampling error
+- [`plot(`*`<mc_trait_gradient_phylo>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md)
+  : Plot the phylogenetic models of a trait-gradient analysis
 - [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
   : Bayesian phylogenetic model of the trait gradient, with latent beta
 - [`pp_check(`*`<mc_trait_gradient_bayes>`*`)`](https://provetelab.org/comdynamite/reference/pp_check.mc_trait_gradient_bayes.md)
   : Posterior predictive check of the trait-gradient model
+- [`plot(`*`<mc_trait_gradient_bayes>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md)
+  : Plot the Bayesian model of the trait gradient
 - [`plot(`*`<mc_trait_gradient>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
   [`plot(`*`<mc_trait_gradient_test>`*`)`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md)
   : Plot a trait-gradient analysis
+- [`coef(`*`<mc_trait_gradient>`*`)`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md)
+  [`nobs(`*`<mc_trait_gradient>`*`)`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md)
+  [`coef(`*`<mc_trait_gradient_phylo>`*`)`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md)
+  [`nobs(`*`<mc_trait_gradient_phylo>`*`)`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md)
+  : Coefficients and numbers of observations of the trait-gradient
+  analysis
 - [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md)
   : Trait indices of communities against null models
 - [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md)
@@ -289,6 +324,13 @@ analysis, community trait indices and decompositions of trait variation.
   means
 - [`plot(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md)
   : Plot the decomposition of community trait means
+- [`print(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
+  [`formula(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
+  [`fitted(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
+  [`residuals(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
+  [`nobs(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
+  : Model, fitted values and residuals of the decomposition of community
+  trait means
 - [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md)
   : Variance components of traits across nested or crossed levels
 - [`plot(`*`<nested_variance>`*`)`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md)

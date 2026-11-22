@@ -95,6 +95,7 @@
 <p>Methods that link traits, phylogenies, biogeography and metacommunities in R, to analyse data and to simulate it.</p>
 <p>The simulations work at the level of populations in ecological time: abundances in every site grow, compete and disperse, and, when asked, each population carries the genetic means of one or more traits that evolve by selection and drift under quantitative genetics (Lande 1979), with a covariance matrix <em>G</em> per species. Lineages can split into new species inside the metacommunity, so the same run gives communities, trait distributions of individuals and the true phylogeny. Because the truth is known, the analysis functions of the package can be tested on these simulations before they are applied to field data.</p>
 <p>comdynamite is a modular framework rather than a model that contains the others: processes are switched on as options (evolution, speciation, disturbance, lottery recruitment, overlapping generations), in the spirit of the flexible mechanistic models called for by Cabral, Valente &amp; Hartig (2017). The <a href="https://provetelab.org/comdynamite/articles/nesting-map.html">nesting map</a> shows which settings approximate six published models, which of their mechanisms are missing, and what happened when we tried to reproduce the results of Urban &amp; De Meester (2009) and Leibold et al. (2019).</p>
+<p>The package is written for community ecologists, biogeographers and evolutionary biologists who analyse species composition, traits and phylogenies across sites, and for methodologists who want to check, by simulation, whether a method recovers a known process. It assumes familiarity with R and with the methods it implements, whose original papers each help page cites.</p>
 <div class="section level2">
 <h2 id="what-do-you-want-to-do">What do you want to do?<a class="anchor" aria-label="anchor" href="#what-do-you-want-to-do"></a>
 </h2>
@@ -231,6 +232,11 @@
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"cmdstanr"</span>, repos <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"https://stan-dev.r-universe.dev"</span>,</span>
 <span>                                       <span class="st">"https://cloud.r-project.org"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">cmdstanr</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/cmdstanr/reference/install_cmdstan.html" class="external-link">install_cmdstan</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="priors">Priors<a class="anchor" aria-label="anchor" href="#priors"></a>
+</h2>
+<p>Two functions are Bayesian, and both take their priors as arguments. <code><a href="reference/abc_table.html">abc_table()</a></code> draws the parameters of each simulation from uniform priors given in <code>prior</code>, a named list with the lower and upper limit of each parameter, for example <code>prior = list(log_dispersal = c(-3, -1), lambda = c(0, 1))</code>; <code><a href="reference/abc_fit.html">abc_fit()</a></code> then estimates the posterior from that reference table. <code><a href="reference/trait_gradient_bayes.html">trait_gradient_bayes()</a></code> puts a beta prior on the phylogenetic share (lambda) of each quantity, with shape parameters <code>lambda_prior</code> (<code>c(1, 1)</code>, uniform, by default); its help page lists the fixed priors of the other parameters, which are set on the standardised scale of the trait.</p>
 </div>
 <div class="section level2">
 <h2 id="large-analyses">Large analyses<a class="anchor" aria-label="anchor" href="#large-analyses"></a>

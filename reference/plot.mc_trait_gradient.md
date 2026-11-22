@@ -65,17 +65,23 @@ A ggplot object.
 [`trait_gradient_test()`](https://provetelab.org/comdynamite/reference/trait_gradient_test.md)
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
@@ -99,10 +105,6 @@ sim <- simulate_metacommunity(landscape_implicit(15), species_traits(tree),
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
 tg <- trait_gradient(ind, abundance = "abundance")
-#> trait_gradient() implements the method of:
-#>   Ackerly, D. D., & Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x
-#> Please cite these papers together with comdynamite (citation("comdynamite")).
-#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 plot(tg)
 
 plot(tg, type = "beta_alpha", species_labels = TRUE)

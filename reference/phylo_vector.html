@@ -112,8 +112,10 @@ Or an <code><a href="mc_data.html">mc_data()</a></code> object, whose parts fill
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Numeric vector with the value of each site. The authors estimate one
-vector for each predictor.</p></dd>
+<dd><p>Numeric vector with the value of each site. The authors estimate one vector for
+each predictor. Columns must be numeric or logical: factors and character columns stop
+with an error, so code a factor as dummy variables first, for example with
+<code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-n-perm">n_perm<a class="anchor" aria-label="anchor" href="#arg-n-perm"></a></dt>
@@ -229,6 +231,7 @@ traits–environment relationships in the fourth-corner problem. <em>Ecology</em
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other environment and space:
+<code><a href="plot.mc_phylo_vector.html">plot.mc_phylo_vector()</a></code>,
 <code><a href="plot_trait_partition.html">plot_trait_partition()</a></code>,
 <code><a href="trait_partition.html">trait_partition()</a></code></p></div>
     </div>
@@ -250,7 +253,7 @@ traits–environment relationships in the fourth-corner problem. <em>Ecology</em
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;mc_phylo_vector&gt; 18 eigenvectors, 2 retained</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> permutations: 99 free of sites, 99 of species; smallest possible p: 0.01</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> global test: p (sites): 0.01  p (species): 0.01  p (max): 0.01 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B -0.595 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> correlation: PEV 0.61  PEV-B 0.588 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

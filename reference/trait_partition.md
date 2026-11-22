@@ -46,7 +46,10 @@ trait_partition(
   Numeric vector, or matrix or data frame, with one row per site. For
   `space`, the article uses Moran's eigenvector maps, which
   [`adespatial::dbmem()`](http://adeverse.github.io/adespatial/reference/dbmem.md)
-  gives.
+  gives. Columns must be numeric or logical: factors and character
+  columns stop with an error, so code a factor as dummy variables first,
+  for example with
+  [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html).
 
 - component:
 
@@ -338,6 +341,7 @@ methods. *Methods in Ecology and Evolution*, 6, 1169–1178.
 
 Other environment and space:
 [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+[`plot.mc_phylo_vector()`](https://provetelab.org/comdynamite/reference/plot.mc_phylo_vector.md),
 [`plot_trait_partition()`](https://provetelab.org/comdynamite/reference/plot_trait_partition.md)
 
 ## Examples

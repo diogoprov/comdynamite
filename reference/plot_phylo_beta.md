@@ -15,7 +15,7 @@ plot_phylo_beta(
   tree,
   axis = 1,
   colours = "#0072B2",
-  text_size = 2.5,
+  text_size = 3.2,
   ...,
   col = NULL,
   cex = NULL
@@ -76,6 +76,7 @@ Other the whole tree:
 [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
 [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md),
+[`plot.mc_pcc()`](https://provetelab.org/comdynamite/reference/plot.mc_pcc.md),
 [`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md)
 
 ## Examples

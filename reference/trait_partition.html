@@ -113,7 +113,9 @@ order, and those in only one of the two are dropped with a warning.</p></dd>
 
 <dt id="arg-env-space">env, space<a class="anchor" aria-label="anchor" href="#arg-env-space"></a></dt>
 <dd><p>Numeric vector, or matrix or data frame, with one row per site. For
-<code>space</code>, the article uses Moran's eigenvector maps, which <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code> gives.</p></dd>
+<code>space</code>, the article uses Moran's eigenvector maps, which <code><a href="http://adeverse.github.io/adespatial/reference/dbmem.html" class="external-link">adespatial::dbmem()</a></code> gives.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-component">component<a class="anchor" aria-label="anchor" href="#arg-component"></a></dt>
@@ -331,6 +333,7 @@ and Evolution</em>, 6, 1169–1178. <a href="https://doi.org/10.1111/2041-210X.1
     <div class="dont-index"><p><code><a href="plot_trait_partition.html">plot_trait_partition()</a></code></p>
 <p>Other environment and space:
 <code><a href="phylo_vector.html">phylo_vector()</a></code>,
+<code><a href="plot.mc_phylo_vector.html">plot.mc_phylo_vector()</a></code>,
 <code><a href="plot_trait_partition.html">plot_trait_partition()</a></code></p></div>
     </div>
 

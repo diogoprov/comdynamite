@@ -61,8 +61,9 @@ trait_gradient_bayes(
 
 - ...:
 
-  Further arguments to `$sample()`, such as `max_treedepth` or
-  `refresh`.
+  Further arguments to `$sample()`, such as `max_treedepth`, `refresh`,
+  `save_warmup` or `init` (which accepts the `fit` of an earlier result,
+  to restart the chains from where it stopped).
 
 ## Value
 
@@ -96,6 +97,11 @@ An object of class `mc_trait_gradient_bayes`, a list with
 
   the `CmdStanMCMC` object; its draws live in temporary files of the
   session, so save them with `fit$save_object()` to keep them.
+
+- seed:
+
+  the seed of the sampler, also the one drawn by cmdstanr when
+  `seed = NULL` (from `fit$metadata()$seed`).
 
 - data, A, ou_alpha, lambda_prior:
 
@@ -173,7 +179,14 @@ hit the maximum tree depth of the sampler, over the intercepts, standard
 deviations, \\\lambda\\, correlations, species values and `lp__`) and
 the fit, with
 [`bayesplot::pp_check()`](https://mc-stan.org/bayesplot/reference/pp_check.html)
-on the result, before reading the estimates.
+on the result, before reading the estimates. R-hat and the bulk and tail
+effective sample sizes are those of Vehtari et al. (2021), computed by
+[`posterior::summarise_draws()`](https://mc-stan.org/posterior/reference/draws_summary.html);
+divergences and transitions at the maximum tree depth are counted by
+cmdstanr. When the chains have not converged, run them longer
+(`iter_sampling`, `iter_warmup`), or restart from the end of a previous
+fit: `init`, passed through `...`, takes the `fit` element of an earlier
+result, as in the examples.
 
 The model is in
 `system.file("stan", "trait_gradient.stan", package = "comdynamite")`.
@@ -235,24 +248,38 @@ with 18 species the chains of that version did not mix. Use
 to test the signal as well, and do not read a fit that fails
 `diagnostics`.
 
+## References
+
+Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C.
+(2021). Rank-normalization, folding, and localization: an improved
+\\\hat{R}\\ for assessing convergence of MCMC (with discussion).
+*Bayesian Analysis*, 16, 667–718.
+[doi:10.1214/20-BA1221](https://doi.org/10.1214/20-BA1221)
+
 ## See also
 
 [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
 [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
@@ -280,5 +307,10 @@ bayes <- trait_gradient_bayes(tg, tree, parallel_chains = 4)
 bayes$diagnostics
 bayes$signal
 bayesplot::pp_check(bayes, resp = "sitemean")
+plot(bayes)
+plot(bayes, type = "trace")
+# longer chains that start where the first ones stopped
+longer <- trait_gradient_bayes(tg, tree, parallel_chains = 4, iter_sampling = 2000,
+                               init = bayes$fit)
 }
 ```

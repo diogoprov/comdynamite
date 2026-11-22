@@ -125,7 +125,19 @@ correlated traits from <code><a href="rate_matrix.html">rate_matrix()</a></code>
 stops with the list of valid options. Each scalar argument is checked for its length, type
 and range before any computation, and missing or infinite values in <code>comm</code>, <code>env</code> and the
 other data inputs stop the function with a message that names the argument; remove or
-impute missing values before the analysis.</p>
+impute missing values before the analysis. Factors used as labels (the site and species
+columns of the data on individuals, <code>group</code> of <code><a href="drift_test.html">drift_test()</a></code>, <code>regimes</code> of the DAMOCLES
+functions, <code>strata</code> of <code><a href="env_surrogates.html">env_surrogates()</a></code>) are taken as unordered: the order of the levels
+of an ordered factor is ignored. Factors and character columns are refused as predictors in
+<code>env</code>; code them as dummy variables.</p>
+<p>Inputs are converted once, at the start: community tables become double matrices (integer
+counts included, so the <code>comm</code> of <code><a href="mc_data.html">mc_data()</a></code> is double), and site and species labels in
+results are character, even when the input columns were factors. Attributes and classes of
+numeric columns, such as units of the units package, are dropped without a message: values
+are taken in the units given, and results are in those units. The analyses take either an
+<code><a href="mc_data.html">mc_data()</a></code> object, which keeps the parts matched by site and species names, or the parts
+as separate arguments (<code>comm</code>, <code>tree</code>, <code>traits</code>, <code>env</code>), which are matched by the same names
+inside each function.</p>
     </div>
     <div class="section level2">
     <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a></h2>
@@ -135,6 +147,16 @@ impute missing values before the analysis.</p>
 methods you use. Each function that implements a published method shows these papers the
 first time it runs in a session, and <code><a href="method_references.html">method_references()</a></code> lists them by function; see
 <code><a href="method_references.html">method_references()</a></code> for how to turn the message off.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="audience">Audience<a class="anchor" aria-label="anchor" href="#audience"></a></h2>
+
+
+<p>The package is written for community ecologists, biogeographers and evolutionary biologists
+who analyse species composition, traits and phylogenies across sites, and for
+methodologists who want to check, by simulation, whether a method recovers a known process.
+It assumes familiarity with R and with the methods it implements, whose original papers each
+help page cites.</p>
     </div>
     <div class="section level2">
     <h2 id="where-to-start">Where to start<a class="anchor" aria-label="anchor" href="#where-to-start"></a></h2>

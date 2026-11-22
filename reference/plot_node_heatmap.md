@@ -16,7 +16,7 @@ plot_node_heatmap(
   test = c("max", "site", "joint"),
   level = 0.05,
   colours = c("#0072B2", "#D55E00"),
-  text_size = 2.5,
+  text_size = 3.2,
   ...,
   alpha = NULL,
   col = NULL,

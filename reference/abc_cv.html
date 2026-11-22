@@ -149,7 +149,8 @@ is in the interval), <code>p</code> (two-sided posterior predictive p-value) and
 value minus the predicted median over the predictive standard deviation. <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code>
 averages over folds and data sets (<code>n</code> rows per statistic): the coverage, the mean of <code>z</code>,
 the root mean square of <code>z</code> and the fraction of p-values below 0.05. Under the model the
-coverage is at or above <code>level</code> and the root mean square of <code>z</code> below 1 (see Details).</p>
+coverage is at or above <code>level</code> and the root mean square of <code>z</code> below 1 (see Details).
+The attribute <code>seed</code> holds the seed.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -173,7 +174,10 @@ outside its interval, or a small <code>p</code>, is evidence against the model, 
 <code><a href="abc_recovery.html">abc_recovery()</a></code>,
 <code><a href="abc_table.html">abc_table()</a></code>,
 <code><a href="fold_summarise.html">fold_summarise()</a></code>,
+<code><a href="nobs.mc_node_test.html">nobs.mc_node_test()</a></code>,
 <code><a href="observe_detection.html">observe_detection()</a></code>,
+<code><a href="plot.mc_abc_choice.html">plot.mc_abc_choice()</a></code>,
+<code><a href="plot.mc_abc_fit.html">plot.mc_abc_fit()</a></code>,
 <code><a href="spatial_folds.html">spatial_folds()</a></code></p></div>
     </div>
 

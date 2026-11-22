@@ -157,7 +157,11 @@ number (<code>"omit"</code>, the default), or the function stops (<code>"fail"</
 <code>n_populations</code> and <code>n_species</code> (that entered as responses). With <code>nboot &gt; 0</code> it also has
 <code>displacement_corrected</code>, <code>displacement_low</code>, <code>displacement_high</code>, <code>p_displacement</code> and,
 for each slope, <code>_low</code> and <code>_high</code> columns. The attribute <code>profile</code> holds, for each width
-tried, the residual sum of squares, \(R^2\) and the estimates.</p>
+tried, the residual sum of squares, \(R^2\) and the estimates; the attribute <code>model</code>
+holds the regression at the chosen width, one row per half-sample mean of a population
+(<code>site</code>, <code>species</code>, <code>half</code>), with the <code>response</code> and <code>fitted</code> values and the <code>residual</code>,
+all centred within species. Methods: <a href="coef.population_shifts.html">coef()</a>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> and
+<code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov()</a></code> (from the bootstrap, with <code>nboot &gt; 0</code>), <code><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs()</a></code>, <code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -239,7 +243,10 @@ of <code>c</code> far from zero, of either sign. The grid runs from the larger o
 median standard deviation of population means within sites and the pooled standard
 deviation within populations (a kernel narrower than the spread of individuals mostly fits
 sampling noise), but no higher than that median, to four times the median, and is refined by
-<code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code> around its best value. A warning is given when the best width stays at
+<code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">stats::optimize()</a></code> around its best value, on the logarithm of the width and with the
+default tolerance of <code><a href="https://rdrr.io/r/stats/optimize.html" class="external-link">optimize()</a></code>, since the residual sum of squares is flat near its
+minimum and a finer width would not change <code>c</code> beyond its sampling error. A warning is given
+when the best width stays at
 one of the ends of the grid after the refinement or when the residual sum of squares changes
 by less than 5% along the grid; <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> shows the profile of
 the fit and of the estimates along the width. Fix <code>width</code> from independent knowledge of the
@@ -257,7 +264,8 @@ standard deviation of the simulations come from a fit: the constants are the mea
 species of the populations that enter as responses, and the variance of populations is the
 root of a moment equation in which each squared residual is net of the sampling variance of
 its mean and weighted by the inverse square of its expected value, so that means of few
-individuals weigh little (in the fitted set, the sampling variance is scaled by
+individuals weigh little (solved by fixed-point iteration to a relative change below
+\(10^{-8}\), at most 50 iterations, which is ample for one parameter; in the fitted set, the sampling variance is scaled by
 \((1 - c_0 D_j)^2\), with \(D_j\) the derivative of the push on a
 population with respect to its own mean, since the sampling error of the mean also enters
 the push removed from it). Two sets are simulated:</p><ul><li><p>without displacement (<code>c = 0</code>), from the fit without displacement (the slopes of the full
@@ -300,17 +308,23 @@ an environmental gradient. <em>Evolution</em>, 60, 1344–1357. <a href="https:/
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="sample_individuals.html">sample_individuals()</a></code>, <code><a href="tstats.html">tstats()</a></code> with <code>null_ip = "species"</code>.</p>
 <p>Other trait variation among individuals:
+<code><a href="coef.drift_test.html">coef.drift_test()</a></code>,
+<code><a href="coef.mc_trait_gradient.html">coef.mc_trait_gradient()</a></code>,
+<code><a href="coef.population_shifts.html">coef.population_shifts()</a></code>,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="drift_test.html">drift_test()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="nested_variance.html">nested_variance()</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
 <code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
+<code><a href="plot.mc_trait_gradient_bayes.html">plot.mc_trait_gradient_bayes()</a></code>,
+<code><a href="plot.mc_trait_gradient_phylo.html">plot.mc_trait_gradient_phylo()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
 <code><a href="plot.tstats.html">plot.tstats()</a></code>,
 <code><a href="plot_population_traits.html">plot_population_traits()</a></code>,
+<code><a href="print.trait_flex.html">print.trait_flex()</a></code>,
 <code><a href="sample_individuals.html">sample_individuals()</a></code>,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,

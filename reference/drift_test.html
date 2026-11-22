@@ -155,7 +155,9 @@ interval <code>conf_int</code>, the <code>statistic</code> (\(t\)) and <code>p_v
 the matrix <code>W</code>
 and a data frame <code>components</code> with the <code>eigenvalue</code>, the expected <code>sampling</code> variance of
 the means (0 without correction) and the <code>between</code> variance (corrected) of each principal
-component. It has <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> methods.</p>
+component, and <code>fit</code>, the <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> fit of <code>log(between)</code> on <code>log(eigenvalue)</code>. It
+has <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code>, <a href="coef.drift_test.html">coef()</a>, <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov()</a></code>, <code><a href="https://rdrr.io/r/stats/nobs.html" class="external-link">nobs()</a></code>,
+<code><a href="https://rdrr.io/r/stats/fitted.values.html" class="external-link">fitted()</a></code> and <code><a href="https://rdrr.io/r/stats/residuals.html" class="external-link">residuals()</a></code> methods.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -191,17 +193,23 @@ with phenotypic covariance matrices: a simulation study. <em>Evolution</em>, 67,
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other trait variation among individuals:
+<code><a href="coef.drift_test.html">coef.drift_test()</a></code>,
+<code><a href="coef.mc_trait_gradient.html">coef.mc_trait_gradient()</a></code>,
+<code><a href="coef.population_shifts.html">coef.population_shifts()</a></code>,
 <code><a href="community_index.html">community_index()</a></code>,
 <code><a href="neighbour_metrics.html">neighbour_metrics</a></code>,
 <code><a href="nested_variance.html">nested_variance()</a></code>,
 <code><a href="null_intervals.html">null_intervals()</a></code>,
 <code><a href="plot.mc_trait_gradient.html">plot.mc_trait_gradient()</a></code>,
+<code><a href="plot.mc_trait_gradient_bayes.html">plot.mc_trait_gradient_bayes()</a></code>,
+<code><a href="plot.mc_trait_gradient_phylo.html">plot.mc_trait_gradient_phylo()</a></code>,
 <code><a href="plot.nested_variance.html">plot.nested_variance()</a></code>,
 <code><a href="plot.trait_flex.html">plot.trait_flex()</a></code>,
 <code><a href="plot.trait_rarefaction.html">plot.trait_rarefaction()</a></code>,
 <code><a href="plot.tstats.html">plot.tstats()</a></code>,
 <code><a href="plot_population_traits.html">plot_population_traits()</a></code>,
 <code><a href="population_shifts.html">population_shifts()</a></code>,
+<code><a href="print.trait_flex.html">print.trait_flex()</a></code>,
 <code><a href="sample_individuals.html">sample_individuals()</a></code>,
 <code><a href="subsample_individuals.html">subsample_individuals()</a></code>,
 <code><a href="trait_densities.html">trait_densities()</a></code>,
@@ -224,10 +232,6 @@ with phenotypic covariance matrices: a simulation study. <em>Evolution</em>, 67,
 <span class="r-in"><span><span class="va">means</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span> <span class="op">*</span> <span class="fl">4</span><span class="op">)</span>, <span class="fl">30</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html" class="external-link">chol</a></span><span class="op">(</span><span class="va">G</span> <span class="op">*</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="va">means</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>, <span class="op">]</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">600</span> <span class="op">*</span> <span class="fl">4</span><span class="op">)</span>, <span class="fl">600</span><span class="op">)</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/chol.html" class="external-link">chol</a></span><span class="op">(</span><span class="va">G</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu">drift_test</span><span class="op">(</span><span class="va">ind</span>, group <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">30</span>, each <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> drift_test() implements the method of:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span>   Ackermann, R. R., &amp; Cheverud, J. M. (2004). Detecting genetic drift versus selection in human evolution. Proceedings of the National Academy of Sciences, 101, 17946-17951. https://doi.org/10.1073/pnas.0405919102</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Please cite these papers together with comdynamite (citation("comdynamite")).</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span>
 <span class="r-in"><span><span class="va">test</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Test of proportional divergence (Ackermann &amp; Cheverud 2004)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 30 groups, 4 traits</span>

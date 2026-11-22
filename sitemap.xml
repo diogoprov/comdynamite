@@ -46,6 +46,9 @@
 <url><loc>https://provetelab.org/comdynamite/reference/assemble_community.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/biogeography_matrix.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/clade_regimes.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/coef.drift_test.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/coef.population_shifts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/colonisation_history.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/comdynamite-deprecated.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/comdynamite-package.html</loc></url>
@@ -90,6 +93,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/neighbour_metrics.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/nested_variance.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/niche_correlation.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/nobs.mc_node_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/node_contrasts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/node_test.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/null_intervals.html</loc></url>
@@ -105,8 +109,14 @@
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_eigenvectors.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/phylo_vector.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.food_web.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_abc_choice.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_abc_fit.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_pcc.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.mc_pcps.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_phylo_vector.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.nested_variance.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.population_shifts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.rate_matrix.html</loc></url>
@@ -123,6 +133,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/plot_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/population_shifts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/pp_check.mc_trait_gradient_bayes.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/print.trait_flex.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/random_regimes.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/range_history.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/rate_matrix.html</loc></url>

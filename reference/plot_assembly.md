@@ -14,6 +14,7 @@ plot_assembly(
   colours = c("#0072B2", "grey60", "#D55E00"),
   species_labels = FALSE,
   point_size = 2,
+  text_size = 3.5,
   ...,
   labels = NULL
 )
@@ -41,6 +42,12 @@ plot_assembly(
 - point_size:
 
   Size of the species. One number greater than 0.
+
+- text_size:
+
+  Size of the species labels, in mm (as in
+  [`ggplot2::geom_text()`](https://ggplot2.tidyverse.org/reference/geom_text.html)).
+  One number greater than 0.
 
 - labels, ...:
 

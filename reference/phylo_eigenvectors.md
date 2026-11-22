@@ -42,6 +42,7 @@ Other the whole tree:
 [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
 [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
 [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md),
+[`plot.mc_pcc()`](https://provetelab.org/comdynamite/reference/plot.mc_pcc.md),
 [`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md),
 [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
 

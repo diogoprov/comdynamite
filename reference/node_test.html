@@ -115,8 +115,9 @@ Or an <code><a href="mc_data.html">mc_data()</a></code> object, whose parts fill
 
 
 <dt id="arg-env">env<a class="anchor" aria-label="anchor" href="#arg-env"></a></dt>
-<dd><p>Predictor, or matrix or data frame of predictors, with one row per
-site.</p></dd>
+<dd><p>Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with <code><a href="https://rdrr.io/r/stats/model.matrix.html" class="external-link">stats::model.matrix()</a></code>.</p></dd>
 
 
 <dt id="arg-biogeography">biogeography<a class="anchor" aria-label="anchor" href="#arg-biogeography"></a></dt>

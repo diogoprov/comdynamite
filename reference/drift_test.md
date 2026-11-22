@@ -81,9 +81,17 @@ proportionality constant, an estimate of \\\log(t / N_e)\\ when `W` is
 \\G\\ and `correct = TRUE`), `df`, `n_groups`, `n_traits`, the matrix
 `W` and a data frame `components` with the `eigenvalue`, the expected
 `sampling` variance of the means (0 without correction) and the
-`between` variance (corrected) of each principal component. It has
-[`print()`](https://rdrr.io/r/base/print.html) and
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods.
+`between` variance (corrected) of each principal component, and `fit`,
+the [`stats::lm()`](https://rdrr.io/r/stats/lm.html) fit of
+`log(between)` on `log(eigenvalue)`. It has
+[`print()`](https://rdrr.io/r/base/print.html),
+[`plot()`](https://rdrr.io/r/graphics/plot.default.html),
+[coef()](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`confint()`](https://rdrr.io/r/stats/confint.html),
+[`vcov()`](https://rdrr.io/r/stats/vcov.html),
+[`nobs()`](https://rdrr.io/r/stats/nobs.html),
+[`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+[`residuals()`](https://rdrr.io/r/stats/residuals.html) methods.
 
 ## Details
 
@@ -131,17 +139,23 @@ study. *Evolution*, 67, 185–195.
 ## See also
 
 Other trait variation among individuals:
+[`coef.drift_test()`](https://provetelab.org/comdynamite/reference/coef.drift_test.md),
+[`coef.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/coef.mc_trait_gradient.md),
+[`coef.population_shifts()`](https://provetelab.org/comdynamite/reference/coef.population_shifts.md),
 [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
 [`neighbour_metrics`](https://provetelab.org/comdynamite/reference/neighbour_metrics.md),
 [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md),
 [`null_intervals()`](https://provetelab.org/comdynamite/reference/null_intervals.md),
 [`plot.mc_trait_gradient()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient.md),
+[`plot.mc_trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_bayes.md),
+[`plot.mc_trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/plot.mc_trait_gradient_phylo.md),
 [`plot.nested_variance()`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md),
 [`plot.trait_flex()`](https://provetelab.org/comdynamite/reference/plot.trait_flex.md),
 [`plot.trait_rarefaction()`](https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.md),
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
@@ -164,10 +178,6 @@ G <- genetic_matrices(1, 4, correlation = 0.5)$genetic_var[[1]]
 means <- matrix(rnorm(30 * 4), 30) %*% chol(G * 0.5)
 ind <- means[rep(1:30, each = 20), ] + matrix(rnorm(600 * 4), 600) %*% chol(G)
 test <- drift_test(ind, group = rep(1:30, each = 20))
-#> drift_test() implements the method of:
-#>   Ackermann, R. R., & Cheverud, J. M. (2004). Detecting genetic drift versus selection in human evolution. Proceedings of the National Academy of Sciences, 101, 17946-17951. https://doi.org/10.1073/pnas.0405919102
-#> Please cite these papers together with comdynamite (citation("comdynamite")).
-#> This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.
 test
 #> Test of proportional divergence (Ackermann & Cheverud 2004)
 #> 30 groups, 4 traits

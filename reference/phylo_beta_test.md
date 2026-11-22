@@ -40,7 +40,10 @@ phylo_beta_test(
 - env:
 
   Predictor, or matrix or data frame of predictors, with one row per
-  site.
+  site. Columns must be numeric or logical: factors and character
+  columns stop with an error, so code a factor as dummy variables first,
+  for example with
+  [`stats::model.matrix()`](https://rdrr.io/r/stats/model.matrix.html).
 
 - n_perm:
 
@@ -82,9 +85,10 @@ phylo_beta_test(
 
 List of class `mc_phylo_beta` with `r2_adjusted`, the adjusted R2;
 `statistic`, the pseudo-F; `p_site`, `p_species` and `p_max`; `scores`,
-the sites on the principal coordinates of the predicted matrix, which
-the authors suggest using to order sites in a heatmap of the community
-matrix; and `permutations`.
+the sites on the principal coordinates of the predicted matrix (rows
+named by the occupied sites of `comm`, columns `PCoA1`, `PCoA2`, ...),
+which the authors suggest using to order sites in a heatmap of the
+community matrix; and `permutations`.
 
 ## Details
 
@@ -130,6 +134,7 @@ Other the whole tree:
 [`pcps_test()`](https://provetelab.org/comdynamite/reference/pcps_test.md),
 [`phylo_beta()`](https://provetelab.org/comdynamite/reference/phylo_beta.md),
 [`phylo_eigenvectors()`](https://provetelab.org/comdynamite/reference/phylo_eigenvectors.md),
+[`plot.mc_pcc()`](https://provetelab.org/comdynamite/reference/plot.mc_pcc.md),
 [`plot.mc_pcps()`](https://provetelab.org/comdynamite/reference/plot.mc_pcps.md),
 [`plot_phylo_beta()`](https://provetelab.org/comdynamite/reference/plot_phylo_beta.md)
 

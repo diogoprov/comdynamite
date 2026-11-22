@@ -2,6 +2,86 @@
 
 ## comdynamite (development version)
 
+- Text in plots is larger by default (3.2 to 3.5 mm), and
+  [`plot_traits()`](https://provetelab.org/comdynamite/reference/plot_traits.md)
+  and
+  [`plot_assembly()`](https://provetelab.org/comdynamite/reference/plot_assembly.md)
+  gain `text_size`.
+
+- Documentation: the intended audience and the priors of the Bayesian
+  functions in the README; how to restart
+  [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+  from an earlier fit (`init = previous$fit`) and the reference for its
+  convergence diagnostics; the tolerances of the optimisers of
+  [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md)
+  and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md);
+  that predictors must be numeric or logical; and, in
+  [`?comdynamite`](https://provetelab.org/comdynamite/reference/comdynamite-package.md),
+  how factors, units and integer tables are converted.
+
+- New accessor methods for the regression results:
+  [`coef()`](https://rdrr.io/r/stats/coef.html),
+  [`confint()`](https://rdrr.io/r/stats/confint.html),
+  [`vcov()`](https://rdrr.io/r/stats/vcov.html),
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) and
+  [`residuals()`](https://rdrr.io/r/stats/residuals.html) for
+  [`drift_test()`](https://provetelab.org/comdynamite/reference/drift_test.md)
+  (which now keeps its [`stats::lm()`](https://rdrr.io/r/stats/lm.html)
+  fit as `fit`) and
+  [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md)
+  (intervals and covariance from the bootstrap; fitted values and
+  residuals of the regression at the chosen width, in the new attribute
+  `model`); [`formula()`](https://rdrr.io/r/stats/formula.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html),
+  [`residuals()`](https://rdrr.io/r/stats/residuals.html),
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html) and a
+  [`print()`](https://rdrr.io/r/base/print.html) method for
+  [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
+  whose result now keeps `formula` and the site-level `model`;
+  [`coef()`](https://rdrr.io/r/stats/coef.html) and
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html) for
+  [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md)
+  and
+  [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md);
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html) for
+  [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md)
+  and
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md).
+
+- The [`print()`](https://rdrr.io/r/base/print.html) methods of the
+  result classes take `digits`.
+
+- New [`plot()`](https://rdrr.io/r/graphics/plot.default.html) methods
+  for
+  [`pcc_test()`](https://provetelab.org/comdynamite/reference/pcc_test.md),
+  [`phylo_vector()`](https://provetelab.org/comdynamite/reference/phylo_vector.md),
+  [`trait_gradient_phylo()`](https://provetelab.org/comdynamite/reference/trait_gradient_phylo.md),
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  (posterior against prior),
+  [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
+  and
+  [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+  (intervals, or trace plots of the chains with `type = "trace"`).
+
+- The seed is kept with the result of
+  [`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+  (element `seed`) and of
+  [`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md),
+  [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
+  [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md)
+  and
+  [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md)
+  (attribute `seed`).
+
+- The `scores` of
+  [`phylo_beta_test()`](https://provetelab.org/comdynamite/reference/phylo_beta_test.md)
+  keep the site names of `comm`, and
+  [`predict()`](https://rdrr.io/r/stats/predict.html) of
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  adds a column `name` with the row names of `newdata`.
+
 - [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md),
   [`community_index()`](https://provetelab.org/comdynamite/reference/community_index.md),
   [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),

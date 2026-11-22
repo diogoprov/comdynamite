@@ -23,6 +23,13 @@ which settings approximate six published models, which of their
 mechanisms are missing, and what happened when we tried to reproduce the
 results of Urban & De Meester (2009) and Leibold et al. (2019).
 
+The package is written for community ecologists, biogeographers and
+evolutionary biologists who analyse species composition, traits and
+phylogenies across sites, and for methodologists who want to check, by
+simulation, whether a method recovers a known process. It assumes
+familiarity with R and with the methods it implements, whose original
+papers each help page cites.
+
 ## What do you want to do?
 
 **Analyse data**
@@ -77,6 +84,21 @@ install.packages("cmdstanr", repos = c("https://stan-dev.r-universe.dev",
                                        "https://cloud.r-project.org"))
 cmdstanr::install_cmdstan()
 ```
+
+## Priors
+
+Two functions are Bayesian, and both take their priors as arguments.
+[`abc_table()`](https://provetelab.org/comdynamite/reference/abc_table.md)
+draws the parameters of each simulation from uniform priors given in
+`prior`, a named list with the lower and upper limit of each parameter,
+for example `prior = list(log_dispersal = c(-3, -1), lambda = c(0, 1))`;
+[`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+then estimates the posterior from that reference table.
+[`trait_gradient_bayes()`](https://provetelab.org/comdynamite/reference/trait_gradient_bayes.md)
+puts a beta prior on the phylogenetic share (lambda) of each quantity,
+with shape parameters `lambda_prior` (`c(1, 1)`, uniform, by default);
+its help page lists the fixed priors of the other parameters, which are
+set on the standardised scale of the trait.
 
 ## Large analyses
 
