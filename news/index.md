@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.11.0
 
 - [`node_test()`](https://provetelab.org/comdynamite/reference/node_test.md):
   `r2`, `r2_adjusted` and the semipartial correlations now sum squares
