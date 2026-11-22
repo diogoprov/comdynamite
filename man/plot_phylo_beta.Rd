@@ -10,7 +10,7 @@ plot_phylo_beta(
   tree,
   axis = 1,
   colours = "#0072B2",
-  text_size = 2.5,
+  text_size = 3.2,
   ...,
   col = NULL,
   cex = NULL

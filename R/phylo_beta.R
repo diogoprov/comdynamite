@@ -68,8 +68,9 @@ phylo_beta <- function(comm, tree) {
 #' in [phylo_beta()].
 #'
 #' @inheritParams phylo_beta
-#' @param env Predictor, or matrix or data frame of predictors, with one row per
-#'   site.
+#' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param site_permutations Optional matrix of site indices with one permutation
 #'   per row, for example from [torus_permutations()], to use instead of free

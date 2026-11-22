@@ -22,7 +22,9 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 
 \item{tree}{A \code{phylo} object.}
 
-\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.}
+\item{env}{Predictor, or matrix or data frame of predictors, with one row per site.
+Columns must be numeric or logical: factors and character columns stop with an error, so
+code a factor as dummy variables first, for example with \code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{axes}{Principal coordinates to test, in order of eigenvalue: a vector of distinct
 whole numbers, 1 or more.}

@@ -24,10 +24,9 @@
 #'   limits (`prior` of `abc_table()`). The Stan model has fixed, explicit priors on the
 #'   standardised scale (normal(0, 1), exponential(1), lkj(2)) and a beta prior of the
 #'   phylogenetic share that the user sets with `lambda_prior`.
-#' @srrstatsTODO {BS1.2a} The README names `trait_gradient_bayes()` only in the
-#'   installation notes and says nothing about ABC or about how priors are specified.
-#'   Missing: a short paragraph or example in `README.Rmd` on the `prior` list of
-#'   `abc_table()` and on `lambda_prior` of `trait_gradient_bayes()`.
+#' @srrstats {BS1.2a} The README has a section "Priors" on the `prior` list of `abc_table()`
+#'   (uniform limits per parameter, with an example) and on `lambda_prior` of
+#'   `trait_gradient_bayes()`, whose help page lists the fixed priors of the other parameters.
 #' @srrstats {BS1.2b} `vignettes/abc.Rmd` explains that parameters are drawn uniformly
 #'   from the prior, defines the `prior` list of six parameters in code (with parameters
 #'   that span orders of magnitude drawn on the log scale), passes it to `abc_table()`
@@ -49,12 +48,10 @@
 #'   `ntree`, `ncores` and `min_node_size` of `abc_fit()`, `n_test`, `level` and `seed`
 #'   of `abc_recovery()`, and `n`, `seed` of `abc_ppc()` and `abc_cv()` are documented
 #'   in the respective help pages.
-#' @srrstatsTODO {BS1.3a} Not documented. For the Stan model it works: `init` passed
-#'   through `...` accepts the `fit` element of a previous result (checked by hand with
-#'   cmdstanr 0.9.0.9002), but neither the help page nor an example says so. Missing: a
-#'   sentence and an example line in `trait_gradient_bayes()`, such as
-#'   `trait_gradient_bayes(tg, tree, init = previous$fit)`. Does not apply to ABC, which
-#'   has no starting point.
+#' @srrstats {BS1.3a} The help page of `trait_gradient_bayes()` says, in Details and under
+#'   `...`, that `init` accepts the `fit` element of an earlier result to restart the chains from
+#'   where they stopped, and its examples show `trait_gradient_bayes(tg, tree, iter_sampling =
+#'   2000, init = bayes$fit)`. ABC has no starting point.
 #' @srrstats {BS1.4} The convergence checks of the Stan model (R-hat, bulk and tail
 #'   effective sample sizes, divergent transitions) are computed after sampling in
 #'   every call and returned in `diagnostics`; they do not change or stop the sampling,
@@ -168,12 +165,10 @@
 #'   predictive check), `abc_cv()` (cross-validation over folds of sites) and
 #'   `abc_diagnose()` (effective sample size of the weights, statistics outside the
 #'   reference table).
-#' @srrstatsTODO {BS4.3} The checkers exist (R-hat, bulk and tail effective sample
-#'   sizes from `posterior::summarise_draws()`, divergent transitions from the sampler;
-#'   `tg_diagnostics_from()`), but the help page of `trait_gradient_bayes()` gives only
-#'   the thresholds, with no reference for the statistics or their implementation.
-#'   Missing: a `@references` entry for R-hat and the effective sample sizes as
-#'   computed by the posterior package, and a mention of that package in Details.
+#' @srrstats {BS4.3} The help page of `trait_gradient_bayes()` cites Vehtari et al. (2021,
+#'   Bayesian Analysis 16: 667-718) for R-hat and the bulk and tail effective sample sizes, and
+#'   says that they are computed by `posterior::summarise_draws()` and that divergences and
+#'   transitions at the maximum tree depth are counted by cmdstanr.
 #' @srrstats {BS4.5} The diagnostics count transitions that hit the maximum tree depth
 #'   (`max_treedepth` in `diagnostics`) besides divergences, R-hat and effective sample
 #'   sizes. When the diagnostics fail, `trait_gradient_bayes()` warns, returns

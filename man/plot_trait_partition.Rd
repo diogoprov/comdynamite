@@ -11,7 +11,7 @@ plot_trait_partition(
   level = 0.05,
   colours = "#0072B2",
   labels = c("Environment", "Space"),
-  text_size = 3.2,
+  text_size = 3.5,
   ...,
   alpha = NULL,
   col = NULL,

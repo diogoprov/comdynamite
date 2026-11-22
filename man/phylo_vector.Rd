@@ -23,8 +23,10 @@ Or an \code{\link[=mc_data]{mc_data()}} object, whose parts fill the arguments l
 
 \item{tree}{A \code{phylo} object.}
 
-\item{env}{Numeric vector with the value of each site. The authors estimate one
-vector for each predictor.}
+\item{env}{Numeric vector with the value of each site. The authors estimate one vector for
+each predictor. Columns must be numeric or logical: factors and character columns stop
+with an error, so code a factor as dummy variables first, for example with
+\code{\link[stats:model.matrix]{stats::model.matrix()}}.}
 
 \item{n_perm}{Number of permutations of sites and of species. One whole number, 1 or more.}
 

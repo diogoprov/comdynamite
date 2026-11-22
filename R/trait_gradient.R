@@ -651,7 +651,15 @@ print.mc_trait_gradient_test <- function(x, digits = 3, ...) {
 #'
 #' \eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
 #' lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
-#' such fits are marked in `at_bound` and their half-life is `NA`. AIC differences among three
+#' such fits are marked in `at_bound` and their half-life is `NA`. The restricted likelihood
+#' is maximised by [stats::optimize()] over the logarithm of \eqn{\sigma^2} for white noise and
+#' BM, with its default tolerance, and for OU by [stats::optim()] with method `"L-BFGS-B"` and
+#' its default controls (relative tolerance `factr = 1e7`, at most 100 iterations) from three
+#' starting values of \eqn{a} (0.1, 1 and 5 divided by the height of the tree), keeping the
+#' best. These settings are fixed: the surfaces have one or two parameters on bounded
+#' intervals, and the several starts guard against local optima better than a tighter
+#' tolerance would; `converged` reports the convergence code of the best start. AIC
+#' differences among three
 #' models fitted to few species are unstable, and the bootstrap standard error of a species
 #' seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 #'

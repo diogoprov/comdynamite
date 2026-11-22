@@ -18,14 +18,12 @@
 #'   matched to the sites by name, so the design matrix is that of `stats::model.matrix()`
 #'   with the default contrasts. The help of `trait_flex()` states that `formula` is
 #'   one-sided, must keep the intercept and uses the variables of `env`.
-#' @srrstatsTODO {RE1.2} The help pages give the format of the predictors (`env`: a vector,
-#'   matrix or data frame with one row per site, matched to `comm` by row names; column names
-#'   in `trait_flex()`, `population_shifts()`, `trait_gradient()`), and `check_env()` and
-#'   `check_numeric_columns()` (R/checks.R) refuse character and factor columns with a
-#'   message that says to code factors as dummy variables. Missing: the `env` entries of the
-#'   help pages of `node_test()`, `pcc_test()`, `phylo_beta_test()`, `pcps_test()`,
-#'   `phylo_vector()` and `trait_partition()` do not say that only numeric or logical
-#'   columns are accepted and that factors and character columns are refused.
+#' @srrstats {RE1.2} The help pages give the format of the predictors: `env` is a vector,
+#'   matrix or data frame with one row per site, matched to `comm` by row names, and the `env`
+#'   entries of `node_test()`, `pcc_test()`, `phylo_beta_test()`, `pcps_test()`, `phylo_vector()`
+#'   and `trait_partition()` say that columns must be numeric or logical and that factors and
+#'   character columns stop with an error, to be coded as dummy variables; `check_env()` and
+#'   `check_numeric_columns()` (R/checks.R) enforce it.
 #' @srrstats {RE1.3} Names are kept in the results: node numbers and predictor names in the
 #'   tables and matrices of `node_test()`, predictor and trait names in `trait_partition()`,
 #'   species names in `phylo_vector()` and `phylo_eigenvectors()`, site and species names in the
@@ -99,15 +97,17 @@
 #'   information stays in the result: `population_shifts()` keeps the attribute `profile`, with
 #'   the residual sum of squares and the estimates at each width, and `trait_gradient_phylo()`
 #'   keeps the columns `at_bound` and `converged` of its `models` table.
-#' @srrstatsTODO {RE3.2} The help of `population_shifts()` gives the grid of widths and the
-#'   5% threshold of a flat profile, and that of `trait_gradient_phylo()` the bounds of the
-#'   OU parameter. Missing: the tolerances themselves (defaults of `stats::optimize()` and
-#'   of `stats::optim()` with L-BFGS-B, and the relative tolerance of 1e-8 and 50 iterations
-#'   of `population_variance()`) are not documented.
-#' @srrstatsTODO {RE3.3} `population_shifts()` lets the user fix `width`, which removes the
-#'   search, but no function takes a tolerance or a maximum number of iterations. Missing:
-#'   either such arguments (for example a `control` list passed to `stats::optim()` in
-#'   `trait_gradient_phylo()`) or a documented reason for fixing them.
+#' @srrstats {RE3.2} The tolerances are documented: the help of `trait_gradient_phylo()` gives
+#'   the bounds of the OU parameter, the use of `stats::optimize()` with its default tolerance
+#'   and of `stats::optim()` with L-BFGS-B and its default controls from three starts; that of
+#'   `population_shifts()` gives the grid of widths, its refinement by `optimize()` with its
+#'   default tolerance, the 5% threshold of a flat profile, and the relative tolerance of 1e-8
+#'   and 50 iterations of the variance of populations.
+#' @srrstats {RE3.3} `population_shifts()` lets the user fix `width`, which removes the search.
+#'   The other tolerances are fixed, with the reason given in the help pages: the surfaces have
+#'   one or two parameters on bounded intervals, several starts guard against local optima better
+#'   than a tighter tolerance would, and a finer width or variance would not change the estimates
+#'   beyond their sampling error; non-convergence is reported (`converged`, warnings).
 #' @srrstats {RE4.0} Each analysis returns an object of its own S3 class: `mc_node_test`,
 #'   `mc_pcc`, `mc_phylo_beta`, `mc_pcps`, `mc_phylo_vector`, `mc_trait_partition`,
 #'   `mc_trait_gradient`, `mc_trait_gradient_test`, `mc_trait_gradient_phylo`, `trait_flex`,

@@ -22,6 +22,8 @@
 #' @param tip_labels `TRUE` or `FALSE`. Should the tips be labelled?
 #' @param legend `TRUE` or `FALSE`. Draw the legend of the regimes?
 #' @param point_size Size of the tips. One number greater than 0.
+#' @param text_size Size of the tip labels, in mm (as in [ggplot2::geom_text()]). One number
+#'   greater than 0.
 #' @param linewidth Width of the branches. One number greater than 0.
 #' @param labels,... Deprecated: `labels` is now `tip_labels`; graphical arguments of base
 #'   graphics are no longer used (modify the ggplot object instead).
@@ -40,13 +42,15 @@
 #' plot_traits(x, habitat, traits = 1, regimes = habitat)
 #' @export
 plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colours = NULL,
-                        tip_labels = FALSE, legend = TRUE, point_size = 1.8, linewidth = 0.7,
+                        tip_labels = FALSE, legend = TRUE, point_size = 1.8, text_size = 3.5,
+                        linewidth = 0.7,
                         ..., labels = NULL) {
   need_ggplot("plot_traits()")
   tip_labels <- renamed_arg(tip_labels, labels, "tip_labels", "labels")
   legend <- legend_flag(legend)
   check_flag(tip_labels, "tip_labels")
   check_number(point_size, "point_size", lower = 0, open = TRUE)
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
   check_number(linewidth, "linewidth", lower = 0, open = TRUE)
   x <- as.matrix(x)
   if (!is.numeric(x) || is.null(rownames(x))) {
@@ -69,8 +73,8 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
     tips <- data.frame(a = x[, traits[1]], b = x[, traits[2]], label = rownames(x))
     p <- ggplot2::ggplot(tips, ggplot2::aes(.data$a, .data$b)) +
       ggplot2::geom_point(colour = (colours %||% "#0072B2")[1], size = point_size)
-    if (tip_labels) p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label), size = 2.5,
-                                                vjust = -0.6)
+    if (tip_labels) p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label),
+                                                size = text_size, vjust = -0.6)
     return(p + ggplot2::labs(x = lab[1], y = lab[2]) + ggplot2::theme_minimal())
   }
   check_tree(tree, branch_lengths = FALSE)
@@ -121,7 +125,7 @@ plot_traits <- function(x, tree = NULL, traits = c(1, 2), regimes = NULL, colour
   }
   if (tip_labels) {
     p <- p + ggplot2::geom_text(data = tips, ggplot2::aes(.data$x, .data$y, label = .data$label),
-                                size = 2.5, hjust = if (length(traits) == 2) 0.5 else -0.15,
+                                size = text_size, hjust = if (length(traits) == 2) 0.5 else -0.15,
                                 vjust = if (length(traits) == 2) -0.7 else 0.5)
   }
   p + ggplot2::scale_colour_manual(values = cols, name = "Regime",
@@ -205,6 +209,8 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL, leg
 #' @param colours Colours of the species kept and removed, and of the contours.
 #' @param species_labels `TRUE` or `FALSE`. Should the species be labelled?
 #' @param point_size Size of the species. One number greater than 0.
+#' @param text_size Size of the species labels, in mm (as in [ggplot2::geom_text()]). One
+#'   number greater than 0.
 #' @param labels,... Deprecated: `labels` is now `species_labels`; graphical arguments of base
 #'   graphics are no longer used. The aspect ratio is always 1, so that the contours of
 #'   Euclidean distances are circles.
@@ -222,11 +228,13 @@ plot.rate_matrix <- function(x, traits = c(1, 2), level = 1, colours = NULL, leg
 #'   ggplot2::ggtitle("Mahalanobis")
 #' @export
 plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", "#D55E00"),
-                          species_labels = FALSE, point_size = 2, ..., labels = NULL) {
+                          species_labels = FALSE, point_size = 2, text_size = 3.5, ...,
+                          labels = NULL) {
   need_ggplot("plot_assembly()")
   species_labels <- renamed_arg(species_labels, labels, "species_labels", "labels")
   check_flag(species_labels, "species_labels")
   check_number(point_size, "point_size", lower = 0, open = TRUE)
+  check_number(text_size, "text_size", lower = 0, open = TRUE)
   if (!inherits(x, "mc_assembly")) {
     stop("`x` must be the output of assemble_community()", call. = FALSE)
   }
@@ -272,7 +280,8 @@ plot_assembly <- function(x, traits = c(1, 2), colours = c("#0072B2", "grey60", 
                                  colour = colours[3])
   }
   if (species_labels) {
-    p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label), size = 2.5, vjust = -0.7)
+    p <- p + ggplot2::geom_text(ggplot2::aes(label = .data$label), size = text_size,
+                                vjust = -0.7)
   }
   p + ggplot2::coord_equal() + ggplot2::labs(x = lab[1], y = lab[2]) +
     ggplot2::theme_minimal()

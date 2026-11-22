@@ -53,8 +53,9 @@ phylo_eigenvectors <- function(tree, squared = FALSE) {
 #'   two are dropped with a warning. Every site needs at least one individual.
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
-#' @param env Predictor, or matrix or data frame of predictors, with one row per
-#'   site.
+#' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.
 #' @param squared `TRUE` or `FALSE`, passed to [phylo_eigenvectors()].
 #' @param site_permutations Optional matrix of site indices with one permutation

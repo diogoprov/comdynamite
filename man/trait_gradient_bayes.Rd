@@ -35,7 +35,9 @@ finite numbers greater than 0.}
 one whole number, 1 or more; \code{iter_warmup} one whole number, 0 or more; \code{adapt_delta} one
 number between 0 and 1, both excluded; \code{seed} one whole number, 0 or more, or \code{NULL}.}
 
-\item{...}{Further arguments to \verb{$sample()}, such as \code{max_treedepth} or \code{refresh}.}
+\item{...}{Further arguments to \verb{$sample()}, such as \code{max_treedepth}, \code{refresh},
+\code{save_warmup} or \code{init} (which accepts the \code{fit} of an earlier result, to restart the
+chains from where it stopped).}
 }
 \value{
 An object of class \code{mc_trait_gradient_bayes}, a list with
@@ -119,7 +121,12 @@ Check convergence (\code{diagnostics}: R-hat below 1.01, bulk and tail effective
 above 400, no divergent transitions and no transitions that hit the maximum tree depth of
 the sampler, over the intercepts, standard deviations,
 \eqn{\lambda}, correlations, species values and \code{lp__}) and the fit, with
-\code{\link[bayesplot:pp_check]{bayesplot::pp_check()}} on the result, before reading the estimates.
+\code{\link[bayesplot:pp_check]{bayesplot::pp_check()}} on the result, before reading the estimates. R-hat and the bulk
+and tail effective sample sizes are those of Vehtari et al. (2021), computed by
+\code{posterior::summarise_draws()}; divergences and transitions at the maximum tree depth are
+counted by cmdstanr. When the chains have not converged, run them longer
+(\code{iter_sampling}, \code{iter_warmup}), or restart from the end of a previous fit: \code{init}, passed
+through \code{...}, takes the \code{fit} element of an earlier result, as in the examples.
 
 The model is in \code{system.file("stan", "trait_gradient.stan", package = "comdynamite")}. It
 is compiled by cmdstanr the first time it is used and kept in
@@ -184,7 +191,16 @@ bayes$signal
 bayesplot::pp_check(bayes, resp = "sitemean")
 plot(bayes)
 plot(bayes, type = "trace")
+# longer chains that start where the first ones stopped
+longer <- trait_gradient_bayes(tg, tree, parallel_chains = 4, iter_sampling = 2000,
+                               init = bayes$fit)
 \dontshow{\}) # examplesIf}
+}
+\references{
+Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021).
+Rank-normalization, folding, and localization: an improved \eqn{\hat{R}} for assessing
+convergence of MCMC (with discussion). \emph{Bayesian Analysis}, 16, 667--718.
+\doi{10.1214/20-BA1221}
 }
 \seealso{
 \code{\link[=trait_gradient]{trait_gradient()}}, \code{\link[=trait_gradient_phylo]{trait_gradient_phylo()}}

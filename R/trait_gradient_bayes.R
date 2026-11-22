@@ -60,7 +60,12 @@
 #' above 400, no divergent transitions and no transitions that hit the maximum tree depth of
 #' the sampler, over the intercepts, standard deviations,
 #' \eqn{\lambda}, correlations, species values and `lp__`) and the fit, with
-#' [bayesplot::pp_check()] on the result, before reading the estimates.
+#' [bayesplot::pp_check()] on the result, before reading the estimates. R-hat and the bulk
+#' and tail effective sample sizes are those of Vehtari et al. (2021), computed by
+#' `posterior::summarise_draws()`; divergences and transitions at the maximum tree depth are
+#' counted by cmdstanr. When the chains have not converged, run them longer
+#' (`iter_sampling`, `iter_warmup`), or restart from the end of a previous fit: `init`, passed
+#' through `...`, takes the `fit` element of an earlier result, as in the examples.
 #'
 #' The model is in `system.file("stan", "trait_gradient.stan", package = "comdynamite")`. It
 #' is compiled by cmdstanr the first time it is used and kept in
@@ -120,7 +125,9 @@
 #'   `$sample()` method of cmdstanr. `chains`, `parallel_chains` and `iter_sampling` are each
 #'   one whole number, 1 or more; `iter_warmup` one whole number, 0 or more; `adapt_delta` one
 #'   number between 0 and 1, both excluded; `seed` one whole number, 0 or more, or `NULL`.
-#' @param ... Further arguments to `$sample()`, such as `max_treedepth` or `refresh`.
+#' @param ... Further arguments to `$sample()`, such as `max_treedepth`, `refresh`,
+#'   `save_warmup` or `init` (which accepts the `fit` of an earlier result, to restart the
+#'   chains from where it stopped).
 #' @return An object of class `mc_trait_gradient_bayes`, a list with
 #'   \describe{
 #'     \item{signal}{the phylogenetic share \eqn{\lambda} of \eqn{\beta}, \eqn{\alpha} and the
@@ -141,6 +148,10 @@
 #'     \item{data, A, ou_alpha, lambda_prior}{the data of the model, the phylogenetic
 #'       correlation matrix and the settings.}
 #'   }
+#' @references Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021).
+#'   Rank-normalization, folding, and localization: an improved \eqn{\hat{R}} for assessing
+#'   convergence of MCMC (with discussion). *Bayesian Analysis*, 16, 667--718.
+#'   \doi{10.1214/20-BA1221}
 #' @seealso [trait_gradient()], [trait_gradient_phylo()]
 #' @family trait variation among individuals
 #' @examplesIf interactive() && requireNamespace("cmdstanr", quietly = TRUE) && requireNamespace("treeshapesim", quietly = TRUE)
@@ -157,6 +168,9 @@
 #' bayesplot::pp_check(bayes, resp = "sitemean")
 #' plot(bayes)
 #' plot(bayes, type = "trace")
+#' # longer chains that start where the first ones stopped
+#' longer <- trait_gradient_bayes(tg, tree, parallel_chains = 4, iter_sampling = 2000,
+#'                                init = bayes$fit)
 #' @export
 trait_gradient_bayes <-function(x, tree, ou_alpha = NULL, lambda_prior = c(1, 1), chains = 4,
                                  parallel_chains = 1, iter_warmup = 1000,

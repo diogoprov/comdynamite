@@ -36,6 +36,8 @@
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param env Predictor, or matrix or data frame of predictors, with one row per site.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param axes Principal coordinates to test, in order of eigenvalue: a vector of distinct
 #'   whole numbers, 1 or more.
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.

@@ -70,7 +70,15 @@ it.
 
 \eqn{a} is bounded between \eqn{10^{-3}} and 50 divided by the height of the tree. At the
 lower bound OU is Brownian motion and at the upper bound it is the model without phylogeny;
-such fits are marked in \code{at_bound} and their half-life is \code{NA}. AIC differences among three
+such fits are marked in \code{at_bound} and their half-life is \code{NA}. The restricted likelihood
+is maximised by \code{\link[stats:optimize]{stats::optimize()}} over the logarithm of \eqn{\sigma^2} for white noise and
+BM, with its default tolerance, and for OU by \code{\link[stats:optim]{stats::optim()}} with method \code{"L-BFGS-B"} and
+its default controls (relative tolerance \code{factr = 1e7}, at most 100 iterations) from three
+starting values of \eqn{a} (0.1, 1 and 5 divided by the height of the tree), keeping the
+best. These settings are fixed: the surfaces have one or two parameters on bounded
+intervals, and the several starts guard against local optima better than a tighter
+tolerance would; \code{converged} reports the convergence code of the best start. AIC
+differences among three
 models fitted to few species are unstable, and the bootstrap standard error of a species
 seen in \eqn{n} sites is biased low by about \eqn{\sqrt{(n - 1)/n}}.
 }

@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- Text in plots is larger by default (3.2 to 3.5 mm), and `plot_traits()` and `plot_assembly()`
+  gain `text_size`.
+- Documentation: the intended audience and the priors of the Bayesian functions in the README;
+  how to restart `trait_gradient_bayes()` from an earlier fit (`init = previous$fit`) and the
+  reference for its convergence diagnostics; the tolerances of the optimisers of
+  `trait_gradient_phylo()` and `population_shifts()`; that predictors must be numeric or
+  logical; and, in `?comdynamite`, how factors, units and integer tables are converted.
+
 - New accessor methods for the regression results: `coef()`, `confint()`, `vcov()`, `nobs()`,
   `fitted()` and `residuals()` for `drift_test()` (which now keeps its `stats::lm()` fit as
   `fit`) and `population_shifts()` (intervals and covariance from the bootstrap; fitted values

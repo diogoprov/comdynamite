@@ -82,7 +82,10 @@
 #' median standard deviation of population means within sites and the pooled standard
 #' deviation within populations (a kernel narrower than the spread of individuals mostly fits
 #' sampling noise), but no higher than that median, to four times the median, and is refined by
-#' [stats::optimize()] around its best value. A warning is given when the best width stays at
+#' [stats::optimize()] around its best value, on the logarithm of the width and with the
+#' default tolerance of `optimize()`, since the residual sum of squares is flat near its
+#' minimum and a finer width would not change `c` beyond its sampling error. A warning is given
+#' when the best width stays at
 #' one of the ends of the grid after the refinement or when the residual sum of squares changes
 #' by less than 5% along the grid; `plot()` shows the profile of
 #' the fit and of the estimates along the width. Fix `width` from independent knowledge of the
@@ -97,7 +100,8 @@
 #' species of the populations that enter as responses, and the variance of populations is the
 #' root of a moment equation in which each squared residual is net of the sampling variance of
 #' its mean and weighted by the inverse square of its expected value, so that means of few
-#' individuals weigh little (in the fitted set, the sampling variance is scaled by
+#' individuals weigh little (solved by fixed-point iteration to a relative change below
+#' \eqn{10^{-8}}{1e-8}, at most 50 iterations, which is ample for one parameter; in the fitted set, the sampling variance is scaled by
 #' \eqn{(1 - c_0 D_j)^2}{(1 - c_0 D_j)^2}, with \eqn{D_j}{D_j} the derivative of the push on a
 #' population with respect to its own mean, since the sampling error of the mean also enters
 #' the push removed from it). Two sets are simulated:

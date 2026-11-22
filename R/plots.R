@@ -56,7 +56,7 @@
 #' @export
 plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
                            type = c("phylogram", "fan"), level = 0.05,
-                           colours = c("#0072B2", "#D55E00"), text_size = 2.8, legend = TRUE,
+                           colours = c("#0072B2", "#D55E00"), text_size = 3.5, legend = TRUE,
                            ..., alpha = NULL, col = NULL, cex = NULL) {
   need_ggplot("plot_node_test()")
   level <- deprecated_level(level, alpha)
@@ -193,7 +193,7 @@ plot_node_test <- function(x, tree, test = c("max", "site", "joint"),
 #' plot_node_heatmap(out, test = "site")
 #' @export
 plot_node_heatmap <- function(x, test = c("max", "site", "joint"), level = 0.05,
-                              colours = c("#0072B2", "#D55E00"), text_size = 2.5, ...,
+                              colours = c("#0072B2", "#D55E00"), text_size = 3.2, ...,
                               alpha = NULL, col = NULL, cex = NULL) {
   need_ggplot("plot_node_heatmap()")
   level <- deprecated_level(level, alpha)
@@ -312,7 +312,7 @@ node_marks <- function(x, test, alpha) {
 plot_trait_partition <- function(x, value = c("r2_adjusted", "r2", "r2_component"),
                                  test = c("max", "site", "species"), level = 0.05,
                                  colours = "#0072B2", labels = c("Environment", "Space"),
-                                 text_size = 3.2, ..., alpha = NULL, col = NULL, cex = NULL) {
+                                 text_size = 3.5, ..., alpha = NULL, col = NULL, cex = NULL) {
   need_ggplot("plot_trait_partition()")
   level <- deprecated_level(level, alpha)
   colours <- renamed_arg(colours, col, "colours", "col")
@@ -427,7 +427,7 @@ fraction_positions <- function(edges, width) {
 #' out <- phylo_beta_test(comm[keep, ], tree, env[keep], n_perm = 9)
 #' plot_phylo_beta(out, comm[keep, ], tree)
 #' @export
-plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_size = 2.5,
+plot_phylo_beta <- function(x, comm, tree, axis = 1, colours = "#0072B2", text_size = 3.2,
                             ..., col = NULL, cex = NULL) {
   need_ggplot("plot_phylo_beta()")
   colours <- renamed_arg(colours, col, "colours", "col")

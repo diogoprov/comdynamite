@@ -22,8 +22,10 @@
 #'   Or an [mc_data()] object, whose parts fill the arguments left out.
 #' @param tree A `phylo` object.
 #' @param predictor Deprecated, use `env`.
-#' @param env Numeric vector with the value of each site. The authors estimate one
-#'   vector for each predictor.
+#' @param env Numeric vector with the value of each site. The authors estimate one vector for
+#'   each predictor. Columns must be numeric or logical: factors and character columns stop
+#'   with an error, so code a factor as dummy variables first, for example with
+#'   [stats::model.matrix()].
 #' @param level Significance level of the global test and of the selection. One number
 #'   between 0 and 1, both excluded.
 #' @param alpha Deprecated, use `level`.
@@ -332,6 +334,8 @@ plot.mc_phylo_vector <- function(x, colour = "#0072B2", ...) {
 #'   order, and those in only one of the two are dropped with a warning.
 #' @param env,space Numeric vector, or matrix or data frame, with one row per site. For
 #'   `space`, the article uses Moran's eigenvector maps, which `adespatial::dbmem()` gives.
+#'   Columns must be numeric or logical: factors and character columns stop with an error, so
+#'   code a factor as dummy variables first, for example with [stats::model.matrix()].
 #' @param component `"mean"` for the composition of sites or `"variance"` for their
 #'   dispersion.
 #' @param n_perm Number of permutations of sites and of species. One whole number, 1 or more.

@@ -93,11 +93,10 @@
 #' @srrstats {G2.4e} Factor input is converted with `as.integer()` (`folds` in R/abc_cv.R) or
 #'   `as.character()` (`kernel_group` in R/dynamics.R; site and species columns in
 #'   R/trait_gradient.R) before use, never through its internal codes implicitly.
-#' @srrstatsTODO {G2.5} Arguments that accept factors (`regimes` of the DAMOCLES functions,
-#'   `group` of `drift_test()`, `strata` of `env_surrogates()`, and the site and species columns
-#'   of the functions for individuals) treat them as unordered labels. Missing: the help pages
-#'   do not say that factors are taken as unordered and that the order of an ordered factor is
-#'   ignored.
+#' @srrstats {G2.5} Factors used as labels (`regimes` of the DAMOCLES functions, `group` of
+#'   `drift_test()`, `strata` of `env_surrogates()`, and the site and species columns of the
+#'   functions for individuals) are taken as unordered; the section "Arguments" of the package
+#'   help says so and that the order of an ordered factor is ignored.
 #' @srrstats {G2.6} One-dimensional input is accepted as a vector, a one-column matrix or a
 #'   one-column data frame (`check_env()`, `metric_input()` in R/neighbour_metrics.R).
 #'   `metric_input()` keeps only the `dim`, `dimnames` and `names` attributes, so a vector of
@@ -126,10 +125,11 @@
 #'   data frames are taken with `[[`, and subsets of matrices use `drop = FALSE`, so results do
 #'   not depend on the class of the table; the test with tibbles in
 #'   tests/testthat/test-parallel.R compares classes of input.
-#' @srrstatsTODO {G2.11} Data frames with columns of class `units` run in `check_env()`,
-#'   `tstats()` and `trait_gradient()` (checked by hand), with the units dropped without a
-#'   message. Missing: tests with `units` columns, and a decision on whether to report that the
-#'   units were dropped.
+#' @srrstats {G2.11} Columns of class `units` run in `check_env()`, `tstats()` and
+#'   `trait_gradient()`, and vectors of that class in the neighbour metrics (tested in
+#'   tests/testthat/test-neighbour_metrics.R). The units are dropped without a message, by
+#'   decision: the values are used in the units given and results are in those units, as stated
+#'   in the section "Arguments" of the package help.
 #' @srrstatsTODO {G2.12} List columns stop with a message that names them:
 #'   `check_numeric_columns()` (R/checks.R) for `comm`, `env` and coordinates, and the checks of
 #'   the trait column in `tstats()` and `trait_gradient()`. Missing: tests with list columns
