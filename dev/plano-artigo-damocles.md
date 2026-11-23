@@ -629,6 +629,24 @@ Consequências (interpretação minha; substitui a lista anterior onde conflita)
   - restringir o sorteio a clados com idade de coroa parecida, além do tamanho;
   - mais partições por réplica.
 
+**Fechado sem rodada própria (22/11/2026, decisão do Diogo).** O S1 v3 e o bootstrap do S1
+já respondem à pergunta do S4, e uma rodada focada custaria ~800 horas-núcleo (piloto
+local: 19 sorteios em 1,75 min com 1 mudança em 112 pontas; com 3 mudanças, mais de 8 min
+sem terminar) para refinar um teste que não será o principal.
+
+- Evidência usada:
+  - com 1 mudança, o nulo quase não existe (mediana de 3 partições distintas);
+  - com partições suficientes, o teste é levemente liberal (~0,08);
+  - o χ² (0,047–0,054) e o bootstrap paramétrico (0,048) estão calibrados.
+- Decisão para o artigo:
+  - χ² como teste principal;
+  - bootstrap paramétrico como checagem de robustez;
+  - partições aleatórias só como diagnóstico, com a ressalva de resolução e de leve
+    liberalidade nos Métodos.
+- Não avaliados: mid-p, pareamento por idade de coroa, `tolerance`, `max_overlap` e
+  `n_rand`. Ficam como trabalho futuro, só se um revisor pedir o teste de partição como
+  evidência principal.
+
 ### S5. Dependência espacial entre comunidades
 
 - O ajuste compartilhado trata as comunidades como independentes, dada a árvore. Sítios
@@ -931,7 +949,7 @@ persistência de linhagem; a ligação com a diversificação é premissa.
 | Etapa | Duração |
 |---|---|
 | E1 (taxonomia e árvore) + piloto de tempo de computação | 1 semana |
-| S1, S2, S4, S6 (em paralelo, em background) | 3–5 semanas |
+| S1, S2, S6 (em paralelo, em background; S4 fechado com o S1) | 3–5 semanas |
 | S3 + código da verossimilhança integrada + S5 e bootstrap em blocos | 2–3 semanas |
 | E2–E5 (caso de estudo) | 2–3 semanas |
 | E6 (escala da Mata Atlântica, com piloto de tempo para pools grandes) | 3–5 semanas |
