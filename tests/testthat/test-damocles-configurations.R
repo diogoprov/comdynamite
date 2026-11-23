@@ -107,6 +107,14 @@ test_that("damocles_samples integrates the likelihood over configurations", {
   expect_error(damocles_samples(comm, tree, regimes = list(reg[[1]], rep("x", length(x))),
                                 integrate = TRUE), "same regimes")
   expect_error(damocles_samples(comm, tree, regimes = reg, integrate = NA), "integrate")
+  # configurations with one regime each: the constant model, with no test
+  flat <- damocles_samples(comm, tree, regimes = list(rep("x", length(x)), rep("y", length(x))),
+                           integrate = TRUE)
+  expect_true(is.na(flat$integrated$p_value))
+  expect_equal(flat$integrated$loglik, attr(flat$constant, "loglik_total"), tolerance = 1e-4)
+  expect_equal(log_mean_exp(c(log(2), log(4))), log(3))
+  expect_identical(log_mean_exp(c(-1e10, -Inf)), -1e10)
+  expect_equal(log_mean_exp(c(log(2), -1e10)), log(1))
 })
 
 test_that("damocles_partition_test compares a partition with random ones", {

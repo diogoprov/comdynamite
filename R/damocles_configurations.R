@@ -147,6 +147,16 @@ damocles_samples <- function(comm, tree, regimes = NULL, edge_covariate = NULL,
             class = "mc_damocles_samples")
 }
 
+#' log of the mean of exp(ll), with values at or below -1e10 (failed likelihoods) taken as
+#' -Inf, and -1e10 when none is finite
+#' @noRd
+log_mean_exp <- function(ll) {
+  ll[ll <= -1e10] <- -Inf
+  if (!any(is.finite(ll))) return(-1e10)
+  top <- max(ll)
+  top + log(mean(exp(ll - top)))
+}
+
 #' fit maximising the likelihood averaged over the configurations, L(theta) = mean over k of
 #' L(theta | configuration k), and its likelihood-ratio test against constant rates
 #' @noRd
@@ -163,11 +173,7 @@ damocles_integrated <- function(presence, tree, configurations, is_regimes, vary
   post <- damocles_postorder(tree)
   objectives <- lapply(designs, function(d) damocles_objective(presence, tree, post, root, d))
   objective <- function(par) {
-    ll <- -vapply(objectives, function(o) o(par), numeric(1))
-    ll[ll <= -1e10] <- -Inf
-    if (!any(is.finite(ll))) return(1e10)
-    top <- max(ll)
-    -(top + log(mean(exp(ll - top))))
+    -log_mean_exp(-vapply(objectives, function(o) o(par), numeric(1)))
   }
   base <- rbind(c(constant$gamma[1], constant$mu[1]), damocles_starts(post$tree, NULL))
   best <- damocles_optim(objective, damocles_par_starts(base, design))
