@@ -6,6 +6,20 @@
   as `$integrated` and shown by `print()` and `summary()`. In simulations with ClaDS
   posteriors (`data-raw/s3_clads_validation.R`) this was the most powerful way to test a
   branch-rate covariate from posterior samples, with the size of the test kept.
+
+- `evolution_control()`: `loci` gives a genetic architecture of a few diploid loci of large,
+  additive effect. Each population carries its allele frequencies, its genetic mean and
+  variance follow from them, and selection changes them by Wright's (1937) formula, which also
+  removes variance near the optimum until mutation balances it. Drift, gene flow, founders,
+  seeds and lottery recruitment act on the frequencies, which are returned as
+  `allele_frequency`. Tested in the article "Replicating Leibold et al. (2019)": at their
+  mutation rate, the loci give species sorting, and no setting gives their local dominance.
+
+- `sample_individuals(source = "evolution")` and `maladaptation()` now use the genetic
+  variance of each population at the last step when the simulation has `mutation_var` (or
+  `loci`). Before, a partial match of `genetic_var` read that matrix as one value per species,
+  so the variance of the sampled individuals was wrong.
+
 - `evolution_control()`: `variance_selection = "sexual"` keeps the reduction of the genetic
   variance by stabilising selection as linkage disequilibrium, which recombination halves each
   generation (Bulmer 1971), so the variance recovers when selection relaxes. `TRUE` (now also

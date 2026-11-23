@@ -99,7 +99,10 @@ the optimum of each species with the arguments above; \code{"evolution"} takes t
 simulation run with \code{evolution} (\code{\link[=evolution_control]{evolution_control()}}), as the genetic mean plus the
 plastic part of each population at the sampled step, and draws individuals around them with
 the genetic plus environmental variance of each species (\code{genetic_var + env_var}, plus,
-for a species of several lineages, the variance among them in the site), so that
+for a species of several lineages, the variance among them in the site; with
+\code{mutation_var} or \code{loci} in \code{\link[=evolution_control]{evolution_control()}}, the genetic variance of each
+population at the last step takes the place of \code{genetic_var}, and with \code{loci} only the
+last step can be sampled), so that
 the T-statistics of \code{\link[=tstats]{tstats()}} reflect the variation that evolved. \code{intraspecific_sd},
 when given, then adds variation such as measurement error, and \code{local_adaptation},
 \code{population_sd}, \code{displacement}, \code{founder_sd}, \code{monopolization} and \code{env} must keep their

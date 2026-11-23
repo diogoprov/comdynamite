@@ -51,7 +51,7 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
                         every = 100, nm = 10, immigrant_selection = FALSE,
                         ne_ratio = 0.5, founder = TRUE, mutation_var = NULL,
                         recruitment = "beverton_holt", mortality = 1,
-                        variance_selection = FALSE, p_ext = 0.01) {
+                        variance_selection = FALSE, p_ext = 0.01, loci = NULL) {
   landscape_type <- match.arg(landscape_type)
   set.seed(seed)
   env <- if (landscape_type == "two") sample(rep(c(40, 60), side^2 / 2)) else rep(50, side^2)
@@ -68,22 +68,27 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
   # steps: n_steps and every stay in generations, and patch extinction is per generation
   per <- 1 / mortality
   steps <- seq(every, n_steps, every)
+  # with `loci` (a few loci of large effect), the variance comes from the allele frequencies
+  # and G is not used
+  evolution <- if (is.null(loci)) {
+    evolution_control(genetic_var = G, env_var = 4, ne_ratio = ne_ratio,
+                      immigrant_selection = immigrant_selection, founder = founder,
+                      mutation_var = mutation_var, variance_selection = variance_selection)
+  } else {
+    evolution_control(env_var = 4, ne_ratio = ne_ratio, founder = founder, loci = loci)
+  }
   sim <- simulate_metacommunity(ls, traits, alpha, dispersal = nm / 400,
                                 n_steps = round(n_steps * per),
                                 seed_steps = integer(0), initial = initial,
                                 record_steps = round(steps * per),
                                 disturbance = 1 - (1 - p_ext)^(1 / per),
                                 recruitment = recruitment, microsites = 400,
-                                mortality = mortality,
-                                evolution = evolution_control(
-                                  genetic_var = G, env_var = 4, ne_ratio = ne_ratio,
-                                  immigrant_selection = immigrant_selection,
-                                  founder = founder, mutation_var = mutation_var,
-                                  variance_selection = variance_selection))
+                                mortality = mortality, evolution = evolution)
   list(env = env, preadapted = ifelse(initial[, 1] > 0, 1L, 2L), steps = steps,
        abundance = sim$history, genetic = sim$evolution$history, G = G,
        final = sim$abundance, variance = sim$evolution$genetic_variance,
        disequilibrium = sim$evolution$linkage_disequilibrium,
+       allele_frequency = sim$evolution$allele_frequency,
        landscape_type = landscape_type, seed = seed)
 }
 

@@ -359,6 +359,9 @@ simulate_evolving_metacommunity <- function(landscape, traits, speciation, evolu
     stop("`mutation_var` is not yet available in `simulate_evolving_metacommunity()`",
          call. = FALSE)
   }
+  if (!is.null(evolution$loci)) {
+    stop("`loci` are not yet available in `simulate_evolving_metacommunity()`", call. = FALSE)
+  }
   immigration <- match.arg(immigration)
   evolving_check_numbers(n_steps, inter_max, inter_min, scale, distance_scale, niche_overlap,
                          max_species)
