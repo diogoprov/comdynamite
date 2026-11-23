@@ -75,15 +75,22 @@ variance of the populations at the start and of seeds. Needs a finite \code{ne_r
 only.}
 
 \item{variance_selection}{With \code{mutation_var}, should stabilising selection also remove
-genetic variance? \code{TRUE} or \code{FALSE}. With \code{TRUE}, each generation loses
+genetic variance? \code{FALSE} (the default) keeps the mutation-drift dynamics alone.
+\code{TRUE} or \code{"clonal"} removes each generation
 \eqn{G^2 / (\sigma^2 + G + V_E)}{G^2 / (sigma^2 + G + VE)}, the reduction of the genetic
 variance by Gaussian selection of width \eqn{\sigma}{sigma} on a phenotype of variance
-\eqn{G + V_E}{G + VE} (Bulmer 1971). Under sexual reproduction most of this reduction is
-linkage disequilibrium, which recombination restores, so the full loss holds for clonal
-inheritance, as in the model of Urban & De Meester (2009); with mutation, the variance
-then settles near the balance between mutation and selection (Lande 1975; Turelli 1984)
-rather than at \eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of
-carrying a load. \code{FALSE} (the default) keeps the mutation-drift dynamics alone.}
+\eqn{G + V_E}{G + VE} (Bulmer 1971), for good. This holds for clonal inheritance, as in
+the model of Urban & De Meester (2009); with mutation, the variance then settles near the
+balance between mutation and selection (Lande 1975; Turelli 1984) rather than at
+\eqn{2 N_e V_m}{2 Ne Vm}, and standing variation is eroded instead of carrying a load.
+\code{"sexual"} is the infinitesimal model with free recombination (Bulmer 1971): the
+reduction is linkage disequilibrium \eqn{d}{d}, which gains half of it each generation
+and loses half of itself to recombination, so that \eqn{d}{d} settles at
+\eqn{-G^2 / (\sigma^2 + G + V_E)}{-G^2 / (sigma^2 + G + VE)} and returns to zero when
+selection relaxes. The genic variance \eqn{G - d}{G - d} follows the mutation-drift
+dynamics, and \eqn{G}{G} is the genic variance plus \eqn{d}{d}. Gene flow and founders
+mix \eqn{d}{d} as they mix \eqn{G}{G}, and seeds carry none. The disequilibrium of each
+population at the last step is returned as \code{linkage_disequilibrium}.}
 }
 \value{
 An \code{mc_evolution} object, to pass as \code{evolution}.

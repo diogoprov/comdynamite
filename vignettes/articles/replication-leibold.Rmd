@@ -242,6 +242,31 @@ with a fast loss of species. The rate of mutation was not matched to their loci,
 \(V_m\) could reach the variance needed for adaptation within the 5000 generations; the sweep
 below explores it.
 
+## Erosion under sexual reproduction
+
+The erosion above took the Bulmer reduction as permanent, which holds for clonal inheritance.
+Their default reproduction is sexual, and under free recombination the reduction is linkage
+disequilibrium, which recombination halves each generation, so that the variance recovers
+when selection relaxes (Bulmer 1971). We added `variance_selection = "sexual"` to
+`evolution_control()`, in which the genic variance follows mutation and drift and the
+disequilibrium \(d\) gains half of the Bulmer reduction each generation and loses half of
+itself, settling near \(-G^2/(\sigma^2 + G + V_E)\). We repeated the three recruitment
+settings with mutation and drift from \(G = 200\) and from no variance, \(V_m = 0.5\), at
+\(N_m = 10\) (`data-raw/bulmer_leibold2019.R`; 10 runs of 10,000 generations each).
+
+Sexual erosion behaved almost like no erosion. All 60 runs kept both species at generation 5000. From
+\(G = 200\), the variance at generation 10,000 was 45--78, against 48--91 without erosion and
+about 12 with clonal erosion, and the disequilibrium removed only 4--13 of it; 97--100% of the
+patches were shared and at most 1.5% were switched. From no variance, the variance reached
+63--112, patch type explained 95--97% of the variation in composition at generations
+4000--5000, and 92--95% of the patches were held by the preadapted species, as without
+erosion. The transient reduction of sexual reproduction therefore seems too small to change
+the outcome, and a variance that follows mutation, drift and selection within the
+infinitesimal model does not produce the local dominance of their model. If this mechanism
+lies in the genetic architecture, it seems to need loci of large effect, whose variance can
+change faster than the infinitesimal model allows; this is the second step of block H in the
+roadmap.
+
 ## More replicates and parameter sweeps
 
 The scripts in `data-raw/blockB/` reran the main design with 500 replicates per setting and
@@ -297,7 +322,8 @@ constant \(G\) seems to be a product of drift of the means, and the local domina
 model remains unexplained by our engine.
 Lottery recruitment into vacated microsites, overlapping generations and a variance built
 from new mutations, at low or high mutation rates and with or without erosion by selection,
-did not produce it either. These conclusions held with 500 replicates per setting and across
+did not produce it either, nor did erosion with the transient Bulmer reduction of sexual
+reproduction. These conclusions held with 500 replicates per setting and across
 patch extinction rates from 0 to 0.05, although the speed of adaptation was set through \(G\)
 rather than matched to their model.
 
