@@ -845,9 +845,15 @@ mc_setup_traits <- function(st) {
     # genetic variance of every population, with `mutation_var` (NA where absent)
     pool_g <- matrix(ev$g, m, k_all, byrow = TRUE)
     vg <- NULL
+    vd <- NULL
     if (isTRUE(ev$dyn)) {
       vg <- matrix(NA_real_, m, k_all)
       vg[start_pop] <- pool_g[start_pop]
+    }
+    # linkage disequilibrium of every population, with variance_selection = "sexual"
+    if (isTRUE(ev$sexual)) {
+      vd <- matrix(NA_real_, m, k_all)
+      vd[start_pop] <- 0
     }
   }), st)
   invisible(st)
@@ -961,6 +967,13 @@ mc_seed_traits <- function(st) {
       va[mix] <- w * va[mix] + (1 - w) * pg[mix]
       va[new_seed] <- pg[new_seed]
       vg[, alive] <- va
+      if (isTRUE(ev$sexual)) {
+        # seeds carry no disequilibrium
+        dv <- vd[, alive, drop = FALSE]
+        dv[mix] <- w * dv[mix]
+        dv[new_seed] <- 0
+        vd[, alive] <- dv
+      }
     }
   }), st)
   invisible(st)
@@ -1010,6 +1023,10 @@ mc_step_growth <- function(st) {
       if (isTRUE(ev$dyn)) {
         ga <- vg[, alive, drop = FALSE]
         ga[is.na(ga)] <- pool_g[, alive, drop = FALSE][is.na(ga)]
+        if (isTRUE(ev$sexual)) {
+          da <- vd[, alive, drop = FALSE]
+          da[is.na(da)] <- 0
+        }
         r_now <- evolution_growth_cells(pa, e_now, ev$sigma[alive], ev$r_max[alive],
                                         sweep(ga, 2, ev$ve[alive], "+"))
       } else {
@@ -1036,6 +1053,7 @@ mc_step_reproduce <- function(st) {
       if (!is.null(ev)) {
         z_surv <- za
         if (isTRUE(ev$dyn)) g_surv <- ga
+        if (isTRUE(ev$sexual)) d_surv <- da
         # survivors are a sample of the adults: drift of their mean and loss of variance, so
         # that drift per generation approaches that of a Moran model at low mortality
         g0 <- if (isTRUE(ev$dyn)) ga else matrix(ev$g[alive], m, k, byrow = TRUE)
@@ -1045,6 +1063,7 @@ mc_step_reproduce <- function(st) {
           z_surv[sd_s] <- z_surv[sd_s] + stats::rnorm(sum(sd_s), 0,
                                                       sqrt(g0[sd_s] * x[sd_s] / ev$nu))
           if (isTRUE(ev$dyn)) g_surv[sd_s] <- (g_surv * pmax(1 - x / (2 * ev$nu), 0))[sd_s]
+          if (isTRUE(ev$sexual)) d_surv[sd_s] <- (d_surv * pmax(1 - x / (2 * ev$nu), 0))[sd_s]
         }
       }
       lam <- r_now * n
@@ -1085,9 +1104,7 @@ mc_step_select <- function(st) {
         # mutation-drift dynamics of the genetic variance (Lynch & Hill 1986): a loss of
         # 1 / (2 Ne) and a gain of Vm per generation, equilibrium 2 Ne Vm; with
         # `variance_selection`, also the loss to stabilising selection
-        ga[live] <- variance_update(ga, n, width, ev, alive, 1 / ev$per)[live]
-        ga[!live] <- NA_real_
-        vg[, alive] <- ga
+        mc_variance_step(environment(), live, n, width, 1 / ev$per)
       }
       # phenotype of the offspring, which develop in their site
       pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
@@ -1204,6 +1221,10 @@ mc_flow_sources <- function(st) {
         vi <- immigrant_mean(em_to, g0, disp_matrix, g0)
       }
     }
+    if (isTRUE(ev$sexual)) {
+      d0 <- ifelse(is.na(da), 0, da)
+      vi_d <- immigrant_mean(em_to, d0, disp_matrix, d0)
+    }
   }), st)
   invisible(st)
 }
@@ -1221,6 +1242,7 @@ mc_flow_merge <- function(st) {
       # removed it
       w <- res[both] / (res[both] + imm_m[both])
       ga[both] <- w * ga[both] + (1 - w) * vi[both]
+      if (isTRUE(ev$sexual)) da[both] <- w * da[both] + (1 - w) * vi_d[both]
     }
     za[both] <- (res[both] * za[both] + imm_m[both] * zi[both]) / (res[both] + imm_m[both])
     pa_now[both] <- (res[both] * pa[both] + imm_m[both] * p_imm[both]) /
@@ -1230,6 +1252,7 @@ mc_flow_merge <- function(st) {
       # with a lottery, founders are sampled once, when they recruit
       za[founded] <- zi[founded]
       if (isTRUE(ev$dyn)) ga[founded] <- vi[founded]
+      if (isTRUE(ev$sexual)) da[founded] <- vi_d[founded]
       extra_v[founded] <- between[founded]
       no_drift[founded] <- !ev$founder
       pa_now[founded] <- p_imm[founded]
@@ -1238,12 +1261,14 @@ mc_flow_merge <- function(st) {
         # founders carry the variance of their sources, less 1 / (2k) for k founders
         za[founded] <- found(zi, imm_m, founded, alive, g_cells = vi + between)
         ga[founded] <- (vi * pmax(1 - 1 / (2 * imm_m), 0))[founded]
+        if (isTRUE(ev$sexual)) da[founded] <- (vi_d * pmax(1 - 1 / (2 * imm_m), 0))[founded]
       } else {
         za[founded] <- found(zi, imm_m, founded, alive, between)
       }
       pa_now[founded] <- p_imm[founded]
     }
     if (isTRUE(ev$dyn)) vg[, alive] <- ga
+    if (isTRUE(ev$sexual)) vd[, alive] <- da
     pa <- pa_now
   }), st)
   invisible(st)
@@ -1272,6 +1297,28 @@ mc_step_recruit <- function(st) {
   invisible(st)
 }
 
+#' one update of the genetic variances `ga` (and, with variance_selection = "sexual", the
+#' disequilibria `da`) in the cells `cells`, for populations of size `size` after a fraction
+#' `f` of a generation; absent populations become NA; changes `ga`, `vg`, `da` and `vd` in
+#' the state `st`
+#' @noRd
+mc_variance_step <- function(st, cells, size, width, f) {
+  ev <- st$ev
+  alive <- st$alive
+  if (isTRUE(ev$sexual)) {
+    up <- variance_update_sexual(st$ga, st$da, size, width, ev, alive, f)
+    st$da[cells] <- up$d[cells]
+    st$da[!cells] <- NA_real_
+    st$vd[, alive] <- st$da
+    st$ga[cells] <- up$g[cells]
+  } else {
+    st$ga[cells] <- variance_update(st$ga, size, width, ev, alive, f)[cells]
+  }
+  st$ga[!cells] <- NA_real_
+  st$vg[, alive] <- st$ga
+  invisible(st)
+}
+
 #' genetic means and variances after a lottery: those of the survivors and of the recruits,
 #' weighted by their numbers, with the drift of the recruits; changes `za`, `pa` and `vg`
 #' @noRd
@@ -1293,11 +1340,14 @@ mc_recruit_traits <- function(st) {
     if (isTRUE(ev$dyn)) {
       gs <- ifelse(surv > 0, g_surv, 0)
       ga[has] <- ((surv * gs + rec * g) / n_new)[has]
+      if (isTRUE(ev$sexual)) {
+        ds <- ifelse(surv > 0, d_surv, 0)
+        dr <- ifelse(is.na(da), 0, da)
+        da[has] <- ((surv * ds + rec * dr) / n_new)[has]
+      }
       # mutation, drift and selection on the variance, in proportion to the recruits
       width <- ga + matrix(ev$sigma[alive]^2 + ev$ve[alive], m, k, byrow = TRUE)
-      ga[has] <- variance_update(ga, n_new, width, ev, alive, rec / pmax(n_new, 1))[has]
-      ga[!has] <- NA_real_
-      vg[, alive] <- ga
+      mc_variance_step(environment(), has, n_new, width, rec / pmax(n_new, 1))
     }
     za[!has] <- NA_real_
     pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
@@ -1355,6 +1405,11 @@ mc_step_store <- function(st) {
         va <- vg[, alive, drop = FALSE]
         va[n == 0] <- NA_real_
         vg[, alive] <- va
+      }
+      if (isTRUE(ev$sexual)) {
+        dv <- vd[, alive, drop = FALSE]
+        dv[n == 0] <- NA_real_
+        vd[, alive] <- dv
       }
       z[, alive] <- za
       ph[, alive] <- pa
@@ -1509,10 +1564,15 @@ mc_finish_evolution <- function(st) {
       vg[absent] <- NA_real_
       dimnames(vg) <- labels
     }
+    if (!is.null(vd)) {
+      vd[absent] <- NA_real_
+      dimnames(vd) <- labels
+    }
     out$evolution <- list(genetic = z, plastic = plastic, phenotype = ph, history = z_history,
                           environment = ev$env(n_steps), environment_history = env_history,
                           since_change = since_change(ev$env, n_steps, record_steps, sites),
                           reference = ev$ref, genetic_variance = vg,
+                          linkage_disequilibrium = vd,
                           settings = structure(evolution[setdiff(names(evolution),
                                                                  c("env", "traits"))],
                                                class = "mc_evolution"))

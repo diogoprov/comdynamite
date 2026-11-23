@@ -83,6 +83,7 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
   list(env = env, preadapted = ifelse(initial[, 1] > 0, 1L, 2L), steps = steps,
        abundance = sim$history, genetic = sim$evolution$history, G = G,
        final = sim$abundance, variance = sim$evolution$genetic_variance,
+       disequilibrium = sim$evolution$linkage_disequilibrium,
        landscape_type = landscape_type, seed = seed)
 }
 

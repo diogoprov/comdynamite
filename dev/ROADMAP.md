@@ -272,6 +272,13 @@ permanente que já existe), que cabe no motor atual; (ii) só se (i) não bastar
 dominância local de Leibold et al. (2019), um módulo opcional de poucos locos de efeito grande,
 validado contra a replicação com indivíduos. Reprodução sexuada e ligação ficam fora. Estudo
 primeiro, API depois; não bloqueia o CRAN.
+Etapa (i) feita em 2026-11-22: `variance_selection = "sexual"` (desequilíbrio de ligação que a
+recombinação reduz à metade por geração; `TRUE` = `"clonal"`, permanente). Nas três formas de
+recrutamento do artigo do Leibold (`data-raw/bulmer_leibold2019.R`, 60 rodadas), a redução
+transitória se comportou quase como sem erosão (G 45--112, d de -4 a -26; 97--100% de manchas
+compartilhadas a partir de G = 200, 92--95% com a espécie pré-adaptada a partir de zero) e não
+gerou dominância local. Pela regra do bloco, a etapa (ii), poucos locos de efeito grande, é a
+próxima, a decidir com o usuário.
 
 **Bloco I, metacomunidades multitróficas (pedido em 2026-11-19).** Estender o modelo de
 Thompson et al. (2020) de `simulate_metacommunity()`, hoje de um nível trófico (nicho abiótico

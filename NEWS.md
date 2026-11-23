@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `evolution_control()`: `variance_selection = "sexual"` keeps the reduction of the genetic
+  variance by stabilising selection as linkage disequilibrium, which recombination halves each
+  generation (Bulmer 1971), so the variance recovers when selection relaxes. `TRUE` (now also
+  `"clonal"`) keeps the permanent reduction of clonal inheritance. The disequilibrium of each
+  population is returned as `linkage_disequilibrium`. The article "Replicating Leibold et al.
+  (2019)" tests it: the transient reduction behaves almost like no erosion and does not
+  produce their local dominance.
+
 - Internal: the long and complex functions that goodpractice flagged (the simulation engines,
   trait simulation, landscapes, DAMOCLES, the trait-variation analyses, `node_test()`,
   `pcps_test()`, ABC and several plots) are split into smaller internal helpers, each at most
