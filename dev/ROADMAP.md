@@ -240,6 +240,28 @@ identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica
 populações e a divergência entre populações relativa à distância (tipo QST), testadas com
 `abc_recovery()` nos desenhos do artigo, e um guia curto de desenho amostral na `vignette("abc")`. Prioridade alta entre os itens do bloco.
 
+Acrescentados em 2026-11-23, depois da iteração com os dados do Leandro (Ne e parâmetros
+genéticos pedindo ajuste fino): (ix) reparametrizar G e Ne. Pelas equações de Lande, a deriva
+das médias tem variância proporcional a G/Ne e a resposta à seleção a G/(sigma^2 + P); com
+abundâncias e médias, o que se informa é G e a razão G/Ne, e Ne sozinho só se G estiver bem
+determinado. Estimar `log(G/Ne)` e G em vez de `ne_ratio` e G e comparar a recuperação com
+`abc_recovery()` (hipótese nossa, não testada). Como o `abcrf` estima um parâmetro por vez, a
+correlação entre G e Ne não aparece nos posteriores marginais; (x) estatística temporal de
+deriva para o (viii): variância das mudanças nas médias entre gerações, com dados repetidos
+no tempo, que deve informar Ne mais que qualquer ajuste do ABC; (xi) recalibração dos
+intervalos do ABC-RF por cobertura em pseudo-observações (ideia de Prangle et al. 2014 e
+Rodrigues, Prangle & Sisson 2018), implementada aqui, sem depender do `abc`; os testes
+estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) ABC-RF sequencial para
+priors largos: ajustar, simular de novo na região plausível e ajustar outra vez (Dinh et al.
+2025, *Statistics and Computing*, doi:10.1007/s11222-025-10748-x); (xiii) neural posterior
+estimation, que dá posteriores conjuntos (baixa prioridade; as ferramentas maduras estão em
+Python). Decidido em 2026-11-23: o `abctools` (Nunes & Prangle 2015, doi:10.32614/RJ-2015-030;
+CRAN 1.1.8) não entra. Ele depende do `abc` (GPL), e todas as funções supõem ABC por rejeição
+ou regressão; nenhuma recebe saída do `abcrf`. A seleção de estatísticas que ele oferece
+(Joyce & Marjoram 2008; Nunes & Balding 2010; Fearnhead & Prangle 2012) não cria a informação
+que falta para Ne, a tolerância não existe no ABC-RF, e a cobertura já é medida por
+`abc_recovery()`.
+
 **Bloco D, indivíduos e traits (ponte Leibold–Januario).** (i) vários traits por indivíduo e
 traits de indivíduos que afetem a dinâmica (hoje são sorteados depois); (ii) cruzar com
 dispersão e extinção de manchas (cenário 9); (iii) nulo de T_PC.PR levemente liberal na cauda
@@ -855,7 +877,14 @@ piloto da v0.3.0, já feito, e da estrutura comum da v0.4.0.
 
 Ler antes de implementar: Guzman et al. (2022), lido em parte; mcfly (Duarte et al. 2023); CAMI (Ruffley et al.
 2019), pacote de R com random forests e ABC para montagem de comunidades; van der Plas
-et al. (2015). Definir o que o comdynamite acrescenta a esses trabalhos.
+et al. (2015). Definir o que o comdynamite acrescenta a esses trabalhos. Também com ABC ou
+aprendizado de máquina sobre modelos de comunidade (levantados em 2026-11-23, busca dirigida,
+não sistemática): ecolottery (Munoz et al. 2018, doi:10.1111/2041-210x.12918; neutro com
+imigração filtrada, espacialmente implícito), MESS (Overcast et al. 2021,
+doi:10.1111/1755-0998.13514) e ibiogen (Overcast et al. 2023, doi:10.1111/mec.16958),
+com abundâncias, diversidade genética molecular, traits e filogenia num modelo de ilha. Nenhum
+junta espaço explícito, genética quantitativa por população em tempo ecológico e ABC-RF com
+recuperação, cobertura, validação cruzada espacial e PPC.
 
 Pontarp et al. (2019), lido com o Appendix S4: propõem um ciclo
 de construir o modelo, analisá-lo sem dados, estimar parâmetros e avaliar. O caso de
