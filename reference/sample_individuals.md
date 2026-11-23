@@ -152,7 +152,11 @@ sample_individuals(
   sampled step, and draws individuals around them with the genetic plus
   environmental variance of each species (`genetic_var + env_var`, plus,
   for a species of several lineages, the variance among them in the
-  site), so that the T-statistics of
+  site; with `mutation_var` or `loci` in
+  [`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md),
+  the genetic variance of each population at the last step takes the
+  place of `genetic_var`, and with `loci` only the last step can be
+  sampled), so that the T-statistics of
   [`tstats()`](https://provetelab.org/comdynamite/reference/tstats.md)
   reflect the variation that evolved. `intraspecific_sd`, when given,
   then adds variation such as measurement error, and `local_adaptation`,

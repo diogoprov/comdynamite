@@ -375,8 +375,58 @@ change the outcome, and a variance that follows mutation, drift and
 selection within the infinitesimal model does not produce the local
 dominance of their model. If this mechanism lies in the genetic
 architecture, it seems to need loci of large effect, whose variance can
-change faster than the infinitesimal model allows; this is the second
-step of block H in the roadmap.
+change faster than the infinitesimal model allows; we test this in the
+next section.
+
+## Loci of large effect
+
+Their model has 10 diploid loci with two alleles of additive effect,
+each copy worth 0.05 of a trait that runs from 0 to 1, no standing
+variation at the start, mutation that changes an allele into the other,
+and free recombination. We added `loci` to
+[`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md):
+each population carries the frequency of one allele at each locus, its
+genetic mean and variance follow from them under Hardy-Weinberg
+proportions and linkage equilibrium, and selection changes each
+frequency by the formula of Wright (1937) with the mean fitness of the
+Gaussian growth rate. This formula has two terms: one moves the mean
+towards the optimum, as in Lande’s equation, and the other removes
+variance near the optimum, pushing loci towards fixation until mutation
+balances it (Barton 1986). Drift, gene flow and founders act on the
+frequencies. With the trait multiplied by 100, as above, each copy is
+worth 5, and a species starts with 4 (at 40) or 6 (at 60) of its 10 loci
+fixed for the allele that raises the trait. We crossed the three
+recruitment settings with 10 loci at mutation rates of 10^{-4} (their
+rate per allele), 10^{-3} and 10^{-2}, and with a single locus worth 10
+per copy at 10^{-3}, at N_m = 10 (`data-raw/loci_leibold2019.R`; 10 runs
+of 10,000 generations each).
+
+Loci of large effect did not produce local dominance either: at most 4%
+of the patches of a run were switched. Both species persisted to
+generation 10,000 in all 120 runs, and the recruitment setting changed
+little. At their mutation rate, selection near the optimum removed
+almost all the variance (G of 1.5–1.8 at generation 10,000), each
+species stayed at its own optimum, and 94% of the patches were held by
+the preadapted species, as without evolution. With 10^{-3}, G reached
+19–20 and the species adapted only partly to the other patch type
+(86–90% preadapted). Only with 10^{-2} did mutation outweigh the removal
+of variance (G of 107–114), and both species then shared 99% of the
+patches, the regional neutrality of their model without its local
+dominance. A single locus at 10^{-3} gave stronger sorting (93–95%
+preadapted, G of 3–4). Taken together, neither the transient reduction
+of sexual reproduction nor a few loci of large effect gave local
+dominance in our engine, and at their mutation rate the removal of
+variance by stabilising selection seems to prevent the adaptation to the
+other patch type that regional neutrality requires.
+
+One difference remains untested. In their model selection acts on
+survival at each of the about 10 iterations of a generation, so that
+fitness per generation depends on how long an individual lives; by our
+rough calculation, this makes selection near the optimum several times
+stronger than a niche width of 20 per generation implies. This is our
+interpretation of their model structure, not a result, and stronger
+selection would strengthen both the removal of variance and the
+advantage of residents.
 
 ## More replicates and parameter sweeps
 
@@ -447,11 +497,17 @@ by our engine. Lottery recruitment into vacated microsites, overlapping
 generations and a variance built from new mutations, at low or high
 mutation rates and with or without erosion by selection, did not produce
 it either, nor did erosion with the transient Bulmer reduction of sexual
-reproduction. These conclusions held with 500 replicates per setting and
-across patch extinction rates from 0 to 0.05, although the speed of
-adaptation was set through G rather than matched to their model.
+reproduction or a few loci of large effect, which at their mutation rate
+gave species sorting rather than regional neutrality. These conclusions
+held with 500 replicates per setting and across patch extinction rates
+from 0 to 0.05, although the speed of adaptation was set through G
+rather than matched to their model.
 
 ## References
+
+Barton, N. H. (1986). The maintenance of polygenic variation through a
+balance between mutation and stabilizing selection. *Genetical
+Research*, 47, 209–216. <https://doi.org/10.1017/S0016672300023156>
 
 Bulmer, M. G. (1971). The effect of selection on genetic variability.
 *The American Naturalist*, 105, 201–211.
@@ -465,3 +521,7 @@ Leibold, M. A., Urban, M. C., De Meester, L., Klausmeier, C. A., &
 Vanoverbeke, J. (2019). Regional neutrality evolves through local
 adaptive niche evolution. *Proceedings of the National Academy of
 Sciences*, 116, 2612–2617. <https://doi.org/10.1073/pnas.1808615116>
+
+Wright, S. (1937). The distribution of gene frequencies in populations.
+*Proceedings of the National Academy of Sciences*, 23, 307–320.
+<https://doi.org/10.1073/pnas.23.6.307>

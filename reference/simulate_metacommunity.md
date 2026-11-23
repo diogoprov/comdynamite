@@ -284,11 +284,14 @@ sites x recorded steps; 0 in the step of a change and the step itself
 where the environment never changed), the reference environment and the
 settings, and, with `mutation_var`, the genetic variance of each
 population at the last step (`genetic_variance`); `NA` where a
-population is absent. With several evolving traits, `genetic`, `plastic`
-and `phenotype` are arrays of sites x species x traits, `history` has
-the recorded steps as a fourth dimension, and `genetic_var`, `env_var`
-(one matrix per species) and `plasticity` (species x traits) are kept.
-With a niche of several axes,
+population is absent. With `loci`, `allele_frequency` is an array of
+sites x species x loci with the frequency of allele 1 at each locus in
+each population at the last step, `NA` where a population is absent, and
+`genetic_variance` is the variance that follows from them. With several
+evolving traits, `genetic`, `plastic` and `phenotype` are arrays of
+sites x species x traits, `history` has the recorded steps as a fourth
+dimension, and `genetic_var`, `env_var` (one matrix per species) and
+`plasticity` (species x traits) are kept. With a niche of several axes,
 [`as_mc_data()`](https://provetelab.org/comdynamite/reference/mc_data.md)
 keeps every axis (`env` and one `optimum_` column of traits per axis),
 while

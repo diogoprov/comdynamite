@@ -24,7 +24,8 @@ evolution_control(
   traits = NULL,
   immigrant_selection = FALSE,
   mutation_var = NULL,
-  variance_selection = FALSE
+  variance_selection = FALSE,
+  loci = NULL
 )
 ```
 
@@ -37,6 +38,8 @@ evolution_control(
   the section Several traits), a covariance matrix with one row and
   column per trait, or a list with one per species, such as from
   [`genetic_matrices()`](https://provetelab.org/comdynamite/reference/genetic_matrices.md).
+  With `loci`, leave it out: the variance comes from the allele
+  frequencies.
 
 - ne_ratio:
 
@@ -138,6 +141,49 @@ evolution_control(
   Gene flow and founders mix \\d\\ as they mix \\G\\, and seeds carry
   none. The disequilibrium of each population at the last step is
   returned as `linkage_disequilibrium`.
+
+- loci:
+
+  `NULL` (the default) for the infinitesimal model of the steps above,
+  or a list for a genetic architecture of a few loci of large effect,
+  with `n`, the number of diploid loci with two alleles and additive
+  effects; `effect`, the effect of one copy of allele 1 on the optimum,
+  greater than 0; `mutation`, the probability that an allele changes
+  into the other per generation, between 0 and 0.5; and, optionally,
+  `origin`, the optimum with allele 0 at every locus (0 by default).
+  Each population then carries the frequency \\p_l\\ of allele 1 at each
+  locus, and its genetic mean and variance follow from them under
+  Hardy-Weinberg proportions and linkage equilibrium: \\\bar z =
+  origin + 2 a \sum_l p_l\\ and \\G = 2 a^2 \sum_l p_l (1 - p_l)\\, with
+  \\a\\ the `effect`. These take the place of the constant \\G\\ in
+  growth and selection, so that the variance is lost when alleles fix
+  and returns with mutation or gene flow. Selection changes each
+  frequency by the formula of Wright (1937), \\\Delta p_l = (p_l (1 -
+  p_l) / 2) \\ \partial \ln \bar W / \partial p_l\\, with the mean
+  fitness of the growth rate above, \\\ln \bar W = -\ln(V) / 2 - d^2 /
+  (2 V)\\, \\V = \sigma^2 + P\\ and \\d = E - p\\: \$\$\Delta p_l = p_l
+  (1 - p_l) \left\[\frac{a d}{V} - \frac{a^2 (1 - 2 p_l)}{2 V} \left(1 -
+  \frac{d^2}{V}\right)\right\].\$\$ The first term changes the mean and,
+  summed over loci, is the response of Lande (1976). The second comes
+  from \\G\\ in \\V\\: near the optimum it moves each locus towards the
+  fixation of its commoner allele, so that stabilising selection removes
+  variance until mutation balances it (Barton 1986), and far from the
+  optimum (\\d^2 \> V\\) it favours variance. With every polymorphic
+  locus at \\p_l = 1/2\\ the second term is zero. Mutation adds \\\mu
+  (1 - 2 p_l)\\ per generation. Drift is a binomial sample of \\2 N_e\\
+  alleles per locus, founders are a sample of \\2k\\ alleles from the
+  frequencies of the immigrants, and gene flow and seeds mix frequencies
+  by numbers. The pool of each species has the frequencies that give its
+  optimum in `traits`, with the first loci fixed for allele 1, at most
+  one locus at an intermediate frequency and the others fixed for allele
+  0, so that it starts without variance when the optimum is a whole
+  number of alleles; the optima must lie between `origin` and
+  `origin + 2 * effect * n`. Populations at the start and seeds carry
+  these frequencies. The frequencies at the last step are returned as
+  `allele_frequency` and the variance that follows from them as
+  `genetic_variance`. Not available with `mutation_var`,
+  `variance_selection`, `immigrant_selection`, several traits or
+  [`simulate_evolving_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_evolving_metacommunity.md).
 
 ## Value
 
@@ -289,6 +335,15 @@ Population Biology*, 25, 138–193.
 Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral
 mutation. *Evolution*, 40, 915–935.
 [doi:10.1111/j.1558-5646.1986.tb00561.x](https://doi.org/10.1111/j.1558-5646.1986.tb00561.x)
+
+Wright, S. (1937). The distribution of gene frequencies in populations.
+*Proceedings of the National Academy of Sciences*, 23, 307–320.
+[doi:10.1073/pnas.23.6.307](https://doi.org/10.1073/pnas.23.6.307)
+
+Barton, N. H. (1986). The maintenance of polygenic variation through a
+balance between mutation and stabilizing selection. *Genetical
+Research*, 47, 209–216.
+[doi:10.1017/S0016672300023156](https://doi.org/10.1017/S0016672300023156)
 
 ## See also
 

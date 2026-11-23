@@ -92,7 +92,8 @@ with immigrants and starts from a sample of its founders.</p>
 <span>  traits <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  immigrant_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  mutation_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  variance_selection <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  variance_selection <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  loci <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -104,7 +105,8 @@ with immigrants and starts from a sample of its founders.</p>
 <dd><p>Additive genetic variance of the optimum \(G\), in squared units of
 the environment, one value or one per species. For several traits (see the section
 Several traits), a covariance matrix with one row and column per trait, or a list with
-one per species, such as from <code><a href="genetic_matrices.html">genetic_matrices()</a></code>.</p></dd>
+one per species, such as from <code><a href="genetic_matrices.html">genetic_matrices()</a></code>. With <code>loci</code>, leave it out: the
+variance comes from the allele frequencies.</p></dd>
 
 
 <dt id="arg-ne-ratio">ne_ratio<a class="anchor" aria-label="anchor" href="#arg-ne-ratio"></a></dt>
@@ -191,6 +193,45 @@ selection relaxes. The genic variance \(G - d\) follows the mutation-drift
 dynamics, and \(G\) is the genic variance plus \(d\). Gene flow and founders
 mix \(d\) as they mix \(G\), and seeds carry none. The disequilibrium of each
 population at the last step is returned as <code>linkage_disequilibrium</code>.</p></dd>
+
+
+<dt id="arg-loci">loci<a class="anchor" aria-label="anchor" href="#arg-loci"></a></dt>
+<dd><p><code>NULL</code> (the default) for the infinitesimal model of the steps above, or a list
+for a genetic architecture of a few loci of large effect, with <code>n</code>, the number of
+diploid loci with two alleles and additive effects; <code>effect</code>, the effect of one copy of
+allele 1 on the optimum, greater than 0; <code>mutation</code>, the probability that an allele
+changes into the other per generation, between 0 and 0.5; and, optionally, <code>origin</code>,
+the optimum with allele 0 at every locus (0 by default). Each population then carries
+the frequency \(p_l\) of allele 1 at each locus, and its genetic mean and variance
+follow from them under Hardy-Weinberg proportions and linkage equilibrium:
+\(\bar z = origin + 2 a \sum_l p_l\) and
+\(G = 2 a^2 \sum_l p_l (1 - p_l)\), with \(a\) the
+<code>effect</code>. These take the place of the constant \(G\) in growth and selection, so
+that the variance is lost when alleles fix and returns with mutation or gene flow.
+Selection changes each frequency by the formula of Wright (1937),
+\(\Delta p_l = (p_l (1 - p_l) / 2) \, \partial \ln \bar W / \partial p_l\), with the mean fitness of the growth rate above,
+\(\ln \bar W = -\ln(V) / 2 - d^2 / (2 V)\),
+\(V = \sigma^2 + P\) and \(d = E - p\):
+$$\Delta p_l = p_l (1 - p_l) \left[\frac{a d}{V} - \frac{a^2 (1 - 2 p_l)}{2 V}
+\left(1 - \frac{d^2}{V}\right)\right].$$
+The first term changes the mean and, summed over loci, is the response of Lande (1976).
+The second comes from \(G\) in \(V\): near the optimum it moves each locus
+towards the fixation of its commoner allele, so that stabilising selection removes
+variance until mutation balances it (Barton 1986), and far from the optimum
+(\(d^2 &gt; V\)) it favours variance. With every polymorphic locus at
+\(p_l = 1/2\) the second term is zero. Mutation adds
+\(\mu (1 - 2 p_l)\) per generation. Drift is a binomial sample
+of \(2 N_e\) alleles per locus, founders are a sample of
+\(2k\) alleles from the frequencies of the immigrants, and gene flow and seeds mix
+frequencies by numbers. The pool of each species has the frequencies that give its
+optimum in <code>traits</code>, with the first loci fixed for allele 1, at most one locus at an
+intermediate frequency and the others fixed for allele 0, so that it starts without
+variance when the optimum is a whole number of alleles; the optima must lie between
+<code>origin</code> and <code>origin + 2 * effect * n</code>. Populations at the start and seeds carry these
+frequencies. The frequencies at the last step are returned as <code>allele_frequency</code> and the
+variance that follows from them as <code>genetic_variance</code>. Not available with
+<code>mutation_var</code>, <code>variance_selection</code>, <code>immigrant_selection</code>, several traits or
+<code><a href="simulate_evolving_metacommunity.html">simulate_evolving_metacommunity()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -298,6 +339,11 @@ zeta meets the abdominal bristle. <em>Theoretical Population Biology</em>, 25, 1
 <a href="https://doi.org/10.1016/0040-5809%2884%2990017-0" class="external-link">doi:10.1016/0040-5809(84)90017-0</a></p>
 <p>Lynch, M. &amp; Hill, W. G. (1986). Phenotypic evolution by neutral mutation. <em>Evolution</em>, 40,
 915–935. <a href="https://doi.org/10.1111/j.1558-5646.1986.tb00561.x" class="external-link">doi:10.1111/j.1558-5646.1986.tb00561.x</a></p>
+<p>Wright, S. (1937). The distribution of gene frequencies in populations. <em>Proceedings of
+the National Academy of Sciences</em>, 23, 307–320. <a href="https://doi.org/10.1073/pnas.23.6.307" class="external-link">doi:10.1073/pnas.23.6.307</a></p>
+<p>Barton, N. H. (1986). The maintenance of polygenic variation through a balance between
+mutation and stabilizing selection. <em>Genetical Research</em>, 47, 209–216.
+<a href="https://doi.org/10.1017/S0016672300023156" class="external-link">doi:10.1017/S0016672300023156</a></p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

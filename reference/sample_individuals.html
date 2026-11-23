@@ -205,7 +205,10 @@ the optimum of each species with the arguments above; <code>"evolution"</code> t
 simulation run with <code>evolution</code> (<code><a href="evolution_control.html">evolution_control()</a></code>), as the genetic mean plus the
 plastic part of each population at the sampled step, and draws individuals around them with
 the genetic plus environmental variance of each species (<code>genetic_var + env_var</code>, plus,
-for a species of several lineages, the variance among them in the site), so that
+for a species of several lineages, the variance among them in the site; with
+<code>mutation_var</code> or <code>loci</code> in <code><a href="evolution_control.html">evolution_control()</a></code>, the genetic variance of each
+population at the last step takes the place of <code>genetic_var</code>, and with <code>loci</code> only the
+last step can be sampled), so that
 the T-statistics of <code><a href="tstats.html">tstats()</a></code> reflect the variation that evolved. <code>intraspecific_sd</code>,
 when given, then adds variation such as measurement error, and <code>local_adaptation</code>,
 <code>population_sd</code>, <code>displacement</code>, <code>founder_sd</code>, <code>monopolization</code> and <code>env</code> must keep their
