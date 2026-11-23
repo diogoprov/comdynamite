@@ -184,7 +184,11 @@ site last changed on any axis (\code{since_change}, a list with \code{end}, one 
 the last step, and \code{history}, sites x recorded steps; 0 in the step of a change and the
 step itself where the environment never changed), the reference environment and the
 settings, and, with \code{mutation_var}, the genetic variance of each population at the last
-step (\code{genetic_variance}); \code{NA} where a population is absent. With several evolving traits, \code{genetic},
+step (\code{genetic_variance}); \code{NA} where a population is absent. With \code{loci},
+\code{allele_frequency} is an array of sites x species x loci with the frequency of allele 1 at
+each locus in each population at the last step, \code{NA} where a population is absent, and
+\code{genetic_variance} is the variance that follows from them. With several evolving traits,
+\code{genetic},
 \code{plastic} and \code{phenotype} are arrays of sites x species x traits, \code{history} has the
 recorded steps as a fourth dimension, and \code{genetic_var}, \code{env_var} (one matrix per species)
 and \code{plasticity} (species x traits) are kept. With a niche of several axes, \code{\link[=as_mc_data]{as_mc_data()}} keeps every axis (\code{env} and one

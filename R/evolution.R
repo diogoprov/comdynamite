@@ -99,7 +99,8 @@
 #' @param genetic_var Additive genetic variance of the optimum \eqn{G}{G}, in squared units of
 #'   the environment, one value or one per species. For several traits (see the section
 #'   Several traits), a covariance matrix with one row and column per trait, or a list with
-#'   one per species, such as from [genetic_matrices()].
+#'   one per species, such as from [genetic_matrices()]. With `loci`, leave it out: the
+#'   variance comes from the allele frequencies.
 #' @param ne_ratio Ratio of effective to census population size \eqn{\nu}{nu}: one number
 #'   greater than 0; `Inf` turns drift off.
 #' @param plasticity Slope of the reaction norm b, one value or one per species: 0 for a fixed
@@ -156,6 +157,44 @@
 #'   dynamics, and \eqn{G}{G} is the genic variance plus \eqn{d}{d}. Gene flow and founders
 #'   mix \eqn{d}{d} as they mix \eqn{G}{G}, and seeds carry none. The disequilibrium of each
 #'   population at the last step is returned as `linkage_disequilibrium`.
+#' @param loci `NULL` (the default) for the infinitesimal model of the steps above, or a list
+#'   for a genetic architecture of a few loci of large effect, with `n`, the number of
+#'   diploid loci with two alleles and additive effects; `effect`, the effect of one copy of
+#'   allele 1 on the optimum, greater than 0; `mutation`, the probability that an allele
+#'   changes into the other per generation, between 0 and 0.5; and, optionally, `origin`,
+#'   the optimum with allele 0 at every locus (0 by default). Each population then carries
+#'   the frequency \eqn{p_l}{p_l} of allele 1 at each locus, and its genetic mean and variance
+#'   follow from them under Hardy-Weinberg proportions and linkage equilibrium:
+#'   \eqn{\bar z = origin + 2 a \sum_l p_l}{zbar = origin + 2 a sum(p_l)} and
+#'   \eqn{G = 2 a^2 \sum_l p_l (1 - p_l)}{G = 2 a^2 sum(p_l (1 - p_l))}, with \eqn{a}{a} the
+#'   `effect`. These take the place of the constant \eqn{G}{G} in growth and selection, so
+#'   that the variance is lost when alleles fix and returns with mutation or gene flow.
+#'   Selection changes each frequency by the formula of Wright (1937),
+#'   \eqn{\Delta p_l = (p_l (1 - p_l) / 2) \, \partial \ln \bar W / \partial p_l}{Delta p_l =
+#'   (p_l (1 - p_l) / 2) dlog(W) / dp_l}, with the mean fitness of the growth rate above,
+#'   \eqn{\ln \bar W = -\ln(V) / 2 - d^2 / (2 V)}{log(W) = -log(V) / 2 - d^2 / (2 V)},
+#'   \eqn{V = \sigma^2 + P}{V = sigma^2 + P} and \eqn{d = E - p}{d = E - p}:
+#'   \deqn{\Delta p_l = p_l (1 - p_l) \left[\frac{a d}{V} - \frac{a^2 (1 - 2 p_l)}{2 V}
+#'   \left(1 - \frac{d^2}{V}\right)\right].}{Delta p_l = p_l (1 - p_l) [a d / V - a^2
+#'   (1 - 2 p_l) / (2 V) (1 - d^2 / V)].}
+#'   The first term changes the mean and, summed over loci, is the response of Lande (1976).
+#'   The second comes from \eqn{G}{G} in \eqn{V}{V}: near the optimum it moves each locus
+#'   towards the fixation of its commoner allele, so that stabilising selection removes
+#'   variance until mutation balances it (Barton 1986), and far from the optimum
+#'   (\eqn{d^2 > V}{d^2 > V}) it favours variance. With every polymorphic locus at
+#'   \eqn{p_l = 1/2}{p_l = 1/2} the second term is zero. Mutation adds
+#'   \eqn{\mu (1 - 2 p_l)}{mu (1 - 2 p_l)} per generation. Drift is a binomial sample
+#'   of \eqn{2 N_e}{2 Ne} alleles per locus, founders are a sample of
+#'   \eqn{2k}{2k} alleles from the frequencies of the immigrants, and gene flow and seeds mix
+#'   frequencies by numbers. The pool of each species has the frequencies that give its
+#'   optimum in `traits`, with the first loci fixed for allele 1, at most one locus at an
+#'   intermediate frequency and the others fixed for allele 0, so that it starts without
+#'   variance when the optimum is a whole number of alleles; the optima must lie between
+#'   `origin` and `origin + 2 * effect * n`. Populations at the start and seeds carry these
+#'   frequencies. The frequencies at the last step are returned as `allele_frequency` and the
+#'   variance that follows from them as `genetic_variance`. Not available with
+#'   `mutation_var`, `variance_selection`, `immigrant_selection`, several traits or
+#'   [simulate_evolving_metacommunity()].
 #' @param env,traits The environment of each site (a vector, or a function of the step that
 #'   returns one) and the traits of the species (from [species_traits()]). Filled in by
 #'   [simulate_metacommunity()]; needed only with [mc_dynamics()].
@@ -180,6 +219,13 @@
 #'
 #'   Lynch, M. & Hill, W. G. (1986). Phenotypic evolution by neutral mutation. *Evolution*, 40,
 #'   915--935. \doi{10.1111/j.1558-5646.1986.tb00561.x}
+#'
+#'   Wright, S. (1937). The distribution of gene frequencies in populations. *Proceedings of
+#'   the National Academy of Sciences*, 23, 307--320. \doi{10.1073/pnas.23.6.307}
+#'
+#'   Barton, N. H. (1986). The maintenance of polygenic variation through a balance between
+#'   mutation and stabilizing selection. *Genetical Research*, 47, 209--216.
+#'   \doi{10.1017/S0016672300023156}
 #' @family simulate metacommunities
 #' @examples
 #' set.seed(1)
@@ -195,7 +241,14 @@
 evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var = 0,
                               steps_per_generation = 1, founder = TRUE, env = NULL,
                               traits = NULL, immigrant_selection = FALSE, mutation_var = NULL,
-                              variance_selection = FALSE) {
+                              variance_selection = FALSE, loci = NULL) {
+  if (!is.null(loci)) {
+    loci <- check_loci(loci)
+    check_loci_settings(!missing(genetic_var), env_var, mutation_var, variance_selection,
+                        immigrant_selection)
+    # the variance comes from the allele frequencies
+    genetic_var <- 0
+  }
   if (missing(genetic_var)) stop("`genetic_var` is needed", call. = FALSE)
   evolution_check_variances(genetic_var, env_var)
   # Inf turns drift off
@@ -216,12 +269,14 @@ evolution_control <- function(genetic_var, ne_ratio = 1, plasticity = 0, env_var
     }
   }
   check_variance_selection(variance_selection, mutation_var)
-  structure(list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
-                 env_var = env_var, steps_per_generation = steps_per_generation,
-                 founder = founder, env = env, traits = traits,
-                 immigrant_selection = immigrant_selection, mutation_var = mutation_var,
-                 variance_selection = variance_selection),
-            class = "mc_evolution")
+  out <- list(genetic_var = genetic_var, ne_ratio = ne_ratio, plasticity = plasticity,
+              env_var = env_var, steps_per_generation = steps_per_generation,
+              founder = founder, env = env, traits = traits,
+              immigrant_selection = immigrant_selection, mutation_var = mutation_var,
+              variance_selection = variance_selection)
+  # kept out of the settings without loci, so that they are as they were
+  if (!is.null(loci)) out$loci <- loci
+  structure(out, class = "mc_evolution")
 }
 
 #' stops unless `variance_selection` is `FALSE`, `TRUE`, "clonal" or "sexual", and needs
@@ -269,10 +324,13 @@ print.mc_evolution <- function(x, ...) {
     if (is.matrix(v)) return(paste0(nrow(v), " x ", ncol(v), " matrix"))
     format(v)
   }
-  cat("<mc_evolution> G =", show(x$genetic_var), "| Ne/N =", format(x$ne_ratio),
+  g <- if (is.null(x$loci)) show(x$genetic_var) else "from the loci"
+  cat("<mc_evolution> G =", g, "| Ne/N =", format(x$ne_ratio),
       "| plasticity =", show(x$plasticity), "| VE =", show(x$env_var),
       "| steps per generation =", format(x$steps_per_generation),
-      "| founder sampling:", x$founder, "\n")
+      "| founder sampling:", x$founder,
+      if (!is.null(x$loci)) paste("| loci:", x$loci$n, "of effect", format(x$loci$effect)),
+      "\n")
   invisible(x)
 }
 
@@ -294,7 +352,9 @@ evolution_state <- function(evolution, m, k_all, species) {
        ve = each(evolution$env_var), nu = evolution$ne_ratio,
        per = evolution$steps_per_generation, founder = evolution$founder,
        imm_sel = isTRUE(evolution$immigrant_selection),
-       dyn = !is.null(evolution$mutation_var),
+       dyn = !is.null(evolution$mutation_var) || !is.null(evolution$loci),
+       loci_on = !is.null(evolution$loci), loci = evolution$loci,
+       loci_pool = if (!is.null(evolution$loci)) loci_initial(traits$optimum, evolution$loci),
        vm = if (is.null(evolution$mutation_var)) NULL else each(evolution$mutation_var),
        vsel = !isFALSE(evolution$variance_selection %||% FALSE),
        sexual = identical(evolution$variance_selection, "sexual"))

@@ -191,7 +191,10 @@
 #'   simulation run with `evolution` ([evolution_control()]), as the genetic mean plus the
 #'   plastic part of each population at the sampled step, and draws individuals around them with
 #'   the genetic plus environmental variance of each species (`genetic_var + env_var`, plus,
-#'   for a species of several lineages, the variance among them in the site), so that
+#'   for a species of several lineages, the variance among them in the site; with
+#'   `mutation_var` or `loci` in [evolution_control()], the genetic variance of each
+#'   population at the last step takes the place of `genetic_var`, and with `loci` only the
+#'   last step can be sampled), so that
 #'   the T-statistics of [tstats()] reflect the variation that evolved. `intraspecific_sd`,
 #'   when given, then adds variation such as measurement error, and `local_adaptation`,
 #'   `population_sd`, `displacement`, `founder_sd`, `monopolization` and `env` must keep their
@@ -1048,10 +1051,31 @@ evolved_populations <- function(x, sites, species, step = NULL) {
     if (!is.null(names(v))) return(unname(v[species]))
     rep_len(v, ncol(ev$genetic))[match(species, colnames(ev$genetic))]
   }
-  g <- each(ev$genetic_var %||% ev$settings$genetic_var)
+  # `[[`: `$genetic_var` would also match `genetic_variance`, the variance of each population
+  g <- each(ev[["genetic_var"]] %||% ev$settings$genetic_var)
   ve <- each(ev$env_var %||% ev$settings$env_var)
   var <- sweep(within + matrix(0, length(sites), length(species)), 2, g + ve, "+")
+  if (!is.null(ev[["genetic_variance"]])) {
+    var <- evolved_population_variance(ev, pick, var, g, is.null(step) || step == x$n_steps)
+  }
   list(mean = mean, var = var)
+}
+
+#' the variance among individuals `var` (sites x species) of a simulation in which each
+#' population has its own genetic variance (`mutation_var` or `loci`): at the last step, that
+#' variance takes the place of the one of the species, `g` (0 where the population is absent).
+#' It is not kept at the recorded steps, where `var` stays as it is; with `loci`, whose
+#' species have no variance of their own, those steps are refused
+#' @noRd
+evolved_population_variance <- function(ev, pick, var, g, last) {
+  if (!last && !is.null(ev$settings$loci)) {
+    stop("with `loci`, the genetic variance of the populations is kept at the last step only: ",
+         "use `step = NULL`", call. = FALSE)
+  }
+  if (!last) return(var)
+  now <- pick(ev[["genetic_variance"]])
+  now[is.na(now)] <- 0
+  sweep(var, 2, g, "-") + now
 }
 
 #' the evolutionary state at a recorded step: genetic means from the history, the plastic part

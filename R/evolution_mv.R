@@ -74,6 +74,9 @@ evolution_state_mv <- function(evolution, m, k_all, species) {
   if (!is.null(evolution$mutation_var)) {
     stop("`mutation_var` is not yet available with several traits", call. = FALSE)
   }
+  if (!is.null(evolution$loci)) {
+    stop("`loci` are not yet available with several traits", call. = FALSE)
+  }
   niche_cor <- attr(evolution$traits, "niche_cor")
   traits <- mv_state_traits(evolution, k_all, species)
   q <- length(traits)
