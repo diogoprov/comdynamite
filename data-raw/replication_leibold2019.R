@@ -51,13 +51,14 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
                         every = 100, nm = 10, immigrant_selection = FALSE,
                         ne_ratio = 0.5, founder = TRUE, mutation_var = NULL,
                         recruitment = "beverton_holt", mortality = 1,
-                        variance_selection = FALSE, p_ext = 0.01, loci = NULL) {
+                        variance_selection = FALSE, p_ext = 0.01, loci = NULL,
+                        sigma = 20) {
   landscape_type <- match.arg(landscape_type)
   set.seed(seed)
   env <- if (landscape_type == "two") sample(rep(c(40, 60), side^2 / 2)) else rep(50, side^2)
   optima <- if (landscape_type == "two") c(40, 60) else c(50, 50)
   ls <- landscape_points(xy, env, disp_scale = 0.5)
-  traits <- data.frame(optimum = optima, sigma = 20, r_max = 5, row.names = species)
+  traits <- data.frame(optimum = optima, sigma = sigma, r_max = 5, row.names = species)
   initial <- if (landscape_type == "two") {
     cbind(sp1 = (env == 40) * 400L, sp2 = (env == 60) * 400L)
   } else {
@@ -89,11 +90,11 @@ run_leibold <- function(G, landscape_type = c("two", "one"), seed, n_steps = 100
        final = sim$abundance, variance = sim$evolution$genetic_variance,
        disequilibrium = sim$evolution$linkage_disequilibrium,
        allele_frequency = sim$evolution$allele_frequency,
-       landscape_type = landscape_type, seed = seed)
+       landscape_type = landscape_type, seed = seed, sigma = sigma)
 }
 
 # summaries of one run at each recorded step
-summarise_leibold <- function(run, var_total = 400 + run$G + 4) {
+summarise_leibold <- function(run, var_total = (run$sigma %||% 20)^2 + run$G + 4) {
   types <- sort(unique(run$env))
   rows <- lapply(seq_along(run$steps), function(s) {
     n <- run$abundance[, , s]

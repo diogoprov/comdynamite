@@ -284,11 +284,13 @@ loteria). Parâmetros do modelo deles conferidos no artigo e no código publicad
 0,05 por cópia, mutação 1e-4 por alelo, sem variância inicial). Estudo
 (`data-raw/loci_leibold2019.R`, 120 rodadas): nenhuma configuração deu dominância local (no
 máximo 4% de manchas trocadas); com mutação 1e-4 a purga deixa G em 1,5--1,8 e o resultado é
-species sorting; só com 1e-2 há neutralidade regional. Bloco H fechado. Fica uma diferença não
-testada: no modelo deles a seleção age na sobrevivência a cada iteração (~10 por geração), o
-que, por uma conta aproximada, tornaria a seleção por geração várias vezes mais forte que
-sigma = 20 (sigma efetivo perto de 7); rodar com sigma menor depois de conferir no código deles
-se a fecundidade também depende de w. Corrigido de passagem: `sample_individuals()` com
+species sorting; só com 1e-2 há neutralidade regional. Bloco H fechado. Seleção mais forte
+(SI deles, Table S2: seleção só na sobrevivência, fecundidade independente do fenótipo):
+`data-raw/sigma_leibold2019.R`, 480 rodadas com sigma 6,7 (mesma curvatura de W por geração)
+e 11,5 (mesmo W no outro tipo de mancha). Com locos, a purga fica mais forte (G 0,15--0,66) e o
+resultado continua species sorting (98--100% pré-adaptadas com Nm 1 e 10); com G constante,
+quase nada muda (43--52% trocadas com Nm 1). A força da seleção não explica a dominância
+local deles; seção "Stronger selection" no artigo. Corrigido de passagem: `sample_individuals()` com
 `mutation_var` lia a matriz de variâncias por casamento parcial de nome.
 
 **Bloco I, metacomunidades multitróficas (pedido em 2026-11-19).** Estender o modelo de
