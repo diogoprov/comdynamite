@@ -138,6 +138,7 @@ reference:
     trait indices and decompositions of trait variation.
   contents:
   - sample_individuals
+  - population_stats
   - drift_test
   - coef.drift_test
   - tstats

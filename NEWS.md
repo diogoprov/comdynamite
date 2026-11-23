@@ -1,5 +1,18 @@
 # comdynamite (development version)
 
+- New `population_stats()`: statistics of trait variation among the populations of each
+  species, from measured individuals (`sample_individuals()` output or field data), for ABC.
+  Besides the regression of population means on the environment, it gives the variance within
+  populations, a QST-like divergence beyond the environment, semivariances between near and far
+  populations, the relation of residuals to population size and, with two surveys, the change
+  of the means between them (the basis of the temporal method for the effective size). In
+  simulations (`data-raw/abc_identifiability.R`), the variance within populations made the
+  environmental variance recoverable (R² 0.72 to 0.96, against 0.15 to 0.45 from the means
+  alone), and the new statistics raised the R² of Ne/N from 0.08 to 0.33 to 0.34 to 0.61, also
+  with unknown ancestral optima; the number of sampled populations mattered more than the
+  number of individuals per population. `vignette("abc")` gains a short guide to sampling
+  designs from these results.
+
 - `damocles_samples()` gains `integrate`: with `integrate = TRUE` it also fits the parameters
   that maximise the likelihood averaged over the configurations (posterior samples of regimes
   or branch rates) and tests them against constant rates by a likelihood-ratio test, returned
