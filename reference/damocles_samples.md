@@ -23,6 +23,7 @@ damocles_samples(
   vary = c("both", "gamma", "mu"),
   root = c("both", "absent", "present"),
   sympatry = 0,
+  integrate = FALSE,
   cores = 1
 )
 
@@ -74,6 +75,12 @@ summary(object, probs = c(0.05, 0.5, 0.95), ...)
   a fixed value, or `NULL` to estimate it with the rates (shared or not,
   as they are).
 
+- integrate:
+
+  `TRUE` or `FALSE` (the default). `TRUE` also fits the parameters that
+  maximise the likelihood averaged over the configurations and tests
+  them against constant rates (see Details).
+
 - cores:
 
   Number of cores, with configurations fitted in parallel. One whole
@@ -97,8 +104,12 @@ A list of class `mc_damocles_samples` with `samples`, a data frame with
 one row per configuration (`n_par`, `loglik`, `delta_aic` against
 constant rates, and the likelihood-ratio `statistic`, `df` and
 `p_value`), `constant`, the fit with constant rates, `fits`, the fit of
-each configuration, and `gamma` and `mu`, matrices of the rate of each
-edge (rows) in each configuration (columns).
+each configuration, `gamma` and `mu`, matrices of the rate of each edge
+(rows) in each configuration (columns), and `integrated`, `NULL` unless
+`integrate = TRUE`, when it is a list with the `estimates` of the
+integrated fit, its `loglik` and `n_par`, `delta_aic` against constant
+rates, the likelihood-ratio `statistic`, `df` and `p_value`, and the
+`convergence` code of the optimiser.
 
 ## Details
 
@@ -125,12 +136,28 @@ slope (regression dilution): in `data-raw/damocles_clads.R`, with
 colonisation simulated from the MAP rates of ClaDS with `beta = 2`, the
 MAP rates gave a slope of 1.6 and rejected constant rates, while single
 posterior samples gave a median slope of 0.22 and rejected constant
-rates in 65 of 100. For continuous rates, fit the posterior mean, median
-or MAP of each rate with
+rates in 65 of 100.
+
+`integrate = TRUE` adds one fit that uses all configurations at once:
+the parameters maximise the likelihood averaged over the configurations,
+\\L(\theta) = K^{-1} \sum_k L(\theta \mid c_k)\\, so that the
+uncertainty in the configuration enters the likelihood instead of a
+summary of separate fits, and this fit is compared with constant rates
+(which do not depend on the configuration) by a likelihood-ratio test.
+In simulations with posteriors of branch rates from ClaDS
+(`data-raw/s3_clads_validation.R`), this test had the highest power of
+the ways of summarising the samples, with the size of the test near or
+below its nominal level, while its slope, like that of the posterior
+mean, was attenuated by the noise in the rates. For continuous rates,
+then, use the integrated fit for the test, and report the slope of the
+posterior mean (or median, or MAP) of each rate with
 [`damocles_fit()`](https://provetelab.org/comdynamite/reference/damocles_loglik.md)
-for the estimate, and use the posterior samples to see whether the sign
-and the comparison with constant rates hold, knowing that each sample
-understates the slope.
+as a lower bound of the effect, knowing that single samples understate
+it further. The parameters must mean the same in every configuration:
+always true for `edge_covariate`, and true for `regimes` only when every
+configuration has the same regimes with the same meaning (for example,
+`"0"` for the background and `"1"` for the clade below a shift), not for
+the arbitrary labels of the regimes of each BAMM sample.
 
 [`summary()`](https://rdrr.io/r/base/summary.html) reports, across
 configurations, how often the varying rates fit better than constant
@@ -181,10 +208,12 @@ comm <- simulate_damocles(tr, ifelse(clade_regimes(tr, list(A = crown)) == "A", 
 configurations <- lapply(c(crown, crown + 1, crown + 2), function(node) {
   clade_regimes(tr, list(A = node))
 })
-res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma")
+res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma",
+                        integrate = TRUE)
 res
 #> DAMOCLES fits over 3 configurations, parameters shared by 5 communities
 #> Better than constant rates: p < 0.05 in 1 and AIC lower by more than 2 in 1 of 3 
+#> Integrated over configurations: likelihood-ratio statistic 4.01 on 1 df, p = 0.0452 
 summary(res)
 #> DAMOCLES fits over 3 configurations
 #> 
@@ -203,6 +232,11 @@ summary(res)
 #> Parameters shared by every fit:
 #>          5%     50%  95%
 #> mu 1.88e-09 4.6e-09 3.05
+#> 
+#> Integrated over configurations (log-likelihood -56.3785):
+#> gamma_background          gamma_A               mu 
+#>            0.723            3.849            2.923 
+#> Against constant rates: statistic 4.01 on 1 df, p = 0.0452 
 #> 
 #> Rates of each edge: see `$edges`
 ```

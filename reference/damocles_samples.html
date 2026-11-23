@@ -95,6 +95,7 @@ configuration.</p>
 <span>  vary <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"gamma"</span>, <span class="st">"mu"</span><span class="op">)</span>,</span>
 <span>  root <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"both"</span>, <span class="st">"absent"</span>, <span class="st">"present"</span><span class="op">)</span>,</span>
 <span>  sympatry <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  integrate <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  cores <span class="op">=</span> <span class="fl">1</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -138,6 +139,12 @@ daughters present (see <code><a href="simulate_damocles.html">simulate_damocles(
 <code>NULL</code> to estimate it with the rates (shared or not, as they are).</p></dd>
 
 
+<dt id="arg-integrate">integrate<a class="anchor" aria-label="anchor" href="#arg-integrate"></a></dt>
+<dd><p><code>TRUE</code> or <code>FALSE</code> (the default). <code>TRUE</code> also fits the parameters that
+maximise the likelihood averaged over the configurations and tests them against constant
+rates (see Details).</p></dd>
+
+
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores, with configurations fitted in parallel. One whole number, 1 or
 more. Not available on Windows, where one core is used.</p></dd>
@@ -160,8 +167,10 @@ more. Not available on Windows, where one core is used.</p></dd>
     <p>A list of class <code>mc_damocles_samples</code> with <code>samples</code>, a data frame with one row per
 configuration (<code>n_par</code>, <code>loglik</code>, <code>delta_aic</code> against constant rates, and the
 likelihood-ratio <code>statistic</code>, <code>df</code> and <code>p_value</code>), <code>constant</code>, the fit with constant rates,
-<code>fits</code>, the fit of each configuration, and <code>gamma</code> and <code>mu</code>, matrices of the rate of each
-edge (rows) in each configuration (columns).</p>
+<code>fits</code>, the fit of each configuration, <code>gamma</code> and <code>mu</code>, matrices of the rate of each
+edge (rows) in each configuration (columns), and <code>integrated</code>, <code>NULL</code> unless <code>integrate = TRUE</code>, when it is a list with the <code>estimates</code> of the integrated fit, its <code>loglik</code> and
+<code>n_par</code>, <code>delta_aic</code> against constant rates, the likelihood-ratio <code>statistic</code>, <code>df</code> and
+<code>p_value</code>, and the <code>convergence</code> code of the optimiser.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -181,10 +190,23 @@ carries the sampling noise of each rate, and a noisy covariate attenuates its sl
 (regression dilution): in <code>data-raw/damocles_clads.R</code>, with colonisation simulated from the
 MAP rates of ClaDS with <code>beta = 2</code>, the MAP rates gave a slope of 1.6 and rejected constant
 rates, while single posterior samples gave a median slope of 0.22 and rejected constant
-rates in 65 of 100. For continuous rates, fit the posterior mean, median or MAP of each rate
-with <code><a href="damocles_loglik.html">damocles_fit()</a></code> for the estimate, and use the posterior samples to see whether the sign
-and the comparison with constant rates hold, knowing that each sample understates the
-slope.</p>
+rates in 65 of 100.</p>
+<p><code>integrate = TRUE</code> adds one fit that uses all configurations at once: the parameters
+maximise the likelihood averaged over the configurations, \(L(\theta) = K^{-1} \sum_k
+L(\theta \mid c_k)\), so that the
+uncertainty in the configuration enters the likelihood instead of a summary of separate
+fits, and this fit is compared with constant rates (which do not depend on the
+configuration) by a likelihood-ratio test. In simulations with posteriors of branch rates
+from ClaDS (<code>data-raw/s3_clads_validation.R</code>), this test had the highest power of the ways
+of summarising the samples, with the size of the test near or below its nominal level,
+while its slope, like that of the posterior mean, was attenuated by the noise in the
+rates. For continuous rates, then, use the integrated fit for the test, and report the
+slope of the posterior mean (or median, or MAP) of each rate with <code><a href="damocles_loglik.html">damocles_fit()</a></code> as a
+lower bound of the effect, knowing that single samples understate it further. The
+parameters must mean the same in every configuration: always true for <code>edge_covariate</code>,
+and true for <code>regimes</code> only when every configuration has the same regimes with the same
+meaning (for example, <code>"0"</code> for the background and <code>"1"</code> for the clade below a shift), not
+for the arbitrary labels of the regimes of each BAMM sample.</p>
 <p><code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> reports, across configurations, how often the varying rates fit better than
 constant rates (p-value below 0.05, and AIC lower by more than 2), quantiles of the
 parameters that mean the same in every fit (such as <code>mu</code> when only <code>gamma</code> varies, or
@@ -224,10 +246,12 @@ Biology</em>, 66, 477–498. <a href="https://doi.org/10.1093/sysbio/syx037" cla
 <span class="r-in"><span><span class="va">configurations</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">crown</span>, <span class="va">crown</span> <span class="op">+</span> <span class="fl">1</span>, <span class="va">crown</span> <span class="op">+</span> <span class="fl">2</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">node</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="clade_regimes.html">clade_regimes</a></span><span class="op">(</span><span class="va">tr</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>A <span class="op">=</span> <span class="va">node</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">damocles_samples</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, regimes <span class="op">=</span> <span class="va">configurations</span>, vary <span class="op">=</span> <span class="st">"gamma"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">damocles_samples</span><span class="op">(</span><span class="va">comm</span>, <span class="va">tr</span>, regimes <span class="op">=</span> <span class="va">configurations</span>, vary <span class="op">=</span> <span class="st">"gamma"</span>,</span></span>
+<span class="r-in"><span>                        integrate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES fits over 3 configurations, parameters shared by 5 communities</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Better than constant rates: p &lt; 0.05 in 1 and AIC lower by more than 2 in 1 of 3 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Integrated over configurations: likelihood-ratio statistic 4.01 on 1 df, p = 0.0452 </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> DAMOCLES fits over 3 configurations</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -246,6 +270,11 @@ Biology</em>, 66, 477–498. <a href="https://doi.org/10.1093/sysbio/syx037" cla
 <span class="r-out co"><span class="r-pr">#&gt;</span> Parameters shared by every fit:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          5%     50%  95%</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> mu 1.88e-09 4.6e-09 3.05</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Integrated over configurations (log-likelihood -56.3785):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gamma_background          gamma_A               mu </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            0.723            3.849            2.923 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Against constant rates: statistic 4.01 on 1 df, p = 0.0452 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Rates of each edge: see `$edges`</span>
 </code></pre></div>
