@@ -74,6 +74,49 @@ test_that("damocles_samples fits each configuration and summarises them", {
   expect_error(damocles_samples(comm, tree, regimes = configurations, cores = 0), "cores")
 })
 
+test_that("damocles_samples integrates the likelihood over configurations", {
+  set.seed(21)
+  tree <- treeshapesim::sim_tree_shape(30)
+  x <- exp(stats::rnorm(nrow(tree$edge), 0, 0.5))
+  comm <- simulate_damocles(tree, 2 * x / exp(mean(log(x))), 1, n = 4)
+  # with copies of one configuration, the integrated fit is the fit of that configuration
+  single <- damocles_fit(comm, tree, shared = TRUE, edge_covariate = x, vary = "gamma")
+  same <- damocles_samples(comm, tree, edge_covariate = list(x, x), vary = "gamma",
+                           integrate = TRUE)
+  expect_equal(same$integrated$loglik, attr(single, "loglik_total"), tolerance = 1e-4)
+  expect_equal(unname(same$integrated$estimates["beta_gamma"]), single$beta_gamma[1],
+               tolerance = 1e-2)
+  expect_identical(same$integrated$df, 1)
+  expect_equal(same$integrated$statistic,
+               2 * (same$integrated$loglik - attr(same$constant, "loglik_total")))
+  # averaging likelihoods: never above the best configuration, never below the mean
+  noisy <- lapply(1:3, function(i) x * exp(stats::rnorm(length(x), 0, 0.5)))
+  res <- damocles_samples(comm, tree, edge_covariate = noisy, vary = "gamma",
+                          integrate = TRUE)
+  expect_lte(res$integrated$loglik, max(res$samples$loglik) + 1e-6)
+  expect_named(res$integrated, c("estimates", "loglik", "n_par", "delta_aic", "statistic",
+                                 "df", "p_value", "convergence"))
+  expect_output(print(res), "Integrated over configurations")
+  expect_output(print(summary(res)), "beta_gamma")
+  expect_null(damocles_samples(comm, tree, edge_covariate = noisy[1:2])$integrated)
+  # regimes with the same levels are integrated; different levels are not
+  crown <- ape::Ntip(tree) + 2
+  reg <- lapply(c(crown, crown + 1), function(n) clade_regimes(tree, list(A = n)))
+  r <- damocles_samples(comm, tree, regimes = reg, vary = "gamma", integrate = TRUE)
+  expect_named(r$integrated$estimates, c("gamma_background", "gamma_A", "mu"))
+  expect_error(damocles_samples(comm, tree, regimes = list(reg[[1]], rep("x", length(x))),
+                                integrate = TRUE), "same regimes")
+  expect_error(damocles_samples(comm, tree, regimes = reg, integrate = NA), "integrate")
+  # configurations with one regime each: the constant model, with no test
+  flat <- damocles_samples(comm, tree, regimes = list(rep("x", length(x)), rep("y", length(x))),
+                           integrate = TRUE)
+  expect_true(is.na(flat$integrated$p_value))
+  expect_equal(flat$integrated$loglik, attr(flat$constant, "loglik_total"), tolerance = 1e-4)
+  expect_equal(log_mean_exp(c(log(2), log(4))), log(3))
+  expect_identical(log_mean_exp(c(-1e10, -Inf)), -1e10)
+  expect_equal(log_mean_exp(c(log(2), -1e10)), log(1))
+})
+
 test_that("damocles_partition_test compares a partition with random ones", {
   set.seed(18)
   tree <- treeshapesim::sim_tree_shape(30)

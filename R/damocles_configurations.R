@@ -25,10 +25,24 @@
 #' (regression dilution): in `data-raw/damocles_clads.R`, with colonisation simulated from the
 #' MAP rates of ClaDS with `beta = 2`, the MAP rates gave a slope of 1.6 and rejected constant
 #' rates, while single posterior samples gave a median slope of 0.22 and rejected constant
-#' rates in 65 of 100. For continuous rates, fit the posterior mean, median or MAP of each rate
-#' with [damocles_fit()] for the estimate, and use the posterior samples to see whether the sign
-#' and the comparison with constant rates hold, knowing that each sample understates the
-#' slope.
+#' rates in 65 of 100.
+#'
+#' `integrate = TRUE` adds one fit that uses all configurations at once: the parameters
+#' maximise the likelihood averaged over the configurations, \eqn{L(\theta) = K^{-1} \sum_k
+#' L(\theta \mid c_k)}{L(theta) = mean over k of L(theta | configuration k)}, so that the
+#' uncertainty in the configuration enters the likelihood instead of a summary of separate
+#' fits, and this fit is compared with constant rates (which do not depend on the
+#' configuration) by a likelihood-ratio test. In simulations with posteriors of branch rates
+#' from ClaDS (`data-raw/s3_clads_validation.R`), this test had the highest power of the ways
+#' of summarising the samples, with the size of the test near or below its nominal level,
+#' while its slope, like that of the posterior mean, was attenuated by the noise in the
+#' rates. For continuous rates, then, use the integrated fit for the test, and report the
+#' slope of the posterior mean (or median, or MAP) of each rate with [damocles_fit()] as a
+#' lower bound of the effect, knowing that single samples understate it further. The
+#' parameters must mean the same in every configuration: always true for `edge_covariate`,
+#' and true for `regimes` only when every configuration has the same regimes with the same
+#' meaning (for example, `"0"` for the background and `"1"` for the clade below a shift), not
+#' for the arbitrary labels of the regimes of each BAMM sample.
 #'
 #' `summary()` reports, across configurations, how often the varying rates fit better than
 #' constant rates (p-value below 0.05, and AIC lower by more than 2), quantiles of the
@@ -47,13 +61,19 @@
 #' @inheritParams damocles_fit
 #' @param regimes,edge_covariate A list of configurations, each a vector with one value per edge
 #'   of `tree` in the order of `tree$edge` (see [damocles_fit()]). Give one of the two.
+#' @param integrate `TRUE` or `FALSE` (the default). `TRUE` also fits the parameters that
+#'   maximise the likelihood averaged over the configurations and tests them against constant
+#'   rates (see Details).
 #' @param cores Number of cores, with configurations fitted in parallel. One whole number, 1 or
 #'   more. Not available on Windows, where one core is used.
 #' @return A list of class `mc_damocles_samples` with `samples`, a data frame with one row per
 #'   configuration (`n_par`, `loglik`, `delta_aic` against constant rates, and the
 #'   likelihood-ratio `statistic`, `df` and `p_value`), `constant`, the fit with constant rates,
-#'   `fits`, the fit of each configuration, and `gamma` and `mu`, matrices of the rate of each
-#'   edge (rows) in each configuration (columns).
+#'   `fits`, the fit of each configuration, `gamma` and `mu`, matrices of the rate of each
+#'   edge (rows) in each configuration (columns), and `integrated`, `NULL` unless `integrate =
+#'   TRUE`, when it is a list with the `estimates` of the integrated fit, its `loglik` and
+#'   `n_par`, `delta_aic` against constant rates, the likelihood-ratio `statistic`, `df` and
+#'   `p_value`, and the `convergence` code of the optimiser.
 #' @references Moore, B. R., Höhna, S., May, M. R., Rannala, B., & Huelsenbeck, J. P. (2016).
 #'   Critically evaluating the theory and performance of Bayesian analysis of macroevolutionary
 #'   mixtures. *Proceedings of the National Academy of Sciences*, 113, 9569--9574.
@@ -73,15 +93,18 @@
 #' configurations <- lapply(c(crown, crown + 1, crown + 2), function(node) {
 #'   clade_regimes(tr, list(A = node))
 #' })
-#' res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma")
+#' res <- damocles_samples(comm, tr, regimes = configurations, vary = "gamma",
+#'                         integrate = TRUE)
 #' res
 #' summary(res)
 #' @export
 damocles_samples <- function(comm, tree, regimes = NULL, edge_covariate = NULL,
                              vary = c("both", "gamma", "mu"),
-                             root = c("both", "absent", "present"), sympatry = 0, cores = 1) {
+                             root = c("both", "absent", "present"), sympatry = 0,
+                             integrate = FALSE, cores = 1) {
   vary <- match.arg(vary)
   root <- match.arg(root)
+  check_flag(integrate, "integrate")
   check_count(cores, "cores")
   if (is.null(regimes) == is.null(edge_covariate)) {
     stop("give a list of `regimes` or a list of `edge_covariate`", call. = FALSE)
@@ -115,9 +138,55 @@ damocles_samples <- function(comm, tree, regimes = NULL, edge_covariate = NULL,
   rates <- function(rate) {
     vapply(fits, function(fit) attr(fit, "edge_rates")[[1]][[rate]], numeric(nrow(tree$edge)))
   }
+  integrated <- if (integrate) {
+    damocles_integrated(presence, tree, configurations, !is.null(regimes), vary, root,
+                        sympatry, constant)
+  }
   structure(list(samples = samples, constant = constant, fits = fits,
-                 gamma = rates("gamma"), mu = rates("mu")),
+                 gamma = rates("gamma"), mu = rates("mu"), integrated = integrated),
             class = "mc_damocles_samples")
+}
+
+#' log of the mean of exp(ll), with values at or below -1e10 (failed likelihoods) taken as
+#' -Inf, and -1e10 when none is finite
+#' @noRd
+log_mean_exp <- function(ll) {
+  ll[ll <= -1e10] <- -Inf
+  if (!any(is.finite(ll))) return(-1e10)
+  top <- max(ll)
+  top + log(mean(exp(ll - top)))
+}
+
+#' fit maximising the likelihood averaged over the configurations, L(theta) = mean over k of
+#' L(theta | configuration k), and its likelihood-ratio test against constant rates
+#' @noRd
+damocles_integrated <- function(presence, tree, configurations, is_regimes, vary, root,
+                                sympatry, constant) {
+  designs <- lapply(configurations, function(cfg) {
+    damocles_design(tree, if (is_regimes) cfg, if (!is_regimes) cfg, vary, sympatry)
+  })
+  if (length(unique(lapply(designs, `[[`, "names"))) > 1) {
+    stop("`integrate = TRUE` in `damocles_samples()` needs configurations with the same ",
+         "parameters: the same regimes in every configuration", call. = FALSE)
+  }
+  design <- designs[[1]]
+  post <- damocles_postorder(tree)
+  objectives <- lapply(designs, function(d) damocles_objective(presence, tree, post, root, d))
+  objective <- function(par) {
+    -log_mean_exp(-vapply(objectives, function(o) o(par), numeric(1)))
+  }
+  base <- rbind(c(constant$gamma[1], constant$mu[1]), damocles_starts(post$tree, NULL))
+  best <- damocles_optim(objective, damocles_par_starts(base, design))
+  loglik <- -best$value
+  loglik[loglik <= -1e10] <- -Inf
+  loglik0 <- attr(constant, "loglik_total")
+  df <- as.numeric(design$n_par - attr(constant, "n_par"))
+  statistic <- if (df > 0) max(2 * (loglik - loglik0), 0) else NA_real_
+  list(estimates = damocles_par_values(best$par, design), loglik = loglik,
+       n_par = design$n_par, delta_aic = 2 * df - 2 * (loglik - loglik0),
+       statistic = statistic, df = if (df > 0) df else NA_real_,
+       p_value = if (df > 0) stats::pchisq(statistic, df, lower.tail = FALSE) else NA_real_,
+       convergence = best$convergence)
 }
 
 #' @export
@@ -127,6 +196,11 @@ print.mc_damocles_samples <- function(x, ...) {
       nrow(attr(x$constant, "damocles")$presence), "communities\n")
   cat("Better than constant rates: p < 0.05 in", sum(s$p_value < 0.05, na.rm = TRUE),
       "and AIC lower by more than 2 in", sum(s$delta_aic < -2), "of", nrow(s), "\n")
+  if (!is.null(x$integrated)) {
+    cat("Integrated over configurations: likelihood-ratio statistic",
+        format(x$integrated$statistic, digits = 3), "on", x$integrated$df, "df, p =",
+        format(x$integrated$p_value, digits = 3), "\n")
+  }
   invisible(x)
 }
 
@@ -154,7 +228,7 @@ summary.mc_damocles_samples <- function(object, probs = c(0.05, 0.5, 0.95), ...)
                       mu = t(apply(object$mu, 1, quantiles)), check.names = FALSE)
   structure(list(comparison = comparison, statistic = quantiles(s$statistic),
                  delta_aic = quantiles(s$delta_aic), parameters = parameters, edges = edges,
-                 n = nrow(s)),
+                 n = nrow(s), integrated = object$integrated),
             class = "summary.mc_damocles_samples")
 }
 
@@ -170,6 +244,14 @@ print.summary.mc_damocles_samples <- function(x, ...) {
   if (!is.null(x$parameters)) {
     cat("\nParameters shared by every fit:\n")
     print(x$parameters, digits = 3)
+  }
+  if (!is.null(x$integrated)) {
+    i <- x$integrated
+    cat("\nIntegrated over configurations (log-likelihood ", format(i$loglik, digits = 6),
+        "):\n", sep = "")
+    print(i$estimates, digits = 3)
+    cat("Against constant rates: statistic", format(i$statistic, digits = 3), "on", i$df,
+        "df, p =", format(i$p_value, digits = 3), "\n")
   }
   cat("\nRates of each edge: see `$edges`\n")
   invisible(x)

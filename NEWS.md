@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `damocles_samples()` gains `integrate`: with `integrate = TRUE` it also fits the parameters
+  that maximise the likelihood averaged over the configurations (posterior samples of regimes
+  or branch rates) and tests them against constant rates by a likelihood-ratio test, returned
+  as `$integrated` and shown by `print()` and `summary()`. In simulations with ClaDS
+  posteriors (`data-raw/s3_clads_validation.R`) this was the most powerful way to test a
+  branch-rate covariate from posterior samples, with the size of the test kept.
+
 - `evolution_control()`: `loci` gives a genetic architecture of a few diploid loci of large,
   additive effect. Each population carries its allele frequencies, its genetic mean and
   variance follow from them, and selection changes them by Wright's (1937) formula, which also
