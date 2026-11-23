@@ -262,6 +262,30 @@ ou regressão; nenhuma recebe saída do `abcrf`. A seleção de estatísticas qu
 que falta para Ne, a tolerância não existe no ABC-RF, e a cobertura já é medida por
 `abc_recovery()`.
 
+Leitura para o bloco C, do *Handbook of Approximate Bayesian Computation* (Sisson, Fan &
+Beaumont, eds., Chapman & Hall/CRC, 2018, doi:10.1201/9781315117195; PDF do usuário, sumário
+conferido em 2026-11-23; páginas do livro). Prioridade alta: cap. 5, "Summary Statistics"
+(Prangle, p. 125), seções 5.1 (suficiência), 5.3 (seleção de subconjuntos), 5.4 (projeções:
+PLS, regressão, boosting), 5.5 (likelihood auxiliar), 5.6 (escolha de modelos, erro local) e
+5.7 (qual método usar), para (viii) a (x); cap. 8, "High-Dimensional ABC" (Nott, Ong, Fan &
+Sisson, p. 211), 8.2.1 (ajuste marginal) e 8.2.3 (Gaussian copula ABC), que montam um
+posterior conjunto a partir de marginais, a limitação do `abcrf` com G e Ne correlacionados
+(ix); cap. 20, "ABC in Ecological Modelling" (Fasiolo & Wood, p. 597), 20.1.2 (modelos de
+espaço de estados) e 20.1.3 (likelihood sintética contra ABC com tolerância), para (x) e (vi);
+cap. 18, aplicação aos pigmeus (Estoup et al., p. 541), fluxo completo com ABC-RF: escolha de
+modelos (18.3.1), estimação (18.3.2) e checagem do posterior do modelo (18.3.3), o mais
+próximo de `abc_choose()`, `abc_fit()` e `abc_ppc()`. Para itens específicos: cap. 6,
+"Likelihood-Free Model Choice" (Marin, Pudlo, Estoup & Robert, p. 153), 6.3 e 6.4, para
+validar a leitura de `abc_choose()`; cap. 12, "Approximating the Likelihood in ABC"
+(Drovandi, Grazian, Mengersen & Robert, p. 321), 12.2 (likelihood sintética) e 12.4
+(empirical likelihood), para (vi); cap. 4, "ABC Samplers" (Sisson & Fan, p. 87), 4.4 (SMC),
+para (xii); cap. 7, "ABC and Indirect Inference" (Drovandi, p. 179), 7.3 e 7.4, estatísticas
+a partir de um modelo auxiliar; cap. 3, "Regression Approaches for ABC" (Blum, p. 71), 3.2.5
+(transformações de parâmetros) e 3.2.6 (shrinkage), para (ix) e (xi); cap. 10, "Asymptotics
+of ABC" (Fearnhead, p. 269), 10.2.4 (erro de modelo) e 10.5; cap. 11, "Informed Choices"
+(Ratmann, Camacho, Hu & Colijn, p. 289), testes de equivalência e o pacote `abc.star`,
+complementar ao `abc_ppc()` (baixa prioridade). Ordem de leitura sugerida: 5, 8.2 e 20.
+
 **Bloco D, indivíduos e traits (ponte Leibold–Januario).** (i) vários traits por indivíduo e
 traits de indivíduos que afetem a dinâmica (hoje são sorteados depois); (ii) cruzar com
 dispersão e extinção de manchas (cenário 9); (iii) nulo de T_PC.PR levemente liberal na cauda
