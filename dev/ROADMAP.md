@@ -277,8 +277,19 @@ recombinação reduz à metade por geração; `TRUE` = `"clonal"`, permanente). 
 recrutamento do artigo do Leibold (`data-raw/bulmer_leibold2019.R`, 60 rodadas), a redução
 transitória se comportou quase como sem erosão (G 45--112, d de -4 a -26; 97--100% de manchas
 compartilhadas a partir de G = 200, 92--95% com a espécie pré-adaptada a partir de zero) e não
-gerou dominância local. Pela regra do bloco, a etapa (ii), poucos locos de efeito grande, é a
-próxima, a decidir com o usuário.
+gerou dominância local.
+Etapa (ii) feita em 2026-11-22: `loci` em `evolution_control()` (locos diploides bialélicos
+aditivos, fórmula de Wright com o termo que purga variância perto do ótimo; Beverton-Holt e
+loteria). Parâmetros do modelo deles conferidos no artigo e no código publicado (10 locos,
+0,05 por cópia, mutação 1e-4 por alelo, sem variância inicial). Estudo
+(`data-raw/loci_leibold2019.R`, 120 rodadas): nenhuma configuração deu dominância local (no
+máximo 4% de manchas trocadas); com mutação 1e-4 a purga deixa G em 1,5--1,8 e o resultado é
+species sorting; só com 1e-2 há neutralidade regional. Bloco H fechado. Fica uma diferença não
+testada: no modelo deles a seleção age na sobrevivência a cada iteração (~10 por geração), o
+que, por uma conta aproximada, tornaria a seleção por geração várias vezes mais forte que
+sigma = 20 (sigma efetivo perto de 7); rodar com sigma menor depois de conferir no código deles
+se a fecundidade também depende de w. Corrigido de passagem: `sample_individuals()` com
+`mutation_var` lia a matriz de variâncias por casamento parcial de nome.
 
 **Bloco I, metacomunidades multitróficas (pedido em 2026-11-19).** Estender o modelo de
 Thompson et al. (2020) de `simulate_metacommunity()`, hoje de um nível trófico (nicho abiótico

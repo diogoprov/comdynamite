@@ -212,7 +212,11 @@
 #'   the last step, and `history`, sites x recorded steps; 0 in the step of a change and the
 #'   step itself where the environment never changed), the reference environment and the
 #'   settings, and, with `mutation_var`, the genetic variance of each population at the last
-#'   step (`genetic_variance`); `NA` where a population is absent. With several evolving traits, `genetic`,
+#'   step (`genetic_variance`); `NA` where a population is absent. With `loci`,
+#'   `allele_frequency` is an array of sites x species x loci with the frequency of allele 1 at
+#'   each locus in each population at the last step, `NA` where a population is absent, and
+#'   `genetic_variance` is the variance that follows from them. With several evolving traits,
+#'   `genetic`,
 #'   `plastic` and `phenotype` are arrays of sites x species x traits, `history` has the
 #'   recorded steps as a fourth dimension, and `genetic_var`, `env_var` (one matrix per species)
 #'   and `plasticity` (species x traits) are kept. With a niche of several axes, [as_mc_data()] keeps every axis (`env` and one
@@ -855,6 +859,8 @@ mc_setup_traits <- function(st) {
       vd <- matrix(NA_real_, m, k_all)
       vd[start_pop] <- 0
     }
+    # allele frequencies of every population, with `loci`
+    if (isTRUE(ev$loci_on)) loci_setup(environment())
   }), st)
   invisible(st)
 }
@@ -975,6 +981,7 @@ mc_seed_traits <- function(st) {
         vd[, alive] <- dv
       }
     }
+    if (isTRUE(ev$loci_on)) loci_step_seed(environment())
   }), st)
   invisible(st)
 }
@@ -1019,6 +1026,7 @@ mc_step_growth <- function(st) {
       if (any(fixed_z[alive])) {
         za[, fixed_z[alive]] <- pool_mean[, alive, drop = FALSE][, fixed_z[alive]]
       }
+      if (isTRUE(ev$loci_on)) loci_step_start(environment())
       pa <- za + sweep(matrix(e_now - ev$ref, m, k), 2, ev$b[alive], "*")
       if (isTRUE(ev$dyn)) {
         ga <- vg[, alive, drop = FALSE]
@@ -1059,7 +1067,9 @@ mc_step_reproduce <- function(st) {
         g0 <- if (isTRUE(ev$dyn)) ga else matrix(ev$g[alive], m, k, byrow = TRUE)
         x <- ifelse(surv > 0 & surv < n, 1 / pmax(surv, 1) - 1 / pmax(n, 1), 0)
         sd_s <- surv > 0 & x > 0 & g0 > 0
-        if (is.finite(ev$nu) && any(sd_s)) {
+        if (isTRUE(ev$loci_on)) {
+          loci_step_survive(environment())
+        } else if (is.finite(ev$nu) && any(sd_s)) {
           z_surv[sd_s] <- z_surv[sd_s] + stats::rnorm(sum(sd_s), 0,
                                                       sqrt(g0[sd_s] * x[sd_s] / ev$nu))
           if (isTRUE(ev$dyn)) g_surv[sd_s] <- (g_surv * pmax(1 - x / (2 * ev$nu), 0))[sd_s]
@@ -1086,6 +1096,8 @@ mc_step_select <- function(st) {
     if (isTRUE(ev$mv)) {
       za <- mv_select(ev, za, pa, e_now, n, alive)
       pa <- mv_phenotype(ev, za, e_now, alive)
+    } else if (isTRUE(ev$loci_on)) {
+      loci_step_select(environment())
     } else if (!is.null(ev)) {
       # selection toward the local environment and drift, in populations present after
       # reproduction (Lande 1976); no draws without drift
@@ -1191,7 +1203,7 @@ mc_step_gene_flow <- function(st) {
     }), st)
   } else if (!is.null(st$ev)) {
     mc_flow_sources(st)
-    mc_flow_merge(st)
+    if (isTRUE(st$ev$loci_on)) loci_step_flow(st) else mc_flow_merge(st)
   }
   invisible(st)
 }
@@ -1291,7 +1303,11 @@ mc_step_recruit <- function(st) {
     }
     imm[!from_imm] <- 0L
     n_new <- surv + rec
-    if (!is.null(ev)) mc_recruit_traits(environment())
+    if (isTRUE(ev$loci_on)) {
+      loci_step_recruit(environment())
+    } else if (!is.null(ev)) {
+      mc_recruit_traits(environment())
+    }
     n <- n_new
   }), st)
   invisible(st)
@@ -1411,6 +1427,7 @@ mc_step_store <- function(st) {
         dv[n == 0] <- NA_real_
         vd[, alive] <- dv
       }
+      if (isTRUE(ev$loci_on)) loci_step_store(environment())
       z[, alive] <- za
       ph[, alive] <- pa
     }
@@ -1576,6 +1593,9 @@ mc_finish_evolution <- function(st) {
                           settings = structure(evolution[setdiff(names(evolution),
                                                                  c("env", "traits"))],
                                                class = "mc_evolution"))
+    if (isTRUE(ev$loci_on)) {
+      out$evolution$allele_frequency <- loci_output(lp, absent, sites, species)
+    }
   }), st)
   invisible(st)
 }
