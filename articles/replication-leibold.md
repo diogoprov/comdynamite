@@ -419,14 +419,42 @@ dominance in our engine, and at their mutation rate the removal of
 variance by stabilising selection seems to prevent the adaptation to the
 other patch type that regional neutrality requires.
 
-One difference remains untested. In their model selection acts on
-survival at each of the about 10 iterations of a generation, so that
-fitness per generation depends on how long an individual lives; by our
-rough calculation, this makes selection near the optimum several times
-stronger than a niche width of 20 per generation implies. This is our
-interpretation of their model structure, not a result, and stronger
-selection would strengthen both the removal of variance and the
-advantage of residents.
+## Stronger selection
+
+In their model selection acts only on survival: at each time step an
+individual survives with probability (1 - d) f, where d = 0.1 and f is a
+Gaussian function of the distance between phenotype and environment with
+width \omega_e, while the number of offspring of a patch depends only on
+its density (Leibold et al. 2019, SI Appendix, Table S2). With the trait
+multiplied by 100, \omega_e = 20, and an individual at distance x from
+its optimum lives on average 1 / (1 - (1 - d) f(x)) time steps, so its
+fitness per generation relative to a perfectly adapted individual is
+W(x) = d / (1 - (1 - d) f(x)). This function is narrower than a Gaussian
+of width 20. We bracketed it with two niche widths: 6.7, which gives the
+same curvature at the optimum (\omega_e \sqrt{d / (1 - d)}), and 11.5,
+which gives the same fitness, 0.22, at the optimum of the other patch
+type, 20 units away, where a width of 20 gives 0.61. For each width we
+repeated the main design with a constant G (0 to 400, N_m of 1, 10 and
+100, Beverton-Holt recruitment) and the 10 loci at their mutation rate,
+with Beverton-Holt and with lottery recruitment, at the same three
+dispersal levels (`data-raw/sigma_leibold2019.R`; 10 runs of 10,000
+generations per setting, 480 runs).
+
+Stronger selection did not produce local dominance. With loci, both
+species persisted to generation 5000 in all 120 runs, but the removal of
+variance became stronger: G at generation 10,000 fell to 0.15–0.20 with
+a width of 6.7 and to 0.40–0.66 with 11.5, against 1.5–1.8 with 20. With
+N_m of 1 and 10, 98 to 100% of the patches were held by the preadapted
+species and at most 1% were switched, so the outcome was species
+sorting, as without evolution, whereas with N_m = 100 65 to 80% of the
+patches were shared, through mass effects, also as without evolution.
+With a constant G, the narrower niches changed little. With N_m = 1 and
+G \geq 20, 43 to 52% of the patches were switched, against 40 to 45%
+with a width of 20, and with N_m = 10 and G \geq 50 only 1 to 3 of 10
+runs kept both species (shared patches 10 to 38% in those runs). Taken
+together, stronger selection makes the loci of their model even less
+able to adapt to the other patch type, so the difference in selection
+strength seems not to explain the local dominance of their model.
 
 ## More replicates and parameter sweeps
 
@@ -498,10 +526,11 @@ generations and a variance built from new mutations, at low or high
 mutation rates and with or without erosion by selection, did not produce
 it either, nor did erosion with the transient Bulmer reduction of sexual
 reproduction or a few loci of large effect, which at their mutation rate
-gave species sorting rather than regional neutrality. These conclusions
-held with 500 replicates per setting and across patch extinction rates
-from 0 to 0.05, although the speed of adaptation was set through G
-rather than matched to their model.
+gave species sorting rather than regional neutrality, also with the
+stronger selection per generation implied by their survival-based
+fitness. These conclusions held with 500 replicates per setting and
+across patch extinction rates from 0 to 0.05, although the speed of
+adaptation was set through G rather than matched to their model.
 
 ## References
 
