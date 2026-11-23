@@ -120,17 +120,24 @@ evolution_control(
 - variance_selection:
 
   With `mutation_var`, should stabilising selection also remove genetic
-  variance? `TRUE` or `FALSE`. With `TRUE`, each generation loses \\G^2
-  / (\sigma^2 + G + V_E)\\, the reduction of the genetic variance by
+  variance? `FALSE` (the default) keeps the mutation-drift dynamics
+  alone. `TRUE` or `"clonal"` removes each generation \\G^2 /
+  (\sigma^2 + G + V_E)\\, the reduction of the genetic variance by
   Gaussian selection of width \\\sigma\\ on a phenotype of variance
-  \\G + V_E\\ (Bulmer 1971). Under sexual reproduction most of this
-  reduction is linkage disequilibrium, which recombination restores, so
-  the full loss holds for clonal inheritance, as in the model of Urban &
-  De Meester (2009); with mutation, the variance then settles near the
-  balance between mutation and selection (Lande 1975; Turelli 1984)
-  rather than at \\2 N_e V_m\\, and standing variation is eroded instead
-  of carrying a load. `FALSE` (the default) keeps the mutation-drift
-  dynamics alone.
+  \\G + V_E\\ (Bulmer 1971), for good. This holds for clonal
+  inheritance, as in the model of Urban & De Meester (2009); with
+  mutation, the variance then settles near the balance between mutation
+  and selection (Lande 1975; Turelli 1984) rather than at \\2 N_e V_m\\,
+  and standing variation is eroded instead of carrying a load.
+  `"sexual"` is the infinitesimal model with free recombination (Bulmer
+  1971): the reduction is linkage disequilibrium \\d\\, which gains half
+  of it each generation and loses half of itself to recombination, so
+  that \\d\\ settles at \\-G^2 / (\sigma^2 + G + V_E)\\ and returns to
+  zero when selection relaxes. The genic variance \\G - d\\ follows the
+  mutation-drift dynamics, and \\G\\ is the genic variance plus \\d\\.
+  Gene flow and founders mix \\d\\ as they mix \\G\\, and seeds carry
+  none. The disequilibrium of each population at the last step is
+  returned as `linkage_disequilibrium`.
 
 ## Value
 
