@@ -70,8 +70,14 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    fora do git. Falta registrar o DOI do preprint em `CITATION` e no README quando sair.
    As limitações resolvíveis do manuscrito entraram nos blocos A, B, C e H (ver "Limitações do
    manuscrito" abaixo), para que a revisão já encontre parte delas feitas.
-3. **DAMOCLES:** terminar a validação S3 com o ClaDS2 e escrever o plano do artigo
-   (`dev/plano-artigo-damocles.md`). O proxy de persistência por traits (ideia do Januário)
+3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
+   integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
+   (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
+   das amostras do posterior e testa contra taxas constantes por LRT. Foi o teste mais poderoso
+   no S3, com o tamanho mantido. O S4 (calibração das partições aleatórias) foi fechado sem
+   rodada própria, com a evidência do S1: χ² como teste principal, bootstrap paramétrico como
+   robustez e partições só como diagnóstico (uma rodada focada custaria ~800 horas-núcleo).
+   Plano do artigo em `dev/plano-artigo-damocles.md`. O proxy de persistência por traits (ideia do Januário)
    foi testado com TetrapodTraits, longevidade e ocupação dinâmica no NAAMP (PR #120,
    2026-11-19); nota enviada ao Januário em 2026-11-19, aguardando a reunião.
 4. **Delatorre et al. (2015):** experimento virtual feito (local, `dev/delatorre2015/`, fora
@@ -248,12 +254,13 @@ inferior (0,068 contra 0,04): sortear médias de população com o denominador o
 (mudanças de taxa por Poisson em eventos de reembaralhamento); (vi) `alpha` matricial no OU,
 como `mvOU()`, e taxas por ramo vezes uma matriz.
 
-**Bloco E, DAMOCLES.** Segue o plano do artigo (`dev/plano-artigo-damocles.md`): S3 com o
-ClaDS2 em andamento. Variantes ainda não feitas: colonização dependente do tempo (`gamma_td`),
+**Bloco E, DAMOCLES.** Segue o plano do artigo (`dev/plano-artigo-damocles.md`): S1 e S3 feitos,
+verossimilhança integrada no pacote (PR #161), S4 fechado com o S1; seguem S2 (poder), S5
+(dependência espacial) e S6. Variantes ainda não feitas: colonização dependente do tempo (`gamma_td`),
 modelos com traits discretos (`model = 1, 2` do pacote), amostragem incompleta do pool, taxas
 por época, ligação com a saída de `simulate_metacommunity()`. A suspeita de que o teste contra
 partições aleatórias fosse liberal foi resolvida no S1 (calibrado com o qui-quadrado e o
-bootstrap; a partição ficou só como diagnóstico).
+bootstrap; a partição ficou só como diagnóstico, e o S4 foi fechado com essa evidência).
 
 **Bloco F, fluxo biogeográfico de Benício et al. (2021).** É a lista da antiga seção v0.8.0,
 que saiu com outro conteúdo (eco-evolução). Já há partes: `observe_detection()` (detecção
@@ -1252,9 +1259,10 @@ pacotes de referência em vez de reimplementá-los.
       `random_regimes()` (partições aleatórias de mesma complexidade), `clade_regimes()` com
       nós, `dr_rates()` (DR de Jetz et al. 2012), conversão de BAMM e ClaDS em
       `data-raw/damocles_bamm.R` e `data-raw/damocles_clads.R`; `max_overlap` em
-      `random_regimes()` (sem ele o teste contra partições aleatórias não tinha poder). Falta:
-      checar se o teste contra partições aleatórias é levemente liberal (4/40 sem efeito) com
-      mais réplicas.
+      `random_regimes()` (sem ele o teste contra partições aleatórias não tinha poder). Checado no S1
+      (2026-11-14): levemente liberal (~0,08) e sem resolução com uma mudança; fica como
+      diagnóstico. Verossimilhança integrada sobre configurações (`integrate = TRUE` em
+      `damocles_samples()`) feita em 2026-11-22 (PR #161).
       Próximos, em ordem de
       facilidade: taxas por época (quadratura do fator integrante, sem EDO); trait discreto coevoluindo com a presença (estado
       presença × trait); traits contínuos e colonização dependente de parentesco só por
