@@ -177,7 +177,8 @@ damocles_integrated <- function(presence, tree, configurations, is_regimes, vary
   }
   base <- rbind(c(constant$gamma[1], constant$mu[1]), damocles_starts(post$tree, NULL))
   best <- damocles_optim(objective, damocles_par_starts(base, design))
-  loglik <- if (best$value >= 1e10) -Inf else -best$value
+  loglik <- -best$value
+  loglik[loglik <= -1e10] <- -Inf
   loglik0 <- attr(constant, "loglik_total")
   df <- as.numeric(design$n_par - attr(constant, "n_par"))
   statistic <- if (df > 0) max(2 * (loglik - loglik0), 0) else NA_real_
