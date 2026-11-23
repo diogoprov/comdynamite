@@ -68,6 +68,7 @@ Other trait variation among individuals:
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=plot_population_traits]{plot_population_traits()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=population_stats]{population_stats()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
 \code{\link[=trait_densities]{trait_densities()}},

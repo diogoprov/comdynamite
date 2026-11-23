@@ -1,6 +1,6 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-22. Versão atual: 0.11.0 (tag `v0.11.0`, release, DOI
+Atualizado em 2026-11-23. Versão atual: 0.11.0 (tag `v0.11.0`, release, DOI
 `10.5281/zenodo.24446713`), após a 0.10.0 (tag `v0.10.0`, release, DOI `10.5281/zenodo.24423302`) e a 0.9.0 (DOI
 `10.5281/zenodo.24341231`; DOI de conceito `10.5281/zenodo.23993533`). Em desenvolvimento:
 0.11.0.9000.
@@ -8,7 +8,7 @@ Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0
 `v0.9.0`, `v0.10.0` e `v0.11.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-22)
+## Próximos passos (2026-11-23)
 
 0. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
    aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
@@ -70,6 +70,15 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    fora do git. Falta registrar o DOI do preprint em `CITATION` e no README quando sair.
    As limitações resolvíveis do manuscrito entraram nos blocos A, B, C e H (ver "Limitações do
    manuscrito" abaixo), para que a revisão já encontre parte delas feitas.
+2b. **Bloco C (viii) feito em 2026-11-23** (branch `abc-identifiability`): `population_stats()`
+   exportada (variância dentro das populações, divergência tipo QST, semivariâncias por
+   distância, relação com o tamanho populacional e mudança temporal das médias) e estudo em
+   `data-raw/abc_identifiability.R` (8 casos, 10.000 simulações cada). V_E passa a ser
+   recuperado (R² 0,72 a 0,96, contra 0,15 a 0,45 só com as médias); Ne/N sobe de 0,08 a 0,33
+   para 0,34 a 0,61 e atinge o critério em 4 dos 8 casos no desenho mais rico; ótimos
+   desconhecidos não pioram G nem Ne/N. Guia de desenho amostral na `vignette("abc")`. O texto
+   da quarta limitação do manuscrito ainda não foi mudado (decisão do usuário). Seguem, no
+   bloco C: (i), (ii), (iv), (v), (iii); (ix) e (x) são a continuação natural para Ne.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -245,6 +254,14 @@ imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridad
 identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica dentro das
 populações e a divergência entre populações relativa à distância (tipo QST), testadas com
 `abc_recovery()` nos desenhos do artigo, e um guia curto de desenho amostral na `vignette("abc")`. Prioridade alta entre os itens do bloco.
+**(viii) feito em 2026-11-23:** `population_stats()` e `data-raw/abc_identifiability.R`, com
+ótimos conhecidos ou sorteados de priors e G constante ou definido por mutação. Só com as
+médias, G já era recuperado (R² 0,89 a 0,92), V_E e Ne/N não; com as estatísticas novas, V_E
+chega a 0,72 a 0,96 e Ne/N a 0,34 a 0,61 (critério atingido em 4 de 8 casos, pior sob
+aquecimento com mutação). O número de populações pesa mais que o de indivíduos por população;
+a segunda amostragem ajuda Ne/N só no ambiente estático com G constante (+0,10), o que
+deixa o (x), com mudanças entre gerações em vez de entre duas amostragens 50 passos
+distantes, ainda em aberto.
 
 Acrescentados em 2026-11-23, depois da iteração com os dados do Leandro (Ne e parâmetros
 genéticos pedindo ajuste fino): (ix) reparametrizar G e Ne. Pelas equações de Lande, a deriva

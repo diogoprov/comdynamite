@@ -111,6 +111,7 @@ Other trait variation among individuals:
 \code{\link[=plot.trait_rarefaction]{plot.trait_rarefaction()}},
 \code{\link[=plot.tstats]{plot.tstats()}},
 \code{\link[=population_shifts]{population_shifts()}},
+\code{\link[=population_stats]{population_stats()}},
 \code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=sample_individuals]{sample_individuals()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
