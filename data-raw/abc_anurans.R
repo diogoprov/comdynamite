@@ -105,6 +105,13 @@ observed_data <- mc_data(padded, tree = anurans$tree,
 observed <- summarise(observed_data, fixed)
 city_stats <- grep("^(cg|sjc)_", names(observed), value = TRUE)
 phylogenetic <- grep("ses_", city_stats, value = TRUE)
+# ses_mpd and ses_mntd use 19 draws of the null model, as in the simulations, so a single
+# observed value changes with the draws (standard deviation 0.10 to 0.19; in São José dos Campos,
+# ses_mpd ranged from -0.03 to -0.35 in three unseeded runs); the observed values are their means
+# over 100 sets of draws, with a fixed seed
+set.seed(2041)
+ses <- grep("ses_", names(observed), value = TRUE)
+observed[ses] <- rowMeans(replicate(100, summarise(observed_data, fixed)[ses]))
 
 # the analysis runs only from Rscript, so that other scripts can source the definitions above
 if (sys.nframe() == 0) {

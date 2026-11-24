@@ -116,7 +116,9 @@
 #' @param seed_steps Steps at which individuals are added during colonisation, a numeric
 #'   vector without `NA` (`numeric(0)` for none).
 #' @param seed_mean Mean number of individuals of each species added to each
-#'   site at each seeding step (and at the start), one finite number, 0 or more.
+#'   site at each seeding step (and at the start), finite numbers, 0 or more: one value, or one
+#'   per species (in the order of the species of `traits`), for colonisation from a region
+#'   where some species are commoner than others (species born by speciation get none).
 #' @param record_steps Optional steps at which abundances are recorded, a numeric vector
 #'   without `NA`; steps outside 1 to `n_steps` are dropped.
 #' @param immigration How emigrants reach other sites on spatially explicit landscapes:
@@ -513,6 +515,29 @@ mc_setup <- function(st) {
   invisible(st)
 }
 
+#' stops unless `seed_mean` holds one finite number, 0 or more, or one per species
+#' @noRd
+mc_check_seed_mean <- function(seed_mean, k_all) {
+  ok <- is.numeric(seed_mean) && length(seed_mean) %in% c(1, k_all) &&
+    all(is.finite(seed_mean)) && all(seed_mean >= 0)
+  if (!ok) {
+    stop("`seed_mean` must be one finite number, 0 or more, or one per species (", k_all, ")",
+         call. = FALSE)
+  }
+  invisible(seed_mean)
+}
+
+#' mean seeds of the species in `alive`, by site (a vector in the order of a sites x species
+#' matrix with `m` rows); species born after the start get none when `seed_mean` is given per
+#' species
+#' @noRd
+seed_rates <- function(seed_mean, alive, m) {
+  if (length(seed_mean) == 1) return(seed_mean)
+  rate <- seed_mean[alive]
+  rate[is.na(rate)] <- 0
+  rep(rate, each = m)
+}
+
 #' checks the arguments of mc_dynamics() on steps, growth rates, competition, dispersal,
 #' extirpation, disturbance and recruitment, in the frame `st`, and sets the numbers of sites
 #' (`m`) and species (`k_all`)
@@ -521,7 +546,6 @@ mc_setup_arguments <- function(st) {
   eval(quote({
     immigration <- match.arg(immigration)
     check_count(n_steps, "n_steps")
-    check_number(seed_mean, "seed_mean", lower = 0)
     mc_check_steps(seed_steps, record_steps)
     r_fun <- if (is.function(r)) r else function(step) r
     r1 <- r_fun(1)
@@ -536,6 +560,7 @@ mc_setup_arguments <- function(st) {
     probabilities_per_species(extirpation, "extirpation", k_all)
     dispersal <- rep_len(dispersal, k_all)
     extirpation <- rep_len(extirpation, k_all)
+    mc_check_seed_mean(seed_mean, k_all)
     mc_check_disturbance(disturbance, m, n_steps)
     recruitment <- match.arg(recruitment, c("beverton_holt", "lottery"))
     lottery <- recruitment == "lottery"
@@ -704,7 +729,11 @@ mc_setup_start <- function(st) {
 #' @noRd
 mc_setup_abundance <- function(st) {
   eval(quote({
-    n <- if (is.null(initial)) matrix(stats::rpois(m * k, seed_mean), m, k) else unname(initial)
+    n <- if (is.null(initial)) {
+      matrix(stats::rpois(m * k, seed_rates(seed_mean, seq_len(k), m)), m, k)
+    } else {
+      unname(initial)
+    }
     if (!is.null(inside)) n[!inside] <- 0L
     if (lottery) {
       if (!is.null(initial) && any(rowSums(n) > microsites)) {
@@ -918,7 +947,7 @@ mc_step_seeds <- function(st) {
     added <- 0L
     if (!is.null(pool_from)) inside <- inside_at(step, alive)
     if (step %in% seed_steps) {
-      seeds <- stats::rpois(m * k, seed_mean)
+      seeds <- stats::rpois(m * k, seed_rates(seed_mean, alive, m))
       added <- if (is.null(inside)) seeds else seeds * inside
       if (isTRUE(ev$mv)) {
         mc_seed_traits_mv(environment())

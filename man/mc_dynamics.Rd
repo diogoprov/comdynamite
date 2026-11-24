@@ -48,7 +48,9 @@ rows of \code{traits} by name, or by position if \code{alpha} has no names.}
 vector without \code{NA} (\code{numeric(0)} for none).}
 
 \item{seed_mean}{Mean number of individuals of each species added to each
-site at each seeding step (and at the start), one finite number, 0 or more.}
+site at each seeding step (and at the start), finite numbers, 0 or more: one value, or one
+per species (in the order of the species of \code{traits}), for colonisation from a region
+where some species are commoner than others (species born by speciation get none).}
 
 \item{disp_matrix}{Row-stochastic dispersal matrix (sites x sites), or
 \code{NULL} for uniform dispersal.}
