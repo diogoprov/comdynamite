@@ -106,78 +106,81 @@ observed <- summarise(observed_data, fixed)
 city_stats <- grep("^(cg|sjc)_", names(observed), value = TRUE)
 phylogenetic <- grep("ses_", city_stats, value = TRUE)
 
-future::plan(future::multicore, workers = cores)
-started <- Sys.time()
-competition <- abc_table(prior, simulate, n = n_ref + n_test, setup = function() fixed,
-                         summarise = summarise, seed = 2040)
-none <- abc_table(prior[names(prior) != "inter_max"], simulate, n = n_ref,
-                  setup = function() fixed, summarise = summarise, seed = 2041)
-future::plan(future::sequential)
-minutes_sim <- as.numeric(difftime(Sys.time(), started, units = "mins"))
+# the analysis runs only from Rscript, so that other scripts can source the definitions above
+if (sys.nframe() == 0) {
+  future::plan(future::multicore, workers = cores)
+  started <- Sys.time()
+  competition <- abc_table(prior, simulate, n = n_ref + n_test, setup = function() fixed,
+                           summarise = summarise, seed = 2040)
+  none <- abc_table(prior[names(prior) != "inter_max"], simulate, n = n_ref,
+                    setup = function() fixed, summarise = summarise, seed = 2041)
+  future::plan(future::sequential)
+  minutes_sim <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 
-keep <- function(t, rows) {
-  out <- t[rows, ]
-  attributes(out)[c("prior", "parameters", "statistics", "class")] <-
-    attributes(t)[c("prior", "parameters", "statistics", "class")]
-  out
+  keep <- function(t, rows) {
+    out <- t[rows, ]
+    attributes(out)[c("prior", "parameters", "statistics", "class")] <-
+      attributes(t)[c("prior", "parameters", "statistics", "class")]
+    out
+  }
+  reference <- keep(competition, seq_len(n_ref))
+  started <- Sys.time()
+  # (i) recovery, with the pseudo-observations left out of the reference table
+  recovery <- abc_recovery(competition, statistics = city_stats, n_test = n_test, ntree = ntree,
+                           ncores = cores, seed = 2042)
+  # (ii) model choice
+  choice <- abc_choose(list(phylogenetic = reference, none = none), statistics = city_stats,
+                       ntree = ntree, ncores = cores)
+  chosen <- predict(choice, observed, ntree = ntree, ncores = cores)
+  # (iii) posterior and diagnostics
+  fit <- abc_fit(reference, statistics = city_stats, ntree = ntree, ncores = cores)
+  posterior <- predict(fit, observed)
+  importance <- abc_importance(fit)
+  diagnose <- abc_diagnose(fit, observed)
+  # (iv) posterior predictive check of the phylogenetic statistics
+  fit_rest <- abc_fit(reference, statistics = setdiff(city_stats, phylogenetic), ntree = ntree,
+                      ncores = cores)
+  ppc_phylo <- abc_ppc(fit_rest, observed, reference, statistics = phylogenetic, n = 500,
+                       seed = 2043)
+  ppc_all <- abc_ppc(fit, observed, reference, statistics = city_stats, n = 500, seed = 2044)
+  # (v) cross-validation with spatial blocks
+  cv <- abc_cv(as.data.frame(reference), observed, parameters = names(prior), ntree = ntree,
+               ncores = cores, seed = 2045)
+  # (vi) sensitivity to the statistics bound by the pool
+  reduced <- grep("_(gamma|beta)$", city_stats, value = TRUE, invert = TRUE)
+  choice_reduced <- abc_choose(list(phylogenetic = reference, none = none), statistics = reduced,
+                               ntree = ntree, ncores = cores)
+  chosen_reduced <- predict(choice_reduced, observed, ntree = ntree, ncores = cores)
+  fit_reduced <- abc_fit(reference, statistics = reduced, ntree = ntree, ncores = cores)
+  posterior_reduced <- predict(fit_reduced, observed)
+  recovery_reduced <- abc_recovery(competition, statistics = reduced, n_test = n_test,
+                                   ntree = ntree, ncores = cores, seed = 2042)
+  minutes_fit <- as.numeric(difftime(Sys.time(), started, units = "mins"))
+
+  saveRDS(list(observed = observed, folds = folds, prior = prior, recovery = recovery,
+               estimates = attr(recovery, "estimates"),
+               choice = choice[c("error", "confusion", "statistics", "models")], chosen = chosen,
+               posterior = posterior, importance = importance, diagnose = diagnose,
+               draws = attr(ppc_all, "draws")[c(names(prior), city_stats)],
+               ppc_phylo = ppc_phylo,
+               reduced = list(statistics = reduced, recovery = recovery_reduced,
+                              choice = choice_reduced[c("error", "confusion")],
+                              chosen = chosen_reduced, posterior = posterior_reduced),
+               ppc_all = ppc_all, cv = cv, cv_summary = summary(cv),
+               minutes = c(simulation = minutes_sim, forests = minutes_fit),
+               settings = list(n_ref = n_ref, n_test = n_test, ntree = ntree)), output)
+  print(recovery, digits = 3)
+  cat("model choice: out-of-bag error", round(choice$error, 3), "\n")
+  print(choice$confusion)
+  print(chosen, digits = 3)
+  print(posterior, digits = 3)
+  print(diagnose, digits = 3)
+  print(ppc_phylo, digits = 3)
+  print(as.data.frame(ppc_all)[c("statistic", "observed", "p")], digits = 3)
+  print(summary(cv), digits = 3)
+  cat("without gamma and beta: out-of-bag error", round(choice_reduced$error, 3), "\n")
+  print(chosen_reduced, digits = 3)
+  print(posterior_reduced, digits = 3)
+  print(recovery_reduced, digits = 3)
+  cat("simulation", round(minutes_sim, 1), "min; forests", round(minutes_fit, 1), "min\n")
 }
-reference <- keep(competition, seq_len(n_ref))
-started <- Sys.time()
-# (i) recovery, with the pseudo-observations left out of the reference table
-recovery <- abc_recovery(competition, statistics = city_stats, n_test = n_test, ntree = ntree,
-                         ncores = cores, seed = 2042)
-# (ii) model choice
-choice <- abc_choose(list(phylogenetic = reference, none = none), statistics = city_stats,
-                     ntree = ntree, ncores = cores)
-chosen <- predict(choice, observed, ntree = ntree, ncores = cores)
-# (iii) posterior and diagnostics
-fit <- abc_fit(reference, statistics = city_stats, ntree = ntree, ncores = cores)
-posterior <- predict(fit, observed)
-importance <- abc_importance(fit)
-diagnose <- abc_diagnose(fit, observed)
-# (iv) posterior predictive check of the phylogenetic statistics
-fit_rest <- abc_fit(reference, statistics = setdiff(city_stats, phylogenetic), ntree = ntree,
-                    ncores = cores)
-ppc_phylo <- abc_ppc(fit_rest, observed, reference, statistics = phylogenetic, n = 500,
-                     seed = 2043)
-ppc_all <- abc_ppc(fit, observed, reference, statistics = city_stats, n = 500, seed = 2044)
-# (v) cross-validation with spatial blocks
-cv <- abc_cv(as.data.frame(reference), observed, parameters = names(prior), ntree = ntree,
-             ncores = cores, seed = 2045)
-# (vi) sensitivity to the statistics bound by the pool
-reduced <- grep("_(gamma|beta)$", city_stats, value = TRUE, invert = TRUE)
-choice_reduced <- abc_choose(list(phylogenetic = reference, none = none), statistics = reduced,
-                             ntree = ntree, ncores = cores)
-chosen_reduced <- predict(choice_reduced, observed, ntree = ntree, ncores = cores)
-fit_reduced <- abc_fit(reference, statistics = reduced, ntree = ntree, ncores = cores)
-posterior_reduced <- predict(fit_reduced, observed)
-recovery_reduced <- abc_recovery(competition, statistics = reduced, n_test = n_test,
-                                 ntree = ntree, ncores = cores, seed = 2042)
-minutes_fit <- as.numeric(difftime(Sys.time(), started, units = "mins"))
-
-saveRDS(list(observed = observed, folds = folds, prior = prior, recovery = recovery,
-             estimates = attr(recovery, "estimates"),
-             choice = choice[c("error", "confusion", "statistics", "models")], chosen = chosen,
-             posterior = posterior, importance = importance, diagnose = diagnose,
-             draws = attr(ppc_all, "draws")[c(names(prior), city_stats)],
-             ppc_phylo = ppc_phylo,
-             reduced = list(statistics = reduced, recovery = recovery_reduced,
-                            choice = choice_reduced[c("error", "confusion")],
-                            chosen = chosen_reduced, posterior = posterior_reduced),
-             ppc_all = ppc_all, cv = cv, cv_summary = summary(cv),
-             minutes = c(simulation = minutes_sim, forests = minutes_fit),
-             settings = list(n_ref = n_ref, n_test = n_test, ntree = ntree)), output)
-print(recovery, digits = 3)
-cat("model choice: out-of-bag error", round(choice$error, 3), "\n")
-print(choice$confusion)
-print(chosen, digits = 3)
-print(posterior, digits = 3)
-print(diagnose, digits = 3)
-print(ppc_phylo, digits = 3)
-print(as.data.frame(ppc_all)[c("statistic", "observed", "p")], digits = 3)
-print(summary(cv), digits = 3)
-cat("without gamma and beta: out-of-bag error", round(choice_reduced$error, 3), "\n")
-print(chosen_reduced, digits = 3)
-print(posterior_reduced, digits = 3)
-print(recovery_reduced, digits = 3)
-cat("simulation", round(minutes_sim, 1), "min; forests", round(minutes_fit, 1), "min\n")

@@ -83,8 +83,16 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    realizada, só com dados observáveis. `lambda` sobe de R² 0 para 0,26 (30 espécies, 25
    sítios) e 0,34 (100 espécies, 100 sítios) com abundâncias, perto do teto dado pelo K dos
    ótimos simulados (0,40 e 0,37); com incidência, 0,05 e 0,17. Nenhuma vista passa no
-   critério. O ABC dos anuros não foi refeito. Seguem, no bloco C: (ii), (iv), (v), (iii); (ix)
+   critério. O ABC dos anuros não foi refeito. Seguem, no bloco C: (iv), (v), (iii); (ix)
    e (x) são a continuação natural para Ne.
+2d. **Bloco C (ii) fechado em 2026-11-24** (branch `block-c-conserved-filter`): filtro urbano
+   conservado na filogenia nos anuros (`data-raw/abc_conserved_filter.R`). O filtro conservado
+   não corrige a falha do MPD (sob competição com filtro conservado, escolhido com 0,82, p =
+   0,016 em Campo Grande), a competição continua escolhida (497 de 500 votos) e os dois filtros
+   quase não se distinguem (cerca de 30% de confusão; `lambda_filter` com R² 0,06). Poder do
+   PPC no MPD contra filtro conservado sem competição: 23% a 39%, contra 4% sob o modelo certo;
+   MNTD sem poder. A escolha da vignette não confunde filtro conservado com competição (199 de
+   200). Próxima hipótese para a falha do MPD: (iii), colonização limitada.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -258,7 +266,9 @@ espécies em 25 sítios e a 0,34 com 100 espécies em 100 sítios, quase o mesmo
 0,17. Como nem os ótimos passam de 0,4, `lambda` parece pouco identificável a partir de uma
 única árvore, qualquer que seja a estatística (interpretação nossa). Com isso o ABC dos anuros
 não foi refeito: com incidência em 40 lagoas, `lambda` continuaria sem recuperação); (ii) PPC com modelo mal especificado de fato: filtro urbano conservado na filogenia
-nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`;
+nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`
+(**feito em 2026-11-24**, `data-raw/abc_conserved_filter.R`; ver 2d: o filtro conservado não
+explica a falha, e o PPC tem poder de 23% a 39% no MPD);
 (iii) colonização limitada a partir do pool regional; (iv) validação cruzada por blocos numa
 paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção
 imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
