@@ -110,7 +110,7 @@ three changes, described in its help page: site means leave out the
 focal species, the weights of site means and of species means are chosen
 apart, and the tests use a null model with fixed margins and a
 phylogenetic model that carries the sampling error of each value. The
-results below are simulated.</p>
+results below are simulated, with this code:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://provetelab.org/comdynamite/">comdynamite</a></span><span class="op">)</span></span>
 <span></span>
@@ -119,23 +119,30 @@ results below are simulated.</p>
 <span><span class="va">sim</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/simulate_metacommunity.html">simulate_metacommunity</a></span><span class="op">(</span><span class="fu"><a href="../reference/landscape_implicit.html">landscape_implicit</a></span><span class="op">(</span><span class="fl">25</span><span class="op">)</span>, <span class="fu"><a href="../reference/species_traits.html">species_traits</a></span><span class="op">(</span><span class="va">tree</span>, lambda <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
 <span>                              <span class="fu"><a href="../reference/competition_matrix.html">competition_matrix</a></span><span class="op">(</span><span class="va">tree</span>, <span class="st">"none"</span><span class="op">)</span>, n_steps <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>                              seed_steps <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="co">#&gt; simulate_metacommunity() implements the method of:</span></span>
-<span><span class="co">#&gt;   Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik, R., Vanschoenwinkel, B., Viana, D. S., &amp; Chase, J. M. (2020). A process-based metacommunity framework linking local and regional scale community ecology. Ecology Letters, 23, 1314-1329. https://doi.org/10.1111/ele.13568</span></span>
-<span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
-<span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
-<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, n <span class="op">=</span> <span class="fl">5</span>, local_adaptation <span class="op">=</span> <span class="fl">0.5</span>, intraspecific_sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/sample_individuals.html">sample_individuals</a></span><span class="op">(</span><span class="va">sim</span>, n <span class="op">=</span> <span class="fl">5</span>, local_adaptation <span class="op">=</span> <span class="fl">0.5</span>, intraspecific_sd <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
+<p>The same seed gives a different metacommunity on different operating
+systems, because small differences in floating-point arithmetic change
+some random draws of the simulation. So that every reader gets the
+numbers shown here, the tree and the individuals are read from <a href="https://github.com/diogoprov/comdynamite/blob/main/data-raw/vignette_trait_gradient.R" class="external-link"><code>data-raw/vignette_trait_gradient.R</code></a>,
+which ran the code above (on macOS), and the analysis starts from
+them:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://provetelab.org/comdynamite/">comdynamite</a></span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">"trait-gradient.rds"</span><span class="op">)</span></span>
+<span><span class="va">tree</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">tree</span></span>
+<span><span class="va">ind</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">individuals</span></span>
 <span><span class="va">tg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; trait_gradient() implements the method of:</span></span>
 <span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
 <span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
 <span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">tg</span></span>
-<span><span class="co">#&gt; Trait-gradient analysis of 29 species in 25 sites</span></span>
+<span><span class="co">#&gt; Trait-gradient analysis of 27 species in 25 sites</span></span>
 <span><span class="co">#&gt; Site means: without the focal species | weights of sites: abundance | of species: abundance </span></span>
-<span><span class="co">#&gt; Correlation of beta and alpha: 0.834 </span></span>
-<span><span class="co">#&gt; Variance of species means: 470</span></span>
-<span><span class="co">#&gt;   of beta: 258</span></span>
-<span><span class="co">#&gt;   of alpha: 40.9</span></span></code></pre></div>
+<span><span class="co">#&gt; Correlation of beta and alpha: 0.793 </span></span>
+<span><span class="co">#&gt; Variance of species means: 481</span></span>
+<span><span class="co">#&gt;   of beta: 312</span></span>
+<span><span class="co">#&gt;   of alpha: 26</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="the-gradient">The gradient<a class="anchor" aria-label="anchor" href="#the-gradient"></a>
 </h2>
@@ -144,9 +151,9 @@ species itself. Lines are the slopes of species over the range of their
 sites, and large points are the species means at <span class="math inline">(\beta_i, \bar t_i)</span>. Species above the dashed
 line have positive <span class="math inline">\alpha</span>: they carry
 larger values than the species they live with.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">tg</span><span class="op">)</span></span></code></pre></div>
-<p><img src="trait-gradient_files/figure-html/unnamed-chunk-3-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="trait-gradient_files/figure-html/unnamed-chunk-4-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level2">
 <h2 id="leaving-the-focal-species-out">Leaving the focal species out<a class="anchor" aria-label="anchor" href="#leaving-the-focal-species-out"></a>
@@ -155,18 +162,18 @@ larger values than the species they live with.</p>
 share its sites. The original <span class="math inline">\beta</span> is
 pulled toward the mean of the species itself; below are the species
 where the two versions differ most.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">original</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span>, leave_one_out <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">both</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>species <span class="op">=</span> <span class="va">tg</span><span class="op">$</span><span class="va">species</span><span class="op">$</span><span class="va">species</span>, mean <span class="op">=</span> <span class="va">tg</span><span class="op">$</span><span class="va">species</span><span class="op">$</span><span class="va">mean</span>,</span>
 <span>                   beta <span class="op">=</span> <span class="va">tg</span><span class="op">$</span><span class="va">species</span><span class="op">$</span><span class="va">beta</span>, beta_original <span class="op">=</span> <span class="va">original</span><span class="op">$</span><span class="va">species</span><span class="op">$</span><span class="va">beta</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">both</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/order.html" class="external-link">order</a></span><span class="op">(</span><span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">both</span><span class="op">$</span><span class="va">beta</span> <span class="op">-</span> <span class="va">both</span><span class="op">$</span><span class="va">beta_original</span><span class="op">)</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span></span>
 <span><span class="co">#&gt;    species      mean     beta beta_original</span></span>
-<span><span class="co">#&gt; 7      t16  4.261821 29.94307      9.697106</span></span>
-<span><span class="co">#&gt; 13     t21 32.069204 38.91281     37.845875</span></span>
-<span><span class="co">#&gt; 16     t24 97.217766 91.11292     91.942343</span></span>
-<span><span class="co">#&gt; 17     t25 84.520701 75.53700     76.354633</span></span>
-<span><span class="co">#&gt; 10     t19 44.084085 49.03554     48.442121</span></span>
-<span><span class="co">#&gt; 18     t26 97.288470 89.60545     90.039499</span></span></code></pre></div>
+<span><span class="co">#&gt; 7      t16  3.838063 20.59497      11.80809</span></span>
+<span><span class="co">#&gt; 8      t17 19.482053 25.21034      23.17181</span></span>
+<span><span class="co">#&gt; 3      t11 92.188646 80.72369      82.08792</span></span>
+<span><span class="co">#&gt; 10     t19 43.666212 47.74811      47.09960</span></span>
+<span><span class="co">#&gt; 6      t14 34.288191 38.92643      38.44228</span></span>
+<span><span class="co">#&gt; 16     t25 77.108860 70.83459      71.25842</span></span></code></pre></div>
 <p>The raw correlation of <span class="math inline">\beta</span> and
 <span class="math inline">\alpha</span> is not readable on its own under
 either version, because <span class="math inline">\alpha = \bar t -
@@ -181,13 +188,13 @@ leave-one-out means.</p>
 <p>Abundance weights let the dominant species set the gradient.
 <code><a href="../reference/trait_gradient_weights.html">trait_gradient_weights()</a></code> runs the four combinations of
 weights for sites and species and correlates them with the first.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trait_gradient_weights.html">trait_gradient_weights</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span><span class="op">)</span><span class="op">$</span><span class="va">correlation</span></span>
 <span><span class="co">#&gt;                 weights      beta     alpha</span></span>
 <span><span class="co">#&gt; 1   abundance/abundance 1.0000000 1.0000000</span></span>
-<span><span class="co">#&gt; 2  abundance/occurrence 0.8605559 0.9270340</span></span>
-<span><span class="co">#&gt; 3  occurrence/abundance 0.9971254 0.9671218</span></span>
-<span><span class="co">#&gt; 4 occurrence/occurrence 0.8757289 0.9458010</span></span></code></pre></div>
+<span><span class="co">#&gt; 2  abundance/occurrence 0.8816057 0.9162971</span></span>
+<span><span class="co">#&gt; 3  occurrence/abundance 0.9996782 0.9480404</span></span>
+<span><span class="co">#&gt; 4 occurrence/occurrence 0.8699525 0.9219668</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="null-models">Null models<a class="anchor" aria-label="anchor" href="#null-models"></a>
@@ -195,7 +202,7 @@ weights for sites and species and correlates them with the first.</p>
 <p><code><a href="../reference/trait_gradient_test.html">trait_gradient_test()</a></code> exchanges the trait means of
 species among species and keeps the communities as observed, which tests
 whether species with similar traits live in similar communities.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="co">#&gt; trait_gradient_test() implements the method of:</span></span>
 <span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
@@ -204,11 +211,11 @@ whether species with similar traits live in similar communities.</p>
 <span><span class="va">test</span></span>
 <span><span class="co">#&gt; Null model of the trait-gradient analysis: 199 communities, species </span></span>
 <span><span class="co">#&gt;       statistic observed null_mean null_sd   ses    p</span></span>
-<span><span class="co">#&gt;  cor_beta_alpha    0.834     -0.42   0.168  7.44 0.01</span></span>
-<span><span class="co">#&gt;        var_beta  258.000     48.30  32.200  6.51 0.01</span></span>
-<span><span class="co">#&gt;       var_alpha   40.900    553.00  58.500 -8.76 0.01</span></span>
+<span><span class="co">#&gt;  cor_beta_alpha    0.793    -0.435   0.173  7.10 0.01</span></span>
+<span><span class="co">#&gt;        var_beta  312.000    39.600  30.800  8.85 0.01</span></span>
+<span><span class="co">#&gt;       var_alpha   26.000   563.000  57.000 -9.42 0.01</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">test</span><span class="op">)</span></span></code></pre></div>
-<p><img src="trait-gradient_files/figure-html/unnamed-chunk-6-1.png" class="r-plt" alt="" width="576"></p>
+<p><img src="trait-gradient_files/figure-html/unnamed-chunk-7-1.png" class="r-plt" alt="" width="576"></p>
 <p>The curveball null moves species among sites instead, keeping the
 richness of every site and the number of sites of every species. It also
 breaks the turnover of species along the gradient, so its tests of the
@@ -216,22 +223,22 @@ variances reject whenever composition changes among sites; use it for
 the correlation of <span class="math inline">\beta</span> and <span class="math inline">\alpha</span> only. The help page of
 <code><a href="../reference/trait_gradient_test.html">trait_gradient_test()</a></code> gives the error rates of both nulls
 in simulations.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span>, null <span class="op">=</span> <span class="st">"curveball"</span><span class="op">)</span><span class="op">$</span><span class="va">statistics</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span>
-<span><span class="co">#&gt;        statistic observed  null_mean   null_sd      ses    p</span></span>
-<span><span class="co">#&gt; 1 cor_beta_alpha 0.833901 -0.2733103 0.2338977 4.733741 0.01</span></span></code></pre></div>
+<span><span class="co">#&gt;        statistic  observed  null_mean   null_sd     ses    p</span></span>
+<span><span class="co">#&gt; 1 cor_beta_alpha 0.7933778 -0.3706455 0.2115029 5.50358 0.01</span></span></code></pre></div>
 <p>When niches are conserved, a trait that merely carries the same
 phylogenetic structure looks sorted along the gradient under the
 exchange of means among all species. The phylogenetic permutations of
 Lapointe &amp; Garland (2001) exchange means preferably among relatives;
 <code>phylo_k</code> closer to 1 keeps exchanges closer in the tree.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/trait_gradient_test.html">trait_gradient_test</a></span><span class="op">(</span><span class="va">tg</span>, n_null <span class="op">=</span> <span class="fl">199</span>, null <span class="op">=</span> <span class="st">"phylo"</span>, tree <span class="op">=</span> <span class="va">tree</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Null model of the trait-gradient analysis: 199 communities, phylo </span></span>
 <span><span class="co">#&gt;       statistic observed null_mean null_sd   ses    p</span></span>
-<span><span class="co">#&gt;  cor_beta_alpha    0.834    -0.358   0.173  6.90 0.01</span></span>
-<span><span class="co">#&gt;        var_beta  258.000    70.000  44.300  4.23 0.01</span></span>
-<span><span class="co">#&gt;       var_alpha   40.900   528.000  67.700 -7.19 0.01</span></span></code></pre></div>
+<span><span class="co">#&gt;  cor_beta_alpha    0.793     -0.26    0.16  6.57 0.01</span></span>
+<span><span class="co">#&gt;        var_beta  312.000    106.00   58.50  3.52 0.01</span></span>
+<span><span class="co">#&gt;       var_alpha   26.000    484.00   88.90 -5.15 0.01</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="phylogeny">Phylogeny<a class="anchor" aria-label="anchor" href="#phylogeny"></a>
@@ -240,34 +247,35 @@ Lapointe &amp; Garland (2001) exchange means preferably among relatives;
 Each value has a bootstrap standard error, added to the covariance of
 the model, so a species seen in few sites does not pass for fast
 evolution.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo</a></span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, n_boot <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2</span><span class="op">)</span></span>
+<span><span class="va">ph</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_phylo.html">trait_gradient_phylo</a></span><span class="op">(</span><span class="va">tg</span>, <span class="va">tree</span>, n_boot <span class="op">=</span> <span class="fl">199</span><span class="op">)</span></span>
 <span><span class="co">#&gt; trait_gradient_phylo() implements the method of:</span></span>
 <span><span class="co">#&gt;   Ackerly, D. D., &amp; Cornwell, W. K. (2007). A trait-based approach to community assembly: partitioning of species trait values into within- and among-community components. Ecology Letters, 10, 135-145. https://doi.org/10.1111/j.1461-0248.2006.01006.x</span></span>
 <span><span class="co">#&gt; Please cite these papers together with comdynamite (citation("comdynamite")).</span></span>
 <span><span class="co">#&gt; This message is shown once per session; options(comdynamite.cite = FALSE) turns it off.</span></span>
 <span><span class="va">ph</span></span>
-<span><span class="co">#&gt; Phylogenetic models of the trait-gradient analysis: 26 species</span></span>
+<span><span class="co">#&gt; Phylogenetic models of the trait-gradient analysis: 24 species</span></span>
 <span><span class="co">#&gt;  response model     mu sigma2     a half_life at_bound converged loglik n_par</span></span>
-<span><span class="co">#&gt;      beta white 59.800  203.0    NA        NA       NA      TRUE -105.0     2</span></span>
-<span><span class="co">#&gt;      beta    BM 60.400  379.0    NA        NA       NA      TRUE  -97.4     2</span></span>
-<span><span class="co">#&gt;      beta    OU 60.400  458.0 0.506      1.37    FALSE      TRUE  -97.3     3</span></span>
-<span><span class="co">#&gt;     alpha white -0.809   34.7    NA        NA       NA      TRUE  -83.5     2</span></span>
-<span><span class="co">#&gt;     alpha    BM -0.404   66.6    NA        NA       NA      TRUE  -75.8     2</span></span>
-<span><span class="co">#&gt;     alpha    OU -0.404   66.7 0.001        NA     TRUE      TRUE  -75.8     3</span></span>
-<span><span class="co">#&gt;      mean white 59.700  446.0    NA        NA       NA      TRUE -114.0     2</span></span>
-<span><span class="co">#&gt;      mean    BM 60.600  844.0    NA        NA       NA      TRUE -105.0     2</span></span>
-<span><span class="co">#&gt;      mean    OU 60.500  908.0 0.213      3.25    FALSE      TRUE -105.0     3</span></span>
+<span><span class="co">#&gt;      beta white 58.700  308.0    NA        NA       NA      TRUE -100.0     2</span></span>
+<span><span class="co">#&gt;      beta    BM 60.900  347.0    NA        NA       NA      TRUE  -86.8     2</span></span>
+<span><span class="co">#&gt;      beta    OU 60.900  347.0 0.001        NA     TRUE      TRUE  -86.8     3</span></span>
+<span><span class="co">#&gt;     alpha white -0.404   25.0    NA        NA       NA      TRUE  -72.2     2</span></span>
+<span><span class="co">#&gt;     alpha    BM  0.789   64.2    NA        NA       NA      TRUE  -69.3     2</span></span>
+<span><span class="co">#&gt;     alpha    OU  0.498  111.0 1.830     0.379    FALSE      TRUE  -68.3     3</span></span>
+<span><span class="co">#&gt;      mean white 58.400  490.0    NA        NA       NA      TRUE -106.0     2</span></span>
+<span><span class="co">#&gt;      mean    BM 61.800  675.0    NA        NA       NA      TRUE  -93.6     2</span></span>
+<span><span class="co">#&gt;      mean    OU 61.800  675.0 0.001        NA     TRUE      TRUE  -93.6     3</span></span>
 <span><span class="co">#&gt;  aic delta_aic</span></span>
-<span><span class="co">#&gt;  214     14.88</span></span>
-<span><span class="co">#&gt;  199      0.00</span></span>
-<span><span class="co">#&gt;  201      1.77</span></span>
-<span><span class="co">#&gt;  171     15.26</span></span>
-<span><span class="co">#&gt;  156      0.00</span></span>
-<span><span class="co">#&gt;  158      2.00</span></span>
-<span><span class="co">#&gt;  231     16.76</span></span>
-<span><span class="co">#&gt;  215      0.00</span></span>
-<span><span class="co">#&gt;  217      1.96</span></span></code></pre></div>
+<span><span class="co">#&gt;  205     27.22</span></span>
+<span><span class="co">#&gt;  178      0.00</span></span>
+<span><span class="co">#&gt;  180      2.00</span></span>
+<span><span class="co">#&gt;  148      5.89</span></span>
+<span><span class="co">#&gt;  143      0.05</span></span>
+<span><span class="co">#&gt;  143      0.00</span></span>
+<span><span class="co">#&gt;  215     23.88</span></span>
+<span><span class="co">#&gt;  191      0.00</span></span>
+<span><span class="co">#&gt;  193      2.00</span></span></code></pre></div>
 <p>In this simulation the optima evolve by Brownian motion
 (<code>lambda = 1</code>), so <span class="math inline">\beta</span>,
 which follows the optima, should prefer Brownian motion over the model
@@ -291,17 +299,49 @@ species.</p>
 <p>In simulations with about 40 species, <span class="math inline">\lambda</span> of <span class="math inline">\beta</span> near 0 and near 1 was recovered, while
 intermediate signal came out low with wide intervals; the help page
 gives the numbers.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>The site is built without cmdstanr, so this code is not run here; its
+output below was saved by
+<code>data-raw/vignette_trait_gradient.R</code> (cmdstan 2.40.0), which
+runs the same code with the seeds of the sampler fixed.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">tg_occ</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient.html">trait_gradient</a></span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span>, species_weights <span class="op">=</span> <span class="st">"occurrence"</span><span class="op">)</span></span>
-<span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">bayes</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span>, seed <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="va">bayes</span><span class="op">$</span><span class="va">diagnostics</span>   <span class="co"># R-hat, effective sample sizes, divergent transitions</span></span>
 <span><span class="va">bayes</span><span class="op">$</span><span class="va">signal</span></span>
 <span><span class="fu">bayesplot</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/bayesplot/reference/pp_check.html" class="external-link">pp_check</a></span><span class="op">(</span><span class="va">bayes</span>, resp <span class="op">=</span> <span class="st">"sitemean"</span><span class="op">)</span></span>
 <span><span class="co"># an OU structure with the strength fitted to beta by trait_gradient_phylo()</span></span>
 <span><span class="va">a</span> <span class="op">&lt;-</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">a</span><span class="op">[</span><span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">response</span> <span class="op">==</span> <span class="st">"beta"</span> <span class="op">&amp;</span> <span class="va">ph</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">model</span> <span class="op">==</span> <span class="st">"OU"</span><span class="op">]</span></span>
-<span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, ou_alpha <span class="op">=</span> <span class="va">a</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span><span class="va">ou</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/trait_gradient_bayes.html">trait_gradient_bayes</a></span><span class="op">(</span><span class="va">tg_occ</span>, <span class="va">tree</span>, ou_alpha <span class="op">=</span> <span class="va">a</span>, parallel_chains <span class="op">=</span> <span class="fl">4</span>, seed <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span><span class="co"># cross-validation one response at a time, since the two are fitted to different populations</span></span>
 <span><span class="fu">loo</span><span class="fu">::</span><span class="fu"><a href="https://mc-stan.org/loo/reference/loo_compare.html" class="external-link">loo_compare</a></span><span class="op">(</span><span class="va">bayes</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik_p"</span><span class="op">)</span>, <span class="va">ou</span><span class="op">$</span><span class="va">fit</span><span class="op">$</span><span class="fu">loo</span><span class="op">(</span>variables <span class="op">=</span> <span class="st">"log_lik_p"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>The sampler converged (R-hat at most 1.006, no divergent
+transitions):</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">bayes</span><span class="op">$</span><span class="va">diagnostics</span></span>
+<span><span class="co">#&gt;   max_rhat min_ess_bulk min_ess_tail divergent max_treedepth   ok</span></span>
+<span><span class="co">#&gt; 1 1.005708     1041.291     1837.445         0             0 TRUE</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">bayes</span><span class="op">$</span><span class="va">signal</span></span>
+<span><span class="co">#&gt;               quantity  estimate      lower     upper</span></span>
+<span><span class="co">#&gt; 1          lambda_beta 0.8729290  0.3809386 0.9954069</span></span>
+<span><span class="co">#&gt; 2         lambda_alpha 0.8688132  0.4502830 0.9849526</span></span>
+<span><span class="co">#&gt; 3          lambda_mean 0.9314219  0.5569639 0.9970500</span></span>
+<span><span class="co">#&gt; 4  cor_phylo_beta_mean 0.8507108  0.4055330 0.9811387</span></span>
+<span><span class="co">#&gt; 5 cor_phylo_beta_alpha 0.5468470 -0.2075849 0.9283035</span></span></code></pre></div>
+<p><img src="trait_gradient_ppc.png" class="r-plt" alt="Posterior predictive check of the site means: densities of replicated site means over the density of the observed ones." width="80%"></p>
+<p>The replicated site means cover the centre and the spread of the
+observed ones, but not their several peaks, which a model with normal
+errors cannot produce; read the estimates with that misfit in mind. The
+phylogenetic share of <span class="math inline">\beta</span> is high, as
+expected with optima that evolve by Brownian motion, but its 95%
+interval is wide (0.38 to 0.995). In this simulation the strength of the
+OU process fitted to <span class="math inline">\beta</span> is at its
+lower bound (0.001), so the OU structure is Brownian motion and the
+cross-validation has nothing to tell apart:</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">res</span><span class="op">$</span><span class="va">loo</span></span>
+<span><span class="co">#&gt;    elpd_diff    se_diff</span></span>
+<span><span class="co">#&gt; 1  0.0000000 0.00000000</span></span>
+<span><span class="co">#&gt; 2 -0.1340604 0.06818054</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
