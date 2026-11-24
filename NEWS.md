@@ -1,5 +1,12 @@
 # comdynamite (development version)
 
+- `data-raw/abc_cv.R` repeats the study of `abc_cv()` with spatial blocks against random folds
+  in grids of 25 and 100 sites, with and without a torus. Blocks rejected a wrong model (species
+  tracking a hidden, autocorrelated environment) more often than random folds only in the grid
+  of 100 sites, by 1.9 percentage points without a torus and 1.1 with one, below the 3 points
+  set as the criterion for recommending them; part of this gain came from blocks being less
+  conservative also when the model was true. `vignette("abc")` now says so.
+
 - `simulate_metacommunity()` accepts `seed_mean` per species, for colonisation from a region
   where some species are commoner than others. `vignette("abc")` uses it to test limited
   colonisation as an explanation of the competition chosen for the anurans

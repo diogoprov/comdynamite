@@ -10,17 +10,28 @@
 #     more often than random folds? Expected yes, since random test sites resemble their
 #     training neighbours.
 # Run from the root of the package. N_REF, N_TEST, N_WRONG, CORES and NTREE change the size;
-# OUTPUT the file.
+# OUTPUT the file. SIDE and TORUS change the grid (5 and TRUE by default). Item (iv) of block C
+# of dev/ROADMAP.md repeated the study with SIDE=5 TORUS=FALSE, SIDE=10 TORUS=TRUE and SIDE=10
+# TORUS=FALSE, and again the default with the statistics of 2026-11-24
+# (OUTPUT=data-raw/abc_cv_<side>_<torus or flat>.rds), five folds of 20 sites in
+# the larger grid, to learn whether the torus or the small grid hid the advantage of blocks.
+# Criterion set before running: blocks are worth recommending if, in the grid of 100 sites
+# without torus, they reject the wrong model at least 3 percentage points more often than
+# random folds (paired over the same data sets, with the 95% interval of the difference above
+# zero), while the coverage with the right model stays at 0.85 or more.
 suppressMessages(devtools::load_all(".", quiet = TRUE))
 n_ref <- as.integer(Sys.getenv("N_REF", "10000"))
 n_test <- as.integer(Sys.getenv("N_TEST", "100"))
 n_wrong <- as.integer(Sys.getenv("N_WRONG", "100"))
 cores <- as.integer(Sys.getenv("CORES", "6"))
 ntree <- as.integer(Sys.getenv("NTREE", "500"))
-output <- Sys.getenv("OUTPUT", "data-raw/abc_cv.rds")
+output <- Sys.getenv("OUTPUT", "data-raw/abc_cv_5_torus.rds")
+side <- as.integer(Sys.getenv("SIDE", "5"))
+torus <- as.logical(Sys.getenv("TORUS", "TRUE"))
 
 set.seed(20261107)
-fixed <- list(tree = treeshapesim::sim_tree_shape(30), landscape = landscape_grid(side = 5))
+fixed <- list(tree = treeshapesim::sim_tree_shape(30),
+              landscape = landscape_grid(side = side, torus = torus))
 prior <- list(log_dispersal = log10(c(0.001, 0.5)), inter_max = c(0, 1), sigma_mean = c(2, 30),
               lambda = c(0, 1))
 simulate <- function(scenario, shared) {
@@ -57,7 +68,7 @@ cell_seed(2033)
 wrong_parameters <- as.data.frame(lapply(prior, function(p) stats::runif(n_wrong, p[1], p[2])))
 wrong <- do.call(rbind, progress_map(seq_len(n_wrong), function(i) {
   cell_seed(4000 + i)
-  shared <- c(fixed, list(hidden = landscape_grid(side = 5)$env))
+  shared <- c(fixed, list(hidden = landscape_grid(side = side, torus = torus)$env))
   summarise(simulate(as.list(wrong_parameters[i, ]), shared), shared)
 }, "Wrong model"))
 future::plan(future::sequential)
@@ -84,14 +95,26 @@ minutes_fit <- as.numeric(difftime(Sys.time(), started, units = "mins"))
 by_set <- aggregate(cbind(coverage = inside, rejected = p < 0.05) ~ folds + truth + observation,
                     results, mean)
 overall <- aggregate(cbind(coverage, rejected) ~ folds + truth, by_set, mean)
+# rejection with blocks minus rejection with random folds, paired over the same data sets
+paired <- do.call(rbind, lapply(c("right", "wrong"), function(truth) {
+  b <- by_set[by_set$folds == "blocks" & by_set$truth == truth, ]
+  r <- by_set[by_set$folds == "random" & by_set$truth == truth, ]
+  d <- b$rejected[order(b$observation)] - r$rejected[order(r$observation)]
+  se <- stats::sd(d) / sqrt(length(d))
+  data.frame(truth = truth, difference = mean(d), low = mean(d) - 1.96 * se,
+             high = mean(d) + 1.96 * se)
+}))
 by_statistic <- aggregate(cbind(coverage = inside, rejected = p < 0.05) ~ folds + truth + statistic,
                           results, mean)
-saveRDS(list(results = results, overall = overall, by_statistic = by_statistic, folds = folds,
-             table = table, wrong = wrong, wrong_parameters = wrong_parameters,
+saveRDS(list(results = results, overall = overall, paired = paired, by_statistic = by_statistic,
+             folds = folds,
+             wrong_parameters = wrong_parameters,
              minutes = c(simulation = minutes_sim, forests = minutes_fit),
-             settings = list(n_ref = n_ref, n_test = n_test, n_wrong = n_wrong, ntree = ntree)),
-        output)
+             settings = list(n_ref = n_ref, n_test = n_test, n_wrong = n_wrong, ntree = ntree,
+                             side = side, torus = torus)),
+        output, compress = "xz")
 print(overall, digits = 3)
+print(paired, digits = 3)
 print(by_statistic[order(by_statistic$truth, by_statistic$statistic, by_statistic$folds), ],
       digits = 3, row.names = FALSE)
 cat("simulation", round(minutes_sim, 1), "min; forests", round(minutes_fit, 1), "min\n")

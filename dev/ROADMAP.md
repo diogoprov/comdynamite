@@ -105,6 +105,19 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    (`data-raw/abc_anurans.R`); um único conjunto variava até 0,3. O ABC principal da vignette
    (`vignettes/abc.rds`) ainda usa o valor de uma rodada sem semente. Seguem, no bloco C: (iv),
    (v).
+2f. **Bloco C (iv) fechado em 2026-11-24, critério não atingido** (branch `block-c-block-cv`):
+   validação cruzada por blocos em grade maior e sem toro (`data-raw/abc_cv.R` com `SIDE` e
+   `TORUS`; fatorial 5×5 ou 10×10, com ou sem toro, 10 mil simulações, 5 folds, 100 conjuntos
+   certos e 100 errados cada; `data-raw/abc_cv_<lado>_<torus|flat>.rds`, sem as tabelas). Rejeição
+   do modelo errado, blocos menos aleatórios, pareada: 5×5 com toro +0,3 pp [−0,4; 1,1], sem
+   toro +0,1 [−0,7; 1,0]; 10×10 com toro +1,1 [0,4; 1,8], sem toro +1,9 [1,3; 2,6], abaixo dos
+   3 pp do critério. O tamanho da grade pesa mais que o toro. Com o modelo certo, os blocos
+   também rejeitam um pouco mais (1,8% contra 1,2% na 10×10 sem toro; cobertura 0,958 contra
+   0,970), então parte da vantagem é só menor conservadorismo. Ganho concentrado em
+   `evenness_regional` e `sad_sd`; perda em `trait_env` e `decay`. O 5×5 com toro refeito com as
+   estatísticas atuais repete o de 2026-11-11 (10,0% contra 9,7%) e substitui `abc_cv.rds`.
+   Conclusão: blocos não fazem mal e ajudam pouco em paisagens grandes; a vignette os mantém
+   pela lógica de Roberts et al. (2017), sem prometer ganho de poder. Segue, no bloco C: (v).
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -282,7 +295,7 @@ nos anuros, contra competição, que também testa a falha do MPD na `vignette("
 (**feito em 2026-11-24**, `data-raw/abc_conserved_filter.R`; ver 2d: o filtro conservado não
 explica a falha, e o PPC tem poder de 23% a 39% no MPD);
 (iii) colonização limitada a partir do pool regional (**feito em 2026-11-24**, `data-raw/abc_colonisation.R`; ver 2e: lida como competição sem o modelo alternativo, mas não explica toda a competição dos anuros); (iv) validação cruzada por blocos numa
-paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção
+paisagem maior e sem toro (**feito em 2026-11-24**, `data-raw/abc_cv.R`; ver 2f: blocos rejeitam o modelo errado só 1,9 pp a mais na grade de 100 sítios sem toro, abaixo do critério); (v) árvore e paisagem variando entre simulações e detecção
 imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
 `anurans` (exige a conta do usuário); (viii) da quarta limitação do manuscrito: estatísticas que tornem `ne_ratio` e G
 identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica dentro das
@@ -1078,7 +1091,9 @@ Avaliação do modelo, sempre em conjunto com a inferência:
       contra 87%), que detecta o erro já pelo ambiente medido. Conclusão: neste desenho
       a vantagem esperada dos blocos não apareceu; uma explicação possível, não testada, é
       que a grade de 25 sítios é um toro e os blocos de 5 sítios ficam vizinhos de todos os
-      lados. Falta repetir com paisagem maior e sem toro antes de recomendar blocos.
+      lados. Falta repetir com paisagem maior e sem toro antes de recomendar blocos. Repetido em
+      2026-11-24 (bloco C, item iv; ver 2f): com 100 sítios sem toro, +1,9 pp, abaixo do
+      critério de 3 pp.
 - [x] Diagnóstico de Pareto k dos pesos de importância, para saber quando a posterior
       ponderada depende de poucas simulações: `abc_diagnose()` (2026-11-11), com
       `posterior::pareto_diags()` em vez de `loo::psis()`, o tamanho efetivo de amostra dos
