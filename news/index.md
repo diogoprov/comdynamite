@@ -2,6 +2,18 @@
 
 ## comdynamite (development version)
 
+- `data-raw/abc_cv.R` repeats the study of
+  [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md)
+  with spatial blocks against random folds in grids of 25 and 100 sites,
+  with and without a torus. Blocks rejected a wrong model (species
+  tracking a hidden, autocorrelated environment) more often than random
+  folds only in the grid of 100 sites, by 1.9 percentage points without
+  a torus and 1.1 with one, below the 3 points set as the criterion for
+  recommending them; part of this gain came from blocks being less
+  conservative also when the model was true.
+  [`vignette("abc")`](https://provetelab.org/comdynamite/articles/abc.md)
+  now says so.
+
 - [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
   accepts `seed_mean` per species, for colonisation from a region where
   some species are commoner than others.

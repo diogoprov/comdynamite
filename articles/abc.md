@@ -507,8 +507,13 @@ print(res$reduced$posterior, digits = 2)
 
 The last check asks whether the model fitted to some ponds predicts the
 others. With spatial blocks, the ponds left out are not neighbours of
-those kept (Roberts et al. 2017). We split each city into two blocks
-with
+those kept (Roberts et al. 2017). In simulations with a wrong model, in
+which species tracked a hidden, spatially autocorrelated environment,
+blocks rejected it only slightly more often than random folds: by about
+two percentage points in a grid of 100 sites, and not at all in a grid
+of 25 (`data-raw/abc_cv.R`). We therefore use blocks because they keep
+the test from resting on neighbours, not because they add much power. We
+split each city into two blocks with
 [`spatial_folds()`](https://provetelab.org/comdynamite/reference/spatial_folds.md),
 so that each of the four folds leaves out half of one city, and
 [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md)
