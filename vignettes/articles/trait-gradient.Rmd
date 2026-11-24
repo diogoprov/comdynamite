@@ -17,9 +17,10 @@ measures how it differs within them.
 `trait_gradient()` follows the original analysis with three changes, described in its help
 page: site means leave out the focal species, the weights of site means and of species means
 are chosen apart, and the tests use a null model with fixed margins and a phylogenetic model
-that carries the sampling error of each value. The results below are simulated.
+that carries the sampling error of each value. The results below are simulated, with this
+code:
 
-```{r}
+```{r, eval = FALSE}
 library(comdynamite)
 
 set.seed(1)
@@ -28,6 +29,19 @@ sim <- simulate_metacommunity(landscape_implicit(25), species_traits(tree, lambd
                               competition_matrix(tree, "none"), n_steps = 100,
                               seed_steps = 1:5)
 ind <- sample_individuals(sim, n = 5, local_adaptation = 0.5, intraspecific_sd = 1)
+```
+
+The same seed gives a different metacommunity on different operating systems, because small
+differences in floating-point arithmetic change some random draws of the simulation. So that
+every reader gets the numbers shown here, the tree and the individuals are read from
+[`data-raw/vignette_trait_gradient.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/vignette_trait_gradient.R),
+which ran the code above (on macOS), and the analysis starts from them:
+
+```{r}
+library(comdynamite)
+res <- readRDS("trait-gradient.rds")
+tree <- res$tree
+ind <- res$individuals
 tg <- trait_gradient(ind, abundance = "abundance")
 tg
 ```
@@ -108,6 +122,7 @@ conserved. Each value has a bootstrap standard error, added to the covariance of
 so a species seen in few sites does not pass for fast evolution.
 
 ```{r}
+set.seed(2)
 ph <- trait_gradient_phylo(tg, tree, n_boot = 199)
 ph
 ```
@@ -130,17 +145,47 @@ weights make the posterior too narrow, so the model below uses occurrence weight
 In simulations with about 40 species, \(\lambda\) of \(\beta\) near 0 and near 1 was recovered,
 while intermediate signal came out low with wide intervals; the help page gives the numbers.
 
+The site is built without cmdstanr, so this code is not run here; its output below was saved by
+`data-raw/vignette_trait_gradient.R` (cmdstan `r res$session$cmdstan`), which runs the same
+code with the seeds of the sampler fixed.
+
 ```{r, eval = FALSE}
 tg_occ <- trait_gradient(ind, abundance = "abundance", species_weights = "occurrence")
-bayes <- trait_gradient_bayes(tg_occ, tree, parallel_chains = 4)
+bayes <- trait_gradient_bayes(tg_occ, tree, parallel_chains = 4, seed = 3)
 bayes$diagnostics   # R-hat, effective sample sizes, divergent transitions
 bayes$signal
 bayesplot::pp_check(bayes, resp = "sitemean")
 # an OU structure with the strength fitted to beta by trait_gradient_phylo()
 a <- ph$models$a[ph$models$response == "beta" & ph$models$model == "OU"]
-ou <- trait_gradient_bayes(tg_occ, tree, ou_alpha = a, parallel_chains = 4)
+ou <- trait_gradient_bayes(tg_occ, tree, ou_alpha = a, parallel_chains = 4, seed = 4)
 # cross-validation one response at a time, since the two are fitted to different populations
 loo::loo_compare(bayes$fit$loo(variables = "log_lik_p"), ou$fit$loo(variables = "log_lik_p"))
+```
+
+The sampler converged (R-hat at most `r round(res$bayes$diagnostics$max_rhat, 3)`, no
+divergent transitions):
+
+```{r}
+res$bayes$diagnostics
+res$bayes$signal
+```
+
+```{r, echo = FALSE, out.width = "80%", fig.alt = "Posterior predictive check of the site means: densities of replicated site means over the density of the observed ones."}
+knitr::include_graphics("trait_gradient_ppc.png")
+```
+
+The replicated site means cover the centre and the spread of the observed ones, but not their
+several peaks, which a model with normal errors cannot produce; read the estimates with that
+misfit in mind. The phylogenetic share of \(\beta\) is high, as expected with optima that
+evolve by Brownian motion, but its 95% interval is wide
+(`r sprintf("%.2f", res$bayes$signal$lower[1])` to
+`r sprintf("%.3f", res$bayes$signal$upper[1])`). In this
+simulation the strength of the OU process fitted to \(\beta\) is at its lower bound
+(`r res$ou_alpha`), so the OU structure is Brownian motion and the cross-validation has nothing
+to tell apart:
+
+```{r}
+res$loo
 ```
 
 ## References
