@@ -81,6 +81,7 @@ Other trait variation among individuals:
 [`plot.tstats()`](https://provetelab.org/comdynamite/reference/plot.tstats.md),
 [`plot_population_traits()`](https://provetelab.org/comdynamite/reference/plot_population_traits.md),
 [`population_shifts()`](https://provetelab.org/comdynamite/reference/population_shifts.md),
+[`population_stats()`](https://provetelab.org/comdynamite/reference/population_stats.md),
 [`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),

@@ -511,6 +511,68 @@ functions, not to test hypotheses about these frogs, which would also
 need a model of detection if abundances were used (see
 [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)).
 
+## Planning a field study of trait variation
+
+Incidence and abundances say little about the genetic parameters of the
+evolutionary engine
+([`evolution_control()`](https://provetelab.org/comdynamite/reference/evolution_control.md)),
+so a study that wants to estimate them needs measured individuals. A
+simulation study in
+[`data-raw/abc_identifiability.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_identifiability.R)
+asked which statistics of individuals, and which sampling designs, make
+the genetic variance G, the ratio of effective to census size Ne/N and
+the environmental variance V_E recoverable by
+[`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
+with the same criterion as above (R² of at least 0.5 and coverage of the
+90% interval of at least 0.85). It used eight species on a 10 x 10 grid
+and 10,000 simulations per case, in eight cases: a static or a warming
+environment; one G for every population, or G of each population set by
+mutation, drift and selection (`mutation_var`); and ancestral optima the
+same in every run, or drawn from priors as they would be unknown for
+real species. The individuals of each design were summarised with
+[`population_stats()`](https://provetelab.org/comdynamite/reference/population_stats.md),
+which takes the output of
+[`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md)
+or field measurements:
+
+``` r
+
+ind <- sample_individuals(sim, n = 10, source = "evolution", step = c(350, 400))
+population_stats(ind, abundance = "abundance", step = "step", coords = coords)
+```
+
+With the means of the populations alone (their regression on the
+environment), G was well recovered (R² 0.89 to 0.92), but V_E (0.15 to
+0.45) and Ne/N (0.08 to 0.33) were not. The variance within populations
+is what separates G from V_E: with it, V_E reached R² 0.72 to 0.78 with
+one G and 0.94 to 0.96 with mutation, and the mutational variance, when
+it was the parameter, rose from 0.64 to 0.71 to 0.82 to 0.91. Ne/N
+stayed the hardest parameter. With the QST-like divergence beyond the
+environment (Spitze 1993), the semivariance of neighbouring populations,
+the relation of the residuals to population size and, with two surveys,
+the change of the means between them (the basis of the temporal method,
+Waples 1989), its R² rose to 0.34 to 0.61, and it met the criterion in
+four of the eight cases with the richest design; it fell short under
+warming with mutation in particular. Unknown optima did not lower the
+recovery of G or Ne/N; their centre was recovered with R² 0.40 to 0.76
+and their spread with 0.23 to 0.35 (one G) or 0.67 to 0.73 (mutation).
+
+Among the designs, the number of populations mattered more than the
+number of individuals in each. With 10 individuals at 20 of the 100
+sites instead of at every occupied site, the R² of Ne/N fell from 0.29
+to 0.52 to 0.18 to 0.38, and that of the mutational variance by 0.07 to
+0.13; with 5 or 30 individuals per population instead of 10, the R²
+changed by at most 0.08. A second survey 50 steps before the last raised
+the R² of Ne/N by 0.10 and 0.11 in the static environment with one G,
+and by 0.03 or less in the other cases. With 200 pseudo-observations,
+differences of about 0.05 in R² are close to the sampling error, so
+these are tendencies rather than rules, and they hold for this simulator
+and these priors. A field study can use them as a starting point:
+measure about ten individuals in as many populations as possible along
+the environmental gradient, survey twice if Ne matters, and run
+[`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
+with its own simulator and design before going to the field.
+
 ## References
 
 Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., &
@@ -529,3 +591,11 @@ B., Thuiller, W., Warton, D. I., Wintle, B. A., Hartig, F., & Dormann,
 C. F. (2017). Cross-validation strategies for data with temporal,
 spatial, hierarchical, or phylogenetic structure. *Ecography*, 40,
 913–929. <https://doi.org/10.1111/ecog.02881>
+
+Spitze, K. (1993). Population structure in *Daphnia obtusa*:
+quantitative genetic and allozymic variation. *Genetics*, 135, 367–374.
+<https://doi.org/10.1093/genetics/135.2.367>
+
+Waples, R. S. (1989). A generalized approach for estimating effective
+population size from temporal changes in allele frequency. *Genetics*,
+121, 379–391. <https://doi.org/10.1093/genetics/121.2.379>
