@@ -77,8 +77,14 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    recuperado (R² 0,72 a 0,96, contra 0,15 a 0,45 só com as médias); Ne/N sobe de 0,08 a 0,33
    para 0,34 a 0,61 e atinge o critério em 4 dos 8 casos no desenho mais rico; ótimos
    desconhecidos não pioram G nem Ne/N. Guia de desenho amostral na `vignette("abc")`. O texto
-   da quarta limitação do manuscrito ainda não foi mudado (decisão do usuário). Seguem, no
-   bloco C: (i), (ii), (iv), (v), (iii); (ix) e (x) são a continuação natural para Ne.
+   da quarta limitação do manuscrito fica como está até a revisão da revista voltar.
+2c. **Bloco C (i) fechado em 2026-11-23, com resultado parcial** (branch `block-c-lambda`):
+   `summary_stats()` ganha `niche_k` e `niche_dist_cor`, sinal filogenético da posição de nicho
+   realizada, só com dados observáveis. `lambda` sobe de R² 0 para 0,26 (30 espécies, 25
+   sítios) e 0,34 (100 espécies, 100 sítios) com abundâncias, perto do teto dado pelo K dos
+   ótimos simulados (0,40 e 0,37); com incidência, 0,05 e 0,17. Nenhuma vista passa no
+   critério. O ABC dos anuros não foi refeito. Seguem, no bloco C: (ii), (iv), (v), (iii); (ix)
+   e (x) são a continuação natural para Ne.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -245,7 +251,13 @@ permanente (Urban), a persistência com 500 réplicas (Leibold) e a extensão se
 
 **Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
-(v0.3.0); (ii) PPC com modelo mal especificado de fato: filtro urbano conservado na filogenia
+(v0.3.0; **fechado em 2026-11-23 com resultado parcial**, `data-raw/abc_lambda.R`: `niche_k`
+e `niche_dist_cor`, da posição de nicho realizada, levam `lambda` de R² 0 a 0,26 com 30
+espécies em 25 sítios e a 0,34 com 100 espécies em 100 sítios, quase o mesmo que o K dos
+ótimos simulados, inobservável (0,40 e 0,37), mas abaixo do critério; com incidência, 0,05 e
+0,17. Como nem os ótimos passam de 0,4, `lambda` parece pouco identificável a partir de uma
+única árvore, qualquer que seja a estatística (interpretação nossa). Com isso o ABC dos anuros
+não foi refeito: com incidência em 40 lagoas, `lambda` continuaria sem recuperação); (ii) PPC com modelo mal especificado de fato: filtro urbano conservado na filogenia
 nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`;
 (iii) colonização limitada a partir do pool regional; (iv) validação cruzada por blocos numa
 paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção

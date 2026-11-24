@@ -69,6 +69,23 @@ test_that("trait_k is Blomberg's K, as picante gives it", {
                drop(picante::Kcalc(trait[big_tree$tip.label[-1]], ape::drop.tip(big_tree, 1))))
 })
 
+test_that("niche_k and niche_dist_cor use the realised niche positions of the species present", {
+  env <- c(1, 2, 3, 4)
+  out <- summary_stats(small, tree, env = env, n_null = 2)
+  position <- c(t1 = (4 * 1 + 1 * 3) / 5, t2 = (1 * 1 + 2 * 2) / 3, t3 = 2, t4 = 3)
+  expect_equal(out[["niche_k"]], blomberg_k(position, tree))
+  d <- ape::cophenetic.phylo(tree)[names(position), names(position)]
+  expect_equal(out[["niche_dist_cor"]],
+               cor(d[lower.tri(d)], abs(outer(position, position, "-"))[lower.tri(d)]))
+  expect_true(all(is.na(summary_stats(small, tree, n_null = 2)[c("niche_k", "niche_dist_cor")])))
+  # fewer than three species present
+  expect_warning(two <- summary_stats(small[, c(1, 4)], tree, env = env, n_null = 2), "dropped")
+  expect_true(all(is.na(two[c("niche_k", "niche_dist_cor")])))
+  # incidence gives the unweighted mean environment of the occupied sites
+  inc <- summary_stats(small > 0, tree, env = env, n_null = 2)
+  expect_equal(inc[["niche_k"]], blomberg_k(c(t1 = 2, t2 = 1.5, t3 = 2, t4 = 3), tree))
+})
+
 test_that("decay and traits follow their definitions", {
   coords <- cbind(c(0, 1, 3, 9), 0)
   out <- summary_stats(small, coords = coords)

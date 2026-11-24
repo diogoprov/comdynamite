@@ -1,5 +1,14 @@
 # comdynamite (development version)
 
+- `summary_stats()` gains `niche_k` and `niche_dist_cor`, which need `env` and `tree` and use
+  only what can be observed: Blomberg's K of the realised niche positions of the species
+  present (the mean environment of the sites each occupies, weighted by abundance) and the
+  correlation of phylogenetic distance with the difference of these positions (the Mantel
+  statistic, without the test). In simulations (`data-raw/abc_lambda.R`), they raised the
+  recovery of the phylogenetic signal of the niche (`lambda`) by ABC from R² 0 to 0.26 with 30
+  species and to 0.34 with 100, close to what Blomberg's K of the simulated optima gave (0.40
+  and 0.37), but not to the criterion of R² 0.5; with incidence alone, to 0.05 and 0.17.
+
 - New `population_stats()`: statistics of trait variation among the populations of each
   species, from measured individuals (`sample_individuals()` output or field data), for ABC.
   Besides the regression of population means on the environment, it gives the variance within

@@ -72,6 +72,14 @@ including those without individuals, as \code{picante::Kcalc()} gives it. For a 
 trait is the optimum, which is not observed in the field; the K of a measured trait carries
 less of the signal of the optima.
 
+\code{niche_k} and \code{niche_dist_cor} need \code{env} and \code{tree}, and use only what can be observed. The
+realised niche position of each species present is the mean environment of the sites it
+occupies, weighted by its abundance. \code{niche_k} is Blomberg's K of these positions, and
+\code{niche_dist_cor} the correlation between the phylogenetic distance of pairs of species and the
+absolute difference of their positions: the statistic of a Mantel test, without the test,
+which has little power as a test of phylogenetic signal (Harmon & Glor 2010) but may still
+carry information as a summary.
+
 The temporal statistics need at least two steps, from \code{history} or an array. \code{cv_population},
 \code{cv_site} and \code{cv_regional} are mean coefficients of variation over time: of each species
 in each site, of the individuals of each site, and of each species in all sites, leaving out
@@ -93,6 +101,10 @@ round(summary_stats(sim, tree, n_null = 19), 3)
 Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for phylogenetic
 signal in comparative data: behavioral traits are more labile. \emph{Evolution}, 57, 717--745.
 \doi{10.1111/j.0014-3820.2003.tb00285.x}
+
+Harmon, L. J., & Glor, R. E. (2010). Poor statistical performance of the Mantel test in
+phylogenetic comparative analyses. \emph{Evolution}, 64, 2173--2178.
+\doi{10.1111/j.1558-5646.2010.00973.x}
 
 Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
 Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P., Anton-Pardo, M., Langenheder, S., De
