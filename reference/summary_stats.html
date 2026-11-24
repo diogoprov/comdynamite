@@ -153,6 +153,13 @@ K (Blomberg et al. 2003) of the trait over all the species shared by <code>trait
 including those without individuals, as <code><a href="https://rdrr.io/pkg/picante/man/Kcalc.html" class="external-link">picante::Kcalc()</a></code> gives it. For a simulation the
 trait is the optimum, which is not observed in the field; the K of a measured trait carries
 less of the signal of the optima.</p>
+<p><code>niche_k</code> and <code>niche_dist_cor</code> need <code>env</code> and <code>tree</code>, and use only what can be observed. The
+realised niche position of each species present is the mean environment of the sites it
+occupies, weighted by its abundance. <code>niche_k</code> is Blomberg's K of these positions, and
+<code>niche_dist_cor</code> the correlation between the phylogenetic distance of pairs of species and the
+absolute difference of their positions: the statistic of a Mantel test, without the test,
+which has little power as a test of phylogenetic signal (Harmon &amp; Glor 2010) but may still
+carry information as a summary.</p>
 <p>The temporal statistics need at least two steps, from <code>history</code> or an array. <code>cv_population</code>,
 <code>cv_site</code> and <code>cv_regional</code> are mean coefficients of variation over time: of each species
 in each site, of the individuals of each site, and of each species in all sites, leaving out
@@ -165,6 +172,9 @@ explanatory power, and that dispersal depended on them.</p>
     <p>Blomberg, S. P., Garland, T., &amp; Ives, A. R. (2003). Testing for phylogenetic
 signal in comparative data: behavioral traits are more labile. <em>Evolution</em>, 57, 717–745.
 <a href="https://doi.org/10.1111/j.0014-3820.2003.tb00285.x" class="external-link">doi:10.1111/j.0014-3820.2003.tb00285.x</a></p>
+<p>Harmon, L. J., &amp; Glor, R. E. (2010). Poor statistical performance of the Mantel test in
+phylogenetic comparative analyses. <em>Evolution</em>, 64, 2173–2178.
+<a href="https://doi.org/10.1111/j.1558-5646.2010.00973.x" class="external-link">doi:10.1111/j.1558-5646.2010.00973.x</a></p>
 <p>Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
 Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P., Anton-Pardo, M., Langenheder, S., De
 Meester, L., &amp; Chase, J. M. (2022). Accounting for temporal change in multiple
@@ -193,10 +203,12 @@ e3683. <a href="https://doi.org/10.1002/ecy.3683" class="external-link">doi:10.1
 <span class="r-out co"><span class="r-pr">#&gt;</span>             0.334           239.720             0.766             0.841 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            sad_sd           ses_mpd          ses_mntd             decay </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             1.185             0.185            -0.251             0.163 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         trait_env          trait_sd           trait_k     cv_population </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             0.951            19.708             0.720             0.771 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           cv_site       cv_regional          turnover </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             0.082             0.275             0.107 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         trait_env          trait_sd           trait_k           niche_k </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             0.951            19.708             0.720             1.036 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    niche_dist_cor     cv_population           cv_site       cv_regional </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             0.201             0.771             0.082             0.275 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          turnover </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             0.107 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

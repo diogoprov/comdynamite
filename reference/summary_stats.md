@@ -100,6 +100,16 @@ it. For a simulation the trait is the optimum, which is not observed in
 the field; the K of a measured trait carries less of the signal of the
 optima.
 
+`niche_k` and `niche_dist_cor` need `env` and `tree`, and use only what
+can be observed. The realised niche position of each species present is
+the mean environment of the sites it occupies, weighted by its
+abundance. `niche_k` is Blomberg's K of these positions, and
+`niche_dist_cor` the correlation between the phylogenetic distance of
+pairs of species and the absolute difference of their positions: the
+statistic of a Mantel test, without the test, which has little power as
+a test of phylogenetic signal (Harmon & Glor 2010) but may still carry
+information as a summary.
+
 The temporal statistics need at least two steps, from `history` or an
 array. `cv_population`, `cv_site` and `cv_regional` are mean
 coefficients of variation over time: of each species in each site, of
@@ -115,6 +125,11 @@ Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for
 phylogenetic signal in comparative data: behavioral traits are more
 labile. *Evolution*, 57, 717–745.
 [doi:10.1111/j.0014-3820.2003.tb00285.x](https://doi.org/10.1111/j.0014-3820.2003.tb00285.x)
+
+Harmon, L. J., & Glor, R. E. (2010). Poor statistical performance of the
+Mantel test in phylogenetic comparative analyses. *Evolution*, 64,
+2173–2178.
+[doi:10.1111/j.1558-5646.2010.00973.x](https://doi.org/10.1111/j.1558-5646.2010.00973.x)
 
 Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B.,
 Horváth, Z., Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P.,
@@ -145,8 +160,10 @@ round(summary_stats(sim, tree, n_null = 19), 3)
 #>             0.334           239.720             0.766             0.841 
 #>            sad_sd           ses_mpd          ses_mntd             decay 
 #>             1.185             0.185            -0.251             0.163 
-#>         trait_env          trait_sd           trait_k     cv_population 
-#>             0.951            19.708             0.720             0.771 
-#>           cv_site       cv_regional          turnover 
-#>             0.082             0.275             0.107 
+#>         trait_env          trait_sd           trait_k           niche_k 
+#>             0.951            19.708             0.720             1.036 
+#>    niche_dist_cor     cv_population           cv_site       cv_regional 
+#>             0.201             0.771             0.082             0.275 
+#>          turnover 
+#>             0.107 
 ```
