@@ -69,7 +69,9 @@ their phenotypes in each site? \code{TRUE} or \code{FALSE}.}
 Poisson(\code{seed_mean}) individuals of each species in every site.}
 
 \item{seed_mean}{Mean number of individuals of each species added to each
-site at each seeding step (and at the start), one finite number, 0 or more.}
+site at each seeding step (and at the start), finite numbers, 0 or more: one value, or one
+per species (in the order of the species of \code{traits}), for colonisation from a region
+where some species are commoner than others (species born by speciation get none).}
 
 \item{record_steps}{Optional steps at which abundances are recorded, a numeric vector
 without \code{NA}; steps outside 1 to \code{n_steps} are dropped.}

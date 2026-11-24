@@ -361,3 +361,26 @@ test_that("lottery keeps the microsites, counts immigrant recruits and checks it
   expect_true(all(sim$history[3, , 1:9] == 0))
   expect_identical(sum(sim$abundance[3, ]), 50L)
 })
+
+test_that("seed_mean can be given per species", {
+  set.seed(1)
+  tr <- ape::rcoal(4)
+  ls <- landscape_implicit(5)
+  tt <- species_traits(tr)
+  sim <- simulate_metacommunity(ls, tt, competition_matrix(tr, "none"), n_steps = 20,
+                                seed_steps = 1:5, seed_mean = c(0, 0, 2, 2),
+                                record_steps = 1:20)
+  expect_true(all(sim$abundance[, 1:2] == 0))
+  expect_true(any(sim$abundance[, 3:4] > 0))
+  # one value per species equal to the default draws the same seeds
+  set.seed(2)
+  a <- simulate_metacommunity(ls, tt, competition_matrix(tr, "none"), n_steps = 20)
+  set.seed(2)
+  b <- simulate_metacommunity(ls, tt, competition_matrix(tr, "none"), n_steps = 20,
+                              seed_mean = rep(0.5, 4))
+  expect_identical(a$abundance, b$abundance)
+  expect_error(simulate_metacommunity(ls, tt, competition_matrix(tr, "none"), n_steps = 5,
+                                      seed_mean = c(1, 2)), "one per species")
+  expect_error(simulate_metacommunity(ls, tt, competition_matrix(tr, "none"), n_steps = 5,
+                                      seed_mean = -1), "seed_mean")
+})

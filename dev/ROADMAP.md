@@ -83,7 +83,7 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    realizada, só com dados observáveis. `lambda` sobe de R² 0 para 0,26 (30 espécies, 25
    sítios) e 0,34 (100 espécies, 100 sítios) com abundâncias, perto do teto dado pelo K dos
    ótimos simulados (0,40 e 0,37); com incidência, 0,05 e 0,17. Nenhuma vista passa no
-   critério. O ABC dos anuros não foi refeito. Seguem, no bloco C: (iv), (v), (iii); (ix)
+   critério. O ABC dos anuros não foi refeito. Seguem, no bloco C: (iv), (v); (ix)
    e (x) são a continuação natural para Ne.
 2d. **Bloco C (ii) fechado em 2026-11-24** (branch `block-c-conserved-filter`): filtro urbano
    conservado na filogenia nos anuros (`data-raw/abc_conserved_filter.R`). O filtro conservado
@@ -93,6 +93,18 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    PPC no MPD contra filtro conservado sem competição: 23% a 39%, contra 4% sob o modelo certo;
    MNTD sem poder. A escolha da vignette não confunde filtro conservado com competição (199 de
    200). Próxima hipótese para a falha do MPD: (iii), colonização limitada.
+2e. **Bloco C (iii) fechado em 2026-11-24** (branch `block-c-colonisation`): colonização
+   limitada a partir da região (`data-raw/abc_colonisation.R`; `seed_mean` por espécie em
+   `simulate_metacommunity()`). Sem competição, a colonização limitada é lida como competição
+   pela escolha da vignette em 103 de 199 casos (13% com região homogênea, 89% com região
+   desigual); com os quatro modelos, só 10 de 199. PPC no MPD: 25% a 43%, contra 2% a 4%. Nos
+   anuros, competição ainda escolhida (454 de 500 votos; competição com colonização limitada,
+   0,60), `inter_max` menor (0,35 [0,11–0,72] contra 0,57) e MPD menos desajustado (p = 0,04 e
+   0,08). Parâmetros da colonização mal recuperados (R² 0,12 e 0,37; `lambda_region` nada).
+   O MPD observado agora é a média de 100 conjuntos de sorteios do nulo, com semente
+   (`data-raw/abc_anurans.R`); um único conjunto variava até 0,3. O ABC principal da vignette
+   (`vignettes/abc.rds`) ainda usa o valor de uma rodada sem semente. Seguem, no bloco C: (iv),
+   (v).
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -269,7 +281,7 @@ não foi refeito: com incidência em 40 lagoas, `lambda` continuaria sem recuper
 nos anuros, contra competição, que também testa a falha do MPD na `vignette("abc")`
 (**feito em 2026-11-24**, `data-raw/abc_conserved_filter.R`; ver 2d: o filtro conservado não
 explica a falha, e o PPC tem poder de 23% a 39% no MPD);
-(iii) colonização limitada a partir do pool regional; (iv) validação cruzada por blocos numa
+(iii) colonização limitada a partir do pool regional (**feito em 2026-11-24**, `data-raw/abc_colonisation.R`; ver 2e: lida como competição sem o modelo alternativo, mas não explica toda a competição dos anuros); (iv) validação cruzada por blocos numa
 paisagem maior e sem toro; (v) árvore e paisagem variando entre simulações e detecção
 imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
 `anurans` (exige a conta do usuário); (viii) da quarta limitação do manuscrito: estatísticas que tornem `ne_ratio` e G
