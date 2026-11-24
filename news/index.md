@@ -2,6 +2,18 @@
 
 ## comdynamite (development version)
 
+- [`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+  accepts `seed_mean` per species, for colonisation from a region where
+  some species are commoner than others.
+  [`vignette("abc")`](https://provetelab.org/comdynamite/articles/abc.md)
+  uses it to test limited colonisation as an explanation of the
+  competition chosen for the anurans (`data-raw/abc_colonisation.R`):
+  without competition, limited colonisation was read as competition in
+  half of the simulated data sets, and in up to 89% when regional
+  abundances were most uneven, but for the observed ponds competition
+  was still chosen, with a lower estimate and a milder misfit of the
+  standardised MPD.
+
 - [`vignette("abc")`](https://provetelab.org/comdynamite/articles/abc.md)
   reports a test of the hypothesis it raised for the misfit of the
   phylogenetic statistics of the anurans

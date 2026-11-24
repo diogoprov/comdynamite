@@ -89,7 +89,10 @@ simulate_metacommunity(
 - seed_mean:
 
   Mean number of individuals of each species added to each site at each
-  seeding step (and at the start), one finite number, 0 or more.
+  seeding step (and at the start), finite numbers, 0 or more: one value,
+  or one per species (in the order of the species of `traits`), for
+  colonisation from a region where some species are commoner than others
+  (species born by speciation get none).
 
 - record_steps:
 

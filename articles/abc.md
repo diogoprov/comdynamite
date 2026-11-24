@@ -442,8 +442,48 @@ filter. Model choice between the two models of this vignette assigned
 199 of these 200 pseudo-observations to the model without competition,
 so a conserved filter alone does not produce the pattern read here as
 competition. The check says what the model misses, not why, and the
-misfit of the MPD remains unexplained; limits to colonisation from the
-region are the hypothesis still to be tested.
+misfit of the MPD remains unexplained by a conserved filter.
+
+The second hypothesis, limited colonisation from the region, was tested
+in the same way in
+[`data-raw/abc_colonisation.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_colonisation.R).
+In the simulator above, every species of the pool receives the same
+number of seeds in every pond. In the alternative, the mean number of
+seeds of each species (`seed_mean`, which
+[`simulate_metacommunity()`](https://provetelab.org/comdynamite/reference/simulate_metacommunity.md)
+accepts per species) is `10^log_seed` times a regional abundance drawn
+from a lognormal distribution with standard deviation `sigma_region` on
+the log scale, so that a few species are common in the region and most
+are rare. The log abundances were drawn on the tree with Pagel’s lambda
+(`lambda_region`), so that related species may be similarly common. With
+`sigma_region = 0` and `log_seed = log10(0.5)`, this is the model above.
+Because the standardised MPD and MNTD of the observed ponds change with
+the draws of the null model (standard deviation 0.10 to 0.19 among sets
+of 19 draws), their observed values in this study were averaged over 100
+sets of draws.
+
+Unlike the conserved filter, limited colonisation is read as
+competition. Among 199 pseudo-observations from limited colonisation
+without competition, model choice between the two models of this
+vignette assigned 103 to competition, and this share rose from 13% when
+the regional abundances were nearly even (`sigma_region` below 1) to 89%
+when they were most uneven (above 2). The posterior predictive check
+flagged the standardised MPD of these pseudo-observations in 43% of them
+in São José dos Campos and in 25% in Campo Grande, against 2% to 4% when
+the model was true. With all four models, however, competition was
+rarely chosen for these pseudo-observations (10 of 199), so the
+alternative model, once included, removes most of the confusion. For the
+observed ponds, the models with competition still received 454 of the
+500 votes, and competition with limited colonisation was chosen with a
+posterior probability of 0.60. Under this model, the estimate of
+`inter_max` was lower than above (0.35, 90% interval 0.11 to 0.72), and
+the observed MPD stayed in the lower tail, but less so (p = 0.04 in
+Campo Grande and p = 0.08 in São José dos Campos). Limited colonisation
+therefore seems to account for part of the low richness that the model
+above attributed to competition, and for part of the misfit of the MPD,
+but not for all of it. Its parameters were poorly recovered (R² 0.12 for
+`log_seed`, 0.37 for `sigma_region` and none for `lambda_region` under
+competition), so the data say little about how uneven the region is.
 
 Leaving out total richness and beta diversity (total over mean richness)
 changes little, so the choice does not rest on them alone:
@@ -532,16 +572,17 @@ looked at the data, that `lambda` cannot be learned from them. Model
 choice preferred competition among close relatives with a probability
 near one, and the posterior predictive checks and cross-validation then
 showed that this model does not reproduce the phylogenetic structure of
-the ponds. A filter conserved in the phylogeny, the first hypothesis
-this suggested, did not remove the misfit in simulations, which leaves
-limits to colonisation from the region to be tested. An earlier version
-of this analysis, with the pool of each city restricted to the species
-recorded there, made the observed total richness the largest value a
-simulation could reach, and that bound alone pushed the estimate of
-competition towards zero; the choice of the regional pool matters as
-much as the choice of the model. The analysis is meant to illustrate the
-functions, not to test hypotheses about these frogs, which would also
-need a model of detection if abundances were used (see
+the ponds. Of the two hypotheses this suggested, a filter conserved in
+the phylogeny did not remove the misfit in simulations, and limited
+colonisation from the region reduced both the misfit and the estimate of
+competition without removing either. An earlier version of this
+analysis, with the pool of each city restricted to the species recorded
+there, made the observed total richness the largest value a simulation
+could reach, and that bound alone pushed the estimate of competition
+towards zero; the choice of the regional pool matters as much as the
+choice of the model. The analysis is meant to illustrate the functions,
+not to test hypotheses about these frogs, which would also need a model
+of detection if abundances were used (see
 [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md)).
 
 ## Planning a field study of trait variation
