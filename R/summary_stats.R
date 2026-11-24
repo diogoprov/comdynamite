@@ -30,6 +30,14 @@
 #' trait is the optimum, which is not observed in the field; the K of a measured trait carries
 #' less of the signal of the optima.
 #'
+#' `niche_k` and `niche_dist_cor` need `env` and `tree`, and use only what can be observed. The
+#' realised niche position of each species present is the mean environment of the sites it
+#' occupies, weighted by its abundance. `niche_k` is Blomberg's K of these positions, and
+#' `niche_dist_cor` the correlation between the phylogenetic distance of pairs of species and the
+#' absolute difference of their positions: the statistic of a Mantel test, without the test,
+#' which has little power as a test of phylogenetic signal (Harmon & Glor 2010) but may still
+#' carry information as a summary.
+#'
 #' The temporal statistics need at least two steps, from `history` or an array. `cv_population`,
 #' `cv_site` and `cv_regional` are mean coefficients of variation over time: of each species
 #' in each site, of the individuals of each site, and of each species in all sites, leaving out
@@ -58,6 +66,10 @@
 #' @references Blomberg, S. P., Garland, T., & Ives, A. R. (2003). Testing for phylogenetic
 #'   signal in comparative data: behavioral traits are more labile. *Evolution*, 57, 717--745.
 #'   \doi{10.1111/j.0014-3820.2003.tb00285.x}
+#'
+#'   Harmon, L. J., & Glor, R. E. (2010). Poor statistical performance of the Mantel test in
+#'   phylogenetic comparative analyses. *Evolution*, 64, 2173--2178.
+#'   \doi{10.1111/j.1558-5646.2010.00973.x}
 #'
 #'   Guzman, L. M., Thompson, P. L., Viana, D. S., Vanschoenwinkel, B., Horváth, Z.,
 #'   Ptacnik, R., Jeliazkov, A., Gascón, S., Lemmens, P., Anton-Pardo, M., Langenheder, S., De
@@ -107,7 +119,8 @@ summary_stats <- function(x, tree = NULL, trait = NULL, env = NULL, coords = NUL
     stop("`coords` needs one row per site", call. = FALSE)
   }
   c(community_stats(comm), phylo_stats(comm, tree, n_null), decay = decay_stat(comm, coords),
-    trait_stats(comm, trait, env), trait_k = blomberg_k(trait, tree), temporal_stats(series))
+    trait_stats(comm, trait, env), trait_k = blomberg_k(trait, tree),
+    niche_stats(comm, env, tree), temporal_stats(series))
 }
 
 community_stats <- function(comm) {
@@ -228,6 +241,21 @@ blomberg_k <- function(trait, tree) {
   observed <- sum(deviation^2) / drop(t(deviation) %*% inverse %*% deviation)
   expected <- (sum(diag(covariance)) - n / sum(inverse)) / (n - 1)
   observed / expected
+}
+
+#' Phylogenetic signal of the realised niche positions of the species present
+#' @noRd
+niche_stats <- function(comm, env, tree) {
+  none <- c(niche_k = NA_real_, niche_dist_cor = NA_real_)
+  if (is.null(env) || is.null(tree)) return(none)
+  totals <- colSums(comm)
+  present <- intersect(tree$tip.label, colnames(comm)[totals > 0])
+  if (length(present) < 3) return(none)
+  position <- drop(env %*% comm[, present, drop = FALSE]) / totals[present]
+  distances <- ape::cophenetic.phylo(tree)[present, present]
+  lower <- lower.tri(distances)
+  c(niche_k = blomberg_k(position, tree),
+    niche_dist_cor = safe_cor(distances[lower], abs(outer(position, position, "-"))[lower]))
 }
 
 temporal_stats <- function(series) {
