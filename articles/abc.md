@@ -409,9 +409,41 @@ species are rare, may therefore be read as competition. The phylogenetic
 statistics, which measure who coexists rather than how many, seem to
 point instead to a filter that favours some clades, for instance a
 tolerance to urban cover shared by related species, whereas the filter
-of the simulator acts at random with respect to phylogeny. These are
-hypotheses for a better model, not conclusions: the check says what the
-model misses, not why.
+of the simulator acts at random with respect to phylogeny.
+
+We tested the first of these hypotheses with simulations in
+[`data-raw/abc_conserved_filter.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_conserved_filter.R).
+In a second version of the simulator, a trait drawn on the tree by
+Brownian motion with Pagel’s lambda (`lambda_filter`, uniform between 0
+and 1) ranks the species, so that related species have similar
+thresholds of tolerance to urban cover; with `lambda_filter = 0` it
+reduces to the random filter. With and without competition, this gives
+four models, each with 10,000 simulations. The conserved filter does not
+explain the misfit. For the observed ponds, the models with competition
+received 497 of the 500 votes, 427 of them for competition with the
+conserved filter (posterior probability 0.82), and under this model the
+observed MPD stays in the lower tail (p = 0.016 in Campo Grande and p =
+0.06 in São José dos Campos). The two filters are also hard to tell
+apart: with competition, about 30% of the simulations of each filter
+were assigned to the other, and `lambda_filter` was not recovered (R²
+0.06), so the votes for the conserved filter say little about
+conservatism itself.
+
+The same simulations measured the power of the check. We fitted the
+model of this vignette to 200 pseudo-observations from a conserved
+filter without competition and checked their phylogenetic statistics.
+The standardised MPD was flagged (p \< 0.05) in 39% of them in São José
+dos Campos and in 23% in Campo Grande, against 4% when the model was
+true; the MNTD was flagged no more often than under the true model.
+Interestingly, the power hardly changed with `lambda_filter`, so the
+check seems to detect the absence of competition, which the statistics
+of richness in the fit do not reveal, more than the conservatism of the
+filter. Model choice between the two models of this vignette assigned
+199 of these 200 pseudo-observations to the model without competition,
+so a conserved filter alone does not produce the pattern read here as
+competition. The check says what the model misses, not why, and the
+misfit of the MPD remains unexplained; limits to colonisation from the
+region are the hypothesis still to be tested.
 
 Leaving out total richness and beta diversity (total over mean richness)
 changes little, so the choice does not rest on them alone:
@@ -500,8 +532,9 @@ looked at the data, that `lambda` cannot be learned from them. Model
 choice preferred competition among close relatives with a probability
 near one, and the posterior predictive checks and cross-validation then
 showed that this model does not reproduce the phylogenetic structure of
-the ponds, and suggested where to look next: a filter conserved in the
-phylogeny, or limits to colonisation from the region. An earlier version
+the ponds. A filter conserved in the phylogeny, the first hypothesis
+this suggested, did not remove the misfit in simulations, which leaves
+limits to colonisation from the region to be tested. An earlier version
 of this analysis, with the pool of each city restricted to the species
 recorded there, made the observed total richness the largest value a
 simulation could reach, and that bound alone pushed the estimate of

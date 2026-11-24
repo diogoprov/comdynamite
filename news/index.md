@@ -2,6 +2,16 @@
 
 ## comdynamite (development version)
 
+- [`vignette("abc")`](https://provetelab.org/comdynamite/articles/abc.md)
+  reports a test of the hypothesis it raised for the misfit of the
+  phylogenetic statistics of the anurans
+  (`data-raw/abc_conserved_filter.R`): a filter of tolerance to urban
+  cover conserved in the phylogeny did not remove the misfit of the
+  standardised MPD, and model choice still favoured competition. In the
+  same simulations, the posterior predictive check flagged the MPD in
+  23% to 39% of the data sets from a conserved filter without
+  competition, against 4% when the model was true.
+
 - [`summary_stats()`](https://provetelab.org/comdynamite/reference/summary_stats.md)
   gains `niche_k` and `niche_dist_cor`, which need `env` and `tree` and
   use only what can be observed: Blomberg’s K of the realised niche
