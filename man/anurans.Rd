@@ -14,7 +14,8 @@ the 155 species of the regional pools; \code{tree}, a \code{phylo} object with t
 \code{grafted}, the species added to the tree.
 }
 \source{
-GBIF.org (11 November 2026), occurrence search API; see \code{data-raw/anurans_pool}.
+GBIF.org (11 November 2026), occurrence search API; GBIF.org (25 November 2026), GBIF
+Occurrence Download \doi{10.15468/dl.g4gz8u}; see \code{data-raw/anurans_pool}.
 }
 \usage{
 anurans
@@ -41,7 +42,10 @@ The regional pool of each city has the anurans that breed in lentic water and we
 both in its ecoregion (Dinerstein et al. 2017: Cerrado for Campo Grande; Alto Paraná Atlantic
 forests and Serra do Mar coastal forests for São José dos Campos) and within 200 km of its
 ponds, in occurrences of GBIF (gbif.org, accessed on 11 November 2026, through the occurrence
-search API; queries in \code{data-raw/anurans_pool}), plus the species recorded in its ponds. A
+search API; queries in \code{data-raw/anurans_pool}), plus the species recorded in its ponds. The
+records of the three ecoregions can be cited through a GBIF download made later with the same
+queries (GBIF.org, 25 November 2026, \doi{10.15468/dl.g4gz8u}), whose counts by species differ
+slightly from those of 11 November (see \code{data-raw/anurans_pool/README.md}). A
 species breeds in lentic water if one of its reproductive modes in Nunes-de-Almeida et al.
 (2021), or in da Silva et al. (2012) for species missing from it, has exotrophic tadpoles in
 lentic water, or, for species in neither, if at least three congeners are classified and

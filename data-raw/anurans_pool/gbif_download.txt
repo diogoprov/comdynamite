@@ -1,0 +1,6 @@
+Download key: 0016405-261118162104854
+Requested: 2026-11-24 23:04 -04
+Status: https://api.gbif.org/v1/occurrence/download/0016405-261118162104854
+Predicate: the five filters of query_eco*.json and their three polygons joined by OR
+DOI: https://doi.org/10.15468/dl.g4gz8u
+Records: 115216 from 63 datasets (prepared 2026-11-25 03:18 UTC); the queries of 2026-11-11 counted 115023

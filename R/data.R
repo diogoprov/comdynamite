@@ -80,7 +80,10 @@
 #' both in its ecoregion (Dinerstein et al. 2017: Cerrado for Campo Grande; Alto Paraná Atlantic
 #' forests and Serra do Mar coastal forests for São José dos Campos) and within 200 km of its
 #' ponds, in occurrences of GBIF (gbif.org, accessed on 11 November 2026, through the occurrence
-#' search API; queries in `data-raw/anurans_pool`), plus the species recorded in its ponds. A
+#' search API; queries in `data-raw/anurans_pool`), plus the species recorded in its ponds. The
+#' records of the three ecoregions can be cited through a GBIF download made later with the same
+#' queries (GBIF.org, 25 November 2026, \doi{10.15468/dl.g4gz8u}), whose counts by species differ
+#' slightly from those of 11 November (see `data-raw/anurans_pool/README.md`). A
 #' species breeds in lentic water if one of its reproductive modes in Nunes-de-Almeida et al.
 #' (2021), or in da Silva et al. (2012) for species missing from it, has exotrophic tadpoles in
 #' lentic water, or, for species in neither, if at least three congeners are classified and
@@ -101,7 +104,8 @@
 #'   longitude and latitude of each pond in decimal degrees; `pool`, a 0/1 matrix of ponds by
 #'   the 155 species of the regional pools; `tree`, a `phylo` object with those species; and
 #'   `grafted`, the species added to the tree.
-#' @source GBIF.org (11 November 2026), occurrence search API; see `data-raw/anurans_pool`.
+#' @source GBIF.org (11 November 2026), occurrence search API; GBIF.org (25 November 2026), GBIF
+#'   Occurrence Download \doi{10.15468/dl.g4gz8u}; see `data-raw/anurans_pool`.
 #' @references
 #' da Silva, F. R., Almeida-Neto, M., do Prado, V. H. M., Haddad, C. F. B., & Rossa-Feres, D. C.
 #' (2012). Humidity levels drive reproductive modes and phylogenetic diversity of amphibians in
