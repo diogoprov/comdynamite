@@ -136,6 +136,8 @@ individuals_of <- function(m, env, n_ind, sites, two) {
 design_stats <- function(m, env, n_ind, sites, two) {
   out <- population_stats(individuals_of(m, env, n_ind, sites, two), abundance = "abundance",
                           step = if (two) "step", coords = site_coords)
+  # temporal_step (added in item x) is left out, so that the tables of this study stay the same
+  out <- out[setdiff(names(out), c("temporal_step", "temporal_step_slope"))]
   if (!two) out <- out[setdiff(names(out), c("temporal", "temporal_slope"))]
   out[!is.finite(out)] <- NA
   out

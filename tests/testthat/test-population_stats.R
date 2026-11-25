@@ -20,6 +20,7 @@ test_that("population_stats() returns the same names, with NA where inputs are m
   bare <- population_stats(ind[ind$step == 2, ])
   expect_named(full, c("slope", "r2", "sd", "resid_sd", "within", "within_slope", "qst",
                        "near", "far", "dist_cor", "size_cor", "temporal", "temporal_slope",
+                       "temporal_step", "temporal_step_slope",
                        "slope_min", "slope_max"))
   expect_named(bare, names(full))
   expect_true(all(is.na(bare[c("within_slope", "near", "far", "dist_cor", "size_cor",
@@ -57,8 +58,33 @@ test_that("population_stats() measures the change between the first and the last
   mid <- ind[ind$step == 1, ]
   mid$step <- 1.5
   mid$trait <- mid$trait + 100
-  expect_identical(population_stats(rbind(ind, mid), step = "step"),
-                   population_stats(ind, step = "step"))
+  keep <- setdiff(names(population_stats(ind)), c("temporal_step", "temporal_step_slope"))
+  expect_identical(population_stats(rbind(ind, mid), step = "step")[keep],
+                   population_stats(ind, step = "step")[keep])
+})
+
+test_that("population_stats() measures the change between consecutive surveys", {
+  ind <- pop_data()
+  # two surveys one step apart: the same change as `temporal`, per step
+  out <- population_stats(ind, abundance = "abundance", step = "step")
+  expect_equal(out[["temporal_step"]], out[["temporal"]])
+  expect_equal(out[["temporal_step_slope"]], 0)
+  # a third survey two steps later, with every mean shifted by 0.4 more: the changes per step
+  # are 0.2^2 - 0.5 and (0.4^2 - 0.5) / 2, relative to the variance within, 0.5
+  late <- ind[ind$step == 2, ]
+  late$step <- 4
+  late$trait <- late$trait + 0.4
+  out3 <- population_stats(rbind(ind, late), abundance = "abundance", step = "step")
+  expect_equal(out3[["temporal_step"]], mean(c(0.2^2 - 0.5, (0.4^2 - 0.5) / 2)) / 0.5)
+  expect_equal(out3[["temporal"]], (0.6^2 - 0.5) / 0.5)
+  # one survey, or fewer than three populations measured in consecutive surveys, gives NA
+  expect_true(is.na(population_stats(ind[ind$step == 2, ], step = "step")[["temporal_step"]]))
+  sparse <- ind[ind$step == 2 | ind$site %in% c("s1", "s2"), ]
+  expect_true(is.na(population_stats(sparse, step = "step")[["temporal_step"]]))
+  expect_false(is.na(population_stats(sparse, step = "step")[["slope"]]))
+  # a step that is not numeric gives NA
+  ind$step <- as.character(ind$step)
+  expect_true(is.na(population_stats(ind, step = "step")[["temporal_step"]]))
 })
 
 test_that("population_stats() leaves out species with too few populations", {

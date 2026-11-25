@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- `population_stats()` gains `temporal_step` and `temporal_step_slope`: the squared change of
+  population means between consecutive surveys, corrected for sampling and divided by the
+  interval and the variance within populations, which estimates the variance of drift per
+  generation relative to the phenotypic variance, and its slope on the inverse of abundance. In
+  simulations (`data-raw/abc_temporal_drift.R`), ten consecutive surveys raised the R² of Ne/N
+  by 0.07 at most over two surveys 50 steps apart (0.39 to 0.56), because drift per generation
+  also depends on G / Ne; the statistic tracked G / (Ne (G + V_E)) closely (Spearman 0.83).
+
 - `data-raw/abc_g_ne.R` reparametrises the genetic variance and the effective size in the ABC of
   `data-raw/abc_identifiability.R`: the intensity of drift, G / (Ne/N), and the response to
   selection, G / (sigma^2 + G + V_E), were recovered with R² 0.89 to 0.96 in every case, against

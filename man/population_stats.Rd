@@ -30,7 +30,8 @@ one value per population, or \code{NULL} (the default), which leaves \code{withi
 and \code{temporal_slope} as \code{NA}.}
 
 \item{step}{Name of a column with the survey of each individual, or \code{NULL} (the default) for
-a single survey, which leaves \code{temporal} and \code{temporal_slope} as \code{NA}. Without \code{step}, all
+a single survey, which leaves \code{temporal}, \code{temporal_slope}, \code{temporal_step} and
+\code{temporal_step_slope} as \code{NA}. Without \code{step}, all
 the individuals of a population are pooled.}
 
 \item{coords}{Matrix or data frame with the coordinates of the sites in two columns and the
@@ -76,7 +77,17 @@ With two or more surveys (\code{step}), the first and the last are compared, in 
 with at least two individuals measured in both. \code{temporal} is the mean squared change of
 population means minus its sampling variance, relative to the variance within populations,
 and \code{temporal_slope} the slope of that corrected change on the inverse of abundance, the
-basis of the temporal method of estimating the effective size (Waples 1989).
+basis of the temporal method of estimating the effective size (Waples 1989). Over a long
+interval, selection and gene flow also move the means, so \code{temporal_step} uses every pair of
+consecutive surveys instead: the mean, over these pairs and their populations measured in
+both, of the squared change minus its sampling variance, divided by the interval between the
+surveys (in the units of \code{step}, so per generation when a step is a generation) and by the
+variance within populations at the last survey. It estimates the variance of drift per
+generation relative to the phenotypic variance, which is about
+\eqn{G / (N_e (G + V_E))}{G / (Ne (G + V_E))} (Lande 1976). \code{temporal_step_slope} is the slope
+of the corrected change per unit of time on the inverse of the abundance at the later survey.
+Both need a numeric \code{step} and three changes in all; with two surveys, \code{temporal_step} is
+\code{temporal} divided by the interval.
 
 The statistics of each species are averaged over species, weighted by the summed abundance of
 their populations at the last survey (or by their number of populations without
@@ -100,6 +111,9 @@ rownames(coords) <- rownames(sim$abundance)
 round(population_stats(ind, abundance = "abundance", step = "step", coords = coords), 3)
 }
 \references{
+Lande, R. (1976). Natural selection and random genetic drift in phenotypic
+evolution. \emph{Evolution}, 30, 314--334. \doi{10.1111/j.1558-5646.1976.tb00911.x}
+
 Spitze, K. (1993). Population structure in \emph{Daphnia obtusa}: quantitative
 genetic and allozymic variation. \emph{Genetics}, 135, 367--374.
 \doi{10.1093/genetics/135.2.367}
