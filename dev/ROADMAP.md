@@ -118,6 +118,21 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    estatísticas atuais repete o de 2026-11-11 (10,0% contra 9,7%) e substitui `abc_cv.rds`.
    Conclusão: blocos não fazem mal e ajudam pouco em paisagens grandes; a vignette os mantém
    pela lógica de Roberts et al. (2017), sem prometer ganho de poder. Segue, no bloco C: (v).
+2g. **Bloco C (v) fechado em 2026-11-24** (branch `block-c-variable-design`): árvore e paisagem
+   variando entre simulações, com e sem detecção imperfeita (`data-raw/abc_variable_design.R`;
+   desenho de `abc_detection.R`, 30 espécies, grade 5×5, 20 mil simulações e 200
+   pseudo-observações por tabela). R² com desenho fixo / variando: `log_dispersal` 0,99 / 0,99
+   (com detecção 0,97 / 0,97), `inter_max` 0,88 / 0,88 (0,86 / 0,86), `sigma_mean` 0,93 / 0,88
+   (0,92 / 0,82), `lambda` 0,43 / 0,33 (0,53 / 0,32), `log_detection` 0,97 / 0,97; coberturas de
+   0,89 a 0,985. Os descritores do desenho (média e desvio das distâncias filogenéticas da árvore,
+   I de Moran do ambiente) não recuperam `lambda` (0,34 e 0,36), e o erro quase não se
+   correlaciona com eles (1 de 27 testes com p < 0,05, ρ = −0,14). Conclusão: os estudos de
+   recuperação com uma árvore valem em geral para dispersão, competição, largura de nicho e
+   detecção, mas são um pouco otimistas para `lambda`, que já ficava no limite com uma árvore
+   (0,43 a 0,53; 0,45 em `abc_detection.R`). Ressalvas: o I de Moran quase não varia entre
+   grades 5×5 em toro (0,10 a 0,12), então só o arranjo do ambiente variou; as duas tabelas
+   variáveis compartilham os desenhos, deslocados uma linha (sementes 6003 e 6004). Seguem, no
+   bloco C: (ix) a (xiii); (vi) e (vii) são de baixa prioridade ou dependem da conta do usuário.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -296,7 +311,7 @@ nos anuros, contra competição, que também testa a falha do MPD na `vignette("
 explica a falha, e o PPC tem poder de 23% a 39% no MPD);
 (iii) colonização limitada a partir do pool regional (**feito em 2026-11-24**, `data-raw/abc_colonisation.R`; ver 2e: lida como competição sem o modelo alternativo, mas não explica toda a competição dos anuros); (iv) validação cruzada por blocos numa
 paisagem maior e sem toro (**feito em 2026-11-24**, `data-raw/abc_cv.R`; ver 2f: blocos rejeitam o modelo errado só 1,9 pp a mais na grade de 100 sítios sem toro, abaixo do critério); (v) árvore e paisagem variando entre simulações e detecção
-imperfeita; (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
+imperfeita (**feito em 2026-11-24**, `data-raw/abc_variable_design.R`; ver 2g: só `lambda` perde, de 0,43–0,53 para 0,32); (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
 `anurans` (exige a conta do usuário); (viii) da quarta limitação do manuscrito: estatísticas que tornem `ne_ratio` e G
 identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica dentro das
 populações e a divergência entre populações relativa à distância (tipo QST), testadas com
@@ -672,7 +687,9 @@ funções escritos à mão, o que indica o que falta no pacote.
       intervalo, de 0,13 para 0,10 da amplitude na dispersão. `lambda` não é recuperado
       (R2 <= 0,07). Decisão para o ABC: seguir, com pelo menos 500 aceitas, e dar a `lambda`
       uma estatística de sinal dos traits, que `summary_stats()` ainda não tem. Falta testar com
-      árvore e paisagem variando, detecção imperfeita e modelo errado.
+      árvore e paisagem variando, detecção imperfeita e modelo errado. Testado em
+      2026-11-24 no bloco C: modelo errado em (ii) e (iii), árvore e paisagem variando com
+      detecção imperfeita em (v) (ver 2d, 2e e 2g).
 
 **Concluído quando:** as vignettes puderem ser reescritas com essas funções, com bem
 menos código. A `phylogenetic-structure` mostra o desenho com `run_scenarios()`; os
