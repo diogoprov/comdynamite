@@ -146,7 +146,10 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 2i. **Bloco C (vii) fechado em 2026-11-25:** download do GBIF com DOI 10.15468/dl.g4gz8u
    (`data-raw/anurans_pool/06_download.R`, conta do usuário; 115.216 registros, contra 115.023
    nas consultas de 11/11). Contagens por espécie e ecorregião iguais às do `pools.csv` em 1.296
-   de 1.427 pares; só *Rhinella arenarum* entraria no pool de Campo Grande. Pools não refeitos;
+   de 1.427 pares; nenhuma espécie mudaria de pool (três passam agora do corte de três registros
+   na ecorregião, mas nenhuma tem registro a até 200 km e modo lêntico ao mesmo tempo; o registro
+   de *Rhinella arenarum* no Cerrado é um espécime de 1980 de MG, provavelmente mal
+   identificado; correção de 2026-11-25). Pools não refeitos;
    DOI citado em `?anurans` e no README dos pools. Seguem, no bloco C: (x) a (xiii); (vi) de
    baixa prioridade.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança

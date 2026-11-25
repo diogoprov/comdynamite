@@ -26,7 +26,11 @@ here. Assigned to the ecoregion polygons, its counts by species and ecoregion ma
 `pools.csv` in 1,296 of 1,427 pairs (Spearman correlation of the totals by species and city
 0.9998); 23 pairs had 1 to 10 records fewer, 105 had 1 to 10 more and 3 had 11 to 17 more, and
 one species with a single record in the Cerrado (*Pristimantis moa*, not in any pool) was no
-longer there. With the threshold of three records, three species would now pass it: of these,
-only *Rhinella arenarum* in Campo Grande breeds in lentic water and would enter its pool. The
-pools of `anurans` were not rebuilt, so they rest on the queries of 11 November; the download is
-the citable record of the same query.
+longer there. With the threshold of three records in the ecoregion, three species would now
+pass it, but none would enter the pools of `anurans`, which also require a record within 200 km
+of the ponds and a lentic mode of reproduction (`data-raw/anurans.R`): *Rhinella arenarum* has no
+record within 200 km of either city (its single record in the Cerrado is a specimen of 1980 from
+Minas Gerais, probably misidentified), *Odontophrynus reigi* has none either, and
+*Dendropsophus cerradensis* has no known lentic mode. The pools of `anurans` were not rebuilt,
+so they rest on the queries of 11 November; the download is the citable record of the same
+query.
