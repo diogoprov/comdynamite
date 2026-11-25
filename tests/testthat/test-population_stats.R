@@ -77,6 +77,11 @@ test_that("population_stats() measures the change between consecutive surveys", 
   out3 <- population_stats(rbind(ind, late), abundance = "abundance", step = "step")
   expect_equal(out3[["temporal_step"]], mean(c(0.2^2 - 0.5, (0.4^2 - 0.5) / 2)) / 0.5)
   expect_equal(out3[["temporal"]], (0.6^2 - 0.5) / 0.5)
+  # one survey, or fewer than three populations measured in consecutive surveys, gives NA
+  expect_true(is.na(population_stats(ind[ind$step == 2, ], step = "step")[["temporal_step"]]))
+  sparse <- ind[ind$step == 2 | ind$site %in% c("s1", "s2"), ]
+  expect_true(is.na(population_stats(sparse, step = "step")[["temporal_step"]]))
+  expect_false(is.na(population_stats(sparse, step = "step")[["slope"]]))
   # a step that is not numeric gives NA
   ind$step <- as.character(ind$step)
   expect_true(is.na(population_stats(ind, step = "step")[["temporal_step"]]))
