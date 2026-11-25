@@ -152,6 +152,22 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    identificado; correção de 2026-11-25). Pools não refeitos;
    DOI citado em `?anurans` e no README dos pools. Seguem, no bloco C: (x) a (xiii); (vi) de
    baixa prioridade.
+2j. **Bloco C (x) fechado em 2026-11-25, critério não atingido** (branch
+   `block-c-temporal-drift`): `population_stats()` ganha `temporal_step` e
+   `temporal_step_slope` (mudança quadrática das médias entre levantamentos consecutivos,
+   corrigida pela amostragem, por unidade de tempo e relativa à variância dentro das
+   populações). Em `data-raw/abc_temporal_drift.R` (simulador do (viii), ótimos desconhecidos,
+   quatro casos, 10 mil simulações), R² de Ne/N com 1 levantamento / 2 levantamentos (350, 400) /
+   10 consecutivos (391–400) com 10 indivíduos / com 30: estático e G constante 0,44 / 0,56 /
+   0,56 / 0,56; aquecimento e G constante 0,46 / 0,50 / 0,54 / 0,53; estático com mutação
+   0,44 / 0,44 / 0,50 / 0,51; aquecimento com mutação 0,36 / 0,35 / 0,39 / 0,39. Ganho de 0,00 a
+   0,07 sobre dois levantamentos, abaixo dos 0,10 do critério, como previsto antes de rodar: a
+   deriva por geração também depende de G/Ne (`temporal_step` correlaciona 0,83 com
+   G/(Ne(G+V_E)) e −0,40 com Ne/N). G/Ne melhora pouco (0,94–0,95). Conclusão: médias, mesmo
+   repetidas no tempo, não separam Ne de G; Ne exige informação independente sobre G ou dados
+   genéticos neutros (interpretação nossa). A recomendação "survey twice if Ne matters" da
+   `vignette("abc")` ficou como está. Seguem, no bloco C: (xi) a (xiii); (vi) de baixa
+   prioridade.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -350,7 +366,7 @@ das médias tem variância proporcional a G/Ne e a resposta à seleção a G/(si
 abundâncias e médias, o que se informa é G e a razão G/Ne, e Ne sozinho só se G estiver bem
 determinado. Estimar `log(G/Ne)` e G em vez de `ne_ratio` e G e comparar a recuperação com
 `abc_recovery()` (hipótese nossa, não testada). Como o `abcrf` estima um parâmetro por vez, a
-correlação entre G e Ne não aparece nos posteriores marginais; (x) estatística temporal de
+correlação entre G e Ne não aparece nos posteriores marginais; (x) (**feito em 2026-11-25**, `temporal_step` e `data-raw/abc_temporal_drift.R`; ver 2j: Ne/N ganha no máximo 0,07) estatística temporal de
 deriva para o (viii): variância das mudanças nas médias entre gerações, com dados repetidos
 no tempo, que deve informar Ne mais que qualquer ajuste do ABC; (xi) recalibração dos
 intervalos do ABC-RF por cobertura em pseudo-observações (ideia de Prangle et al. 2014 e
