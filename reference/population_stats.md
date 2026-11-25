@@ -51,9 +51,9 @@ population_stats(
 - step:
 
   Name of a column with the survey of each individual, or `NULL` (the
-  default) for a single survey, which leaves `temporal` and
-  `temporal_slope` as `NA`. Without `step`, all the individuals of a
-  population are pooled.
+  default) for a single survey, which leaves `temporal`,
+  `temporal_slope`, `temporal_step` and `temporal_step_slope` as `NA`.
+  Without `step`, all the individuals of a population are pooled.
 
 - coords:
 
@@ -105,7 +105,18 @@ in the populations with at least two individuals measured in both.
 sampling variance, relative to the variance within populations, and
 `temporal_slope` the slope of that corrected change on the inverse of
 abundance, the basis of the temporal method of estimating the effective
-size (Waples 1989).
+size (Waples 1989). Over a long interval, selection and gene flow also
+move the means, so `temporal_step` uses every pair of consecutive
+surveys instead: the mean, over these pairs and their populations
+measured in both, of the squared change minus its sampling variance,
+divided by the interval between the surveys (in the units of `step`, so
+per generation when a step is a generation) and by the variance within
+populations at the last survey. It estimates the variance of drift per
+generation relative to the phenotypic variance, which is about \\G /
+(N_e (G + V_E))\\ (Lande 1976). `temporal_step_slope` is the slope of
+the corrected change per unit of time on the inverse of the abundance at
+the later survey. Both need a numeric `step` and three changes in all;
+with two surveys, `temporal_step` is `temporal` divided by the interval.
 
 The statistics of each species are averaged over species, weighted by
 the summed abundance of their populations at the last survey (or by
@@ -117,6 +128,10 @@ sampling error, as field data would;
 changes the effort.
 
 ## References
+
+Lande, R. (1976). Natural selection and random genetic drift in
+phenotypic evolution. *Evolution*, 30, 314–334.
+[doi:10.1111/j.1558-5646.1976.tb00911.x](https://doi.org/10.1111/j.1558-5646.1976.tb00911.x)
 
 Spitze, K. (1993). Population structure in *Daphnia obtusa*:
 quantitative genetic and allozymic variation. *Genetics*, 135, 367–374.
@@ -177,10 +192,14 @@ ind <- sample_individuals(sim, n = 10, source = "evolution", step = c(100, 120))
 coords <- land$coords
 rownames(coords) <- rownames(sim$abundance)
 round(population_stats(ind, abundance = "abundance", step = "step", coords = coords), 3)
-#>          slope             r2             sd       resid_sd         within 
-#>          0.204          0.218          8.577          7.463          1.596 
-#>   within_slope            qst           near            far       dist_cor 
-#>          0.166          0.846          0.976          0.920         -0.042 
-#>       size_cor       temporal temporal_slope      slope_min      slope_max 
-#>         -0.223          0.414         29.080          0.107          0.350 
+#>               slope                  r2                  sd            resid_sd 
+#>               0.204               0.218               8.577               7.463 
+#>              within        within_slope                 qst                near 
+#>               1.596               0.166               0.846               0.976 
+#>                 far            dist_cor            size_cor            temporal 
+#>               0.920              -0.042              -0.223               0.414 
+#>      temporal_slope       temporal_step temporal_step_slope           slope_min 
+#>              29.080               0.021               1.454               0.107 
+#>           slope_max 
+#>               0.350 
 ```

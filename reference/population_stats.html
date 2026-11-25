@@ -118,7 +118,8 @@ and <code>temporal_slope</code> as <code>NA</code>.</p></dd>
 
 <dt id="arg-step">step<a class="anchor" aria-label="anchor" href="#arg-step"></a></dt>
 <dd><p>Name of a column with the survey of each individual, or <code>NULL</code> (the default) for
-a single survey, which leaves <code>temporal</code> and <code>temporal_slope</code> as <code>NA</code>. Without <code>step</code>, all
+a single survey, which leaves <code>temporal</code>, <code>temporal_slope</code>, <code>temporal_step</code> and
+<code>temporal_step_slope</code> as <code>NA</code>. Without <code>step</code>, all
 the individuals of a population are pooled.</p></dd>
 
 
@@ -165,7 +166,17 @@ abundance, negative when small populations drift more.</p>
 with at least two individuals measured in both. <code>temporal</code> is the mean squared change of
 population means minus its sampling variance, relative to the variance within populations,
 and <code>temporal_slope</code> the slope of that corrected change on the inverse of abundance, the
-basis of the temporal method of estimating the effective size (Waples 1989).</p>
+basis of the temporal method of estimating the effective size (Waples 1989). Over a long
+interval, selection and gene flow also move the means, so <code>temporal_step</code> uses every pair of
+consecutive surveys instead: the mean, over these pairs and their populations measured in
+both, of the squared change minus its sampling variance, divided by the interval between the
+surveys (in the units of <code>step</code>, so per generation when a step is a generation) and by the
+variance within populations at the last survey. It estimates the variance of drift per
+generation relative to the phenotypic variance, which is about
+\(G / (N_e (G + V_E))\) (Lande 1976). <code>temporal_step_slope</code> is the slope
+of the corrected change per unit of time on the inverse of the abundance at the later survey.
+Both need a numeric <code>step</code> and three changes in all; with two surveys, <code>temporal_step</code> is
+<code>temporal</code> divided by the interval.</p>
 <p>The statistics of each species are averaged over species, weighted by the summed abundance of
 their populations at the last survey (or by their number of populations without
 <code>abundance</code>). <code>slope_min</code> and <code>slope_max</code> are the smallest and largest slope among species.
@@ -174,7 +185,9 @@ as field data would; <code><a href="subsample_individuals.html">subsample_indivi
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
-    <p>Spitze, K. (1993). Population structure in <em>Daphnia obtusa</em>: quantitative
+    <p>Lande, R. (1976). Natural selection and random genetic drift in phenotypic
+evolution. <em>Evolution</em>, 30, 314–334. <a href="https://doi.org/10.1111/j.1558-5646.1976.tb00911.x" class="external-link">doi:10.1111/j.1558-5646.1976.tb00911.x</a></p>
+<p>Spitze, K. (1993). Population structure in <em>Daphnia obtusa</em>: quantitative
 genetic and allozymic variation. <em>Genetics</em>, 135, 367–374.
 <a href="https://doi.org/10.1093/genetics/135.2.367" class="external-link">doi:10.1093/genetics/135.2.367</a></p>
 <p>Waples, R. S. (1989). A generalized approach for estimating effective population size from
@@ -231,12 +244,16 @@ temporal changes in allele frequency. <em>Genetics</em>, 121, 379–391.
 <span class="r-in"><span><span class="va">coords</span> <span class="op">&lt;-</span> <span class="va">land</span><span class="op">$</span><span class="va">coords</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">coords</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">sim</span><span class="op">$</span><span class="va">abundance</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu">population_stats</span><span class="op">(</span><span class="va">ind</span>, abundance <span class="op">=</span> <span class="st">"abundance"</span>, step <span class="op">=</span> <span class="st">"step"</span>, coords <span class="op">=</span> <span class="va">coords</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          slope             r2             sd       resid_sd         within </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0.204          0.218          8.577          7.463          1.596 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   within_slope            qst           near            far       dist_cor </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0.166          0.846          0.976          0.920         -0.042 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       size_cor       temporal temporal_slope      slope_min      slope_max </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         -0.223          0.414         29.080          0.107          0.350 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               slope                  r2                  sd            resid_sd </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               0.204               0.218               8.577               7.463 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              within        within_slope                 qst                near </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               1.596               0.166               0.846               0.976 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 far            dist_cor            size_cor            temporal </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               0.920              -0.042              -0.223               0.414 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      temporal_slope       temporal_step temporal_step_slope           slope_min </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              29.080               0.021               1.454               0.107 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           slope_max </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>               0.350 </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
