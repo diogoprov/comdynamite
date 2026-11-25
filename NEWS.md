@@ -1,5 +1,11 @@
 # comdynamite (development version)
 
+- `data-raw/abc_variable_design.R` tests ABC recovery when the tree and the landscape vary among
+  simulations, with and without imperfect detection. Emigration, competition, niche breadth and
+  detection were still recovered (R² 0.82 to 0.99), while the phylogenetic signal of the niche
+  (`lambda`) fell from 0.43 to 0.53 with one tree to 0.32, and descriptors of the tree and of
+  the landscape added to the statistics did not restore it. `vignette("abc")` now says so.
+
 - `data-raw/abc_cv.R` repeats the study of `abc_cv()` with spatial blocks against random folds
   in grids of 25 and 100 sites, with and without a torus. Blocks rejected a wrong model (species
   tracking a hidden, autocorrelated environment) more often than random folds only in the grid
