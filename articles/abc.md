@@ -231,7 +231,15 @@ niche (`lambda`) not at all: with incidence in 40 ponds, its posterior
 will be its prior. The coverage is at or a little above 90% for all six
 (0.9 to 0.96, with a standard error of about 0.02), so the intervals are
 not too narrow and the posterior of `lambda` is honest about this, just
-uninformative.
+uninformative. This recovery holds for the tree and the ponds of the
+anurans only. In simulations on small grids
+(`data-raw/abc_variable_design.R`), the recovery of emigration,
+competition, niche breadth and detection changed little when every
+simulation drew its own tree and landscape, but that of `lambda`,
+already near the limit with one tree (R² 0.43 to 0.53), fell to 0.32.
+What the forests learn about `lambda` therefore seems to depend on the
+tree used, and a recovery study with the observed tree, as here, is the
+one to trust.
 
 ## Which model?
 

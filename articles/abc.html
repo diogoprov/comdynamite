@@ -288,7 +288,16 @@ phylogenetic signal of the niche (<code>lambda</code>) not at all: with
 incidence in 40 ponds, its posterior will be its prior. The coverage is
 at or a little above 90% for all six (0.9 to 0.96, with a standard error
 of about 0.02), so the intervals are not too narrow and the posterior of
-<code>lambda</code> is honest about this, just uninformative.</p>
+<code>lambda</code> is honest about this, just uninformative. This
+recovery holds for the tree and the ponds of the anurans only. In
+simulations on small grids
+(<code>data-raw/abc_variable_design.R</code>), the recovery of
+emigration, competition, niche breadth and detection changed little when
+every simulation drew its own tree and landscape, but that of
+<code>lambda</code>, already near the limit with one tree (R² 0.43 to
+0.53), fell to 0.32. What the forests learn about <code>lambda</code>
+therefore seems to depend on the tree used, and a recovery study with
+the observed tree, as here, is the one to trust.</p>
 </div>
 <div class="section level2">
 <h2 id="which-model">Which model?<a class="anchor" aria-label="anchor" href="#which-model"></a>
