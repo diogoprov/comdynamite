@@ -133,6 +133,22 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    grades 5×5 em toro (0,10 a 0,12), então só o arranjo do ambiente variou; as duas tabelas
    variáveis compartilham os desenhos, deslocados uma linha (sementes 6003 e 6004). Seguem, no
    bloco C: (ix) a (xiii); (vi) e (vii) são de baixa prioridade ou dependem da conta do usuário.
+2h. **Bloco C (ix) fechado em 2026-11-25** (branch `block-c-g-ne`): reparametrização de G e Ne
+   (`data-raw/abc_g_ne.R`, que refaz as tabelas do (viii) com as mesmas sementes; R² de `log_G` e
+   `log_ne_ratio` idênticos aos do (viii)). G/(Ne/N): R² 0,92 a 0,96; resposta à seleção
+   G/(σ² + G + V_E): 0,89 a 0,94; V_m·Ne/N com mutação: 0,76 a 0,88 (V_m sozinho, 0,82 a 0,91);
+   Ne/N: 0,29 a 0,61; coberturas de 0,90 a 0,99. Ne/N implícito (estimativa de `log_G` menos a de
+   `log_G_ne`, ou de `log_Vm_ne` menos a de `log_Vm`) nunca melhor que a floresta direta (−0,01 a
+   −0,15 de R²). Conclusão: a hipótese se confirma em parte; os dados informam G e a intensidade
+   da deriva, não Ne, e reparametrizar não recupera Ne, já que o erro dele soma os erros
+   residuais de G e de G/Ne, cujas amplitudes são maiores (interpretação nossa). Ne pede
+   informação externa sobre G ou dados temporais: (x).
+2i. **Bloco C (vii) fechado em 2026-11-25:** download do GBIF com DOI 10.15468/dl.g4gz8u
+   (`data-raw/anurans_pool/06_download.R`, conta do usuário; 115.216 registros, contra 115.023
+   nas consultas de 11/11). Contagens por espécie e ecorregião iguais às do `pools.csv` em 1.296
+   de 1.427 pares; só *Rhinella arenarum* entraria no pool de Campo Grande. Pools não refeitos;
+   DOI citado em `?anurans` e no README dos pools. Seguem, no bloco C: (x) a (xiii); (vi) de
+   baixa prioridade.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -311,7 +327,7 @@ nos anuros, contra competição, que também testa a falha do MPD na `vignette("
 explica a falha, e o PPC tem poder de 23% a 39% no MPD);
 (iii) colonização limitada a partir do pool regional (**feito em 2026-11-24**, `data-raw/abc_colonisation.R`; ver 2e: lida como competição sem o modelo alternativo, mas não explica toda a competição dos anuros); (iv) validação cruzada por blocos numa
 paisagem maior e sem toro (**feito em 2026-11-24**, `data-raw/abc_cv.R`; ver 2f: blocos rejeitam o modelo errado só 1,9 pp a mais na grade de 100 sítios sem toro, abaixo do critério); (v) árvore e paisagem variando entre simulações e detecção
-imperfeita (**feito em 2026-11-24**, `data-raw/abc_variable_design.R`; ver 2g: só `lambda` perde, de 0,43–0,53 para 0,32); (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) DOI de download do GBIF para os pools de
+imperfeita (**feito em 2026-11-24**, `data-raw/abc_variable_design.R`; ver 2g: só `lambda` perde, de 0,43–0,53 para 0,32); (vi) likelihood sintética por sítio para PSIS-LOO (baixa prioridade); (vii) (**feito em 2026-11-25**, DOI 10.15468/dl.g4gz8u; ver 2i) DOI de download do GBIF para os pools de
 `anurans` (exige a conta do usuário); (viii) da quarta limitação do manuscrito: estatísticas que tornem `ne_ratio` e G
 identificáveis sem ótimos ancestrais conhecidos, como a variância fenotípica dentro das
 populações e a divergência entre populações relativa à distância (tipo QST), testadas com
@@ -326,7 +342,7 @@ deixa o (x), com mudanças entre gerações em vez de entre duas amostragens 50 
 distantes, ainda em aberto.
 
 Acrescentados em 2026-11-23, depois da iteração com os dados do Leandro (Ne e parâmetros
-genéticos pedindo ajuste fino): (ix) reparametrizar G e Ne. Pelas equações de Lande, a deriva
+genéticos pedindo ajuste fino): (ix) reparametrizar G e Ne (**feito em 2026-11-25**, `data-raw/abc_g_ne.R`; ver 2h: G/Ne recuperado, Ne não). Pelas equações de Lande, a deriva
 das médias tem variância proporcional a G/Ne e a resposta à seleção a G/(sigma^2 + P); com
 abundâncias e médias, o que se informa é G e a razão G/Ne, e Ne sozinho só se G estiver bem
 determinado. Estimar `log(G/Ne)` e G em vez de `ne_ratio` e G e comparar a recuperação com
@@ -1151,8 +1167,8 @@ Estado em 2026-11-11: as funções estão prontas (PRs #77, #78, #80, #81 e #82)
       e ver se a falha some; serve também como o PPC com modelo mal especificado acima.
 - [ ] Colonização limitada a partir do pool regional (a maioria das espécies rara), a outra
       explicação da riqueza baixa que hoje só a competição consegue gerar.
-- [ ] DOI de download do GBIF para os pools de `anurans` (exige a conta do usuário; hoje há
-      só as consultas e a data de acesso em `data-raw/anurans_pool/`).
+- [x] DOI de download do GBIF para os pools de `anurans` (2026-11-25, 10.15468/dl.g4gz8u;
+      `data-raw/anurans_pool/06_download.R`; ver 2i).
 
 **Concluído quando:** uma vignette levar dados reais do ajuste à avaliação, com
 cobertura medida em dados simulados.

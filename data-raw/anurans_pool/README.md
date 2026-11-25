@@ -14,3 +14,19 @@ Nunes-de-Almeida et al. (2021, CC-BY 4.0; definitions in `nunes2021_mode_definit
 for species missing from it, from da Silva et al. (2012, Dryad, CC0), whose modes follow Haddad &
 Prado (2005). The correspondence of the modes of Haddad & Prado (2005) to lentic breeding was
 not checked against the original table.
+
+## GBIF download with a DOI
+
+The facets above came from the occurrence search API, which gives no DOI. On 25 November 2026,
+`06_download.R` requested one GBIF download with the five filters of `query_eco*.json` and the
+three ecoregion polygons joined by OR: GBIF.org (25 November 2026) GBIF Occurrence Download
+https://doi.org/10.15468/dl.g4gz8u (115,216 records from 63 datasets, against 115,023 in the
+queries of 11 November; key and request in `gbif_download.txt`). The file itself is not kept
+here. Assigned to the ecoregion polygons, its counts by species and ecoregion matched those of
+`pools.csv` in 1,296 of 1,427 pairs (Spearman correlation of the totals by species and city
+0.9998); 23 pairs had 1 to 10 records fewer, 105 had 1 to 10 more and 3 had 11 to 17 more, and
+one species with a single record in the Cerrado (*Pristimantis moa*, not in any pool) was no
+longer there. With the threshold of three records, three species would now pass it: of these,
+only *Rhinella arenarum* in Campo Grande breeds in lentic water and would enter its pool. The
+pools of `anurans` were not rebuilt, so they rest on the queries of 11 November; the download is
+the citable record of the same query.

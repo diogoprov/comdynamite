@@ -1,5 +1,16 @@
 # comdynamite (development version)
 
+- `data-raw/abc_g_ne.R` reparametrises the genetic variance and the effective size in the ABC of
+  `data-raw/abc_identifiability.R`: the intensity of drift, G / (Ne/N), and the response to
+  selection, G / (sigma^2 + G + V_E), were recovered with R² 0.89 to 0.96 in every case, against
+  0.29 to 0.61 for Ne/N, but Ne/N implied by the estimates of G and G / (Ne/N) was never better
+  than its own forest. Abundances and trait means therefore seem to inform the strength of
+  drift rather than the effective size.
+
+- The regional pools of `anurans` can now be cited through a GBIF download with a DOI
+  (10.15468/dl.g4gz8u), made with the queries of 11 November 2026; its counts by species differ
+  slightly from those used, as described in `data-raw/anurans_pool/README.md`.
+
 - `data-raw/abc_variable_design.R` tests ABC recovery when the tree and the landscape vary among
   simulations, with and without imperfect detection. Emigration, competition, niche breadth and
   detection were still recovered (R² 0.82 to 0.99), while the phylogenetic signal of the niche
