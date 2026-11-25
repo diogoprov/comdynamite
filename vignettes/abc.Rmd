@@ -439,14 +439,31 @@ each. With 10 individuals at 20 of the 100 sites instead of at every occupied si
 Ne/N fell from 0.29 to 0.52 to 0.18 to 0.38, and that of the mutational variance by 0.07 to
 0.13; with 5 or 30 individuals per population instead of 10, the R² changed by at most 0.08. A
 second survey 50 steps before the last raised the R² of Ne/N by 0.10 and 0.11 in the static
-environment with one G, and by 0.03 or less in the other cases. With 200 pseudo-observations,
+environment with one G, and by 0.03 or less in the other cases.
+
+Two further studies qualify the role of a second survey. When the parameters were G and the
+strength of drift, G / (Ne/N), instead of G and Ne/N
+([`data-raw/abc_g_ne.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_g_ne.R)),
+the strength of drift was recovered with R² 0.92 to 0.96 in every case, but Ne/N computed from
+the two estimates was never better than its own forest. Ten consecutive surveys, summarised by
+the change of population means per generation (`temporal_step` in `population_stats()`;
+[`data-raw/abc_temporal_drift.R`](https://github.com/diogoprov/comdynamite/blob/main/data-raw/abc_temporal_drift.R)),
+raised the R² of Ne/N by 0.07 at most over two surveys 50 steps apart. Since drift per
+generation is proportional to G / Ne (Lande 1976), trait means, even repeated in time, seem to
+inform the strength of drift rather than Ne itself, which would need independent information on
+G, such as a heritability estimated in a common garden.
+
+With 200 pseudo-observations,
 differences of about 0.05 in R² are close to the sampling error, so these are tendencies rather
 than rules, and they hold for this simulator and these priors. A field study can use them as a
 starting point: measure about ten individuals in as many populations as possible along the
-environmental gradient, survey twice if Ne matters, and run `abc_recovery()` with its own
+environmental gradient, survey more than once if the strength of drift matters, and run `abc_recovery()` with its own
 simulator and design before going to the field.
 
 ## References
+
+Lande, R. (1976). Natural selection and random genetic drift in phenotypic evolution.
+*Evolution*, 30, 314–334. https://doi.org/10.1111/j.1558-5646.1976.tb00911.x
 
 Pudlo, P., Marin, J.-M., Estoup, A., Cornuet, J.-M., Gautier, M., & Robert, C. P. (2016).
 Reliable ABC model choice via random forests. *Bioinformatics*, 32, 859–866.
