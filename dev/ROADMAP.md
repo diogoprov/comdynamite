@@ -1,16 +1,24 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-23. Versão atual: 0.11.0 (tag `v0.11.0`, release, DOI
-`10.5281/zenodo.24446713`), após a 0.10.0 (tag `v0.10.0`, release, DOI `10.5281/zenodo.24423302`) e a 0.9.0 (DOI
-`10.5281/zenodo.24341231`; DOI de conceito `10.5281/zenodo.23993533`). Em desenvolvimento:
-0.11.0.9000.
+Atualizado em 2026-11-26. Versão atual: 0.12.0 (tag `v0.12.0`, sem release no GitHub), após a
+0.11.0 (tag `v0.11.0`, release, DOI `10.5281/zenodo.24446713`), a 0.10.0 (tag `v0.10.0`,
+release, DOI `10.5281/zenodo.24423302`) e a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
+conceito `10.5281/zenodo.23993533`).
 Tags: `v0.1.0`, `v0.2.0`, `v0.5.0`, `v0.5.1`, `v0.5.2`, `v0.6.0` a `v0.6.3`, `v0.7.0`, `v0.8.0`,
-`v0.9.0`, `v0.10.0` e `v0.11.0`.
+`v0.9.0`, `v0.10.0`, `v0.11.0` e `v0.12.0`.
 O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
-## Próximos passos (2026-11-23)
+## Próximos passos (2026-11-26)
 
-0. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
+0. **0.12.0 em 2026-11-26** (tag `v0.12.0`): fecha o bloco C (inferência por ABC: robustez),
+   itens (i) a (v) e (vii) a (xii), com `abc_calibrate()` (PR #179), `abc_sequential()` (PR
+   #180), `temporal_step` em `population_stats()` (PR #177), o DOI de download do GBIF para os
+   pools de `anurans` (PR #175) e os estudos em `data-raw` (ver 2a a 2l). Fora da 0.12.0:
+   (xiii) neural posterior estimation, com piloto em andamento no `neuralsbi` (CRAN, MIT, NPE
+   em R com `torch`) sobre as tabelas já simuladas; o `NeuralEstimators` (GPL, exige Julia)
+   fica de fora; (vi) likelihood sintética por sítio para PSIS-LOO, adiada sem data. Próximo
+   marco de código: bloco K, item (i) (partição eco-evolutiva no tempo).
+0b. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
    aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
    arquivos de teste, e o pkgcheck local sem falhas nos checks principais (PR #155). Restam só
    avisos de estilo do goodpractice. Release no GitHub com DOI `10.5281/zenodo.24446713`. A
@@ -206,7 +214,7 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    pesos exatos); estreitar e perder cobertura são o mesmo fenômeno. Ficou: aviso quando a
    última rodada tem menos de 50 simulações efetivas, ESS por rodada no `print()`, e a
    documentação recomenda comparar as rodadas. Ideia para depois: recalibração local que trate
-   também a posição. Segue, no bloco C: (xiii); (vi) de baixa prioridade.
+   também a posição. Bloco C fechado na 0.12.0, com (vi) adiado e (xiii) em piloto.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -371,7 +379,8 @@ replicação foram atualizados em 2026-11-19 (PR #122, 92a29d6), com uma seção
 varreduras em cada um. Falta só levar ao manuscrito, na revisão do JBI: a frase sobre variação
 permanente (Urban), a persistência com 500 réplicas (Leibold) e a extensão sem mudança (Hajian).
 
-**Bloco C, inferência por ABC: robustez.** Estudos em `data-raw`, sem mudança de API, exceto
+**Bloco C, inferência por ABC: robustez (fechado na 0.12.0 em 2026-11-26, exceto (vi),
+adiado, e (xiii), em piloto).** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
 (v0.3.0; **fechado em 2026-11-23 com resultado parcial**, `data-raw/abc_lambda.R`: `niche_k`
 e `niche_dist_cor`, da posição de nicho realizada, levam `lambda` de R² 0 a 0,26 com 30
@@ -413,8 +422,8 @@ Rodrigues, Prangle & Sisson 2018), implementada aqui, sem depender do `abc`; os 
 estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) (**feito em 2026-11-26**, `abc_sequential()`; ver 2l) ABC-RF sequencial para
 priors largos: ajustar, simular de novo na região plausível e ajustar outra vez (Dinh et al.
 2025, *Statistics and Computing*, doi:10.1007/s11222-025-10748-x); (xiii) neural posterior
-estimation, que dá posteriores conjuntos (baixa prioridade; as ferramentas maduras estão em
-Python). Decidido em 2026-11-23: o `abctools` (Nunes & Prangle 2015, doi:10.32614/RJ-2015-030;
+estimation, que dá posteriores conjuntos (piloto com o `neuralsbi` aberto em
+2026-11-26; ver o item 0). Decidido em 2026-11-23: o `abctools` (Nunes & Prangle 2015, doi:10.32614/RJ-2015-030;
 CRAN 1.1.8) não entra. Ele depende do `abc` (GPL), e todas as funções supõem ABC por rejeição
 ou regressão; nenhuma recebe saída do `abcrf`. A seleção de estatísticas que ele oferece
 (Joyce & Marjoram 2008; Nunes & Balding 2010; Fearnhead & Prangle 2012) não cria a informação

@@ -1,4 +1,4 @@
-# comdynamite (development version)
+# comdynamite 0.12.0
 
 - New `abc_sequential()`, sequential ABC with random forests (the ABC-SMC-RF of Dinh et al.
   2025), narrows a wide prior towards one observation by rounds of simulation, with
