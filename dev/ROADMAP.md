@@ -182,6 +182,31 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    fora de todas as simulações da folha; remédio: `min_node_size` maior. Ideia para depois: a
    versão local, com pesos por proximidade. Seguem, no bloco C: (xii) e (xiii); (vi) de baixa
    prioridade.
+2l. **Bloco C (xii) fechado em 2026-11-26, critério atingido em parte** (branch
+   `block-c-sequential`): `abc_sequential()`, o ABC-SMC-RF de Dinh et al. (2025,
+   doi:10.1007/s11222-025-10748-x; Algoritmo 7, conferido no PDF publicado), com kernel normal
+   de duas vezes a variância ponderada (Beaumont et al. 2009, doi:10.1093/biomet/asp052),
+   pesos da floresta vezes prior sobre a densidade da proposta, e uma floresta por rodada só com
+   as simulações da rodada. Em `data-raw/abc_sequential.R`, a 90%, quatro rodadas contra uma
+   rodada com o mesmo total. Brinquedo (200 pseudo-observações, 4 × 1.000 contra 4.000): `a`
+   (prior bem mais largo que o posterior) largura 0,94 → 0,50 (exata 0,33), cobertura 0,97 →
+   0,85 (0,99, 0,905, 0,90, 0,85 nas rodadas 1 a 4); `b` (posterior quase tão largo quanto o
+   prior) 2,32 → 2,11, cobertura 0,82 → 0,81. Comunidade (desenho de `abc_recovery.R`, 20
+   pseudo-observações, 2.000 da tabela mais 3 × 2.000 contra 8.000): `log_dispersal` 0,57 →
+   0,42 (−27%), `sigma_mean` 8,2 → 6,7 (−19%), `inter_max` −3%, `lambda` 0%; cobertura de 0,85
+   ou mais em todos; ESS 117 a 161. Diagnóstico em `data-raw/abc_sequential_diagnostics.R`
+   (brinquedo, rodada 4, cobertura a 90% de `a`): pesos exatos no mesmo SMC 0,92, então a
+   proposta e os pesos de importância estão certos; sem a correção de importância 0,82; um
+   parâmetro com uma estatística de ruído 0,86; `min_node_size` 50 0,985 com largura 3,0;
+   kernel de 4, 8 e 16 vezes a variância 0,85, 0,885 e 0,935 com larguras 0,51, 0,80 e 1,07;
+   recalibração local da última rodada 0,845 (corrige `b`, 0,80 → 0,865, não `a`). Leitura
+   nossa: o posterior da floresta se apoia em cerca de 14 simulações efetivas, seu erro de
+   posição segue a dispersão da tabela e não a largura do posterior, e as rodadas o acumulam
+   (verdade fora de todas as partículas com peso em 6% dos casos na rodada 4, contra 2,5% com
+   pesos exatos); estreitar e perder cobertura são o mesmo fenômeno. Ficou: aviso quando a
+   última rodada tem menos de 50 simulações efetivas, ESS por rodada no `print()`, e a
+   documentação recomenda comparar as rodadas. Ideia para depois: recalibração local que trate
+   também a posição. Segue, no bloco C: (xiii); (vi) de baixa prioridade.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -385,7 +410,7 @@ deriva para o (viii): variância das mudanças nas médias entre gerações, com
 no tempo, que deve informar Ne mais que qualquer ajuste do ABC; (xi) (**feito em 2026-11-25**, `abc_calibrate()`; ver 2k) recalibração dos
 intervalos do ABC-RF por cobertura em pseudo-observações (ideia de Prangle et al. 2014 e
 Rodrigues, Prangle & Sisson 2018), implementada aqui, sem depender do `abc`; os testes
-estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) ABC-RF sequencial para
+estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) (**feito em 2026-11-26**, `abc_sequential()`; ver 2l) ABC-RF sequencial para
 priors largos: ajustar, simular de novo na região plausível e ajustar outra vez (Dinh et al.
 2025, *Statistics and Computing*, doi:10.1007/s11222-025-10748-x); (xiii) neural posterior
 estimation, que dá posteriores conjuntos (baixa prioridade; as ferramentas maduras estão em
