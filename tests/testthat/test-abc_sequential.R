@@ -93,3 +93,20 @@ test_that("abc_sequential() and predict() check their arguments", {
   expect_error(abc_sequential(toy_prior, toy_sim, observed = c(s = 2), n = 50, rounds = 1,
                               summarise = toy_summary, ntree = 20), "missing")
 })
+
+test_that("abc_sequential() leaves the random state as it found it", {
+  skip_if_not_installed("abcrf")
+  if (exists(".Random.seed", envir = globalenv())) {
+    saved <- get(".Random.seed", envir = globalenv())
+    on.exit(assign(".Random.seed", saved, envir = globalenv()))
+    rm(".Random.seed", envir = globalenv())
+  }
+  abc_sequential(toy_prior, toy_sim, observed = c(s = 2, t = 2), n = 50, rounds = 1,
+                 summarise = toy_summary, ntree = 20)
+  expect_false(exists(".Random.seed", envir = globalenv()))
+  set.seed(9)
+  before <- get(".Random.seed", envir = globalenv())
+  abc_sequential(toy_prior, toy_sim, observed = c(s = 2, t = 2), n = 50, rounds = 1,
+                 summarise = toy_summary, ntree = 20)
+  expect_identical(get(".Random.seed", envir = globalenv()), before)
+})
