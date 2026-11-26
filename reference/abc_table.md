@@ -75,6 +75,7 @@ Other inference:
 [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md),
 [`abc_ppc()`](https://provetelab.org/comdynamite/reference/abc_ppc.md),
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md),
+[`abc_sequential()`](https://provetelab.org/comdynamite/reference/abc_sequential.md),
 [`fold_summarise()`](https://provetelab.org/comdynamite/reference/fold_summarise.md),
 [`nobs.mc_node_test()`](https://provetelab.org/comdynamite/reference/nobs.mc_node_test.md),
 [`observe_detection()`](https://provetelab.org/comdynamite/reference/observe_detection.md),

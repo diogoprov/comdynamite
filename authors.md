@@ -285,6 +285,35 @@ https://doi.org/10.1093/bioinformatics/btv684
       doi = {10.1093/bioinformatics/btv684},
     }
 
+Dinh, K. N., Liu, C., Xiang, Z., Liu, Z., & Tavaré, S. (2025).
+Approximate Bayesian computation sequential Monte Carlo via random
+forests. Statistics and Computing, 35, 219.
+https://doi.org/10.1007/s11222-025-10748-x
+
+    @Article{,
+      author = {K. N. Dinh and C. Liu and Z. Xiang and Z. Liu and S. Tavaré},
+      year = {2025},
+      title = {Approximate Bayesian computation sequential Monte Carlo via random forests},
+      journal = {Statistics and Computing},
+      volume = {35},
+      pages = {219},
+      doi = {10.1007/s11222-025-10748-x},
+    }
+
+Beaumont, M. A., Cornuet, J.-M., Marin, J.-M., & Robert, C. P. (2009).
+Adaptive approximate Bayesian computation. Biometrika, 96, 983-990.
+https://doi.org/10.1093/biomet/asp052
+
+    @Article{,
+      author = {M. A. Beaumont and J.-M. Cornuet and J.-M. Marin and C. P. Robert},
+      year = {2009},
+      title = {Adaptive approximate Bayesian computation},
+      journal = {Biometrika},
+      volume = {96},
+      pages = {983--990},
+      doi = {10.1093/biomet/asp052},
+    }
+
 Thompson, P. L., Guzman, L. M., De Meester, L., Horváth, Z., Ptacnik,
 R., Vanschoenwinkel, B., Viana, D. S., & Chase, J. M. (2020). A
 process-based metacommunity framework linking local and regional scale
