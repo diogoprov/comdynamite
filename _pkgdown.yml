@@ -127,6 +127,7 @@ reference:
   - plot.mc_abc_fit
   - abc_recovery
   - abc_calibrate
+  - abc_sequential
   - abc_choose
   - plot.mc_abc_choice
   - abc_ppc

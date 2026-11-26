@@ -99,6 +99,15 @@ method_papers <- list(
     title = "ABC random forests for Bayesian parameter inference",
     journal = "Bioinformatics", volume = "35", pages = "1720--1728",
     doi = "10.1093/bioinformatics/bty867"),
+  dinh2025 = list(
+    authors = c("Dinh, K. N.", "Liu, C.", "Xiang, Z.", "Liu, Z.", "Tavaré, S."), year = 2025,
+    title = "Approximate Bayesian computation sequential Monte Carlo via random forests",
+    journal = "Statistics and Computing", volume = "35", pages = "219",
+    doi = "10.1007/s11222-025-10748-x"),
+  beaumont2009 = list(
+    authors = c("Beaumont, M. A.", "Cornuet, J.-M.", "Marin, J.-M.", "Robert, C. P."),
+    year = 2009, title = "Adaptive approximate Bayesian computation", journal = "Biometrika",
+    volume = "96", pages = "983--990", doi = "10.1093/biomet/asp052"),
   pudlo2016 = list(
     authors = c("Pudlo, P.", "Marin, J.-M.", "Estoup, A.", "Cornuet, J.-M.", "Gautier, M.",
                 "Robert, C. P."), year = 2016,
@@ -159,6 +168,7 @@ method_functions <- list(
   abc_fit = "raynal2019",
   abc_recovery = "raynal2019",
   abc_choose = "pudlo2016",
+  abc_sequential = c("dinh2025", "beaumont2009", "raynal2019"),
   simulate_metacommunity = "thompson2020",
   food_web_dynamics = c("mcpeek2017", "mcpeek2017an"),
   population_shifts = c("goldberg2006", "adams2007")

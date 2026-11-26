@@ -1,5 +1,15 @@
 # comdynamite (development version)
 
+- New `abc_sequential()`, sequential ABC with random forests (the ABC-SMC-RF of Dinh et al.
+  2025), narrows a wide prior towards one observation by rounds of simulation, with
+  `predict()`, `print()` and `plot()` methods. In `data-raw/abc_sequential.R`, four rounds
+  narrowed the 90% intervals of the parameters whose posterior is much narrower than the prior
+  (by 47% in a toy model, 27% for dispersal and 19% for niche breadth in the community model of
+  `data-raw/abc_recovery.R`), and not of the others. With few effective simulations behind the
+  forests the rounds made the intervals too narrow (coverage 0.85 in the fourth round of the
+  toy model, against 0.92 with exact weights; `data-raw/abc_sequential_diagnostics.R`), so a
+  warning is given when the last round has fewer than 50.
+
 - New `abc_calibrate()` recalibrates the credible intervals of ABC with random forests on
   simulations not used to fit, from the probability integral transform of the truth (a global
   version of Rodrigues et al. 2018), and `predict()` of `abc_fit()` gains `calibration`. In

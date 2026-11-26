@@ -78,6 +78,7 @@ Other inference:
 \code{\link[=abc_fit]{abc_fit()}},
 \code{\link[=abc_ppc]{abc_ppc()}},
 \code{\link[=abc_recovery]{abc_recovery()}},
+\code{\link[=abc_sequential]{abc_sequential()}},
 \code{\link[=abc_table]{abc_table()}},
 \code{\link[=fold_summarise]{fold_summarise()}},
 \code{\link[=nobs.mc_node_test]{nobs.mc_node_test()}},
