@@ -68,6 +68,7 @@ to estimate the parameters,
 to check whether they can be recovered.
 
 Other inference:
+[`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md),
 [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md),
 [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md),
 [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md),

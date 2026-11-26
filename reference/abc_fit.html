@@ -94,7 +94,7 @@ dropped, and then simulations with any missing statistic.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'mc_abc_fit'</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span>, level <span class="op">=</span> <span class="fl">0.9</span>, ncores <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">newdata</span>, level <span class="op">=</span> <span class="fl">0.9</span>, ncores <span class="op">=</span> <span class="fl">1</span>, calibration <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">abc_importance</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -145,6 +145,12 @@ data frame with one observation per row.</p></dd>
 than 1.</p></dd>
 
 
+<dt id="arg-calibration">calibration<a class="anchor" aria-label="anchor" href="#arg-calibration"></a></dt>
+<dd><p><code>NULL</code> (the default), or an <code>mc_abc_calibration</code> from <code><a href="abc_calibrate.html">abc_calibrate()</a></code>
+for the same fit, whose quantiles of the probability integral transform replace the
+nominal probabilities of <code>low</code> and <code>high</code>.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Not used.</p></dd>
 
@@ -180,8 +186,9 @@ about 65% of the cases, whatever the number of simulations. The consistency of q
 regression forests asks for leaves that grow with the number of simulations (Meinshausen
 2006); there, with 5000 simulations, a <code>min_node_size</code> of 50, 200 and 500 brought the
 coverage to 0.85, 0.89 and 0.91.
-<code><a href="abc_recovery.html">abc_recovery()</a></code> measures the coverage that the intervals have for a given table, and
-<code><a href="abc_diagnose.html">abc_diagnose()</a></code> gives the effective number of simulations behind a posterior.</p>
+<code><a href="abc_recovery.html">abc_recovery()</a></code> measures the coverage that the intervals have for a given table,
+<code><a href="abc_calibrate.html">abc_calibrate()</a></code> corrects it on average over the prior, and <code><a href="abc_diagnose.html">abc_diagnose()</a></code> gives the
+effective number of simulations behind a posterior.</p>
     </div>
     <div class="section level2">
     <h2 id="functions">Functions<a class="anchor" aria-label="anchor" href="#functions"></a></h2>
@@ -201,6 +208,7 @@ random forests for Bayesian parameter inference. <em>Bioinformatics</em>, 35, 17
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other inference:
+<code><a href="abc_calibrate.html">abc_calibrate()</a></code>,
 <code><a href="abc_choose.html">abc_choose()</a></code>,
 <code><a href="abc_cv.html">abc_cv()</a></code>,
 <code><a href="abc_diagnose.html">abc_diagnose()</a></code>,

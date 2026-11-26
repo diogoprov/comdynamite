@@ -2,6 +2,20 @@
 
 ## comdynamite (development version)
 
+- New
+  [`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md)
+  recalibrates the credible intervals of ABC with random forests on
+  simulations not used to fit, from the probability integral transform
+  of the truth (a global version of Rodrigues et al. 2018), and
+  [`predict()`](https://rdrr.io/r/stats/predict.html) of
+  [`abc_fit()`](https://provetelab.org/comdynamite/reference/abc_fit.md)
+  gains `calibration`. In `data-raw/abc_recalibration.R`, the coverage
+  of 50% to 95% intervals came within two standard errors of the level
+  in 15 of 20 cases, against 2 of 20 before; conservative intervals got
+  up to 30% narrower. With one statistic and small leaves, 90% and 95%
+  intervals stopped at 87%, since the truth fell outside every
+  simulation sharing a leaf in 13% of the cases.
+
 - [`population_stats()`](https://provetelab.org/comdynamite/reference/population_stats.md)
   gains `temporal_step` and `temporal_step_slope`: the squared change of
   population means between consecutive surveys, corrected for sampling

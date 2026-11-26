@@ -244,6 +244,8 @@ parameters.
   : Plot the posterior of an ABC fit against the prior
 - [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
   : Can the parameters be recovered by ABC?
+- [`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md)
+  : Recalibrate the credible intervals of ABC with random forests
 - [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   [`predict(`*`<mc_abc_choice>`*`)`](https://provetelab.org/comdynamite/reference/abc_choose.md)
   : Choose among models by ABC with random forests

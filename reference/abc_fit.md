@@ -23,7 +23,7 @@ abc_fit(
 )
 
 # S3 method for class 'mc_abc_fit'
-predict(object, newdata, level = 0.9, ncores = 1, ...)
+predict(object, newdata, level = 0.9, ncores = 1, calibration = NULL, ...)
 
 abc_importance(x)
 ```
@@ -77,6 +77,13 @@ abc_importance(x)
   Probability of the credible interval. One number greater than 0 and
   less than 1.
 
+- calibration:
+
+  `NULL` (the default), or an `mc_abc_calibration` from
+  [`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md)
+  for the same fit, whose quantiles of the probability integral
+  transform replace the nominal probabilities of `low` and `high`.
+
 - ...:
 
   Not used.
@@ -122,7 +129,9 @@ with the number of simulations (Meinshausen 2006); there, with 5000
 simulations, a `min_node_size` of 50, 200 and 500 brought the coverage
 to 0.85, 0.89 and 0.91.
 [`abc_recovery()`](https://provetelab.org/comdynamite/reference/abc_recovery.md)
-measures the coverage that the intervals have for a given table, and
+measures the coverage that the intervals have for a given table,
+[`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md)
+corrects it on average over the prior, and
 [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md)
 gives the effective number of simulations behind a posterior.
 
@@ -147,6 +156,7 @@ Estoup, A. (2019). ABC random forests for Bayesian parameter inference.
 ## See also
 
 Other inference:
+[`abc_calibrate()`](https://provetelab.org/comdynamite/reference/abc_calibrate.md),
 [`abc_choose()`](https://provetelab.org/comdynamite/reference/abc_choose.md),
 [`abc_cv()`](https://provetelab.org/comdynamite/reference/abc_cv.md),
 [`abc_diagnose()`](https://provetelab.org/comdynamite/reference/abc_diagnose.md),
