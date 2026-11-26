@@ -32,6 +32,7 @@ nobs(out)
 \code{\link[=node_test]{node_test()}}, \code{\link[=abc_fit]{abc_fit()}}.
 
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

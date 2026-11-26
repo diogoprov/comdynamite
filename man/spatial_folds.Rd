@@ -38,6 +38,7 @@ hierarchical, or phylogenetic structure. \emph{Ecography}, 40, 913–929. \doi{1
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

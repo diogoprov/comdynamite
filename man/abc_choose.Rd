@@ -65,6 +65,7 @@ Reliable ABC model choice via random forests. \emph{Bioinformatics}, 32, 859–8
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},
 \code{\link[=abc_fit]{abc_fit()}},

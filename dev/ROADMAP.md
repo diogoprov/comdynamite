@@ -166,7 +166,21 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    G/(Ne(G+V_E)) e −0,40 com Ne/N). G/Ne melhora pouco (0,94–0,95). Conclusão: médias, mesmo
    repetidas no tempo, não separam Ne de G; Ne exige informação independente sobre G ou dados
    genéticos neutros (interpretação nossa). A recomendação "survey twice if Ne matters" da
-   `vignette("abc")` ficou como está. Seguem, no bloco C: (xi) a (xiii); (vi) de baixa
+   `vignette("abc")` foi revista depois (PR #178). Seguem, no bloco C: (xi) a (xiii); (vi) de
+   baixa prioridade.
+2k. **Bloco C (xi) fechado em 2026-11-25, critério atingido em parte** (branch
+   `block-c-recalibration`): `abc_calibrate()` e `predict(calibration = )`, recalibração global
+   pelo PIT do valor verdadeiro em simulações fora do ajuste (Prangle et al. 2014; versão global
+   de Rodrigues, Prangle & Sisson 2018, doi:10.1016/j.csda.2018.04.004). Em
+   `data-raw/abc_recalibration.R` (tabela de `abc_recovery.rds`, 10 mil para treino, 500 para
+   calibração, cerca de 1.000 para teste; e tabela de brinquedo com uma estatística), cobertura
+   dentro de 2 EP do nível em 15 de 20 casos, contra 2 de 20 antes. Caso conservador, a 90%:
+   `log_dispersal` 0,976 → 0,900 (largura 0,48 → 0,34), `sigma_mean` 0,943 → 0,907, `lambda`
+   0,924 → 0,894, `inter_max` 0,943 → 0,877 (corrigido além da conta; na calibração a cobertura
+   nominal foi 0,960, ruído de 500 simulações, interpretação nossa). Caso estreito: 0,33 → 0,52 a
+   50%, 0,56 → 0,80 a 80%, mas 0,871 a 90% e a 95%, porque em 13% das simulações a verdade fica
+   fora de todas as simulações da folha; remédio: `min_node_size` maior. Ideia para depois: a
+   versão local, com pesos por proximidade. Seguem, no bloco C: (xii) e (xiii); (vi) de baixa
    prioridade.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
@@ -368,7 +382,7 @@ determinado. Estimar `log(G/Ne)` e G em vez de `ne_ratio` e G e comparar a recup
 `abc_recovery()` (hipótese nossa, não testada). Como o `abcrf` estima um parâmetro por vez, a
 correlação entre G e Ne não aparece nos posteriores marginais; (x) (**feito em 2026-11-25**, `temporal_step` e `data-raw/abc_temporal_drift.R`; ver 2j: Ne/N ganha no máximo 0,07) estatística temporal de
 deriva para o (viii): variância das mudanças nas médias entre gerações, com dados repetidos
-no tempo, que deve informar Ne mais que qualquer ajuste do ABC; (xi) recalibração dos
+no tempo, que deve informar Ne mais que qualquer ajuste do ABC; (xi) (**feito em 2026-11-25**, `abc_calibrate()`; ver 2k) recalibração dos
 intervalos do ABC-RF por cobertura em pseudo-observações (ideia de Prangle et al. 2014 e
 Rodrigues, Prangle & Sisson 2018), implementada aqui, sem depender do `abc`; os testes
 estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) ABC-RF sequencial para

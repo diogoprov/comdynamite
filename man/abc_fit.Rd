@@ -15,7 +15,7 @@ abc_fit(
   min_node_size = 5
 )
 
-\method{predict}{mc_abc_fit}(object, newdata, level = 0.9, ncores = 1, ...)
+\method{predict}{mc_abc_fit}(object, newdata, level = 0.9, ncores = 1, calibration = NULL, ...)
 
 abc_importance(x)
 }
@@ -43,6 +43,10 @@ data frame with one observation per row.}
 
 \item{level}{Probability of the credible interval. One number greater than 0 and less
 than 1.}
+
+\item{calibration}{\code{NULL} (the default), or an \code{mc_abc_calibration} from \code{\link[=abc_calibrate]{abc_calibrate()}}
+for the same fit, whose quantiles of the probability integral transform replace the
+nominal probabilities of \code{low} and \code{high}.}
 
 \item{...}{Not used.}
 
@@ -83,8 +87,9 @@ about 65\% of the cases, whatever the number of simulations. The consistency of 
 regression forests asks for leaves that grow with the number of simulations (Meinshausen
 2006); there, with 5000 simulations, a \code{min_node_size} of 50, 200 and 500 brought the
 coverage to 0.85, 0.89 and 0.91.
-\code{\link[=abc_recovery]{abc_recovery()}} measures the coverage that the intervals have for a given table, and
-\code{\link[=abc_diagnose]{abc_diagnose()}} gives the effective number of simulations behind a posterior.
+\code{\link[=abc_recovery]{abc_recovery()}} measures the coverage that the intervals have for a given table,
+\code{\link[=abc_calibrate]{abc_calibrate()}} corrects it on average over the prior, and \code{\link[=abc_diagnose]{abc_diagnose()}} gives the
+effective number of simulations behind a posterior.
 }
 \section{Functions}{
 \itemize{
@@ -114,6 +119,7 @@ random forests for Bayesian parameter inference. \emph{Bioinformatics}, 35, 1720
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

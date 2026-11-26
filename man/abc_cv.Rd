@@ -84,6 +84,7 @@ summary(cv)
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},
 \code{\link[=abc_fit]{abc_fit()}},

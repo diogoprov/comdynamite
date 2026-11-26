@@ -50,6 +50,7 @@ replicated counts. \emph{Biometrics}, 60, 108–115. \doi{10.1111/j.0006-341X.20
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

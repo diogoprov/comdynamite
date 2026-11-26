@@ -145,8 +145,9 @@ check_prior <- function(prior) {
 #' regression forests asks for leaves that grow with the number of simulations (Meinshausen
 #' 2006); there, with 5000 simulations, a `min_node_size` of 50, 200 and 500 brought the
 #' coverage to 0.85, 0.89 and 0.91.
-#' [abc_recovery()] measures the coverage that the intervals have for a given table, and
-#' [abc_diagnose()] gives the effective number of simulations behind a posterior.
+#' [abc_recovery()] measures the coverage that the intervals have for a given table,
+#' [abc_calibrate()] corrects it on average over the prior, and [abc_diagnose()] gives the
+#' effective number of simulations behind a posterior.
 #'
 #' @param table An `mc_abc_table` from [abc_table()], or a data frame with the parameters and
 #'   the statistics.
@@ -220,18 +221,24 @@ abc_fit <- function(table, parameters = NULL, statistics = NULL, ntree = 500, nc
 #'   data frame with one observation per row.
 #' @param level Probability of the credible interval. One number greater than 0 and less
 #'   than 1.
+#' @param calibration `NULL` (the default), or an `mc_abc_calibration` from [abc_calibrate()]
+#'   for the same fit, whose quantiles of the probability integral transform replace the
+#'   nominal probabilities of `low` and `high`.
 #' @param ... Not used.
 #' @return For `predict()`, a data frame with `observation` (the row of `newdata`; with
 #'   row names, also `name`), `parameter`, `estimate` (posterior median), `low`, `high` and
 #'   `mean`. The interval from `low` to `high` is approximate; see
 #'   Details.
 #' @export
-predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
+predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, calibration = NULL,
+                               ...) {
   check_number(level, "level", 0, 1, open = TRUE)
   check_count(ncores, "ncores")
+  check_calibration(calibration, object)
   observed <- observed_statistics(newdata, object$statistics)
-  probs <- c((1 - level) / 2, (1 + level) / 2)
   out <- lapply(object$parameters, function(p) {
+    probs <- c((1 - level) / 2, (1 + level) / 2)
+    if (!is.null(calibration)) probs <- calibrated_probs(calibration$pit[[p]], probs)
     training <- data.frame(.parameter = object$training[[p]], object$training[object$statistics])
     post <- stats::predict(object$forests[[p]], observed, training, quantiles = probs,
                            paral = ncores > 1, ncores = ncores)
@@ -244,6 +251,118 @@ predict.mc_abc_fit <- function(object, newdata, level = 0.9, ncores = 1, ...) {
     out <- cbind(out[1], name = rownames(newdata)[out$observation], out[-1])
   }
   out[order(out$observation), , drop = FALSE] |> `rownames<-`(NULL)
+}
+
+#' Recalibrate the credible intervals of ABC with random forests
+#'
+#' Measures, on simulations that were not used to fit, where the true value of each parameter
+#' falls in its estimated posterior, and uses this to correct the credible intervals of
+#' [predict()][abc_fit()]. For each simulation of `pseudo`, the probability integral transform
+#' (PIT) is the posterior distribution function at the true value, read from 999 quantiles of
+#' the quantile regression forest. If the intervals were calibrated, the PIT would be uniform
+#' between 0 and 1 (Prangle et al. 2014); intervals that are too wide give PIT values crowded
+#' in the middle, and intervals that are too narrow give values crowded at the ends. With
+#' `calibration`, [predict()][abc_fit()] then asks the forest for the quantiles of the PIT
+#' instead of the nominal probabilities: for a `level` of 0.9, the 5% and 95% quantiles of the
+#' PIT values, so that 90% of the calibration simulations would fall inside.
+#'
+#' This is a global version of the recalibration of Rodrigues et al. (2018), who weight the
+#' calibration simulations by their closeness to the observation. It corrects the coverage on
+#' average over the prior, as measured by [abc_recovery()], and not the interval of one
+#' observation, which can still be too wide or too narrow where the posterior differs from the
+#' average. It cannot make an uninformative posterior informative either: for a parameter that
+#' the statistics do not inform, the PIT is already about uniform and nothing changes. Nor can
+#' it widen an interval beyond the parameters of the simulations that share leaves with the
+#' observation: with one statistic and the default `min_node_size`, the truth fell outside all
+#' of them in about 13% of the simulations, so recalibrated 90% and 95% intervals both held it
+#' in about 87% (`data-raw/abc_recalibration.R`); a larger `min_node_size` of [abc_fit()] is the
+#' remedy there.
+#'
+#' @param fit An `mc_abc_fit` from [abc_fit()].
+#' @param pseudo Data frame of simulations from the same prior and model that were not used to
+#'   fit, with the parameters and statistics of `fit` (for example a second [abc_table()] with
+#'   another seed). Rows with missing or infinite values are dropped; at least 20 must remain.
+#'   A few hundred give quantiles of the PIT precise enough for a 90% interval.
+#' @param ncores Number of threads for the forests. One whole number, 1 or more.
+#' @return An `mc_abc_calibration`: a list with `pit` (one vector per parameter), `coverage` (a
+#'   data frame with the fraction of simulations of `pseudo` inside the nominal 50%, 80%, 90%
+#'   and 95% intervals of each parameter, before recalibration) and `n`, the number of
+#'   simulations used.
+#' @references
+#' Prangle, D., Blum, M. G. B., Popovic, G., & Sisson, S. A. (2014). Diagnostic tools for
+#' approximate Bayesian computation using the coverage property. *Australian & New Zealand
+#' Journal of Statistics*, 56, 309–329. \doi{10.1111/anzs.12087}
+#'
+#' Rodrigues, G. S., Prangle, D., & Sisson, S. A. (2018). Recalibration: A post-processing
+#' method for approximate Bayesian computation. *Computational Statistics & Data Analysis*,
+#' 126, 53–66. \doi{10.1016/j.csda.2018.04.004}
+#' @family inference
+#' @examplesIf requireNamespace("abcrf", quietly = TRUE)
+#' set.seed(1)
+#' make <- function(n) {
+#'   d <- data.frame(a = runif(n))
+#'   d$s <- d$a + rnorm(n, 0, 0.05)
+#'   d
+#' }
+#' fit <- abc_fit(make(1000), parameters = "a", ntree = 100)
+#' calibration <- abc_calibrate(fit, make(200))
+#' calibration$coverage
+#' predict(fit, c(s = 0.5), calibration = calibration)
+#' @export
+abc_calibrate <- function(fit, pseudo, ncores = 1) {
+  check_abc_fit(fit, "fit")
+  check_count(ncores, "ncores")
+  if (!is.data.frame(pseudo)) stop("`pseudo` must be a data frame.", call. = FALSE)
+  missing <- setdiff(c(fit$parameters, fit$statistics), names(pseudo))
+  if (length(missing)) {
+    stop("Not in `pseudo`: ", toString(missing), ".", call. = FALSE)
+  }
+  pseudo <- as.data.frame(pseudo)[, c(fit$parameters, fit$statistics), drop = FALSE]
+  pseudo <- pseudo[rowSums(!is.finite(as.matrix(pseudo))) == 0, , drop = FALSE]
+  if (nrow(pseudo) < 20) {
+    stop("`pseudo` must have at least 20 complete simulations.", call. = FALSE)
+  }
+  grid <- seq(0.001, 0.999, by = 0.001)
+  observed <- pseudo[fit$statistics]
+  pit <- lapply(stats::setNames(fit$parameters, fit$parameters), function(p) {
+    training <- data.frame(.parameter = fit$training[[p]], fit$training[fit$statistics])
+    q <- stats::predict(fit$forests[[p]], observed, training, quantiles = grid,
+                        paral = ncores > 1, ncores = ncores)$quantiles
+    truth <- pseudo[[p]]
+    # the share of the 999 quantiles below the truth, ties counting half
+    (rowSums(q < truth) + 0.5 * rowSums(q == truth) + 0.5) / (length(grid) + 1)
+  })
+  levels <- c(0.5, 0.8, 0.9, 0.95)
+  coverage <- do.call(rbind, lapply(names(pit), function(p) {
+    data.frame(parameter = p, level = levels,
+               coverage = vapply(levels, function(l) {
+                 mean(pit[[p]] >= (1 - l) / 2 & pit[[p]] <= (1 + l) / 2)
+               }, 0))
+  }))
+  structure(list(pit = pit, coverage = coverage, n = nrow(pseudo)),
+            class = "mc_abc_calibration")
+}
+
+#' probabilities of the recalibrated interval: the quantiles of the PIT at the nominal ones,
+#' kept inside the grid of abc_calibrate()
+#' @noRd
+calibrated_probs <- function(pit, probs) {
+  out <- unname(stats::quantile(pit, probs, type = 8))
+  pmin(pmax(out, 0.001), 0.999)
+}
+
+#' stops unless `calibration` is NULL or an mc_abc_calibration with every parameter of `fit`
+#' @noRd
+check_calibration <- function(calibration, fit) {
+  if (is.null(calibration)) return(invisible(NULL))
+  if (!inherits(calibration, "mc_abc_calibration")) {
+    stop("`calibration` must come from abc_calibrate().", call. = FALSE)
+  }
+  missing <- setdiff(fit$parameters, names(calibration$pit))
+  if (length(missing)) {
+    stop("`calibration` lacks the parameters ", toString(missing), ".", call. = FALSE)
+  }
+  invisible(calibration)
 }
 
 #' @describeIn abc_fit Importance of each statistic for each parameter, as the decrease in
