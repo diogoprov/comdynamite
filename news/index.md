@@ -1,6 +1,6 @@
 # Changelog
 
-## comdynamite (development version)
+## comdynamite 0.12.0
 
 - New
   [`abc_sequential()`](https://provetelab.org/comdynamite/reference/abc_sequential.md),
