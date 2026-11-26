@@ -100,7 +100,7 @@ method_papers <- list(
     journal = "Bioinformatics", volume = "35", pages = "1720--1728",
     doi = "10.1093/bioinformatics/bty867"),
   dinh2025 = list(
-    authors = c("Dinh, K. N.", "Liu, C.", "Xiang, Z.", "Liu, Z.", "Tavaré, S."), year = 2025,
+    authors = c("Dinh, K. N.", "Liu, C.", "Xiang, Z.", "Liu, Z.", "Tavar\u00e9, S."), year = 2025,
     title = "Approximate Bayesian computation sequential Monte Carlo via random forests",
     journal = "Statistics and Computing", volume = "35", pages = "219",
     doi = "10.1007/s11222-025-10748-x"),

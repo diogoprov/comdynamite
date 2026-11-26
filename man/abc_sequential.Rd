@@ -80,10 +80,10 @@ of Dinh et al. (2025). The first round is a reference table drawn from the prior
 parameters from the weighted parameters of the round before, perturbs them with a normal
 kernel of twice their weighted variance (Beaumont et al. 2009), draws again those outside the
 prior, simulates and fits new forests on the new simulations only. The variance of the kernel
-is that of the parameters of the round before weighted by their weights. The weights of a round are
-those the forests give to its simulations for the observation, times the prior and divided by
-the density of the proposal they were drawn from, so that the last round estimates the
-posterior under the prior and not under the proposal.
+is that of the parameters of the round before weighted by their weights. The weights of a
+round are those the forests give to its simulations for the observation, times the prior and
+divided by the density of the proposal they were drawn from, so that the last round estimates
+the posterior under the prior and not under the proposal.
 }
 \details{
 The gain is in precision for the same number of simulations when the prior is wide and the

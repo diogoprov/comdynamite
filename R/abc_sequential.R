@@ -7,10 +7,10 @@
 #' parameters from the weighted parameters of the round before, perturbs them with a normal
 #' kernel of twice their weighted variance (Beaumont et al. 2009), draws again those outside the
 #' prior, simulates and fits new forests on the new simulations only. The variance of the kernel
-#' is that of the parameters of the round before weighted by their weights. The weights of a round are
-#' those the forests give to its simulations for the observation, times the prior and divided by
-#' the density of the proposal they were drawn from, so that the last round estimates the
-#' posterior under the prior and not under the proposal.
+#' is that of the parameters of the round before weighted by their weights. The weights of a
+#' round are those the forests give to its simulations for the observation, times the prior and
+#' divided by the density of the proposal they were drawn from, so that the last round estimates
+#' the posterior under the prior and not under the proposal.
 #'
 #' The gain is in precision for the same number of simulations when the prior is wide and the
 #' posterior narrow, since later rounds simulate where the posterior is. The result belongs to
@@ -249,10 +249,10 @@ print.mc_abc_sequential <- function(x, ...) {
       sum(sizes), "simulations used\n")
   cat("Parameters:", toString(x$parameters), "\n")
   cat("Statistics:", length(x$statistics), "\n")
-  est <- predict(x)
+  est <- stats::predict(x)
   print(est[c("parameter", "estimate", "low", "high", "ess")], row.names = FALSE,
         digits = 3)
-  ess <- do.call(rbind, lapply(seq_along(x$rounds), function(r) predict(x, round = r)$ess))
+  ess <- do.call(rbind, lapply(seq_along(x$rounds), function(r) stats::predict(x, round = r)$ess))
   dimnames(ess) <- list(paste("round", seq_along(x$rounds)), x$parameters)
   cat("Effective simulations per round:\n")
   print(round(ess, 1))
