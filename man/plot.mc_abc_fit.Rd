@@ -43,6 +43,7 @@ plot(fit, c(s1 = 0.5, s2 = 0.2))
 posterior.
 
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

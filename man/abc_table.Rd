@@ -61,6 +61,7 @@ head(table[, 1:5])
 recovered.
 
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_diagnose]{abc_diagnose()}},

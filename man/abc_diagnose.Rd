@@ -53,6 +53,7 @@ sampling. \emph{Journal of Machine Learning Research}, 25(72), 1–58.
 }
 \seealso{
 Other inference:
+\code{\link[=abc_calibrate]{abc_calibrate()}},
 \code{\link[=abc_choose]{abc_choose()}},
 \code{\link[=abc_cv]{abc_cv()}},
 \code{\link[=abc_fit]{abc_fit()}},

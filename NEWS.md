@@ -1,5 +1,13 @@
 # comdynamite (development version)
 
+- New `abc_calibrate()` recalibrates the credible intervals of ABC with random forests on
+  simulations not used to fit, from the probability integral transform of the truth (a global
+  version of Rodrigues et al. 2018), and `predict()` of `abc_fit()` gains `calibration`. In
+  `data-raw/abc_recalibration.R`, the coverage of 50% to 95% intervals came within two standard
+  errors of the level in 15 of 20 cases, against 2 of 20 before; conservative intervals got up
+  to 30% narrower. With one statistic and small leaves, 90% and 95% intervals stopped at 87%,
+  since the truth fell outside every simulation sharing a leaf in 13% of the cases.
+
 - `population_stats()` gains `temporal_step` and `temporal_step_slope`: the squared change of
   population means between consecutive surveys, corrected for sampling and divided by the
   interval and the variance within populations, which estimates the variance of drift per
