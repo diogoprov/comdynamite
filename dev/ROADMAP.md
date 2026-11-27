@@ -1,6 +1,6 @@
 # comdynamite: estado e próximos passos
 
-Atualizado em 2026-11-26. Versão atual: 0.12.0 (tag `v0.12.0`, sem release no GitHub), após a
+Atualizado em 2026-11-26. Versão atual: 0.12.0 (tag `v0.12.0`, release, DOI `10.5281/zenodo.24588970`), após a
 0.11.0 (tag `v0.11.0`, release, DOI `10.5281/zenodo.24446713`), a 0.10.0 (tag `v0.10.0`,
 release, DOI `10.5281/zenodo.24423302`) e a 0.9.0 (DOI `10.5281/zenodo.24341231`; DOI de
 conceito `10.5281/zenodo.23993533`).
@@ -10,7 +10,8 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
 
 ## Próximos passos (2026-11-26)
 
-0. **0.12.0 em 2026-11-26** (tag `v0.12.0`): fecha o bloco C (inferência por ABC: robustez),
+0. **0.12.0 em 2026-11-26** (tag `v0.12.0`; release no GitHub em 2026-11-27, DOI
+   `10.5281/zenodo.24588970`): fecha o bloco C (inferência por ABC: robustez),
    itens (i) a (v) e (vii) a (xii), com `abc_calibrate()` (PR #179), `abc_sequential()` (PR
    #180), `temporal_step` em `population_stats()` (PR #177), o DOI de download do GBIF para os
    pools de `anurans` (PR #175) e os estudos em `data-raw` (ver 2a a 2l). Fora da 0.12.0:
