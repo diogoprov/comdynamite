@@ -162,6 +162,9 @@ reference:
   - trait_flex
   - plot.trait_flex
   - print.trait_flex
+  - trait_change
+  - summary.trait_change
+  - plot.trait_change
   - nested_variance
   - plot.nested_variance
   - null_intervals

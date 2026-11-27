@@ -64,6 +64,21 @@ method_papers <- list(
                   "vs intraspecific trait variability effects"),
     journal = "Ecography", volume = "34", pages = "856--863",
     doi = "10.1111/j.1600-0587.2010.06904.x"),
+  ellner2011 = list(
+    authors = c("Ellner, S. P.", "Geber, M. A.", "Hairston, N. G."), year = 2011,
+    title = paste("Does rapid evolution matter? Measuring the rate of contemporary evolution",
+                  "and its impacts on ecological dynamics"),
+    journal = "Ecology Letters", volume = "14", pages = "603--614",
+    doi = "10.1111/j.1461-0248.2011.01616.x"),
+  hairston2005 = list(
+    authors = c("Hairston, N. G.", "Ellner, S. P.", "Geber, M. A.", "Yoshida, T.", "Fox, J. A."),
+    year = 2005,
+    title = "Rapid evolution and the convergence of ecological and evolutionary time",
+    journal = "Ecology Letters", volume = "8", pages = "1114--1127",
+    doi = "10.1111/j.1461-0248.2005.00812.x"),
+  price1970 = list(
+    authors = "Price, G. R.", year = 1970, title = "Selection and covariance",
+    journal = "Nature", volume = "227", pages = "520--521", doi = "10.1038/227520a0"),
   messier2010 = list(
     authors = c("Messier, J.", "McGill, B. J.", "Lechowicz, M. J."), year = 2010,
     title = "How do traits vary across ecological scales? A case for trait-based ecology",
@@ -155,6 +170,7 @@ method_functions <- list(
   tstats = c("violle2012", "taudiere2016"),
   community_index = "taudiere2016",
   trait_flex = "leps2011",
+  trait_change = c("ellner2011", "hairston2005", "price1970", "leps2011"),
   nested_variance = "messier2010",
   trait_gradient = "ackerly2007",
   trait_gradient_test = "ackerly2007",
