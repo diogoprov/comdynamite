@@ -335,6 +335,7 @@ Other trait variation among individuals:
 \code{\link[=population_stats]{population_stats()}},
 \code{\link[=print.trait_flex]{print.trait_flex()}},
 \code{\link[=subsample_individuals]{subsample_individuals()}},
+\code{\link[=trait_change]{trait_change()}},
 \code{\link[=trait_densities]{trait_densities()}},
 \code{\link[=trait_flex]{trait_flex()}},
 \code{\link[=trait_gradient]{trait_gradient()}},

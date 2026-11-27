@@ -1,5 +1,19 @@
 # comdynamite (development version)
 
+- New `trait_change()` splits the change of the community-weighted mean trait between
+  recorded steps into sorting, turnover, change within species and covariance (the Price
+  equation among the species present at both steps, and the temporal counterpart of
+  `trait_flex()`), with the change within species split into a genetic and a plastic part. It
+  takes a simulation with `evolution` and `record_steps` or a data frame of populations by
+  step, with an optional column of genetic means. For simulations with one evolving trait, it
+  also splits the change in the log growth rate of each population into evolution, plasticity
+  and the environment (Ellner et al. 2011), averaging the effect of each over the orders of
+  change as in eqn 8 of Hairston et al. (2005), so that the parts add up exactly. `summary()`,
+  `print()` and `plot()` methods. In `data-raw/trait_change.R`, the genetic part grew with the
+  genetic variance and the plastic part with plasticity under warming, each was zero when its
+  process was off, and the partition of growth equalled eqn 6 of Ellner et al. (2011)
+  integrated between the steps.
+
 - `data-raw/abc_npe_pilot.R` and `data-raw/abc_npe_tests.R` compare neural posterior estimation
   (the package neuralsbi, not a dependency of comdynamite) with ABC with random forests on reference
   tables already simulated. With 10 000 or more simulations, NPE matched or exceeded the R² of

@@ -18,8 +18,8 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    (xiii) neural posterior estimation, piloto feito depois da tag (ver 2m) com o `neuralsbi`
    (CRAN, MIT, NPE em R com `torch`) sobre as tabelas já simuladas; o `NeuralEstimators` (GPL,
    exige Julia) fica de fora; (vi) likelihood sintética por sítio para PSIS-LOO, adiada sem data. Próximo
-   marco de código: bloco K, item (i) (partição eco-evolutiva no tempo); depois dele,
-   `abc_npe()` (decidido em 2026-11-27; ver 2m).
+   marco de código: `abc_npe()` (decidido em 2026-11-27; ver 2m), depois do bloco K, item
+   (i), feito em 2026-11-27 (`trait_change()`, ver 2n).
 0b. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
    aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
    arquivos de teste, e o pkgcheck local sem falhas nos checks principais (PR #155). Restam só
@@ -245,6 +245,32 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    separadas, ligada por padrão; aviso abaixo de cerca de 10 mil simulações; amostras do
    posterior conjunto para `plot()` e `abc_ppc()`; validação com várias sementes, para separar
    ruído das falhas entre 0,825 e 0,845; tags `srr` e testes no padrão rOpenSci.
+2n. **Bloco K (i), partição eco-evolutiva no tempo, feito em 2026-11-27, critério atingido**
+   (branch `block-k-eco-evo-partition`): nova `trait_change()`, com `summary()`, `print()` e
+   `plot()` (ggplot2). Recebe uma simulação com `evolution` e `record_steps`
+   (`simulate_metacommunity()` ou `simulate_evolving_metacommunity()`) ou um data frame de
+   populações por passo (dados de campo, com coluna `genetic` opcional, de jardim comum). Nível
+   da comunidade: a mudança da média ponderada entre passos consecutivos, por sítio, em
+   sorting, turnover, mudança dentro das espécies e covariância, sem resíduo; entre as espécies
+   presentes nos dois passos é a equação de Price (1970), com o sorting no termo de seleção e
+   within + covariância no de transmissão. Dentro das espécies e na covariância, parte genética
+   e parte plástica (o fenótipo é ḡ + b(E − E0); a parte plástica por passo sai de
+   `environment_history`, não do `phenotype` pós-dispersão). Nível da população (`growth`, só
+   simulações com um trait): a mudança do log da taxa de crescimento em evolução, plasticidade e
+   ambiente (Ellner et al. 2011, eqns 5 e 6), com valores de Shapley sobre as seis ordens de
+   mudança, extensão a três componentes da eqn 8 de Hairston et al. (2005, PDF conferido),
+   variância fenotípica fixa em G + VE (suposição da média populacional). Validação
+   (`data-raw/trait_change.R`, 20 réplicas de G ∈ {0, 1, 4} × b ∈ {0; 0,3; 0,6}, aquecimento ou
+   ambiente estático, 36 sítios, 8 espécies): somas fecham com erro < 1e-8; partes genética e
+   plástica nulas com G = 0 e b = 0; no aquecimento a parte genética cresce com G e a plástica
+   com b em todas as combinações; no ambiente estático, parte plástica e efeito do ambiente
+   nulos. Os valores de Shapley coincidem com a eqn 6 integrada na trajetória reta (gradiente no
+   ponto médio, diferença 5e-14, porque o log do crescimento é quadrático). Padrões: com G = 4 a
+   parte genética cai de 2,85 para 1,16 quando b vai de 0 a 0,6 (a plasticidade parece proteger
+   da seleção; interpretação nossa); no crescimento, a evolução compensa boa parte do efeito
+   direto do aquecimento (G = 1, b = 0: +0,16 contra −0,12), só nas populações que persistem.
+   Price (1972) não foi necessário; Govaert et al. (2016) segue não verificado. Próximo:
+   `abc_npe()` (ver 2m).
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -589,7 +615,7 @@ covariação da média ponderada da comunidade entre sítios, com regressão no 
 `trait_gradient()`, `population_shifts()`, `nested_variance()`, `maladaptation()`,
 `persistence()`, `dispersal_site`, `kernels` e o dataset `anurans` (cobertura urbana, duas
 cidades). Itens:
-(i) partição eco-evolutiva no tempo: decompor a mudança da média da comunidade entre passos de
+(i) **feito em 2026-11-27 (`trait_change()`, ver 2n).** Partição eco-evolutiva no tempo: decompor a mudança da média da comunidade entre passos de
 uma simulação em sorting entre espécies, mudança dentro das espécies e covariância, e, como a
 simulação guarda as médias genéticas, separar a parte genética da plástica. `trait_flex()` faz
 a versão entre sítios; falta a temporal sobre `history`. Referência conferida no PDF: Ellner,

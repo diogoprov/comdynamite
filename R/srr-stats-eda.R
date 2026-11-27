@@ -14,7 +14,7 @@
 #'   biogeographic events, and an optional array of sites by species by steps. The
 #'   functions for trait variation among individuals (`tstats()`, `community_index()`,
 #'   `trait_flex()`, `nested_variance()`, `trait_densities()`) take a long data frame with
-#'   one row per individual.
+#'   one row per individual, and `trait_change()` one with a row per population and step.
 #' @srrstats {EA1.2} The package help (`?comdynamite`, sections "Analyse data" and
 #'   "Simulate data" in `R/comdynamite-package.R`) and the table "What do you want to do?"
 #'   of `README.md` list the questions the software helps explore, each with its functions
@@ -97,7 +97,7 @@
 #'   `trait_rarefaction()` are data frames with an extra class, printed as data frames.
 #'   `plot` methods exist for `mc_node_test`, `mc_pcps`, `mc_phylo_beta`,
 #'   `mc_trait_gradient`, `mc_trait_gradient_test`, `mc_trait_partition`, `tstats`,
-#'   `community_index`, `trait_flex`, `nested_variance`, `trait_rarefaction`,
+#'   `community_index`, `trait_flex`, `trait_change`, `nested_variance`, `trait_rarefaction`,
 #'   `population_shifts`, `rate_matrix`, `drift_test` and `food_web`, and `summary`
 #'   methods are documented in `?"result-methods"` (`R/methods.R`). The result of
 #'   `trait_flex()` has no `print` method and prints as a plain list of two data frames.
@@ -123,7 +123,8 @@
 #'   Every plot has a `colours` or `palette` argument.
 #' @srrstats {EA5.2} The `print()` methods format numbers with `digits` significant digits
 #'   (EA4.1), for example `print.mc_pcps()`, `print.mc_phylo_beta()`,
-#'   `print.mc_trait_gradient()`, `print.drift_test()` and `print.trait_flex()`. Results that are
+#'   `print.mc_trait_gradient()`, `print.drift_test()`, `print.trait_flex()` and
+#'   `print.trait_change()`. Results that are
 #'   data frames (`tstats()`, `community_index()`, `null_intervals()`, `nested_variance()`,
 #'   `population_shifts()`) print with `print.data.frame()`, whose `digits` argument sets the
 #'   precision.
