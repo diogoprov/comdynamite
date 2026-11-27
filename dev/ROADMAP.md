@@ -17,7 +17,8 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    (xiii) neural posterior estimation, piloto feito depois da tag (ver 2m) com o `neuralsbi`
    (CRAN, MIT, NPE em R com `torch`) sobre as tabelas já simuladas; o `NeuralEstimators` (GPL,
    exige Julia) fica de fora; (vi) likelihood sintética por sítio para PSIS-LOO, adiada sem data. Próximo
-   marco de código: bloco K, item (i) (partição eco-evolutiva no tempo).
+   marco de código: bloco K, item (i) (partição eco-evolutiva no tempo); depois dele,
+   `abc_npe()` (decidido em 2026-11-27; ver 2m).
 0b. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
    aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
    arquivos de teste, e o pkgcheck local sem falhas nos checks principais (PR #155). Restam só
@@ -235,8 +236,14 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    falhas que restam ficam entre 0,825 e 0,845, a cerca de 3 EP de 0,9, no alcance da variação
    entre sementes (interpretação nossa). Leitura nossa: a NPE usa todas as simulações e dá
    intervalos mais estreitos com R² igual ou melhor, mas precisa de 10 mil simulações ou mais e
-   de recalibração; não informa Ne melhor que o ABC-RF. Ideia para depois: wrapper com o
-   `neuralsbi` em Suggests, recalibração embutida e aviso abaixo de 10 mil simulações.
+   de recalibração; não informa Ne melhor que o ABC-RF. Decidido em 2026-11-27: implementar
+   `abc_npe()` depois do bloco K (i), com prioridade média, como wrapper fino do `neuralsbi` em
+   Suggests (usa só `npe()`, `posterior()`, `sample()` e `prior_uniform()`, o que limita o risco
+   de um pacote de quatro meses, um autor e versão 0.3). Mesma interface de `abc_fit()` e
+   `predict()` sobre a tabela de `abc_table()`; NSF ou MAF; recalibração global com simulações
+   separadas, ligada por padrão; aviso abaixo de cerca de 10 mil simulações; amostras do
+   posterior conjunto para `plot()` e `abc_ppc()`; validação com várias sementes, para separar
+   ruído das falhas entre 0,825 e 0,845; tags `srr` e testes no padrão rOpenSci.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
