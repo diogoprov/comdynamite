@@ -630,6 +630,12 @@ analysis, community trait indices and decompositions of trait variation.
   [`nobs(`*`<trait_flex>`*`)`](https://provetelab.org/comdynamite/reference/print.trait_flex.md)
   : Model, fitted values and residuals of the decomposition of community
   trait means
+- [`trait_change()`](https://provetelab.org/comdynamite/reference/trait_change.md)
+  : Eco-evolutionary partition of trait change over time
+- [`summary(`*`<trait_change>`*`)`](https://provetelab.org/comdynamite/reference/summary.trait_change.md)
+  : Summarise an eco-evolutionary partition of trait change
+- [`plot(`*`<trait_change>`*`)`](https://provetelab.org/comdynamite/reference/plot.trait_change.md)
+  : Plot an eco-evolutionary partition of trait change
 - [`nested_variance()`](https://provetelab.org/comdynamite/reference/nested_variance.md)
   : Variance components of traits across nested or crossed levels
 - [`plot(`*`<nested_variance>`*`)`](https://provetelab.org/comdynamite/reference/plot.nested_variance.md)

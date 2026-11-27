@@ -411,6 +411,7 @@ Other trait variation among individuals:
 [`population_stats()`](https://provetelab.org/comdynamite/reference/population_stats.md),
 [`print.trait_flex()`](https://provetelab.org/comdynamite/reference/print.trait_flex.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
+[`trait_change()`](https://provetelab.org/comdynamite/reference/trait_change.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
 [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),

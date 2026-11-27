@@ -75,6 +75,7 @@ Other trait variation among individuals:
 [`population_stats()`](https://provetelab.org/comdynamite/reference/population_stats.md),
 [`sample_individuals()`](https://provetelab.org/comdynamite/reference/sample_individuals.md),
 [`subsample_individuals()`](https://provetelab.org/comdynamite/reference/subsample_individuals.md),
+[`trait_change()`](https://provetelab.org/comdynamite/reference/trait_change.md),
 [`trait_densities()`](https://provetelab.org/comdynamite/reference/trait_densities.md),
 [`trait_flex()`](https://provetelab.org/comdynamite/reference/trait_flex.md),
 [`trait_gradient()`](https://provetelab.org/comdynamite/reference/trait_gradient.md),
@@ -106,7 +107,7 @@ res
 #>  trait         total     42.50   2.6700 45.20 1.34e-03
 formula(res)
 #> ~moisture
-#> <environment: 0x5d882bcf1408>
+#> <environment: 0x5ab20a0195e8>
 head(residuals(res))
 #> [1]  0.9149881 -1.2164700  0.1542713 -0.1912190  0.2105633  0.1278662
 ```

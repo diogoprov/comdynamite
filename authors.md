@@ -169,6 +169,49 @@ https://doi.org/10.1111/j.1600-0587.2010.06904.x
       doi = {10.1111/j.1600-0587.2010.06904.x},
     }
 
+Ellner, S. P., Geber, M. A., & Hairston, N. G. (2011). Does rapid
+evolution matter? Measuring the rate of contemporary evolution and its
+impacts on ecological dynamics. Ecology Letters, 14, 603-614.
+https://doi.org/10.1111/j.1461-0248.2011.01616.x
+
+    @Article{,
+      author = {S. P. Ellner and M. A. Geber and N. G. Hairston},
+      year = {2011},
+      title = {Does rapid evolution matter? Measuring the rate of contemporary evolution and its impacts on ecological dynamics},
+      journal = {Ecology Letters},
+      volume = {14},
+      pages = {603--614},
+      doi = {10.1111/j.1461-0248.2011.01616.x},
+    }
+
+Hairston, N. G., Ellner, S. P., Geber, M. A., Yoshida, T., & Fox, J. A.
+(2005). Rapid evolution and the convergence of ecological and
+evolutionary time. Ecology Letters, 8, 1114-1127.
+https://doi.org/10.1111/j.1461-0248.2005.00812.x
+
+    @Article{,
+      author = {N. G. Hairston and S. P. Ellner and M. A. Geber and T. Yoshida and J. A. Fox},
+      year = {2005},
+      title = {Rapid evolution and the convergence of ecological and evolutionary time},
+      journal = {Ecology Letters},
+      volume = {8},
+      pages = {1114--1127},
+      doi = {10.1111/j.1461-0248.2005.00812.x},
+    }
+
+Price, G. R. (1970). Selection and covariance. Nature, 227, 520-521.
+https://doi.org/10.1038/227520a0
+
+    @Article{,
+      author = {G. R. Price},
+      year = {1970},
+      title = {Selection and covariance},
+      journal = {Nature},
+      volume = {227},
+      pages = {520--521},
+      doi = {10.1038/227520a0},
+    }
+
 Messier, J., McGill, B. J., & Lechowicz, M. J. (2010). How do traits
 vary across ecological scales? A case for trait-based ecology. Ecology
 Letters, 13, 838-848. https://doi.org/10.1111/j.1461-0248.2010.01476.x

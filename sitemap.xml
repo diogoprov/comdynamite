@@ -122,6 +122,7 @@
 <url><loc>https://provetelab.org/comdynamite/reference/plot.nested_variance.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.population_shifts.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.rate_matrix.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/plot.trait_change.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.trait_flex.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.trait_rarefaction.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/plot.tstats.html</loc></url>
@@ -157,10 +158,12 @@
 <url><loc>https://provetelab.org/comdynamite/reference/speciation_control.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/species_traits.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/subsample_individuals.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/summary.trait_change.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/summary_stats.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/tip_history_metrics.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/torus_permutations.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_bm.html</loc></url>
+<url><loc>https://provetelab.org/comdynamite/reference/trait_change.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_densities.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_flex.html</loc></url>
 <url><loc>https://provetelab.org/comdynamite/reference/trait_gradient.html</loc></url>
