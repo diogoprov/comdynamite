@@ -1,3 +1,13 @@
+# comdynamite (development version)
+
+- `data-raw/abc_npe_pilot.R` and `data-raw/abc_npe_tests.R` compare neural posterior estimation
+  (the package neuralsbi, not a dependency of comdynamite) with ABC with random forests on reference
+  tables already simulated. With 10 000 or more simulations, NPE matched or exceeded the R² of
+  ABC-RF with intervals 8% to 47% narrower and gave the joint posterior of the genetic variance
+  and the effective size, but its intervals were too narrow until recalibrated as in
+  `abc_calibrate()` (90% coverage between 0.85 and 0.95 in 8 of 10 cases, against 3 without),
+  and it did not estimate Ne/N better.
+
 # comdynamite 0.12.0
 
 - New `abc_sequential()`, sequential ABC with random forests (the ABC-SMC-RF of Dinh et al.

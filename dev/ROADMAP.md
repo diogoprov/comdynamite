@@ -14,9 +14,9 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    itens (i) a (v) e (vii) a (xii), com `abc_calibrate()` (PR #179), `abc_sequential()` (PR
    #180), `temporal_step` em `population_stats()` (PR #177), o DOI de download do GBIF para os
    pools de `anurans` (PR #175) e os estudos em `data-raw` (ver 2a a 2l). Fora da 0.12.0:
-   (xiii) neural posterior estimation, com piloto em andamento no `neuralsbi` (CRAN, MIT, NPE
-   em R com `torch`) sobre as tabelas já simuladas; o `NeuralEstimators` (GPL, exige Julia)
-   fica de fora; (vi) likelihood sintética por sítio para PSIS-LOO, adiada sem data. Próximo
+   (xiii) neural posterior estimation, piloto feito depois da tag (ver 2m) com o `neuralsbi`
+   (CRAN, MIT, NPE em R com `torch`) sobre as tabelas já simuladas; o `NeuralEstimators` (GPL,
+   exige Julia) fica de fora; (vi) likelihood sintética por sítio para PSIS-LOO, adiada sem data. Próximo
    marco de código: bloco K, item (i) (partição eco-evolutiva no tempo).
 0b. **0.11.0 em 2026-11-22** (tag `v0.11.0`): fecha os padrões do rOpenSci. Todos os padrões
    aplicáveis do `srr` documentados (blocos A a D, PRs #150 a #153), com as tags também nos
@@ -215,6 +215,28 @@ O marco v0.3.0 fechou em 2026-11-07 e saiu na 0.6.2, sem tag `v0.3.0`.
    última rodada tem menos de 50 simulações efetivas, ESS por rodada no `print()`, e a
    documentação recomenda comparar as rodadas. Ideia para depois: recalibração local que trate
    também a posição. Bloco C fechado na 0.12.0, com (vi) adiado e (xiii) em piloto.
+2m. **Bloco C (xiii), piloto de NPE feito em 2026-11-27, critério atingido** (branch
+   `block-c-npe-pilot`): `data-raw/abc_npe_pilot.R` e `data-raw/abc_npe_tests.R`, NPE do
+   `neuralsbi` 0.3.2 (fluxo autorregressivo mascarado, MAF, com `torch`) contra o ABC-RF, com as
+   mesmas simulações e as mesmas 200 pseudo-observações, sem simulação nova: o brinquedo do
+   (xii), a tabela de `abc_recovery.rds` e as tabelas de G constante de
+   `abc_temporal_drift.R` (amostragem `surveys2`, oito parâmetros no posterior conjunto). Piloto,
+   a 90%: brinquedo `a` largura 0,35 contra 1,04 do RF (exata 0,33), cobertura 0,90; comunidade
+   com 50 mil, R² igual ou maior que o do RF (`log_dispersal` 0,991 contra 0,983, `sigma_mean`
+   0,951 contra 0,930) e intervalos 8% a 47% mais estreitos, cobertura 0,87 a 0,93; G/Ne,
+   `log(G/Ne)` das amostras conjuntas com R² 0,948 e 0,942 contra 0,933 e 0,943 da floresta
+   direta, correlação posterior entre G e Ne de cerca de 0,66, mas Ne/N sem ganho (+0,03 e
+   −0,08) e cobertura de G e Ne de 0,76 a 0,83 (excesso de confiança). Testes (`maf`, `nsf`,
+   `mdn`, ensemble de 5 MAF, recalibração global como em `abc_calibrate()` com 500 simulações
+   separadas, e 2.500 e 5.000 de treino), em 10 casos (quatro parâmetros da comunidade com 10
+   mil; G, Ne/N e G/Ne nos dois ambientes), cobertura entre 0,85 e 0,95 com largura menor que a
+   do RF: MAF 3 de 10; MAF recalibrado 8; NSF 8; ensemble recalibrado 8; MDN 7 (com R² de Ne/N
+   menor); ensemble 6; com 2.500 ou 5.000 simulações tudo pior (R² de Ne/N 0,25 a 0,46). As
+   falhas que restam ficam entre 0,825 e 0,845, a cerca de 3 EP de 0,9, no alcance da variação
+   entre sementes (interpretação nossa). Leitura nossa: a NPE usa todas as simulações e dá
+   intervalos mais estreitos com R² igual ou melhor, mas precisa de 10 mil simulações ou mais e
+   de recalibração; não informa Ne melhor que o ABC-RF. Ideia para depois: wrapper com o
+   `neuralsbi` em Suggests, recalibração embutida e aviso abaixo de 10 mil simulações.
 3. **DAMOCLES:** a validação S3 com o ClaDS2 está feita (PR #113), e a verossimilhança
    integrada sobre configurações entrou no pacote como `damocles_samples(integrate = TRUE)`
    (PR #161, 2026-11-22): ajusta uma vez as taxas que maximizam a média das verossimilhanças
@@ -379,8 +401,8 @@ replicação foram atualizados em 2026-11-19 (PR #122, 92a29d6), com uma seção
 varreduras em cada um. Falta só levar ao manuscrito, na revisão do JBI: a frase sobre variação
 permanente (Urban), a persistência com 500 réplicas (Leibold) e a extensão sem mudança (Hajian).
 
-**Bloco C, inferência por ABC: robustez (fechado na 0.12.0 em 2026-11-26, exceto (vi),
-adiado, e (xiii), em piloto).** Estudos em `data-raw`, sem mudança de API, exceto
+**Bloco C, inferência por ABC: robustez (fechado na 0.12.0 em 2026-11-26; (vi) adiado;
+piloto do (xiii) feito em 2026-11-27).** Estudos em `data-raw`, sem mudança de API, exceto
 o primeiro e o oitavo: (i) estatística de sinal dos traits em `summary_stats()`, para recuperar `lambda`
 (v0.3.0; **fechado em 2026-11-23 com resultado parcial**, `data-raw/abc_lambda.R`: `niche_k`
 e `niche_dist_cor`, da posição de nicho realizada, levam `lambda` de R² 0 a 0,26 com 30
@@ -422,8 +444,8 @@ Rodrigues, Prangle & Sisson 2018), implementada aqui, sem depender do `abc`; os 
 estendidos da Fase 4 mostraram que os intervalos são aproximados; (xii) (**feito em 2026-11-26**, `abc_sequential()`; ver 2l) ABC-RF sequencial para
 priors largos: ajustar, simular de novo na região plausível e ajustar outra vez (Dinh et al.
 2025, *Statistics and Computing*, doi:10.1007/s11222-025-10748-x); (xiii) neural posterior
-estimation, que dá posteriores conjuntos (piloto com o `neuralsbi` aberto em
-2026-11-26; ver o item 0). Decidido em 2026-11-23: o `abctools` (Nunes & Prangle 2015, doi:10.32614/RJ-2015-030;
+estimation, que dá posteriores conjuntos (**piloto feito em 2026-11-27** com o
+`neuralsbi`; ver 2m). Decidido em 2026-11-23: o `abctools` (Nunes & Prangle 2015, doi:10.32614/RJ-2015-030;
 CRAN 1.1.8) não entra. Ele depende do `abc` (GPL), e todas as funções supõem ABC por rejeição
 ou regressão; nenhuma recebe saída do `abcrf`. A seleção de estatísticas que ele oferece
 (Joyce & Marjoram 2008; Nunes & Balding 2010; Fearnhead & Prangle 2012) não cria a informação
